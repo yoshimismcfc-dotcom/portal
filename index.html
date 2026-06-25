@@ -4,6 +4,13 @@
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>吉見SMC FC スマートポータル</title>
+  <link rel="manifest" href="manifest.json">
+  <meta name="theme-color" content="#ff6b2b">
+  <meta name="mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <meta name="apple-mobile-web-app-title" content="SMC FC">
+  <link rel="apple-touch-icon" href="icon.svg">
   <link rel="stylesheet" href="common.css">
   <style>
     /* 日本代表カラー帯 */
@@ -58,6 +65,10 @@
   </div>
 </header>
 <main class="page-wrap">
+  <!-- PWAインストール案内 -->
+  <div id="pwa-banner" class="notice-bar blue" style="display:none;cursor:pointer" onclick="installPWA()">
+    📱 このアプリをホーム画面に追加できます → <strong>タップして追加</strong>
+  </div>
   <div class="portal-header">
     <div class="japan-accent">
       <div class="jline"></div><div class="jball">⚽</div><div class="jline"></div>
@@ -99,10 +110,18 @@
     <a class="menu-card" href="https://yoshimi-smc.studio.site/" target="_blank" rel="noopener"><div class="card-icon">🌐</div><div class="card-label">ホームページ</div><div class="card-desc">チーム公式サイト</div><span class="card-badge">外部</span></a>
   </div>
 
+  <div class="section-head"><div class="section-icon">🆕</div><h2>NEW FEATURES</h2><div class="section-divider"></div></div>
+  <div class="card-grid">
+    <a class="menu-card accent" href="weather.html"><div class="card-icon">🌤️</div><div class="card-label">天気・WBGT予報</div><div class="card-desc">8時間予報と熱中症判定</div><span class="card-badge">NEW</span></a>
+    <a class="menu-card" href="diary.html"><div class="card-icon">📝</div><div class="card-label">練習日誌</div><div class="card-desc">記録・タグ・検索</div><span class="card-badge">NEW</span></a>
+    <a class="menu-card" href="uniform.html"><div class="card-icon">👕</div><div class="card-label">ユニフォーム貸出</div><div class="card-desc">在庫・貸出・返却管理</div><span class="card-badge">NEW</span></a>
+    <a class="menu-card" href="game_adjust.html"><div class="card-icon">📊</div><div class="card-label">試合調整</div><div class="card-desc">ふれあいG大会調整表</div></a>
+  </div>
+
   <div class="section-head"><div class="section-icon">🔗</div><h2>LINKS</h2><div class="section-divider"></div></div>
   <div class="card-grid">
     <a class="menu-card" href="https://www.instagram.com/yoshimi.smc.fc?igsh=Y3NlNWd0MndzZ2Mw&utm_source=qr" target="_blank" rel="noopener"><div class="card-icon">📷</div><div class="card-label">Instagram</div><div class="card-desc">チームの活動写真</div></a>
-    <a class="menu-card" href="https://line.me/R/nv/recommendOA/@097pvkaq" target="_blank" rel="noopener"><div class="card-icon">💬</div><div class="card-label">公式LINE</div><div class="card-desc">連絡・お知らせ</div></a>
+    <a class="menu-card" href="https://lin.ee/RZ53mSm" target="_blank" rel="noopener"><div class="card-icon">💬</div><div class="card-label">LINE友だち追加</div><div class="card-desc">タップで公式LINEを追加</div><span class="card-badge">友だち追加</span></a>
     <a class="menu-card" href="https://chouseisan.com/s?h=04a01b20cc2b4a38b3e1f4aa93d1d06c" target="_blank" rel="noopener"><div class="card-icon">✅</div><div class="card-label">出欠（団員）</div><div class="card-desc">調整さん</div></a>
     <a class="menu-card" href="https://www.wbgt.env.go.jp/" target="_blank" rel="noopener"><div class="card-icon">🌤️</div><div class="card-label">環境省WBGT</div><div class="card-desc">リアルタイム熱中症</div></a>
   </div>
@@ -113,5 +132,21 @@
 const g=localStorage.getItem("smc_guidance"),w=localStorage.getItem("smc_warning");
 if(g){document.getElementById("guidance-text").textContent=g;document.getElementById("home-guidance").style.display="flex";}
 if(w){document.getElementById("warning-text").textContent=w;document.getElementById("home-warning").style.display="flex";}
+</script>
+
+<script>
+var deferredPrompt;
+window.addEventListener("beforeinstallprompt",function(e){
+  e.preventDefault();deferredPrompt=e;
+  document.getElementById("pwa-banner").style.display="flex";
+});
+function installPWA(){
+  if(deferredPrompt){deferredPrompt.prompt();
+    deferredPrompt.userChoice.then(function(){deferredPrompt=null;document.getElementById("pwa-banner").style.display="none";});
+  }
+}
+if("serviceWorker" in navigator){
+  navigator.serviceWorker.register("/portal/sw.js").catch(function(){});
+}
 </script>
 </body></html>

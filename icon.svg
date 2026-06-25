@@ -1,0 +1,5 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 192 192">
+  <rect width="192" height="192" rx="36" fill="#ff6b2b"/>
+  <circle cx="96" cy="96" r="58" fill="white" fill-opacity=".15"/>
+  <text x="96" y="120" font-size="80" text-anchor="middle" fill="white">⚽</text>
+</svg>

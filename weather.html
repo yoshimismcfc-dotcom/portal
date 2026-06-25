@@ -1,0 +1,190 @@
+<!doctype html>
+<html lang="ja">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>天気・WBGT自動判定｜吉見SMC FC</title>
+  <link rel="stylesheet" href="common.css">
+  <style>
+    .weather-hero{
+      background:linear-gradient(135deg,var(--surface-lt),var(--surface));
+      border:1px solid var(--line-2);border-radius:var(--r16);
+      padding:20px;margin-bottom:16px;
+    }
+    .wbgt-big{
+      text-align:center;padding:24px 16px;border-radius:var(--r12);
+      transition:background .4s,color .4s;margin-bottom:12px;
+    }
+    .wbgt-num{font-size:3.6rem;font-weight:900;line-height:1}
+    .wbgt-lv{font-size:1.5rem;font-weight:900;margin:6px 0}
+    .wbgt-msg{font-size:.86rem;line-height:1.65;max-width:360px;margin:0 auto;opacity:.9}
+    .wbgt-meta{font-size:.72rem;opacity:.6;margin-top:8px}
+    .forecast-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:8px;margin-bottom:16px}
+    .fc-card{
+      background:var(--surface-lt);border-radius:var(--r8);
+      border:1px solid var(--line);padding:10px 8px;text-align:center;
+    }
+    .fc-time{font-size:.68rem;color:var(--ink-3);margin-bottom:4px}
+    .fc-icon{font-size:1.6rem;margin-bottom:4px}
+    .fc-temp{font-size:.9rem;font-weight:900;color:#fff}
+    .fc-hum{font-size:.7rem;color:var(--ink-3)}
+    .fc-wbgt{font-size:.72rem;font-weight:900;margin-top:3px;padding:2px 6px;border-radius:4px;display:inline-block}
+    .level-table-wrap{overflow-x:auto}
+    .level-dot{width:10px;height:10px;border-radius:50%;display:inline-block;margin-right:5px;vertical-align:middle}
+    @media(max-width:480px){.forecast-grid{grid-template-columns:repeat(2,1fr)}}
+  </style>
+</head>
+<body>
+<header class="site-header">
+  <div class="header-inner">
+    <a class="header-logo" href="index.html">
+      <div class="logo-mark">⚽</div>
+      <div><span class="logo-name">吉見SMC FC</span><span class="logo-sub">SMART PORTAL</span></div>
+    </a>
+  </div>
+</header>
+<main class="page-wrap">
+  <a class="back-btn" href="index.html">ホームに戻る</a>
+  <div class="hero-band">
+    <div class="hero-emoji">🌤️</div>
+    <div>
+      <div class="hero-title">天気・WBGT 自動判定</div>
+      <div class="hero-sub">現在地の気象を自動取得。今後8時間の予報とWBGT熱中症リスクを表示します。</div>
+    </div>
+  </div>
+
+  <div style="display:flex;gap:8px;margin-bottom:14px;flex-wrap:wrap">
+    <button class="btn btn-primary" id="fetch-btn" onclick="fetchWeather()" style="flex:1">📍 現在地の気象を取得</button>
+    <button class="btn btn-outline btn-sm" onclick="fetchWeather()">🔄 更新</button>
+  </div>
+  <p id="status-msg" style="font-size:.82rem;color:var(--ink-3);margin-bottom:10px;min-height:1.2em"></p>
+
+  <!-- 現在のWBGT -->
+  <div class="wbgt-big" id="wbgt-display" style="background:var(--surface-lt);color:var(--ink)">
+    <div class="wbgt-num" id="wbgt-val">—</div>
+    <div class="wbgt-lv" id="wbgt-lv">取得ボタンを押してください</div>
+    <div class="wbgt-msg" id="wbgt-msg"></div>
+    <div class="wbgt-meta" id="wbgt-meta"></div>
+  </div>
+
+  <!-- 今後8時間予報 -->
+  <div class="panel">
+    <div class="panel-title">📅 今後8時間の予報</div>
+    <div class="forecast-grid" id="forecast-grid">
+      <div style="grid-column:1/-1;text-align:center;color:var(--ink-3);font-size:.85rem;padding:16px">気象データを取得すると表示されます</div>
+    </div>
+  </div>
+
+  <!-- 判定基準表 -->
+  <div class="panel">
+    <div class="panel-title">判定基準（日本スポーツ協会準拠）</div>
+    <div class="level-table-wrap">
+      <table class="data-table">
+        <thead><tr><th>WBGT</th><th>レベル</th><th>活動の目安</th></tr></thead>
+        <tbody>
+          <tr><td><span class="level-dot" style="background:#ff4466"></span>31℃以上</td><td><span class="badge badge-red">危険</span></td><td>原則運動中止。日陰待機・保護者連絡。</td></tr>
+          <tr><td><span class="level-dot" style="background:#ff8800"></span>28〜31℃</td><td><span class="badge badge-yellow">厳重警戒</span></td><td>激しい運動禁止。15分ごとに給水・休憩。</td></tr>
+          <tr><td><span class="level-dot" style="background:#ffcc00"></span>25〜28℃</td><td><span class="badge badge-yellow">警戒</span></td><td>積極的に休憩。体調不良者を早期確認。</td></tr>
+          <tr><td><span class="level-dot" style="background:#4488ff"></span>21〜25℃</td><td><span class="badge badge-blue">注意</span></td><td>給水間隔を短く。体調変化に注意。</td></tr>
+          <tr><td><span class="level-dot" style="background:#00ff88"></span>21℃未満</td><td><span class="badge badge-green">ほぼ安全</span></td><td>通常活動可。水分補給は忘れずに。</td></tr>
+        </tbody>
+      </table>
+    </div>
+    <p style="font-size:.72rem;color:var(--ink-3);margin-top:8px">※ 推定式：WBGT≈0.735×気温+0.0374×湿度+0.00292×気温×湿度−4.064（屋外・日射あり）<br>気象データ：Open-Meteo API（無料・無登録）使用。±2〜3℃の誤差が生じる場合があります。</p>
+  </div>
+
+  <div class="notice-bar">
+    💡 実測WBGTは環境省「<a href="https://www.wbgt.env.go.jp/" target="_blank" rel="noopener" style="color:var(--orange);font-weight:700">熱中症予防情報サイト</a>」でも確認できます。
+  </div>
+</main>
+<footer class="site-footer">YOSHIMI SMC FC — SMART PORTAL</footer>
+<script>
+var LEVELS=[
+  {min:31,label:"危険",     color:"#ff4466",bg:"rgba(255,68,102,.15)",  msg:"原則運動中止。日陰で安静にし、保護者へ連絡してください。"},
+  {min:28,label:"厳重警戒", color:"#ff8800",bg:"rgba(255,136,0,.12)",   msg:"激しい運動は避けてください。15分ごとに給水・休憩をとってください。"},
+  {min:25,label:"警戒",     color:"#ffcc00",bg:"rgba(255,204,0,.12)",   msg:"積極的に休憩を増やしてください。体調不良者を早期に確認してください。"},
+  {min:21,label:"注意",     color:"#4488ff",bg:"rgba(68,136,255,.12)",  msg:"給水間隔を短くしましょう。体調の変化に気を配ってください。"},
+  {min:-99,label:"ほぼ安全",color:"#00ff88",bg:"rgba(0,255,136,.1)",   msg:"通常の活動が可能です。水分補給は忘れずに行いましょう。"},
+];
+var WEATHER_ICONS={0:"☀️",1:"🌤️",2:"⛅",3:"☁️",45:"🌫️",48:"🌫️",51:"🌦️",53:"🌦️",55:"🌧️",61:"🌧️",63:"🌧️",65:"🌧️",80:"🌦️",81:"🌧️",82:"⛈️",95:"⛈️",99:"⛈️"};
+
+function estimateWBGT(t,h){return 0.735*t+0.0374*h+0.00292*t*h-4.064;}
+function getLevel(wbgt){return LEVELS.find(function(l){return wbgt>=l.min;})||LEVELS[4];}
+
+function showWBGT(wbgt,meta){
+  var lv=getLevel(wbgt);
+  var d=document.getElementById("wbgt-display");
+  document.getElementById("wbgt-val").textContent=wbgt.toFixed(1)+"℃";
+  document.getElementById("wbgt-lv").textContent=lv.label;
+  document.getElementById("wbgt-msg").textContent=lv.msg;
+  document.getElementById("wbgt-meta").textContent=meta||"";
+  d.style.background=lv.bg; d.style.color=lv.color;
+}
+
+function fetchWeather(){
+  var btn=document.getElementById("fetch-btn");
+  var status=document.getElementById("status-msg");
+  btn.disabled=true; btn.textContent="📍 位置情報を取得中…";
+  status.textContent="";
+  if(!navigator.geolocation){
+    status.textContent="このブラウザは位置情報に対応していません。";
+    btn.disabled=false;btn.textContent="📍 現在地の気象を取得";return;
+  }
+  navigator.geolocation.getCurrentPosition(function(pos){
+    var lat=pos.coords.latitude,lon=pos.coords.longitude;
+    status.textContent="気象データを取得中…";
+    var url="https://api.open-meteo.com/v1/forecast?latitude="+lat+"&longitude="+lon
+      +"&current=temperature_2m,relative_humidity_2m,weathercode"
+      +"&hourly=temperature_2m,relative_humidity_2m,weathercode"
+      +"&timezone=Asia/Tokyo&forecast_days=1";
+    fetch(url).then(function(r){return r.json();}).then(function(data){
+      var t=data.current.temperature_2m;
+      var h=data.current.relative_humidity_2m;
+      var wbgt=estimateWBGT(t,h);
+      var now=new Date();
+      var timeStr=now.getHours()+"時"+String(now.getMinutes()).padStart(2,"0")+"分";
+      showWBGT(wbgt,"📍 現在地  気温"+t+"℃ / 湿度"+h+"%  "+timeStr+"現在");
+      status.textContent="";
+      btn.textContent="🔄 再取得";
+
+      // 予報（現在から8時間）
+      var hours=data.hourly;
+      var nowH=now.getHours();
+      var grid=document.getElementById("forecast-grid");
+      grid.innerHTML="";
+      var count=0;
+      for(var i=0;i<hours.time.length&&count<8;i++){
+        var hTime=new Date(hours.time[i]);
+        if(hTime<=now) continue;
+        var ht=hours.temperature_2m[i];
+        var hh=hours.relative_humidity_2m[i];
+        var hw=estimateWBGT(ht,hh);
+        var hlv=getLevel(hw);
+        var icon=WEATHER_ICONS[hours.weathercode[i]]||"🌤️";
+        var hLabel=hTime.getHours()+"時";
+        var card='<div class="fc-card">'
+          +'<div class="fc-time">'+hLabel+'</div>'
+          +'<div class="fc-icon">'+icon+'</div>'
+          +'<div class="fc-temp">'+ht+'℃ / '+hh+'%</div>'
+          +'<div class="fc-wbgt" style="background:'+hlv.bg+';color:'+hlv.color+'">'+hw.toFixed(1)+'℃ '+hlv.label+'</div>'
+          +'</div>';
+        grid.innerHTML+=card;
+        count++;
+      }
+      if(count===0) grid.innerHTML='<div style="grid-column:1/-1;text-align:center;color:var(--ink-3);font-size:.85rem;padding:16px">予報データがありません。</div>';
+      btn.disabled=false;
+    }).catch(function(){
+      status.textContent="気象データの取得に失敗しました。時間をおいて再試行してください。";
+      btn.disabled=false;btn.textContent="📍 現在地の気象を取得";
+    });
+  },function(err){
+    var msgs={1:"位置情報の使用が拒否されました。",2:"位置情報を取得できませんでした。",3:"タイムアウトしました。"};
+    status.textContent=msgs[err.code]||"位置情報の取得に失敗しました。";
+    btn.disabled=false;btn.textContent="📍 現在地の気象を取得";
+  },{timeout:10000});
+}
+
+// 自動取得
+window.addEventListener("DOMContentLoaded",function(){fetchWeather();});
+</script>
+</body></html>

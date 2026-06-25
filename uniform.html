@@ -1,0 +1,274 @@
+<!doctype html>
+<html lang="ja">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>ユニフォーム貸出｜吉見SMC FC</title>
+  <link rel="stylesheet" href="common.css">
+  <style>
+    .uni-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(160px,1fr));gap:12px;margin-bottom:20px}
+    .uni-card{
+      background:var(--surface-lt);border-radius:var(--r12);
+      border:1px solid var(--line);padding:14px 12px;text-align:center;
+      transition:.15s;cursor:pointer;
+    }
+    .uni-card:hover{border-color:var(--orange)}
+    .uni-card.lent{border-color:rgba(255,68,102,.5);background:rgba(255,68,102,.06)}
+    .uni-card.lent .uni-status{color:var(--red)}
+    .uni-card.free{border-color:rgba(0,255,136,.4);background:rgba(0,255,136,.05)}
+    .uni-card.free .uni-status{color:var(--green)}
+    .uni-number{font-size:2rem;font-weight:900;color:#fff;line-height:1}
+    .uni-size{font-size:.75rem;color:var(--cyan);margin:3px 0}
+    .uni-status{font-size:.8rem;font-weight:900;margin:4px 0}
+    .uni-lent-to{font-size:.72rem;color:var(--ink-3);margin-top:2px}
+    .modal-bg{position:fixed;inset:0;background:rgba(0,0,0,.82);display:none;place-items:center;z-index:200;backdrop-filter:blur(6px);padding:16px}
+    .modal-bg.open{display:grid}
+    .modal{background:var(--surface-lt);border:1px solid var(--line-2);border-radius:var(--r16);padding:22px;width:min(380px,100%);box-shadow:var(--shadow-lg)}
+    .modal h3{font-size:.95rem;font-weight:900;color:#fff;margin-bottom:14px}
+    .modal-btns{display:flex;gap:8px;justify-content:flex-end;margin-top:14px;flex-wrap:wrap}
+    .stat-row{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-bottom:16px}
+    .stat-card{background:var(--surface-lt);border-radius:var(--r8);padding:12px;text-align:center;border:1px solid var(--line)}
+    .stat-card .sv{font-size:1.6rem;font-weight:900;color:#fff}
+    .stat-card .sl{font-size:.7rem;color:var(--ink-3);margin-top:2px}
+    .history-list{display:grid;gap:6px;max-height:200px;overflow-y:auto}
+    .history-item{background:rgba(255,255,255,.04);border-radius:var(--r8);padding:8px 12px;font-size:.8rem;display:flex;align-items:center;gap:8px}
+    .fg2{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+    @media(max-width:400px){.stat-row{grid-template-columns:1fr 1fr};.fg2{grid-template-columns:1fr}}
+  </style>
+</head>
+<body>
+<header class="site-header">
+  <div class="header-inner">
+    <a class="header-logo" href="index.html">
+      <div class="logo-mark">⚽</div>
+      <div><span class="logo-name">吉見SMC FC</span><span class="logo-sub">SMART PORTAL</span></div>
+    </a>
+  </div>
+</header>
+<main class="page-wrap">
+  <a class="back-btn" href="index.html">ホームに戻る</a>
+  <div class="hero-band">
+    <div class="hero-emoji">👕</div>
+    <div>
+      <div class="hero-title">ユニフォーム貸出管理</div>
+      <div class="hero-sub">在庫状況・貸出・返却をリアルタイムで管理できます。</div>
+    </div>
+  </div>
+  <div class="notice-bar">💾 データはこのブラウザ（端末）に保存されます。</div>
+
+  <!-- 統計 -->
+  <div class="stat-row" id="stat-row"></div>
+
+  <!-- 操作ボタン -->
+  <div style="display:flex;gap:8px;margin-bottom:14px;flex-wrap:wrap">
+    <button class="btn btn-primary" onclick="openAdd()">＋ ユニフォームを追加</button>
+    <button class="btn btn-outline btn-sm" onclick="showHistory()">📋 貸出履歴</button>
+  </div>
+
+  <div class="tab-list" role="tablist">
+    <button class="tab-btn active" data-tab="all" onclick="setFilter('all',this)">全件</button>
+    <button class="tab-btn" data-tab="free" onclick="setFilter('free',this)">在庫あり</button>
+    <button class="tab-btn" data-tab="lent" onclick="setFilter('lent',this)">貸出中</button>
+  </div>
+
+  <div class="uni-grid" id="uni-grid"></div>
+</main>
+
+<!-- ユニフォーム追加/編集 -->
+<div class="modal-bg" id="modal-add">
+  <div class="modal">
+    <h3 id="add-title">ユニフォームを追加</h3>
+    <div class="fg2">
+      <div class="form-group"><label class="form-label">背番号</label>
+        <input class="form-control" id="u-num" type="number" placeholder="例：10" style="text-align:center"></div>
+      <div class="form-group"><label class="form-label">サイズ</label>
+        <select class="form-control" id="u-size">
+          <option>100</option><option>110</option><option>120</option><option>130</option>
+          <option>140</option><option>150</option><option>160</option><option>S</option>
+          <option>M</option><option>L</option>
+        </select></div>
+    </div>
+    <div class="form-group"><label class="form-label">メモ（色・種別など）</label>
+      <input class="form-control" id="u-memo" placeholder="例：青/白 ホーム用"></div>
+    <div class="modal-btns">
+      <button class="btn btn-outline btn-sm" id="u-del-btn" style="color:var(--red);border-color:rgba(255,68,102,.4);display:none" onclick="deleteUni()">🗑 削除</button>
+      <button class="btn btn-outline" onclick="closeModal('modal-add')">キャンセル</button>
+      <button class="btn btn-primary" onclick="saveUni()">保存</button>
+    </div>
+  </div>
+</div>
+
+<!-- 貸出 -->
+<div class="modal-bg" id="modal-lend">
+  <div class="modal">
+    <h3 id="lend-title">貸出・返却</h3>
+    <div id="lend-info" style="font-size:.85rem;color:var(--cyan);margin-bottom:12px"></div>
+    <div id="lend-form">
+      <div class="form-group"><label class="form-label">借りる人（氏名）</label>
+        <input class="form-control" id="l-name" placeholder="例：吉見太郎"></div>
+      <div class="form-group"><label class="form-label">貸出日</label>
+        <input class="form-control" id="l-date" type="date"></div>
+      <div class="form-group"><label class="form-label">返却予定日</label>
+        <input class="form-control" id="l-return" type="date"></div>
+    </div>
+    <div class="modal-btns">
+      <button class="btn btn-outline" onclick="closeModal('modal-lend')">キャンセル</button>
+      <button class="btn btn-primary" id="lend-action-btn" onclick="doLend()">貸し出す</button>
+    </div>
+  </div>
+</div>
+
+<!-- 履歴 -->
+<div class="modal-bg" id="modal-history">
+  <div class="modal">
+    <h3>📋 貸出履歴</h3>
+    <div class="history-list" id="history-list"></div>
+    <div class="modal-btns"><button class="btn btn-outline" onclick="closeModal('modal-history')">閉じる</button></div>
+  </div>
+</div>
+
+<footer class="site-footer">YOSHIMI SMC FC — SMART PORTAL</footer>
+<script>
+var KEY_U="smc_uniform_v1",KEY_H="smc_uniform_hist_v1";
+var editId=null,lendId=null,filter="all";
+function loadU(){try{return JSON.parse(localStorage.getItem(KEY_U))||[];}catch(e){return[];}}
+function saveU(d){localStorage.setItem(KEY_U,JSON.stringify(d));}
+function loadH(){try{return JSON.parse(localStorage.getItem(KEY_H))||[];}catch(e){return[];}}
+function saveH(d){localStorage.setItem(KEY_H,JSON.stringify(d));}
+
+function renderStats(){
+  var data=loadU();
+  var total=data.length,free=data.filter(function(u){return !u.lentTo;}).length,lent=total-free;
+  document.getElementById("stat-row").innerHTML=
+    '<div class="stat-card"><div class="sv">'+total+'</div><div class="sl">総在庫</div></div>'
+    +'<div class="stat-card"><div class="sv" style="color:#00ff88">'+free+'</div><div class="sl">貸出可</div></div>'
+    +'<div class="stat-card"><div class="sv" style="color:#ff4466">'+lent+'</div><div class="sl">貸出中</div></div>';
+}
+function renderGrid(){
+  var data=loadU();
+  if(filter==="free")data=data.filter(function(u){return !u.lentTo;});
+  else if(filter==="lent")data=data.filter(function(u){return !!u.lentTo;});
+  data.sort(function(a,b){return Number(a.num)-Number(b.num);});
+  var grid=document.getElementById("uni-grid");
+  if(!data.length){grid.innerHTML='<div style="grid-column:1/-1;text-align:center;color:var(--ink-3);padding:24px;font-size:.88rem">ユニフォームがありません。</div>';return;}
+  grid.innerHTML=data.map(function(u){
+    var isLent=!!u.lentTo;
+    var statusText=isLent?"貸出中 🔴":"在庫あり 🟢";
+    return '<div class="uni-card '+(isLent?"lent":"free")+'" onclick="openLend(\''+u.id+'\''+')">'
+      +'<div class="uni-number">#'+u.num+'</div>'
+      +'<div class="uni-size">サイズ '+u.size+'</div>'
+      +(u.memo?'<div style="font-size:.68rem;color:var(--ink-3)">'+u.memo+'</div>':"")
+      +'<div class="uni-status">'+statusText+'</div>'
+      +(isLent?'<div class="uni-lent-to">'+u.lentTo+'<br>'+u.lentDate+'〜</div>':"")
+      +'<div style="margin-top:6px"><button class="btn btn-outline btn-sm" style="font-size:.68rem;height:26px;padding:0 8px" onclick="event.stopPropagation();openEdit(\''+u.id+'\')">✏️ 編集</button></div>'
+      +'</div>';
+  }).join("");
+}
+function render(){renderStats();renderGrid();}
+
+function setFilter(f,btn){
+  filter=f;
+  document.querySelectorAll(".tab-btn").forEach(function(b){b.classList.remove("active");});
+  btn.classList.add("active");
+  renderGrid();
+}
+
+function openAdd(){
+  editId=null;
+  document.getElementById("add-title").textContent="ユニフォームを追加";
+  document.getElementById("u-del-btn").style.display="none";
+  document.getElementById("u-num").value="";
+  document.getElementById("u-size").value="130";
+  document.getElementById("u-memo").value="";
+  document.getElementById("modal-add").classList.add("open");
+}
+function openEdit(id){
+  var u=loadU().find(function(x){return x.id===id;});
+  if(!u)return;
+  editId=id;
+  document.getElementById("add-title").textContent="ユニフォームを編集";
+  document.getElementById("u-del-btn").style.display="inline-flex";
+  document.getElementById("u-num").value=u.num;
+  document.getElementById("u-size").value=u.size;
+  document.getElementById("u-memo").value=u.memo||"";
+  document.getElementById("modal-add").classList.add("open");
+}
+function saveUni(){
+  var num=document.getElementById("u-num").value.trim();
+  if(!num){alert("背番号を入力してください");return;}
+  var data=loadU();
+  var id=editId||("u"+Date.now());
+  var existing=data.find(function(x){return x.id===id;});
+  var entry=Object.assign(existing||{},{id:id,num:num,size:document.getElementById("u-size").value,memo:document.getElementById("u-memo").value.trim()});
+  if(!existing)data.push(entry);
+  saveU(data);closeModal("modal-add");render();
+}
+function deleteUni(){
+  if(!editId||!confirm("削除しますか？"))return;
+  saveU(loadU().filter(function(x){return x.id!==editId;}));
+  closeModal("modal-add");render();
+}
+
+function openLend(id){
+  lendId=id;
+  var u=loadU().find(function(x){return x.id===id;});
+  if(!u)return;
+  var isLent=!!u.lentTo;
+  document.getElementById("lend-title").textContent="# "+u.num+" (サイズ"+u.size+")";
+  document.getElementById("lend-info").textContent=isLent?"現在："+u.lentTo+"さんに貸出中":"現在：在庫あり";
+  document.getElementById("lend-form").style.display=isLent?"none":"block";
+  var btn=document.getElementById("lend-action-btn");
+  if(isLent){btn.textContent="返却済みにする";btn.onclick=doReturn;}
+  else{btn.textContent="貸し出す";btn.onclick=doLend;
+    document.getElementById("l-name").value="";
+    document.getElementById("l-date").value=new Date().toISOString().slice(0,10);
+    document.getElementById("l-return").value="";}
+  document.getElementById("modal-lend").classList.add("open");
+}
+function doLend(){
+  var name=document.getElementById("l-name").value.trim();
+  if(!name){alert("氏名を入力してください");return;}
+  var data=loadU();
+  var u=data.find(function(x){return x.id===lendId;});
+  if(!u)return;
+  u.lentTo=name;u.lentDate=document.getElementById("l-date").value;u.returnDate=document.getElementById("l-return").value;
+  saveU(data);
+  var h=loadH();
+  h.push({type:"貸出",date:u.lentDate,num:u.num,size:u.size,name:name,returnDate:u.returnDate||""});
+  saveH(h);closeModal("modal-lend");render();
+}
+function doReturn(){
+  var data=loadU();
+  var u=data.find(function(x){return x.id===lendId;});
+  if(!u)return;
+  var h=loadH();
+  h.push({type:"返却",date:new Date().toISOString().slice(0,10),num:u.num,size:u.size,name:u.lentTo,returnDate:""});
+  saveH(h);
+  delete u.lentTo;delete u.lentDate;delete u.returnDate;
+  saveU(data);closeModal("modal-lend");render();
+}
+function showHistory(){
+  var h=loadH().reverse();
+  var list=document.getElementById("history-list");
+  if(!h.length){list.innerHTML='<div style="color:var(--ink-3);text-align:center;padding:16px">履歴がありません。</div>';
+  }else{
+    list.innerHTML=h.map(function(x){
+      var col=x.type==="貸出"?"#ffaa66":"#66ffaa";
+      return '<div class="history-item">'
+        +'<span style="color:'+col+';font-weight:900;font-size:.72rem">'+x.type+'</span>'
+        +'<span style="color:var(--ink-3)">'+x.date+'</span>'
+        +'<span style="color:#fff">#'+x.num+'('+x.size+')</span>'
+        +'<span style="color:var(--cyan)">'+x.name+'</span>'
+        +(x.returnDate?'<span style="color:var(--ink-3);font-size:.7rem">返却予定:'+x.returnDate+'</span>':"")
+        +'</div>';
+    }).join("");
+  }
+  document.getElementById("modal-history").classList.add("open");
+}
+function closeModal(id){document.getElementById(id).classList.remove("open");}
+["modal-add","modal-lend","modal-history"].forEach(function(id){
+  document.getElementById(id).addEventListener("click",function(e){if(e.target.id===id)closeModal(id);});
+});
+render();
+</script>
+</body></html>

@@ -1,0 +1,239 @@
+<!doctype html>
+<html lang="ja">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>練習日誌｜吉見SMC FC</title>
+  <link rel="stylesheet" href="common.css">
+  <style>
+    .diary-list{display:grid;gap:10px}
+    .diary-card{
+      background:var(--surface-lt);border:1px solid var(--line);
+      border-radius:var(--r12);padding:14px 16px;cursor:pointer;
+      transition:.15s;
+    }
+    .diary-card:hover{border-color:var(--orange)}
+    .diary-card .dc-header{display:flex;align-items:center;gap:10px;margin-bottom:6px}
+    .diary-card .dc-date{font-size:.8rem;color:var(--cyan);font-weight:700}
+    .diary-card .dc-grade{font-size:.72rem;padding:2px 8px;border-radius:99px;background:rgba(255,107,43,.18);color:#ffaa66;border:1px solid rgba(255,107,43,.3)}
+    .diary-card .dc-weather{font-size:.9rem}
+    .diary-card .dc-title{font-size:.95rem;font-weight:900;color:#fff;margin-bottom:4px}
+    .diary-card .dc-body{font-size:.82rem;color:var(--ink-2);line-height:1.6;white-space:pre-wrap;word-break:break-all}
+    .diary-card .dc-footer{display:flex;gap:8px;margin-top:8px;align-items:center}
+    .diary-card .dc-tag{font-size:.68rem;padding:2px 7px;border-radius:99px;background:rgba(0,212,255,.12);color:var(--cyan);border:1px solid rgba(0,212,255,.25)}
+    .diary-del{margin-left:auto;background:none;border:none;color:rgba(255,68,102,.5);cursor:pointer;font-size:.85rem;padding:3px 7px;border-radius:5px;transition:.15s}
+    .diary-del:hover{color:#ff4466;background:rgba(255,68,102,.15)}
+    .modal-bg{position:fixed;inset:0;background:rgba(0,0,0,.82);display:none;place-items:center;z-index:200;backdrop-filter:blur(6px);padding:16px}
+    .modal-bg.open{display:grid}
+    .modal{background:var(--surface-lt);border:1px solid var(--line-2);border-radius:var(--r16);padding:22px;width:min(480px,100%);box-shadow:var(--shadow-lg);max-height:90vh;overflow-y:auto}
+    .modal h3{font-size:1rem;font-weight:900;color:#fff;margin-bottom:14px}
+    .modal-btns{display:flex;gap:8px;justify-content:flex-end;margin-top:14px;flex-wrap:wrap}
+    .fg2{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+    .tag-input{display:flex;gap:6px;flex-wrap:wrap;margin-top:6px}
+    .tag-btn{padding:4px 10px;border-radius:99px;border:1px solid var(--line-2);background:none;color:var(--ink-3);cursor:pointer;font-size:.75rem;transition:.15s}
+    .tag-btn.on{background:rgba(0,212,255,.18);color:var(--cyan);border-color:rgba(0,212,255,.4)}
+    .search-bar{display:flex;gap:8px;margin-bottom:14px}
+    .empty-msg{text-align:center;color:var(--ink-3);padding:32px;font-size:.88rem}
+    @media(max-width:480px){.fg2{grid-template-columns:1fr}}
+  </style>
+</head>
+<body>
+<header class="site-header">
+  <div class="header-inner">
+    <a class="header-logo" href="index.html">
+      <div class="logo-mark">⚽</div>
+      <div><span class="logo-name">吉見SMC FC</span><span class="logo-sub">SMART PORTAL</span></div>
+    </a>
+  </div>
+</header>
+<main class="page-wrap">
+  <a class="back-btn" href="index.html">ホームに戻る</a>
+  <div class="hero-band">
+    <div class="hero-emoji">📝</div>
+    <div>
+      <div class="hero-title">練習日誌</div>
+      <div class="hero-sub">練習内容・気づきを記録して蓄積できます。コーチ専用から入力してください。</div>
+    </div>
+  </div>
+  <div class="notice-bar">💾 データはこのブラウザ（端末）に保存されます。</div>
+
+  <div style="display:flex;gap:8px;margin-bottom:14px;flex-wrap:wrap">
+    <button class="btn btn-primary" onclick="openNew()">＋ 日誌を追加</button>
+    <button class="btn btn-outline btn-sm" onclick="exportDiary()">📥 エクスポート</button>
+  </div>
+
+  <div class="search-bar">
+    <input class="form-control" id="search-input" placeholder="🔍 キーワードで絞り込み" oninput="renderList()">
+    <select class="form-control" id="filter-grade" onchange="renderList()" style="width:auto;min-width:90px">
+      <option value="">全学年</option>
+      <option>6年</option><option>5年</option><option>4年</option>
+      <option>3年</option><option>2年</option><option>1年</option><option>全体</option>
+    </select>
+  </div>
+
+  <div class="diary-list" id="diary-list">
+    <div class="empty-msg">まだ日誌がありません。「＋ 日誌を追加」から記録してください。</div>
+  </div>
+</main>
+
+<!-- 入力モーダル -->
+<div class="modal-bg" id="modal">
+  <div class="modal">
+    <h3 id="modal-title">練習日誌を追加</h3>
+    <div class="fg2">
+      <div class="form-group"><label class="form-label">日付</label>
+        <input class="form-control" id="d-date" type="date"></div>
+      <div class="form-group"><label class="form-label">学年</label>
+        <select class="form-control" id="d-grade">
+          <option>全体</option><option>6年</option><option>5年</option>
+          <option>4年</option><option>3年</option><option>2年</option><option>1年</option>
+        </select></div>
+    </div>
+    <div class="fg2">
+      <div class="form-group"><label class="form-label">天気</label>
+        <select class="form-control" id="d-weather">
+          <option value="☀️">☀️ 晴れ</option><option value="⛅">⛅ 曇り</option>
+          <option value="🌧️">🌧️ 雨</option><option value="❄️">❄️ 雪</option>
+        </select></div>
+      <div class="form-group"><label class="form-label">参加人数</label>
+        <input class="form-control" id="d-count" type="number" min="1" placeholder="例：12"></div>
+    </div>
+    <div class="form-group"><label class="form-label">テーマ・タイトル</label>
+      <input class="form-control" id="d-title" placeholder="例：パス&コントロール練習"></div>
+    <div class="form-group"><label class="form-label">練習内容・メニュー</label>
+      <textarea class="form-control" id="d-content" rows="4" placeholder="例：&#10;・ウォームアップ 10分&#10;・対面パス 15分&#10;・ゲーム形式 30分"></textarea></div>
+    <div class="form-group"><label class="form-label">気づき・改善点</label>
+      <textarea class="form-control" id="d-note" rows="3" placeholder="例：ファーストタッチの精度を上げる必要あり"></textarea></div>
+    <div class="form-group">
+      <label class="form-label">タグ</label>
+      <div class="tag-input" id="tag-input">
+        <button class="tag-btn" onclick="toggleTag(this)">パス</button>
+        <button class="tag-btn" onclick="toggleTag(this)">シュート</button>
+        <button class="tag-btn" onclick="toggleTag(this)">ドリブル</button>
+        <button class="tag-btn" onclick="toggleTag(this)">守備</button>
+        <button class="tag-btn" onclick="toggleTag(this)">ゲーム形式</button>
+        <button class="tag-btn" onclick="toggleTag(this)">フィジカル</button>
+        <button class="tag-btn" onclick="toggleTag(this)">GK練習</button>
+        <button class="tag-btn" onclick="toggleTag(this)">紅白戦</button>
+      </div>
+    </div>
+    <div class="modal-btns">
+      <button class="btn btn-outline btn-sm" id="del-btn" style="color:var(--red);border-color:rgba(255,68,102,.4);display:none" onclick="deleteDiary()">🗑 削除</button>
+      <button class="btn btn-outline" onclick="closeModal()">キャンセル</button>
+      <button class="btn btn-primary" onclick="saveDiary()">💾 保存</button>
+    </div>
+  </div>
+</div>
+
+<footer class="site-footer">YOSHIMI SMC FC — SMART PORTAL</footer>
+<script>
+var KEY="smc_diary_v1";
+var editId=null;
+function load(){try{return JSON.parse(localStorage.getItem(KEY))||[];}catch(e){return[];}}
+function save(d){localStorage.setItem(KEY,JSON.stringify(d));}
+
+function renderList(){
+  var q=document.getElementById("search-input").value.trim().toLowerCase();
+  var gr=document.getElementById("filter-grade").value;
+  var data=load().sort(function(a,b){return b.date.localeCompare(a.date);});
+  if(gr)data=data.filter(function(d){return d.grade===gr;});
+  if(q)data=data.filter(function(d){return (d.title+d.content+d.note+d.tags.join("")).toLowerCase().includes(q);});
+  var list=document.getElementById("diary-list");
+  if(!data.length){list.innerHTML='<div class="empty-msg">記録がありません。</div>';return;}
+  list.innerHTML=data.map(function(d){
+    var tagsHtml=d.tags.map(function(t){return '<span class="dc-tag">'+t+'</span>';}).join("");
+    var bodyPreview=d.content.length>80?d.content.slice(0,80)+"…":d.content;
+    return '<div class="diary-card" onclick="openEdit(\''+d.id+'\')">'
+      +'<div class="dc-header">'
+      +'<span class="dc-date">'+d.date+'</span>'
+      +'<span class="dc-grade">'+d.grade+'</span>'
+      +'<span class="dc-weather">'+d.weather+'</span>'
+      +(d.count?'<span style="font-size:.72rem;color:var(--ink-3)">'+d.count+'名</span>':"")
+      +'</div>'
+      +'<div class="dc-title">'+d.title+'</div>'
+      +'<div class="dc-body">'+bodyPreview+'</div>'
+      +(d.note?'<div style="font-size:.78rem;color:#ffaa66;margin-top:4px">💡 '+d.note.slice(0,60)+(d.note.length>60?"…":"")+'</div>':"")
+      +'<div class="dc-footer">'+tagsHtml
+      +'<button class="diary-del" onclick="event.stopPropagation();confirmDelete(\''+d.id+'\')">🗑</button>'
+      +'</div>'
+      +'</div>';
+  }).join("");
+}
+
+function openNew(){
+  editId=null;
+  document.getElementById("modal-title").textContent="練習日誌を追加";
+  document.getElementById("del-btn").style.display="none";
+  document.getElementById("d-date").value=new Date().toISOString().slice(0,10);
+  document.getElementById("d-grade").value="全体";
+  document.getElementById("d-weather").value="☀️";
+  document.getElementById("d-count").value="";
+  document.getElementById("d-title").value="";
+  document.getElementById("d-content").value="";
+  document.getElementById("d-note").value="";
+  document.querySelectorAll(".tag-btn").forEach(function(b){b.classList.remove("on");});
+  document.getElementById("modal").classList.add("open");
+}
+function openEdit(id){
+  var d=load().find(function(x){return x.id===id;});
+  if(!d)return;
+  editId=id;
+  document.getElementById("modal-title").textContent="日誌を編集";
+  document.getElementById("del-btn").style.display="inline-flex";
+  document.getElementById("d-date").value=d.date;
+  document.getElementById("d-grade").value=d.grade;
+  document.getElementById("d-weather").value=d.weather;
+  document.getElementById("d-count").value=d.count||"";
+  document.getElementById("d-title").value=d.title;
+  document.getElementById("d-content").value=d.content;
+  document.getElementById("d-note").value=d.note||"";
+  document.querySelectorAll(".tag-btn").forEach(function(b){
+    b.classList.toggle("on",d.tags&&d.tags.includes(b.textContent));
+  });
+  document.getElementById("modal").classList.add("open");
+}
+function closeModal(){document.getElementById("modal").classList.remove("open");}
+function toggleTag(btn){btn.classList.toggle("on");}
+function saveDiary(){
+  var title=document.getElementById("d-title").value.trim();
+  if(!title){alert("テーマ・タイトルを入力してください");return;}
+  var tags=[];
+  document.querySelectorAll(".tag-btn.on").forEach(function(b){tags.push(b.textContent);});
+  var entry={
+    id:editId||("d"+Date.now()),
+    date:document.getElementById("d-date").value,
+    grade:document.getElementById("d-grade").value,
+    weather:document.getElementById("d-weather").value,
+    count:document.getElementById("d-count").value,
+    title:title,
+    content:document.getElementById("d-content").value,
+    note:document.getElementById("d-note").value,
+    tags:tags
+  };
+  var data=load().filter(function(x){return x.id!==entry.id;});
+  data.push(entry);
+  save(data);closeModal();renderList();
+}
+function confirmDelete(id){
+  if(!confirm("この日誌を削除しますか？"))return;
+  save(load().filter(function(x){return x.id!==id;}));renderList();
+}
+function deleteDiary(){
+  if(!editId||!confirm("この日誌を削除しますか？"))return;
+  save(load().filter(function(x){return x.id!==editId;}));
+  closeModal();renderList();
+}
+function exportDiary(){
+  var data=load().sort(function(a,b){return b.date.localeCompare(a.date);});
+  var csv="\uFEFF日付,学年,天気,参加人数,テーマ,練習内容,気づき,タグ\n";
+  data.forEach(function(d){
+    csv+='"'+d.date+'","'+d.grade+'","'+d.weather+'","'+(d.count||"")+'","'+d.title+'","'+d.content.replace(/"/g,'""')+'","'+(d.note||"").replace(/"/g,'""')+'","'+(d.tags||[]).join("/")+"\"\n";
+  });
+  var a=document.createElement("a");
+  a.href=URL.createObjectURL(new Blob([csv],{type:"text/csv"}));
+  a.download="smc_diary.csv";a.click();
+}
+document.getElementById("modal").addEventListener("click",function(e){if(e.target.id==="modal")closeModal();});
+renderList();
+</script>
+</body></html>
