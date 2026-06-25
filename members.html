@@ -6,24 +6,30 @@
   <title>団員名簿｜吉見SMC FC</title>
   <link rel="stylesheet" href="common.css">
   <style>
-    .grade-tabs{display:flex;gap:4px;flex-wrap:wrap;border-bottom:2px solid var(--gray200);margin-bottom:18px;overflow-x:auto;scrollbar-width:none}
-    .grade-tabs::-webkit-scrollbar{display:none}
-    .grade-tab{padding:8px 14px;font:inherit;font-size:.82rem;font-weight:700;color:var(--gray600);background:none;border:none;border-bottom:3px solid transparent;margin-bottom:-2px;cursor:pointer;white-space:nowrap;transition:.15s}
-    .grade-tab:hover{color:var(--navy)}
+    .grade-tabs{display:flex;gap:4px;flex-wrap:wrap;border-bottom:1px solid var(--line-bright);margin-bottom:16px}
+    .grade-tab{padding:8px 14px;font:inherit;font-size:.82rem;font-weight:700;color:var(--ink-muted);background:none;border:none;border-bottom:3px solid transparent;margin-bottom:-1px;cursor:pointer;white-space:nowrap;transition:.15s}
+    .grade-tab:hover{color:var(--ink)}
     .grade-tab.active{color:var(--orange);border-bottom-color:var(--orange)}
     .grade-panel{display:none}.grade-panel.active{display:block}
-    .member-table{width:100%;border-collapse:collapse;font-size:.88rem}
-    .member-table th,.member-table td{padding:9px 10px;border-bottom:1px solid var(--gray100);vertical-align:middle}
-    .member-table th{background:var(--gray50);font-size:.78rem;font-weight:900;color:var(--gray600);white-space:nowrap}
-    .member-table tbody tr:hover{background:var(--gray50)}
-    .member-table input{width:100%;border:1px solid transparent;border-radius:6px;padding:5px 8px;font:inherit;font-size:.85rem;background:transparent;transition:.15s}
-    .member-table input:focus{outline:none;border-color:var(--orange);background:var(--white);box-shadow:0 0 0 2px rgba(232,97,42,.12)}
-    .del-btn{background:none;border:none;color:var(--gray400);font-size:1rem;cursor:pointer;padding:4px 6px;border-radius:5px;line-height:1}
+    .member-table{width:100%;border-collapse:collapse;font-size:.88rem;table-layout:fixed}
+    .member-table th,.member-table td{padding:9px 8px;border-bottom:1px solid var(--line);vertical-align:middle}
+    .member-table th{background:rgba(255,255,255,.06);font-size:.75rem;font-weight:900;color:var(--ink-muted);white-space:nowrap}
+    .member-table tbody tr:hover{background:rgba(255,255,255,.04)}
+    .col-no{width:32px;text-align:center}
+    .col-name{width:auto}
+    .col-kana{width:28%}
+    .col-num{width:60px}
+    .col-note{width:28%}
+    .col-del{width:36px}
+    .member-table input{width:100%;border:1px solid transparent;border-radius:6px;padding:6px 8px;font:inherit;font-size:.88rem;background:transparent;color:var(--ink);transition:.15s}
+    .member-table input:focus{outline:none;border-color:var(--orange);background:rgba(255,107,43,.08);box-shadow:0 0 0 2px rgba(255,107,43,.15)}
+    .member-table input::placeholder{color:rgba(255,255,255,.2)}
+    .del-btn{background:none;border:none;color:var(--ink-muted);font-size:.95rem;cursor:pointer;padding:4px 6px;border-radius:5px;line-height:1;transition:.15s}
     .del-btn:hover{color:var(--red);background:var(--red-lt)}
-    .add-btn-row{display:flex;gap:8px;margin-top:10px}
-    .count-badge{font-size:.78rem;color:var(--gray600);font-weight:400;margin-left:6px}
-    .save-bar{position:sticky;bottom:0;background:var(--white);border-top:1px solid var(--gray100);padding:10px 0;display:flex;gap:8px;align-items:center;justify-content:flex-end;margin-top:16px}
-    .save-msg{font-size:.82rem;color:var(--green);min-height:1.2em}
+    .add-btn-row{margin-top:10px}
+    .save-bar{position:sticky;bottom:0;background:var(--navy-card);border-top:1px solid var(--line-bright);padding:10px 0;display:flex;gap:8px;align-items:center;justify-content:flex-end;margin-top:14px}
+    .save-msg{font-size:.82rem;color:var(--green);min-height:1.2em;flex:1}
+    .table-wrap{overflow-x:auto;-webkit-overflow-scrolling:touch}
   </style>
 </head>
 <body>
@@ -42,18 +48,13 @@
   <div class="hero-band">
     <div class="hero-emoji">📒</div>
     <div><div class="hero-title">団員名簿</div>
-      <div class="hero-sub">学年別に随時入力・編集できます。データはこの端末に保存されます。</div></div>
+      <div class="hero-sub">学年別に随時入力・編集できます。「保存」を押すとこの端末に保存されます。</div></div>
   </div>
-
-  <div class="notice-bar">
-    💾 データはこのブラウザ（端末）に保存されます。入力後は「保存」を押してください。
-  </div>
+  <div class="notice-bar">💾 データはこのブラウザ（端末）に保存されます。入力後は必ず「保存」を押してください。</div>
 
   <div class="panel">
-    <!-- 学年タブ -->
     <div class="grade-tabs" id="grade-tabs"></div>
     <div id="grade-panels"></div>
-
     <div class="save-bar">
       <span class="save-msg" id="save-msg"></span>
       <button class="btn btn-outline btn-sm" onclick="exportCSV()">📥 CSV出力</button>
@@ -62,194 +63,159 @@
   </div>
 </main>
 <footer class="site-footer">吉見SMCサッカースポーツ少年団｜スマートポータル</footer>
-
 <script>
-// ===== 初期データ（名簿より） =====
 const GRADES = ["6年","5年","4年","3年","2年","1年","年長"];
 const INITIAL = {
-  "6年": [
-    {no:1,name:"有瀧　晴一",kana:"",pos:"",note:""},
-    {no:2,name:"石川　日向葵",kana:"",pos:"",note:""},
-    {no:3,name:"一場　純",kana:"",pos:"",note:""},
-    {no:4,name:"岡野　楓斗",kana:"",pos:"",note:""},
-    {no:5,name:"金井　暖記",kana:"",pos:"",note:""},
-    {no:6,name:"笹野　陽青",kana:"",pos:"",note:""},
-    {no:7,name:"武部　陽樹",kana:"",pos:"",note:""},
-    {no:8,name:"長嶋　蓮弥",kana:"",pos:"",note:""},
-    {no:9,name:"芝嵜　理矩",kana:"",pos:"",note:""},
-    {no:10,name:"柴田　凌玖",kana:"",pos:"",note:""},
-    {no:11,name:"瀬戸　大志",kana:"",pos:"",note:""},
-    {no:12,name:"武部　優樹",kana:"",pos:"",note:""},
-    {no:13,name:"長嶋　茉莉",kana:"",pos:"",note:""},
+  "6年":[
+    {no:1,name:"有瀧　晴一",kana:"",num:"",note:""},
+    {no:2,name:"石川　日向葵",kana:"",num:"",note:""},
+    {no:3,name:"一場　純",kana:"",num:"",note:""},
+    {no:4,name:"岡野　楓斗",kana:"",num:"",note:""},
+    {no:5,name:"金井　暖記",kana:"",num:"",note:""},
+    {no:6,name:"笹野　陽青",kana:"",num:"",note:""},
+    {no:7,name:"武部　陽樹",kana:"",num:"",note:""},
+    {no:8,name:"長嶋　蓮弥",kana:"",num:"",note:""},
+    {no:9,name:"芝嵜　理矩",kana:"",num:"",note:""},
+    {no:10,name:"柴田　凌玖",kana:"",num:"",note:""},
+    {no:11,name:"瀬戸　大志",kana:"",num:"",note:""},
+    {no:12,name:"武部　優樹",kana:"",num:"",note:""},
+    {no:13,name:"長嶋　茉莉",kana:"",num:"",note:""},
   ],
-  "5年": [
-    {no:1,name:"上村　夏萌",kana:"",pos:"",note:""},
-    {no:2,name:"木村　玲菜",kana:"",pos:"",note:""},
-    {no:3,name:"澤井　怜央",kana:"",pos:"",note:""},
-    {no:4,name:"谷口　じゅんな",kana:"",pos:"",note:""},
-    {no:5,name:"木村　翔馬",kana:"",pos:"",note:""},
-    {no:6,name:"小林　蒼",kana:"",pos:"",note:""},
-    {no:7,name:"坂上　大珠",kana:"",pos:"",note:""},
-    {no:8,name:"篠田　和希",kana:"",pos:"",note:""},
+  "5年":[
+    {no:1,name:"上村　夏萌",kana:"",num:"",note:""},
+    {no:2,name:"木村　玲菜",kana:"",num:"",note:""},
+    {no:3,name:"澤井　怜央",kana:"",num:"",note:""},
+    {no:4,name:"谷口　じゅんな",kana:"",num:"",note:""},
+    {no:5,name:"木村　翔馬",kana:"",num:"",note:""},
+    {no:6,name:"小林　蒼",kana:"",num:"",note:""},
+    {no:7,name:"坂上　大珠",kana:"",num:"",note:""},
+    {no:8,name:"篠田　和希",kana:"",num:"",note:""},
   ],
-  "4年": [
-    {no:1,name:"金井　勇記",kana:"",pos:"",note:""},
-    {no:2,name:"功刀　莉愛",kana:"",pos:"",note:""},
-    {no:3,name:"小柳　柊真",kana:"",pos:"",note:""},
-    {no:4,name:"北村　悠真",kana:"",pos:"",note:""},
-    {no:5,name:"丸山　輝",kana:"",pos:"",note:""},
+  "4年":[
+    {no:1,name:"金井　勇記",kana:"",num:"",note:""},
+    {no:2,name:"功刀　莉愛",kana:"",num:"",note:""},
+    {no:3,name:"小柳　柊真",kana:"",num:"",note:""},
+    {no:4,name:"北村　悠真",kana:"",num:"",note:""},
+    {no:5,name:"丸山　輝",kana:"",num:"",note:""},
   ],
-  "3年": [
-    {no:1,name:"石川　幸乃羽",kana:"",pos:"",note:""},
-    {no:2,name:"加藤　陸",kana:"",pos:"",note:""},
-    {no:3,name:"上村　葵",kana:"",pos:"",note:""},
-    {no:4,name:"原口　颯太",kana:"",pos:"",note:""},
+  "3年":[
+    {no:1,name:"石川　幸乃羽",kana:"",num:"",note:""},
+    {no:2,name:"加藤　陸",kana:"",num:"",note:""},
+    {no:3,name:"上村　葵",kana:"",num:"",note:""},
+    {no:4,name:"原口　颯太",kana:"",num:"",note:""},
   ],
-  "2年": [
-    {no:1,name:"飯塚　洋介",kana:"",pos:"",note:""},
-    {no:2,name:"関口　夏絆",kana:"",pos:"",note:""},
-    {no:3,name:"野口　陽生",kana:"",pos:"",note:""},
+  "2年":[
+    {no:1,name:"飯塚　洋介",kana:"",num:"",note:""},
+    {no:2,name:"関口　夏絆",kana:"",num:"",note:""},
+    {no:3,name:"野口　陽生",kana:"",num:"",note:""},
   ],
-  "1年": [
-    {no:1,name:"功刀　あいと",kana:"",pos:"",note:""},
-  ],
-  "年長": [],
+  "1年":[{no:1,name:"功刀　あいと",kana:"",num:"",note:""}],
+  "年長":[],
 };
-
-const KEY = "smc_members_v1";
-
-function loadData(){
-  try{
-    const saved = JSON.parse(localStorage.getItem(KEY));
-    if(saved) return saved;
-  }catch(e){}
-  return JSON.parse(JSON.stringify(INITIAL));
-}
-
+const KEY="smc_members_v2";
+function loadData(){try{const s=JSON.parse(localStorage.getItem(KEY));if(s)return s;}catch(e){}return JSON.parse(JSON.stringify(INITIAL));}
 function saveAll(){
-  const data = collectData();
-  localStorage.setItem(KEY, JSON.stringify(data));
-  const msg = document.getElementById("save-msg");
-  msg.textContent = "✅ 保存しました（" + new Date().toLocaleTimeString("ja-JP",{hour:"2-digit",minute:"2-digit"}) + "）";
-  setTimeout(()=>{ msg.textContent=""; }, 3000);
+  const data=collectData();
+  localStorage.setItem(KEY,JSON.stringify(data));
+  const msg=document.getElementById("save-msg");
+  msg.textContent="✅ 保存しました（"+new Date().toLocaleTimeString("ja-JP",{hour:"2-digit",minute:"2-digit"})+"）";
+  setTimeout(()=>{msg.textContent="";},3000);
 }
-
 function collectData(){
-  const result = {};
-  GRADES.forEach(g => {
-    result[g] = [];
-    const rows = document.querySelectorAll(`#panel-${g.replace(/[年長]/g,c=>c)} tbody tr`);
-    rows.forEach((tr,i)=>{
-      const inputs = tr.querySelectorAll("input");
-      result[g].push({
-        no: i+1,
-        name: inputs[0].value,
-        kana: inputs[1].value,
-        pos:  inputs[2].value,
-        note: inputs[3].value,
-      });
+  const result={};
+  GRADES.forEach(g=>{
+    result[g]=[];
+    document.querySelectorAll(`#panel-${gid(g)} tbody tr`).forEach((tr,i)=>{
+      const inp=tr.querySelectorAll("input");
+      result[g].push({no:i+1,name:inp[0].value,kana:inp[1].value,num:inp[2].value,note:inp[3].value});
     });
   });
   return result;
 }
-
-function addRow(grade){
-  const tbody = document.querySelector(`#panel-${gradeId(grade)} tbody`);
-  const no = tbody.querySelectorAll("tr").length + 1;
-  tbody.appendChild(makeRow(grade, {no,name:"",kana:"",pos:"",note:""}));
-  updateCount(grade);
+function addRow(g){
+  const tbody=document.querySelector(`#panel-${gid(g)} tbody`);
+  const no=tbody.querySelectorAll("tr").length+1;
+  tbody.appendChild(makeRow(g,{no,name:"",kana:"",num:"",note:""}));
+  updateCount(g);
 }
-
-function deleteRow(btn, grade){
-  if(!confirm("この団員を削除しますか？")) return;
+function deleteRow(btn,g){
+  if(!confirm("この団員を削除しますか？"))return;
   btn.closest("tr").remove();
-  renumber(grade);
-  updateCount(grade);
+  renumber(g); updateCount(g);
 }
-
-function renumber(grade){
-  document.querySelectorAll(`#panel-${gradeId(grade)} tbody tr`).forEach((tr,i)=>{
-    tr.querySelector(".row-no").textContent = i+1;
-  });
+function renumber(g){document.querySelectorAll(`#panel-${gid(g)} tbody tr`).forEach((tr,i)=>{tr.querySelector(".row-no").textContent=i+1;});}
+function updateCount(g){
+  const n=document.querySelectorAll(`#panel-${gid(g)} tbody tr`).length;
+  const tab=document.querySelector(`[data-grade="${g}"]`);
+  if(tab)tab.querySelector(".cnt").textContent=`(${n})`;
 }
-
-function updateCount(grade){
-  const n = document.querySelectorAll(`#panel-${gradeId(grade)} tbody tr`).length;
-  const tab = document.querySelector(`[data-grade="${grade}"]`);
-  if(tab) tab.querySelector(".count-badge").textContent = `(${n})`;
-}
-
-function gradeId(grade){ return grade.replace("年","nen").replace("長","cho"); }
-
-function makeRow(grade, d){
-  const tr = document.createElement("tr");
-  tr.innerHTML = `
-    <td class="row-no" style="width:36px;text-align:center;color:var(--gray400);font-size:.8rem">${d.no}</td>
-    <td><input type="text" value="${d.name}" placeholder="氏名"></td>
-    <td><input type="text" value="${d.kana}" placeholder="ふりがな"></td>
-    <td><input type="text" value="${d.pos}" placeholder="ポジション"></td>
-    <td><input type="text" value="${d.note}" placeholder="メモ"></td>
-    <td><button class="del-btn" onclick="deleteRow(this,'${grade}')" title="削除">🗑</button></td>`;
+function gid(g){return g.replace("年","nen").replace("長","cho");}
+function makeRow(g,d){
+  const tr=document.createElement("tr");
+  tr.innerHTML=`
+    <td class="col-no"><span class="row-no" style="color:var(--ink-muted);font-size:.78rem">${d.no}</span></td>
+    <td class="col-name"><input type="text" value="${d.name}" placeholder="氏名（例：田中 太郎）"></td>
+    <td class="col-kana"><input type="text" value="${d.kana}" placeholder="ふりがな"></td>
+    <td class="col-num"><input type="text" value="${d.num}" placeholder="背番号" style="text-align:center"></td>
+    <td class="col-note"><input type="text" value="${d.note}" placeholder="メモ"></td>
+    <td class="col-del"><button class="del-btn" onclick="deleteRow(this,'${g}')" title="削除">🗑</button></td>`;
   return tr;
 }
-
 function buildUI(){
-  const data = loadData();
-  const tabsEl = document.getElementById("grade-tabs");
-  const panelsEl = document.getElementById("grade-panels");
-
-  GRADES.forEach((grade, idx) => {
-    const members = data[grade] || [];
-    const id = gradeId(grade);
-
-    // タブ
-    const tab = document.createElement("button");
-    tab.className = "grade-tab" + (idx===0?" active":"");
-    tab.dataset.grade = grade;
-    tab.innerHTML = `${grade}<span class="count-badge">(${members.length})</span>`;
-    tab.addEventListener("click", ()=>{
+  const data=loadData();
+  const tabsEl=document.getElementById("grade-tabs");
+  const panelsEl=document.getElementById("grade-panels");
+  GRADES.forEach((g,idx)=>{
+    const members=data[g]||[];
+    const id=gid(g);
+    const tab=document.createElement("button");
+    tab.className="grade-tab"+(idx===0?" active":"");
+    tab.dataset.grade=g;
+    tab.innerHTML=`${g}<span class="cnt" style="font-size:.72rem;color:var(--ink-muted);margin-left:4px">(${members.length})</span>`;
+    tab.addEventListener("click",()=>{
       document.querySelectorAll(".grade-tab").forEach(t=>t.classList.remove("active"));
       document.querySelectorAll(".grade-panel").forEach(p=>p.classList.remove("active"));
       tab.classList.add("active");
       document.getElementById(`panel-${id}`).classList.add("active");
     });
     tabsEl.appendChild(tab);
-
-    // パネル
-    const panel = document.createElement("div");
-    panel.className = "grade-panel" + (idx===0?" active":"");
-    panel.id = `panel-${id}`;
-    panel.innerHTML = `
-      <div style="overflow-x:auto">
+    const panel=document.createElement("div");
+    panel.className="grade-panel"+(idx===0?" active":"");
+    panel.id=`panel-${id}`;
+    panel.innerHTML=`
+      <div class="table-wrap">
         <table class="member-table">
-          <thead><tr><th style="width:36px">#</th><th>氏名</th><th>ふりがな</th><th>ポジション</th><th>メモ</th><th style="width:36px"></th></tr></thead>
+          <colgroup>
+            <col class="col-no"><col class="col-name"><col class="col-kana">
+            <col class="col-num"><col class="col-note"><col class="col-del">
+          </colgroup>
+          <thead><tr>
+            <th class="col-no">#</th>
+            <th class="col-name">氏名</th>
+            <th class="col-kana">ふりがな</th>
+            <th class="col-num">背番号</th>
+            <th class="col-note">メモ</th>
+            <th class="col-del"></th>
+          </tr></thead>
           <tbody></tbody>
         </table>
       </div>
       <div class="add-btn-row">
-        <button class="btn btn-outline btn-sm" onclick="addRow('${grade}')">＋ 団員を追加</button>
+        <button class="btn btn-outline btn-sm" onclick="addRow('${g}')">＋ 団員を追加</button>
       </div>`;
     panelsEl.appendChild(panel);
-
-    const tbody = panel.querySelector("tbody");
-    members.forEach(m => tbody.appendChild(makeRow(grade, m)));
+    const tbody=panel.querySelector("tbody");
+    members.forEach(m=>tbody.appendChild(makeRow(g,m)));
   });
 }
-
 function exportCSV(){
-  const data = collectData();
-  let csv = "\uFEFF学年,No,氏名,ふりがな,ポジション,メモ\n";
-  GRADES.forEach(g=>{
-    (data[g]||[]).forEach((m,i)=>{
-      csv += `${g},${i+1},"${m.name}","${m.kana}","${m.pos}","${m.note}"\n`;
-    });
-  });
-  const a = document.createElement("a");
-  a.href = URL.createObjectURL(new Blob([csv],{type:"text/csv"}));
-  a.download = "smc_members.csv";
-  a.click();
+  const data=collectData();
+  let csv="\uFEFF学年,No,氏名,ふりがな,背番号,メモ\n";
+  GRADES.forEach(g=>{(data[g]||[]).forEach((m,i)=>{csv+=`${g},${i+1},"${m.name}","${m.kana}","${m.num}","${m.note}"\n`;});});
+  const a=document.createElement("a");
+  a.href=URL.createObjectURL(new Blob([csv],{type:"text/csv"}));
+  a.download="smc_members.csv"; a.click();
 }
-
 buildUI();
 </script>
 </body></html>

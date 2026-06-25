@@ -33,11 +33,7 @@
     <span class="notice-label">⚠️ 注意</span>
     <span id="warning-text"></span>
   </div>
-
-  <!-- ヒーロー帯 -->
-  <div class="hero-band">
-    <div class="hero-emoji">📢</div>
-    <div>
+<div>
       <div class="hero-title" id="today-notice">今日の連絡を読み込み中…</div>
       <div class="hero-sub">最終更新: <span id="last-updated">—</span></div>
     </div>
@@ -83,13 +79,7 @@
 <footer class="site-footer">吉見SMCサッカースポーツ少年団｜スマートポータル</footer>
 
 <script>
-// 今日の連絡
-const notices = ["6月29日（日）4年生 TM｜8:00 平方スポーツ広場集合｜水筒2本・帽子必須"];
-const el = document.getElementById("today-notice");
-const lu = document.getElementById("last-updated");
-el.textContent = notices[0] || "本日の連絡はありません。";
-const now = new Date();
-lu.textContent = `${now.getMonth()+1}/${now.getDate()} ${now.getHours()}:${String(now.getMinutes()).padStart(2,"0")}`;
+
 
 // ガイダンス・注意事項をlocalStorageから表示
 const guidance = localStorage.getItem("smc_guidance");
