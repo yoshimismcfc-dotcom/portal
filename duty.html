@@ -10,124 +10,244 @@
     .duty-table-wrap{overflow-x:auto}
     .duty-table{width:100%;border-collapse:collapse;font-size:.86rem;min-width:460px}
     .duty-table th,.duty-table td{padding:9px 10px;border-bottom:1px solid var(--line);text-align:left;vertical-align:middle}
-    .duty-table th{background:rgba(255,255,255,.04);font-size:.75rem;font-weight:900;color:var(--ink-muted);white-space:nowrap}
-    .duty-table tbody tr:hover{background:rgba(255,255,255,.03)}
-    .del-btn{background:none;border:none;color:var(--ink-muted);font-size:1rem;cursor:pointer;padding:4px 8px;border-radius:6px;line-height:1;transition:.15s}
-    .del-btn:hover{color:var(--red);background:var(--red-lt)}
-    .grade-badge{display:inline-block;padding:2px 8px;border-radius:99px;font-size:.72rem;font-weight:900;background:rgba(255,107,43,.2);color:var(--orange);border:1px solid rgba(255,107,43,.3)}
-    .empty-msg{text-align:center;color:var(--ink-muted);padding:28px;font-size:.85rem}
+    .duty-table th{background:rgba(0,212,255,.08);font-size:.72rem;font-weight:900;color:var(--cyan);white-space:nowrap}
+    .duty-table tbody tr:hover{background:rgba(0,212,255,.04)}
+    .del-btn{background:none;border:none;color:rgba(255,68,102,.5);font-size:.95rem;cursor:pointer;padding:4px 6px;border-radius:5px;transition:.15s}
+    .del-btn:hover{color:#ff4466;background:rgba(255,68,102,.18)}
+    .grade-badge{display:inline-block;padding:2px 8px;border-radius:99px;font-size:.72rem;font-weight:900;background:rgba(255,107,43,.2);color:#ffaa66;border:1px solid rgba(255,107,43,.3)}
+    .empty-msg{text-align:center;color:#6aaccc;padding:28px;font-size:.85rem}
     @media(max-width:600px){.duty-row{grid-template-columns:1fr 1fr}.duty-row .btn{grid-column:1/-1}}
+    /* チェックリスト */
+    .check-list{display:grid;gap:8px}
+    .check-item{
+      display:flex;align-items:center;gap:12px;
+      background:var(--surface-lt);border:1px solid var(--line);border-radius:var(--r8);
+      padding:11px 14px;cursor:pointer;transition:.15s;user-select:none;
+    }
+    .check-item:hover{border-color:var(--cyan);background:rgba(0,212,255,.06)}
+    .check-item.done{background:rgba(0,255,136,.08);border-color:rgba(0,255,136,.3)}
+    .check-item.done .check-name{text-decoration:line-through;color:#6aaccc}
+    .check-icon{font-size:1.2rem;flex-shrink:0;width:28px;text-align:center}
+    .check-name{flex:1;font-size:.9rem;font-weight:700;color:#ffffff}
+    .check-box{
+      width:22px;height:22px;border-radius:6px;border:2px solid var(--line-2);
+      display:grid;place-items:center;flex-shrink:0;transition:.15s;
+    }
+    .check-item.done .check-box{background:var(--green);border-color:var(--green)}
+    .check-box::after{content:"";display:none;width:6px;height:10px;border:2px solid #000;border-top:none;border-left:none;transform:rotate(45deg) translate(-1px,-1px)}
+    .check-item.done .check-box::after{display:block}
+    .del-check-btn{background:none;border:none;color:rgba(255,68,102,.4);cursor:pointer;font-size:.85rem;padding:2px 6px;border-radius:4px;transition:.15s;flex-shrink:0}
+    .del-check-btn:hover{color:#ff4466;background:rgba(255,68,102,.18)}
+    .add-check-row{display:flex;gap:8px;margin-top:10px}
+    .progress-bar{
+      height:6px;border-radius:3px;background:rgba(255,255,255,.1);margin-bottom:14px;overflow:hidden;
+    }
+    .progress-fill{height:100%;border-radius:3px;background:linear-gradient(90deg,var(--orange),var(--green));transition:width .3s}
+    .progress-label{font-size:.78rem;color:#a8d4f0;margin-bottom:6px}
   </style>
 </head>
 <body>
 <header class="site-header">
   <div class="header-inner">
-    <a class="header-logo" href="index.html"><div class="logo-mark">⚽</div>
-      <div><span class="logo-name">吉見SMC FC</span><span class="logo-sub">SMART PORTAL</span></div></a>
+    <a class="header-logo" href="index.html">
+      <div class="logo-mark">⚽</div>
+      <div><span class="logo-name">吉見SMC FC</span><span class="logo-sub">SMART PORTAL</span></div>
+    </a>
   </div>
 </header>
 <main class="page-wrap">
   <a class="back-btn" href="index.html">ホームに戻る</a>
   <div class="hero-band">
     <div class="hero-emoji">📋</div>
-    <div><div class="hero-title">当番表</div>
-      <div class="hero-sub">誰でも入力・削除できます。データはこの端末に保存されます。</div></div>
+    <div><div class="hero-title">当番表・荷物チェック</div>
+      <div class="hero-sub">当番の記録と荷物チェックリストを管理できます。</div></div>
   </div>
-  <div class="notice-bar">💾 データはこのブラウザ（端末）に保存されます。別の端末からは見えません。</div>
+  <div class="notice-bar">💾 データはこのブラウザ（端末）に保存されます。</div>
 
-  <div class="panel">
-    <div class="panel-title">当番を追加</div>
-    <div class="duty-row">
-      <div class="form-group" style="margin:0"><label class="form-label">日付</label>
-        <input class="form-control" type="date" id="duty-date"></div>
-      <div class="form-group" style="margin:0"><label class="form-label">学年</label>
-        <select class="form-control" id="duty-grade">
-          <option>1年</option><option>2年</option><option>3年</option><option>4年</option>
-          <option>5年</option><option>6年</option><option>全学年</option>
-        </select></div>
-      <div class="form-group" style="margin:0"><label class="form-label">行き・帰り</label>
-        <select class="form-control" id="duty-way">
-          <option>行き</option><option>帰り</option><option>行き・帰り</option>
-        </select></div>
-      <div class="form-group" style="margin:0"><label class="form-label">担当者名</label>
-        <input class="form-control" type="text" id="duty-name" placeholder="例：田中さん"></div>
-      <div style="padding-bottom:0">
-        <button class="btn btn-primary" onclick="addDuty()" style="height:42px">＋追加</button>
+  <div class="tab-list" role="tablist">
+    <button class="tab-btn active" data-tab="checklist">🎒 荷物チェック</button>
+    <button class="tab-btn" data-tab="duty">📋 当番表</button>
+  </div>
+
+  <!-- 荷物チェックリスト -->
+  <div class="tab-content active" id="tab-checklist">
+    <div class="panel">
+      <div class="panel-title">荷物チェックリスト</div>
+      <div class="progress-label" id="check-progress-label">0 / 0 完了</div>
+      <div class="progress-bar"><div class="progress-fill" id="check-progress-fill" style="width:0%"></div></div>
+      <div class="check-list" id="check-list"></div>
+      <div class="add-check-row" style="margin-top:14px">
+        <input class="form-control" id="new-check-name" placeholder="新しいアイテムを追加（例：審判グッズ）" style="flex:1">
+        <button class="btn btn-primary btn-sm" onclick="addCheckItem()">＋ 追加</button>
       </div>
+    </div>
+    <div style="display:flex;gap:8px;justify-content:flex-end">
+      <button class="btn btn-outline btn-sm" onclick="resetChecks()">✅ チェックをリセット</button>
+      <button class="btn btn-outline btn-sm" style="color:var(--red);border-color:rgba(255,68,102,.4)" onclick="clearAllChecks()">🗑 リスト初期化</button>
     </div>
   </div>
 
-  <div class="panel">
-    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:14px;flex-wrap:wrap;gap:8px">
-      <div class="panel-title" style="margin:0;padding:0;border:none">当番一覧 <span id="duty-count" style="font-size:.78rem;color:var(--ink-muted);font-weight:400"></span></div>
-      <div style="display:flex;gap:8px;align-items:center">
-        <select class="form-control" id="filter-grade" onchange="renderTable()" style="height:34px;width:auto;font-size:.8rem">
+  <!-- 当番表 -->
+  <div class="tab-content" id="tab-duty">
+    <div class="panel">
+      <div class="panel-title">当番を追加</div>
+      <div class="duty-row">
+        <div class="form-group" style="margin:0"><label class="form-label">日付</label>
+          <input class="form-control" type="date" id="duty-date"></div>
+        <div class="form-group" style="margin:0"><label class="form-label">学年</label>
+          <select class="form-control" id="duty-grade">
+            <option>1年</option><option>2年</option><option>3年</option><option>4年</option>
+            <option>5年</option><option>6年</option><option>全学年</option>
+          </select></div>
+        <div class="form-group" style="margin:0"><label class="form-label">行き・帰り</label>
+          <select class="form-control" id="duty-way">
+            <option>行き</option><option>帰り</option><option>行き・帰り</option>
+          </select></div>
+        <div class="form-group" style="margin:0"><label class="form-label">担当者名</label>
+          <input class="form-control" type="text" id="duty-name" placeholder="例：田中さん"></div>
+        <button class="btn btn-primary" onclick="addDuty()" style="height:42px">＋追加</button>
+      </div>
+    </div>
+    <div class="panel">
+      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:14px;flex-wrap:wrap;gap:8px">
+        <div class="panel-title" style="margin:0;padding:0;border:none">当番一覧 <span id="duty-count" style="font-size:.78rem;color:#6aaccc;font-weight:400"></span></div>
+        <select class="form-control" id="filter-grade" onchange="renderDutyTable()" style="height:34px;width:auto;font-size:.8rem">
           <option value="">全学年</option>
           <option>1年</option><option>2年</option><option>3年</option><option>4年</option>
           <option>5年</option><option>6年</option><option>全学年</option>
         </select>
       </div>
+      <div class="duty-table-wrap">
+        <table class="duty-table">
+          <thead><tr><th>日付</th><th>学年</th><th>行き・帰り</th><th>担当者</th><th></th></tr></thead>
+          <tbody id="duty-tbody"></tbody>
+        </table>
+      </div>
+      <div id="duty-empty" class="empty-msg" style="display:none">まだ当番が登録されていません。</div>
     </div>
-    <div class="duty-table-wrap">
-      <table class="duty-table">
-        <thead><tr><th>日付</th><th>学年</th><th>行き・帰り</th><th>担当者</th><th></th></tr></thead>
-        <tbody id="duty-tbody"></tbody>
-      </table>
+    <div style="text-align:right">
+      <button class="btn btn-outline btn-sm" onclick="clearAllDuty()" style="color:var(--red);border-color:rgba(255,68,102,.4)">🗑 全件削除</button>
     </div>
-    <div id="duty-empty" class="empty-msg" style="display:none">まだ当番が登録されていません。上のフォームから追加してください。</div>
-  </div>
-
-  <div style="text-align:right">
-    <button class="btn btn-outline btn-sm" onclick="clearAll()" style="color:var(--red);border-color:rgba(239,68,68,.4)">🗑️ 全件削除</button>
   </div>
 </main>
-<footer class="site-footer">吉見SMCサッカースポーツ少年団｜スマートポータル</footer>
+<footer class="site-footer">YOSHIMI SMC FC — SMART PORTAL</footer>
 <script>
-const KEY="smc_duty_v1";
-function load(){try{return JSON.parse(localStorage.getItem(KEY))||[];}catch{return[];}}
-function save(d){localStorage.setItem(KEY,JSON.stringify(d));}
+// ===== タブ =====
+document.querySelectorAll(".tab-btn").forEach(function(btn){
+  btn.addEventListener("click",function(){
+    var t=btn.dataset.tab;
+    document.querySelectorAll(".tab-btn").forEach(function(b){b.classList.toggle("active",b===btn);});
+    document.querySelectorAll(".tab-content").forEach(function(p){p.classList.toggle("active",p.id==="tab-"+t);});
+  });
+});
+
+// ===== 荷物チェックリスト =====
+var CHECK_KEY = "smc_checklist_v1";
+var DEFAULT_ITEMS = [
+  {id:1,name:"ベンチ",icon:"🪑",done:false},
+  {id:2,name:"タープ",icon:"⛺",done:false},
+  {id:3,name:"ボールカゴ",icon:"🧺",done:false},
+  {id:4,name:"救急グッズ",icon:"🩺",done:false},
+  {id:5,name:"お茶",icon:"🧴",done:false},
+  {id:6,name:"シート",icon:"🛖",done:false},
+];
+function loadChecks(){
+  try{var s=localStorage.getItem(CHECK_KEY);if(s)return JSON.parse(s);}catch(e){}
+  return JSON.parse(JSON.stringify(DEFAULT_ITEMS));
+}
+function saveChecks(data){localStorage.setItem(CHECK_KEY,JSON.stringify(data));}
+function renderChecks(){
+  var data=loadChecks();
+  var list=document.getElementById("check-list");
+  var done=data.filter(function(d){return d.done;}).length;
+  var total=data.length;
+  document.getElementById("check-progress-label").textContent=done+" / "+total+" 完了";
+  var pct=total>0?Math.round(done/total*100):0;
+  document.getElementById("check-progress-fill").style.width=pct+"%";
+  if(!data.length){list.innerHTML="<div style='color:#6aaccc;text-align:center;padding:20px;font-size:.85rem'>アイテムがありません。下から追加してください。</div>";return;}
+  list.innerHTML=data.map(function(item){
+    return "<div class='check-item"+(item.done?" done":"")+"' onclick=\"toggleCheck("+item.id+")\" id='ci-"+item.id+"'>" +
+      "<div class='check-icon'>"+item.icon+"</div>" +
+      "<div class='check-name'>"+item.name+"</div>" +
+      "<div class='check-box'></div>" +
+      "<button class='del-check-btn' onclick=\"event.stopPropagation();deleteCheck("+item.id+")\" title='削除'>✕</button>" +
+    "</div>";
+  }).join("");
+}
+function toggleCheck(id){
+  var data=loadChecks();
+  var item=data.find(function(d){return d.id===id;});
+  if(item)item.done=!item.done;
+  saveChecks(data); renderChecks();
+}
+function deleteCheck(id){
+  if(!confirm("このアイテムを削除しますか？"))return;
+  saveChecks(loadChecks().filter(function(d){return d.id!==id;}));
+  renderChecks();
+}
+function addCheckItem(){
+  var name=document.getElementById("new-check-name").value.trim();
+  if(!name){alert("アイテム名を入力してください");return;}
+  var data=loadChecks();
+  var maxId=data.reduce(function(m,d){return Math.max(m,d.id);},0);
+  data.push({id:maxId+1,name:name,icon:"📦",done:false});
+  saveChecks(data);
+  document.getElementById("new-check-name").value="";
+  renderChecks();
+}
+function resetChecks(){
+  var data=loadChecks().map(function(d){return Object.assign({},d,{done:false});});
+  saveChecks(data); renderChecks();
+}
+function clearAllChecks(){
+  if(!confirm("リストを初期化しますか？カスタムアイテムも含めて削除されます。"))return;
+  localStorage.removeItem(CHECK_KEY); renderChecks();
+}
+
+// ===== 当番表 =====
+var DUTY_KEY="smc_duty_v1";
+function loadDuty(){try{return JSON.parse(localStorage.getItem(DUTY_KEY))||[];}catch(e){return[];}}
+function saveDuty(d){localStorage.setItem(DUTY_KEY,JSON.stringify(d));}
 function addDuty(){
-  const date=document.getElementById("duty-date").value;
-  const grade=document.getElementById("duty-grade").value;
-  const way=document.getElementById("duty-way").value;
-  const name=document.getElementById("duty-name").value.trim();
+  var date=document.getElementById("duty-date").value;
+  var grade=document.getElementById("duty-grade").value;
+  var way=document.getElementById("duty-way").value;
+  var name=document.getElementById("duty-name").value.trim();
   if(!date){alert("日付を入力してください");return;}
   if(!name){alert("担当者名を入力してください");return;}
-  const data=load();
-  data.push({id:Date.now(),date,grade,way,name});
-  data.sort((a,b)=>a.date.localeCompare(b.date));
-  save(data); document.getElementById("duty-name").value=""; renderTable();
+  var data=loadDuty();
+  data.push({id:Date.now(),date:date,grade:grade,way:way,name:name});
+  data.sort(function(a,b){return a.date.localeCompare(b.date);});
+  saveDuty(data);
+  document.getElementById("duty-name").value="";
+  renderDutyTable();
 }
 function deleteDuty(id){
   if(!confirm("この当番を削除しますか？"))return;
-  save(load().filter(d=>d.id!==id)); renderTable();
+  saveDuty(loadDuty().filter(function(d){return d.id!==id;}));
+  renderDutyTable();
 }
-function clearAll(){
-  if(!confirm("全件削除しますか？この操作は取り消せません。"))return;
-  save([]); renderTable();
+function clearAllDuty(){
+  if(!confirm("全件削除しますか？"))return;
+  saveDuty([]); renderDutyTable();
 }
-function renderTable(){
-  const filter=document.getElementById("filter-grade").value;
-  let data=load();
-  if(filter) data=data.filter(d=>d.grade===filter||d.grade==="全学年");
-  const tbody=document.getElementById("duty-tbody");
-  const empty=document.getElementById("duty-empty");
-  const count=document.getElementById("duty-count");
+function renderDutyTable(){
+  var filter=document.getElementById("filter-grade").value;
+  var data=loadDuty();
+  if(filter)data=data.filter(function(d){return d.grade===filter||d.grade==="全学年";});
+  var tbody=document.getElementById("duty-tbody");
+  var empty=document.getElementById("duty-empty");
+  var count=document.getElementById("duty-count");
   if(!data.length){tbody.innerHTML="";empty.style.display="block";count.textContent="";return;}
-  empty.style.display="none"; count.textContent=`（${data.length}件）`;
-  const wayColor=w=>w.includes("行き")&&w.includes("帰り")?"badge-gray":w==="行き"?"badge-yellow":"badge-blue";
-  tbody.innerHTML=data.map(d=>{
-    const ds=d.date?new Date(d.date+"T00:00:00").toLocaleDateString("ja-JP",{month:"numeric",day:"numeric",weekday:"short"}):"—";
-    return `<tr>
-      <td>${ds}</td>
-      <td><span class="grade-badge">${d.grade}</span></td>
-      <td><span class="badge ${wayColor(d.way)}">${d.way}</span></td>
-      <td>${d.name}</td>
-      <td><button class="del-btn" onclick="deleteDuty(${d.id})" title="削除">🗑</button></td>
-    </tr>`;
+  empty.style.display="none";count.textContent="（"+data.length+"件）";
+  var wayColor=function(w){return w.includes("行き")&&w.includes("帰り")?"badge-gray":w==="行き"?"badge-yellow":"badge-blue";};
+  tbody.innerHTML=data.map(function(d){
+    var ds=d.date?new Date(d.date+"T00:00:00").toLocaleDateString("ja-JP",{month:"numeric",day:"numeric",weekday:"short"}):"—";
+    return "<tr><td>"+ds+"</td><td><span class='grade-badge'>"+d.grade+"</span></td><td><span class='badge "+wayColor(d.way)+"'>"+d.way+"</span></td><td>"+d.name+"</td><td><button class='del-btn' onclick='deleteDuty("+d.id+")' title='削除'>🗑</button></td></tr>";
   }).join("");
 }
 document.getElementById("duty-date").value=new Date().toISOString().slice(0,10);
-renderTable();
+renderChecks();
+renderDutyTable();
 </script>
 </body></html>

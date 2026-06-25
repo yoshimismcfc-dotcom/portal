@@ -6,25 +6,36 @@
   <title>審判ガイド｜吉見SMC FC</title>
   <link rel="stylesheet" href="common.css">
   <style>
-    .guide-section{margin-bottom:22px}
-    .guide-section h3{font-size:1rem;font-weight:900;color:var(--navy);margin-bottom:10px;padding-left:10px;border-left:4px solid var(--orange)}
-    .guide-list{list-style:none;display:grid;gap:6px}
-    .guide-list li{background:var(--gray50);border-radius:var(--r8);padding:10px 13px;font-size:.88rem;line-height:1.6}
-    .guide-list li::before{content:"▸ ";color:var(--orange);font-weight:900}
-    /* ジェスチャーカード */
-    .gesture-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:10px}
-    .gesture-card{background:var(--gray50);border-radius:var(--r12);padding:14px 10px;text-align:center;border:1px solid var(--gray200)}
-    .gesture-svg{display:block;margin:0 auto 8px}
-    .gesture-card strong{display:block;font-size:.85rem;color:var(--navy);margin-bottom:4px}
-    .gesture-card p{font-size:.75rem;color:var(--gray600);margin:0;line-height:1.45}
+    .gesture-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:12px}
+    .gesture-card{
+      background:var(--surface-lt);border-radius:var(--r12);padding:14px 10px;
+      text-align:center;border:1px solid var(--line-2);
+    }
+    .gesture-card strong{display:block;font-size:.84rem;color:#ffffff;margin-bottom:4px;font-weight:900}
+    .gesture-card p{font-size:.72rem;color:#a8d4f0;margin:0;line-height:1.45}
     @media(max-width:480px){.gesture-grid{grid-template-columns:repeat(2,1fr)}}
+    .guide-section{margin-bottom:20px}
+    .guide-section h3{font-size:.95rem;font-weight:900;color:#ffffff;margin-bottom:10px;padding-left:10px;border-left:3px solid var(--orange)}
+    .guide-list{list-style:none;display:grid;gap:6px}
+    .guide-list li{background:rgba(0,212,255,.07);border-radius:var(--r8);padding:9px 13px;font-size:.86rem;line-height:1.6;color:#c8e8ff}
+    .guide-list li::before{content:"▸ ";color:var(--orange);font-weight:900}
+    /* 審判別タブ内の役職バッジ */
+    .role-badge{
+      display:inline-block;padding:3px 12px;border-radius:99px;
+      font-size:.7rem;font-weight:900;letter-spacing:.06em;margin-bottom:12px;
+    }
+    .role-main   {background:rgba(255,107,43,.2);color:#ffaa66;border:1px solid rgba(255,107,43,.4)}
+    .role-assist {background:rgba(0,212,255,.15);color:var(--cyan);border:1px solid rgba(0,212,255,.4)}
+    .role-4th    {background:rgba(0,255,136,.12);color:#66ffaa;border:1px solid rgba(0,255,136,.35)}
   </style>
 </head>
 <body>
 <header class="site-header">
   <div class="header-inner">
-    <a class="header-logo" href="index.html"><div class="logo-mark">⚽</div>
-      <div><span class="logo-name">吉見SMC FC</span><span class="logo-sub">SMART PORTAL</span></div></a>
+    <a class="header-logo" href="index.html">
+      <div class="logo-mark">⚽</div>
+      <div><span class="logo-name">吉見SMC FC</span><span class="logo-sub">SMART PORTAL</span></div>
+    </a>
   </div>
 </header>
 <main class="page-wrap">
@@ -32,31 +43,131 @@
   <div class="hero-band">
     <div class="hero-emoji">🟡</div>
     <div><div class="hero-title">審判ガイド</div>
-      <div class="hero-sub">少年サッカー（8人制）の審判役割・ジェスチャー・チェックリストです。</div></div>
+      <div class="hero-sub">少年サッカー（8人制）の審判役割・ジェスチャー・試合前チェックリストです。</div></div>
   </div>
 
   <div class="tab-list" role="tablist">
-    <button class="tab-btn active" data-tab="roles">役割</button>
-    <button class="tab-btn" data-tab="gestures">ジェスチャー</button>
-    <button class="tab-btn" data-tab="check">試合前チェック</button>
-    <button class="tab-btn" data-tab="local">ルール</button>
+    <button class="tab-btn active" data-tab="main-ref">⚽ 主審</button>
+    <button class="tab-btn" data-tab="assist-ref">🚩 副審</button>
+    <button class="tab-btn" data-tab="fourth-ref">⏱️ 第4審判</button>
+    <button class="tab-btn" data-tab="check">📋 試合前</button>
+    <button class="tab-btn" data-tab="local">📜 ルール</button>
   </div>
 
-  <!-- 役割 -->
-  <div class="tab-content active" id="tab-roles">
+  <!-- 主審タブ -->
+  <div class="tab-content active" id="tab-main-ref">
     <div class="panel">
+      <div style="text-align:center;margin-bottom:16px"><span class="role-badge role-main">主審（レフェリー）</span></div>
       <div class="guide-section">
-        <h3>⚽ 主審（レフェリー）</h3>
+        <h3>役割・立ち位置</h3>
         <ul class="guide-list">
           <li>試合の最終権限を持つ。全ての判定は主審が行う。</li>
           <li>試合開始前にコイントス。勝った方がキックオフ方向またはキックオフを選択。</li>
           <li>フィールド全体を対角線上に動く（対角線審判法）。</li>
-          <li>ファウル・オフサイド・ゴールの判定を行い、笛を吹く。</li>
           <li>飲水タイムはWBGT警戒以上で積極的に設定する。</li>
+          <li>負傷者が出た場合はプレーを止め、安全を確認してから再開。</li>
         </ul>
       </div>
       <div class="guide-section">
-        <h3>🚩 副審（アシスタントレフェリー）</h3>
+        <h3>主審のジェスチャー</h3>
+        <div class="gesture-grid">
+
+          <!-- フリーキック -->
+          <div class="gesture-card">
+            <svg width="70" height="88" viewBox="0 0 70 88" style="display:block;margin:0 auto 8px">
+              <circle cx="35" cy="13" r="9" fill="#fff" stroke="#ffaa66" stroke-width="1.5"/>
+              <rect x="30" y="22" width="10" height="26" rx="4" fill="#fff"/>
+              <line x1="30" y1="31" x2="8" y2="27" stroke="#fff" stroke-width="4" stroke-linecap="round"/>
+              <line x1="40" y1="31" x2="46" y2="44" stroke="#fff" stroke-width="4" stroke-linecap="round"/>
+              <line x1="32" y1="48" x2="27" y2="72" stroke="#fff" stroke-width="4" stroke-linecap="round"/>
+              <line x1="38" y1="48" x2="43" y2="72" stroke="#fff" stroke-width="4" stroke-linecap="round"/>
+              <polygon points="18,23 24,27 18,31" fill="#ff6b2b"/>
+            </svg>
+            <strong>フリーキック</strong><p>攻撃方向に腕を伸ばして指す</p>
+          </div>
+
+          <!-- イエローカード -->
+          <div class="gesture-card">
+            <svg width="70" height="88" viewBox="0 0 70 88" style="display:block;margin:0 auto 8px">
+              <circle cx="35" cy="13" r="9" fill="#fff" stroke="#ffaa66" stroke-width="1.5"/>
+              <rect x="30" y="22" width="10" height="26" rx="4" fill="#fff"/>
+              <line x1="35" y1="30" x2="35" y2="5" stroke="#fff" stroke-width="4" stroke-linecap="round"/>
+              <line x1="40" y1="31" x2="44" y2="46" stroke="#fff" stroke-width="4" stroke-linecap="round"/>
+              <line x1="32" y1="48" x2="27" y2="72" stroke="#fff" stroke-width="4" stroke-linecap="round"/>
+              <line x1="38" y1="48" x2="43" y2="72" stroke="#fff" stroke-width="4" stroke-linecap="round"/>
+              <rect x="29" y="1" width="13" height="17" rx="2" fill="#ffcc00" stroke="#cc9900" stroke-width="1"/>
+            </svg>
+            <strong>イエローカード</strong><p>カードを頭上に高く掲げる</p>
+          </div>
+
+          <!-- レッドカード -->
+          <div class="gesture-card">
+            <svg width="70" height="88" viewBox="0 0 70 88" style="display:block;margin:0 auto 8px">
+              <circle cx="35" cy="13" r="9" fill="#fff" stroke="#ffaa66" stroke-width="1.5"/>
+              <rect x="30" y="22" width="10" height="26" rx="4" fill="#fff"/>
+              <line x1="35" y1="30" x2="35" y2="5" stroke="#fff" stroke-width="4" stroke-linecap="round"/>
+              <line x1="40" y1="31" x2="44" y2="46" stroke="#fff" stroke-width="4" stroke-linecap="round"/>
+              <line x1="32" y1="48" x2="27" y2="72" stroke="#fff" stroke-width="4" stroke-linecap="round"/>
+              <line x1="38" y1="48" x2="43" y2="72" stroke="#fff" stroke-width="4" stroke-linecap="round"/>
+              <rect x="29" y="1" width="13" height="17" rx="2" fill="#ff4466" stroke="#cc2244" stroke-width="1"/>
+            </svg>
+            <strong>レッドカード</strong><p>赤カードを頭上に掲げる</p>
+          </div>
+
+          <!-- PK -->
+          <div class="gesture-card">
+            <svg width="70" height="88" viewBox="0 0 70 88" style="display:block;margin:0 auto 8px">
+              <circle cx="35" cy="13" r="9" fill="#fff" stroke="#ffaa66" stroke-width="1.5"/>
+              <rect x="30" y="22" width="10" height="26" rx="4" fill="#fff"/>
+              <line x1="30" y1="31" x2="10" y2="31" stroke="#fff" stroke-width="4" stroke-linecap="round"/>
+              <line x1="40" y1="31" x2="60" y2="31" stroke="#fff" stroke-width="4" stroke-linecap="round"/>
+              <line x1="32" y1="48" x2="27" y2="72" stroke="#fff" stroke-width="4" stroke-linecap="round"/>
+              <line x1="38" y1="48" x2="43" y2="72" stroke="#fff" stroke-width="4" stroke-linecap="round"/>
+              <circle cx="35" cy="80" r="5" fill="none" stroke="#ff6b2b" stroke-width="2"/>
+              <text x="35" y="78" fill="#ff6b2b" font-size="7" text-anchor="middle">PK</text>
+            </svg>
+            <strong>PKスポット指示</strong><p>ペナルティスポットを指す</p>
+          </div>
+
+          <!-- アドバンテージ -->
+          <div class="gesture-card">
+            <svg width="70" height="88" viewBox="0 0 70 88" style="display:block;margin:0 auto 8px">
+              <circle cx="35" cy="13" r="9" fill="#fff" stroke="#ffaa66" stroke-width="1.5"/>
+              <rect x="30" y="22" width="10" height="26" rx="4" fill="#fff"/>
+              <line x1="30" y1="28" x2="12" y2="16" stroke="#fff" stroke-width="4" stroke-linecap="round"/>
+              <line x1="40" y1="28" x2="58" y2="16" stroke="#fff" stroke-width="4" stroke-linecap="round"/>
+              <line x1="32" y1="48" x2="27" y2="72" stroke="#fff" stroke-width="4" stroke-linecap="round"/>
+              <line x1="38" y1="48" x2="43" y2="72" stroke="#fff" stroke-width="4" stroke-linecap="round"/>
+              <polygon points="54,12 60,16 54,20" fill="#00ff88"/>
+              <polygon points="16,12 10,16 16,20" fill="#00ff88"/>
+            </svg>
+            <strong>アドバンテージ</strong><p>両腕を斜め前方へ上げる</p>
+          </div>
+
+          <!-- 飲水タイム -->
+          <div class="gesture-card">
+            <svg width="70" height="88" viewBox="0 0 70 88" style="display:block;margin:0 auto 8px">
+              <circle cx="35" cy="13" r="9" fill="#fff" stroke="#ffaa66" stroke-width="1.5"/>
+              <rect x="30" y="22" width="10" height="26" rx="4" fill="#fff"/>
+              <line x1="30" y1="28" x2="19" y2="21" stroke="#fff" stroke-width="4" stroke-linecap="round"/>
+              <line x1="40" y1="28" x2="51" y2="21" stroke="#fff" stroke-width="4" stroke-linecap="round"/>
+              <line x1="32" y1="48" x2="27" y2="72" stroke="#fff" stroke-width="4" stroke-linecap="round"/>
+              <line x1="38" y1="48" x2="43" y2="72" stroke="#fff" stroke-width="4" stroke-linecap="round"/>
+              <path d="M35,4 Q38,9 35,14 Q32,9 35,4Z" fill="#00d4ff"/>
+            </svg>
+            <strong>飲水タイム</strong><p>両手を口元に持っていく仕草</p>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- 副審タブ -->
+  <div class="tab-content" id="tab-assist-ref">
+    <div class="panel">
+      <div style="text-align:center;margin-bottom:16px"><span class="role-badge role-assist">副審（アシスタントレフェリー）</span></div>
+      <div class="guide-section">
+        <h3>役割・立ち位置</h3>
         <ul class="guide-list">
           <li>タッチライン沿いを担当エリア（ハーフ）で往復する。</li>
           <li>ボールがラインを割ったとき（スローイン・コーナー・ゴールキック）を旗で表示。</li>
@@ -65,175 +176,170 @@
         </ul>
       </div>
       <div class="guide-section">
-        <h3>⏱️ 第4審判</h3>
-        <ul class="guide-list">
-          <li>両チームのベンチ間に位置し、ベンチ管理を行う。</li>
-          <li>交代選手の確認・アディショナルタイムの掲示を行う。</li>
-          <li>主審・副審が交代できない場合は第4審判が代行する。</li>
-        </ul>
+        <h3>副審のジェスチャー（旗）</h3>
+        <div class="gesture-grid">
+
+          <!-- スローイン（自チーム） -->
+          <div class="gesture-card">
+            <svg width="70" height="88" viewBox="0 0 70 88" style="display:block;margin:0 auto 8px">
+              <circle cx="35" cy="13" r="9" fill="#fff" stroke="#00d4ff" stroke-width="1.5"/>
+              <rect x="30" y="22" width="10" height="26" rx="4" fill="#fff"/>
+              <line x1="30" y1="31" x2="8" y2="31" stroke="#fff" stroke-width="4" stroke-linecap="round"/>
+              <!-- 旗 -->
+              <rect x="0" y="24" width="2" height="18" fill="#00d4ff"/>
+              <polygon points="2,24 14,28 2,32" fill="#00d4ff"/>
+              <line x1="40" y1="31" x2="46" y2="44" stroke="#fff" stroke-width="4" stroke-linecap="round"/>
+              <line x1="32" y1="48" x2="27" y2="72" stroke="#fff" stroke-width="4" stroke-linecap="round"/>
+              <line x1="38" y1="48" x2="43" y2="72" stroke="#fff" stroke-width="4" stroke-linecap="round"/>
+            </svg>
+            <strong>スローイン</strong><p>ボールが割れたチーム側に旗を水平に伸ばす</p>
+          </div>
+
+          <!-- オフサイド -->
+          <div class="gesture-card">
+            <svg width="70" height="88" viewBox="0 0 70 88" style="display:block;margin:0 auto 8px">
+              <circle cx="35" cy="13" r="9" fill="#fff" stroke="#00d4ff" stroke-width="1.5"/>
+              <rect x="30" y="22" width="10" height="26" rx="4" fill="#fff"/>
+              <line x1="30" y1="28" x2="10" y2="10" stroke="#fff" stroke-width="4" stroke-linecap="round"/>
+              <!-- 旗（斜め上） -->
+              <rect x="6" y="3" width="2" height="16" fill="#00d4ff" transform="rotate(45,7,3)"/>
+              <polygon points="7,3 19,8 7,13" fill="#00d4ff" transform="rotate(45,7,3)"/>
+              <line x1="40" y1="31" x2="46" y2="44" stroke="#fff" stroke-width="4" stroke-linecap="round"/>
+              <line x1="32" y1="48" x2="27" y2="72" stroke="#fff" stroke-width="4" stroke-linecap="round"/>
+              <line x1="38" y1="48" x2="43" y2="72" stroke="#fff" stroke-width="4" stroke-linecap="round"/>
+            </svg>
+            <strong>オフサイド</strong><p>旗を斜め上に挙げ位置を示す</p>
+          </div>
+
+          <!-- コーナーキック -->
+          <div class="gesture-card">
+            <svg width="70" height="88" viewBox="0 0 70 88" style="display:block;margin:0 auto 8px">
+              <circle cx="35" cy="13" r="9" fill="#fff" stroke="#00d4ff" stroke-width="1.5"/>
+              <rect x="30" y="22" width="10" height="26" rx="4" fill="#fff"/>
+              <line x1="30" y1="34" x2="10" y2="54" stroke="#fff" stroke-width="4" stroke-linecap="round"/>
+              <line x1="40" y1="34" x2="52" y2="46" stroke="#fff" stroke-width="4" stroke-linecap="round"/>
+              <line x1="32" y1="48" x2="27" y2="72" stroke="#fff" stroke-width="4" stroke-linecap="round"/>
+              <line x1="38" y1="48" x2="43" y2="72" stroke="#fff" stroke-width="4" stroke-linecap="round"/>
+              <!-- コーナーフラッグ -->
+              <rect x="4" y="52" width="2" height="18" fill="#ffcc00"/>
+              <polygon points="6,52 16,56 6,60" fill="#ffcc00"/>
+            </svg>
+            <strong>コーナーキック</strong><p>コーナーフラッグ方向を指す</p>
+          </div>
+
+          <!-- ゴールキック -->
+          <div class="gesture-card">
+            <svg width="70" height="88" viewBox="0 0 70 88" style="display:block;margin:0 auto 8px">
+              <circle cx="35" cy="13" r="9" fill="#fff" stroke="#00d4ff" stroke-width="1.5"/>
+              <rect x="30" y="22" width="10" height="26" rx="4" fill="#fff"/>
+              <line x1="30" y1="34" x2="12" y2="52" stroke="#fff" stroke-width="4" stroke-linecap="round"/>
+              <line x1="40" y1="31" x2="46" y2="44" stroke="#fff" stroke-width="4" stroke-linecap="round"/>
+              <line x1="32" y1="48" x2="27" y2="72" stroke="#fff" stroke-width="4" stroke-linecap="round"/>
+              <line x1="38" y1="48" x2="43" y2="72" stroke="#fff" stroke-width="4" stroke-linecap="round"/>
+              <!-- 地面ライン -->
+              <line x1="4" y1="76" x2="22" y2="76" stroke="#00d4ff" stroke-width="2"/>
+              <polygon points="4,72 0,76 4,80" fill="#00d4ff"/>
+            </svg>
+            <strong>ゴールキック</strong><p>ゴールエリア方向を旗で指す</p>
+          </div>
+
+          <!-- 交代サイン -->
+          <div class="gesture-card">
+            <svg width="70" height="88" viewBox="0 0 70 88" style="display:block;margin:0 auto 8px">
+              <circle cx="35" cy="13" r="9" fill="#fff" stroke="#00d4ff" stroke-width="1.5"/>
+              <rect x="30" y="22" width="10" height="26" rx="4" fill="#fff"/>
+              <line x1="35" y1="30" x2="35" y2="8" stroke="#fff" stroke-width="4" stroke-linecap="round"/>
+              <line x1="40" y1="31" x2="46" y2="44" stroke="#fff" stroke-width="4" stroke-linecap="round"/>
+              <line x1="32" y1="48" x2="27" y2="72" stroke="#fff" stroke-width="4" stroke-linecap="round"/>
+              <line x1="38" y1="48" x2="43" y2="72" stroke="#fff" stroke-width="4" stroke-linecap="round"/>
+              <!-- 掲示板 -->
+              <rect x="28" y="2" width="14" height="10" rx="1" fill="#00d4ff"/>
+              <text x="35" y="9.5" fill="#fff" font-size="6" font-weight="bold" text-anchor="middle">交代</text>
+            </svg>
+            <strong>交代サイン</strong><p>掲示板を頭上に掲げる</p>
+          </div>
+
+          <!-- ファウル報告 -->
+          <div class="gesture-card">
+            <svg width="70" height="88" viewBox="0 0 70 88" style="display:block;margin:0 auto 8px">
+              <circle cx="35" cy="13" r="9" fill="#fff" stroke="#00d4ff" stroke-width="1.5"/>
+              <rect x="30" y="22" width="10" height="26" rx="4" fill="#fff"/>
+              <!-- 旗を垂直に持つ -->
+              <line x1="30" y1="28" x2="30" y2="10" stroke="#fff" stroke-width="4" stroke-linecap="round"/>
+              <rect x="26" y="4" width="2" height="14" fill="#00d4ff"/>
+              <polygon points="28,4 38,7 28,10" fill="#00d4ff"/>
+              <line x1="40" y1="31" x2="48" y2="42" stroke="#fff" stroke-width="4" stroke-linecap="round"/>
+              <line x1="32" y1="48" x2="27" y2="72" stroke="#fff" stroke-width="4" stroke-linecap="round"/>
+              <line x1="38" y1="48" x2="43" y2="72" stroke="#fff" stroke-width="4" stroke-linecap="round"/>
+            </svg>
+            <strong>ファウル報告</strong><p>旗を垂直に立てて主審に知らせる</p>
+          </div>
+        </div>
       </div>
     </div>
   </div>
 
-  <!-- ジェスチャー -->
-  <div class="tab-content" id="tab-gestures">
+  <!-- 第4審判タブ -->
+  <div class="tab-content" id="tab-fourth-ref">
     <div class="panel">
-      <div class="gesture-grid">
+      <div style="text-align:center;margin-bottom:16px"><span class="role-badge role-4th">第4審判</span></div>
+      <div class="guide-section">
+        <h3>役割</h3>
+        <ul class="guide-list">
+          <li>両チームのベンチ間に位置し、ベンチ管理を行う。</li>
+          <li>交代選手の確認・アディショナルタイムの掲示を行う。</li>
+          <li>ベンチからコート内への不正な指示・妨害を防ぐ。</li>
+          <li>主審・副審が交代できない場合は第4審判が代行する。</li>
+        </ul>
+      </div>
+      <div class="guide-section">
+        <h3>第4審判のジェスチャー</h3>
+        <div class="gesture-grid">
 
-        <!-- フリーキック -->
-        <div class="gesture-card">
-          <svg class="gesture-svg" width="70" height="90" viewBox="0 0 70 90">
-            <!-- 体 -->
-            <circle cx="35" cy="14" r="10" fill="#1B2A3B"/>
-            <rect x="29" y="24" width="12" height="28" rx="4" fill="#1B2A3B"/>
-            <!-- 右腕を横に伸ばす -->
-            <line x1="29" y1="32" x2="5" y2="28" stroke="#1B2A3B" stroke-width="5" stroke-linecap="round"/>
-            <!-- 左腕を下げる -->
-            <line x1="41" y1="32" x2="48" y2="46" stroke="#1B2A3B" stroke-width="5" stroke-linecap="round"/>
-            <!-- 脚 -->
-            <line x1="33" y1="52" x2="28" y2="75" stroke="#1B2A3B" stroke-width="5" stroke-linecap="round"/>
-            <line x1="37" y1="52" x2="42" y2="75" stroke="#1B2A3B" stroke-width="5" stroke-linecap="round"/>
-            <!-- 矢印 -->
-            <line x1="5" y1="28" x2="18" y2="28" stroke="#E8612A" stroke-width="2.5" stroke-dasharray="3,2"/>
-            <polygon points="18,24 24,28 18,32" fill="#E8612A"/>
-          </svg>
-          <strong>フリーキック</strong>
-          <p>攻撃方向に腕を伸ばして指す</p>
+          <!-- アディショナルタイム -->
+          <div class="gesture-card">
+            <svg width="70" height="88" viewBox="0 0 70 88" style="display:block;margin:0 auto 8px">
+              <circle cx="35" cy="13" r="9" fill="#fff" stroke="#66ffaa" stroke-width="1.5"/>
+              <rect x="30" y="22" width="10" height="26" rx="4" fill="#fff"/>
+              <line x1="35" y1="30" x2="35" y2="6" stroke="#fff" stroke-width="4" stroke-linecap="round"/>
+              <line x1="40" y1="31" x2="46" y2="44" stroke="#fff" stroke-width="4" stroke-linecap="round"/>
+              <line x1="32" y1="48" x2="27" y2="72" stroke="#fff" stroke-width="4" stroke-linecap="round"/>
+              <line x1="38" y1="48" x2="43" y2="72" stroke="#fff" stroke-width="4" stroke-linecap="round"/>
+              <!-- 掲示板 -->
+              <rect x="27" y="0" width="18" height="12" rx="2" fill="#00ff88"/>
+              <text x="36" y="9" fill="#003" font-size="7" font-weight="bold" text-anchor="middle">+2'</text>
+            </svg>
+            <strong>アディショナルタイム</strong><p>掲示板を頭上に掲げて示す</p>
+          </div>
+
+          <!-- 交代合図 -->
+          <div class="gesture-card">
+            <svg width="70" height="88" viewBox="0 0 70 88" style="display:block;margin:0 auto 8px">
+              <circle cx="35" cy="13" r="9" fill="#fff" stroke="#66ffaa" stroke-width="1.5"/>
+              <rect x="30" y="22" width="10" height="26" rx="4" fill="#fff"/>
+              <!-- 両腕を胸でクロス -->
+              <line x1="30" y1="31" x2="50" y2="44" stroke="#fff" stroke-width="4" stroke-linecap="round"/>
+              <line x1="40" y1="31" x2="20" y2="44" stroke="#fff" stroke-width="4" stroke-linecap="round"/>
+              <line x1="32" y1="48" x2="27" y2="72" stroke="#fff" stroke-width="4" stroke-linecap="round"/>
+              <line x1="38" y1="48" x2="43" y2="72" stroke="#fff" stroke-width="4" stroke-linecap="round"/>
+            </svg>
+            <strong>交代合図</strong><p>両腕を胸前でクロスして示す</p>
+          </div>
+
+          <!-- ウォームアップ許可 -->
+          <div class="gesture-card">
+            <svg width="70" height="88" viewBox="0 0 70 88" style="display:block;margin:0 auto 8px">
+              <circle cx="35" cy="13" r="9" fill="#fff" stroke="#66ffaa" stroke-width="1.5"/>
+              <rect x="30" y="22" width="10" height="26" rx="4" fill="#fff"/>
+              <line x1="30" y1="31" x2="10" y2="44" stroke="#fff" stroke-width="4" stroke-linecap="round"/>
+              <line x1="40" y1="31" x2="60" y2="44" stroke="#fff" stroke-width="4" stroke-linecap="round"/>
+              <line x1="32" y1="48" x2="27" y2="72" stroke="#fff" stroke-width="4" stroke-linecap="round"/>
+              <line x1="38" y1="48" x2="43" y2="72" stroke="#fff" stroke-width="4" stroke-linecap="round"/>
+              <text x="35" y="84" fill="#66ffaa" font-size="7" text-anchor="middle">WU OK</text>
+            </svg>
+            <strong>ウォームアップ許可</strong><p>ウォームアップエリアを手で示す</p>
+          </div>
         </div>
-
-        <!-- イエローカード -->
-        <div class="gesture-card">
-          <svg class="gesture-svg" width="70" height="90" viewBox="0 0 70 90">
-            <circle cx="35" cy="14" r="10" fill="#1B2A3B"/>
-            <rect x="29" y="24" width="12" height="28" rx="4" fill="#1B2A3B"/>
-            <!-- 右腕を真上に上げる -->
-            <line x1="35" y1="32" x2="35" y2="6" stroke="#1B2A3B" stroke-width="5" stroke-linecap="round"/>
-            <line x1="41" y1="32" x2="44" y2="48" stroke="#1B2A3B" stroke-width="5" stroke-linecap="round"/>
-            <line x1="33" y1="52" x2="28" y2="75" stroke="#1B2A3B" stroke-width="5" stroke-linecap="round"/>
-            <line x1="37" y1="52" x2="42" y2="75" stroke="#1B2A3B" stroke-width="5" stroke-linecap="round"/>
-            <!-- カード -->
-            <rect x="29" y="2" width="14" height="18" rx="2" fill="#F0B429" stroke="#b88a00" stroke-width="1"/>
-          </svg>
-          <strong>イエローカード</strong>
-          <p>カードを頭上に高く掲げる</p>
-        </div>
-
-        <!-- レッドカード -->
-        <div class="gesture-card">
-          <svg class="gesture-svg" width="70" height="90" viewBox="0 0 70 90">
-            <circle cx="35" cy="14" r="10" fill="#1B2A3B"/>
-            <rect x="29" y="24" width="12" height="28" rx="4" fill="#1B2A3B"/>
-            <line x1="35" y1="32" x2="35" y2="6" stroke="#1B2A3B" stroke-width="5" stroke-linecap="round"/>
-            <line x1="41" y1="32" x2="44" y2="48" stroke="#1B2A3B" stroke-width="5" stroke-linecap="round"/>
-            <line x1="33" y1="52" x2="28" y2="75" stroke="#1B2A3B" stroke-width="5" stroke-linecap="round"/>
-            <line x1="37" y1="52" x2="42" y2="75" stroke="#1B2A3B" stroke-width="5" stroke-linecap="round"/>
-            <rect x="29" y="2" width="14" height="18" rx="2" fill="#C0392B" stroke="#8a1a1a" stroke-width="1"/>
-          </svg>
-          <strong>レッドカード</strong>
-          <p>赤カードを頭上に掲げる</p>
-        </div>
-
-        <!-- スローイン -->
-        <div class="gesture-card">
-          <svg class="gesture-svg" width="70" height="90" viewBox="0 0 70 90">
-            <circle cx="35" cy="14" r="10" fill="#1B2A3B"/>
-            <rect x="29" y="24" width="12" height="28" rx="4" fill="#1B2A3B"/>
-            <!-- 両腕を横に水平 -->
-            <line x1="29" y1="32" x2="5" y2="32" stroke="#1B2A3B" stroke-width="5" stroke-linecap="round"/>
-            <line x1="41" y1="32" x2="65" y2="32" stroke="#1B2A3B" stroke-width="5" stroke-linecap="round"/>
-            <line x1="33" y1="52" x2="28" y2="75" stroke="#1B2A3B" stroke-width="5" stroke-linecap="round"/>
-            <line x1="37" y1="52" x2="42" y2="75" stroke="#1B2A3B" stroke-width="5" stroke-linecap="round"/>
-          </svg>
-          <strong>スローイン</strong>
-          <p>割れた側の腕を水平に伸ばす</p>
-        </div>
-
-        <!-- オフサイド -->
-        <div class="gesture-card">
-          <svg class="gesture-svg" width="70" height="90" viewBox="0 0 70 90">
-            <circle cx="35" cy="14" r="10" fill="#1B2A3B"/>
-            <rect x="29" y="24" width="12" height="28" rx="4" fill="#1B2A3B"/>
-            <!-- 旗を斜め上へ -->
-            <line x1="29" y1="30" x2="8" y2="10" stroke="#1B2A3B" stroke-width="5" stroke-linecap="round"/>
-            <!-- 旗 -->
-            <polygon points="8,10 22,14 8,18" fill="#E8612A"/>
-            <line x1="41" y1="32" x2="46" y2="48" stroke="#1B2A3B" stroke-width="5" stroke-linecap="round"/>
-            <line x1="33" y1="52" x2="28" y2="75" stroke="#1B2A3B" stroke-width="5" stroke-linecap="round"/>
-            <line x1="37" y1="52" x2="42" y2="75" stroke="#1B2A3B" stroke-width="5" stroke-linecap="round"/>
-          </svg>
-          <strong>オフサイド</strong>
-          <p>旗を斜め上に挙げ方向を示す</p>
-        </div>
-
-        <!-- ゴールキック -->
-        <div class="gesture-card">
-          <svg class="gesture-svg" width="70" height="90" viewBox="0 0 70 90">
-            <circle cx="35" cy="14" r="10" fill="#1B2A3B"/>
-            <rect x="29" y="24" width="12" height="28" rx="4" fill="#1B2A3B"/>
-            <!-- 片腕を地面に向けて斜め下 -->
-            <line x1="29" y1="34" x2="10" y2="52" stroke="#1B2A3B" stroke-width="5" stroke-linecap="round"/>
-            <line x1="41" y1="32" x2="46" y2="48" stroke="#1B2A3B" stroke-width="5" stroke-linecap="round"/>
-            <line x1="33" y1="52" x2="28" y2="75" stroke="#1B2A3B" stroke-width="5" stroke-linecap="round"/>
-            <line x1="37" y1="52" x2="42" y2="75" stroke="#1B2A3B" stroke-width="5" stroke-linecap="round"/>
-            <!-- 地面矢印 -->
-            <line x1="4" y1="80" x2="22" y2="80" stroke="#E8612A" stroke-width="2"/>
-            <polygon points="4,76 0,80 4,84" fill="#E8612A"/>
-          </svg>
-          <strong>ゴールキック</strong>
-          <p>ゴールエリア方向を指す</p>
-        </div>
-
-        <!-- コーナーキック -->
-        <div class="gesture-card">
-          <svg class="gesture-svg" width="70" height="90" viewBox="0 0 70 90">
-            <circle cx="35" cy="14" r="10" fill="#1B2A3B"/>
-            <rect x="29" y="24" width="12" height="28" rx="4" fill="#1B2A3B"/>
-            <!-- 腕を斜め下45°コーナー方向 -->
-            <line x1="29" y1="34" x2="8" y2="55" stroke="#1B2A3B" stroke-width="5" stroke-linecap="round"/>
-            <line x1="41" y1="34" x2="52" y2="48" stroke="#1B2A3B" stroke-width="5" stroke-linecap="round"/>
-            <line x1="33" y1="52" x2="28" y2="75" stroke="#1B2A3B" stroke-width="5" stroke-linecap="round"/>
-            <line x1="37" y1="52" x2="42" y2="75" stroke="#1B2A3B" stroke-width="5" stroke-linecap="round"/>
-            <!-- コーナーフラッグ -->
-            <rect x="2" y="52" width="2" height="20" fill="#E8612A"/>
-            <polygon points="4,52 14,56 4,60" fill="#E8612A"/>
-          </svg>
-          <strong>コーナーキック</strong>
-          <p>コーナーフラッグ方向を両腕で指す</p>
-        </div>
-
-        <!-- 飲水タイム -->
-        <div class="gesture-card">
-          <svg class="gesture-svg" width="70" height="90" viewBox="0 0 70 90">
-            <circle cx="35" cy="14" r="10" fill="#1B2A3B"/>
-            <rect x="29" y="24" width="12" height="28" rx="4" fill="#1B2A3B"/>
-            <!-- 両手を口元へ -->
-            <line x1="29" y1="28" x2="20" y2="20" stroke="#1B2A3B" stroke-width="5" stroke-linecap="round"/>
-            <line x1="41" y1="28" x2="50" y2="20" stroke="#1B2A3B" stroke-width="5" stroke-linecap="round"/>
-            <line x1="33" y1="52" x2="28" y2="75" stroke="#1B2A3B" stroke-width="5" stroke-linecap="round"/>
-            <line x1="37" y1="52" x2="42" y2="75" stroke="#1B2A3B" stroke-width="5" stroke-linecap="round"/>
-            <!-- 水滴 -->
-            <path d="M35,4 Q37,8 35,12 Q33,8 35,4Z" fill="#1A5FA8"/>
-          </svg>
-          <strong>飲水タイム</strong>
-          <p>両手を口元に持っていく仕草</p>
-        </div>
-
-        <!-- プレー再開 -->
-        <div class="gesture-card">
-          <svg class="gesture-svg" width="70" height="90" viewBox="0 0 70 90">
-            <circle cx="35" cy="14" r="10" fill="#1B2A3B"/>
-            <rect x="29" y="24" width="12" height="28" rx="4" fill="#1B2A3B"/>
-            <!-- 腕を前方に向ける -->
-            <line x1="41" y1="30" x2="62" y2="26" stroke="#1B2A3B" stroke-width="5" stroke-linecap="round"/>
-            <line x1="29" y1="34" x2="22" y2="48" stroke="#1B2A3B" stroke-width="5" stroke-linecap="round"/>
-            <line x1="33" y1="52" x2="28" y2="75" stroke="#1B2A3B" stroke-width="5" stroke-linecap="round"/>
-            <line x1="37" y1="52" x2="42" y2="75" stroke="#1B2A3B" stroke-width="5" stroke-linecap="round"/>
-            <polygon points="58,22 65,26 58,30" fill="#1A7A4A"/>
-          </svg>
-          <strong>プレー続行</strong>
-          <p>腕を前方に伸ばしてアドバンテージ</p>
-        </div>
-
       </div>
     </div>
   </div>
@@ -248,7 +354,7 @@
           <li>ボールの空気圧を確認。試合球を準備。</li>
           <li>ゴールネット・コーナーフラッグを確認・設置。</li>
           <li>AED・救護バッグの場所を確認。</li>
-          <li>WBGT確認（<a href="heat.html" style="color:var(--orange);font-weight:700">熱中症チェックページ</a>）・飲水タイムを計画。</li>
+          <li>WBGT確認・飲水タイムを計画。<a href="heat.html" style="color:var(--orange);font-weight:700">→ 熱中症チェック</a></li>
         </ul>
       </div>
       <div class="guide-section">
@@ -256,7 +362,7 @@
         <ul class="guide-list">
           <li>両チームの参加選手数を確認（8人制：最少5人で試合成立）。</li>
           <li>スパイク・アクセサリー（時計・ネックレス禁止）を確認。</li>
-          <li>GKのグローブ色・ユニフォーム色が他選手と異なることを確認。</li>
+          <li>GKのユニフォーム色が他選手と異なることを確認。</li>
           <li>コイントス実施。</li>
         </ul>
       </div>
@@ -273,7 +379,7 @@
           <li>交代：何度でも可（出た選手の再出場もOK）。</li>
           <li>オフサイド：あり（低学年大会はなしの場合がある）。</li>
           <li>試合時間：12〜15分×2（大会により異なる）。</li>
-          <li>ピッチサイズ：目安68m×50m（<a href="pitch.html" style="color:var(--orange);font-weight:700">詳細はピッチサイズページ</a>）。</li>
+          <li>ピッチサイズ：目安68m×50m。<a href="pitch.html" style="color:var(--orange);font-weight:700">→ ピッチサイズページ</a></li>
         </ul>
       </div>
       <div class="guide-section">
@@ -288,6 +394,6 @@
     </div>
   </div>
 </main>
-<footer class="site-footer">吉見SMCサッカースポーツ少年団｜スマートポータル</footer>
+<footer class="site-footer">YOSHIMI SMC FC — SMART PORTAL</footer>
 <script src="common.js"></script>
 </body></html>
