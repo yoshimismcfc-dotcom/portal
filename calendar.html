@@ -6,26 +6,17 @@
   <title>チームカレンダー｜吉見SMC FC</title>
   <link rel="stylesheet" href="common.css">
   <style>
-    .calendar-embed {
-      width: 100%;
-      min-height: 500px;
-      border: none;
+    .calendar-wrap {
       border-radius: var(--r12);
       overflow: hidden;
-      background: var(--gray100);
+      box-shadow: var(--shadow-md);
+    }
+    .calendar-wrap iframe {
       display: block;
+      width: 100%;
+      height: 600px;
+      border: none;
     }
-    .calendar-placeholder {
-      min-height: 420px;
-      border: 2px dashed var(--gray200);
-      border-radius: var(--r12);
-      display: grid;
-      place-items: center;
-      text-align: center;
-      gap: 10px;
-      padding: 24px;
-    }
-    .calendar-placeholder p { color: var(--gray600); font-size:.88rem; }
   </style>
 </head>
 <body>
@@ -60,22 +51,10 @@
 
   <div class="panel">
     <div class="panel-title">チーム予定表</div>
-    <!-- ▼ Googleカレンダーのiframe URLをここに貼る ▼ -->
-    <!--
-    <iframe class="calendar-embed"
-      src="https://calendar.google.com/calendar/embed?src=xxxx%40gmail.com&ctz=Asia%2FTokyo"
-      frameborder="0" scrolling="no">
-    </iframe>
-    -->
-    <!-- ▲ URLが未設定の場合はプレースホルダーを表示 ▲ -->
-    <div class="calendar-placeholder">
-      <div style="font-size:2.5rem">📅</div>
-      <strong style="font-size:1.1rem;color:var(--navy)">Googleカレンダー 埋め込み予定</strong>
-      <p>管理者が公開カレンダーのURLを設定すると、ここにカレンダーが表示されます。<br>
-         設定方法：Googleカレンダー → 設定 → 「カレンダーの統合」→ iframeコードのsrc= URLをコピー</p>
-      <a class="btn btn-outline" href="https://calendar.google.com/" target="_blank" rel="noopener">
-        Googleカレンダーを開く
-      </a>
+    <div class="calendar-wrap">
+      <iframe src="https://calendar.google.com/calendar/embed?height=600&wkst=1&ctz=Asia%2FTokyo&showPrint=0&src=eW9zaGltaS5zbWMuZmNAZ21haWwuY29t&src=ZmNlZmY4MjEzODJlMTRhYjhjNTA0YTIwZTEyNjI3M2U0ZmM1ODgzYmYzODdhN2FlMzAyNjJjYTZlOGM5ZWMwNUBncm91cC5jYWxlbmRhci5nb29nbGUuY29t&src=YjkwYmQ4MTAwMWNkMDk2MzU1MWM4Y2Q0NGViNTM1MzFkMTU4N2YzYWI4NzU5MzE4ZTgwMjNkYTY1YjdiMDhlZUBncm91cC5jYWxlbmRhci5nb29nbGUuY29t&src=MWU1YTdkN2ZkOTFjYTg0OTg3YjE5ODBhNjU3NmQ3MDM0ZjQzMWU3OTA2N2ZlMmM4ZTFhMzhmZWIwNmZlMjI5MkBncm91cC5jYWxlbmRhci5nb29nbGUuY29t&src=Zjg1OGY0MzMxN2JhYTFmZmIwY2UxMTEwYjAzYzZlY2FjM2JmMTBhNWQ1MzY3NDI0YTBiOWZjNTM4YjUwZWZjZkBncm91cC5jYWxlbmRhci5nb29nbGUuY29t&src=NzNiNzM1YmRlNWI5ZDIyZjI3M2M0ODBlNTcyMTg4NWQ1MWUxOWZlZGFkZTcxZGYwN2M1MjFlOTlmNmQ1M2YzYUBncm91cC5jYWxlbmRhci5nb29nbGUuY29t&src=MDFkMjJiNzA4ZDYzMjA5OGY0NWRkN2JjMWJlMGNhZTg4ZWZmMDBlNGQyZTRiOWYwNzdjOGQ3MGJjY2E0NmRlMEBncm91cC5jYWxlbmRhci5nb29nbGUuY29t&src=Y2NkODMzMGJiM2I2ZWZiOGY5MGEzNmUxNjU1YWMwNDU5ZGRiZTA0NzE1NTMyNTM2N2JiMGZlZGRkMWVhZTgzZEBncm91cC5jYWxlbmRhci5nb29nbGUuY29t&src=amEuamFwYW5lc2UjaG9saWRheUBncm91cC52LmNhbGVuZGFyLmdvb2dsZS5jb20&color=%23616161&color=%23f09300&color=%23d50000&color=%238e24aa&color=%230b8043&color=%237cb342&color=%23e4c441&color=%234285f4&color=%23616161"
+        frameborder="0" scrolling="no" allowfullscreen>
+      </iframe>
     </div>
   </div>
 
