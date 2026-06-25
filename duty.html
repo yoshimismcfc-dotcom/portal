@@ -65,12 +65,12 @@
   <div class="notice-bar">💾 データはこのブラウザ（端末）に保存されます。</div>
 
   <div class="tab-list" role="tablist">
-    <button class="tab-btn active" data-tab="checklist">🎒 荷物チェック</button>
-    <button class="tab-btn" data-tab="duty">📋 当番表</button>
+    <button class="tab-btn active" data-tab="duty">📋 当番表</button>
+    <button class="tab-btn" data-tab="checklist">🎒 荷物チェック</button>
   </div>
 
   <!-- 荷物チェックリスト -->
-  <div class="tab-content active" id="tab-checklist">
+  <div class="tab-content" id="tab-checklist">
     <div class="panel">
       <div class="panel-title">荷物チェックリスト</div>
       <div class="progress-label" id="check-progress-label">0 / 0 完了</div>
@@ -88,7 +88,7 @@
   </div>
 
   <!-- 当番表 -->
-  <div class="tab-content" id="tab-duty">
+  <div class="tab-content active" id="tab-duty">
     <div class="panel">
       <div class="panel-title">当番を追加</div>
       <div class="duty-row">
