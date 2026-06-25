@@ -9,39 +9,30 @@
     .roster-wrap{overflow-x:auto;-webkit-overflow-scrolling:touch;border-radius:var(--r12);border:1px solid var(--line-2)}
     .roster-table{border-collapse:collapse;width:max-content;min-width:100%;font-size:.82rem}
     .roster-table th,.roster-table td{border:1px solid var(--line-2);padding:0;vertical-align:top;white-space:nowrap}
-    /* 行番号 */
-    .col-no{width:28px;text-align:center;color:#6aaccc;font-size:.72rem;background:rgba(0,212,255,.06);padding:6px 3px;position:sticky;left:0;z-index:10;border-right:2px solid var(--line-2) !important}
+    .col-no{width:28px;text-align:center;color:#6aaccc;font-size:.72rem;background:rgba(0,212,255,.06);padding:6px 3px;position:sticky;left:0;z-index:10;border-right:2px solid var(--line-2)!important}
     .roster-table thead .col-no{background:rgba(0,212,255,.14);font-size:.68rem;font-weight:900;color:var(--cyan);position:sticky;left:0;z-index:22}
-    /* 学年ヘッダー */
-    .roster-table thead tr:first-child th.grade-head{background:rgba(0,48,135,.45);color:#fff;font-size:.78rem;font-weight:900;text-align:center;padding:7px 10px;letter-spacing:.06em;border-bottom:2px solid rgba(0,212,255,.4) !important;position:sticky;top:0;z-index:15;min-width:110px}
+    .roster-table thead tr:first-child th.grade-head{background:rgba(0,48,135,.45);color:#fff;font-size:.78rem;font-weight:900;text-align:center;padding:7px 10px;letter-spacing:.06em;border-bottom:2px solid rgba(0,212,255,.4)!important;position:sticky;top:0;z-index:15;min-width:110px}
     .roster-table thead tr:first-child .col-no{position:sticky;left:0;top:0;z-index:25;background:rgba(0,48,135,.45)}
-    /* 名前セル */
-    .name-cell{min-width:112px;padding:4px 9px 6px;cursor:pointer;transition:.12s;position:relative}
+    .name-cell{min-width:112px;padding:4px 9px 6px;cursor:pointer;transition:.12s}
     .name-cell:hover{background:rgba(0,212,255,.08)}
-    .name-cell .kana{font-size:.58rem;color:#6aaccc;line-height:1.3;margin-bottom:1px;letter-spacing:.02em}
+    .name-cell .kana{font-size:.58rem;color:#6aaccc;line-height:1.3;margin-bottom:1px}
     .name-cell .kanji{font-size:.96rem;font-weight:900;color:#fff;line-height:1.2;letter-spacing:.04em}
     .name-cell .num-badge{font-size:.58rem;color:#ffaa66;margin-top:1px}
     .name-cell .gender-dot{display:inline-block;width:7px;height:7px;border-radius:50%;margin-right:3px;vertical-align:middle}
-    /* 女子赤 */
     .name-cell.girl .kanji{color:#ff8888}
     .name-cell.girl .kana{color:#ffaaaa}
-    /* 空セル */
     .name-cell.empty{min-width:112px;height:52px;cursor:pointer}
     .name-cell.empty:hover{background:rgba(255,255,255,.04)}
-    /* 編集モーダル */
     .edit-modal-bg{position:fixed;inset:0;background:rgba(0,0,0,.82);display:none;place-items:center;z-index:200;backdrop-filter:blur(6px)}
     .edit-modal-bg.open{display:grid}
     .edit-modal{background:var(--surface-lt);border:1px solid var(--line-2);border-radius:var(--r16);padding:22px;width:min(360px,92vw);box-shadow:var(--shadow-lg)}
-    .edit-modal h3{font-size:.92rem;font-weight:900;color:#fff;margin-bottom:14px;letter-spacing:.04em}
+    .edit-modal h3{font-size:.92rem;font-weight:900;color:#fff;margin-bottom:14px}
     .edit-modal-btns{display:flex;gap:8px;justify-content:flex-end;margin-top:14px;flex-wrap:wrap}
-    /* 性別ラジオ */
     .gender-radio{display:flex;gap:16px;margin-top:4px}
     .gender-radio label{display:flex;align-items:center;gap:6px;cursor:pointer;font-size:.9rem;color:#c8e8ff}
     .gender-radio input{width:auto;height:auto}
-    /* 保存バー */
     .save-bar{position:sticky;bottom:0;background:rgba(10,31,48,.97);border-top:1px solid var(--line-2);padding:10px 0;display:flex;gap:8px;align-items:center;justify-content:flex-end;margin-top:14px}
     .save-msg{font-size:.82rem;color:#00ff88;min-height:1.2em;flex:1}
-    /* 凡例 */
     .legend-bar{display:flex;gap:14px;align-items:center;font-size:.75rem;color:#6aaccc;margin-bottom:10px;flex-wrap:wrap}
     .legend-dot{width:9px;height:9px;border-radius:50%;display:inline-block;margin-right:3px;vertical-align:middle}
   </style>
@@ -63,7 +54,6 @@
       <div class="hero-sub">2026年度 SMC学年別名簿。氏名をタップして編集できます。</div></div>
   </div>
   <div class="notice-bar">💾 「保存」を押すとこの端末に保存されます。セルをタップして編集できます。</div>
-
   <div class="panel">
     <div class="legend-bar">
       <span><span class="legend-dot" style="background:#6aaccc"></span>男子</span>
@@ -81,7 +71,6 @@
   </div>
 </main>
 
-<!-- 編集モーダル -->
 <div class="edit-modal-bg" id="edit-modal">
   <div class="edit-modal">
     <h3 id="edit-title">団員を編集</h3>
@@ -95,7 +84,7 @@
       <label class="form-label">性別</label>
       <div class="gender-radio">
         <label><input type="radio" name="edit-gender" value="m" id="edit-g-m"> 男子</label>
-        <label><input type="radio" name="edit-gender" value="f" id="edit-g-f"> 女子（赤字表示）</label>
+        <label><input type="radio" name="edit-gender" value="f" id="edit-g-f"> 女子（赤字）</label>
       </div>
     </div>
     <div class="edit-modal-btns">
@@ -112,58 +101,67 @@ var GRADES=["6年","5年","4年","3年","2年","1年","年長"];
 var KEY="smc_members_v4";
 var ROWS=14;
 
-// 初期データ（添付名簿画像準拠・正確な学年別）
+// ===== 画像の名簿に正確に合わせたデータ =====
 var INIT={
   "6年":[
-    {name:"有瀧　晴一",  kana:"ありたき　はるいち",   num:"",gender:"m"},
-    {name:"石川　日向葵",kana:"いしかわ　ひなたあおい",num:"",gender:"f"},
-    {name:"一場　純",    kana:"いちば　じゅん",        num:"",gender:"m"},
-    {name:"岡野　楓斗",  kana:"おかの　はやと",        num:"",gender:"m"},
-    {name:"金井　暖記",  kana:"かない　はるき",        num:"",gender:"m"},
-    {name:"笹野　陽青",  kana:"ささの　はるせ",        num:"",gender:"m"},
-    {name:"武部　陽樹",  kana:"たけべ　はるき",        num:"",gender:"m"},
-    {name:"長嶋　蓮弥",  kana:"ながしま　れんや",      num:"",gender:"m"},
+    {name:"有瀧　晴一",   kana:"ありたき　はるいち",    num:"",gender:"m"},
+    {name:"石川　日向葵", kana:"いしかわ　ひなたあおい",num:"",gender:"f"},
+    {name:"一場　純",     kana:"いちば　じゅん",        num:"",gender:"m"},
+    {name:"岡野　楓斗",   kana:"おかの　はやと",        num:"",gender:"m"},
+    {name:"金井　暖記",   kana:"かない　はるき",        num:"",gender:"m"},
+    {name:"笹野　陽青",   kana:"ささの　はるせ",        num:"",gender:"m"},
+    {name:"武部　陽樹",   kana:"たけべ　はるき",        num:"",gender:"m"},
+    {name:"長嶋　蓮弥",   kana:"ながしま　れんや",      num:"",gender:"m"},
     null,null,null,null,null,null
   ],
   "5年":[
-    {name:"上村　夏萌",    kana:"かみむら　なつめ",    num:"",gender:"f"},
-    {name:"木村　玲菜",    kana:"きむら　れいな",      num:"",gender:"f"},
-    {name:"澤井　怜央",    kana:"さわい　れお",        num:"",gender:"m"},
-    {name:"谷口　じゅんな",kana:"たにぐち　じゅんな",  num:"",gender:"f"},
-    {name:"木村　翔馬",    kana:"きむら　しょうま",    num:"",gender:"m"},
-    {name:"小林　蒼",      kana:"こばやし　あおい",    num:"",gender:"m"},
-    {name:"坂上　大珠",    kana:"さかうえ　たいじゅ",  num:"",gender:"m"},
-    {name:"篠田　和希",    kana:"しのだ　ともき",      num:"",gender:"m"},
+    {name:"上村　夏萌",    kana:"かみむら　なつめ",     num:"",gender:"f"},
+    {name:"木村　玲菜",    kana:"きむら　れいな",       num:"",gender:"f"},
+    {name:"澤井　怜央",    kana:"さわい　れお",         num:"",gender:"m"},
+    {name:"谷口　じゅんな",kana:"たにぐち　じゅんな",   num:"",gender:"f"},
+    {name:"木村　翔馬",    kana:"きむら　しょうま",     num:"",gender:"m"},
+    {name:"小林　蒼",      kana:"こばやし　あおい",     num:"",gender:"m"},
+    {name:"坂上　大珠",    kana:"さかうえ　たいじゅ",   num:"",gender:"m"},
+    {name:"篠田　和希",    kana:"しのだ　ともき",       num:"",gender:"m"},
     null,null,null,null,null,null
   ],
   "4年":[
-    {name:"金井　勇記",    kana:"かない　ゆうき",      num:"",gender:"m"},
-    {name:"功刀　莉愛",    kana:"くぬぎ　りお",        num:"",gender:"f"},
-    {name:"小柳　柊真",    kana:"こやなぎ　とうま",    num:"",gender:"m"},
-    {name:"谷口　じゅんな",kana:"たにぐち　じゅんな",  num:"",gender:"f"},
-    {name:"北村　悠真",    kana:"きたむら　はるま",    num:"",gender:"m"},
-    {name:"丸山　輝",      kana:"まるやま　ひかる",    num:"",gender:"m"},
+    {name:"金井　勇記",    kana:"かない　ゆうき",       num:"",gender:"m"},
+    {name:"功刀　莉愛",    kana:"くぬぎ　りお",         num:"",gender:"f"},
+    {name:"小柳　柊真",    kana:"こやなぎ　とうま",     num:"",gender:"m"},
+    {name:"谷口　じゅんな",kana:"たにぐち　じゅんな",   num:"",gender:"f"},
+    {name:"北村　悠真",    kana:"きたむら　はるま",     num:"",gender:"m"},
+    {name:"丸山　輝",      kana:"まるやま　ひかる",     num:"",gender:"m"},
     null,null,null,null,null,null,null,null
   ],
   "3年":[
-    {name:"石川　幸乃羽",kana:"いしかわ　このは",      num:"",gender:"f"},
-    {name:"加藤　陸",    kana:"かとう　りく",          num:"",gender:"m"},
-    {name:"上村　葵",    kana:"かみむら　あおい",      num:"",gender:"f"},
-    {name:"原口　颯太",  kana:"はらぐち　そうた",      num:"",gender:"m"},
-    null,null,null,null,null,null,null,null,null,null
+    {name:"石川　幸乃羽", kana:"いしかわ　このは",      num:"",gender:"f"},
+    {name:"加藤　陸",     kana:"かとう　りく",          num:"",gender:"m"},
+    {name:"上村　葵",     kana:"かみむら　あおい",      num:"",gender:"f"},
+    {name:"北村　悠真",   kana:"きたむら　はるま",      num:"",gender:"m"},
+    {name:"木村　翔馬",   kana:"きむら　しょうま",      num:"",gender:"m"},
+    {name:"小林　蒼",     kana:"こばやし　あおい",      num:"",gender:"m"},
+    {name:"坂上　大珠",   kana:"さかうえ　たいじゅ",    num:"",gender:"m"},
+    {name:"篠田　和希",   kana:"しのだ　ともき",        num:"",gender:"m"},
+    {name:"芝嵜　理矩",   kana:"しばさき　りく",        num:"",gender:"m"},
+    {name:"柴田　凌玖",   kana:"しばた　りく",          num:"",gender:"m"},
+    {name:"瀬戸　大志",   kana:"せと　たいし",          num:"",gender:"m"},
+    {name:"武部　優樹",   kana:"たけべ　ゆうき",        num:"",gender:"m"},
+    {name:"長嶋　茉莉",   kana:"ながしま　まり",        num:"",gender:"f"},
+    null
   ],
   "2年":[
-    {name:"飯塚　洋介",kana:"いいづか　ようすけ",      num:"",gender:"m"},
-    {name:"関口　夏絆",kana:"せきぐち　なつき",        num:"",gender:"f"},
-    {name:"野口　陽生",kana:"のぐち　はるき",          num:"",gender:"m"},
+    {name:"飯塚　洋介",   kana:"いいづか　ようすけ",    num:"",gender:"m"},
+    {name:"関口　夏絆",   kana:"せきぐち　なつき",      num:"",gender:"f"},
+    {name:"野口　陽生",   kana:"のぐち　はるき",        num:"",gender:"m"},
     null,null,null,null,null,null,null,null,null,null,null
   ],
   "1年":[
-    {name:"功刀　あいと",kana:"くぬぎ　あいと",        num:"",gender:"m"},
-    null,null,null,null,null,null,null,null,null,null,null,null,null
+    null,null,null,null,null,null,null,null,null,null,null,null,null,null
   ],
   "年長":[
-    null,null,null,null,null,null,null,null,null,null,null,null,null,null
+    {name:"功刀　あいと", kana:"くぬぎ　あいと",        num:"",gender:"m"},
+    null,null,null,null,null,null,null,null,null,null,null,null,null
   ]
 };
 
@@ -176,7 +174,6 @@ var editGrade=null,editRow=null;
 
 function renderTable(){
   var tbl=document.getElementById("roster-table");
-  // ヘッダー
   var h="<thead><tr><th class='col-no'>#</th>";
   GRADES.forEach(function(g){
     var arr=data[g]||[];
@@ -193,9 +190,9 @@ function renderTable(){
         var girl=m.gender==="f";
         var dotColor=girl?"#ff8888":"#6aaccc";
         h+="<td><div class='name-cell"+(girl?" girl":"")+"' onclick=\"openEdit('"+g+"',"+r+")\">";
-        h+="<div class='kana'>"+( m.kana||"")+"</div>";
+        h+="<div class='kana'>"+(m.kana||"")+"</div>";
         h+="<div class='kanji'><span class='gender-dot' style='background:"+dotColor+"'></span>"+m.name+"</div>";
-        if(m.num) h+="<div class='num-badge'>#"+m.num+"</div>";
+        if(m.num)h+="<div class='num-badge'>#"+m.num+"</div>";
         h+="</div></td>";
       } else {
         h+="<td><div class='name-cell empty' onclick=\"openNew('"+g+"',"+r+")\"></div></td>";
@@ -236,8 +233,7 @@ function saveEdit(){
   if(!data[editGrade])data[editGrade]=[];
   while(data[editGrade].length<=editRow)data[editGrade].push(null);
   data[editGrade][editRow]=name?{
-    name:name,
-    kana:document.getElementById("edit-kana").value.trim(),
+    name:name,kana:document.getElementById("edit-kana").value.trim(),
     num:document.getElementById("edit-num").value.trim(),
     gender:gender?gender.value:"m"
   }:null;
