@@ -6,88 +6,46 @@
   <title>出欠確認｜吉見SMC FC</title>
   <link rel="stylesheet" href="common.css">
   <style>
-    .attend-card {
-      background: var(--white);
-      border-radius: var(--r16);
-      border: 2px solid var(--gray100);
-      padding: 24px 20px;
-      display: flex;
-      flex-direction: column;
-      gap: 14px;
-      box-shadow: var(--shadow-sm);
-    }
-    .attend-card.coach-card { border-color: var(--navy); }
-    .attend-card .card-head { display: flex; align-items: center; gap: 12px; }
-    .attend-card .card-emoji { font-size: 2rem; }
-    .attend-card .card-title { font-size: 1.1rem; font-weight: 900; color: var(--navy); }
-    .attend-card .card-subtitle { font-size: .8rem; color: var(--gray600); margin-top: 2px; }
-    .attend-card p { font-size: .88rem; color: var(--gray600); line-height: 1.65; margin: 0; }
-    .attend-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin-bottom: 24px; }
-    @media(max-width:560px){ .attend-grid{ grid-template-columns:1fr; } }
+    .attend-grid{display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-bottom:24px}
+    .attend-card{background:var(--white);border-radius:var(--r16);border:3px solid var(--gray100);padding:28px 20px;display:flex;flex-direction:column;gap:16px;box-shadow:var(--shadow-sm);text-align:center}
+    .attend-card.coach-card{border-color:var(--navy)}
+    .attend-card .card-emoji{font-size:2.6rem}
+    .attend-card .card-title{font-size:1.15rem;font-weight:900;color:var(--navy)}
+    .attend-card .card-subtitle{font-size:.8rem;color:var(--gray600);margin-top:2px}
+    @media(max-width:520px){.attend-grid{grid-template-columns:1fr}}
   </style>
 </head>
 <body>
 <header class="site-header">
   <div class="header-inner">
-    <a class="header-logo" href="index.html">
-      <div class="logo-mark">⚽</div>
-      <div><span>吉見SMC FC</span><span class="logo-sub">スマートポータル</span></div>
-    </a>
+    <a class="header-logo" href="index.html"><div class="logo-mark">⚽</div>
+      <div><span>吉見SMC FC</span><span class="logo-sub">スマートポータル</span></div></a>
     <nav class="header-nav">
-      <a href="index.html">ホーム</a>
-      <a href="heat.html">熱中症</a>
-      <a href="calendar.html">予定</a>
-      <a href="coach.html">コーチ専用</a>
+      <a href="index.html">ホーム</a><a href="heat.html">熱中症</a>
+      <a href="calendar.html">予定</a><a href="coach.html">コーチ専用</a>
     </nav>
   </div>
 </header>
-
 <main class="page-wrap">
   <div class="hero-band">
     <div class="hero-emoji">✋</div>
-    <div>
-      <div class="hero-title">出欠確認</div>
-      <div class="hero-sub">団員・保護者用とコーチ用で回答先が異なります。間違えないようご注意ください。</div>
-    </div>
+    <div><div class="hero-title">出欠確認</div>
+      <div class="hero-sub">回答先が異なります。間違えないようご注意ください。</div></div>
   </div>
-
   <div class="attend-grid">
-    <!-- 団員・保護者 -->
     <div class="attend-card">
-      <div class="card-head">
-        <div class="card-emoji">👨‍👩‍👦</div>
-        <div>
-          <div class="card-title">団員・保護者用</div>
-          <div class="card-subtitle">練習・試合の出欠はこちら</div>
-        </div>
-      </div>
-      <p>練習・試合への参加、欠席、遅刻、早退はこちらから回答してください。</p>
-      <a class="btn btn-primary btn-lg" href="https://chouseisan.com/s?h=04a01b20cc2b4a38b3e1f4aa93d1d06c" target="_blank" rel="noopener" style="text-align:center">
-        📅 回答する（団員・保護者）
-      </a>
+      <div class="card-emoji">👨‍👩‍👦</div>
+      <div><div class="card-title">団員・保護者</div>
+        <div class="card-subtitle">練習・試合の出欠</div></div>
+      <a class="btn btn-primary btn-lg" href="https://chouseisan.com/s?h=04a01b20cc2b4a38b3e1f4aa93d1d06c" target="_blank" rel="noopener" style="text-align:center">📅 回答する</a>
     </div>
-
-    <!-- コーチ -->
     <div class="attend-card coach-card">
-      <div class="card-head">
-        <div class="card-emoji">🧑‍🏫</div>
-        <div>
-          <div class="card-title">コーチ用</div>
-          <div class="card-subtitle">帯同・審判・車出しの可否はこちら</div>
-        </div>
-      </div>
-      <p>帯同、審判、車出し、会場設営の可否はこちらから回答してください。</p>
-      <a class="btn btn-navy btn-lg" href="https://chouseisan.com/s?h=20c37e0538dd4feb8d91d8e31be23ad3" target="_blank" rel="noopener" style="text-align:center">
-        📅 回答する（コーチ）
-      </a>
+      <div class="card-emoji">🧑‍🏫</div>
+      <div><div class="card-title">コーチ</div>
+        <div class="card-subtitle">帯同・審判・車出しの可否</div></div>
+      <a class="btn btn-navy btn-lg" href="https://chouseisan.com/s?h=20c37e0538dd4feb8d91d8e31be23ad3" target="_blank" rel="noopener" style="text-align:center">📅 回答する</a>
     </div>
-  </div>
-
-  <div class="notice-bar">
-    ⚠️ 団員・保護者の方はオレンジのボタン、コーチの方はネイビーのボタンから回答してください。
   </div>
 </main>
-
 <footer class="site-footer">吉見SMCサッカースポーツ少年団｜スマートポータル</footer>
-</body>
-</html>
+</body></html>

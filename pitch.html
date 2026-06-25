@@ -6,7 +6,7 @@
   <title>ピッチサイズ｜吉見SMC FC</title>
   <link rel="stylesheet" href="common.css">
   <style>
-    .pitch-svg-wrap { background: #2d6a1e; border-radius: var(--r12); padding: 16px; overflow-x: auto; margin-bottom: 16px; }
+    .pitch-svg-wrap { background: #2d6a1e; border-radius: var(--r12); padding: 20px 16px; overflow-x: auto; margin-bottom: 16px; }
     .pitch-svg-wrap svg { display: block; margin: 0 auto; }
     .spec-grid { display: grid; grid-template-columns: repeat(3,1fr); gap: 10px; margin-bottom: 20px; }
     .spec-card { background: var(--gray50); border-radius: var(--r8); padding: 14px 12px; text-align: center; }
@@ -18,26 +18,19 @@
 <body>
 <header class="site-header">
   <div class="header-inner">
-    <a class="header-logo" href="index.html">
-      <div class="logo-mark">⚽</div>
-      <div><span>吉見SMC FC</span><span class="logo-sub">スマートポータル</span></div>
-    </a>
+    <a class="header-logo" href="index.html"><div class="logo-mark">⚽</div>
+      <div><span>吉見SMC FC</span><span class="logo-sub">スマートポータル</span></div></a>
     <nav class="header-nav">
-      <a href="index.html">ホーム</a>
-      <a href="heat.html">熱中症</a>
-      <a href="calendar.html">予定</a>
-      <a href="coach.html">コーチ専用</a>
+      <a href="index.html">ホーム</a><a href="heat.html">熱中症</a>
+      <a href="calendar.html">予定</a><a href="coach.html">コーチ専用</a>
     </nav>
   </div>
 </header>
-
 <main class="page-wrap">
   <div class="hero-band">
     <div class="hero-emoji">📐</div>
-    <div>
-      <div class="hero-title">ピッチサイズ</div>
-      <div class="hero-sub">少年サッカー（8人制）と低学年（4人制）の設営基準です。</div>
-    </div>
+    <div><div class="hero-title">ピッチサイズ</div>
+      <div class="hero-sub">少年サッカー（8人制）と低学年（4人制）の設営基準です。</div></div>
   </div>
 
   <div class="tab-list" role="tablist">
@@ -53,44 +46,69 @@
       <div class="spec-card"><div class="spec-label">ピッチ（ヨコ）</div><div class="spec-value">50 m</div></div>
       <div class="spec-card"><div class="spec-label">ゴール幅</div><div class="spec-value">5 m</div></div>
       <div class="spec-card"><div class="spec-label">ゴール高さ</div><div class="spec-value">2.15 m</div></div>
-      <div class="spec-card"><div class="spec-label">ペナルティエリア幅</div><div class="spec-value">25 m</div></div>
-      <div class="spec-card"><div class="spec-label">ペナルティエリア深さ</div><div class="spec-value">12 m</div></div>
+      <div class="spec-card"><div class="spec-label">PA幅</div><div class="spec-value">25 m</div></div>
+      <div class="spec-card"><div class="spec-label">PA深さ</div><div class="spec-value">12 m</div></div>
     </div>
     <div class="pitch-svg-wrap">
-      <svg viewBox="0 0 340 250" width="340" height="250" xmlns="http://www.w3.org/2000/svg" style="max-width:100%">
-        <!-- フィールド -->
-        <rect x="20" y="15" width="300" height="220" fill="none" stroke="white" stroke-width="2"/>
-        <!-- センターライン -->
-        <line x1="170" y1="15" x2="170" y2="235" stroke="white" stroke-width="1.5"/>
+      <!-- 横向き（左右にゴール）: viewBox 幅380 高さ260 -->
+      <svg viewBox="0 0 420 280" width="100%" style="max-width:500px" xmlns="http://www.w3.org/2000/svg">
+        <!-- フィールド外枠 -->
+        <rect x="50" y="30" width="320" height="220" fill="none" stroke="white" stroke-width="2.5"/>
+
+        <!-- センターライン（縦） -->
+        <line x1="210" y1="30" x2="210" y2="250" stroke="white" stroke-width="1.5"/>
         <!-- センターサークル -->
-        <circle cx="170" cy="125" r="30" fill="none" stroke="white" stroke-width="1.5"/>
-        <circle cx="170" cy="125" r="2" fill="white"/>
-        <!-- ペナルティエリア（上） -->
-        <rect x="95" y="15" width="150" height="36" fill="none" stroke="white" stroke-width="1.5"/>
-        <!-- ゴールエリア（上） -->
-        <rect x="128" y="15" width="84" height="15" fill="none" stroke="white" stroke-width="1.5"/>
-        <!-- ゴール（上） -->
-        <rect x="143" y="5" width="54" height="10" fill="none" stroke="white" stroke-width="2"/>
-        <!-- ペナルティエリア（下） -->
-        <rect x="95" y="199" width="150" height="36" fill="none" stroke="white" stroke-width="1.5"/>
-        <!-- ゴールエリア（下） -->
-        <rect x="128" y="220" width="84" height="15" fill="none" stroke="white" stroke-width="1.5"/>
-        <!-- ゴール（下） -->
-        <rect x="143" y="235" width="54" height="10" fill="none" stroke="white" stroke-width="2"/>
+        <circle cx="210" cy="140" r="34" fill="none" stroke="white" stroke-width="1.5"/>
+        <circle cx="210" cy="140" r="2.5" fill="white"/>
+
+        <!-- ===== 左ゴール側 ===== -->
+        <!-- ペナルティエリア（左） -->
+        <rect x="50" y="78" width="44" height="124" fill="none" stroke="white" stroke-width="1.5"/>
+        <!-- ゴールエリア（左） -->
+        <rect x="50" y="108" width="18" height="64" fill="none" stroke="white" stroke-width="1.5"/>
+        <!-- ゴール本体（左） -->
+        <rect x="38" y="119" width="12" height="42" fill="rgba(255,255,255,.15)" stroke="white" stroke-width="2"/>
+
+        <!-- ===== 右ゴール側 ===== -->
+        <!-- ペナルティエリア（右） -->
+        <rect x="326" y="78" width="44" height="124" fill="none" stroke="white" stroke-width="1.5"/>
+        <!-- ゴールエリア（右） -->
+        <rect x="352" y="108" width="18" height="64" fill="none" stroke="white" stroke-width="1.5"/>
+        <!-- ゴール本体（右） -->
+        <rect x="370" y="119" width="12" height="42" fill="rgba(255,255,255,.15)" stroke="white" stroke-width="2"/>
+
         <!-- コーナーアーク -->
-        <path d="M20,25 A10,10 0 0,1 30,15" fill="none" stroke="white" stroke-width="1.5"/>
-        <path d="M310,25 A10,10 0 0,0 320,15" fill="none" stroke="white" stroke-width="1.5"/>
-        <path d="M20,225 A10,10 0 0,0 30,235" fill="none" stroke="white" stroke-width="1.5"/>
-        <path d="M310,225 A10,10 0 0,1 320,235" fill="none" stroke="white" stroke-width="1.5"/>
-        <!-- 寸法ラベル -->
-        <text x="170" y="246" fill="white" font-size="9" text-anchor="middle">←── 50 m ──→</text>
-        <text x="8" y="128" fill="white" font-size="9" text-anchor="middle" transform="rotate(-90,8,128)">68 m</text>
+        <path d="M50,40 A10,10 0 0,1 60,30" fill="none" stroke="white" stroke-width="1.5"/>
+        <path d="M360,30 A10,10 0 0,1 370,40" fill="none" stroke="white" stroke-width="1.5"/>
+        <path d="M50,240 A10,10 0 0,0 60,250" fill="none" stroke="white" stroke-width="1.5"/>
+        <path d="M360,250 A10,10 0 0,0 370,240" fill="none" stroke="white" stroke-width="1.5"/>
+
+        <!-- ===== 寸法ラベル ===== -->
+        <!-- タテ（高さ）：フィールド左外 -->
+        <line x1="42" y1="30" x2="42" y2="250" stroke="#ffdd44" stroke-width="1" stroke-dasharray="3,2"/>
+        <line x1="38" y1="30" x2="46" y2="30" stroke="#ffdd44" stroke-width="1"/>
+        <line x1="38" y1="250" x2="46" y2="250" stroke="#ffdd44" stroke-width="1"/>
+        <text x="35" y="143" fill="#ffdd44" font-size="10" font-weight="bold" text-anchor="middle" transform="rotate(-90,35,143)">50 m</text>
+
+        <!-- ヨコ（幅）：フィールド下外 -->
+        <line x1="50" y1="258" x2="370" y2="258" stroke="#ffdd44" stroke-width="1" stroke-dasharray="3,2"/>
+        <line x1="50" y1="254" x2="50" y2="262" stroke="#ffdd44" stroke-width="1"/>
+        <line x1="370" y1="254" x2="370" y2="262" stroke="#ffdd44" stroke-width="1"/>
+        <text x="210" y="272" fill="#ffdd44" font-size="10" font-weight="bold" text-anchor="middle">68 m</text>
+
+        <!-- PA深さ（左） -->
+        <text x="73" y="26" fill="#aaffaa" font-size="8.5" text-anchor="middle">PA 12m</text>
+
+        <!-- ゴール幅（左） -->
+        <text x="27" y="143" fill="#aaffaa" font-size="8" text-anchor="middle">5m</text>
+
         <!-- ゴールラベル -->
-        <text x="170" y="10" fill="#ffdd44" font-size="8" text-anchor="middle" font-weight="bold">ゴール 5m×2.15m</text>
+        <text x="27" y="110" fill="#ffdd44" font-size="7.5" text-anchor="middle" font-weight="bold">GOAL</text>
+        <text x="393" y="110" fill="#ffdd44" font-size="7.5" text-anchor="middle" font-weight="bold">GOAL</text>
       </svg>
     </div>
     <div class="notice-bar">
-      📌 上記はJFA推奨寸法。会場の広さにより60×40m程度に縮小する場合があります。
+      📌 上記はJFA推奨寸法。会場の広さにより60×40m程度に縮小する場合があります。ゴール：幅5m×高さ2.15m
     </div>
   </div>
 
@@ -107,10 +125,8 @@
     <div class="panel">
       <div class="panel-title">低学年の特別ルール</div>
       <ul style="padding-left:18px;font-size:.88rem;line-height:2;color:var(--gray600)">
-        <li>オフサイドなし</li>
-        <li>GKはパントキックなし（地面から蹴る）</li>
-        <li>スローインは正確さより参加を優先（やり直しOK）</li>
-        <li>ゴールキックはペナルティエリア内から蹴る</li>
+        <li>オフサイドなし</li><li>GKはパントキックなし（地面から蹴る）</li>
+        <li>スローインはやり直しOK</li><li>ゴールキックはペナルティエリア内から蹴る</li>
         <li>大会・地域により細かいルールが異なるため事前確認を</li>
       </ul>
     </div>
@@ -121,28 +137,14 @@
     <div class="panel">
       <div class="panel-title">設営の手順と注意点</div>
       <div style="display:grid;gap:12px;font-size:.88rem">
-        <div style="background:var(--gray50);border-radius:var(--r8);padding:13px">
-          <strong style="color:var(--navy);display:block;margin-bottom:6px">① ゴール設置</strong>
-          ゴールはアンカーペグ・重りで必ず固定。強風時は横倒し保管。子どもが近くにいる時はゴールにぶら下がらせない。
-        </div>
-        <div style="background:var(--gray50);border-radius:var(--r8);padding:13px">
-          <strong style="color:var(--navy);display:block;margin-bottom:6px">② コーナーフラッグ</strong>
-          4隅に設置。旗の向きは外側に倒れるように（選手への危険防止）。
-        </div>
-        <div style="background:var(--gray50);border-radius:var(--r8);padding:13px">
-          <strong style="color:var(--navy);display:block;margin-bottom:6px">③ 応援エリアの分離</strong>
-          両チームの保護者・応援エリアをタッチラインから2m以上離し、相互に分離して設置する。
-        </div>
-        <div style="background:var(--gray50);border-radius:var(--r8);padding:13px">
-          <strong style="color:var(--navy);display:block;margin-bottom:6px">④ 救護スペース</strong>
-          本部テント横に救護バッグを配置。AEDの位置を試合前に全スタッフで確認する。
-        </div>
+        <div style="background:var(--gray50);border-radius:var(--r8);padding:13px"><strong style="color:var(--navy);display:block;margin-bottom:6px">① ゴール設置</strong>アンカーペグ・重りで必ず固定。強風時は横倒し保管。子どもをゴールにぶら下がらせない。</div>
+        <div style="background:var(--gray50);border-radius:var(--r8);padding:13px"><strong style="color:var(--navy);display:block;margin-bottom:6px">② コーナーフラッグ</strong>4隅に設置。旗の向きは外側に倒れるように（選手への危険防止）。</div>
+        <div style="background:var(--gray50);border-radius:var(--r8);padding:13px"><strong style="color:var(--navy);display:block;margin-bottom:6px">③ 応援エリアの分離</strong>両チームの保護者・応援エリアをタッチラインから2m以上離し、相互に分離して設置する。</div>
+        <div style="background:var(--gray50);border-radius:var(--r8);padding:13px"><strong style="color:var(--navy);display:block;margin-bottom:6px">④ 救護スペース</strong>本部テント横に救護バッグを配置。AEDの位置を試合前に全スタッフで確認する。</div>
       </div>
     </div>
   </div>
 </main>
-
 <footer class="site-footer">吉見SMCサッカースポーツ少年団｜スマートポータル</footer>
 <script src="common.js"></script>
-</body>
-</html>
+</body></html>
