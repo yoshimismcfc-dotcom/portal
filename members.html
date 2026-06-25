@@ -6,42 +6,62 @@
   <title>団員名簿｜吉見SMC FC</title>
   <link rel="stylesheet" href="common.css">
   <style>
-    .grade-tabs{display:flex;gap:4px;flex-wrap:wrap;border-bottom:1px solid var(--line-2);margin-bottom:16px}
-    .grade-tab{padding:8px 13px;font:inherit;font-size:.82rem;font-weight:700;color:#8ac8e8;background:none;border:none;border-bottom:2px solid transparent;margin-bottom:-1px;cursor:pointer;white-space:nowrap;transition:.15s}
-    .grade-tab:hover{color:#c8e8ff}
-    .grade-tab.active{color:var(--orange);border-bottom-color:var(--orange)}
-    .grade-panel{display:none}.grade-panel.active{display:block}
-    .member-table{width:100%;border-collapse:collapse;font-size:.88rem;table-layout:fixed}
-    .member-table th,.member-table td{padding:9px 8px;border-bottom:1px solid var(--line);vertical-align:middle}
-    .member-table th{background:rgba(0,212,255,.08);font-size:.72rem;font-weight:900;color:var(--cyan);white-space:nowrap;letter-spacing:.05em}
-    .member-table tbody tr:hover{background:rgba(0,212,255,.05)}
-    .col-no{width:30px;text-align:center}
-    .col-name{width:auto}
-    .col-kana{width:28%}
-    .col-num{width:58px}
-    .col-note{width:26%}
-    .col-del{width:34px}
-    .member-table input{
-      width:100%;border:1px solid transparent;border-radius:6px;
-      padding:5px 8px;font:inherit;font-size:.88rem;
-      background:transparent;color:#ffffff;transition:.15s;
+    /* ===== 表形式名簿 ===== */
+    .roster-wrap{overflow-x:auto;-webkit-overflow-scrolling:touch;border-radius:var(--r12);border:1px solid var(--line-2)}
+    .roster-table{border-collapse:collapse;font-size:.88rem;width:max-content;min-width:100%}
+    .roster-table th,.roster-table td{
+      border:1px solid var(--line-2);padding:0;
+      vertical-align:top;white-space:nowrap;
     }
-    .member-table input:focus{
-      outline:none;border-color:var(--orange);
-      background:rgba(255,107,43,.1);
+    /* 行番号列 */
+    .roster-table .col-no{
+      width:36px;text-align:center;color:#6aaccc;font-size:.75rem;
+      background:rgba(0,212,255,.06);padding:8px 4px;
+      position:sticky;left:0;z-index:10;border-right:2px solid var(--line-2) !important;
     }
-    .member-table input::placeholder{color:rgba(255,255,255,.2)}
-    .del-btn{background:none;border:none;color:rgba(255,68,102,.5);font-size:.95rem;cursor:pointer;padding:4px 6px;border-radius:5px;line-height:1;transition:.15s}
-    .del-btn:hover{color:#ff4466;background:rgba(255,68,102,.18)}
-    .add-btn-row{margin-top:10px}
-    .save-bar{
-      position:sticky;bottom:0;background:rgba(10,31,48,.97);
-      border-top:1px solid var(--line-2);padding:10px 0;
-      display:flex;gap:8px;align-items:center;justify-content:flex-end;margin-top:14px;
+    .roster-table thead .col-no{
+      background:rgba(0,212,255,.14);font-size:.7rem;font-weight:900;color:var(--cyan);
+      position:sticky;left:0;z-index:20;
     }
+    /* 学年ヘッダー */
+    .roster-table thead tr:first-child th.grade-head{
+      background:rgba(0,48,135,.35);color:#ffffff;font-size:.82rem;font-weight:900;
+      text-align:center;padding:8px 12px;letter-spacing:.06em;
+      border-bottom:2px solid rgba(0,212,255,.4) !important;
+      position:sticky;top:0;z-index:15;
+    }
+    .roster-table thead tr:first-child .col-no{
+      position:sticky;left:0;top:0;z-index:25;background:rgba(0,48,135,.35);
+    }
+    /* セル内レイアウト */
+    .name-cell{
+      min-width:108px;padding:5px 10px 7px;cursor:pointer;
+      transition:.12s;position:relative;
+    }
+    .name-cell:hover{background:rgba(0,212,255,.07)}
+    .name-cell .kana{
+      font-size:.62rem;color:#6aaccc;line-height:1.3;
+      margin-bottom:2px;letter-spacing:.02em;
+    }
+    .name-cell .kanji{
+      font-size:1rem;font-weight:900;color:#ffffff;
+      line-height:1.2;letter-spacing:.04em;
+    }
+    /* 女子：赤色（画像準拠） */
+    .name-cell.girl .kanji{color:#ff8888}
+    .name-cell.girl .kana{color:#ffaaaa}
+    /* 空セル */
+    .name-cell.empty{cursor:default;min-width:108px}
+    .name-cell.empty:hover{background:none}
+    /* 編集モーダル */
+    .edit-modal-bg{position:fixed;inset:0;background:rgba(0,0,0,.8);display:none;place-items:center;z-index:200;backdrop-filter:blur(6px)}
+    .edit-modal-bg.open{display:grid}
+    .edit-modal{background:var(--surface-lt);border:1px solid var(--line-2);border-radius:var(--r16);padding:22px;width:min(360px,92vw);box-shadow:var(--shadow-lg)}
+    .edit-modal h3{font-size:.95rem;font-weight:900;color:#fff;margin-bottom:14px}
+    .edit-modal-btns{display:flex;gap:8px;justify-content:flex-end;margin-top:14px;flex-wrap:wrap}
+    /* 保存バー */
+    .save-bar{position:sticky;bottom:0;background:rgba(10,31,48,.97);border-top:1px solid var(--line-2);padding:10px 0;display:flex;gap:8px;align-items:center;justify-content:flex-end;margin-top:14px}
     .save-msg{font-size:.82rem;color:#00ff88;min-height:1.2em;flex:1}
-    .table-wrap{overflow-x:auto;-webkit-overflow-scrolling:touch}
-    .no-badge{color:#8ac8e8;font-size:.78rem}
   </style>
 </head>
 <body>
@@ -58,182 +78,229 @@
   <div class="hero-band">
     <div class="hero-emoji">📒</div>
     <div><div class="hero-title">団員名簿</div>
-      <div class="hero-sub">学年別に随時入力・編集できます。「保存」を押すとこの端末に保存されます。</div></div>
+      <div class="hero-sub">2026年度 SMC学年別名簿。氏名をタップして編集できます。</div></div>
   </div>
-  <div class="notice-bar">💾 データはこのブラウザ（端末）に保存されます。入力後は必ず「保存」を押してください。</div>
+  <div class="notice-bar">💾 「保存」を押すとこの端末に保存されます。セルをタップすると氏名・ふりがな・背番号を編集できます。</div>
 
   <div class="panel">
-    <div class="grade-tabs" id="grade-tabs"></div>
-    <div id="grade-panels"></div>
+    <div class="roster-wrap">
+      <table class="roster-table" id="roster-table"></table>
+    </div>
     <div class="save-bar">
       <span class="save-msg" id="save-msg"></span>
       <button class="btn btn-outline btn-sm" onclick="exportCSV()">📥 CSV出力</button>
-      <button class="btn btn-primary" onclick="saveAll()">💾 保存</button>
+      <button class="btn btn-primary" onclick="saveData()">💾 保存</button>
     </div>
   </div>
 </main>
+
+<!-- 編集モーダル -->
+<div class="edit-modal-bg" id="edit-modal">
+  <div class="edit-modal">
+    <h3 id="edit-modal-title">団員を編集</h3>
+    <div class="form-group"><label class="form-label">氏名（漢字）</label>
+      <input class="form-control" id="edit-name" placeholder="例：吉見　太郎"></div>
+    <div class="form-group"><label class="form-label">ふりがな</label>
+      <input class="form-control" id="edit-kana" placeholder="例：よしみ　たろう"></div>
+    <div class="form-group"><label class="form-label">背番号</label>
+      <input class="form-control" id="edit-num" placeholder="例：10" style="text-align:center"></div>
+    <div class="form-group">
+      <label class="form-label">性別（女子は赤表示）</label>
+      <select class="form-control" id="edit-gender">
+        <option value="m">男子</option>
+        <option value="f">女子（赤表示）</option>
+      </select>
+    </div>
+    <div class="edit-modal-btns">
+      <button class="btn btn-outline btn-sm" id="edit-delete-btn" style="color:var(--red);border-color:rgba(255,68,102,.4)">🗑 削除</button>
+      <button class="btn btn-outline" onclick="closeEditModal()">キャンセル</button>
+      <button class="btn btn-primary" onclick="saveEdit()">保存</button>
+    </div>
+  </div>
+</div>
+
 <footer class="site-footer">YOSHIMI SMC FC — SMART PORTAL</footer>
 <script>
 var GRADES = ["6年","5年","4年","3年","2年","1年","年長"];
-var INITIAL = {
+var KEY = "smc_members_v3";
+
+// 初期データ（添付画像の名簿より）
+var INIT = {
   "6年":[
-    {no:1, name:"有瀧　晴一",   kana:"ありたき　はるいち",  num:"", note:""},
-    {no:2, name:"石川　日向葵", kana:"いしかわ　ひなたあおい",num:"",note:""},
-    {no:3, name:"一場　純",     kana:"いちば　じゅん",      num:"", note:""},
-    {no:4, name:"岡野　楓斗",   kana:"おかの　はやと",      num:"", note:""},
-    {no:5, name:"金井　暖記",   kana:"かない　はるき",      num:"", note:""},
-    {no:6, name:"笹野　陽青",   kana:"ささの　はるせ",      num:"", note:""},
-    {no:7, name:"武部　陽樹",   kana:"たけべ　はるき",      num:"", note:""},
-    {no:8, name:"長嶋　蓮弥",   kana:"ながしま　れんや",    num:"", note:""},
-    {no:9, name:"芝嵜　理矩",   kana:"しばさき　りく",      num:"", note:""},
-    {no:10,name:"柴田　凌玖",   kana:"しばた　りく",        num:"", note:""},
-    {no:11,name:"瀬戸　大志",   kana:"せと　たいし",        num:"", note:""},
-    {no:12,name:"武部　優樹",   kana:"たけべ　ゆうき",      num:"", note:""},
-    {no:13,name:"長嶋　茉莉",   kana:"ながしま　まり",      num:"", note:""},
+    {name:"有瀧　晴一", kana:"ありたき　はるいち",  num:"", gender:"m"},
+    {name:"石川　日向葵",kana:"いしかわ　ひなたあおい",num:"",gender:"f"},
+    {name:"一場　純",    kana:"いちば　じゅん",      num:"", gender:"m"},
+    {name:"岡野　楓斗",  kana:"おかの　はやと",      num:"", gender:"m"},
+    {name:"金井　暖記",  kana:"かない　はるき",      num:"", gender:"m"},
+    {name:"笹野　陽青",  kana:"ささの　はるせ",      num:"", gender:"m"},
+    {name:"武部　陽樹",  kana:"たけべ　はるき",      num:"", gender:"m"},
+    {name:"長嶋　蓮弥",  kana:"ながしま　れんや",    num:"", gender:"m"},
+    {name:"芝嵜　理矩",  kana:"しばさき　りく",      num:"", gender:"m"},
+    {name:"柴田　凌玖",  kana:"しばた　りく",        num:"", gender:"m"},
+    {name:"瀬戸　大志",  kana:"せと　たいし",        num:"", gender:"m"},
+    {name:"武部　優樹",  kana:"たけべ　ゆうき",      num:"", gender:"m"},
+    {name:"長嶋　茉莉",  kana:"ながしま　まり",      num:"", gender:"f"},
+    null
   ],
   "5年":[
-    {no:1, name:"上村　夏萌",   kana:"かみむら　なつめ",  num:"", note:""},
-    {no:2, name:"木村　玲菜",   kana:"きむら　れいな",    num:"", note:""},
-    {no:3, name:"澤井　怜央",   kana:"さわい　れお",      num:"", note:""},
-    {no:4, name:"谷口　じゅんな",kana:"たにぐち　じゅんな",num:"",note:""},
-    {no:5, name:"木村　翔馬",   kana:"きむら　しょうま",  num:"", note:""},
-    {no:6, name:"小林　蒼",     kana:"こばやし　あおい",  num:"", note:""},
-    {no:7, name:"坂上　大珠",   kana:"さかうえ　たいじゅ",num:"", note:""},
-    {no:8, name:"篠田　和希",   kana:"しのだ　ともき",    num:"", note:""},
+    {name:"上村　夏萌",   kana:"かみむら　なつめ",    num:"", gender:"f"},
+    {name:"木村　玲菜",   kana:"きむら　れいな",      num:"", gender:"f"},
+    {name:"澤井　怜央",   kana:"さわい　れお",        num:"", gender:"m"},
+    {name:"谷口　じゅんな",kana:"たにぐち　じゅんな", num:"", gender:"f"},
+    {name:"木村　翔馬",   kana:"きむら　しょうま",    num:"", gender:"m"},
+    {name:"小林　蒼",     kana:"こばやし　あおい",    num:"", gender:"m"},
+    {name:"坂上　大珠",   kana:"さかうえ　たいじゅ",  num:"", gender:"m"},
+    {name:"篠田　和希",   kana:"しのだ　ともき",      num:"", gender:"m"},
+    null,null,null,null,null,null
   ],
   "4年":[
-    {no:1, name:"金井　勇記",   kana:"かない　ゆうき",    num:"", note:""},
-    {no:2, name:"功刀　莉愛",   kana:"くぬぎ　りお",      num:"", note:""},
-    {no:3, name:"小柳　柊真",   kana:"こやなぎ　とうま",  num:"", note:""},
-    {no:4, name:"北村　悠真",   kana:"きたむら　はるま",  num:"", note:""},
-    {no:5, name:"丸山　輝",     kana:"まるやま　ひかる",  num:"", note:""},
+    {name:"金井　勇記",   kana:"かない　ゆうき",      num:"", gender:"m"},
+    {name:"功刀　莉愛",   kana:"くぬぎ　りお",        num:"", gender:"f"},
+    {name:"小柳　柊真",   kana:"こやなぎ　とうま",    num:"", gender:"m"},
+    {name:"谷口　じゅんな",kana:"たにぐち　じゅんな", num:"", gender:"f"},
+    {name:"北村　悠真",   kana:"きたむら　はるま",    num:"", gender:"m"},
+    {name:"丸山　輝",     kana:"まるやま　ひかる",    num:"", gender:"m"},
+    null,null,null,null,null,null,null,null
   ],
   "3年":[
-    {no:1, name:"石川　幸乃羽", kana:"いしかわ　このは",  num:"", note:""},
-    {no:2, name:"加藤　陸",     kana:"かとう　りく",      num:"", note:""},
-    {no:3, name:"上村　葵",     kana:"かみむら　あおい",  num:"", note:""},
-    {no:4, name:"原口　颯太",   kana:"はらぐち　そうた",  num:"", note:""},
+    {name:"石川　幸乃羽", kana:"いしかわ　このは",    num:"", gender:"f"},
+    {name:"加藤　陸",     kana:"かとう　りく",        num:"", gender:"m"},
+    {name:"上村　葵",     kana:"かみむら　あおい",    num:"", gender:"f"},
+    {name:"北村　悠真",   kana:"きたむら　はるま",    num:"", gender:"m"},
+    {name:"木村　翔馬",   kana:"きむら　しょうま",    num:"", gender:"m"},
+    {name:"小林　蒼",     kana:"こばやし　あおい",    num:"", gender:"m"},
+    {name:"坂上　大珠",   kana:"さかうえ　たいじゅ",  num:"", gender:"m"},
+    {name:"篠田　和希",   kana:"しのだ　ともき",      num:"", gender:"m"},
+    {name:"芝嵜　理矩",   kana:"しばさき　りく",      num:"", gender:"m"},
+    {name:"柴田　凌玖",   kana:"しばた　りく",        num:"", gender:"m"},
+    {name:"瀬戸　大志",   kana:"せと　たいし",        num:"", gender:"m"},
+    {name:"武部　優樹",   kana:"たけべ　ゆうき",      num:"", gender:"m"},
+    {name:"長嶋　茉莉",   kana:"ながしま　まり",      num:"", gender:"f"},
+    {name:"原口　颯太",   kana:"はらぐち　そうた",    num:"", gender:"m"}
   ],
   "2年":[
-    {no:1, name:"飯塚　洋介",   kana:"いいづか　ようすけ",num:"", note:""},
-    {no:2, name:"関口　夏絆",   kana:"せきぐち　なつき",  num:"", note:""},
-    {no:3, name:"野口　陽生",   kana:"のぐち　はるき",    num:"", note:""},
+    {name:"飯塚　洋介",   kana:"いいづか　ようすけ",  num:"", gender:"m"},
+    {name:"関口　夏絆",   kana:"せきぐち　なつき",    num:"", gender:"f"},
+    {name:"野口　陽生",   kana:"のぐち　はるき",      num:"", gender:"m"},
+    null,null,null,null,null,null,null,null,null,null,null
   ],
   "1年":[
-    {no:1, name:"功刀　あいと", kana:"くぬぎ　あいと",    num:"", note:""},
+    {name:"功刀　あいと", kana:"くぬぎ　あいと",      num:"", gender:"m"},
+    null,null,null,null,null,null,null,null,null,null,null,null,null
   ],
-  "年長":[]
+  "年長":[
+    null,null,null,null,null,null,null,null,null,null,null,null,null,null
+  ]
 };
 
-var KEY = "smc_members_v2";
-function loadData() {
-  try { var s = JSON.parse(localStorage.getItem(KEY)); if(s) return s; } catch(e) {}
-  return JSON.parse(JSON.stringify(INITIAL));
+function loadData(){
+  try{var s=localStorage.getItem(KEY);if(s)return JSON.parse(s);}catch(e){}
+  return JSON.parse(JSON.stringify(INIT));
 }
-function saveAll() {
-  var data = collectData();
-  localStorage.setItem(KEY, JSON.stringify(data));
-  var msg = document.getElementById("save-msg");
-  msg.textContent = "✅ 保存しました（" + new Date().toLocaleTimeString("ja-JP",{hour:"2-digit",minute:"2-digit"}) + "）";
-  setTimeout(function(){ msg.textContent = ""; }, 3000);
+var data = loadData();
+var ROWS = 14; // 最大14行
+
+// 現在編集中
+var editGrade = null, editRow = null;
+
+function renderTable(){
+  var tbl = document.getElementById("roster-table");
+  var html = "<thead><tr><th class='col-no roster-table'>#</th>";
+  GRADES.forEach(function(g){
+    html += "<th class='grade-head'>"+g+"</th>";
+  });
+  html += "</tr></thead><tbody>";
+
+  for(var r=0; r<ROWS; r++){
+    html += "<tr><td class='col-no'>"+(r+1)+"</td>";
+    GRADES.forEach(function(g){
+      var arr = data[g] || [];
+      var m = arr[r];
+      if(m && m.name){
+        var isgirl = m.gender==="f";
+        html += "<td><div class='name-cell"+(isgirl?" girl":"")+"' onclick=\"openEdit('"+g+"',"+r+")\">";
+        html += "<div class='kana'>"+(m.kana||"　")+"</div>";
+        html += "<div class='kanji'>"+m.name+"</div>";
+        if(m.num) html += "<div style='font-size:.6rem;color:#6aaccc;margin-top:2px'>#"+m.num+"</div>";
+        html += "</div></td>";
+      } else {
+        html += "<td><div class='name-cell empty' onclick=\"openNew('"+g+"',"+r+")\"></div></td>";
+      }
+    });
+    html += "</tr>";
+  }
+  html += "</tbody>";
+  tbl.innerHTML = html;
 }
-function collectData() {
-  var result = {};
-  GRADES.forEach(function(g) {
-    result[g] = [];
-    var rows = document.querySelectorAll("#panel-" + gid(g) + " tbody tr");
-    rows.forEach(function(tr, i) {
-      var inp = tr.querySelectorAll("input");
-      result[g].push({no:i+1,name:inp[0].value,kana:inp[1].value,num:inp[2].value,note:inp[3].value});
+
+function openEdit(grade, row){
+  var m = (data[grade]||[])[row];
+  if(!m || !m.name){ openNew(grade,row); return; }
+  editGrade = grade; editRow = row;
+  document.getElementById("edit-modal-title").textContent = grade+" "+row+"番目を編集";
+  document.getElementById("edit-name").value = m.name||"";
+  document.getElementById("edit-kana").value = m.kana||"";
+  document.getElementById("edit-num").value  = m.num||"";
+  document.getElementById("edit-gender").value = m.gender||"m";
+  document.getElementById("edit-delete-btn").style.display = "inline-flex";
+  document.getElementById("edit-delete-btn").onclick = function(){ deleteEntry(); };
+  document.getElementById("edit-modal").classList.add("open");
+}
+function openNew(grade, row){
+  editGrade = grade; editRow = row;
+  document.getElementById("edit-modal-title").textContent = grade+" "+(row+1)+"番を追加";
+  document.getElementById("edit-name").value = "";
+  document.getElementById("edit-kana").value = "";
+  document.getElementById("edit-num").value  = "";
+  document.getElementById("edit-gender").value = "m";
+  document.getElementById("edit-delete-btn").style.display = "none";
+  document.getElementById("edit-modal").classList.add("open");
+}
+function closeEditModal(){document.getElementById("edit-modal").classList.remove("open");}
+function saveEdit(){
+  var name = document.getElementById("edit-name").value.trim();
+  if(!data[editGrade]) data[editGrade]=[];
+  while(data[editGrade].length<=editRow) data[editGrade].push(null);
+  if(name){
+    data[editGrade][editRow]={
+      name:name,
+      kana:document.getElementById("edit-kana").value.trim(),
+      num: document.getElementById("edit-num").value.trim(),
+      gender:document.getElementById("edit-gender").value
+    };
+  } else {
+    data[editGrade][editRow]=null;
+  }
+  closeEditModal();
+  renderTable();
+}
+function deleteEntry(){
+  if(!confirm("このデータを削除しますか？"))return;
+  if(data[editGrade]) data[editGrade][editRow]=null;
+  closeEditModal();
+  renderTable();
+}
+function saveData(){
+  localStorage.setItem(KEY,JSON.stringify(data));
+  var msg=document.getElementById("save-msg");
+  msg.textContent="✅ 保存しました（"+new Date().toLocaleTimeString("ja-JP",{hour:"2-digit",minute:"2-digit"})+"）";
+  setTimeout(function(){msg.textContent="";},3000);
+}
+function exportCSV(){
+  var csv="\uFEFF学年,No,氏名,ふりがな,背番号,性別\n";
+  GRADES.forEach(function(g){
+    var arr=data[g]||[];
+    arr.forEach(function(m,i){
+      if(m&&m.name) csv+=g+","+(i+1)+",\""+m.name+"\",\""+m.kana+"\",\""+m.num+"\","+(m.gender==="f"?"女子":"男子")+"\n";
     });
   });
-  return result;
+  var a=document.createElement("a");
+  a.href=URL.createObjectURL(new Blob([csv],{type:"text/csv"}));
+  a.download="smc_members_2026.csv";a.click();
 }
-function addRow(g) {
-  var tbody = document.querySelector("#panel-" + gid(g) + " tbody");
-  var no = tbody.querySelectorAll("tr").length + 1;
-  tbody.appendChild(makeRow(g, {no:no,name:"",kana:"",num:"",note:""}));
-  updateCount(g);
-}
-function deleteRow(btn, g) {
-  if (!confirm("この団員を削除しますか？")) return;
-  btn.closest("tr").remove();
-  renumber(g); updateCount(g);
-}
-function renumber(g) {
-  document.querySelectorAll("#panel-" + gid(g) + " tbody tr").forEach(function(tr,i){
-    tr.querySelector(".row-no").textContent = i+1;
-  });
-}
-function updateCount(g) {
-  var n = document.querySelectorAll("#panel-" + gid(g) + " tbody tr").length;
-  var tab = document.querySelector("[data-grade='" + g + "']");
-  if (tab) tab.querySelector(".cnt").textContent = "(" + n + ")";
-}
-function gid(g) { return g.replace("年","nen").replace("長","cho"); }
-
-function makeRow(g, d) {
-  var tr = document.createElement("tr");
-  tr.innerHTML =
-    "<td class='col-no'><span class='row-no no-badge'>" + d.no + "</span></td>" +
-    "<td class='col-name'><input type='text' value=\"" + d.name + "\" placeholder='氏名'></td>" +
-    "<td class='col-kana'><input type='text' value=\"" + d.kana + "\" placeholder='ふりがな'></td>" +
-    "<td class='col-num'><input type='text' value=\"" + d.num + "\" placeholder='背番号' style='text-align:center'></td>" +
-    "<td class='col-note'><input type='text' value=\"" + d.note + "\" placeholder='メモ'></td>" +
-    "<td class='col-del'><button class='del-btn' onclick=\"deleteRow(this,'" + g + "')\" title='削除'>🗑</button></td>";
-  return tr;
-}
-
-function buildUI() {
-  var data = loadData();
-  var tabsEl = document.getElementById("grade-tabs");
-  var panelsEl = document.getElementById("grade-panels");
-  GRADES.forEach(function(g, idx) {
-    var members = data[g] || [];
-    var id = gid(g);
-    var tab = document.createElement("button");
-    tab.className = "grade-tab" + (idx===0?" active":"");
-    tab.dataset.grade = g;
-    tab.innerHTML = g + "<span class='cnt' style='font-size:.7rem;color:#6aaccc;margin-left:4px'>(" + members.length + ")</span>";
-    tab.addEventListener("click", function() {
-      document.querySelectorAll(".grade-tab").forEach(function(t){ t.classList.remove("active"); });
-      document.querySelectorAll(".grade-panel").forEach(function(p){ p.classList.remove("active"); });
-      tab.classList.add("active");
-      document.getElementById("panel-" + id).classList.add("active");
-    });
-    tabsEl.appendChild(tab);
-    var panel = document.createElement("div");
-    panel.className = "grade-panel" + (idx===0?" active":"");
-    panel.id = "panel-" + id;
-    panel.innerHTML =
-      "<div class='table-wrap'>" +
-      "<table class='member-table'>" +
-      "<colgroup><col class='col-no'><col class='col-name'><col class='col-kana'><col class='col-num'><col class='col-note'><col class='col-del'></colgroup>" +
-      "<thead><tr>" +
-      "<th class='col-no'>#</th><th class='col-name'>氏名</th><th class='col-kana'>ふりがな</th>" +
-      "<th class='col-num'>背番号</th><th class='col-note'>メモ</th><th class='col-del'></th>" +
-      "</tr></thead><tbody></tbody></table></div>" +
-      "<div class='add-btn-row'><button class='btn btn-outline btn-sm' onclick=\"addRow('" + g + "')\">＋ 団員を追加</button></div>";
-    panelsEl.appendChild(panel);
-    var tbody = panel.querySelector("tbody");
-    members.forEach(function(m){ tbody.appendChild(makeRow(g, m)); });
-  });
-}
-
-function exportCSV() {
-  var data = collectData();
-  var csv = "\uFEFF学年,No,氏名,ふりがな,背番号,メモ\n";
-  GRADES.forEach(function(g) {
-    (data[g]||[]).forEach(function(m,i) {
-      csv += g + "," + (i+1) + ",\"" + m.name + "\",\"" + m.kana + "\",\"" + m.num + "\",\"" + m.note + "\"\n";
-    });
-  });
-  var a = document.createElement("a");
-  a.href = URL.createObjectURL(new Blob([csv],{type:"text/csv"}));
-  a.download = "smc_members.csv";
-  a.click();
-}
-
-buildUI();
+document.getElementById("edit-modal").addEventListener("click",function(e){
+  if(e.target.id==="edit-modal")closeEditModal();
+});
+renderTable();
 </script>
 </body></html>

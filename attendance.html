@@ -7,19 +7,27 @@
   <link rel="stylesheet" href="common.css">
   <style>
     .attend-grid{display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-bottom:24px}
-    .attend-card{background:var(--white);border-radius:var(--r16);border:3px solid var(--gray100);padding:28px 20px;display:flex;flex-direction:column;gap:16px;box-shadow:var(--shadow-sm);text-align:center}
-    .attend-card.coach-card{border-color:var(--navy)}
-    .attend-card .card-emoji{font-size:2.6rem}
-    .attend-card .card-title{font-size:1.15rem;font-weight:900;color:var(--navy)}
-    .attend-card .card-subtitle{font-size:.8rem;color:var(--gray600);margin-top:2px}
+    .attend-card{
+      background:var(--surface-lt);border-radius:var(--r16);border:2px solid var(--line-2);
+      padding:28px 20px;display:flex;flex-direction:column;gap:16px;
+      box-shadow:var(--shadow);text-align:center;transition:.18s;
+    }
+    .attend-card:hover{border-color:var(--cyan);box-shadow:var(--glow-c),var(--shadow)}
+    .attend-card.coach-card{border-color:rgba(0,212,255,.4)}
+    .attend-card.coach-card:hover{border-color:var(--orange);box-shadow:var(--glow-o),var(--shadow)}
+    .attend-card .card-emoji{font-size:2.6rem;filter:drop-shadow(0 0 8px rgba(255,107,43,.4))}
+    .attend-card .card-title{font-size:1.15rem;font-weight:900;color:#ffffff}
+    .attend-card .card-subtitle{font-size:.8rem;color:#a8d4f0;margin-top:2px}
     @media(max-width:520px){.attend-grid{grid-template-columns:1fr}}
   </style>
 </head>
 <body>
 <header class="site-header">
   <div class="header-inner">
-    <a class="header-logo" href="index.html"><div class="logo-mark">⚽</div>
-      <div><span class="logo-name">吉見SMC FC</span><span class="logo-sub">SMART PORTAL</span></div></a>
+    <a class="header-logo" href="index.html">
+      <div class="logo-mark">⚽</div>
+      <div><span class="logo-name">吉見SMC FC</span><span class="logo-sub">SMART PORTAL</span></div>
+    </a>
   </div>
 </header>
 <main class="page-wrap">
@@ -30,19 +38,29 @@
       <div class="hero-sub">回答先が異なります。間違えないようご注意ください。</div></div>
   </div>
   <div class="attend-grid">
+    <!-- 団員 -->
     <div class="attend-card">
-      <div class="card-emoji">👨‍👩‍👦</div>
-      <div><div class="card-title">団員・保護者</div>
-        <div class="card-subtitle">練習・試合の出欠</div></div>
-      <a class="btn btn-primary btn-lg" href="https://chouseisan.com/s?h=04a01b20cc2b4a38b3e1f4aa93d1d06c" target="_blank" rel="noopener" style="text-align:center">📅 回答する</a>
+      <div class="card-emoji">⚽</div>
+      <div><div class="card-title">団員</div>
+        <div class="card-subtitle">練習・試合の出欠はこちら</div></div>
+      <a class="btn btn-primary btn-lg"
+         href="https://chouseisan.com/s?h=04a01b20cc2b4a38b3e1f4aa93d1d06c"
+         target="_blank" rel="noopener" style="text-align:center">
+        📅 回答する（団員）
+      </a>
     </div>
+    <!-- コーチ -->
     <div class="attend-card coach-card">
       <div class="card-emoji">🧑‍🏫</div>
       <div><div class="card-title">コーチ</div>
-        <div class="card-subtitle">帯同・審判・車出しの可否</div></div>
-      <a class="btn btn-navy btn-lg" href="https://chouseisan.com/s?h=20c37e0538dd4feb8d91d8e31be23ad3" target="_blank" rel="noopener" style="text-align:center">📅 回答する</a>
+        <div class="card-subtitle">練習参加・試合帯同の可否</div></div>
+      <a class="btn btn-cyan btn-lg"
+         href="https://chouseisan.com/s?h=20c37e0538dd4feb8d91d8e31be23ad3"
+         target="_blank" rel="noopener" style="text-align:center">
+        📅 回答する（コーチ）
+      </a>
     </div>
   </div>
 </main>
-<footer class="site-footer">吉見SMCサッカースポーツ少年団｜スマートポータル</footer>
+<footer class="site-footer">YOSHIMI SMC FC — SMART PORTAL</footer>
 </body></html>
