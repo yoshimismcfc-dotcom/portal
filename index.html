@@ -6,34 +6,49 @@
   <title>吉見SMC FC スマートポータル</title>
   <link rel="stylesheet" href="common.css">
   <style>
-    .portal-header{
-      text-align:center;padding:28px 16px 22px;margin-bottom:22px;
-      border-bottom:1px solid var(--line);
-      background:linear-gradient(180deg,rgba(255,107,43,.07) 0%,transparent 100%);
-      position:relative;
+    /* 日本代表カラー帯 */
+    .japan-stripe {
+      height: 4px;
+      background: linear-gradient(90deg, #003087 0%, #003087 33%, #ffffff 33%, #ffffff 66%, #003087 66%);
     }
-    .portal-header::after{
-      content:"";position:absolute;bottom:0;left:10%;right:10%;height:1px;
-      background:linear-gradient(90deg,transparent,var(--orange-gl),transparent);
+    .portal-header {
+      text-align: center; padding: 24px 16px 18px;
+      margin-bottom: 22px;
+      background: linear-gradient(180deg,rgba(0,48,135,.18) 0%,transparent 100%);
+      border-bottom: 1px solid rgba(0,212,255,.2);
+      position: relative;
     }
-    .portal-eyebrow{
-      font-size:.65rem;font-weight:900;letter-spacing:.22em;color:var(--cyan);
-      margin-bottom:8px;display:flex;align-items:center;justify-content:center;gap:10px;
+    .portal-header::after {
+      content:""; position:absolute; bottom:0; left:10%; right:10%; height:1px;
+      background:linear-gradient(90deg,transparent,rgba(0,48,135,.6),rgba(0,212,255,.4),rgba(0,48,135,.6),transparent);
     }
-    .portal-eyebrow::before,.portal-eyebrow::after{
-      content:"";flex:1;max-width:64px;height:1px;
+    .portal-eyebrow {
+      font-size:.62rem; font-weight:900; letter-spacing:.2em; color:var(--cyan);
+      margin-bottom:8px; display:flex; align-items:center; justify-content:center; gap:10px;
+    }
+    .portal-eyebrow::before,.portal-eyebrow::after {
+      content:""; flex:1; max-width:52px; height:1px;
       background:linear-gradient(90deg,transparent,var(--cyan));
     }
-    .portal-eyebrow::after{background:linear-gradient(90deg,var(--cyan),transparent)}
-    .portal-header h1{
-      font-size:clamp(1.35rem,5vw,1.9rem);font-weight:900;
-      color:#ffffff;letter-spacing:.04em;line-height:1.25;
-      text-shadow:0 0 30px rgba(0,212,255,.4),0 0 60px rgba(0,212,255,.15);
+    .portal-eyebrow::after { background:linear-gradient(90deg,var(--cyan),transparent); }
+    /* チーム名 — 小さめに調整 */
+    .portal-header h1 {
+      font-size: clamp(1.1rem, 4vw, 1.45rem);
+      font-weight: 900; color: #ffffff;
+      letter-spacing: .04em; line-height: 1.25;
+      text-shadow: 0 0 24px rgba(0,48,135,.8), 0 0 48px rgba(0,212,255,.3);
     }
-    .portal-header .sub{font-size:.75rem;color:var(--ink-3);margin-top:5px;letter-spacing:.07em}
+    .portal-header .sub { font-size:.72rem; color:var(--ink-3); margin-top:4px; letter-spacing:.07em; }
+    /* 日本代表エンブレム風ライン */
+    .japan-accent {
+      display:flex; align-items:center; gap:8px; justify-content:center; margin-bottom:8px;
+    }
+    .japan-accent .jline { width:32px; height:2px; background:#003087; border-radius:1px; }
+    .japan-accent .jball { font-size:.9rem; filter:drop-shadow(0 0 6px rgba(0,48,135,.8)); }
   </style>
 </head>
 <body>
+<div class="japan-stripe"></div>
 <header class="site-header">
   <div class="header-inner">
     <a class="header-logo" href="index.html">
@@ -52,6 +67,9 @@
   </div>
 
   <div class="portal-header">
+    <div class="japan-accent">
+      <div class="jline"></div><div class="jball">⚽</div><div class="jline"></div>
+    </div>
     <div class="portal-eyebrow">JUNIOR SOCCER SMART PORTAL</div>
     <h1>吉見SMCサッカースポーツ少年団</h1>
     <div class="sub">団員・保護者・コーチのためのチームポータル</div>
@@ -88,12 +106,12 @@
     <a class="menu-card" href="https://chouseisan.com/s?h=04a01b20cc2b4a38b3e1f4aa93d1d06c" target="_blank" rel="noopener"><div class="card-icon">✅</div><div class="card-label">出欠（団員）</div><div class="card-desc">調整さん</div></a>
     <a class="menu-card" href="https://www.wbgt.env.go.jp/" target="_blank" rel="noopener"><div class="card-icon">🌤️</div><div class="card-label">環境省WBGT</div><div class="card-desc">リアルタイム熱中症</div></a>
   </div>
-
 </main>
+<div class="japan-stripe"></div>
 <footer class="site-footer">YOSHIMI SMC FC — SMART PORTAL</footer>
 <script>
 const g=localStorage.getItem("smc_guidance"),w=localStorage.getItem("smc_warning");
-if(g){document.getElementById("guidance-text").textContent=g;document.getElementById("home-guidance").style.display="flex"}
-if(w){document.getElementById("warning-text").textContent=w;document.getElementById("home-warning").style.display="flex"}
+if(g){document.getElementById("guidance-text").textContent=g;document.getElementById("home-guidance").style.display="flex";}
+if(w){document.getElementById("warning-text").textContent=w;document.getElementById("home-warning").style.display="flex";}
 </script>
 </body></html>

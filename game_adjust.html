@@ -6,22 +6,19 @@
   <title>試合調整｜吉見SMC FC</title>
   <link rel="stylesheet" href="common.css">
   <style>
-    /* ===== 固定ヘッダー・固定左列 ===== */
     .adj-wrap{
-      overflow:auto;max-height:62vh;
-      border:1px solid var(--line-2);border-radius:var(--r12);
-      scrollbar-width:thin;scrollbar-color:rgba(255,107,43,.6) rgba(0,0,0,.4);
+      overflow:auto; max-height:62vh;
+      border:1px solid var(--line-2); border-radius:var(--r12);
+      scrollbar-width:thin; scrollbar-color:rgba(255,107,43,.6) rgba(0,0,0,.4);
     }
     .adj-wrap::-webkit-scrollbar{height:7px;width:7px}
     .adj-wrap::-webkit-scrollbar-track{background:rgba(0,0,0,.4)}
     .adj-wrap::-webkit-scrollbar-thumb{background:rgba(255,107,43,.6);border-radius:4px}
-
     .adj-table{border-collapse:separate;border-spacing:0;font-size:.82rem;width:max-content;min-width:100%}
     .adj-table th,.adj-table td{
-      border-right:1px solid var(--line);border-bottom:1px solid var(--line);
-      padding:8px 10px;white-space:nowrap;vertical-align:middle;
+      border-right:1px solid var(--line); border-bottom:1px solid var(--line);
+      padding:8px 10px; white-space:nowrap; vertical-align:middle;
     }
-
     /* 固定1行目 */
     .adj-table thead tr:first-child th{
       position:sticky;top:0;z-index:30;background:#071523;
@@ -35,80 +32,71 @@
     /* 固定左列 */
     .col-fixed{
       position:sticky;left:0;z-index:20;
-      background:#0a1f30;min-width:118px;max-width:160px;
-      font-weight:700;color:#ffffff;
+      background:#0a1f30; min-width:118px; max-width:160px;
+      font-weight:700; color:#ffffff;
       border-right:2px solid rgba(0,212,255,.35) !important;
     }
     thead tr:first-child .col-fixed{z-index:40;background:#071523}
     thead tr:nth-child(2) .col-fixed{z-index:39;background:#050f1a}
     tbody tr:hover td{background:rgba(0,212,255,.04)}
     tbody tr:hover .col-fixed{background:#0e2a3e}
-
     /* ヘッダーセル */
-    .th-date{
-      text-align:center;color:#ffffff;font-size:.8rem;
-      font-weight:900;min-width:92px;letter-spacing:.03em;
-    }
-    .th-cat{text-align:center;color:var(--ink-2);font-size:.68rem;font-weight:400}
+    .th-date{text-align:center;color:#ffffff;font-size:.8rem;font-weight:900;min-width:92px;letter-spacing:.03em}
+    .th-cat{text-align:center;color:#a8d4f0;font-size:.68rem;font-weight:400}
     .th-label{color:var(--cyan);font-size:.68rem;font-weight:900;letter-spacing:.08em}
     .th-tantou{text-align:center;min-width:74px}
-
     /* ステータスボタン */
-    .s-ok   {background:rgba(0,255,136,.18);color:#00ff88;border:1px solid rgba(0,255,136,.5)}
-    .s-ng   {background:rgba(255,68,102,.18);color:#ff8888;border:1px solid rgba(255,68,102,.5)}
-    .s-kakun{background:rgba(255,204,0,.18); color:#ffdd55;border:1px solid rgba(255,204,0,.5)}
-    .s-none {background:rgba(255,255,255,.06);color:#6aaccc;border:1px solid rgba(0,212,255,.2)}
+    .s-ok   {background:rgba(0,255,136,.2); color:#00ff88;border:1px solid rgba(0,255,136,.6)}
+    .s-ng   {background:rgba(255,68,102,.2);color:#ff8888;border:1px solid rgba(255,68,102,.6)}
+    .s-kakun{background:rgba(255,204,0,.2); color:#ffee44;border:1px solid rgba(255,204,0,.6)}
+    .s-none {background:rgba(255,255,255,.07);color:#8ac8e8;border:1px solid rgba(0,212,255,.25)}
     .status-btn{
-      border-radius:6px;padding:3px 10px;font:inherit;font-size:.78rem;font-weight:900;
+      border-radius:6px;padding:4px 10px;font:inherit;font-size:.8rem;font-weight:900;
       cursor:pointer;display:inline-block;min-width:58px;text-align:center;
-      transition:all .1s;user-select:none;border:none;
+      transition:all .12s;user-select:none;border:none;
     }
-    .status-btn:active{transform:scale(.9);filter:brightness(1.4)}
-
-    /* 集計・備考行 */
+    .status-btn:hover{filter:brightness(1.25)}
+    .status-btn:active{transform:scale(.9);filter:brightness(1.5)}
+    /* 集計行 */
     .tr-count .col-fixed{background:#060e18;color:var(--cyan);font-size:.72rem}
-    .tr-count td{background:rgba(255,107,43,.08);color:var(--orange);font-weight:900;font-size:.78rem;text-align:center}
+    .tr-count td{background:rgba(255,107,43,.09);color:#ffaa77;font-weight:900;font-size:.78rem;text-align:center}
     .tr-nokori .col-fixed{background:#060e18;color:var(--cyan);font-size:.72rem}
     .tr-nokori td{background:rgba(0,212,255,.07);font-weight:900;font-size:.78rem;text-align:center}
-    .tr-biko .col-fixed{background:#060e18;color:var(--ink-3);font-size:.7rem}
-    .tr-biko td{background:rgba(255,204,0,.05);font-size:.72rem;padding:4px 6px}
+    .tr-biko .col-fixed{background:#060e18;color:#8ac8e8;font-size:.7rem}
+    .tr-biko td{background:rgba(255,204,0,.06);font-size:.72rem;padding:4px 6px}
     .biko-input{
-      width:100%;background:transparent;border:none;color:#ffe566;
+      width:100%;background:transparent;border:none;color:#ffee66;
       font:inherit;font-size:.72rem;resize:none;outline:none;padding:2px 4px;min-width:82px;
     }
-    .biko-input:focus{background:rgba(255,204,0,.1);border-radius:4px}
-
+    .biko-input:focus{background:rgba(255,204,0,.12);border-radius:4px}
     /* 削除ボタン */
     .del-date-btn{
-      background:none;border:none;color:rgba(255,68,102,.5);
+      background:none;border:none;color:rgba(255,100,120,.6);
       cursor:pointer;font-size:.75rem;padding:1px 5px;border-radius:4px;
       margin-left:4px;transition:.15s;vertical-align:middle;
     }
-    .del-date-btn:hover{color:var(--red);background:rgba(255,68,102,.18)}
+    .del-date-btn:hover{color:#ff4466;background:rgba(255,68,102,.2)}
     .del-team-btn{
-      background:none;border:none;color:rgba(255,68,102,.4);
+      background:none;border:none;color:rgba(255,100,120,.5);
       cursor:pointer;font-size:.82rem;padding:2px 5px;border-radius:4px;transition:.15s;
     }
-    .del-team-btn:hover{color:var(--red);background:rgba(255,68,102,.18)}
+    .del-team-btn:hover{color:#ff4466;background:rgba(255,68,102,.2)}
     /* 担当者インライン編集 */
     .tantou-input{
-      background:transparent;border:none;color:var(--ink-3);
-      font:inherit;font-size:.78rem;text-align:center;
-      width:100%;outline:none;padding:0;
+      background:transparent;border:none;color:#a8d4f0;
+      font:inherit;font-size:.78rem;text-align:center;width:100%;outline:none;padding:0;
     }
-    .tantou-input:focus{color:#ffffff;background:rgba(255,255,255,.06);border-radius:4px}
-
+    .tantou-input:focus{color:#ffffff;background:rgba(255,255,255,.07);border-radius:4px}
     /* 操作バー・凡例 */
     .ctrl-bar{display:flex;gap:8px;align-items:center;flex-wrap:wrap;margin-bottom:10px}
-    .legend{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:12px;font-size:.76rem;align-items:center;color:var(--ink-3)}
-
+    .legend{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:12px;font-size:.76rem;align-items:center;color:#8ac8e8}
     /* モーダル */
-    .modal-bg{position:fixed;inset:0;background:rgba(0,0,0,.8);display:none;place-items:center;z-index:200;backdrop-filter:blur(6px)}
+    .modal-bg{position:fixed;inset:0;background:rgba(0,0,0,.82);display:none;place-items:center;z-index:200;backdrop-filter:blur(6px)}
     .modal-bg.open{display:grid}
     .modal{
       background:var(--surface-lt);border:1px solid var(--line-2);
       border-radius:var(--r16);padding:24px;width:min(400px,92vw);
-      box-shadow:var(--shadow-lg),var(--glow-c);
+      box-shadow:var(--shadow-lg),0 0 40px rgba(0,212,255,.15);
     }
     .modal h3{font-size:1rem;font-weight:900;margin-bottom:16px;color:#ffffff;letter-spacing:.05em}
     .modal-btns{display:flex;gap:8px;justify-content:flex-end;margin-top:16px;flex-wrap:wrap}
@@ -138,24 +126,24 @@
     <button class="btn btn-cyan btn-sm" onclick="openModal('modal-date')">＋ 日程追加</button>
     <button class="btn btn-green btn-sm" onclick="saveData()">💾 保存</button>
     <button class="btn btn-outline btn-sm" style="color:var(--red);border-color:rgba(255,68,102,.4)" onclick="resetData()">↩ リセット</button>
-    <span id="save-msg" style="font-size:.78rem;color:var(--green)"></span>
+    <span id="save-msg" style="font-size:.78rem;color:#00ff88"></span>
   </div>
   <div class="legend">
-    <span>タップで切替 →</span>
-    <span class="status-btn s-ok" style="cursor:default">OK</span><span>参加可</span>
-    <span class="status-btn s-ng" style="cursor:default">NG</span><span>不可</span>
-    <span class="status-btn s-kakun" style="cursor:default">確認中</span><span>返答待ち</span>
-    <span class="status-btn s-none" style="cursor:default">－</span><span>未打診</span>
-    <span style="color:var(--ink-3);font-size:.7rem">｜ 日付の✕で列削除 ／ チームの🗑で行削除</span>
+    タップで切替 →
+    <span class="status-btn s-ok" style="cursor:default">OK</span>参加可
+    <span class="status-btn s-ng" style="cursor:default">NG</span>不可
+    <span class="status-btn s-kakun" style="cursor:default">確認中</span>返答待ち
+    <span class="status-btn s-none" style="cursor:default">－</span>未打診
+    <span style="color:#6aaccc;font-size:.7rem">｜ 日付の✕で列削除 ／ チームの🗑で行削除</span>
   </div>
 
   <div class="adj-wrap">
     <table class="adj-table" id="adj-table"></table>
   </div>
-  <p style="font-size:.7rem;color:var(--ink-3);margin-top:8px">← 横スクロール可。チーム列と日付・カテゴリー行は固定。備考欄はタップして直接編集できます。</p>
+  <p style="font-size:.7rem;color:#6aaccc;margin-top:8px">← 横スクロール可。チーム列と日付行は固定。備考欄・担当者欄はタップして直接編集できます。</p>
 </main>
 
-<!-- チーム追加 -->
+<!-- チーム追加モーダル -->
 <div class="modal-bg" id="modal-team">
   <div class="modal">
     <h3>⚽ チームを追加</h3>
@@ -170,7 +158,7 @@
   </div>
 </div>
 
-<!-- 日程追加 -->
+<!-- 日程追加モーダル -->
 <div class="modal-bg" id="modal-date">
   <div class="modal">
     <h3>📅 日程を追加</h3>
@@ -189,16 +177,16 @@
 
 <footer class="site-footer">YOSHIMI SMC FC — SMART PORTAL</footer>
 <script>
-const KEY="smc_game_adj_v1";
-const INIT={
+const KEY = "smc_game_adj_v1";
+const INIT = {
   dates:[
-    {id:"d1",label:"5/10（日）",  cat:"U9/SMC 2チーム 全4チーム",target:2},
-    {id:"d2",label:"5/30（土）",  cat:"U12 4チーム",              target:3},
-    {id:"d3",label:"6/6（土）",   cat:"U12 4チーム",              target:3},
-    {id:"d4",label:"6/6（土）U9", cat:"U9 4チーム",               target:3},
-    {id:"d5",label:"7/4（土）",   cat:"U9/SMC 2チーム 全8チーム",target:6},
-    {id:"d6",label:"8/30（日）",  cat:"U12 4チーム",              target:3},
-    {id:"d7",label:"8/30（日）U9",cat:"U9 4チーム",               target:3},
+    {id:"d1",label:"5/10（日）",  cat:"U9/SMC 2チーム 全4チーム", target:2},
+    {id:"d2",label:"5/30（土）",  cat:"U12 4チーム",               target:3},
+    {id:"d3",label:"6/6（土）",   cat:"U12 4チーム",               target:3},
+    {id:"d4",label:"6/6（土）U9", cat:"U9 4チーム",                target:3},
+    {id:"d5",label:"7/4（土）",   cat:"U9/SMC 2チーム 全8チーム",  target:6},
+    {id:"d6",label:"8/30（日）",  cat:"U12 4チーム",               target:3},
+    {id:"d7",label:"8/30（日）U9",cat:"U9 4チーム",                target:3},
   ],
   teams:[
     {id:"t01",name:"田間宮",           tantou:"野口",     statuses:{d1:"NG",d2:"－",d3:"－",d4:"OK",d5:"NG",d6:"－",d7:"－"}},
@@ -219,134 +207,174 @@ const INIT={
   備考:{d2:"中止（若草まつり）",d5:"川越U9 大会不可"}
 };
 
-function loadData(){try{const s=localStorage.getItem(KEY);if(s)return JSON.parse(s);}catch(e){}return JSON.parse(JSON.stringify(INIT));}
-let data=loadData();
+function loadData(){
+  try {
+    const s = localStorage.getItem(KEY);
+    if (s) return JSON.parse(s);
+  } catch(e) {}
+  return JSON.parse(JSON.stringify(INIT));
+}
+let data = loadData();
 
-function collectDOMChanges(){
-  document.querySelectorAll(".biko-input").forEach(el=>{
-    if(!data.備考)data.備考={};
-    const v=el.value.trim();
-    if(v)data.備考[el.dataset.did]=v; else delete data.備考[el.dataset.did];
+function collectDOMChanges() {
+  document.querySelectorAll(".biko-input").forEach(function(el) {
+    if (!data.備考) data.備考 = {};
+    var v = el.value.trim();
+    if (v) data.備考[el.dataset.did] = v;
+    else delete data.備考[el.dataset.did];
   });
-  document.querySelectorAll(".tantou-input").forEach(el=>{
-    const t=data.teams.find(t=>t.id===el.dataset.tid);
-    if(t)t.tantou=el.value;
+  document.querySelectorAll(".tantou-input").forEach(function(el) {
+    var t = data.teams.find(function(t){ return t.id === el.dataset.tid; });
+    if (t) t.tantou = el.value;
   });
 }
-function saveData(){collectDOMChanges();localStorage.setItem(KEY,JSON.stringify(data));flash("💾 保存しました",var(--green));}
-function resetData(){if(!confirm("初期データに戻しますか？"))return;localStorage.removeItem(KEY);data=JSON.parse(JSON.stringify(INIT));renderTable();flash("↩ リセットしました","#ff9999");}
-function flash(msg,col){const e=document.getElementById("save-msg");e.textContent=msg;e.style.color=col||"var(--green)";setTimeout(()=>{e.textContent="";},2500);}
 
-const CYCLE=["－","OK","NG","確認中"];
-const SCLS={"OK":"s-ok","NG":"s-ng","確認中":"s-kakun","－":"s-none"};
-function cycleStatus(tid,did){
-  const t=data.teams.find(t=>t.id===tid);if(!t)return;
-  const cur=t.statuses[did]||"－";
-  t.statuses[did]=CYCLE[(CYCLE.indexOf(cur)+1)%CYCLE.length];
-  saveData();renderTable();
-}
-function deleteDate(did){
-  if(!confirm("この日程列を削除しますか？"))return;
+function saveData() {
   collectDOMChanges();
-  data.dates=data.dates.filter(d=>d.id!==did);
-  data.teams.forEach(t=>delete t.statuses[did]);
-  if(data.備考)delete data.備考[did];
-  saveData();renderTable();
+  localStorage.setItem(KEY, JSON.stringify(data));
+  flash("💾 保存しました", "#00ff88");
 }
-function deleteTeam(tid){
-  if(!confirm("このチームを削除しますか？"))return;
+
+function resetData() {
+  if (!confirm("初期データに戻しますか？現在のデータは消えます。")) return;
+  localStorage.removeItem(KEY);
+  data = JSON.parse(JSON.stringify(INIT));
+  renderTable();
+  flash("↩ リセットしました", "#ffaa88");
+}
+
+function flash(msg, col) {
+  var e = document.getElementById("save-msg");
+  e.textContent = msg;
+  e.style.color = col || "#00ff88";
+  setTimeout(function(){ e.textContent = ""; }, 2500);
+}
+
+var CYCLE = ["－","OK","NG","確認中"];
+var SCLS = {"OK":"s-ok","NG":"s-ng","確認中":"s-kakun","－":"s-none"};
+
+function cycleStatus(tid, did) {
+  var t = data.teams.find(function(t){ return t.id === tid; });
+  if (!t) return;
+  var cur = t.statuses[did] || "－";
+  t.statuses[did] = CYCLE[(CYCLE.indexOf(cur) + 1) % CYCLE.length];
+  saveData();
+  renderTable();
+}
+
+function deleteDate(did) {
+  if (!confirm("この日程列を削除しますか？")) return;
   collectDOMChanges();
-  data.teams=data.teams.filter(t=>t.id!==tid);
-  saveData();renderTable();
+  data.dates = data.dates.filter(function(d){ return d.id !== did; });
+  data.teams.forEach(function(t){ delete t.statuses[did]; });
+  if (data.備考) delete data.備考[did];
+  saveData();
+  renderTable();
 }
 
-function renderTable(){
-  const tbl=document.getElementById("adj-table");
-  const {dates,teams}=data;
-  if(!data.備考)data.備考={};
-  const DOW=["日","月","火","水","木","金","土"];
+function deleteTeam(tid) {
+  if (!confirm("このチームを削除しますか？")) return;
+  collectDOMChanges();
+  data.teams = data.teams.filter(function(t){ return t.id !== tid; });
+  saveData();
+  renderTable();
+}
 
-  let h=`<thead>
-  <tr>
-    <th class="col-fixed th-label">チーム</th>`;
-  dates.forEach(d=>{
-    h+=`<th class="th-date">${d.label}<button class="del-date-btn" onclick="deleteDate('${d.id}')" title="この列を削除">✕</button></th>`;
-  });
-  h+=`<th class="th-date th-tantou">担当</th></tr>
-  <tr>
-    <th class="col-fixed th-cat" style="color:var(--ink-3)">カテゴリー / 目標</th>`;
-  dates.forEach(d=>{
-    h+=`<th class="th-cat">${d.cat}<br><span style="color:var(--orange);font-weight:900">目標 ${d.target}チーム</span></th>`;
-  });
-  h+=`<th class="th-cat"></th></tr></thead><tbody>`;
+function renderTable() {
+  var tbl = document.getElementById("adj-table");
+  var dates = data.dates, teams = data.teams;
+  if (!data.備考) data.備考 = {};
+  var DOW = ["日","月","火","水","木","金","土"];
 
-  teams.forEach(t=>{
-    h+=`<tr><td class="col-fixed">${t.name} <button class="del-team-btn" onclick="deleteTeam('${t.id}')" title="削除">🗑</button></td>`;
-    dates.forEach(d=>{
-      const st=t.statuses[d.id]||"－";
-      h+=`<td style="text-align:center"><button class="status-btn ${SCLS[st]||"s-none"}" onclick="cycleStatus('${t.id}','${d.id}')">${st}</button></td>`;
+  var h = "<thead><tr><th class='col-fixed th-label'>チーム</th>";
+  dates.forEach(function(d) {
+    h += "<th class='th-date'>" + d.label +
+         "<button class='del-date-btn' onclick=\"deleteDate('" + d.id + "')\" title='この列を削除'>✕</button></th>";
+  });
+  h += "<th class='th-date th-tantou'>担当</th></tr>";
+  h += "<tr><th class='col-fixed th-cat' style='color:#8ac8e8'>カテゴリー / 目標</th>";
+  dates.forEach(function(d) {
+    h += "<th class='th-cat'>" + d.cat + "<br><span style='color:#ffaa66;font-weight:900'>目標 " + d.target + "チーム</span></th>";
+  });
+  h += "<th class='th-cat'></th></tr></thead><tbody>";
+
+  teams.forEach(function(t) {
+    h += "<tr><td class='col-fixed'>" + t.name +
+         " <button class='del-team-btn' onclick=\"deleteTeam('" + t.id + "')\" title='削除'>🗑</button></td>";
+    dates.forEach(function(d) {
+      var st = t.statuses[d.id] || "－";
+      var cls = SCLS[st] || "s-none";
+      h += "<td style='text-align:center'><button class='status-btn " + cls +
+           "' onclick=\"cycleStatus('" + t.id + "','" + d.id + "')\">" + st + "</button></td>";
     });
-    h+=`<td style="text-align:center"><input class="tantou-input" data-tid="${t.id}" value="${t.tantou||""}" placeholder="担当"></td></tr>`;
+    h += "<td style='text-align:center'><input class='tantou-input' data-tid='" + t.id +
+         "' value='" + (t.tantou || "") + "' placeholder='担当'></td></tr>";
   });
 
   // 参加数
-  h+=`<tr class="tr-count"><td class="col-fixed">✅ 参加チーム数</td>`;
-  dates.forEach(d=>{
-    const cnt=teams.filter(t=>(t.statuses[d.id]||"－")==="OK").length;
-    h+=`<td>${cnt}<span style="font-size:.65rem;color:var(--ink-3)"> /${d.target}</span></td>`;
+  h += "<tr class='tr-count'><td class='col-fixed'>✅ 参加チーム数</td>";
+  dates.forEach(function(d) {
+    var cnt = teams.filter(function(t){ return (t.statuses[d.id] || "－") === "OK"; }).length;
+    h += "<td>" + cnt + "<span style='font-size:.65rem;color:#8ac8e8'> /" + d.target + "</span></td>";
   });
-  h+=`<td></td></tr>`;
+  h += "<td></td></tr>";
 
   // 残り
-  h+=`<tr class="tr-nokori"><td class="col-fixed">残り</td>`;
-  dates.forEach(d=>{
-    const cnt=teams.filter(t=>(t.statuses[d.id]||"－")==="OK").length;
-    const n=d.target-cnt;
-    const col=n<=0?"#00ff88":n===1?"#ffdd55":"#ff8888";
-    h+=`<td style="color:${col};font-weight:900">${n<=0?"✅ 充足":n}</td>`;
+  h += "<tr class='tr-nokori'><td class='col-fixed'>残り</td>";
+  dates.forEach(function(d) {
+    var cnt = teams.filter(function(t){ return (t.statuses[d.id] || "－") === "OK"; }).length;
+    var n = d.target - cnt;
+    var col = n <= 0 ? "#00ff88" : n === 1 ? "#ffee44" : "#ff8888";
+    h += "<td style='color:" + col + ";font-weight:900'>" + (n <= 0 ? "✅ 充足" : n) + "</td>";
   });
-  h+=`<td></td></tr>`;
+  h += "<td></td></tr>";
 
   // 備考（直接編集）
-  h+=`<tr class="tr-biko"><td class="col-fixed">📝 備考</td>`;
-  dates.forEach(d=>{
-    h+=`<td><textarea class="biko-input" data-did="${d.id}" rows="1" placeholder="備考…">${(data.備考||{})[d.id]||""}</textarea></td>`;
+  h += "<tr class='tr-biko'><td class='col-fixed'>📝 備考</td>";
+  dates.forEach(function(d) {
+    var biko = (data.備考 || {})[d.id] || "";
+    h += "<td><textarea class='biko-input' data-did='" + d.id + "' rows='1' placeholder='備考…'>" + biko + "</textarea></td>";
   });
-  h+=`<td></td></tr></tbody>`;
-  tbl.innerHTML=h;
+  h += "<td></td></tr></tbody>";
+  tbl.innerHTML = h;
 }
 
-function openModal(id){document.getElementById(id).classList.add("open")}
-function closeModal(id){document.getElementById(id).classList.remove("open")}
-["modal-team","modal-date"].forEach(id=>{
-  document.getElementById(id).addEventListener("click",e=>{if(e.target.id===id)closeModal(id)});
+function openModal(id) { document.getElementById(id).classList.add("open"); }
+function closeModal(id) { document.getElementById(id).classList.remove("open"); }
+
+["modal-team","modal-date"].forEach(function(id) {
+  document.getElementById(id).addEventListener("click", function(e) {
+    if (e.target.id === id) closeModal(id);
+  });
 });
 
-function addTeam(){
-  const name=document.getElementById("new-team-name").value.trim();
-  const tantou=document.getElementById("new-team-tantou").value.trim();
-  if(!name){alert("チーム名を入力してください");return;}
-  const id="t"+Date.now(),statuses={};
-  data.dates.forEach(d=>{statuses[d.id]="－"});
-  data.teams.push({id,name,tantou,statuses});
-  saveData();renderTable();closeModal("modal-team");
-  document.getElementById("new-team-name").value="";
-  document.getElementById("new-team-tantou").value="";
+function addTeam() {
+  var name = document.getElementById("new-team-name").value.trim();
+  var tantou = document.getElementById("new-team-tantou").value.trim();
+  if (!name) { alert("チーム名を入力してください"); return; }
+  var id = "t" + Date.now(), statuses = {};
+  data.dates.forEach(function(d){ statuses[d.id] = "－"; });
+  data.teams.push({id:id, name:name, tantou:tantou, statuses:statuses});
+  saveData(); renderTable(); closeModal("modal-team");
+  document.getElementById("new-team-name").value = "";
+  document.getElementById("new-team-tantou").value = "";
 }
-function addDate(){
-  const dateVal=document.getElementById("new-date").value;
-  const cat=document.getElementById("new-cat").value.trim()||"未設定";
-  const target=Number(document.getElementById("new-target").value)||3;
-  if(!dateVal){alert("日付を入力してください");return;}
-  const d=new Date(dateVal);
-  const label=`${d.getMonth()+1}/${d.getDate()}（${["日","月","火","水","木","金","土"][d.getDay()]}）`;
-  const id="d"+Date.now();
-  data.dates.push({id,label,cat,target});
-  data.teams.forEach(t=>{t.statuses[id]="－"});
-  saveData();renderTable();closeModal("modal-date");
-  document.getElementById("new-date").value="";
-  document.getElementById("new-cat").value="";
+
+function addDate() {
+  var dateVal = document.getElementById("new-date").value;
+  var cat = document.getElementById("new-cat").value.trim() || "未設定";
+  var target = Number(document.getElementById("new-target").value) || 3;
+  if (!dateVal) { alert("日付を入力してください"); return; }
+  var d = new Date(dateVal);
+  var label = (d.getMonth()+1) + "/" + d.getDate() + "（" + ["日","月","火","水","木","金","土"][d.getDay()] + "）";
+  var id = "d" + Date.now();
+  data.dates.push({id:id, label:label, cat:cat, target:target});
+  data.teams.forEach(function(t){ t.statuses[id] = "－"; });
+  saveData(); renderTable(); closeModal("modal-date");
+  document.getElementById("new-date").value = "";
+  document.getElementById("new-cat").value = "";
 }
+
 renderTable();
 </script>
 </body></html>
