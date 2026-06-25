@@ -13,45 +13,32 @@
   <link rel="apple-touch-icon" href="icon.svg">
   <link rel="stylesheet" href="common.css">
   <style>
-    /* 日本代表カラー帯 */
-    .japan-stripe {
-      height: 4px;
-      background: linear-gradient(90deg, #003087 0%, #003087 33%, #ffffff 33%, #ffffff 66%, #003087 66%);
+    .japan-stripe{height:4px;background:linear-gradient(90deg,#003087 0%,#003087 33%,#fff 33%,#fff 66%,#003087 66%)}
+    .portal-header{text-align:center;padding:22px 16px 16px;margin-bottom:20px;background:linear-gradient(180deg,rgba(0,48,135,.18) 0%,transparent 100%);border-bottom:1px solid rgba(0,212,255,.2);position:relative}
+    .portal-header::after{content:"";position:absolute;bottom:0;left:10%;right:10%;height:1px;background:linear-gradient(90deg,transparent,rgba(0,212,255,.4),transparent)}
+    .portal-eyebrow{font-size:.6rem;font-weight:900;letter-spacing:.2em;color:var(--cyan);margin-bottom:6px;display:flex;align-items:center;justify-content:center;gap:10px}
+    .portal-eyebrow::before,.portal-eyebrow::after{content:"";flex:1;max-width:48px;height:1px;background:linear-gradient(90deg,transparent,var(--cyan))}
+    .portal-eyebrow::after{background:linear-gradient(90deg,var(--cyan),transparent)}
+    .portal-header h1{font-size:clamp(1rem,3.8vw,1.35rem);font-weight:900;color:#fff;letter-spacing:.04em;line-height:1.25;text-shadow:0 0 24px rgba(0,48,135,.8),0 0 48px rgba(0,212,255,.3)}
+    .portal-header .sub{font-size:.7rem;color:var(--ink-3);margin-top:4px;letter-spacing:.06em}
+    .japan-accent{display:flex;align-items:center;gap:8px;justify-content:center;margin-bottom:6px}
+    .japan-accent .jline{width:28px;height:2px;background:#003087;border-radius:1px}
+    /* PWAバナー */
+    .pwa-install-card{
+      background:linear-gradient(135deg,rgba(0,212,255,.12),rgba(0,212,255,.06));
+      border:1px solid rgba(0,212,255,.4);border-radius:var(--r12);
+      padding:16px;margin-bottom:18px;display:none;
     }
-    .portal-header {
-      text-align: center; padding: 24px 16px 18px;
-      margin-bottom: 22px;
-      background: linear-gradient(180deg,rgba(0,48,135,.18) 0%,transparent 100%);
-      border-bottom: 1px solid rgba(0,212,255,.2);
-      position: relative;
+    .pwa-install-card .pwa-title{font-size:.95rem;font-weight:900;color:var(--cyan);margin-bottom:8px;display:flex;align-items:center;gap:8px}
+    .pwa-install-card .pwa-steps{font-size:.78rem;color:#a8d4f0;line-height:2;margin-bottom:10px}
+    .pwa-install-card .pwa-steps span{display:block}
+    /* 常時表示のPWAガイド（iOS用） */
+    .pwa-guide-card{
+      background:rgba(255,107,43,.08);border:1px solid rgba(255,107,43,.3);
+      border-radius:var(--r12);padding:14px 16px;margin-bottom:18px;
     }
-    .portal-header::after {
-      content:""; position:absolute; bottom:0; left:10%; right:10%; height:1px;
-      background:linear-gradient(90deg,transparent,rgba(0,48,135,.6),rgba(0,212,255,.4),rgba(0,48,135,.6),transparent);
-    }
-    .portal-eyebrow {
-      font-size:.62rem; font-weight:900; letter-spacing:.2em; color:var(--cyan);
-      margin-bottom:8px; display:flex; align-items:center; justify-content:center; gap:10px;
-    }
-    .portal-eyebrow::before,.portal-eyebrow::after {
-      content:""; flex:1; max-width:52px; height:1px;
-      background:linear-gradient(90deg,transparent,var(--cyan));
-    }
-    .portal-eyebrow::after { background:linear-gradient(90deg,var(--cyan),transparent); }
-    /* チーム名 — 小さめに調整 */
-    .portal-header h1 {
-      font-size: clamp(1.1rem, 4vw, 1.45rem);
-      font-weight: 900; color: #ffffff;
-      letter-spacing: .04em; line-height: 1.25;
-      text-shadow: 0 0 24px rgba(0,48,135,.8), 0 0 48px rgba(0,212,255,.3);
-    }
-    .portal-header .sub { font-size:.72rem; color:var(--ink-3); margin-top:4px; letter-spacing:.07em; }
-    /* 日本代表エンブレム風ライン */
-    .japan-accent {
-      display:flex; align-items:center; gap:8px; justify-content:center; margin-bottom:8px;
-    }
-    .japan-accent .jline { width:32px; height:2px; background:#003087; border-radius:1px; }
-    .japan-accent .jball { font-size:.9rem; filter:drop-shadow(0 0 6px rgba(0,48,135,.8)); }
+    .pwa-guide-card .pwa-guide-title{font-size:.85rem;font-weight:900;color:var(--orange);margin-bottom:6px}
+    .pwa-guide-card .pwa-guide-body{font-size:.76rem;color:#c8e8ff;line-height:1.8}
   </style>
 </head>
 <body>
@@ -64,29 +51,10 @@
     </a>
   </div>
 </header>
-<main class="page-wrap">
-  <!-- PWAインストール案内 -->
-  <div id="pwa-banner" class="notice-bar blue" style="display:none;cursor:pointer;flex-direction:column;gap:6px" onclick="installPWA()">
-    <div style="display:flex;align-items:center;gap:8px;font-weight:900;font-size:.9rem">
-      📱 <span>このアプリをホーム画面に追加できます</span>
-    </div>
-    <div style="font-size:.78rem;opacity:.85;line-height:1.6">
-      ① 下の「<strong>追加</strong>」ボタンをタップ<br>
-      ② 「ホーム画面に追加」を選択<br>
-      ③ アプリアイコンから起動できます（オフラインでも使えます）
-    </div>
-    <button class="btn btn-primary btn-sm" style="align-self:flex-start;margin-top:2px" onclick="event.stopPropagation();installPWA()">📲 ホーム画面に追加する</button>
-  </div>
-  <div class="portal-header">
-    <div class="japan-accent">
-      <div class="jline"></div><div class="jball">⚽</div><div class="jline"></div>
-    </div>
-    <div class="portal-eyebrow">JUNIOR SOCCER SMART PORTAL</div>
-    <h1>吉見SMCサッカースポーツ少年団</h1>
-    <div class="sub">団員・保護者・コーチのためのチームポータル</div>
-  </div>
 
-  <!-- ガイダンス・注意事項（タイトル直下） -->
+<main class="page-wrap">
+
+  <!-- ガイダンス・注意事項 -->
   <div id="home-guidance" class="dynamic-notice guidance" style="display:none">
     <span class="notice-label">📢 INFO</span><span id="guidance-text"></span>
   </div>
@@ -94,6 +62,40 @@
     <span class="notice-label">⚠️ ALERT</span><span id="warning-text"></span>
   </div>
 
+  <!-- タイトル -->
+  <div class="portal-header">
+    <div class="japan-accent">
+      <div class="jline"></div><span>⚽</span><div class="jline"></div>
+    </div>
+    <div class="portal-eyebrow">JUNIOR SOCCER SMART PORTAL</div>
+    <h1>吉見SMCサッカースポーツ少年団</h1>
+    <div class="sub">団員・保護者・コーチのためのチームポータル</div>
+  </div>
+
+  <!-- PWA Androidインストールバナー（自動検出） -->
+  <div class="pwa-install-card" id="pwa-banner">
+    <div class="pwa-title">📱 アプリとしてインストールできます</div>
+    <div class="pwa-steps">
+      <span>① 「📲 ホーム画面に追加する」をタップ</span>
+      <span>② 「インストール」を選択</span>
+      <span>③ ホーム画面のアイコンから起動できます</span>
+      <span style="color:rgba(168,212,240,.6)">※ オフラインでも基本機能が使えます</span>
+    </div>
+    <button class="btn btn-cyan btn-sm" onclick="installPWA()">📲 ホーム画面に追加する</button>
+  </div>
+
+  <!-- PWA iOSガイド（常時表示） -->
+  <div class="pwa-guide-card" id="pwa-ios-guide" style="display:none">
+    <div class="pwa-guide-title">📱 iPhoneでアプリとして使う方法</div>
+    <div class="pwa-guide-body">
+      ① Safari下部の「共有ボタン（□↑）」をタップ<br>
+      ② 「ホーム画面に追加」を選択<br>
+      ③ 「追加」をタップ → アイコンから起動できます<br>
+      <span style="color:rgba(168,212,240,.6);font-size:.72rem">※ Safariでのみ対応。Chromeアプリでは非対応です。</span>
+    </div>
+  </div>
+
+  <!-- QUICK ACCESS -->
   <div class="section-head"><div class="section-icon">⚡</div><h2>QUICK ACCESS</h2><div class="section-divider"></div></div>
   <div class="card-grid">
     <a class="menu-card accent" href="calendar.html"><div class="card-icon">📅</div><div class="card-label">チームカレンダー</div><div class="card-desc">試合・練習の予定</div><span class="card-badge">Google</span></a>
@@ -102,6 +104,7 @@
     <a class="menu-card accent" href="weather.html"><div class="card-icon">🌤️</div><div class="card-label">天気・WBGT</div><div class="card-desc">8時間予報＋熱中症判定</div><span class="card-badge">GPS</span></a>
   </div>
 
+  <!-- MATCH & OPS -->
   <div class="section-head"><div class="section-icon">🏟️</div><h2>MATCH & OPS</h2><div class="section-divider"></div></div>
   <div class="card-grid">
     <a class="menu-card" href="pitch.html"><div class="card-icon">📐</div><div class="card-label">ピッチサイズ</div><div class="card-desc">8人制・低学年・設営図</div></a>
@@ -110,51 +113,54 @@
     <a class="menu-card" href="orders.html"><div class="card-icon">🛒</div><div class="card-label">注文リンク集</div><div class="card-desc">トロフィー・用品</div></a>
   </div>
 
+  <!-- MEMBERS -->
   <div class="section-head"><div class="section-icon">👨‍👩‍👦</div><h2>MEMBERS</h2><div class="section-divider"></div></div>
   <div class="card-grid">
     <a class="menu-card" href="album.html"><div class="card-icon">📸</div><div class="card-label">写真・動画</div><div class="card-desc">アルバム・試合動画</div></a>
-    <a class="menu-card" href="join.html"><div class="card-icon">⚽</div><div class="card-label">体験・入団</div><div class="card-desc">申込・FAQ・持ち物</div></a>
+    <a class="menu-card" href="join.html"><div class="card-icon">⚽</div><div class="card-label">体験・入団</div><div class="card-desc">申込書・A4印刷</div></a>
     <a class="menu-card accent" href="coach.html"><div class="card-icon">🔒</div><div class="card-label">コーチ専用</div><div class="card-desc">練習メニュー・資料</div></a>
     <a class="menu-card" href="https://yoshimi-smc.studio.site/" target="_blank" rel="noopener"><div class="card-icon">🌐</div><div class="card-label">ホームページ</div><div class="card-desc">チーム公式サイト</div><span class="card-badge">外部</span></a>
   </div>
-</div>
-  <div class="card-grid">
-    <a class="menu-card accent" href="weather.html"><div class="card-icon">🌤️</div><div class="card-label">天気・WBGT予報</div><div class="card-desc">8時間予報と熱中症判定</div><span class="card-badge">NEW</span></a>
-    <a class="menu-card" href="diary.html"><div class="card-icon">📝</div><div class="card-label">練習日誌</div><div class="card-desc">記録・タグ・検索</div><span class="card-badge">NEW</span></a>
-    <a class="menu-card" href="uniform.html"><div class="card-icon">👕</div><div class="card-label">ユニフォーム貸出</div><div class="card-desc">在庫・貸出・返却管理</div><span class="card-badge">NEW</span></a>
-    <a class="menu-card" href="game_adjust.html"><div class="card-icon">📊</div><div class="card-label">試合調整</div><div class="card-desc">ふれあいG大会調整表</div></a>
-  </div>
 
+  <!-- LINKS -->
   <div class="section-head"><div class="section-icon">🔗</div><h2>LINKS</h2><div class="section-divider"></div></div>
   <div class="card-grid">
     <a class="menu-card" href="https://www.instagram.com/yoshimi.smc.fc?igsh=Y3NlNWd0MndzZ2Mw&utm_source=qr" target="_blank" rel="noopener"><div class="card-icon">📷</div><div class="card-label">Instagram</div><div class="card-desc">チームの活動写真</div></a>
-    <a class="menu-card accent" href="https://lin.ee/RZ53mSm" target="_blank" rel="noopener"><div class="card-icon">💬</div><div class="card-label">LINE を登録</div><div class="card-desc">公式LINEに友だち追加</div><span class="card-badge">友だち追加</span></a>
-    <a class="menu-card" href="https://line.me/R/nv/recommendOA/@097pvkaq" target="_blank" rel="noopener"><div class="card-icon">🔗</div><div class="card-label">LINE をシェア</div><div class="card-desc">友達にLINEを紹介</div><span class="card-badge">シェア</span></a>
-
-    <a class="menu-card" href="https://www.wbgt.env.go.jp/" target="_blank" rel="noopener"><div class="card-icon">🌤️</div><div class="card-label">環境省WBGT</div><div class="card-desc">リアルタイム熱中症</div></a>
+    <a class="menu-card accent" href="https://lin.ee/RZ53mSm" target="_blank" rel="noopener"><div class="card-icon">💬</div><div class="card-label">LINEを登録</div><div class="card-desc">公式LINEに友だち追加</div><span class="card-badge">友だち追加</span></a>
+    <a class="menu-card" href="https://line.me/R/nv/recommendOA/@097pvkaq" target="_blank" rel="noopener"><div class="card-icon">🔗</div><div class="card-label">LINEをシェア</div><div class="card-desc">友達にLINEを紹介する</div><span class="card-badge">シェア</span></a>
+    <a class="menu-card" href="https://www.wbgt.env.go.jp/" target="_blank" rel="noopener"><div class="card-icon">🌡️</div><div class="card-label">環境省WBGT</div><div class="card-desc">リアルタイム熱中症情報</div></a>
   </div>
+
 </main>
 <div class="japan-stripe"></div>
 <footer class="site-footer">YOSHIMI SMC FC — SMART PORTAL</footer>
-<script>
-const g=localStorage.getItem("smc_guidance"),w=localStorage.getItem("smc_warning");
-if(g){document.getElementById("guidance-text").textContent=g;document.getElementById("home-guidance").style.display="flex";}
-if(w){document.getElementById("warning-text").textContent=w;document.getElementById("home-warning").style.display="flex";}
-</script>
 
 <script>
-var deferredPrompt;
+// ガイダンス表示
+var g=localStorage.getItem("smc_guidance"),w=localStorage.getItem("smc_warning");
+if(g){document.getElementById("guidance-text").textContent=g;document.getElementById("home-guidance").style.display="flex";}
+if(w){document.getElementById("warning-text").textContent=w;document.getElementById("home-warning").style.display="flex";}
+
+// PWA
+var deferredPrompt=null;
 window.addEventListener("beforeinstallprompt",function(e){
   e.preventDefault();deferredPrompt=e;
-  document.getElementById("pwa-banner").style.display="flex";
+  document.getElementById("pwa-banner").style.display="block";
 });
 function installPWA(){
-  if(deferredPrompt){deferredPrompt.prompt();
-    deferredPrompt.userChoice.then(function(){deferredPrompt=null;document.getElementById("pwa-banner").style.display="none";});
-  }
+  if(!deferredPrompt)return;
+  deferredPrompt.prompt();
+  deferredPrompt.userChoice.then(function(){deferredPrompt=null;document.getElementById("pwa-banner").style.display="none";});
 }
-if("serviceWorker" in navigator){
-  navigator.serviceWorker.register("/portal/sw.js").catch(function(){});
-}
+window.addEventListener("appinstalled",function(){document.getElementById("pwa-banner").style.display="none";});
+
+// iOS判定（SafariでPWA未インストール時）
+var isIOS=/iPad|iPhone|iPod/.test(navigator.userAgent)&&!window.MSStream;
+var isInStandalone=window.matchMedia("(display-mode: standalone)").matches||window.navigator.standalone;
+if(isIOS&&!isInStandalone){document.getElementById("pwa-ios-guide").style.display="block";}
+
+// Service Worker
+if("serviceWorker" in navigator){navigator.serviceWorker.register("/portal/sw.js").catch(function(){});}
 </script>
-</body></html>
+</body>
+</html>
