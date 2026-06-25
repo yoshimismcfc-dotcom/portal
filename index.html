@@ -1,0 +1,203 @@
+<!doctype html>
+<html lang="ja">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>吉見SMCサッカースポーツ少年団 スマートポータル</title>
+  <link rel="stylesheet" href="common.css">
+</head>
+<body>
+
+<header class="site-header">
+  <div class="header-inner">
+    <a class="header-logo" href="index.html">
+      <div class="logo-mark">⚽</div>
+      <div>
+        <span>吉見SMC FC</span>
+        <span class="logo-sub">スマートポータル</span>
+      </div>
+    </a>
+    <nav class="header-nav">
+      <a href="index.html" class="active">ホーム</a>
+      <a href="heat.html">熱中症</a>
+      <a href="calendar.html">予定</a>
+      <a href="coach.html">コーチ専用</a>
+    </nav>
+  </div>
+</header>
+
+<main class="page-wrap">
+
+  <!-- ヒーロー帯：今日の連絡 -->
+  <div class="hero-band">
+    <div class="hero-emoji">📢</div>
+    <div>
+      <div class="hero-title" id="today-notice">今日の連絡を読み込み中…</div>
+      <div class="hero-sub">最終更新: <span id="last-updated">—</span></div>
+    </div>
+  </div>
+
+  <!-- お知らせ帯 -->
+  <div class="notice-bar red">
+    ⚠️ <span>夏季期間中は給水・休憩・日陰待機を優先してください。体調不良は無理せずコーチへ連絡。</span>
+  </div>
+
+  <!-- すぐ使う -->
+  <div class="section-head">
+    <div class="section-icon">⚡</div>
+    <h2>すぐ使う</h2>
+    <div class="section-divider"></div>
+  </div>
+  <div class="card-grid" style="margin-bottom:28px">
+    <a class="menu-card accent" href="heat.html">
+      <div class="card-icon">🌡️</div>
+      <div class="card-label">熱中症チェック</div>
+      <div class="card-desc">気温・湿度からリスク判定</div>
+      <span class="card-badge">AI判定</span>
+    </a>
+    <a class="menu-card" href="attendance.html">
+      <div class="card-icon">✋</div>
+      <div class="card-label">出欠確認</div>
+      <div class="card-desc">練習・試合の参加・欠席</div>
+      <span class="card-badge">調整さん</span>
+    </a>
+    <a class="menu-card" href="calendar.html">
+      <div class="card-icon">📅</div>
+      <div class="card-label">チームカレンダー</div>
+      <div class="card-desc">試合・練習の予定一覧</div>
+      <span class="card-badge">Google</span>
+    </a>
+    <a class="menu-card" href="venue.html">
+      <div class="card-icon">📍</div>
+      <div class="card-label">試合会場</div>
+      <div class="card-desc">地図・駐車場・設営情報</div>
+    </a>
+  </div>
+
+  <!-- 試合・運営 -->
+  <div class="section-head">
+    <div class="section-icon">🏟️</div>
+    <h2>試合・運営</h2>
+    <div class="section-divider"></div>
+  </div>
+  <div class="card-grid" style="margin-bottom:28px">
+    <a class="menu-card" href="referee.html">
+      <div class="card-icon">🟡</div>
+      <div class="card-label">審判ガイド</div>
+      <div class="card-desc">主審・副審・第4審の注意事項</div>
+      <span class="card-badge">改訂版</span>
+    </a>
+    <a class="menu-card" href="pitch.html">
+      <div class="card-icon">📐</div>
+      <div class="card-label">ピッチサイズ</div>
+      <div class="card-desc">8人制・低学年・設営図</div>
+    </a>
+    <a class="menu-card" href="car.html">
+      <div class="card-icon">🚗</div>
+      <div class="card-label">配車管理</div>
+      <div class="card-desc">乗車人数・集合場所・車出し</div>
+    </a>
+    <a class="menu-card" href="duty.html">
+      <div class="card-icon">📋</div>
+      <div class="card-label">当番表</div>
+      <div class="card-desc">鍵・救護・写真・設営・片付け</div>
+    </a>
+  </div>
+
+  <!-- 団員・保護者 -->
+  <div class="section-head">
+    <div class="section-icon">👨‍👩‍👦</div>
+    <h2>団員・保護者</h2>
+    <div class="section-divider"></div>
+  </div>
+  <div class="card-grid" style="margin-bottom:28px">
+    <a class="menu-card" href="members.html">
+      <div class="card-icon">📒</div>
+      <div class="card-label">団員名簿</div>
+      <div class="card-desc">学年別・緊急連絡・アレルギー</div>
+    </a>
+    <a class="menu-card" href="orders.html">
+      <div class="card-icon">🛒</div>
+      <div class="card-label">注文リンク集</div>
+      <div class="card-desc">用品・ボール・ソックス</div>
+    </a>
+    <a class="menu-card" href="album.html">
+      <div class="card-icon">📸</div>
+      <div class="card-label">写真・動画</div>
+      <div class="card-desc">公開用と団員限定を分離</div>
+    </a>
+    <a class="menu-card" href="join.html">
+      <div class="card-icon">⚽</div>
+      <div class="card-label">体験・入団</div>
+      <div class="card-desc">申込・FAQ・持ち物案内</div>
+    </a>
+  </div>
+
+  <!-- コーチ専用 -->
+  <div class="section-head">
+    <div class="section-icon">🔒</div>
+    <h2>コーチ専用</h2>
+    <div class="section-divider"></div>
+  </div>
+  <div class="card-grid col2" style="margin-bottom:28px">
+    <a class="menu-card accent" href="coach.html">
+      <div class="card-icon">📁</div>
+      <div class="card-label">練習メニュー・資料庫</div>
+      <div class="card-desc">戦術メモ・学年別ファイル（パスコード必要）</div>
+    </a>
+    <a class="menu-card accent" href="coach.html#meeting">
+      <div class="card-icon">📝</div>
+      <div class="card-label">コーチ会議資料</div>
+      <div class="card-desc">議案・活動報告・議事録（パスコード必要）</div>
+    </a>
+  </div>
+
+  <!-- 外部リンク -->
+  <div class="section-head">
+    <div class="section-icon">🔗</div>
+    <h2>外部リンク</h2>
+    <div class="section-divider"></div>
+  </div>
+  <div class="card-grid" style="margin-bottom:0">
+    <a class="menu-card" href="https://www.instagram.com/" target="_blank" rel="noopener">
+      <div class="card-icon">📷</div>
+      <div class="card-label">Instagram</div>
+      <div class="card-desc">チームの活動写真</div>
+    </a>
+    <a class="menu-card" href="https://line.me/" target="_blank" rel="noopener">
+      <div class="card-icon">💬</div>
+      <div class="card-label">公式LINE</div>
+      <div class="card-desc">連絡・お知らせ</div>
+    </a>
+    <a class="menu-card" href="https://chouseisan.com/" target="_blank" rel="noopener">
+      <div class="card-icon">✅</div>
+      <div class="card-label">調整さん</div>
+      <div class="card-desc">出欠回答（外部サイト）</div>
+    </a>
+    <a class="menu-card" href="https://www.wbgt.env.go.jp/" target="_blank" rel="noopener">
+      <div class="card-icon">🌤️</div>
+      <div class="card-label">環境省WBGT</div>
+      <div class="card-desc">リアルタイム熱中症情報</div>
+    </a>
+  </div>
+
+</main>
+
+<footer class="site-footer">
+  吉見SMCサッカースポーツ少年団｜スマートポータル
+</footer>
+
+<script>
+  // 今日の連絡（差し替え可能）
+  const notices = [
+    "6月29日（日）4年生 TM｜8:00 平方スポーツ広場集合｜水筒2本・帽子必須",
+  ];
+  const el = document.getElementById("today-notice");
+  const lu = document.getElementById("last-updated");
+  el.textContent = notices[0] || "本日の連絡はありません。";
+  const now = new Date();
+  lu.textContent = `${now.getMonth()+1}/${now.getDate()} ${now.getHours()}:${String(now.getMinutes()).padStart(2,"0")}`;
+</script>
+
+</body>
+</html>

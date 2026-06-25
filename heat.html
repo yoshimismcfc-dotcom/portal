@@ -1,0 +1,161 @@
+<!doctype html>
+<html lang="ja">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>熱中症チェック｜吉見SMC FC</title>
+  <link rel="stylesheet" href="common.css">
+  <style>
+    .wbgt-display {
+      text-align: center;
+      padding: 28px 20px;
+      border-radius: var(--r12);
+      background: var(--navy-dk);
+      color: var(--white);
+      margin-bottom: 16px;
+    }
+    .wbgt-value {
+      font-size: 3.2rem;
+      font-weight: 900;
+      line-height: 1;
+      margin-bottom: 4px;
+    }
+    .wbgt-label {
+      font-size: 1.4rem;
+      font-weight: 900;
+      margin-bottom: 8px;
+    }
+    .wbgt-message {
+      font-size: 0.9rem;
+      color: var(--gray400);
+      line-height: 1.6;
+      max-width: 360px;
+      margin: 0 auto;
+    }
+    .level-table td:first-child { font-weight: 900; white-space: nowrap; }
+    .input-row { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+    @media (max-width: 400px) { .input-row { grid-template-columns: 1fr; } }
+  </style>
+</head>
+<body>
+
+<header class="site-header">
+  <div class="header-inner">
+    <a class="header-logo" href="index.html">
+      <div class="logo-mark">⚽</div>
+      <div>
+        <span>吉見SMC FC</span>
+        <span class="logo-sub">スマートポータル</span>
+      </div>
+    </a>
+    <nav class="header-nav">
+      <a href="index.html">ホーム</a>
+      <a href="heat.html" class="active">熱中症</a>
+      <a href="calendar.html">予定</a>
+      <a href="coach.html">コーチ専用</a>
+    </nav>
+  </div>
+</header>
+
+<main class="page-wrap">
+
+  <div class="hero-band">
+    <div class="hero-emoji">🌡️</div>
+    <div>
+      <div class="hero-title">熱中症リスク判定</div>
+      <div class="hero-sub">活動前の目安確認ツール。環境省WBGTや現地判断と併用してください。</div>
+    </div>
+  </div>
+
+  <div class="panel">
+    <div class="panel-title">気温・湿度を入力</div>
+    <div class="input-row">
+      <div class="form-group">
+        <label class="form-label" for="temperature">気温（℃）</label>
+        <input class="form-control" id="temperature" type="number" value="32" min="0" max="45">
+      </div>
+      <div class="form-group">
+        <label class="form-label" for="humidity">湿度（%）</label>
+        <input class="form-control" id="humidity" type="number" value="62" min="0" max="100">
+      </div>
+    </div>
+    <button class="btn btn-primary btn-lg" id="judge-btn" style="width:100%">判定する</button>
+  </div>
+
+  <div class="wbgt-display" id="wbgt-display">
+    <div class="wbgt-value" id="wbgt-value">—</div>
+    <div class="wbgt-label" id="wbgt-label">数値を入力して判定してください</div>
+    <div class="wbgt-message" id="wbgt-message"></div>
+  </div>
+
+  <div class="panel">
+    <div class="panel-title">判定基準（日本スポーツ協会準拠）</div>
+    <table class="data-table level-table">
+      <thead>
+        <tr><th>WBGT</th><th>レベル</th><th>活動の目安</th></tr>
+      </thead>
+      <tbody>
+        <tr><td style="color:var(--red);font-size:1rem">31℃以上</td><td><span class="badge badge-red">危険</span></td><td>原則運動中止。日陰待機・保護者連絡。</td></tr>
+        <tr><td style="color:#b85c00">28〜31℃</td><td><span class="badge badge-yellow">厳重警戒</span></td><td>激しい運動は避け、15分ごとに給水・休憩。</td></tr>
+        <tr><td style="color:#8a6500">25〜28℃</td><td><span class="badge badge-yellow">警戒</span></td><td>積極的に休憩。体調不良者を早期確認。</td></tr>
+        <tr><td style="color:var(--blue)">21〜25℃</td><td><span class="badge badge-blue">注意</span></td><td>給水間隔を短く。体調変化に気を配る。</td></tr>
+        <tr><td style="color:var(--green)">21℃未満</td><td><span class="badge badge-green">ほぼ安全</span></td><td>通常活動可。水分補給は忘れずに。</td></tr>
+      </tbody>
+    </table>
+    <p style="font-size:.75rem;color:var(--gray600);margin-top:10px">
+      ※ 推定式：WBGT ≈ 0.735×気温 + 0.0374×湿度 + 0.00292×気温×湿度 − 4.064（屋外・日射あり）<br>
+      　日射・風速条件により実測値と±2〜3℃の誤差が生じる場合があります。
+    </p>
+  </div>
+
+  <div class="notice-bar">
+    💡 実測WBGTは環境省「<a href="https://www.wbgt.env.go.jp/" target="_blank" rel="noopener" style="color:var(--orange);font-weight:700">熱中症予防情報サイト</a>」で確認できます。
+  </div>
+
+</main>
+
+<footer class="site-footer">
+  吉見SMCサッカースポーツ少年団｜スマートポータル
+</footer>
+
+<script>
+const LEVELS = [
+  { min: 31,   label: "危険",     color: "#C0392B", bg: "#FEF0ED", message: "原則運動中止。日陰で安静にし、保護者へ連絡してください。水分・塩分を補給し、体調が回復しない場合は救急対応を。" },
+  { min: 28,   label: "厳重警戒", color: "#b85c00", bg: "#FFF8E6", message: "激しい運動は避けてください。15分ごとに給水・休憩をとり、体調不良者がいないか全員に声をかけてください。" },
+  { min: 25,   label: "警戒",     color: "#8a6500", bg: "#FFF8E6", message: "積極的に休憩を増やしてください。体調不良者を早期に確認し、無理をさせないよう注意してください。" },
+  { min: 21,   label: "注意",     color: "#1A5FA8", bg: "#E8F0FB", message: "給水間隔を短くしましょう。体調の変化に気を配り、こまめに声をかけてください。" },
+  { min: -Infinity, label: "ほぼ安全", color: "#1A7A4A", bg: "#E6F5ED", message: "通常の活動が可能です。水分補給は忘れずに行いましょう。" },
+];
+
+function estimateWBGT(t, h) {
+  return 0.735 * t + 0.0374 * h + 0.00292 * t * h - 4.064;
+}
+
+function judge() {
+  const t = Number(document.getElementById("temperature").value);
+  const h = Number(document.getElementById("humidity").value);
+  if (isNaN(t) || isNaN(h)) return;
+  const wbgt = estimateWBGT(t, h);
+  const level = LEVELS.find(l => wbgt >= l.min);
+
+  const display = document.getElementById("wbgt-display");
+  document.getElementById("wbgt-value").textContent = wbgt.toFixed(1) + "℃";
+  document.getElementById("wbgt-label").textContent = level.label;
+  document.getElementById("wbgt-message").textContent = level.message;
+  display.style.background = level.bg;
+  display.style.color = level.color;
+}
+
+document.getElementById("judge-btn").addEventListener("click", judge);
+
+// 入力変更で即時再判定
+["temperature","humidity"].forEach(id => {
+  document.getElementById(id).addEventListener("input", judge);
+});
+
+// 初期実行
+judge();
+</script>
+
+</body>
+</html>
