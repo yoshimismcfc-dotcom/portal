@@ -1,0 +1,204 @@
+<!doctype html>
+<html lang="ja">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>当番表｜吉見SMC FC</title>
+  <link rel="stylesheet" href="common.css">
+  <style>
+    .duty-form { display: grid; gap: 10px; }
+    .duty-row { display: grid; grid-template-columns: 1fr 1fr 1fr 1fr auto; gap: 8px; align-items: end; }
+    .duty-table-wrap { overflow-x: auto; }
+    .duty-table { width: 100%; border-collapse: collapse; font-size: .88rem; min-width: 480px; }
+    .duty-table th, .duty-table td { padding: 9px 11px; border-bottom: 1px solid var(--gray100); text-align: left; vertical-align: middle; }
+    .duty-table th { background: var(--gray50); font-weight: 900; font-size: .78rem; color: var(--gray600); white-space: nowrap; }
+    .duty-table tr:last-child td { border-bottom: none; }
+    .duty-table tbody tr:hover { background: var(--gray50); }
+    .del-btn { background: none; border: none; color: var(--red); font-size: 1.1rem; cursor: pointer; padding: 4px 8px; border-radius: 6px; line-height: 1; }
+    .del-btn:hover { background: var(--red-lt); }
+    .grade-badge { display: inline-block; padding: 2px 8px; border-radius: 99px; font-size: .72rem; font-weight: 900; background: var(--navy); color: var(--white); }
+    .way-go   { background: var(--orange-lt); color: var(--orange-dk); }
+    .way-back { background: var(--blue-lt);   color: var(--blue); }
+    .empty-msg { text-align: center; color: var(--gray400); padding: 28px; font-size: .88rem; }
+    @media(max-width:600px){
+      .duty-row { grid-template-columns: 1fr 1fr; }
+      .duty-row .btn { grid-column: 1/-1; }
+    }
+  </style>
+</head>
+<body>
+<header class="site-header">
+  <div class="header-inner">
+    <a class="header-logo" href="index.html">
+      <div class="logo-mark">⚽</div>
+      <div><span>吉見SMC FC</span><span class="logo-sub">スマートポータル</span></div>
+    </a>
+    <nav class="header-nav">
+      <a href="index.html">ホーム</a>
+      <a href="heat.html">熱中症</a>
+      <a href="calendar.html">予定</a>
+      <a href="coach.html">コーチ専用</a>
+    </nav>
+  </div>
+</header>
+
+<main class="page-wrap">
+  <div class="hero-band">
+    <div class="hero-emoji">📋</div>
+    <div>
+      <div class="hero-title">当番表</div>
+      <div class="hero-sub">誰でも入力・削除できます。入力したデータはこの端末に保存されます。</div>
+    </div>
+  </div>
+
+  <div class="notice-bar">
+    💾 データはこのブラウザ（端末）に保存されます。別の端末からは見えません。全員で共有したい場合はコーチにお申し付けください。
+  </div>
+
+  <!-- 入力フォーム -->
+  <div class="panel" style="margin-bottom:20px">
+    <div class="panel-title">当番を追加</div>
+    <div class="duty-row">
+      <div class="form-group" style="margin:0">
+        <label class="form-label">日付</label>
+        <input class="form-control" type="date" id="duty-date">
+      </div>
+      <div class="form-group" style="margin:0">
+        <label class="form-label">学年</label>
+        <select class="form-control" id="duty-grade">
+          <option value="1年">1年</option>
+          <option value="2年">2年</option>
+          <option value="3年">3年</option>
+          <option value="4年">4年</option>
+          <option value="5年">5年</option>
+          <option value="6年">6年</option>
+          <option value="全学年">全学年</option>
+        </select>
+      </div>
+      <div class="form-group" style="margin:0">
+        <label class="form-label">行き・帰り</label>
+        <select class="form-control" id="duty-way">
+          <option value="行き">行き</option>
+          <option value="帰り">帰り</option>
+          <option value="行き・帰り">行き・帰り</option>
+        </select>
+      </div>
+      <div class="form-group" style="margin:0">
+        <label class="form-label">担当者名</label>
+        <input class="form-control" type="text" id="duty-name" placeholder="例：田中さん">
+      </div>
+      <div style="padding-bottom:0">
+        <button class="btn btn-primary" onclick="addDuty()" style="height:42px;white-space:nowrap">＋追加</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- 一覧 -->
+  <div class="panel">
+    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:14px;flex-wrap:wrap;gap:8px">
+      <div class="panel-title" style="margin:0;padding:0;border:none">当番一覧 <span id="duty-count" style="font-size:.8rem;color:var(--gray600);font-weight:400"></span></div>
+      <div style="display:flex;gap:8px;align-items:center">
+        <label class="form-label" style="margin:0;white-space:nowrap">絞り込み：</label>
+        <select class="form-control" id="filter-grade" onchange="renderTable()" style="height:34px;width:auto;font-size:.82rem">
+          <option value="">全学年</option>
+          <option value="1年">1年</option>
+          <option value="2年">2年</option>
+          <option value="3年">3年</option>
+          <option value="4年">4年</option>
+          <option value="5年">5年</option>
+          <option value="6年">6年</option>
+          <option value="全学年">全学年</option>
+        </select>
+      </div>
+    </div>
+    <div class="duty-table-wrap">
+      <table class="duty-table">
+        <thead>
+          <tr><th>日付</th><th>学年</th><th>行き・帰り</th><th>担当者</th><th></th></tr>
+        </thead>
+        <tbody id="duty-tbody"></tbody>
+      </table>
+    </div>
+    <div id="duty-empty" class="empty-msg" style="display:none">まだ当番が登録されていません。上のフォームから追加してください。</div>
+  </div>
+
+  <div style="text-align:right;margin-top:8px">
+    <button class="btn btn-outline btn-sm" onclick="clearAll()" style="color:var(--red);border-color:var(--red)">🗑️ 全件削除</button>
+  </div>
+</main>
+
+<footer class="site-footer">吉見SMCサッカースポーツ少年団｜スマートポータル</footer>
+
+<script>
+const KEY = "smc_duty_v1";
+
+function load() {
+  try { return JSON.parse(localStorage.getItem(KEY)) || []; } catch { return []; }
+}
+function save(data) { localStorage.setItem(KEY, JSON.stringify(data)); }
+
+function addDuty() {
+  const date  = document.getElementById("duty-date").value;
+  const grade = document.getElementById("duty-grade").value;
+  const way   = document.getElementById("duty-way").value;
+  const name  = document.getElementById("duty-name").value.trim();
+  if (!date)  { alert("日付を入力してください"); return; }
+  if (!name)  { alert("担当者名を入力してください"); return; }
+  const data = load();
+  data.push({ id: Date.now(), date, grade, way, name });
+  data.sort((a,b) => a.date.localeCompare(b.date));
+  save(data);
+  document.getElementById("duty-name").value = "";
+  renderTable();
+}
+
+function deleteDuty(id) {
+  if (!confirm("この当番を削除しますか？")) return;
+  save(load().filter(d => d.id !== id));
+  renderTable();
+}
+
+function clearAll() {
+  if (!confirm("全件削除しますか？この操作は取り消せません。")) return;
+  save([]);
+  renderTable();
+}
+
+function renderTable() {
+  const filter = document.getElementById("filter-grade").value;
+  let data = load();
+  if (filter) data = data.filter(d => d.grade === filter || d.grade === "全学年");
+
+  const tbody = document.getElementById("duty-tbody");
+  const empty = document.getElementById("duty-empty");
+  const count = document.getElementById("duty-count");
+
+  if (data.length === 0) {
+    tbody.innerHTML = "";
+    empty.style.display = "block";
+    count.textContent = "";
+    return;
+  }
+  empty.style.display = "none";
+  count.textContent = `（${data.length}件）`;
+
+  tbody.innerHTML = data.map(d => {
+    const dateStr = d.date ? new Date(d.date+"T00:00:00").toLocaleDateString("ja-JP",{month:"numeric",day:"numeric",weekday:"short"}) : "—";
+    const wayClass = d.way.includes("行き") && d.way.includes("帰り") ? "" : d.way === "行き" ? "way-go" : "way-back";
+    return `<tr>
+      <td>${dateStr}</td>
+      <td><span class="grade-badge">${d.grade}</span></td>
+      <td><span class="badge ${wayClass}">${d.way}</span></td>
+      <td>${d.name}</td>
+      <td><button class="del-btn" onclick="deleteDuty(${d.id})" title="削除">🗑</button></td>
+    </tr>`;
+  }).join("");
+}
+
+// 初期値：今日の日付をセット
+document.getElementById("duty-date").value = new Date().toISOString().slice(0,10);
+
+renderTable();
+</script>
+</body>
+</html>

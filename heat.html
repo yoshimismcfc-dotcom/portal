@@ -13,40 +13,31 @@
       background: var(--navy-dk);
       color: var(--white);
       margin-bottom: 16px;
+      transition: background .3s, color .3s;
     }
-    .wbgt-value {
-      font-size: 3.2rem;
-      font-weight: 900;
-      line-height: 1;
-      margin-bottom: 4px;
-    }
-    .wbgt-label {
-      font-size: 1.4rem;
-      font-weight: 900;
-      margin-bottom: 8px;
-    }
-    .wbgt-message {
-      font-size: 0.9rem;
-      color: var(--gray400);
-      line-height: 1.6;
-      max-width: 360px;
-      margin: 0 auto;
-    }
-    .level-table td:first-child { font-weight: 900; white-space: nowrap; }
+    .wbgt-value { font-size: 3.4rem; font-weight: 900; line-height: 1; margin-bottom: 4px; }
+    .wbgt-label { font-size: 1.5rem; font-weight: 900; margin-bottom: 8px; }
+    .wbgt-message { font-size: 0.88rem; line-height: 1.65; max-width: 380px; margin: 0 auto; opacity: .85; }
+    .wbgt-location { font-size: 0.78rem; opacity: .6; margin-top: 10px; }
     .input-row { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
-    @media (max-width: 400px) { .input-row { grid-template-columns: 1fr; } }
+    .gps-btn { width: 100%; margin-bottom: 12px; }
+    .level-dot { display: inline-block; width: 10px; height: 10px; border-radius: 50%; margin-right: 6px; }
+    .source-tabs { display: flex; gap: 8px; margin-bottom: 16px; }
+    .source-tab { flex: 1; padding: 10px; border: 2px solid var(--gray200); border-radius: var(--r8);
+      background: var(--white); font: inherit; font-size: .85rem; font-weight: 700;
+      color: var(--gray600); cursor: pointer; transition: .15s; }
+    .source-tab.active { border-color: var(--orange); color: var(--orange); background: var(--orange-lt); }
+    .auto-panel, .manual-panel { display: none; }
+    .auto-panel.show, .manual-panel.show { display: block; }
+    @media(max-width:400px){ .input-row{ grid-template-columns:1fr; } }
   </style>
 </head>
 <body>
-
 <header class="site-header">
   <div class="header-inner">
     <a class="header-logo" href="index.html">
       <div class="logo-mark">⚽</div>
-      <div>
-        <span>吉見SMC FC</span>
-        <span class="logo-sub">スマートポータル</span>
-      </div>
+      <div><span>吉見SMC FC</span><span class="logo-sub">スマートポータル</span></div>
     </a>
     <nav class="header-nav">
       <a href="index.html">ホーム</a>
@@ -58,104 +49,166 @@
 </header>
 
 <main class="page-wrap">
-
   <div class="hero-band">
     <div class="hero-emoji">🌡️</div>
     <div>
       <div class="hero-title">熱中症リスク判定</div>
-      <div class="hero-sub">活動前の目安確認ツール。環境省WBGTや現地判断と併用してください。</div>
+      <div class="hero-sub">現在地の気象データを自動取得、またはマニュアル入力で判定します。</div>
     </div>
   </div>
 
-  <div class="panel">
-    <div class="panel-title">気温・湿度を入力</div>
-    <div class="input-row">
-      <div class="form-group">
-        <label class="form-label" for="temperature">気温（℃）</label>
-        <input class="form-control" id="temperature" type="number" value="32" min="0" max="45">
-      </div>
-      <div class="form-group">
-        <label class="form-label" for="humidity">湿度（%）</label>
-        <input class="form-control" id="humidity" type="number" value="62" min="0" max="100">
-      </div>
-    </div>
-    <button class="btn btn-primary btn-lg" id="judge-btn" style="width:100%">判定する</button>
+  <!-- 入力モード切替 -->
+  <div class="source-tabs">
+    <button class="source-tab active" id="tab-auto" onclick="switchMode('auto')">📍 現在地から自動取得</button>
+    <button class="source-tab" id="tab-manual" onclick="switchMode('manual')">✏️ 手動で入力</button>
   </div>
 
+  <!-- 自動取得パネル -->
+  <div class="auto-panel show" id="auto-panel">
+    <div class="panel" style="margin-bottom:12px">
+      <button class="btn btn-primary btn-lg gps-btn" id="gps-btn" onclick="fetchWeather()">
+        📍 現在地の気象データを取得
+      </button>
+      <p id="gps-status" style="font-size:.82rem;color:var(--gray600);text-align:center;min-height:1.4em"></p>
+    </div>
+  </div>
+
+  <!-- 手動入力パネル -->
+  <div class="manual-panel" id="manual-panel">
+    <div class="panel" style="margin-bottom:12px">
+      <div class="input-row">
+        <div class="form-group">
+          <label class="form-label" for="temperature">気温（℃）</label>
+          <input class="form-control" id="temperature" type="number" value="32" min="0" max="45">
+        </div>
+        <div class="form-group">
+          <label class="form-label" for="humidity">湿度（%）</label>
+          <input class="form-control" id="humidity" type="number" value="62" min="0" max="100">
+        </div>
+      </div>
+      <button class="btn btn-primary btn-lg" onclick="judgeManual()" style="width:100%">判定する</button>
+    </div>
+  </div>
+
+  <!-- 結果表示 -->
   <div class="wbgt-display" id="wbgt-display">
     <div class="wbgt-value" id="wbgt-value">—</div>
-    <div class="wbgt-label" id="wbgt-label">数値を入力して判定してください</div>
+    <div class="wbgt-label" id="wbgt-label">上のボタンで判定してください</div>
     <div class="wbgt-message" id="wbgt-message"></div>
+    <div class="wbgt-location" id="wbgt-location"></div>
   </div>
 
+  <!-- 判定基準表 -->
   <div class="panel">
     <div class="panel-title">判定基準（日本スポーツ協会準拠）</div>
-    <table class="data-table level-table">
-      <thead>
-        <tr><th>WBGT</th><th>レベル</th><th>活動の目安</th></tr>
-      </thead>
+    <table class="data-table">
+      <thead><tr><th>WBGT</th><th>レベル</th><th>活動の目安</th></tr></thead>
       <tbody>
-        <tr><td style="color:var(--red);font-size:1rem">31℃以上</td><td><span class="badge badge-red">危険</span></td><td>原則運動中止。日陰待機・保護者連絡。</td></tr>
-        <tr><td style="color:#b85c00">28〜31℃</td><td><span class="badge badge-yellow">厳重警戒</span></td><td>激しい運動は避け、15分ごとに給水・休憩。</td></tr>
-        <tr><td style="color:#8a6500">25〜28℃</td><td><span class="badge badge-yellow">警戒</span></td><td>積極的に休憩。体調不良者を早期確認。</td></tr>
-        <tr><td style="color:var(--blue)">21〜25℃</td><td><span class="badge badge-blue">注意</span></td><td>給水間隔を短く。体調変化に気を配る。</td></tr>
-        <tr><td style="color:var(--green)">21℃未満</td><td><span class="badge badge-green">ほぼ安全</span></td><td>通常活動可。水分補給は忘れずに。</td></tr>
+        <tr><td><span class="level-dot" style="background:#C0392B"></span>31℃以上</td><td><span class="badge badge-red">危険</span></td><td>原則運動中止。日陰待機・保護者連絡。</td></tr>
+        <tr><td><span class="level-dot" style="background:#b85c00"></span>28〜31℃</td><td><span class="badge badge-yellow">厳重警戒</span></td><td>激しい運動禁止。15分ごとに給水・休憩。</td></tr>
+        <tr><td><span class="level-dot" style="background:#8a6500"></span>25〜28℃</td><td><span class="badge badge-yellow">警戒</span></td><td>積極的に休憩。体調不良者を早期確認。</td></tr>
+        <tr><td><span class="level-dot" style="background:#1A5FA8"></span>21〜25℃</td><td><span class="badge badge-blue">注意</span></td><td>給水間隔を短く。体調変化に注意。</td></tr>
+        <tr><td><span class="level-dot" style="background:#1A7A4A"></span>21℃未満</td><td><span class="badge badge-green">ほぼ安全</span></td><td>通常活動可。水分補給は忘れずに。</td></tr>
       </tbody>
     </table>
     <p style="font-size:.75rem;color:var(--gray600);margin-top:10px">
       ※ 推定式：WBGT ≈ 0.735×気温 + 0.0374×湿度 + 0.00292×気温×湿度 − 4.064（屋外・日射あり）<br>
-      　日射・風速条件により実測値と±2〜3℃の誤差が生じる場合があります。
+      　気象データは Open-Meteo API（無料・無登録）を使用。日射・風速条件により±2〜3℃の誤差が生じる場合があります。
     </p>
   </div>
 
   <div class="notice-bar">
-    💡 実測WBGTは環境省「<a href="https://www.wbgt.env.go.jp/" target="_blank" rel="noopener" style="color:var(--orange);font-weight:700">熱中症予防情報サイト</a>」で確認できます。
+    💡 実測WBGTは環境省「<a href="https://www.wbgt.env.go.jp/" target="_blank" rel="noopener" style="color:var(--orange);font-weight:700">熱中症予防情報サイト</a>」でも確認できます。
   </div>
-
 </main>
 
-<footer class="site-footer">
-  吉見SMCサッカースポーツ少年団｜スマートポータル
-</footer>
+<footer class="site-footer">吉見SMCサッカースポーツ少年団｜スマートポータル</footer>
 
 <script>
 const LEVELS = [
-  { min: 31,   label: "危険",     color: "#C0392B", bg: "#FEF0ED", message: "原則運動中止。日陰で安静にし、保護者へ連絡してください。水分・塩分を補給し、体調が回復しない場合は救急対応を。" },
-  { min: 28,   label: "厳重警戒", color: "#b85c00", bg: "#FFF8E6", message: "激しい運動は避けてください。15分ごとに給水・休憩をとり、体調不良者がいないか全員に声をかけてください。" },
-  { min: 25,   label: "警戒",     color: "#8a6500", bg: "#FFF8E6", message: "積極的に休憩を増やしてください。体調不良者を早期に確認し、無理をさせないよう注意してください。" },
-  { min: 21,   label: "注意",     color: "#1A5FA8", bg: "#E8F0FB", message: "給水間隔を短くしましょう。体調の変化に気を配り、こまめに声をかけてください。" },
-  { min: -Infinity, label: "ほぼ安全", color: "#1A7A4A", bg: "#E6F5ED", message: "通常の活動が可能です。水分補給は忘れずに行いましょう。" },
+  { min:31, label:"危険",     color:"#C0392B", bg:"#FEF0ED", message:"原則運動中止。日陰で安静にし、保護者へ連絡してください。水分・塩分を補給し、体調が回復しない場合は救急対応を。" },
+  { min:28, label:"厳重警戒", color:"#b85c00", bg:"#FFF3E0", message:"激しい運動は避けてください。15分ごとに給水・休憩をとり、体調不良者がいないか全員に声をかけてください。" },
+  { min:25, label:"警戒",     color:"#8a6500", bg:"#FFF8E6", message:"積極的に休憩を増やしてください。体調不良者を早期に確認し、無理をさせないよう注意してください。" },
+  { min:21, label:"注意",     color:"#1A5FA8", bg:"#E8F0FB", message:"給水間隔を短くしましょう。体調の変化に気を配り、こまめに声をかけてください。" },
+  { min:-Infinity, label:"ほぼ安全", color:"#1A7A4A", bg:"#E6F5ED", message:"通常の活動が可能です。水分補給は忘れずに行いましょう。" },
 ];
 
 function estimateWBGT(t, h) {
-  return 0.735 * t + 0.0374 * h + 0.00292 * t * h - 4.064;
+  return 0.735*t + 0.0374*h + 0.00292*t*h - 4.064;
 }
 
-function judge() {
-  const t = Number(document.getElementById("temperature").value);
-  const h = Number(document.getElementById("humidity").value);
-  if (isNaN(t) || isNaN(h)) return;
-  const wbgt = estimateWBGT(t, h);
+function showResult(wbgt, locationText) {
   const level = LEVELS.find(l => wbgt >= l.min);
-
   const display = document.getElementById("wbgt-display");
   document.getElementById("wbgt-value").textContent = wbgt.toFixed(1) + "℃";
   document.getElementById("wbgt-label").textContent = level.label;
   document.getElementById("wbgt-message").textContent = level.message;
+  document.getElementById("wbgt-location").textContent = locationText || "";
   display.style.background = level.bg;
   display.style.color = level.color;
 }
 
-document.getElementById("judge-btn").addEventListener("click", judge);
+function switchMode(mode) {
+  document.getElementById("auto-panel").classList.toggle("show", mode==="auto");
+  document.getElementById("manual-panel").classList.toggle("show", mode==="manual");
+  document.getElementById("tab-auto").classList.toggle("active", mode==="auto");
+  document.getElementById("tab-manual").classList.toggle("active", mode==="manual");
+}
 
-// 入力変更で即時再判定
+function judgeManual() {
+  const t = Number(document.getElementById("temperature").value);
+  const h = Number(document.getElementById("humidity").value);
+  showResult(estimateWBGT(t, h), "手動入力値");
+}
+
+// 入力変更で即時反映（手動モード）
 ["temperature","humidity"].forEach(id => {
-  document.getElementById(id).addEventListener("input", judge);
+  document.getElementById(id)?.addEventListener("input", () => {
+    if (document.getElementById("manual-panel").classList.contains("show")) judgeManual();
+  });
 });
 
-// 初期実行
-judge();
-</script>
+async function fetchWeather() {
+  const btn = document.getElementById("gps-btn");
+  const status = document.getElementById("gps-status");
+  btn.disabled = true;
+  btn.textContent = "📍 位置情報を取得中…";
+  status.textContent = "";
 
+  if (!navigator.geolocation) {
+    status.textContent = "このブラウザは位置情報に対応していません。手動入力をお使いください。";
+    btn.disabled = false; btn.textContent = "📍 現在地の気象データを取得";
+    return;
+  }
+
+  navigator.geolocation.getCurrentPosition(
+    async (pos) => {
+      const { latitude: lat, longitude: lon } = pos.coords;
+      status.textContent = "気象データを取得中…";
+      try {
+        const url = `https://api.open-meteo.com/v1/forecast?latitude=${lat}&longitude=${lon}&current=temperature_2m,relative_humidity_2m,apparent_temperature&timezone=Asia/Tokyo`;
+        const res = await fetch(url);
+        const data = await res.json();
+        const t = data.current.temperature_2m;
+        const h = data.current.relative_humidity_2m;
+        const wbgt = estimateWBGT(t, h);
+        showResult(wbgt, `📍 現在地 気温${t}℃ / 湿度${h}% (${new Date().toLocaleTimeString("ja-JP",{hour:"2-digit",minute:"2-digit"})}現在)`);
+        status.textContent = "";
+        btn.textContent = "🔄 再取得";
+      } catch(e) {
+        status.textContent = "気象データの取得に失敗しました。時間をおいて再試行してください。";
+        btn.textContent = "📍 現在地の気象データを取得";
+      }
+      btn.disabled = false;
+    },
+    (err) => {
+      const msgs = { 1:"位置情報の使用が拒否されました。ブラウザの設定を確認してください。", 2:"位置情報を取得できませんでした。", 3:"タイムアウトしました。再度お試しください。" };
+      status.textContent = msgs[err.code] || "位置情報の取得に失敗しました。";
+      btn.disabled = false; btn.textContent = "📍 現在地の気象データを取得";
+    },
+    { timeout: 10000 }
+  );
+}
+</script>
 </body>
 </html>

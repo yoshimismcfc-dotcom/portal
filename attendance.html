@@ -5,17 +5,33 @@
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>出欠確認｜吉見SMC FC</title>
   <link rel="stylesheet" href="common.css">
+  <style>
+    .attend-card {
+      background: var(--white);
+      border-radius: var(--r16);
+      border: 2px solid var(--gray100);
+      padding: 24px 20px;
+      display: flex;
+      flex-direction: column;
+      gap: 14px;
+      box-shadow: var(--shadow-sm);
+    }
+    .attend-card.coach-card { border-color: var(--navy); }
+    .attend-card .card-head { display: flex; align-items: center; gap: 12px; }
+    .attend-card .card-emoji { font-size: 2rem; }
+    .attend-card .card-title { font-size: 1.1rem; font-weight: 900; color: var(--navy); }
+    .attend-card .card-subtitle { font-size: .8rem; color: var(--gray600); margin-top: 2px; }
+    .attend-card p { font-size: .88rem; color: var(--gray600); line-height: 1.65; margin: 0; }
+    .attend-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin-bottom: 24px; }
+    @media(max-width:560px){ .attend-grid{ grid-template-columns:1fr; } }
+  </style>
 </head>
 <body>
-
 <header class="site-header">
   <div class="header-inner">
     <a class="header-logo" href="index.html">
       <div class="logo-mark">⚽</div>
-      <div>
-        <span>吉見SMC FC</span>
-        <span class="logo-sub">スマートポータル</span>
-      </div>
+      <div><span>吉見SMC FC</span><span class="logo-sub">スマートポータル</span></div>
     </a>
     <nav class="header-nav">
       <a href="index.html">ホーム</a>
@@ -27,46 +43,51 @@
 </header>
 
 <main class="page-wrap">
-
   <div class="hero-band">
     <div class="hero-emoji">✋</div>
     <div>
       <div class="hero-title">出欠確認</div>
-      <div class="hero-sub">団員・保護者用とコーチ用で回答先が異なります。間違えないようにご注意ください。</div>
+      <div class="hero-sub">団員・保護者用とコーチ用で回答先が異なります。間違えないようご注意ください。</div>
     </div>
   </div>
 
-  <div class="tab-list" role="tablist">
-    <button class="tab-btn active" data-tab="member" role="tab" aria-selected="true">団員・保護者</button>
-    <button class="tab-btn" data-tab="coach" role="tab" aria-selected="false">コーチ</button>
-  </div>
+  <div class="attend-grid">
+    <!-- 団員・保護者 -->
+    <div class="attend-card">
+      <div class="card-head">
+        <div class="card-emoji">👨‍👩‍👦</div>
+        <div>
+          <div class="card-title">団員・保護者用</div>
+          <div class="card-subtitle">練習・試合の出欠はこちら</div>
+        </div>
+      </div>
+      <p>練習・試合への参加、欠席、遅刻、早退はこちらから回答してください。</p>
+      <a class="btn btn-primary btn-lg" href="https://chouseisan.com/s?h=04a01b20cc2b4a38b3e1f4aa93d1d06c" target="_blank" rel="noopener" style="text-align:center">
+        📅 回答する（団員・保護者）
+      </a>
+    </div>
 
-  <div class="tab-content active" id="tab-member">
-    <div class="panel">
-      <div class="panel-title">団員・保護者用</div>
-      <p style="margin-bottom:16px;color:var(--gray600)">練習・試合の参加、欠席、遅刻、早退はこちらから回答してください。</p>
-      <a class="btn btn-primary btn-lg" href="https://chouseisan.com/s?h=04a01b20cc2b4a38b3e1f4aa93d1d06c" target="_blank" rel="noopener" style="width:100%;text-align:center">
-        📅 調整さんを開く（団員・保護者用）
+    <!-- コーチ -->
+    <div class="attend-card coach-card">
+      <div class="card-head">
+        <div class="card-emoji">🧑‍🏫</div>
+        <div>
+          <div class="card-title">コーチ用</div>
+          <div class="card-subtitle">帯同・審判・車出しの可否はこちら</div>
+        </div>
+      </div>
+      <p>帯同、審判、車出し、会場設営の可否はこちらから回答してください。</p>
+      <a class="btn btn-navy btn-lg" href="https://chouseisan.com/s?h=20c37e0538dd4feb8d91d8e31be23ad3" target="_blank" rel="noopener" style="text-align:center">
+        📅 回答する（コーチ）
       </a>
     </div>
   </div>
 
-  <div class="tab-content" id="tab-coach">
-    <div class="panel">
-      <div class="panel-title">コーチ用</div>
-      <p style="margin-bottom:16px;color:var(--gray600)">帯同、審判、会場設営の可否はこちらから回答してください。</p>
-      <a class="btn btn-navy btn-lg" href="https://chouseisan.com/s?h=20c37e0538dd4feb8d91d8e31be23ad3" target="_blank" rel="noopener" style="width:100%;text-align:center">
-        📅 調整さんを開く（コーチ用）
-      </a>
-    </div>
+  <div class="notice-bar">
+    ⚠️ 団員・保護者の方はオレンジのボタン、コーチの方はネイビーのボタンから回答してください。
   </div>
-
 </main>
 
-<footer class="site-footer">
-  吉見SMCサッカースポーツ少年団｜スマートポータル
-</footer>
-
-<script src="common.js"></script>
+<footer class="site-footer">吉見SMCサッカースポーツ少年団｜スマートポータル</footer>
 </body>
 </html>

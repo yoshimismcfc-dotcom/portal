@@ -1,0 +1,160 @@
+<!doctype html>
+<html lang="ja">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>審判ガイド｜吉見SMC FC</title>
+  <link rel="stylesheet" href="common.css">
+  <style>
+    .guide-section { margin-bottom: 24px; }
+    .guide-section h3 { font-size: 1rem; font-weight: 900; color: var(--navy); margin-bottom: 10px; padding-left: 10px; border-left: 4px solid var(--orange); }
+    .guide-list { list-style: none; display: grid; gap: 6px; }
+    .guide-list li { background: var(--gray50); border-radius: var(--r8); padding: 10px 13px; font-size: .88rem; line-height: 1.6; }
+    .guide-list li::before { content: "▸ "; color: var(--orange); font-weight: 900; }
+    .signal-grid { display: grid; grid-template-columns: repeat(3,1fr); gap: 10px; }
+    .signal-card { background: var(--gray50); border-radius: var(--r8); padding: 12px 10px; text-align: center; font-size: .82rem; }
+    .signal-card .signal-icon { font-size: 1.8rem; margin-bottom: 4px; }
+    .signal-card strong { display: block; font-size: .85rem; color: var(--navy); margin-bottom: 2px; }
+    .pitch-img { background: linear-gradient(135deg,#2d6a1e,#3a8a2a); border-radius: var(--r12); padding: 20px; position: relative; min-height: 220px; display: flex; align-items: center; justify-content: center; }
+    @media(max-width:480px){ .signal-grid{ grid-template-columns: repeat(2,1fr); } }
+  </style>
+</head>
+<body>
+<header class="site-header">
+  <div class="header-inner">
+    <a class="header-logo" href="index.html">
+      <div class="logo-mark">⚽</div>
+      <div><span>吉見SMC FC</span><span class="logo-sub">スマートポータル</span></div>
+    </a>
+    <nav class="header-nav">
+      <a href="index.html">ホーム</a>
+      <a href="heat.html">熱中症</a>
+      <a href="calendar.html">予定</a>
+      <a href="coach.html">コーチ専用</a>
+    </nav>
+  </div>
+</header>
+
+<main class="page-wrap">
+  <div class="hero-band">
+    <div class="hero-emoji">🟡</div>
+    <div>
+      <div class="hero-title">審判ガイド</div>
+      <div class="hero-sub">少年サッカー（8人制）の審判役割と試合前チェックリストです。</div>
+    </div>
+  </div>
+
+  <div class="tab-list" role="tablist">
+    <button class="tab-btn active" data-tab="roles">役割と立ち位置</button>
+    <button class="tab-btn" data-tab="signals">シグナル</button>
+    <button class="tab-btn" data-tab="check">試合前チェック</button>
+    <button class="tab-btn" data-tab="local">ローカルルール</button>
+  </div>
+
+  <!-- 役割 -->
+  <div class="tab-content active" id="tab-roles">
+    <div class="panel">
+      <div class="guide-section">
+        <h3>⚽ 主審（レフェリー）</h3>
+        <ul class="guide-list">
+          <li>試合の最終権限を持つ。全ての判定は主審が行う。</li>
+          <li>試合開始前にコイントス。勝った方がキックオフ方向またはキックオフを選択。</li>
+          <li>フィールド全体を対角線上に動く（対角線審判法）。</li>
+          <li>ファウル・オフサイド・ゴールの判定を行い、笛を吹く。</li>
+          <li>負傷者が出た場合はプレーを止め、安全を確認してから再開。</li>
+          <li>飲水タイムは主審の判断で設定（WBGT警戒以上で積極的に取る）。</li>
+        </ul>
+      </div>
+      <div class="guide-section">
+        <h3>🚩 副審（アシスタントレフェリー）</h3>
+        <ul class="guide-list">
+          <li>タッチライン沿いを担当エリア（ハーフ）で往復する。</li>
+          <li>ボールがラインを割ったとき（スローイン・コーナー・ゴールキック）を旗で表示。</li>
+          <li>オフサイドポジションを旗で示す（判定は主審）。</li>
+          <li>交代の申し出を受け付け、主審に伝える。</li>
+        </ul>
+      </div>
+      <div class="guide-section">
+        <h3>⏱️ 第4審判</h3>
+        <ul class="guide-list">
+          <li>両チームのベンチ間に位置し、ベンチ管理を行う。</li>
+          <li>交代選手の確認・アディショナルタイムの掲示を行う。</li>
+          <li>用具交換・負傷者への対応をサポートする。</li>
+          <li>主審・副審が交代できない場合は第4審判が代行する。</li>
+        </ul>
+      </div>
+    </div>
+  </div>
+
+  <!-- シグナル -->
+  <div class="tab-content" id="tab-signals">
+    <div class="panel">
+      <div class="signal-grid">
+        <div class="signal-card"><div class="signal-icon">👆</div><strong>フリーキック</strong>攻撃方向に腕を伸ばして指す</div>
+        <div class="signal-card"><div class="signal-icon">🔴</div><strong>レッドカード</strong>カードを頭上に高く掲げる</div>
+        <div class="signal-card"><div class="signal-icon">🟡</div><strong>イエローカード</strong>カードを顔の前に掲げる</div>
+        <div class="signal-card"><div class="signal-icon">🚩</div><strong>オフサイド</strong>旗を斜め上に挙げ、方向を示す</div>
+        <div class="signal-card"><div class="signal-icon">👐</div><strong>スローイン</strong>ボールが割れた側の腕を水平に伸ばす</div>
+        <div class="signal-card"><div class="signal-icon">🔄</div><strong>交代</strong>両腕を胸の前でクロス、掲示板を挙げる</div>
+        <div class="signal-card"><div class="signal-icon">💧</div><strong>飲水タイム</strong>両手で飲む仕草をする</div>
+        <div class="signal-card"><div class="signal-icon">🏁</div><strong>ゴール</strong>センターサークルを指してキックオフ合図</div>
+        <div class="signal-card"><div class="signal-icon">⏸️</div><strong>プレー停止</strong>笛＋腕を真上に挙げる</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- 試合前チェック -->
+  <div class="tab-content" id="tab-check">
+    <div class="panel">
+      <div class="guide-section">
+        <h3>🕐 試合開始30分前</h3>
+        <ul class="guide-list">
+          <li>両チームのユニフォーム色が被らないか確認（被る場合はビブス着用を依頼）。</li>
+          <li>ボールの状態（空気圧）を確認。試合球を準備。</li>
+          <li>ゴールネット、ポスト、コーナーフラッグを確認・設置。</li>
+          <li>AED・救護バッグの場所を確認。</li>
+          <li>WBGT測定・熱中症レベル確認、飲水タイムの計画を立てる。</li>
+        </ul>
+      </div>
+      <div class="guide-section">
+        <h3>📋 試合直前（選手入場時）</h3>
+        <ul class="guide-list">
+          <li>両チームの参加選手数を確認（8人制：最少5人で試合成立）。</li>
+          <li>スパイク・アクセサリー（時計・ネックレス禁止）を確認。</li>
+          <li>GKのグローブ色・ユニフォーム色が他選手と異なることを確認。</li>
+          <li>コイントス実施。</li>
+        </ul>
+      </div>
+    </div>
+  </div>
+
+  <!-- ローカルルール -->
+  <div class="tab-content" id="tab-local">
+    <div class="panel">
+      <div class="guide-section">
+        <h3>⚽ 少年サッカー（8人制）基本ルール</h3>
+        <ul class="guide-list">
+          <li>競技者数：8人（GK含む）。最少人数5人。</li>
+          <li>交代：何度でも可（出た選手が再出場してもよい）。</li>
+          <li>オフサイド：あり（ただし低学年大会はなしの場合がある）。</li>
+          <li>試合時間：12〜15分×2（大会により異なる）。</li>
+          <li>ピッチサイズ：目安68m×50m（<a href="pitch.html" style="color:var(--orange);font-weight:700">詳細はピッチサイズページ</a>）。</li>
+        </ul>
+      </div>
+      <div class="guide-section">
+        <h3>🌡️ 暑熱対応ルール</h3>
+        <ul class="guide-list">
+          <li>WBGT25℃以上：ハーフタイムに5分以上の飲水タイムを設ける。</li>
+          <li>WBGT28℃以上：前後半各1回の飲水タイムを追加する。</li>
+          <li>WBGT31℃以上：試合を中止または延期する。</li>
+          <li>体調不良者が出た場合は即座にプレーを停止し、日陰で安静にさせる。</li>
+        </ul>
+      </div>
+    </div>
+  </div>
+</main>
+
+<footer class="site-footer">吉見SMCサッカースポーツ少年団｜スマートポータル</footer>
+<script src="common.js"></script>
+</body>
+</html>

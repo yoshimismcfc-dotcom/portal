@@ -1,0 +1,107 @@
+<!doctype html>
+<html lang="ja">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>写真・動画｜吉見SMC FC</title>
+  <link rel="stylesheet" href="common.css">
+  <style>
+    .album-card { background: var(--white); border-radius: var(--r16); border: 2px solid var(--gray100); padding: 22px 20px; display: flex; flex-direction: column; gap: 12px; box-shadow: var(--shadow-sm); }
+    .album-card .card-head { display: flex; align-items: center; gap: 12px; }
+    .album-card .card-emoji { font-size: 2rem; }
+    .album-card .card-title { font-size: 1.05rem; font-weight: 900; color: var(--navy); }
+    .album-card .card-subtitle { font-size: .78rem; color: var(--gray600); }
+    .album-card p { font-size: .85rem; color: var(--gray600); line-height: 1.65; margin: 0; }
+    .album-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin-bottom: 24px; }
+    .step-list { list-style: none; display: grid; gap: 10px; counter-reset: step; }
+    .step-list li { background: var(--gray50); border-radius: var(--r8); padding: 12px 14px 12px 46px; font-size: .88rem; line-height: 1.6; position: relative; counter-increment: step; }
+    .step-list li::before { content: counter(step); position: absolute; left: 14px; top: 12px; width: 22px; height: 22px; border-radius: 50%; background: var(--orange); color: var(--white); font-size: .75rem; font-weight: 900; display: grid; place-items: center; }
+    @media(max-width:540px){ .album-grid{ grid-template-columns:1fr; } }
+  </style>
+</head>
+<body>
+<header class="site-header">
+  <div class="header-inner">
+    <a class="header-logo" href="index.html">
+      <div class="logo-mark">⚽</div>
+      <div><span>吉見SMC FC</span><span class="logo-sub">スマートポータル</span></div>
+    </a>
+    <nav class="header-nav">
+      <a href="index.html">ホーム</a>
+      <a href="heat.html">熱中症</a>
+      <a href="calendar.html">予定</a>
+      <a href="coach.html">コーチ専用</a>
+    </nav>
+  </div>
+</header>
+
+<main class="page-wrap">
+  <div class="hero-band">
+    <div class="hero-emoji">📸</div>
+    <div>
+      <div class="hero-title">写真・動画</div>
+      <div class="hero-sub">Googleフォトの共有アルバムでチームの思い出を蓄積します。</div>
+    </div>
+  </div>
+
+  <div class="album-grid">
+    <div class="album-card">
+      <div class="card-head">
+        <div class="card-emoji">🌐</div>
+        <div>
+          <div class="card-title">全体公開アルバム</div>
+          <div class="card-subtitle">SNS・ホームページ掲載用</div>
+        </div>
+      </div>
+      <p>チームの試合・イベントの写真。保護者・コーチ全員が追加できます。</p>
+      <a class="btn btn-primary btn-lg" href="#" id="album-public" style="text-align:center">
+        📷 アルバムを開く
+      </a>
+    </div>
+    <div class="album-card">
+      <div class="card-head">
+        <div class="card-emoji">🔒</div>
+        <div>
+          <div class="card-title">団員限定アルバム</div>
+          <div class="card-subtitle">個人情報を含む写真・動画</div>
+        </div>
+      </div>
+      <p>名前入り写真・集合写真など。共有リンクは団員・保護者のみへ案内してください。</p>
+      <a class="btn btn-navy btn-lg" href="#" id="album-private" style="text-align:center">
+        🔒 アルバムを開く
+      </a>
+    </div>
+  </div>
+
+  <div class="panel">
+    <div class="panel-title">Googleフォト共有アルバムの作り方</div>
+    <ul class="step-list">
+      <li>Googleフォトアプリ（またはWebサイト）を開き、「アルバム」→「＋新しいアルバム」を作成する。</li>
+      <li>アルバム名を決める（例：「吉見SMC FC 2026 公開」）。</li>
+      <li>アルバムを開き「共有」→「リンクを取得」でURLをコピーする。</li>
+      <li>「共同編集者を許可」をオンにすると、リンクを持つ人が写真を追加できる。</li>
+      <li>コピーしたURLをこのページの管理者に送り、ボタンのリンクに設定してもらう。</li>
+    </ul>
+  </div>
+
+  <div class="notice-bar">
+    ⚠️ 個人が特定できる写真・動画を公開アルバムに入れないよう注意してください。SNSへの無断転載は禁止です。
+  </div>
+
+  <div class="panel">
+    <div class="panel-title">アルバムURLの設定方法（管理者向け）</div>
+    <p style="font-size:.85rem;color:var(--gray600);line-height:1.7">
+      <code style="background:var(--gray100);padding:2px 6px;border-radius:4px">album.html</code> 内の以下の箇所にGoogleフォトの共有URLを貼り付けてください。
+    </p>
+    <pre style="background:var(--navy-dk);color:var(--gray200);padding:14px;border-radius:var(--r8);font-size:.78rem;overflow-x:auto;margin-top:10px">
+// 公開アルバム
+document.getElementById("album-public").href = "https://photos.app.goo.gl/xxxxx";
+
+// 限定アルバム
+document.getElementById("album-private").href = "https://photos.app.goo.gl/yyyyy";</pre>
+  </div>
+</main>
+
+<footer class="site-footer">吉見SMCサッカースポーツ少年団｜スマートポータル</footer>
+</body>
+</html>
