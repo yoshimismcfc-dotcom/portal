@@ -6,62 +6,46 @@
   <title>コーチ専用｜吉見SMC FC</title>
   <link rel="stylesheet" href="common.css">
   <style>
-    .lock-wrap {
-      max-width: 380px;
-      margin: 0 auto;
-    }
-    .locked-area {
-      background: var(--navy);
-      color: var(--white);
-      border-radius: var(--r16);
-      padding: 32px 24px;
-      text-align: center;
-    }
-    .locked-area .lock-icon { font-size: 2.8rem; margin-bottom: 12px; }
-    .locked-area h2 { font-size: 1.2rem; margin-bottom: 8px; }
-    .locked-area p  { font-size: .85rem; color: var(--gray400); margin-bottom: 20px; }
-    .locked-area .form-control {
-      text-align: center;
-      font-size: 1.2rem;
-      letter-spacing: .2em;
-      background: rgba(255,255,255,.08);
-      border-color: rgba(255,255,255,.22);
-      color: var(--white);
-    }
-    .locked-area .form-control::placeholder { color: var(--gray400); }
-    .locked-area .form-control:focus { border-color: var(--orange); }
-    #lock-msg { min-height: 1.4em; font-size: .85rem; margin-top: 8px; }
-    #coach-content { display: none; }
+    .lock-wrap{max-width:380px;margin:0 auto}
+    .locked-area{background:var(--navy-lt);border:1px solid var(--line-bright);border-radius:var(--r16);padding:32px 24px;text-align:center}
+    .locked-area .lock-icon{font-size:2.6rem;margin-bottom:12px}
+    .locked-area h2{font-size:1.2rem;margin-bottom:8px;color:var(--ink)}
+    .locked-area p{font-size:.82rem;color:var(--ink-muted);margin-bottom:20px}
+    #coach-content{display:none}
+    /* URLカード */
+    .url-list{display:grid;gap:10px}
+    .url-item{background:rgba(255,255,255,.04);border:1px solid var(--line);border-radius:var(--r8);padding:12px 14px;display:flex;align-items:center;gap:10px}
+    .url-item .url-label{font-size:.85rem;font-weight:700;color:var(--ink);flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+    .url-item .url-link{font-size:.75rem;color:var(--orange);text-decoration:underline;word-break:break-all}
+    .url-item .url-actions{display:flex;gap:6px;flex-shrink:0}
+    .icon-btn{background:none;border:none;cursor:pointer;font-size:1rem;padding:4px 6px;border-radius:6px;line-height:1;transition:.15s}
+    .icon-btn:hover{background:rgba(255,255,255,.08)}
+    .url-form{display:grid;grid-template-columns:1fr 1fr auto;gap:8px;align-items:end;margin-bottom:12px}
+    @media(max-width:560px){.url-form{grid-template-columns:1fr}}
+    /* ガイダンス・注意事項 */
+    .notice-edit-area textarea{min-height:72px}
+    .preview-box{background:rgba(255,255,255,.04);border:1px solid var(--line);border-radius:var(--r8);padding:12px;font-size:.86rem;line-height:1.65;min-height:44px;color:var(--ink-muted);white-space:pre-wrap;word-break:break-word}
+    .preview-box.has-content{color:var(--ink)}
   </style>
 </head>
 <body>
-
 <header class="site-header">
   <div class="header-inner">
-    <a class="header-logo" href="index.html">
-      <div class="logo-mark">⚽</div>
-      <div>
-        <span>吉見SMC FC</span>
-        <span class="logo-sub">スマートポータル</span>
-      </div>
-    </a>
+    <a class="header-logo" href="index.html"><div class="logo-mark">⚽</div>
+      <div><span>吉見SMC FC</span><span class="logo-sub">スマートポータル</span></div></a>
     <nav class="header-nav">
-      <a href="index.html">ホーム</a>
-      <a href="heat.html">熱中症</a>
-      <a href="calendar.html">予定</a>
-      <a href="coach.html" class="active">コーチ専用</a>
+      <a href="index.html">ホーム</a><a href="heat.html">熱中症</a>
+      <a href="calendar.html">予定</a><a href="coach.html" class="active">コーチ専用</a>
     </nav>
   </div>
 </header>
-
 <main class="page-wrap">
+  <a class="back-btn" href="index.html">ホームに戻る</a>
 
   <div class="hero-band">
     <div class="hero-emoji">🔒</div>
-    <div>
-      <div class="hero-title">コーチ専用エリア</div>
-      <div class="hero-sub">練習メニュー・会議資料・学年別ファイルの入口です。</div>
-    </div>
+    <div><div class="hero-title">コーチ専用エリア</div>
+      <div class="hero-sub">練習メニュー・会議資料・ガイダンス設定</div></div>
   </div>
 
   <!-- ロック画面 -->
@@ -72,140 +56,122 @@
       <p>コーチ専用エリアにアクセスするには<br>管理者から配布されたパスコードが必要です。</p>
       <form id="lock-form">
         <div class="form-group">
-          <input class="form-control" id="passcode" type="password"
-                 inputmode="numeric" placeholder="パスコード" autocomplete="off">
+          <input class="form-control" id="passcode" type="password" inputmode="numeric" placeholder="パスコード" autocomplete="off" style="text-align:center;font-size:1.2rem;letter-spacing:.2em">
         </div>
         <button class="btn btn-primary btn-lg" type="submit" style="width:100%">解除する</button>
-        <p id="lock-msg" style="color:var(--gray400)">デモ用パスコード: 2026</p>
+        <p id="lock-msg" style="color:var(--ink-muted);font-size:.82rem;margin-top:10px;min-height:1.4em">デモ用パスコード: 2026</p>
       </form>
     </div>
   </div>
 
   <!-- 解除後コンテンツ -->
   <div id="coach-content">
-    <div class="notice-bar green">
-      ✅ コーチ専用エリアへようこそ。内容は関係者以外に共有しないでください。
-    </div>
+    <div class="notice-bar green">✅ コーチ専用エリアへようこそ。内容は関係者以外に共有しないでください。</div>
 
     <div class="tab-list" role="tablist">
-      <button class="tab-btn active" data-tab="menu">練習メニュー</button>
-      <button class="tab-btn" data-tab="meeting" id="meeting">会議資料</button>
+      <button class="tab-btn active" data-tab="notice-edit">📢 ガイダンス設定</button>
+      <button class="tab-btn" data-tab="menu">練習メニュー</button>
+      <button class="tab-btn" data-tab="meeting">会議資料</button>
       <button class="tab-btn" data-tab="files">学年別ファイル</button>
     </div>
 
-    <div class="tab-content active" id="tab-menu">
+    <!-- ガイダンス設定タブ -->
+    <div class="tab-content active" id="tab-notice-edit">
       <div class="panel">
-        <div class="panel-title">練習メニュー</div>
-        <p style="color:var(--gray600);margin-bottom:16px">
-          学年・テーマ別の練習メニューを管理します。ファイルのリンクをここに追加してください。
-        </p>
-        <div class="card-grid col2">
-          <a class="menu-card" href="#">
-            <div class="card-icon">⚽</div>
-            <div class="card-label">低学年（1〜2年）</div>
-            <div class="card-desc">練習メニュー一覧</div>
-          </a>
-          <a class="menu-card" href="#">
-            <div class="card-icon">⚽</div>
-            <div class="card-label">中学年（3〜4年）</div>
-            <div class="card-desc">練習メニュー一覧</div>
-          </a>
-          <a class="menu-card" href="#">
-            <div class="card-icon">⚽</div>
-            <div class="card-label">高学年（5〜6年）</div>
-            <div class="card-desc">練習メニュー一覧</div>
-          </a>
-          <a class="menu-card" href="#">
-            <div class="card-icon">📋</div>
-            <div class="card-label">戦術メモ</div>
-            <div class="card-desc">フォーメーション・特記事項</div>
-          </a>
+        <div class="panel-title">📢 ガイダンス（ホーム画面上部に表示）</div>
+        <div class="notice-edit-area">
+          <div class="form-group">
+            <label class="form-label">内容（練習場所・持ち物・連絡事項など）</label>
+            <textarea class="form-control" id="guidance-input" placeholder="例: 6月29日（日）4年生TM｜8:00 平方スポーツ広場集合｜水筒2本・帽子必須"></textarea>
+          </div>
+          <div style="display:flex;gap:8px;margin-bottom:14px">
+            <button class="btn btn-primary" onclick="saveNotice('guidance')">💾 保存して表示</button>
+            <button class="btn btn-outline btn-sm" onclick="clearNotice('guidance')">🗑 クリア</button>
+          </div>
+          <div class="form-label" style="margin-bottom:6px">プレビュー</div>
+          <div class="dynamic-notice guidance" style="display:flex">
+            <span class="notice-label">📢 お知らせ</span>
+            <span id="guidance-preview" class="preview-box has-content" style="background:none;border:none;padding:0;flex:1">（未設定）</span>
+          </div>
+        </div>
+      </div>
+
+      <div class="panel">
+        <div class="panel-title">⚠️ 注意事項（ホーム画面上部に表示）</div>
+        <div class="notice-edit-area">
+          <div class="form-group">
+            <label class="form-label">内容（熱中症・天気・持病・その他注意事項）</label>
+            <textarea class="form-control" id="warning-input" placeholder="例: 本日は気温35℃以上の予報です。水筒は2本以上持参し、こまめに補給してください。"></textarea>
+          </div>
+          <div style="display:flex;gap:8px;margin-bottom:14px">
+            <button class="btn btn-red" onclick="saveNotice('warning')">💾 保存して表示</button>
+            <button class="btn btn-outline btn-sm" onclick="clearNotice('warning')">🗑 クリア</button>
+          </div>
+          <div class="form-label" style="margin-bottom:6px">プレビュー</div>
+          <div class="dynamic-notice warning" style="display:flex">
+            <span class="notice-label">⚠️ 注意</span>
+            <span id="warning-preview" class="preview-box has-content" style="background:none;border:none;padding:0;flex:1">（未設定）</span>
+          </div>
         </div>
       </div>
     </div>
 
+    <!-- 練習メニュータブ -->
+    <div class="tab-content" id="tab-menu">
+      <div class="panel">
+        <div class="panel-title">URLを追加</div>
+        <div class="url-form">
+          <div class="form-group" style="margin:0">
+            <label class="form-label">ラベル（表示名）</label>
+            <input class="form-control" id="url-label" placeholder="例: 4年生 6月パス練習">
+          </div>
+          <div class="form-group" style="margin:0">
+            <label class="form-label">URL</label>
+            <input class="form-control" id="url-href" type="url" placeholder="https://...">
+          </div>
+          <button class="btn btn-primary" onclick="addUrl()" style="height:42px">＋追加</button>
+        </div>
+      </div>
+      <div class="panel">
+        <div class="panel-title">練習メニュー一覧</div>
+        <div class="url-list" id="url-list">
+          <p style="color:var(--ink-muted);font-size:.85rem;text-align:center;padding:16px">URLを追加すると、ここに表示されます。</p>
+        </div>
+      </div>
+    </div>
+
+    <!-- 会議資料タブ -->
     <div class="tab-content" id="tab-meeting">
       <div class="panel">
         <div class="panel-title">コーチ会議資料</div>
-        <p style="color:var(--gray600);margin-bottom:16px">
-          議案書・活動報告・議事録を保管します。
-        </p>
         <table class="data-table">
-          <thead>
-            <tr><th>日付</th><th>タイトル</th><th>種別</th><th>ファイル</th></tr>
-          </thead>
+          <thead><tr><th>日付</th><th>タイトル</th><th>種別</th><th>ファイル</th></tr></thead>
           <tbody>
-            <tr>
-              <td>2026/06</td>
-              <td>6月コーチ会議 議案書</td>
-              <td><span class="badge badge-blue">議案</span></td>
-              <td><a href="#" style="color:var(--orange);font-weight:700">開く</a></td>
-            </tr>
-            <tr>
-              <td>2026/05</td>
-              <td>5月コーチ会議 議事録</td>
-              <td><span class="badge badge-gray">議事録</span></td>
-              <td><a href="#" style="color:var(--orange);font-weight:700">開く</a></td>
-            </tr>
+            <tr><td>2026/06</td><td>6月コーチ会議 議案書</td><td><span class="badge badge-blue">議案</span></td><td><span style="color:var(--ink-muted);font-size:.78rem">準備中</span></td></tr>
+            <tr><td>2026/05</td><td>5月コーチ会議 議事録</td><td><span class="badge badge-gray">議事録</span></td><td><span style="color:var(--ink-muted);font-size:.78rem">準備中</span></td></tr>
           </tbody>
         </table>
       </div>
     </div>
 
+    <!-- 学年別ファイルタブ -->
     <div class="tab-content" id="tab-files">
       <div class="panel">
         <div class="panel-title">学年別ファイル</div>
-        <p style="color:var(--gray600);margin-bottom:16px">
-          名簿・試合記録・成長記録などを学年ごとに管理します。
-        </p>
         <div class="card-grid col3">
-          <a class="menu-card" href="#">
-            <div class="card-icon">📂</div>
-            <div class="card-label">1年生</div>
-            <div class="card-desc">名簿・練習記録</div>
-          </a>
-          <a class="menu-card" href="#">
-            <div class="card-icon">📂</div>
-            <div class="card-label">2年生</div>
-            <div class="card-desc">名簿・練習記録</div>
-          </a>
-          <a class="menu-card" href="#">
-            <div class="card-icon">📂</div>
-            <div class="card-label">3年生</div>
-            <div class="card-desc">名簿・練習記録</div>
-          </a>
-          <a class="menu-card" href="#">
-            <div class="card-icon">📂</div>
-            <div class="card-label">4年生</div>
-            <div class="card-desc">名簿・練習記録</div>
-          </a>
-          <a class="menu-card" href="#">
-            <div class="card-icon">📂</div>
-            <div class="card-label">5年生</div>
-            <div class="card-desc">名簿・練習記録</div>
-          </a>
-          <a class="menu-card" href="#">
-            <div class="card-icon">📂</div>
-            <div class="card-label">6年生</div>
-            <div class="card-desc">名簿・練習記録</div>
-          </a>
+          <a class="menu-card" href="members.html"><div class="card-icon">📂</div><div class="card-label">団員名簿</div><div class="card-desc">全学年一覧</div></a>
+          <div class="menu-card" style="opacity:.5"><div class="card-icon">📂</div><div class="card-label">試合記録</div><div class="card-desc">準備中</div></div>
+          <div class="menu-card" style="opacity:.5"><div class="card-icon">📂</div><div class="card-label">成長記録</div><div class="card-desc">準備中</div></div>
         </div>
       </div>
     </div>
-  </div><!-- /coach-content -->
-
+  </div>
 </main>
-
-<footer class="site-footer">
-  吉見SMCサッカースポーツ少年団｜スマートポータル
-</footer>
+<footer class="site-footer">吉見SMCサッカースポーツ少年団｜スマートポータル</footer>
 
 <script>
-// =====================================================
-// パスコード（変更する場合はここだけ）
-// ⚠️ JSソースから確認できます。機密情報の保管には使わないこと。
-// =====================================================
 const PASSCODE = "2026";
+const URL_KEY  = "smc_menu_urls_v1";
 
 document.getElementById("lock-form").addEventListener("submit", e => {
   e.preventDefault();
@@ -214,10 +180,9 @@ document.getElementById("lock-form").addEventListener("submit", e => {
   if (val === PASSCODE) {
     document.getElementById("lock-screen").style.display = "none";
     document.getElementById("coach-content").style.display = "block";
-    // URLハッシュでタブ直リンク対応
-    if (location.hash === "#meeting") {
-      document.querySelector('[data-tab="meeting"]').click();
-    }
+    loadNoticeInputs();
+    renderUrls();
+    if (location.hash === "#meeting") document.querySelector('[data-tab="meeting"]').click();
     return;
   }
   msg.textContent = "パスコードが違います。管理者に確認してください。";
@@ -225,20 +190,84 @@ document.getElementById("lock-form").addEventListener("submit", e => {
   document.getElementById("passcode").value = "";
 });
 
-// タブ切り替え
+// タブ
 document.querySelectorAll(".tab-btn").forEach(btn => {
   btn.addEventListener("click", () => {
-    const target = btn.dataset.tab;
-    document.querySelectorAll(".tab-btn").forEach(b => {
-      b.classList.toggle("active", b === btn);
-      b.setAttribute("aria-selected", String(b === btn));
-    });
-    document.querySelectorAll(".tab-content").forEach(p => {
-      p.classList.toggle("active", p.id === "tab-" + target);
-    });
+    const t = btn.dataset.tab;
+    document.querySelectorAll(".tab-btn").forEach(b => { b.classList.toggle("active", b===btn); b.setAttribute("aria-selected", String(b===btn)); });
+    document.querySelectorAll(".tab-content").forEach(p => { p.classList.toggle("active", p.id==="tab-"+t); });
   });
 });
-</script>
 
-</body>
-</html>
+// ガイダンス・注意事項
+function loadNoticeInputs() {
+  const g = localStorage.getItem("smc_guidance") || "";
+  const w = localStorage.getItem("smc_warning")  || "";
+  document.getElementById("guidance-input").value = g;
+  document.getElementById("warning-input").value  = w;
+  document.getElementById("guidance-preview").textContent = g || "（未設定）";
+  document.getElementById("warning-preview").textContent  = w || "（未設定）";
+}
+function saveNotice(type) {
+  const key = type==="guidance" ? "smc_guidance" : "smc_warning";
+  const val = document.getElementById(type+"-input").value.trim();
+  if (val) localStorage.setItem(key, val);
+  else localStorage.removeItem(key);
+  document.getElementById(type+"-preview").textContent = val || "（未設定）";
+  showSaveFlash(type==="guidance" ? "ガイダンスを保存しました" : "注意事項を保存しました");
+}
+function clearNotice(type) {
+  const key = type==="guidance" ? "smc_guidance" : "smc_warning";
+  localStorage.removeItem(key);
+  document.getElementById(type+"-input").value = "";
+  document.getElementById(type+"-preview").textContent = "（未設定）";
+}
+function showSaveFlash(msg) {
+  const el = document.createElement("div");
+  el.style.cssText = "position:fixed;bottom:24px;right:20px;background:var(--green);color:white;padding:10px 18px;border-radius:8px;font-weight:700;font-size:.85rem;z-index:999;box-shadow:0 4px 16px rgba(0,0,0,.4)";
+  el.textContent = "✅ " + msg;
+  document.body.appendChild(el);
+  setTimeout(() => el.remove(), 2500);
+}
+
+// URL管理
+function loadUrls() { try { return JSON.parse(localStorage.getItem(URL_KEY)) || []; } catch { return []; } }
+function saveUrls(data) { localStorage.setItem(URL_KEY, JSON.stringify(data)); }
+function addUrl() {
+  const label = document.getElementById("url-label").value.trim();
+  const href  = document.getElementById("url-href").value.trim();
+  if (!label) { alert("ラベルを入力してください"); return; }
+  if (!href || !href.startsWith("http")) { alert("URLを正しく入力してください（https://...）"); return; }
+  const data = loadUrls();
+  data.push({ id: Date.now(), label, href });
+  saveUrls(data);
+  document.getElementById("url-label").value = "";
+  document.getElementById("url-href").value  = "";
+  renderUrls();
+}
+function deleteUrl(id) {
+  if (!confirm("このURLを削除しますか？")) return;
+  saveUrls(loadUrls().filter(u => u.id !== id));
+  renderUrls();
+}
+function renderUrls() {
+  const list = document.getElementById("url-list");
+  const data = loadUrls();
+  if (!data.length) {
+    list.innerHTML = '<p style="color:var(--ink-muted);font-size:.85rem;text-align:center;padding:16px">URLを追加すると、ここに表示されます。</p>';
+    return;
+  }
+  list.innerHTML = data.map(u => `
+    <div class="url-item">
+      <div style="flex:1;min-width:0">
+        <div class="url-label">${u.label}</div>
+        <a class="url-link" href="${u.href}" target="_blank" rel="noopener">${u.href}</a>
+      </div>
+      <div class="url-actions">
+        <a class="icon-btn" href="${u.href}" target="_blank" rel="noopener" title="開く">🔗</a>
+        <button class="icon-btn" onclick="deleteUrl(${u.id})" title="削除">🗑</button>
+      </div>
+    </div>`).join("");
+}
+</script>
+</body></html>
