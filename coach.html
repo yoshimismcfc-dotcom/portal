@@ -7,34 +7,56 @@
   <link rel="stylesheet" href="common.css">
   <style>
     .lock-wrap{max-width:380px;margin:0 auto}
-    .locked-area{background:var(--navy-lt);border:1px solid var(--line-bright);border-radius:var(--r16);padding:32px 24px;text-align:center}
-    .locked-area .lock-icon{font-size:2.6rem;margin-bottom:12px}
+    .locked-area{background:var(--surface-lt);border:1px solid var(--line-2);border-radius:var(--r16);padding:32px 24px;text-align:center}
     .locked-area h2{font-size:1.2rem;margin-bottom:8px;color:var(--ink)}
-    .locked-area p{font-size:.82rem;color:var(--ink-muted);margin-bottom:20px}
+    .locked-area p{font-size:.82rem;color:var(--ink-3);margin-bottom:20px}
     #coach-content{display:none}
-    .url-list{display:grid;gap:10px}
-    .url-item{background:rgba(255,255,255,.04);border:1px solid var(--line);border-radius:var(--r8);padding:12px 14px;display:flex;align-items:center;gap:10px}
-    .url-item .url-label{font-size:.85rem;font-weight:700;color:var(--ink);flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
-    .url-item .url-link{font-size:.75rem;color:var(--orange);text-decoration:underline;word-break:break-all}
-    .url-item .url-actions{display:flex;gap:6px;flex-shrink:0}
-    .icon-btn{background:none;border:none;cursor:pointer;font-size:1rem;padding:4px 6px;border-radius:6px;line-height:1;transition:.15s}
-    .icon-btn:hover{background:rgba(255,255,255,.08)}
-    .url-form{display:grid;grid-template-columns:1fr 1fr auto;gap:8px;align-items:end;margin-bottom:12px}
-    @media(max-width:560px){.url-form{grid-template-columns:1fr}}
-    .notice-edit-area textarea{min-height:72px}
-    .preview-box{font-size:.86rem;line-height:1.65;min-height:44px;color:var(--ink-muted);white-space:pre-wrap;word-break:break-word}
-    .preview-box.has-content{color:var(--ink)}
-    .drive-link-card{background:rgba(59,130,246,.1);border:1px solid rgba(59,130,246,.35);border-radius:var(--r12);padding:20px;display:flex;align-items:center;gap:16px;margin-bottom:16px}
-    .drive-link-card .drive-icon{font-size:2.2rem;flex-shrink:0}
-    .drive-link-card .drive-info strong{display:block;font-size:1rem;color:var(--ink);margin-bottom:4px}
-    .drive-link-card .drive-info p{font-size:.82rem;color:var(--ink-muted);margin:0 0 10px}
+    /* ボタングリッド */
+    .coach-btn-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:12px;margin-bottom:24px}
+    .coach-btn{
+      background:var(--surface-lt);border:1px solid var(--line-2);
+      border-radius:var(--r12);padding:18px 14px;
+      display:flex;flex-direction:column;align-items:flex-start;gap:6px;
+      cursor:pointer;text-decoration:none;color:inherit;
+      transition:all .18s;position:relative;overflow:hidden;
+    }
+    .coach-btn::before{content:"";position:absolute;top:0;left:0;width:3px;height:100%;background:var(--orange);border-radius:3px 0 0 3px}
+    .coach-btn:hover{border-color:var(--orange);background:rgba(255,107,43,.08);transform:translateY(-2px);box-shadow:var(--shadow)}
+    .coach-btn.cyan::before{background:var(--cyan)}
+    .coach-btn.cyan:hover{border-color:var(--cyan);background:rgba(0,212,255,.07)}
+    .coach-btn.green::before{background:var(--green)}
+    .coach-btn.green:hover{border-color:var(--green);background:rgba(0,255,136,.06)}
+    .coach-btn .cb-icon{font-size:1.5rem}
+    .coach-btn .cb-label{font-size:.92rem;font-weight:900;color:#fff}
+    .coach-btn .cb-desc{font-size:.72rem;color:var(--ink-3);line-height:1.4}
+    .coach-btn .cb-badge{position:absolute;top:10px;right:10px;font-size:.6rem;font-weight:900;padding:2px 7px;border-radius:99px;background:rgba(255,107,43,.2);color:var(--orange);border:1px solid rgba(255,107,43,.3)}
+    @media(max-width:480px){.coach-btn-grid{grid-template-columns:1fr}}
+    /* URL管理 */
+    .url-list{display:grid;gap:8px}
+    .url-item{background:rgba(255,255,255,.04);border:1px solid var(--line);border-radius:var(--r8);padding:11px 13px;display:flex;align-items:center;gap:10px}
+    .url-label{font-size:.85rem;font-weight:700;color:#fff;flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+    .url-link{font-size:.72rem;color:var(--orange);text-decoration:underline;word-break:break-all}
+    .url-actions{display:flex;gap:5px;flex-shrink:0}
+    .icon-btn{background:none;border:none;cursor:pointer;font-size:.95rem;padding:4px 6px;border-radius:5px;transition:.15s;color:var(--ink-3)}
+    .icon-btn:hover{background:rgba(255,255,255,.08);color:#fff}
+    .url-form{display:grid;grid-template-columns:1fr 1fr auto;gap:8px;align-items:end}
+    @media(max-width:520px){.url-form{grid-template-columns:1fr}}
+    /* ガイダンス */
+    .preview-box{font-size:.86rem;line-height:1.65;min-height:36px;color:var(--ink-3);white-space:pre-wrap;word-break:break-word;padding:6px 0}
+    /* Drive */
+    .drive-card{background:rgba(68,136,255,.1);border:1px solid rgba(68,136,255,.35);border-radius:var(--r12);padding:18px;display:flex;align-items:center;gap:14px;margin-bottom:14px}
+    .drive-card .di{font-size:2rem;flex-shrink:0}
+    .drive-card strong{display:block;color:#fff;margin-bottom:3px}
+    .drive-card p{font-size:.82rem;color:var(--ink-3);margin:0 0 10px}
   </style>
 </head>
 <body>
 <header class="site-header">
   <div class="header-inner">
-    <a class="header-logo" href="index.html"><div class="logo-mark">⚽</div>
-      <div><span class="logo-name">吉見SMC FC</span><span class="logo-sub">SMART PORTAL</span></div></a>
+    <a class="header-logo" href="index.html">
+      <div class="logo-mark">⚽</div>
+      <div><span class="logo-name">吉見SMC FC</span><span class="logo-sub">SMART PORTAL</span></div>
+    </a>
   </div>
 </header>
 <main class="page-wrap">
@@ -48,7 +70,7 @@
   <!-- ロック画面 -->
   <div id="lock-screen" class="lock-wrap">
     <div class="locked-area">
-      <div class="lock-icon">🔐</div>
+      <div style="font-size:2.4rem;margin-bottom:10px">🔐</div>
       <h2>パスコードを入力</h2>
       <p>コーチ専用エリアにアクセスするには<br>管理者から配布されたパスコードが必要です。</p>
       <form id="lock-form">
@@ -56,7 +78,7 @@
           <input class="form-control" id="passcode" type="password" inputmode="numeric" placeholder="パスコード" autocomplete="off" style="text-align:center;font-size:1.2rem;letter-spacing:.2em">
         </div>
         <button class="btn btn-primary btn-lg" type="submit" style="width:100%">解除する</button>
-        <p id="lock-msg" style="color:var(--ink-muted);font-size:.82rem;margin-top:10px;min-height:1.4em">デモ用パスコード: 2026</p>
+        <p id="lock-msg" style="color:var(--ink-3);font-size:.82rem;margin-top:10px;min-height:1.4em">デモ用パスコード: 2026</p>
       </form>
     </div>
   </div>
@@ -65,216 +87,189 @@
   <div id="coach-content">
     <div class="notice-bar green">✅ コーチ専用エリアへようこそ。内容は関係者以外に共有しないでください。</div>
 
-    <div class="tab-list" role="tablist">
-      <button class="tab-btn active" data-tab="notice-edit">📢 ガイダンス設定</button>
-      <button class="tab-btn" data-tab="game-adj">📊 試合調整</button>
-      <button class="tab-btn" data-tab="data-folder">📁 データフォルダ</button>
-      <button class="tab-btn" data-tab="menu">練習メニュー</button>
-      <button class="tab-btn" data-tab="meeting">会議資料</button>
-      <button class="tab-btn" data-tab="new">🆕 新機能</button>
+    <!-- ===== メインボタングリッド ===== -->
+    <div class="section-head"><div class="section-icon">📋</div><h2>メニュー</h2><div class="section-divider"></div></div>
+    <div class="coach-btn-grid">
+      <a class="coach-btn" href="game_adjust.html">
+        <div class="cb-icon">📊</div>
+        <div class="cb-label">試合調整</div>
+        <div class="cb-desc">ふれあいG大会の参加チーム調整表</div>
+      </a>
+      <a class="coach-btn" href="diary.html">
+        <div class="cb-icon">📝</div>
+        <div class="cb-label">練習日誌</div>
+        <div class="cb-desc">練習内容・タグ・検索・CSV出力</div>
+        <span class="cb-badge">NEW</span>
+      </a>
+      <a class="coach-btn cyan" href="uniform.html">
+        <div class="cb-icon">👕</div>
+        <div class="cb-label">ユニフォーム貸出</div>
+        <div class="cb-desc">色別在庫・貸出・返却・履歴管理</div>
+        <span class="cb-badge" style="background:rgba(0,212,255,.2);color:var(--cyan);border-color:rgba(0,212,255,.35)">NEW</span>
+      </a>
+      <a class="coach-btn cyan" href="members.html">
+        <div class="cb-icon">📒</div>
+        <div class="cb-label">団員名簿</div>
+        <div class="cb-desc">学年別・背番号・随時編集</div>
+      </a>
+      <a class="coach-btn green" href="weather.html">
+        <div class="cb-icon">🌤️</div>
+        <div class="cb-label">天気・WBGT予報</div>
+        <div class="cb-desc">8時間予報付き熱中症判定</div>
+      </a>
+      <a class="coach-btn green" href="duty.html">
+        <div class="cb-icon">📋</div>
+        <div class="cb-label">当番表・荷物チェック</div>
+        <div class="cb-desc">当番記録と荷物リスト</div>
+      </a>
     </div>
 
-    <!-- ガイダンス設定 -->
-    <div class="tab-content active" id="tab-notice-edit">
-      <div class="panel">
-        <div class="panel-title">📢 ガイダンス（ホーム画面上部に青帯で表示）</div>
-        <div class="form-group">
-          <label class="form-label">内容（練習場所・持ち物・連絡事項など）</label>
-          <textarea class="form-control" id="guidance-input" placeholder="例: 6月29日（日）4年生TM｜8:00 平方スポーツ広場集合｜水筒2本・帽子必須"></textarea>
-        </div>
-        <div style="display:flex;gap:8px;margin-bottom:14px">
-          <button class="btn btn-primary" onclick="saveNotice('guidance')">💾 保存して表示</button>
-          <button class="btn btn-outline btn-sm" onclick="clearNotice('guidance')">🗑 クリア</button>
-        </div>
-        <div class="form-label" style="margin-bottom:6px">プレビュー</div>
-        <div class="dynamic-notice guidance" style="display:flex">
-          <span class="notice-label">📢 お知らせ</span>
-          <span id="guidance-preview" class="preview-box" style="flex:1">（未設定）</span>
-        </div>
+    <!-- ===== ガイダンス設定 ===== -->
+    <div class="section-head"><div class="section-icon">📢</div><h2>ガイダンス設定</h2><div class="section-divider"></div></div>
+    <div class="panel">
+      <div class="panel-title">📢 ガイダンス（ホーム画面上部に青帯で表示）</div>
+      <div class="form-group">
+        <label class="form-label">内容（練習場所・持ち物・連絡事項）</label>
+        <textarea class="form-control" id="guidance-input" placeholder="例: 6月29日（日）4年生TM｜8:00 平方スポーツ広場集合｜水筒2本・帽子必須"></textarea>
       </div>
-      <div class="panel">
-        <div class="panel-title">⚠️ 注意事項（ホーム画面上部に赤帯で表示）</div>
-        <div class="form-group">
-          <label class="form-label">内容（熱中症・天気・持病・その他注意事項）</label>
-          <textarea class="form-control" id="warning-input" placeholder="例: 本日は気温35℃以上の予報です。水筒は2本以上持参しこまめに補給してください。"></textarea>
-        </div>
-        <div style="display:flex;gap:8px;margin-bottom:14px">
-          <button class="btn btn-red" onclick="saveNotice('warning')">💾 保存して表示</button>
-          <button class="btn btn-outline btn-sm" onclick="clearNotice('warning')">🗑 クリア</button>
-        </div>
-        <div class="form-label" style="margin-bottom:6px">プレビュー</div>
-        <div class="dynamic-notice warning" style="display:flex">
-          <span class="notice-label">⚠️ 注意</span>
-          <span id="warning-preview" class="preview-box" style="flex:1">（未設定）</span>
-        </div>
+      <div style="display:flex;gap:8px;margin-bottom:10px">
+        <button class="btn btn-primary" onclick="saveNotice('guidance')">💾 保存して表示</button>
+        <button class="btn btn-outline btn-sm" onclick="clearNotice('guidance')">🗑 クリア</button>
       </div>
-    </div>
-
-    <!-- 試合調整タブ（iframe埋め込み） -->
-    <div class="tab-content" id="tab-game-adj">
-      <div class="panel" style="padding:0;overflow:hidden">
-        <div style="padding:14px 16px;border-bottom:1px solid var(--line);display:flex;align-items:center;justify-content:space-between;gap:10px">
-          <span style="font-weight:900;color:var(--ink)">📊 ふれあい芝グラウンド 試合調整</span>
-          <a class="btn btn-outline btn-sm" href="game_adjust.html" target="_blank">🔗 全画面で開く</a>
-        </div>
-        <iframe src="game_adjust.html" style="width:100%;height:520px;border:none;display:block"></iframe>
-      </div>
-    </div>
-
-    <!-- データフォルダタブ -->
-    <div class="tab-content" id="tab-data-folder">
-      <div class="drive-link-card">
-        <div class="drive-icon">📁</div>
-        <div class="drive-info">
-          <strong>チームデータフォルダ（Googleドライブ）</strong>
-          <p>試合記録・活動資料・写真などのデータをまとめています。</p>
-          <a class="btn btn-primary" href="https://drive.google.com/drive/folders/1BOinS5PmZgnk7RYlYtLwhEGemDrQIlSJ?usp=sharing" target="_blank" rel="noopener">📁 Googleドライブを開く</a>
-        </div>
-      </div>
-      <div class="panel">
-        <div class="panel-title">フォルダへのクイックリンク</div>
-        <div class="card-grid col3">
-          <a class="menu-card" href="members.html"><div class="card-icon">📒</div><div class="card-label">団員名簿</div><div class="card-desc">全学年・背番号</div></a>
-          <a class="menu-card" href="game_adjust.html"><div class="card-icon">📊</div><div class="card-label">試合調整</div><div class="card-desc">ふれあいG大会</div></a>
-          <a class="menu-card" href="album.html"><div class="card-icon">📸</div><div class="card-label">写真・動画</div><div class="card-desc">アルバム・試合動画</div></a>
-        </div>
+      <div class="form-label">プレビュー</div>
+      <div class="dynamic-notice guidance" style="display:flex;margin-top:6px">
+        <span class="notice-label">📢 INFO</span>
+        <span id="guidance-preview" class="preview-box" style="flex:1">（未設定）</span>
       </div>
     </div>
 
-    <!-- 練習メニュータブ -->
-    <div class="tab-content" id="tab-menu">
-      <div class="panel">
-        <div class="panel-title">URLを追加</div>
-        <div class="url-form">
-          <div class="form-group" style="margin:0">
-            <label class="form-label">ラベル（表示名）</label>
-            <input class="form-control" id="url-label" placeholder="例: 4年生 6月パス練習">
-          </div>
-          <div class="form-group" style="margin:0">
-            <label class="form-label">URL</label>
-            <input class="form-control" id="url-href" type="url" placeholder="https://...">
-          </div>
-          <button class="btn btn-primary" onclick="addUrl()" style="height:42px">＋追加</button>
-        </div>
+    <div class="panel">
+      <div class="panel-title">⚠️ 注意事項（ホーム画面上部に赤帯で表示）</div>
+      <div class="form-group">
+        <label class="form-label">内容（熱中症・天気・その他注意事項）</label>
+        <textarea class="form-control" id="warning-input" placeholder="例: 本日は気温35℃以上の予報です。水筒は2本以上持参してください。"></textarea>
       </div>
-      <div class="panel">
-        <div class="panel-title">練習メニュー一覧</div>
-        <div class="url-list" id="url-list">
-          <p style="color:var(--ink-muted);font-size:.85rem;text-align:center;padding:16px">URLを追加すると、ここに表示されます。</p>
-        </div>
+      <div style="display:flex;gap:8px;margin-bottom:10px">
+        <button class="btn btn-red" onclick="saveNotice('warning')">💾 保存して表示</button>
+        <button class="btn btn-outline btn-sm" onclick="clearNotice('warning')">🗑 クリア</button>
+      </div>
+      <div class="form-label">プレビュー</div>
+      <div class="dynamic-notice warning" style="display:flex;margin-top:6px">
+        <span class="notice-label">⚠️ ALERT</span>
+        <span id="warning-preview" class="preview-box" style="flex:1">（未設定）</span>
       </div>
     </div>
 
-    <!-- 会議資料タブ -->
-    <div class="tab-content" id="tab-meeting">
-      <div class="panel">
-        <div class="panel-title">コーチ会議資料</div>
-        <table class="data-table">
-          <thead><tr><th>日付</th><th>タイトル</th><th>種別</th><th>ファイル</th></tr></thead>
-          <tbody>
-            <tr><td>2026/06</td><td>6月コーチ会議 議案書</td><td><span class="badge badge-blue">議案</span></td><td><span style="color:var(--ink-muted);font-size:.78rem">準備中</span></td></tr>
-            <tr><td>2026/05</td><td>5月コーチ会議 議事録</td><td><span class="badge badge-gray">議事録</span></td><td><span style="color:var(--ink-muted);font-size:.78rem">準備中</span></td></tr>
-          </tbody>
-        </table>
+    <!-- ===== 練習メニューURL ===== -->
+    <div class="section-head"><div class="section-icon">🔗</div><h2>練習メニューURL</h2><div class="section-divider"></div></div>
+    <div class="panel">
+      <div class="url-form" style="margin-bottom:12px">
+        <div class="form-group" style="margin:0">
+          <label class="form-label">ラベル</label>
+          <input class="form-control" id="url-label" placeholder="例: 4年生 パス練習">
+        </div>
+        <div class="form-group" style="margin:0">
+          <label class="form-label">URL</label>
+          <input class="form-control" id="url-href" type="url" placeholder="https://...">
+        </div>
+        <button class="btn btn-primary btn-sm" onclick="addUrl()" style="height:42px">＋追加</button>
       </div>
+      <div class="url-list" id="url-list">
+        <p style="color:var(--ink-3);font-size:.85rem;text-align:center;padding:12px">URLを追加するとここに表示されます。</p>
+      </div>
+    </div>
+
+    <!-- ===== データフォルダ ===== -->
+    <div class="section-head"><div class="section-icon">📁</div><h2>データフォルダ</h2><div class="section-divider"></div></div>
+    <div class="drive-card">
+      <div class="di">📁</div>
+      <div>
+        <strong>チームデータフォルダ（Googleドライブ）</strong>
+        <p>試合記録・活動資料・写真などのデータをまとめています。</p>
+        <a class="btn btn-primary btn-sm" href="https://drive.google.com/drive/folders/1BOinS5PmZgnk7RYlYtLwhEGemDrQIlSJ?usp=sharing" target="_blank" rel="noopener">📁 Googleドライブを開く</a>
+      </div>
+    </div>
+
+    <!-- ===== 会議資料 ===== -->
+    <div class="section-head"><div class="section-icon">📄</div><h2>会議資料</h2><div class="section-divider"></div></div>
+    <div class="panel">
+      <table class="data-table">
+        <thead><tr><th>日付</th><th>タイトル</th><th>種別</th><th>ファイル</th></tr></thead>
+        <tbody>
+          <tr><td>2026/06</td><td>6月コーチ会議 議案書</td><td><span class="badge badge-blue">議案</span></td><td><span style="color:var(--ink-3);font-size:.78rem">準備中</span></td></tr>
+          <tr><td>2026/05</td><td>5月コーチ会議 議事録</td><td><span class="badge badge-gray">議事録</span></td><td><span style="color:var(--ink-3);font-size:.78rem">準備中</span></td></tr>
+        </tbody>
+      </table>
     </div>
   </div>
 </main>
-<footer class="site-footer">吉見SMCサッカースポーツ少年団｜スマートポータル</footer>
-
+<footer class="site-footer">YOSHIMI SMC FC — SMART PORTAL</footer>
 <script>
-const PASSCODE = "2026";
-const URL_KEY  = "smc_menu_urls_v1";
-
-document.getElementById("lock-form").addEventListener("submit", e => {
+var PASSCODE="2026";
+var URL_KEY="smc_menu_urls_v1";
+document.getElementById("lock-form").addEventListener("submit",function(e){
   e.preventDefault();
-  const val = document.getElementById("passcode").value.trim();
-  const msg = document.getElementById("lock-msg");
-  if (val === PASSCODE) {
-    document.getElementById("lock-screen").style.display = "none";
-    document.getElementById("coach-content").style.display = "block";
-    loadNoticeInputs(); renderUrls();
-    if (location.hash === "#meeting") document.querySelector('[data-tab="meeting"]').click();
-    if (location.hash === "#game-adj") document.querySelector('[data-tab="game-adj"]').click();
-    return;
+  var val=document.getElementById("passcode").value.trim();
+  var msg=document.getElementById("lock-msg");
+  if(val===PASSCODE){
+    document.getElementById("lock-screen").style.display="none";
+    document.getElementById("coach-content").style.display="block";
+    loadNoticeInputs();renderUrls();return;
   }
-  msg.textContent = "パスコードが違います。管理者に確認してください。";
-  msg.style.color = "var(--red)";
-  document.getElementById("passcode").value = "";
+  msg.textContent="パスコードが違います。";msg.style.color="var(--red)";
+  document.getElementById("passcode").value="";
 });
-
-document.querySelectorAll(".tab-btn").forEach(btn => {
-  btn.addEventListener("click", () => {
-    const t = btn.dataset.tab;
-    document.querySelectorAll(".tab-btn").forEach(b => { b.classList.toggle("active", b===btn); b.setAttribute("aria-selected", String(b===btn)); });
-    document.querySelectorAll(".tab-content").forEach(p => { p.classList.toggle("active", p.id==="tab-"+t); });
-  });
-});
-
-function loadNoticeInputs() {
-  const g = localStorage.getItem("smc_guidance") || "";
-  const w = localStorage.getItem("smc_warning")  || "";
-  document.getElementById("guidance-input").value = g;
-  document.getElementById("warning-input").value  = w;
-  document.getElementById("guidance-preview").textContent = g || "（未設定）";
-  document.getElementById("warning-preview").textContent  = w || "（未設定）";
+function loadNoticeInputs(){
+  var g=localStorage.getItem("smc_guidance")||"";
+  var w=localStorage.getItem("smc_warning")||"";
+  document.getElementById("guidance-input").value=g;
+  document.getElementById("warning-input").value=w;
+  document.getElementById("guidance-preview").textContent=g||"（未設定）";
+  document.getElementById("warning-preview").textContent=w||"（未設定）";
 }
-function saveNotice(type) {
-  const key = type==="guidance" ? "smc_guidance" : "smc_warning";
-  const val = document.getElementById(type+"-input").value.trim();
-  if (val) localStorage.setItem(key, val); else localStorage.removeItem(key);
-  document.getElementById(type+"-preview").textContent = val || "（未設定）";
-  showFlash(type==="guidance" ? "ガイダンスを保存しました" : "注意事項を保存しました");
+function saveNotice(type){
+  var key=type==="guidance"?"smc_guidance":"smc_warning";
+  var val=document.getElementById(type+"-input").value.trim();
+  if(val)localStorage.setItem(key,val);else localStorage.removeItem(key);
+  document.getElementById(type+"-preview").textContent=val||"（未設定）";
+  showFlash(type==="guidance"?"ガイダンスを保存しました":"注意事項を保存しました");
 }
-function clearNotice(type) {
-  localStorage.removeItem(type==="guidance" ? "smc_guidance" : "smc_warning");
-  document.getElementById(type+"-input").value = "";
-  document.getElementById(type+"-preview").textContent = "（未設定）";
+function clearNotice(type){
+  localStorage.removeItem(type==="guidance"?"smc_guidance":"smc_warning");
+  document.getElementById(type+"-input").value="";
+  document.getElementById(type+"-preview").textContent="（未設定）";
 }
-function showFlash(msg) {
-  const el = document.createElement("div");
-  el.style.cssText = "position:fixed;bottom:24px;right:20px;background:var(--green);color:white;padding:10px 18px;border-radius:8px;font-weight:700;font-size:.85rem;z-index:999;box-shadow:0 4px 16px rgba(0,0,0,.4)";
-  el.textContent = "✅ " + msg;
-  document.body.appendChild(el);
-  setTimeout(() => el.remove(), 2500);
+function showFlash(msg){
+  var el=document.createElement("div");
+  el.style.cssText="position:fixed;bottom:24px;right:20px;background:var(--green);color:#000;padding:10px 18px;border-radius:8px;font-weight:700;font-size:.85rem;z-index:999;box-shadow:0 4px 16px rgba(0,0,0,.4)";
+  el.textContent="✅ "+msg;document.body.appendChild(el);setTimeout(function(){el.remove();},2500);
 }
-
-function loadUrls() { try { return JSON.parse(localStorage.getItem(URL_KEY)) || []; } catch { return []; } }
-function saveUrls(d) { localStorage.setItem(URL_KEY, JSON.stringify(d)); }
-function addUrl() {
-  const label = document.getElementById("url-label").value.trim();
-  const href  = document.getElementById("url-href").value.trim();
-  if (!label) { alert("ラベルを入力してください"); return; }
-  if (!href || !href.startsWith("http")) { alert("URLを正しく入力してください"); return; }
-  const data = loadUrls();
-  data.push({ id: Date.now(), label, href });
-  saveUrls(data);
-  document.getElementById("url-label").value = "";
-  document.getElementById("url-href").value  = "";
-  renderUrls();
+function loadUrls(){try{return JSON.parse(localStorage.getItem(URL_KEY))||[];}catch(e){return[];}}
+function saveUrls(d){localStorage.setItem(URL_KEY,JSON.stringify(d));}
+function addUrl(){
+  var label=document.getElementById("url-label").value.trim();
+  var href=document.getElementById("url-href").value.trim();
+  if(!label){alert("ラベルを入力してください");return;}
+  if(!href||!href.startsWith("http")){alert("URLを正しく入力してください");return;}
+  var data=loadUrls();data.push({id:Date.now(),label:label,href:href});
+  saveUrls(data);document.getElementById("url-label").value="";document.getElementById("url-href").value="";renderUrls();
 }
-function deleteUrl(id) {
-  if (!confirm("このURLを削除しますか？")) return;
-  saveUrls(loadUrls().filter(u => u.id !== id)); renderUrls();
+function deleteUrl(id){
+  if(!confirm("このURLを削除しますか？"))return;
+  saveUrls(loadUrls().filter(function(u){return u.id!==id;}));renderUrls();
 }
-function renderUrls() {
-  const list = document.getElementById("url-list");
-  const data = loadUrls();
-  if (!data.length) {
-    list.innerHTML = '<p style="color:var(--ink-muted);font-size:.85rem;text-align:center;padding:16px">URLを追加すると、ここに表示されます。</p>';
-    return;
-  }
-  list.innerHTML = data.map(u => `
-    <div class="url-item">
-      <div style="flex:1;min-width:0">
-        <div class="url-label">${u.label}</div>
-        <a class="url-link" href="${u.href}" target="_blank" rel="noopener">${u.href}</a>
-      </div>
-      <div class="url-actions">
-        <a class="icon-btn" href="${u.href}" target="_blank" rel="noopener" title="開く">🔗</a>
-        <button class="icon-btn" onclick="deleteUrl(${u.id})" title="削除">🗑</button>
-      </div>
-    </div>`).join("");
+function renderUrls(){
+  var list=document.getElementById("url-list");
+  var data=loadUrls();
+  if(!data.length){list.innerHTML='<p style="color:var(--ink-3);font-size:.85rem;text-align:center;padding:12px">URLを追加するとここに表示されます。</p>';return;}
+  list.innerHTML=data.map(function(u){
+    return '<div class="url-item"><div style="flex:1;min-width:0"><div class="url-label">'+u.label+'</div>'
+      +'<a class="url-link" href="'+u.href+'" target="_blank" rel="noopener">'+u.href+'</a></div>'
+      +'<div class="url-actions">'
+      +'<a class="icon-btn" href="'+u.href+'" target="_blank" rel="noopener" title="開く">🔗</a>'
+      +'<button class="icon-btn" onclick="deleteUrl('+u.id+')" title="削除">🗑</button>'
+      +'</div></div>';
+  }).join("");
 }
 </script>
 </body></html>

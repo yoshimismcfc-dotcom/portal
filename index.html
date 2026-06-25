@@ -66,8 +66,16 @@
 </header>
 <main class="page-wrap">
   <!-- PWAインストール案内 -->
-  <div id="pwa-banner" class="notice-bar blue" style="display:none;cursor:pointer" onclick="installPWA()">
-    📱 このアプリをホーム画面に追加できます → <strong>タップして追加</strong>
+  <div id="pwa-banner" class="notice-bar blue" style="display:none;cursor:pointer;flex-direction:column;gap:6px" onclick="installPWA()">
+    <div style="display:flex;align-items:center;gap:8px;font-weight:900;font-size:.9rem">
+      📱 <span>このアプリをホーム画面に追加できます</span>
+    </div>
+    <div style="font-size:.78rem;opacity:.85;line-height:1.6">
+      ① 下の「<strong>追加</strong>」ボタンをタップ<br>
+      ② 「ホーム画面に追加」を選択<br>
+      ③ アプリアイコンから起動できます（オフラインでも使えます）
+    </div>
+    <button class="btn btn-primary btn-sm" style="align-self:flex-start;margin-top:2px" onclick="event.stopPropagation();installPWA()">📲 ホーム画面に追加する</button>
   </div>
   <div class="portal-header">
     <div class="japan-accent">
@@ -91,14 +99,14 @@
     <a class="menu-card accent" href="calendar.html"><div class="card-icon">📅</div><div class="card-label">チームカレンダー</div><div class="card-desc">試合・練習の予定</div><span class="card-badge">Google</span></a>
     <a class="menu-card" href="attendance.html"><div class="card-icon">✋</div><div class="card-label">出欠確認</div><div class="card-desc">団員・コーチ別に回答</div></a>
     <a class="menu-card" href="members.html"><div class="card-icon">📒</div><div class="card-label">団員名簿</div><div class="card-desc">学年別・随時編集</div></a>
-    <a class="menu-card" href="duty.html"><div class="card-icon">📋</div><div class="card-label">当番表</div><div class="card-desc">随時入力・蓄積</div></a>
+    <a class="menu-card accent" href="weather.html"><div class="card-icon">🌤️</div><div class="card-label">天気・WBGT</div><div class="card-desc">8時間予報＋熱中症判定</div><span class="card-badge">GPS</span></a>
   </div>
 
   <div class="section-head"><div class="section-icon">🏟️</div><h2>MATCH & OPS</h2><div class="section-divider"></div></div>
   <div class="card-grid">
     <a class="menu-card" href="pitch.html"><div class="card-icon">📐</div><div class="card-label">ピッチサイズ</div><div class="card-desc">8人制・低学年・設営図</div></a>
     <a class="menu-card" href="referee.html"><div class="card-icon">🟡</div><div class="card-label">審判ガイド</div><div class="card-desc">ジェスチャー・役割</div></a>
-    <a class="menu-card" href="heat.html"><div class="card-icon">🌡️</div><div class="card-label">熱中症チェック</div><div class="card-desc">現在地から自動判定</div><span class="card-badge">GPS</span></a>
+    <a class="menu-card" href="duty.html"><div class="card-icon">📋</div><div class="card-label">当番表</div><div class="card-desc">随時入力・蓄積</div></a>
     <a class="menu-card" href="orders.html"><div class="card-icon">🛒</div><div class="card-label">注文リンク集</div><div class="card-desc">トロフィー・用品</div></a>
   </div>
 
@@ -109,8 +117,7 @@
     <a class="menu-card accent" href="coach.html"><div class="card-icon">🔒</div><div class="card-label">コーチ専用</div><div class="card-desc">練習メニュー・資料</div></a>
     <a class="menu-card" href="https://yoshimi-smc.studio.site/" target="_blank" rel="noopener"><div class="card-icon">🌐</div><div class="card-label">ホームページ</div><div class="card-desc">チーム公式サイト</div><span class="card-badge">外部</span></a>
   </div>
-
-  <div class="section-head"><div class="section-icon">🆕</div><h2>NEW FEATURES</h2><div class="section-divider"></div></div>
+</div>
   <div class="card-grid">
     <a class="menu-card accent" href="weather.html"><div class="card-icon">🌤️</div><div class="card-label">天気・WBGT予報</div><div class="card-desc">8時間予報と熱中症判定</div><span class="card-badge">NEW</span></a>
     <a class="menu-card" href="diary.html"><div class="card-icon">📝</div><div class="card-label">練習日誌</div><div class="card-desc">記録・タグ・検索</div><span class="card-badge">NEW</span></a>
@@ -121,8 +128,9 @@
   <div class="section-head"><div class="section-icon">🔗</div><h2>LINKS</h2><div class="section-divider"></div></div>
   <div class="card-grid">
     <a class="menu-card" href="https://www.instagram.com/yoshimi.smc.fc?igsh=Y3NlNWd0MndzZ2Mw&utm_source=qr" target="_blank" rel="noopener"><div class="card-icon">📷</div><div class="card-label">Instagram</div><div class="card-desc">チームの活動写真</div></a>
-    <a class="menu-card" href="https://lin.ee/RZ53mSm" target="_blank" rel="noopener"><div class="card-icon">💬</div><div class="card-label">LINE友だち追加</div><div class="card-desc">タップで公式LINEを追加</div><span class="card-badge">友だち追加</span></a>
-    <a class="menu-card" href="https://chouseisan.com/s?h=04a01b20cc2b4a38b3e1f4aa93d1d06c" target="_blank" rel="noopener"><div class="card-icon">✅</div><div class="card-label">出欠（団員）</div><div class="card-desc">調整さん</div></a>
+    <a class="menu-card accent" href="https://lin.ee/RZ53mSm" target="_blank" rel="noopener"><div class="card-icon">💬</div><div class="card-label">LINE を登録</div><div class="card-desc">公式LINEに友だち追加</div><span class="card-badge">友だち追加</span></a>
+    <a class="menu-card" href="https://line.me/R/nv/recommendOA/@097pvkaq" target="_blank" rel="noopener"><div class="card-icon">🔗</div><div class="card-label">LINE をシェア</div><div class="card-desc">友達にLINEを紹介</div><span class="card-badge">シェア</span></a>
+
     <a class="menu-card" href="https://www.wbgt.env.go.jp/" target="_blank" rel="noopener"><div class="card-icon">🌤️</div><div class="card-label">環境省WBGT</div><div class="card-desc">リアルタイム熱中症</div></a>
   </div>
 </main>
