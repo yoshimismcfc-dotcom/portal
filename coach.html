@@ -11,29 +11,18 @@
     .locked-area h2{font-size:1.15rem;margin-bottom:8px;color:var(--ink)}
     .locked-area p{font-size:.82rem;color:var(--ink-3);margin-bottom:18px}
     #coach-content{display:none}
-
-    /* ===== ボタングリッド ===== */
+    /* ボタン */
     .coach-btn-grid{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:24px}
-    .coach-btn{
-      background:var(--surface-lt);border:1px solid var(--line-2);
-      border-radius:var(--r12);padding:16px 14px;
-      display:flex;flex-direction:column;align-items:flex-start;gap:5px;
-      cursor:pointer;text-decoration:none;color:inherit;
-      transition:all .18s;position:relative;overflow:hidden;
-    }
+    .coach-btn{background:var(--surface-lt);border:1px solid var(--line-2);border-radius:var(--r12);padding:16px 14px;display:flex;flex-direction:column;align-items:flex-start;gap:5px;cursor:pointer;text-decoration:none;color:inherit;transition:all .18s;position:relative;overflow:hidden}
     .coach-btn::before{content:"";position:absolute;top:0;left:0;width:3px;height:100%;background:var(--orange);border-radius:3px 0 0 3px}
     .coach-btn:hover{border-color:var(--orange);background:rgba(255,107,43,.08);transform:translateY(-2px);box-shadow:var(--shadow)}
     .coach-btn.c-cyan::before{background:var(--cyan)}
-    .coach-btn.c-cyan:hover{border-color:var(--cyan);background:rgba(0,212,255,.07);box-shadow:var(--glow-c)}
-    .coach-btn.c-green::before{background:var(--green)}
-    .coach-btn.c-green:hover{border-color:var(--green);background:rgba(0,255,136,.06)}
+    .coach-btn.c-cyan:hover{border-color:var(--cyan);background:rgba(0,212,255,.07)}
     .coach-btn .cb-icon{font-size:1.5rem;line-height:1}
     .coach-btn .cb-label{font-size:.9rem;font-weight:900;color:#fff}
     .coach-btn .cb-desc{font-size:.7rem;color:var(--ink-3);line-height:1.4}
-    .coach-btn .cb-new{position:absolute;top:8px;right:8px;font-size:.58rem;font-weight:900;padding:2px 6px;border-radius:99px;background:rgba(255,107,43,.2);color:var(--orange);border:1px solid rgba(255,107,43,.3)}
     @media(max-width:420px){.coach-btn-grid{grid-template-columns:1fr}}
-
-    /* URL管理 */
+    /* URL */
     .url-list{display:grid;gap:8px}
     .url-item{background:rgba(255,255,255,.04);border:1px solid var(--line);border-radius:var(--r8);padding:10px 12px;display:flex;align-items:center;gap:10px}
     .url-item-label{font-size:.85rem;font-weight:700;color:#fff;flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
@@ -41,14 +30,10 @@
     .url-actions{display:flex;gap:5px;flex-shrink:0}
     .icon-btn{background:none;border:none;cursor:pointer;font-size:.9rem;padding:4px 6px;border-radius:5px;transition:.15s;color:var(--ink-3)}
     .icon-btn:hover{background:rgba(255,255,255,.08);color:#fff}
-    .url-form{display:grid;grid-template-columns:1fr 1fr auto;gap:8px;align-items:end}
+    .url-form{display:grid;grid-template-columns:1fr 1fr auto;gap:8px;align-items:end;margin-bottom:12px}
     @media(max-width:520px){.url-form{grid-template-columns:1fr}}
-
-    /* ガイダンス */
     .preview-box{font-size:.84rem;line-height:1.65;min-height:32px;color:var(--ink-3);white-space:pre-wrap;word-break:break-word;padding:4px 0}
-
-    /* Driveカード */
-    .drive-card{background:rgba(68,136,255,.1);border:1px solid rgba(68,136,255,.35);border-radius:var(--r12);padding:16px;display:flex;align-items:center;gap:14px}
+    .drive-card{background:rgba(68,136,255,.1);border:1px solid rgba(68,136,255,.35);border-radius:var(--r12);padding:16px;display:flex;align-items:center;gap:14px;margin-bottom:4px}
     .drive-card .di{font-size:2rem;flex-shrink:0}
     .drive-card strong{display:block;color:#fff;font-size:.95rem;margin-bottom:3px}
     .drive-card p{font-size:.78rem;color:var(--ink-3);margin:0 0 10px}
@@ -68,7 +53,7 @@
   <div class="hero-band">
     <div class="hero-emoji">🔒</div>
     <div><div class="hero-title">コーチ専用エリア</div>
-      <div class="hero-sub">パスコードを入力してアクセスしてください。</div></div>
+      <div class="hero-sub">ガイダンス設定・試合調整・練習メニュー・日誌・資料</div></div>
   </div>
 
   <!-- ロック -->
@@ -92,50 +77,6 @@
   <!-- コーチコンテンツ -->
   <div id="coach-content">
     <div class="notice-bar green">✅ コーチ専用エリアへようこそ。内容は関係者以外に共有しないでください。</div>
-
-    <!-- ===== メインボタン ===== -->
-    <div class="section-head"><div class="section-icon">📋</div><h2>メニュー</h2><div class="section-divider"></div></div>
-    <div class="coach-btn-grid">
-
-      <a class="coach-btn" href="game_adjust.html">
-        <div class="cb-icon">📊</div>
-        <div class="cb-label">試合調整</div>
-        <div class="cb-desc">ふれあいG大会の参加チーム調整</div>
-      </a>
-
-      <a class="coach-btn" href="diary.html">
-        <div class="cb-icon">📝</div>
-        <div class="cb-label">練習日誌</div>
-        <div class="cb-desc">練習内容・タグ・検索・CSV出力</div>
-        <span class="cb-new">NEW</span>
-      </a>
-
-      <a class="coach-btn c-cyan" href="uniform.html">
-        <div class="cb-icon">👕</div>
-        <div class="cb-label">ユニフォーム貸出</div>
-        <div class="cb-desc">色別在庫・貸出・返却・履歴</div>
-        <span class="cb-new" style="background:rgba(0,212,255,.2);color:var(--cyan);border-color:rgba(0,212,255,.3)">NEW</span>
-      </a>
-
-      <a class="coach-btn c-cyan" href="members.html">
-        <div class="cb-icon">📒</div>
-        <div class="cb-label">団員名簿</div>
-        <div class="cb-desc">学年別・背番号・随時編集</div>
-      </a>
-
-      <a class="coach-btn c-green" href="weather.html">
-        <div class="cb-icon">🌤️</div>
-        <div class="cb-label">天気・WBGT予報</div>
-        <div class="cb-desc">8時間予報付き熱中症判定</div>
-      </a>
-
-      <a class="coach-btn c-green" href="duty.html">
-        <div class="cb-icon">📋</div>
-        <div class="cb-label">当番表・荷物チェック</div>
-        <div class="cb-desc">当番記録と持ち物リスト</div>
-      </a>
-
-    </div>
 
     <!-- ===== ガイダンス設定 ===== -->
     <div class="section-head"><div class="section-icon">📢</div><h2>ガイダンス設定</h2><div class="section-divider"></div></div>
@@ -174,24 +115,15 @@
       </div>
     </div>
 
-    <!-- ===== 練習メニューURL ===== -->
-    <div class="section-head"><div class="section-icon">🔗</div><h2>練習メニューURL</h2><div class="section-divider"></div></div>
-    <div class="panel">
-      <div class="url-form" style="margin-bottom:12px">
-        <div class="form-group" style="margin:0">
-          <label class="form-label">ラベル</label>
-          <input class="form-control" id="url-label" placeholder="例: 4年生 パス練習">
-        </div>
-        <div class="form-group" style="margin:0">
-          <label class="form-label">URL</label>
-          <input class="form-control" id="url-href" type="url" placeholder="https://...">
-        </div>
-        <button class="btn btn-primary btn-sm" onclick="addUrl()" style="height:42px">＋</button>
+    <!-- ===== 試合調整ボタン ===== -->
+    <div class="section-head"><div class="section-icon">📊</div><h2>試合調整</h2><div class="section-divider"></div></div>
+    <a class="coach-btn" href="game_adjust.html" style="width:100%;box-sizing:border-box;display:flex;flex-direction:row;align-items:center;gap:14px;margin-bottom:20px">
+      <div class="cb-icon">📊</div>
+      <div>
+        <div class="cb-label">試合調整表を開く</div>
+        <div class="cb-desc">ふれあい芝グラウンド大会 参加チーム調整・OK/NG管理</div>
       </div>
-      <div class="url-list" id="url-list">
-        <p style="color:var(--ink-3);font-size:.82rem;text-align:center;padding:12px">URLを追加するとここに表示されます。</p>
-      </div>
-    </div>
+    </a>
 
     <!-- ===== データフォルダ ===== -->
     <div class="section-head"><div class="section-icon">📁</div><h2>データフォルダ</h2><div class="section-divider"></div></div>
@@ -217,100 +149,110 @@
         </tbody>
       </table>
     </div>
+
+    <!-- ===== 練習メニューURL ===== -->
+    <div class="section-head"><div class="section-icon">🔗</div><h2>練習メニュー</h2><div class="section-divider"></div></div>
+    <div class="panel">
+      <div class="url-form">
+        <div class="form-group" style="margin:0">
+          <label class="form-label">ラベル</label>
+          <input class="form-control" id="url-label" placeholder="例: 4年生 パス練習">
+        </div>
+        <div class="form-group" style="margin:0">
+          <label class="form-label">URL</label>
+          <input class="form-control" id="url-href" type="url" placeholder="https://...">
+        </div>
+        <button class="btn btn-primary btn-sm" onclick="addUrl()" style="height:42px">＋</button>
+      </div>
+      <div class="url-list" id="url-list">
+        <p style="color:var(--ink-3);font-size:.82rem;text-align:center;padding:12px">URLを追加するとここに表示されます。</p>
+      </div>
+    </div>
+
+    <!-- ===== 練習日誌ボタン ===== -->
+    <div class="section-head"><div class="section-icon">📝</div><h2>練習日誌</h2><div class="section-divider"></div></div>
+    <a class="coach-btn c-cyan" href="diary.html" style="width:100%;box-sizing:border-box;display:flex;flex-direction:row;align-items:center;gap:14px;margin-bottom:4px">
+      <div class="cb-icon">📝</div>
+      <div>
+        <div class="cb-label">練習日誌を開く</div>
+        <div class="cb-desc">日付・学年・天気・メニュー・タグ・CSV出力</div>
+      </div>
+    </a>
+
   </div>
 </main>
 <footer class="site-footer">YOSHIMI SMC FC — SMART PORTAL</footer>
-
 <script>
-var PASSCODE = "2026";
-var URL_KEY  = "smc_menu_urls_v1";
-
-document.getElementById("lock-form").addEventListener("submit", function(e){
+var PASSCODE="2026",URL_KEY="smc_menu_urls_v1";
+document.getElementById("lock-form").addEventListener("submit",function(e){
   e.preventDefault();
-  var val = document.getElementById("passcode").value.trim();
-  var msg = document.getElementById("lock-msg");
-  if(val === PASSCODE){
-    document.getElementById("lock-screen").style.display = "none";
-    document.getElementById("coach-content").style.display = "block";
-    loadNoticeInputs(); renderUrls();
-    return;
+  var val=document.getElementById("passcode").value.trim();
+  if(val===PASSCODE){
+    document.getElementById("lock-screen").style.display="none";
+    document.getElementById("coach-content").style.display="block";
+    loadNoticeInputs();renderUrls();return;
   }
-  msg.textContent = "パスコードが違います。";
-  msg.style.color = "var(--red)";
-  document.getElementById("passcode").value = "";
+  var msg=document.getElementById("lock-msg");
+  msg.textContent="パスコードが違います。";msg.style.color="var(--red)";
+  document.getElementById("passcode").value="";
 });
-
 function loadNoticeInputs(){
-  var g = localStorage.getItem("smc_guidance") || "";
-  var w = localStorage.getItem("smc_warning")  || "";
-  document.getElementById("guidance-input").value = g;
-  document.getElementById("warning-input").value  = w;
-  document.getElementById("guidance-preview").textContent = g || "（未設定）";
-  document.getElementById("warning-preview").textContent  = w || "（未設定）";
+  var g=localStorage.getItem("smc_guidance")||"";
+  var w=localStorage.getItem("smc_warning")||"";
+  document.getElementById("guidance-input").value=g;
+  document.getElementById("warning-input").value=w;
+  document.getElementById("guidance-preview").textContent=g||"（未設定）";
+  document.getElementById("warning-preview").textContent=w||"（未設定）";
 }
-
-function saveNotice(type){
-  var key = type === "guidance" ? "smc_guidance" : "smc_warning";
-  var val = document.getElementById(type + "-input").value.trim();
-  if(val) localStorage.setItem(key, val);
-  else    localStorage.removeItem(key);
-  document.getElementById(type + "-preview").textContent = val || "（未設定）";
-  flash(type === "guidance" ? "ガイダンスを保存しました" : "注意事項を保存しました");
+function saveNotice(t){
+  var key=t==="guidance"?"smc_guidance":"smc_warning";
+  var val=document.getElementById(t+"-input").value.trim();
+  if(val)localStorage.setItem(key,val);else localStorage.removeItem(key);
+  document.getElementById(t+"-preview").textContent=val||"（未設定）";
+  flash(t==="guidance"?"ガイダンスを保存しました":"注意事項を保存しました");
 }
-
-function clearNotice(type){
-  localStorage.removeItem(type === "guidance" ? "smc_guidance" : "smc_warning");
-  document.getElementById(type + "-input").value = "";
-  document.getElementById(type + "-preview").textContent = "（未設定）";
+function clearNotice(t){
+  localStorage.removeItem(t==="guidance"?"smc_guidance":"smc_warning");
+  document.getElementById(t+"-input").value="";
+  document.getElementById(t+"-preview").textContent="（未設定）";
 }
-
 function flash(msg){
-  var el = document.createElement("div");
-  el.style.cssText = "position:fixed;bottom:24px;right:20px;background:var(--green);color:#000;padding:10px 18px;border-radius:8px;font-weight:700;font-size:.85rem;z-index:999;box-shadow:0 4px 16px rgba(0,0,0,.4)";
-  el.textContent = "✅ " + msg;
-  document.body.appendChild(el);
-  setTimeout(function(){ el.remove(); }, 2500);
+  var el=document.createElement("div");
+  el.style.cssText="position:fixed;bottom:24px;right:20px;background:#00ff88;color:#000;padding:10px 18px;border-radius:8px;font-weight:700;font-size:.85rem;z-index:999;box-shadow:0 4px 16px rgba(0,0,0,.4)";
+  el.textContent="✅ "+msg;document.body.appendChild(el);setTimeout(function(){el.remove();},2500);
 }
-
-function loadUrls(){ try{ return JSON.parse(localStorage.getItem(URL_KEY)) || []; }catch(e){ return []; } }
-function saveUrls(d){ localStorage.setItem(URL_KEY, JSON.stringify(d)); }
-
+function loadUrls(){try{return JSON.parse(localStorage.getItem(URL_KEY))||[];}catch(e){return[];}}
+function saveUrls(d){localStorage.setItem(URL_KEY,JSON.stringify(d));}
 function addUrl(){
-  var label = document.getElementById("url-label").value.trim();
-  var href  = document.getElementById("url-href").value.trim();
-  if(!label){ alert("ラベルを入力してください"); return; }
-  if(!href || !href.startsWith("http")){ alert("URLを正しく入力してください（https://...）"); return; }
-  var data = loadUrls();
-  data.push({ id: Date.now(), label: label, href: href });
+  var label=document.getElementById("url-label").value.trim();
+  var href=document.getElementById("url-href").value.trim();
+  if(!label){alert("ラベルを入力してください");return;}
+  if(!href||!href.startsWith("http")){alert("URLを正しく入力してください");return;}
+  var data=loadUrls();
+  data.push({id:Date.now(),label:label,href:href});
   saveUrls(data);
-  document.getElementById("url-label").value = "";
-  document.getElementById("url-href").value  = "";
+  document.getElementById("url-label").value="";
+  document.getElementById("url-href").value="";
   renderUrls();
 }
-
 function deleteUrl(id){
-  if(!confirm("このURLを削除しますか？")) return;
-  saveUrls(loadUrls().filter(function(u){ return u.id !== id; }));
-  renderUrls();
+  if(!confirm("削除しますか？"))return;
+  saveUrls(loadUrls().filter(function(u){return u.id!==id;}));renderUrls();
 }
-
 function renderUrls(){
-  var list = document.getElementById("url-list");
-  var data = loadUrls();
+  var list=document.getElementById("url-list");
+  var data=loadUrls();
   if(!data.length){
-    list.innerHTML = '<p style="color:var(--ink-3);font-size:.82rem;text-align:center;padding:12px">URLを追加するとここに表示されます。</p>';
-    return;
+    list.innerHTML='<p style="color:var(--ink-3);font-size:.82rem;text-align:center;padding:12px">URLを追加するとここに表示されます。</p>';return;
   }
-  list.innerHTML = data.map(function(u){
+  list.innerHTML=data.map(function(u){
     return '<div class="url-item">'
-      + '<div style="flex:1;min-width:0">'
-      + '<div class="url-item-label">' + u.label + '</div>'
-      + '<a class="url-item-link" href="' + u.href + '" target="_blank" rel="noopener">' + u.href + '</a>'
-      + '</div>'
-      + '<div class="url-actions">'
-      + '<a class="icon-btn" href="' + u.href + '" target="_blank" rel="noopener" title="開く">🔗</a>'
-      + '<button class="icon-btn" onclick="deleteUrl(' + u.id + ')" title="削除">🗑</button>'
-      + '</div></div>';
+      +'<div style="flex:1;min-width:0"><div class="url-item-label">'+u.label+'</div>'
+      +'<a class="url-item-link" href="'+u.href+'" target="_blank" rel="noopener">'+u.href+'</a></div>'
+      +'<div class="url-actions">'
+      +'<a class="icon-btn" href="'+u.href+'" target="_blank" rel="noopener" title="開く">🔗</a>'
+      +'<button class="icon-btn" onclick="deleteUrl('+u.id+')" title="削除">🗑</button>'
+      +'</div></div>';
   }).join("");
 }
 </script>

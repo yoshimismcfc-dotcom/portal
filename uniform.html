@@ -6,56 +6,64 @@
   <title>ユニフォーム貸出｜吉見SMC FC</title>
   <link rel="stylesheet" href="common.css">
   <style>
-    /* カラーセクション */
-    .color-section{margin-bottom:22px}
-    .color-header{
-      display:flex;align-items:center;gap:10px;padding:10px 14px;
-      border-radius:var(--r8);margin-bottom:10px;cursor:pointer;
-      border:1px solid var(--line);transition:.15s;
-    }
-    .color-header:hover{border-color:var(--orange)}
-    .color-dot{width:16px;height:16px;border-radius:50%;flex-shrink:0;border:2px solid rgba(255,255,255,.3)}
-    .color-name{font-size:.9rem;font-weight:900;color:#fff}
-    .color-count{font-size:.75rem;color:var(--ink-3);margin-left:auto}
-    .color-count .free{color:#00ff88;font-weight:700}
-    .color-count .lent{color:#ff4466;font-weight:700}
-    /* カードグリッド */
-    .uni-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(140px,1fr));gap:10px;padding:0 4px 4px}
-    .uni-card{
-      background:var(--surface-lt);border-radius:var(--r12);
-      border:1px solid var(--line);padding:13px 11px;
-      text-align:center;transition:.15s;cursor:pointer;
-    }
-    .uni-card:hover{border-color:var(--orange)}
-    .uni-card.free{border-color:rgba(0,255,136,.35);background:rgba(0,255,136,.05)}
-    .uni-card.lent{border-color:rgba(255,68,102,.4);background:rgba(255,68,102,.06)}
-    .uni-num{font-size:1.8rem;font-weight:900;color:#fff;line-height:1}
-    .uni-size{font-size:.7rem;color:var(--cyan);margin:3px 0}
-    .uni-stat{font-size:.78rem;font-weight:900;margin:3px 0}
-    .uni-who{font-size:.68rem;color:var(--ink-3);margin-top:2px}
-    .uni-memo{font-size:.65rem;color:var(--ink-3)}
-    /* 統計 */
+    /* ===== 統計 ===== */
     .stat-row{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-bottom:16px}
     .stat-card{background:var(--surface-lt);border-radius:var(--r8);padding:12px;text-align:center;border:1px solid var(--line)}
     .stat-card .sv{font-size:1.6rem;font-weight:900;color:#fff}
     .stat-card .sl{font-size:.7rem;color:var(--ink-3);margin-top:2px}
-    /* モーダル */
+
+    /* ===== カラーフォルダ ===== */
+    .color-folder{margin-bottom:20px;border:1px solid var(--line-2);border-radius:var(--r12);overflow:hidden}
+    .color-folder-header{
+      display:flex;align-items:center;gap:12px;padding:12px 16px;
+      cursor:pointer;user-select:none;transition:.15s;
+      background:var(--surface-lt);
+    }
+    .color-folder-header:hover{background:var(--surface-bd)}
+    .color-swatch{width:20px;height:20px;border-radius:50%;flex-shrink:0;border:2px solid rgba(255,255,255,.25)}
+    .color-folder-name{font-size:.92rem;font-weight:900;color:#fff;flex:1}
+    .color-folder-stats{display:flex;gap:10px;font-size:.75rem}
+    .cf-free{color:#00ff88;font-weight:700}
+    .cf-lent{color:#ff4466;font-weight:700}
+    .cf-total{color:var(--ink-3)}
+    .folder-toggle{font-size:.8rem;color:var(--ink-3);transition:transform .2s}
+    .folder-toggle.open{transform:rotate(90deg)}
+    .color-folder-body{display:none;padding:12px;background:rgba(0,0,0,.2)}
+    .color-folder-body.open{display:block}
+
+    /* ===== カードグリッド ===== */
+    .uni-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(120px,1fr));gap:9px}
+    .uni-card{
+      background:var(--surface-lt);border-radius:var(--r8);border:1px solid var(--line);
+      padding:11px 9px;text-align:center;cursor:pointer;transition:.15s;
+    }
+    .uni-card:hover{border-color:var(--orange);transform:translateY(-2px)}
+    .uni-card.free{border-color:rgba(0,255,136,.4);background:rgba(0,255,136,.05)}
+    .uni-card.lent{border-color:rgba(255,68,102,.45);background:rgba(255,68,102,.07)}
+    .uni-num{font-size:1.7rem;font-weight:900;color:#fff;line-height:1}
+    .uni-name{font-size:.68rem;color:var(--cyan);margin:2px 0;min-height:14px}
+    .uni-size{font-size:.67rem;color:var(--ink-3)}
+    .uni-stat{font-size:.75rem;font-weight:900;margin:4px 0}
+    .uni-who{font-size:.65rem;color:var(--ink-3);margin-top:1px}
+    .uni-edit-btn{margin-top:5px;font-size:.6rem;height:20px;padding:0 6px;border-radius:4px}
+
+    /* ===== モーダル ===== */
     .modal-bg{position:fixed;inset:0;background:rgba(0,0,0,.82);display:none;place-items:center;z-index:200;backdrop-filter:blur(6px);padding:16px}
     .modal-bg.open{display:grid}
-    .modal{background:var(--surface-lt);border:1px solid var(--line-2);border-radius:var(--r16);padding:22px;width:min(400px,100%);box-shadow:var(--shadow-lg);max-height:90vh;overflow-y:auto}
+    .modal{background:var(--surface-lt);border:1px solid var(--line-2);border-radius:var(--r16);padding:22px;width:min(420px,100%);box-shadow:var(--shadow-lg);max-height:90vh;overflow-y:auto}
     .modal h3{font-size:.95rem;font-weight:900;color:#fff;margin-bottom:14px}
     .modal-btns{display:flex;gap:8px;justify-content:flex-end;margin-top:14px;flex-wrap:wrap}
     .fg2{display:grid;grid-template-columns:1fr 1fr;gap:12px}
-    /* カラーピッカー */
-    .color-picker{display:flex;gap:8px;flex-wrap:wrap;margin-top:6px}
-    .cp-btn{
-      width:32px;height:32px;border-radius:50%;border:3px solid transparent;
-      cursor:pointer;transition:.15s;flex-shrink:0;
-    }
-    .cp-btn.selected{border-color:#fff;box-shadow:0 0 0 2px var(--orange)}
+    .fg3{display:grid;grid-template-columns:1fr 1fr 1fr;gap:10px}
+
+    /* カラーパレット */
+    .color-palette{display:flex;gap:8px;flex-wrap:wrap;margin-top:6px;margin-bottom:4px}
+    .cp-swatch{width:28px;height:28px;border-radius:50%;border:3px solid transparent;cursor:pointer;transition:.12s;flex-shrink:0}
+    .cp-swatch.sel{border-color:#fff;box-shadow:0 0 0 2px var(--orange)}
+
     /* 履歴 */
-    .hist-item{background:rgba(255,255,255,.04);border-radius:var(--r8);padding:8px 12px;font-size:.8rem;display:flex;align-items:center;gap:8px;margin-bottom:5px}
-    @media(max-width:400px){.stat-row{grid-template-columns:1fr 1fr};.fg2{grid-template-columns:1fr}}
+    .hist-item{background:rgba(255,255,255,.04);border-radius:var(--r8);padding:8px 12px;font-size:.78rem;display:flex;align-items:center;gap:8px;margin-bottom:5px;flex-wrap:wrap}
+    @media(max-width:400px){.fg2,.fg3{grid-template-columns:1fr}}
   </style>
 </head>
 <body>
@@ -68,22 +76,24 @@
   </div>
 </header>
 <main class="page-wrap">
-  <a class="back-btn" href="coach.html">コーチ専用に戻る</a>
+  <a class="back-btn" href="index.html">ホームに戻る</a>
   <div class="hero-band">
     <div class="hero-emoji">👕</div>
-    <div><div class="hero-title">ユニフォーム貸出管理</div>
-      <div class="hero-sub">色別で在庫・背番号・貸出先を管理します。</div></div>
+    <div>
+      <div class="hero-title">ユニフォーム貸出管理</div>
+      <div class="hero-sub">色別フォルダで在庫・背番号・名前・貸出先を管理します。背番号順に表示されます。</div>
+    </div>
   </div>
   <div class="notice-bar">💾 データはこのブラウザ（端末）に保存されます。</div>
 
   <div class="stat-row" id="stat-row"></div>
 
-  <div style="display:flex;gap:8px;margin-bottom:14px;flex-wrap:wrap">
+  <div style="display:flex;gap:8px;margin-bottom:16px;flex-wrap:wrap">
     <button class="btn btn-primary" onclick="openAdd()">＋ ユニフォームを追加</button>
     <button class="btn btn-outline btn-sm" onclick="showHistory()">📋 貸出履歴</button>
   </div>
 
-  <div id="color-sections"></div>
+  <div id="color-folders"></div>
 </main>
 
 <!-- 追加/編集モーダル -->
@@ -93,26 +103,28 @@
     <div class="fg2">
       <div class="form-group"><label class="form-label">背番号</label>
         <input class="form-control" id="u-num" type="number" placeholder="例：10" style="text-align:center"></div>
-      <div class="form-group"><label class="form-label">サイズ</label>
-        <select class="form-control" id="u-size">
-          <option>100</option><option>110</option><option>120</option><option>130</option>
-          <option>140</option><option>150</option><option>160</option>
-          <option>SS</option><option>S</option><option>M</option><option>L</option><option>XL</option>
-        </select></div>
+      <div class="form-group"><label class="form-label">選手名</label>
+        <input class="form-control" id="u-player" placeholder="例：吉見太郎"></div>
     </div>
+    <div class="form-group"><label class="form-label">サイズ</label>
+      <select class="form-control" id="u-size">
+        <option>100</option><option>110</option><option>120</option><option>130</option>
+        <option>140</option><option>150</option><option>160</option>
+        <option>SS</option><option>S</option><option>M</option><option>L</option><option>XL</option>
+      </select></div>
     <div class="form-group">
-      <label class="form-label">ユニフォームの色</label>
-      <div class="color-picker" id="color-picker"></div>
+      <label class="form-label">ユニフォームの色（フォルダ分け）</label>
+      <div class="color-palette" id="cp"></div>
       <div style="display:flex;gap:8px;margin-top:8px;align-items:center">
-        <input class="form-control" id="u-color-name" placeholder="色の名前（例：青白 ホーム）" style="flex:1">
-        <input type="color" id="u-color-code" value="#1a5fa8" style="width:42px;height:42px;border:none;border-radius:8px;cursor:pointer;background:none;padding:0">
+        <input class="form-control" id="u-cname" placeholder="色の名前（例：青白 ホーム）" style="flex:1">
+        <input type="color" id="u-ccode" value="#1a5fa8" style="width:42px;height:42px;border:none;border-radius:8px;cursor:pointer;padding:2px;background:var(--surface-lt)">
       </div>
     </div>
     <div class="form-group"><label class="form-label">メモ</label>
-      <input class="form-control" id="u-memo" placeholder="例：ホーム用　上下セット"></div>
+      <input class="form-control" id="u-memo" placeholder="例：ホーム用 上下セット"></div>
     <div class="modal-btns">
       <button class="btn btn-outline btn-sm" id="u-del-btn" style="color:var(--red);border-color:rgba(255,68,102,.4);display:none" onclick="deleteUni()">🗑 削除</button>
-      <button class="btn btn-outline" onclick="closeModal('modal-add')">キャンセル</button>
+      <button class="btn btn-outline" onclick="closeM('modal-add')">キャンセル</button>
       <button class="btn btn-primary" onclick="saveUni()">保存</button>
     </div>
   </div>
@@ -122,7 +134,7 @@
 <div class="modal-bg" id="modal-lend">
   <div class="modal">
     <h3 id="lend-title">貸出・返却</h3>
-    <div id="lend-info" style="font-size:.85rem;color:var(--cyan);margin-bottom:12px;line-height:1.6"></div>
+    <div id="lend-info" style="font-size:.85rem;color:var(--cyan);margin-bottom:12px;line-height:1.7"></div>
     <div id="lend-form">
       <div class="form-group"><label class="form-label">借りる人（氏名）</label>
         <input class="form-control" id="l-name" placeholder="例：吉見　太郎"></div>
@@ -130,114 +142,125 @@
         <div class="form-group"><label class="form-label">貸出日</label>
           <input class="form-control" id="l-date" type="date"></div>
         <div class="form-group"><label class="form-label">返却予定日</label>
-          <input class="form-control" id="l-return" type="date"></div>
+          <input class="form-control" id="l-ret" type="date"></div>
       </div>
     </div>
     <div class="modal-btns">
-      <button class="btn btn-outline" onclick="closeModal('modal-lend')">キャンセル</button>
-      <button class="btn btn-primary" id="lend-btn" onclick="doLend()">貸し出す</button>
+      <button class="btn btn-outline" onclick="closeM('modal-lend')">キャンセル</button>
+      <button class="btn btn-primary" id="lend-btn">貸し出す</button>
     </div>
   </div>
 </div>
 
 <!-- 履歴モーダル -->
-<div class="modal-bg" id="modal-history">
+<div class="modal-bg" id="modal-hist">
   <div class="modal">
     <h3>📋 貸出履歴</h3>
-    <div id="hist-list" style="max-height:60vh;overflow-y:auto"></div>
-    <div class="modal-btns"><button class="btn btn-outline" onclick="closeModal('modal-history')">閉じる</button></div>
+    <div id="hist-list" style="max-height:55vh;overflow-y:auto"></div>
+    <div class="modal-btns"><button class="btn btn-outline" onclick="closeM('modal-hist')">閉じる</button></div>
   </div>
 </div>
 
 <footer class="site-footer">YOSHIMI SMC FC — SMART PORTAL</footer>
 <script>
-var KEY_U="smc_uniform_v2",KEY_H="smc_uniform_hist_v1";
+var KU="smc_uniform_v3",KH="smc_uniform_hist_v1";
 var editId=null,lendId=null;
-// 定義済みカラーパレット
 var PALETTE=[
-  {name:"青白 ホーム", code:"#1a5fa8"},
-  {name:"白青 アウェイ",code:"#e8f0fb"},
-  {name:"赤白",        code:"#c0392b"},
-  {name:"黄黒",        code:"#f0b429"},
+  {name:"青白 ホーム",  code:"#1a5fa8"},
+  {name:"白青 アウェイ",code:"#4488cc"},
+  {name:"赤",          code:"#c0392b"},
+  {name:"黄黒",        code:"#d4a017"},
   {name:"緑白",        code:"#1a7a4a"},
-  {name:"黒",          code:"#222"},
+  {name:"黒",          code:"#2c2c2c"},
   {name:"オレンジ",    code:"#e8612a"},
   {name:"紺",          code:"#003087"},
 ];
-var selectedColor=PALETTE[0];
-
-function loadU(){try{return JSON.parse(localStorage.getItem(KEY_U))||[];}catch(e){return[];}}
-function saveU(d){localStorage.setItem(KEY_U,JSON.stringify(d));}
-function loadH(){try{return JSON.parse(localStorage.getItem(KEY_H))||[];}catch(e){return[];}}
-function saveH(d){localStorage.setItem(KEY_H,JSON.stringify(d));}
+function loadU(){try{return JSON.parse(localStorage.getItem(KU))||[];}catch(e){return[];}}
+function saveU(d){localStorage.setItem(KU,JSON.stringify(d));}
+function loadH(){try{return JSON.parse(localStorage.getItem(KH))||[];}catch(e){return[];}}
+function saveH(d){localStorage.setItem(KH,JSON.stringify(d));}
 
 function renderStats(){
-  var data=loadU();
-  var total=data.length,free=data.filter(function(u){return !u.lentTo;}).length,lent=total-free;
+  var d=loadU(),total=d.length,free=d.filter(function(u){return !u.lentTo;}).length;
   document.getElementById("stat-row").innerHTML=
     '<div class="stat-card"><div class="sv">'+total+'</div><div class="sl">総在庫</div></div>'
     +'<div class="stat-card"><div class="sv" style="color:#00ff88">'+free+'</div><div class="sl">貸出可</div></div>'
-    +'<div class="stat-card"><div class="sv" style="color:#ff4466">'+lent+'</div><div class="sl">貸出中</div></div>';
+    +'<div class="stat-card"><div class="sv" style="color:#ff4466">'+(total-free)+'</div><div class="sl">貸出中</div></div>';
 }
 
-function renderColorSections(){
+function renderFolders(){
   var data=loadU();
   // 色ごとにグループ化
-  var colorMap={};
+  var map={};
   data.forEach(function(u){
-    var key=u.colorName||"その他";
-    if(!colorMap[key])colorMap[key]={code:u.colorCode||"#888",items:[]};
-    colorMap[key].items.push(u);
+    var k=u.cname||"その他";
+    if(!map[k])map[k]={code:u.ccode||"#888",items:[]};
+    map[k].items.push(u);
   });
-  var container=document.getElementById("color-sections");
-  var keys=Object.keys(colorMap);
+  var container=document.getElementById("color-folders");
+  var keys=Object.keys(map);
   if(!keys.length){
-    container.innerHTML='<div style="text-align:center;color:var(--ink-3);padding:32px;font-size:.88rem">ユニフォームがありません。「＋ 追加」から登録してください。</div>';
+    container.innerHTML='<div style="text-align:center;color:var(--ink-3);padding:36px;font-size:.88rem">ユニフォームがありません。「＋ ユニフォームを追加」から登録してください。</div>';
     return;
   }
-  container.innerHTML=keys.map(function(cname){
-    var cg=colorMap[cname];
-    var items=cg.items;
+  container.innerHTML=keys.map(function(cname,fi){
+    var cg=map[cname];
+    // 背番号順ソート
+    var items=cg.items.slice().sort(function(a,b){return Number(a.num)-Number(b.num);});
     var free=items.filter(function(u){return !u.lentTo;}).length;
     var lent=items.length-free;
-    var cardsHtml=items.sort(function(a,b){return Number(a.num)-Number(b.num);}).map(function(u){
+    var bodyId="cfb-"+fi;
+
+    var cards=items.map(function(u){
       var isLent=!!u.lentTo;
-      var textCol=isLent?"#ff8888":"#00ff88";
-      var statusTxt=isLent?"貸出中":"在庫あり";
       return '<div class="uni-card '+(isLent?"lent":"free")+'" onclick="openLend(\''+u.id+'\''+')">'
         +'<div class="uni-num">#'+u.num+'</div>'
+        +(u.player?'<div class="uni-name">'+u.player+'</div>':'<div class="uni-name"></div>')
         +'<div class="uni-size">サイズ '+u.size+'</div>'
-        +(u.memo?'<div class="uni-memo">'+u.memo+'</div>':"")
-        +'<div class="uni-stat" style="color:'+textCol+'">'+statusTxt+'</div>'
+        +(u.memo?'<div style="font-size:.62rem;color:var(--ink-3)">'+u.memo+'</div>':"")
+        +'<div class="uni-stat" style="color:'+(isLent?"#ff8888":"#00ff88")+'">'+(isLent?"🔴 貸出中":"🟢 在庫あり")+'</div>'
         +(isLent?'<div class="uni-who">'+u.lentTo+'<br>'+u.lentDate+'〜</div>':"")
-        +'<div style="margin-top:6px"><button class="btn btn-outline btn-sm" style="font-size:.65rem;height:24px;padding:0 7px" onclick="event.stopPropagation();openEdit(\''+u.id+'\')">✏️</button></div>'
+        +'<button class="btn btn-outline btn-sm uni-edit-btn" onclick="event.stopPropagation();openEdit(\''+u.id+'\')">✏️ 編集</button>'
         +'</div>';
     }).join("");
-    return '<div class="color-section">'
-      +'<div class="color-header" style="background:rgba(0,0,0,.2)">'
-      +'<div class="color-dot" style="background:'+cg.code+'"></div>'
-      +'<div class="color-name">'+cname+'</div>'
-      +'<div class="color-count">全'+items.length+'着 ／ <span class="free">在庫'+free+'</span> <span class="lent">貸出'+lent+'</span></div>'
+
+    return '<div class="color-folder">'
+      +'<div class="color-folder-header" onclick="toggleFolder(\''+bodyId+'\')">'
+      +'<div class="color-swatch" style="background:'+cg.code+'"></div>'
+      +'<div class="color-folder-name">'+cname+'</div>'
+      +'<div class="color-folder-stats">'
+      +'<span class="cf-total">全'+items.length+'着</span>'
+      +'<span class="cf-free">在庫'+free+'</span>'
+      +'<span class="cf-lent">貸出'+lent+'</span>'
       +'</div>'
-      +'<div class="uni-grid">'+cardsHtml+'</div>'
+      +'<span class="folder-toggle open" id="ft-'+bodyId+'">▶</span>'
+      +'</div>'
+      +'<div class="color-folder-body open" id="'+bodyId+'">'
+      +'<div class="uni-grid">'+cards+'</div>'
+      +'</div>'
       +'</div>';
   }).join("");
 }
 
-function render(){renderStats();renderColorSections();}
-
-function buildColorPicker(selectedName){
-  var html=PALETTE.map(function(p){
-    var sel=p.name===(selectedName||PALETTE[0].name);
-    return '<div class="cp-btn'+(sel?" selected":"")+'" style="background:'+p.code+'" title="'+p.name+'" onclick="selectPaletteColor(\''+p.name+'\',\''+p.code+'\')"></div>';
-  }).join("");
-  document.getElementById("color-picker").innerHTML=html;
+function toggleFolder(id){
+  var body=document.getElementById(id);
+  var icon=document.getElementById("ft-"+id);
+  var isOpen=body.classList.contains("open");
+  body.classList.toggle("open",!isOpen);
+  if(icon)icon.classList.toggle("open",!isOpen);
 }
-function selectPaletteColor(name,code){
-  selectedColor={name:name,code:code};
-  document.getElementById("u-color-name").value=name;
-  document.getElementById("u-color-code").value=code;
-  document.querySelectorAll(".cp-btn").forEach(function(b){b.classList.toggle("selected",b.title===name);});
+
+function buildPalette(selName){
+  document.getElementById("cp").innerHTML=PALETTE.map(function(p){
+    return '<div class="cp-swatch'+(p.name===selName?" sel":"")
+      +'" style="background:'+p.code+'" title="'+p.name
+      +'" onclick="selPalette(\''+p.name+'\',\''+p.code+'\')"></div>';
+  }).join("");
+}
+function selPalette(name,code){
+  document.getElementById("u-cname").value=name;
+  document.getElementById("u-ccode").value=code;
+  document.querySelectorAll(".cp-swatch").forEach(function(s){s.classList.toggle("sel",s.title===name);});
 }
 
 function openAdd(){
@@ -245,11 +268,12 @@ function openAdd(){
   document.getElementById("add-title").textContent="ユニフォームを追加";
   document.getElementById("u-del-btn").style.display="none";
   document.getElementById("u-num").value="";
+  document.getElementById("u-player").value="";
   document.getElementById("u-size").value="130";
   document.getElementById("u-memo").value="";
-  document.getElementById("u-color-name").value=PALETTE[0].name;
-  document.getElementById("u-color-code").value=PALETTE[0].code;
-  buildColorPicker(PALETTE[0].name);
+  document.getElementById("u-cname").value=PALETTE[0].name;
+  document.getElementById("u-ccode").value=PALETTE[0].code;
+  buildPalette(PALETTE[0].name);
   document.getElementById("modal-add").classList.add("open");
 }
 function openEdit(id){
@@ -259,29 +283,36 @@ function openEdit(id){
   document.getElementById("add-title").textContent="ユニフォームを編集";
   document.getElementById("u-del-btn").style.display="inline-flex";
   document.getElementById("u-num").value=u.num;
+  document.getElementById("u-player").value=u.player||"";
   document.getElementById("u-size").value=u.size;
   document.getElementById("u-memo").value=u.memo||"";
-  document.getElementById("u-color-name").value=u.colorName||"";
-  document.getElementById("u-color-code").value=u.colorCode||"#1a5fa8";
-  buildColorPicker(u.colorName);
+  document.getElementById("u-cname").value=u.cname||"";
+  document.getElementById("u-ccode").value=u.ccode||"#1a5fa8";
+  buildPalette(u.cname);
   document.getElementById("modal-add").classList.add("open");
 }
 function saveUni(){
   var num=document.getElementById("u-num").value.trim();
   if(!num){alert("背番号を入力してください");return;}
-  var cname=document.getElementById("u-color-name").value.trim()||"その他";
-  var ccode=document.getElementById("u-color-code").value;
+  var cname=document.getElementById("u-cname").value.trim()||"その他";
+  var ccode=document.getElementById("u-ccode").value;
   var data=loadU();
   var id=editId||("u"+Date.now());
-  var existing=data.find(function(x){return x.id===id;});
-  var entry=Object.assign(existing||{},{id:id,num:num,size:document.getElementById("u-size").value,memo:document.getElementById("u-memo").value.trim(),colorName:cname,colorCode:ccode});
-  if(!existing)data.push(entry);
-  saveU(data);closeModal("modal-add");render();
+  var exist=data.find(function(x){return x.id===id;});
+  var entry=Object.assign(exist||{},{
+    id:id,num:num,
+    player:document.getElementById("u-player").value.trim(),
+    size:document.getElementById("u-size").value,
+    memo:document.getElementById("u-memo").value.trim(),
+    cname:cname,ccode:ccode
+  });
+  if(!exist)data.push(entry);
+  saveU(data);closeM("modal-add");render();
 }
 function deleteUni(){
   if(!editId||!confirm("削除しますか？"))return;
   saveU(loadU().filter(function(x){return x.id!==editId;}));
-  closeModal("modal-add");render();
+  closeM("modal-add");render();
 }
 
 function openLend(id){
@@ -289,60 +320,60 @@ function openLend(id){
   var u=loadU().find(function(x){return x.id===id;});
   if(!u)return;
   var isLent=!!u.lentTo;
-  document.getElementById("lend-title").textContent="【"+u.colorName+"】#"+u.num+" サイズ"+u.size;
+  document.getElementById("lend-title").textContent="【"+u.cname+"】#"+u.num+(u.player?" "+u.player:"")+" サイズ"+u.size;
   document.getElementById("lend-info").innerHTML=isLent
-    ?"<span style='color:#ff8888'>🔴 貸出中</span><br>借りている人：<strong style='color:#fff'>"+u.lentTo+"</strong><br>貸出日："+u.lentDate+(u.returnDate?"　返却予定："+u.returnDate:"")
+    ?"<span style='color:#ff8888'>🔴 貸出中</span><br>借りている人：<strong style='color:#fff'>"+u.lentTo+"</strong><br>貸出日："+u.lentDate+(u.retDate?"　返却予定："+u.retDate:"")
     :"<span style='color:#00ff88'>🟢 在庫あり</span>";
   document.getElementById("lend-form").style.display=isLent?"none":"block";
   var btn=document.getElementById("lend-btn");
   if(isLent){btn.textContent="✅ 返却済みにする";btn.onclick=doReturn;}
-  else{btn.textContent="📤 貸し出す";btn.onclick=doLend;
-    document.getElementById("l-name").value="";
+  else{
+    btn.textContent="📤 貸し出す";btn.onclick=doLend;
+    document.getElementById("l-name").value=u.player||"";
     document.getElementById("l-date").value=new Date().toISOString().slice(0,10);
-    document.getElementById("l-return").value="";}
+    document.getElementById("l-ret").value="";
+  }
   document.getElementById("modal-lend").classList.add("open");
 }
 function doLend(){
   var name=document.getElementById("l-name").value.trim();
   if(!name){alert("氏名を入力してください");return;}
   var data=loadU();var u=data.find(function(x){return x.id===lendId;});if(!u)return;
-  u.lentTo=name;u.lentDate=document.getElementById("l-date").value;u.returnDate=document.getElementById("l-return").value;
+  u.lentTo=name;u.lentDate=document.getElementById("l-date").value;u.retDate=document.getElementById("l-ret").value;
   saveU(data);
-  var h=loadH();h.push({type:"貸出",date:u.lentDate,num:u.num,size:u.size,color:u.colorName,name:name,returnDate:u.returnDate||""});saveH(h);
-  closeModal("modal-lend");render();
+  var h=loadH();h.push({type:"貸出",date:u.lentDate,num:u.num,cname:u.cname,player:u.player||"",name:name,retDate:u.retDate||""});saveH(h);
+  closeM("modal-lend");render();
 }
 function doReturn(){
   var data=loadU();var u=data.find(function(x){return x.id===lendId;});if(!u)return;
-  var h=loadH();h.push({type:"返却",date:new Date().toISOString().slice(0,10),num:u.num,size:u.size,color:u.colorName,name:u.lentTo,returnDate:""});saveH(h);
-  delete u.lentTo;delete u.lentDate;delete u.returnDate;
-  saveU(data);closeModal("modal-lend");render();
+  var h=loadH();h.push({type:"返却",date:new Date().toISOString().slice(0,10),num:u.num,cname:u.cname,player:u.player||"",name:u.lentTo,retDate:""});saveH(h);
+  delete u.lentTo;delete u.lentDate;delete u.retDate;
+  saveU(data);closeM("modal-lend");render();
 }
 function showHistory(){
   var h=loadH().reverse();
   var list=document.getElementById("hist-list");
-  if(!h.length){list.innerHTML='<div style="color:var(--ink-3);text-align:center;padding:16px;font-size:.85rem">履歴がありません。</div>';
+  if(!h.length){list.innerHTML='<div style="color:var(--ink-3);text-align:center;padding:20px;font-size:.85rem">履歴がありません。</div>';
   }else{
     list.innerHTML=h.map(function(x){
       var col=x.type==="貸出"?"#ffaa66":"#66ffaa";
       return '<div class="hist-item">'
-        +'<span style="color:'+col+';font-weight:900;font-size:.72rem;white-space:nowrap">'+x.type+'</span>'
-        +'<span style="color:var(--ink-3);font-size:.72rem;white-space:nowrap">'+x.date+'</span>'
-        +'<span style="color:#fff;white-space:nowrap">'+x.color+' #'+x.num+'('+x.size+')</span>'
-        +'<span style="color:var(--cyan)">'+x.name+'</span>'
-        +(x.returnDate?'<span style="color:var(--ink-3);font-size:.68rem;white-space:nowrap">予定:'+x.returnDate+'</span>':"")
+        +'<span style="color:'+col+';font-weight:900;white-space:nowrap">'+x.type+'</span>'
+        +'<span style="color:var(--ink-3);white-space:nowrap">'+x.date+'</span>'
+        +'<span style="color:#fff;white-space:nowrap">'+x.cname+' #'+x.num+(x.player?" ("+x.player+")":"")+'</span>'
+        +'<span style="color:var(--cyan)">→ '+x.name+'</span>'
+        +(x.retDate?'<span style="color:var(--ink-3);font-size:.7rem">予定:'+x.retDate+'</span>':"")
         +'</div>';
     }).join("");
   }
-  document.getElementById("modal-history").classList.add("open");
+  document.getElementById("modal-hist").classList.add("open");
 }
-function closeModal(id){document.getElementById(id).classList.remove("open");}
-["modal-add","modal-lend","modal-history"].forEach(function(id){
-  document.getElementById(id).addEventListener("click",function(e){if(e.target.id===id)closeModal(id);});
+function closeM(id){document.getElementById(id).classList.remove("open");}
+["modal-add","modal-lend","modal-hist"].forEach(function(id){
+  document.getElementById(id).addEventListener("click",function(e){if(e.target.id===id)closeM(id);});
 });
-// カラー入力変更時にpickerを更新
-document.getElementById("u-color-code").addEventListener("input",function(e){
-  document.querySelectorAll(".cp-btn").forEach(function(b){b.classList.remove("selected");});
-});
+function render(){renderStats();renderFolders();}
 render();
 </script>
-</body></html>
+</body>
+</html>
