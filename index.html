@@ -3,53 +3,69 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>吉見SMCサッカースポーツ少年団 スマートポータル</title>
+  <title>吉見SMC FC スマートポータル</title>
   <link rel="stylesheet" href="common.css">
+  <style>
+    .portal-header{
+      text-align:center;padding:28px 16px 22px;margin-bottom:22px;
+      border-bottom:1px solid var(--line);
+      background:linear-gradient(180deg,rgba(255,107,43,.07) 0%,transparent 100%);
+      position:relative;
+    }
+    .portal-header::after{
+      content:"";position:absolute;bottom:0;left:10%;right:10%;height:1px;
+      background:linear-gradient(90deg,transparent,var(--orange-gl),transparent);
+    }
+    .portal-eyebrow{
+      font-size:.65rem;font-weight:900;letter-spacing:.22em;color:var(--cyan);
+      margin-bottom:8px;display:flex;align-items:center;justify-content:center;gap:10px;
+    }
+    .portal-eyebrow::before,.portal-eyebrow::after{
+      content:"";flex:1;max-width:64px;height:1px;
+      background:linear-gradient(90deg,transparent,var(--cyan));
+    }
+    .portal-eyebrow::after{background:linear-gradient(90deg,var(--cyan),transparent)}
+    .portal-header h1{
+      font-size:clamp(1.35rem,5vw,1.9rem);font-weight:900;
+      color:#ffffff;letter-spacing:.04em;line-height:1.25;
+      text-shadow:0 0 30px rgba(0,212,255,.4),0 0 60px rgba(0,212,255,.15);
+    }
+    .portal-header .sub{font-size:.75rem;color:var(--ink-3);margin-top:5px;letter-spacing:.07em}
+  </style>
 </head>
 <body>
 <header class="site-header">
   <div class="header-inner">
     <a class="header-logo" href="index.html">
       <div class="logo-mark">⚽</div>
-      <div><span>吉見SMC FC</span><span class="logo-sub">スマートポータル</span></div>
+      <div><span class="logo-name">吉見SMC FC</span><span class="logo-sub">SMART PORTAL</span></div>
     </a>
-    <nav class="header-nav">
-      <a href="index.html" class="active">ホーム</a>
-      <a href="heat.html">熱中症</a>
-      <a href="calendar.html">予定</a>
-      <a href="coach.html">コーチ専用</a>
-    </nav>
   </div>
 </header>
 <main class="page-wrap">
 
-  <!-- ガイダンス（コーチ入力） -->
   <div id="home-guidance" class="dynamic-notice guidance" style="display:none">
-    <span class="notice-label">📢 お知らせ</span>
-    <span id="guidance-text"></span>
+    <span class="notice-label">📢 INFO</span><span id="guidance-text"></span>
   </div>
-  <!-- 注意事項（コーチ入力） -->
   <div id="home-warning" class="dynamic-notice warning" style="display:none">
-    <span class="notice-label">⚠️ 注意</span>
-    <span id="warning-text"></span>
-  </div>
-<div>
-      <div class="hero-title" id="today-notice">今日の連絡を読み込み中…</div>
-      <div class="hero-sub">最終更新: <span id="last-updated">—</span></div>
-    </div>
+    <span class="notice-label">⚠️ ALERT</span><span id="warning-text"></span>
   </div>
 
-  <!-- すぐ使う -->
-  <div class="section-head"><div class="section-icon">⚡</div><h2>すぐ使う</h2><div class="section-divider"></div></div>
+  <div class="portal-header">
+    <div class="portal-eyebrow">JUNIOR SOCCER SMART PORTAL</div>
+    <h1>吉見SMCサッカースポーツ少年団</h1>
+    <div class="sub">団員・保護者・コーチのためのチームポータル</div>
+  </div>
+
+  <div class="section-head"><div class="section-icon">⚡</div><h2>QUICK ACCESS</h2><div class="section-divider"></div></div>
   <div class="card-grid">
-    <a class="menu-card accent" href="heat.html"><div class="card-icon">🌡️</div><div class="card-label">熱中症チェック</div><div class="card-desc">現在地から自動判定</div><span class="card-badge">GPS</span></a>
+    <a class="menu-card accent" href="calendar.html"><div class="card-icon">📅</div><div class="card-label">チームカレンダー</div><div class="card-desc">試合・練習の予定</div><span class="card-badge">Google</span></a>
     <a class="menu-card" href="attendance.html"><div class="card-icon">✋</div><div class="card-label">出欠確認</div><div class="card-desc">団員・コーチ別に回答</div></a>
-    <a class="menu-card" href="calendar.html"><div class="card-icon">📅</div><div class="card-label">チームカレンダー</div><div class="card-desc">試合・練習の予定</div><span class="card-badge">Google</span></a>
+    <a class="menu-card" href="heat.html"><div class="card-icon">🌡️</div><div class="card-label">熱中症チェック</div><div class="card-desc">現在地から自動判定</div><span class="card-badge">GPS</span></a>
     <a class="menu-card" href="referee.html"><div class="card-icon">🟡</div><div class="card-label">審判ガイド</div><div class="card-desc">ジェスチャー・役割</div></a>
   </div>
 
-  <!-- 試合・運営 -->
-  <div class="section-head"><div class="section-icon">🏟️</div><h2>試合・運営</h2><div class="section-divider"></div></div>
+  <div class="section-head"><div class="section-icon">🏟️</div><h2>MATCH & OPS</h2><div class="section-divider"></div></div>
   <div class="card-grid">
     <a class="menu-card" href="pitch.html"><div class="card-icon">📐</div><div class="card-label">ピッチサイズ</div><div class="card-desc">8人制・低学年・設営図</div></a>
     <a class="menu-card" href="duty.html"><div class="card-icon">📋</div><div class="card-label">当番表</div><div class="card-desc">随時入力・蓄積</div></a>
@@ -57,8 +73,7 @@
     <a class="menu-card" href="orders.html"><div class="card-icon">🛒</div><div class="card-label">注文リンク集</div><div class="card-desc">トロフィー・用品</div></a>
   </div>
 
-  <!-- 団員・保護者 -->
-  <div class="section-head"><div class="section-icon">👨‍👩‍👦</div><h2>団員・保護者</h2><div class="section-divider"></div></div>
+  <div class="section-head"><div class="section-icon">👨‍👩‍👦</div><h2>MEMBERS</h2><div class="section-divider"></div></div>
   <div class="card-grid">
     <a class="menu-card" href="album.html"><div class="card-icon">📸</div><div class="card-label">写真・動画</div><div class="card-desc">アルバム・試合動画</div></a>
     <a class="menu-card" href="join.html"><div class="card-icon">⚽</div><div class="card-label">体験・入団</div><div class="card-desc">申込・FAQ・持ち物</div></a>
@@ -66,31 +81,19 @@
     <a class="menu-card" href="https://yoshimi-smc.studio.site/" target="_blank" rel="noopener"><div class="card-icon">🌐</div><div class="card-label">ホームページ</div><div class="card-desc">チーム公式サイト</div><span class="card-badge">外部</span></a>
   </div>
 
-  <!-- 外部リンク -->
-  <div class="section-head"><div class="section-icon">🔗</div><h2>外部リンク</h2><div class="section-divider"></div></div>
+  <div class="section-head"><div class="section-icon">🔗</div><h2>LINKS</h2><div class="section-divider"></div></div>
   <div class="card-grid">
     <a class="menu-card" href="https://www.instagram.com/yoshimi.smc.fc?igsh=Y3NlNWd0MndzZ2Mw&utm_source=qr" target="_blank" rel="noopener"><div class="card-icon">📷</div><div class="card-label">Instagram</div><div class="card-desc">チームの活動写真</div></a>
     <a class="menu-card" href="https://line.me/R/nv/recommendOA/@097pvkaq" target="_blank" rel="noopener"><div class="card-icon">💬</div><div class="card-label">公式LINE</div><div class="card-desc">連絡・お知らせ</div></a>
     <a class="menu-card" href="https://chouseisan.com/s?h=04a01b20cc2b4a38b3e1f4aa93d1d06c" target="_blank" rel="noopener"><div class="card-icon">✅</div><div class="card-label">出欠（団員）</div><div class="card-desc">調整さん</div></a>
-    <a class="menu-card" href="https://www.wbgt.env.go.jp/" target="_blank" rel="noopener"><div class="card-icon">🌤️</div><div class="card-label">環境省WBGT</div><div class="card-desc">リアルタイム熱中症情報</div></a>
+    <a class="menu-card" href="https://www.wbgt.env.go.jp/" target="_blank" rel="noopener"><div class="card-icon">🌤️</div><div class="card-label">環境省WBGT</div><div class="card-desc">リアルタイム熱中症</div></a>
   </div>
 
 </main>
-<footer class="site-footer">吉見SMCサッカースポーツ少年団｜スマートポータル</footer>
-
+<footer class="site-footer">YOSHIMI SMC FC — SMART PORTAL</footer>
 <script>
-
-
-// ガイダンス・注意事項をlocalStorageから表示
-const guidance = localStorage.getItem("smc_guidance");
-const warning  = localStorage.getItem("smc_warning");
-if (guidance) {
-  document.getElementById("guidance-text").textContent = guidance;
-  document.getElementById("home-guidance").style.display = "flex";
-}
-if (warning) {
-  document.getElementById("warning-text").textContent = warning;
-  document.getElementById("home-warning").style.display = "flex";
-}
+const g=localStorage.getItem("smc_guidance"),w=localStorage.getItem("smc_warning");
+if(g){document.getElementById("guidance-text").textContent=g;document.getElementById("home-guidance").style.display="flex"}
+if(w){document.getElementById("warning-text").textContent=w;document.getElementById("home-warning").style.display="flex"}
 </script>
 </body></html>
