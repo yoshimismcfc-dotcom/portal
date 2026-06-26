@@ -6,11 +6,8 @@
   <title>入会申込書｜吉見SMC FC</title>
   <link rel="stylesheet" href="common.css">
   <style>
-    /* ============================
-       入力フォームUI
-    ============================= */
     .tab-bar{display:flex;gap:0;margin-bottom:20px;border-radius:var(--r8);overflow:hidden;border:1px solid var(--line-2)}
-    .tab-btn{flex:1;padding:12px 8px;font:inherit;font-size:.88rem;font-weight:900;background:var(--surface-lt);color:#6aaccc;border:none;cursor:pointer;transition:.15s;display:flex;align-items:center;justify-content:center;gap:6px}
+    .tab-btn{flex:1;padding:12px 8px;font:inherit;font-size:.85rem;font-weight:900;background:var(--surface-lt);color:#6aaccc;border:none;cursor:pointer;transition:.15s;display:flex;align-items:center;justify-content:center;gap:5px}
     .tab-btn:not(:last-child){border-right:1px solid var(--line-2)}
     .tab-btn.active{background:linear-gradient(135deg,#003087,#0050cc);color:#fff}
     .fg2{display:grid;grid-template-columns:1fr 1fr;gap:12px}
@@ -20,9 +17,15 @@
     #form-area{display:block}
     #preview-area{display:none}
 
-    /* ============================
-       印刷設定
-    ============================= */
+    /* PDF送信ガイド */
+    .pdf-guide{
+      background:rgba(0,255,136,.07);border:1px solid rgba(0,255,136,.3);
+      border-radius:var(--r8);padding:12px 14px;font-size:.8rem;
+      color:#a0f0c8;line-height:1.8;margin-top:10px;
+    }
+    .pdf-guide strong{color:#00ff88;display:block;margin-bottom:4px;font-size:.85rem}
+
+    /* ===== 印刷/PDF設定 ===== */
     @page{size:A4 portrait;margin:0}
     @media print{
       *{-webkit-print-color-adjust:exact;print-color-adjust:exact}
@@ -32,92 +35,47 @@
       #form-area{display:none!important}
       #preview-area{display:block!important;padding:0!important;margin:0!important}
       .psheet{
+        position:fixed!important;
+        top:0!important;left:0!important;
         width:210mm!important;height:297mm!important;
-        padding:14mm 18mm 10mm!important;
-        margin:0!important;box-shadow:none!important;border-radius:0!important;
-        overflow:hidden!important;page-break-inside:avoid!important;
+        padding:13mm 17mm 10mm!important;
+        margin:0!important;
+        box-shadow:none!important;border-radius:0!important;
+        overflow:hidden!important;
+        font-size:9.5pt!important;
       }
-      .psheet *{color:#000!important}
     }
 
-    /* ============================
-       プレビューシート
-       実物画像に完全準拠
-    ============================= */
+    /* ===== プレビューシート ===== */
     .psheet{
       background:#fff;color:#111;
-      font-family:"Yu Mincho","Hiragino Mincho ProN","MS Mincho","ヒラギノ明朝 ProN",serif;
-      font-size:10pt;line-height:1.4;
+      font-family:"Yu Mincho","Hiragino Mincho ProN","MS Mincho",serif;
+      font-size:10pt;line-height:1.45;
       border-radius:12px;
       box-shadow:0 20px 60px rgba(0,0,0,.5),0 0 0 1px rgba(0,0,0,.12);
       padding:20px 26px 14px;
-      max-width:680px;margin:0 auto;
-      overflow:hidden;
+      max-width:680px;margin:0 auto;overflow:hidden;
     }
 
-    /* タイトル */
-    .p-title{
-      text-align:center;font-size:14pt;font-weight:bold;
-      letter-spacing:.06em;
-      text-decoration:underline;text-underline-offset:3px;
-      margin-bottom:14px;
-    }
-
-    /* 日付行 */
-    .p-date-row{
-      margin-bottom:8px;font-size:10pt;
-      display:flex;align-items:flex-end;gap:0;
-    }
-    /* インライン下線つき空欄 */
-    .ul-inline{
-      display:inline-block;
-      border-bottom:1px solid #333;
-      min-height:16px;
-      padding:0 2px 0;
-      vertical-align:bottom;
-      font-size:10pt;
-    }
-    /* 1行フル幅の下線 */
-    .ul-block{
-      display:block;
-      border-bottom:1px solid #333;
-      min-height:18px;
-      width:100%;
-      padding:0 4px 1px;
-      font-size:10.5pt;
-      margin-bottom:3px;
-    }
-    .ul-block.xl{font-size:13pt;font-weight:bold;min-height:22px;}
-
-    /* ラベル */
-    .p-label{font-size:10pt;font-weight:bold;margin-bottom:1px;display:flex;align-items:center;gap:8px}
-    .p-sublabel{font-size:8pt;color:#444;margin-bottom:1px;padding-left:2px}
-
-    /* 印鑑円 */
-    .hanko{
-      width:28px;height:28px;border-radius:50%;border:1px solid #555;
-      display:inline-flex;align-items:center;justify-content:center;
-      font-size:8pt;color:#888;flex-shrink:0;vertical-align:middle;
-    }
-
-    /* 2カラム行 */
-    .p-row-flex{display:flex;align-items:flex-end;gap:6px;margin-bottom:5px;font-size:10pt}
-    .p-row-flex .ul-flex{
-      border-bottom:1px solid #333;flex:1;min-height:17px;padding:0 3px 1px;font-size:10.5pt;
-    }
-
-    /* 誓約書 */
-    .p-divider{border:none;border-top:2px solid #111;margin:10px 0 8px}
-    .p-pledge-title{text-align:center;font-size:13pt;font-weight:bold;text-decoration:underline;text-underline-offset:3px;margin-bottom:5px}
-    .p-pledge-to{font-size:10pt;margin-bottom:4px;padding-left:1em}
-    .p-body{font-size:9.5pt;line-height:1.75;margin:5px 0}
-    .p-ki{text-align:center;font-size:10pt;font-weight:bold;letter-spacing:1.5em;margin:5px 0 3px}
-    .p-list{list-style:none;padding:0 0 0 1em;margin:0 0 5px}
-    .p-list li{font-size:9.5pt;line-height:1.85;text-indent:-1em;}
-    .p-ijou{text-align:right;font-size:9.5pt;margin-bottom:4px}
-
-    /* スペーサー */
-    .sp2{margin-bottom:2px}.sp4{margin-bottom:4px}.sp6{margin-bottom:6px}.sp8{margin-bottom:8px}.sp10{margin-bottom:10px}.sp12{margin-bottom:12px}
+    /* 書式 */
+    .p-title{text-align:center;font-size:13.5pt;font-weight:bold;letter-spacing:.06em;text-decoration:underline;text-underline-offset:3px;margin-bottom:12px}
+    .p-date-row{margin-bottom:7px;font-size:10pt;display:flex;align-items:flex-end;gap:0;line-height:1.2}
+    .ui{display:inline-block;border-bottom:1px solid #333;min-height:15px;padding:0 2px 0;vertical-align:bottom;font-size:10pt}
+    .ub{display:block;border-bottom:1px solid #333;min-height:17px;width:100%;padding:0 3px 1px;font-size:10.5pt;margin-bottom:3px;box-sizing:border-box}
+    .ub.xl{font-size:12pt;font-weight:bold;min-height:20px}
+    .p-label{font-size:10pt;font-weight:bold;margin-bottom:1px;display:block}
+    .p-sub{font-size:8pt;color:#444;margin-bottom:1px;padding-left:2px;display:block}
+    .p-flex{display:flex;align-items:flex-end;gap:5px;margin-bottom:5px;font-size:10pt}
+    .p-flex .uf{border-bottom:1px solid #333;flex:1;min-height:16px;padding:0 3px;font-size:10.5pt}
+    .p-divider{border:none;border-top:2px solid #111;margin:9px 0 7px}
+    .p-pledge-title{text-align:center;font-size:12.5pt;font-weight:bold;text-decoration:underline;text-underline-offset:3px;margin-bottom:4px}
+    .p-pledge-to{font-size:10pt;margin-bottom:3px;padding-left:1em}
+    .p-body{font-size:9pt;line-height:1.7;margin:4px 0}
+    .p-ki{text-align:center;font-size:10pt;font-weight:bold;letter-spacing:1.5em;margin:4px 0 2px}
+    .p-list{list-style:none;padding:0 0 0 1em;margin:0 0 4px}
+    .p-list li{font-size:9pt;line-height:1.8;text-indent:-1em}
+    .p-ijou{text-align:right;font-size:9.5pt;margin-bottom:3px}
+    .s2{margin-bottom:2px}.s4{margin-bottom:4px}.s6{margin-bottom:6px}.s8{margin-bottom:8px}.s10{margin-bottom:10px}
   </style>
 </head>
 <body>
@@ -133,16 +91,15 @@
   <a class="back-btn" href="index.html">ホームに戻る</a>
   <div class="hero-band"><div class="hero-emoji">📄</div>
     <div><div class="hero-title">入会申込書</div>
-      <div class="hero-sub">入力後にプレビューを確認し、A4一枚で印刷できます。</div></div></div>
+      <div class="hero-sub">入力→プレビュー→印刷 / PDF保存で送信できます。</div></div></div>
 
-  <!-- タブ -->
   <div class="tab-bar no-print">
-    <button class="tab-btn active" id="btn-form"    onclick="showTab('form')">✏️ 入力フォーム</button>
+    <button class="tab-btn active" id="btn-form"    onclick="showTab('form')">✏️ 入力</button>
     <button class="tab-btn"        id="btn-preview" onclick="showTab('preview')">👁 プレビュー</button>
-    <button class="tab-btn"        id="btn-print"   onclick="doPrint()">🖨 印刷（A4）</button>
+    <button class="tab-btn"        id="btn-print"   onclick="doPrint()">🖨 印刷・PDF</button>
   </div>
 
-  <!-- 入力フォーム -->
+  <!-- フォーム -->
   <div id="form-area">
     <div class="panel">
       <div class="fst">📅 提出日（西暦）</div>
@@ -190,8 +147,14 @@
 
   <!-- プレビュー -->
   <div id="preview-area">
-    <div class="panel no-print" style="margin-bottom:14px;padding:11px 16px">
-      <p style="color:#a8d4f0;font-size:.84rem;margin:0">👇 内容を確認し「🖨 印刷（A4）」をタップしてください。A4一枚に収まります。</p>
+    <div class="panel no-print" style="margin-bottom:14px;padding:13px 16px">
+      <p style="color:#ffffff;font-size:.88rem;font-weight:700;margin:0 0 8px">👁 プレビュー確認後、「🖨 印刷・PDF」タブをタップしてください。</p>
+      <div class="pdf-guide">
+        <strong>📱 PDF保存・送信の方法</strong>
+        🍎 iPhone：「印刷・PDF」→ ピンチアウトで拡大 →「PDFに保存」またはメール送信<br>
+        🤖 Android：「印刷・PDF」→ 送信先を「PDF保存」に変更 → 保存<br>
+        💡 保存したPDFをLINEやメールに添付して送信できます
+      </div>
     </div>
     <div class="psheet" id="psheet"></div>
   </div>
@@ -210,135 +173,91 @@ function doPrint(){
   build();
   document.getElementById("form-area").style.display="none";
   document.getElementById("preview-area").style.display="block";
+  document.getElementById("btn-print").classList.add("active");
   setTimeout(function(){window.print();},300);
 }
 function gv(id){var e=document.getElementById(id);return e?e.value.trim():"";}
-
-// 下線付きインライン空欄
-function ui(val,w){
-  return '<span class="ul-inline" style="min-width:'+(w||"50px")+'">'+(val||"&nbsp;")+'</span>';
-}
-// 下線付きブロック空欄
-function ub(val,cls){
-  return '<div class="ul-block'+(cls?" "+cls:"")+'">'+(val||"&nbsp;")+'</div>';
-}
+function ui(v,w){return '<span class="ui" style="min-width:'+(w||"50px")+'">'+(v||"&nbsp;")+'</span>';}
+function ub(v,cls){return '<div class="ub'+(cls?" "+cls:"")+'">'+(v||"&nbsp;")+'</div>';}
 
 function build(){
   var fy=gv("fy"),fm=gv("fm"),fd=gv("fd");
   var pname=gv("pname"),pkana=gv("pkana"),kana=gv("kana"),name=gv("name");
   var by=gv("by"),bm=gv("bm"),bd=gv("bd");
   var addr=gv("addr"),school=gv("school"),grade=gv("grade"),tel=gv("tel"),mobile=gv("mobile");
-
   var h="";
 
-  /* ========== 申込書 ========== */
-  h += '<div class="p-title">吉見　SMC　フットボールクラブ　入会申込書</div>';
+  /* ===== 申込書 ===== */
+  h+='<div class="p-title">吉見　SMC　フットボールクラブ　入会申込書</div>';
 
-  /* 日付1行目（上の西暦・月・日） */
-  h += '<div class="p-date-row sp6">';
-  h += '西暦　'+ui(fy,"56px")+'　年　'+ui(fm,"28px")+'　月　';
-  h += '<span style="font-size:8pt;padding:0 2px">・</span>　';
-  h += ui(fd,"28px")+'　日';
-  h += '</div>';
+  h+='<div class="p-date-row s6">西暦&nbsp;'+ui(fy,"54px")+'&nbsp;年&nbsp;'+ui(fm,"26px")+'&nbsp;月&nbsp;';
+  h+='<span style="font-size:8pt;padding:0 1px">・</span>&nbsp;'+ui(fd,"26px")+'&nbsp;日</div>';
 
-  /* 入会希望文 */
-  h += '<div class="sp8" style="font-size:10pt">吉見 SMC フットボールクラブ　に入会を希望致します。</div>';
+  h+='<div class="s8" style="font-size:10pt">吉見 SMC フットボールクラブ　に入会を希望致します。</div>';
 
-  /* 提出日 */
-  h += '<div class="p-date-row sp10">';
-  h += '西暦　'+ui(fy,"56px")+'　年　'+ui(fm,"40px")+'　月　'+ui(fd,"40px")+'　日（提出日）';
-  h += '</div>';
+  h+='<div class="p-date-row s10">西暦&nbsp;'+ui(fy,"54px")+'&nbsp;年&nbsp;'+ui(fm,"38px")+'&nbsp;月&nbsp;'+ui(fd,"38px")+'&nbsp;日（提出日）</div>';
 
-  /* 保護者名 */
-  h += '<div class="p-label sp2">保護者名<span class="hanko">印</span></div>';
-  h += ub(pname);
-  h += '<div class="p-sublabel sp2">（フリガナ）</div>';
-  h += ub(pkana);
-  h += '<div class="sp4"></div>';
+  /* 保護者名（印なし） */
+  h+='<span class="p-label s2">保護者名</span>';
+  h+=ub(pname);
+  h+='<span class="p-sub s2">（フリガナ）</span>';
+  h+=ub(pkana);
+  h+='<div class="s4"></div>';
 
   /* 入会者 */
-  h += '<div class="p-label sp2">入会者</div>';
-  h += '<div class="p-sublabel sp2">（西暦で記入）</div>';
-  h += ub(kana);
-  h += ub(name,"xl");
-  h += '<div class="sp4"></div>';
+  h+='<span class="p-label s2">入会者</span>';
+  h+='<span class="p-sub s2">（西暦で記入）</span>';
+  h+=ub(kana);
+  h+=ub(name,"xl");
+  h+='<div class="s4"></div>';
 
   /* 生年月日 */
-  h += '<div class="p-label sp2">生年月日</div>';
-  h += '<div class="p-date-row sp8">';
-  h += ui(by,"60px")+'　年　'+ui(bm,"36px")+'　月　'+ui(bd,"36px")+'　日';
-  h += '</div>';
+  h+='<span class="p-label s2">生年月日</span>';
+  h+='<div class="p-date-row s8">'+ui(by,"58px")+'&nbsp;年&nbsp;'+ui(bm,"34px")+'&nbsp;月&nbsp;'+ui(bd,"34px")+'&nbsp;日</div>';
 
   /* 住所 */
-  h += '<div class="p-row-flex sp2">';
-  h += '<span style="font-size:10pt;font-weight:bold;white-space:nowrap">住所　〒</span>';
-  h += '<div class="ul-flex">'+(addr||"&nbsp;")+'</div>';
-  h += '</div>';
-  h += '<div class="ul-block sp6">&nbsp;</div>';
+  h+='<div class="p-flex s2"><span style="font-size:10pt;font-weight:bold;white-space:nowrap">住所&nbsp;〒</span><div class="uf">'+(addr||"&nbsp;")+'</div></div>';
+  h+=ub("")+"<div class='s5'></div>";
 
-  /* 学校名・学年 */
-  h += '<div class="p-label sp2">学校名・学年</div>';
-  h += '<div class="p-row-flex sp6">';
-  h += '<div class="ul-flex">'+(school||"&nbsp;")+'</div>';
-  h += '<div style="border-bottom:1px solid #333;min-width:52px;min-height:17px;padding:0 3px;font-size:10.5pt">'+(grade||"&nbsp;")+'</div>';
-  h += '<span style="font-size:10pt;white-space:nowrap;padding-bottom:1px">年生</span>';
-  h += '</div>';
+  /* 学校 */
+  h+='<span class="p-label s2">学校名・学年</span>';
+  h+='<div class="p-flex s6"><div class="uf">'+(school||"&nbsp;")+'</div>';
+  h+='<div style="border-bottom:1px solid #333;min-width:48px;min-height:16px;padding:0 3px;font-size:10.5pt">'+(grade||"&nbsp;")+'</div>';
+  h+='<span style="font-size:10pt;white-space:nowrap;padding-bottom:1px">年生</span></div>';
 
-  /* 電話番号 */
-  h += '<div class="p-label sp2">電話番号</div>';
-  h += ub(tel);
-  h += '<div class="sp4"></div>';
+  /* 電話 */
+  h+='<span class="p-label s2">電話番号</span>'+ub(tel)+'<div class="s4"></div>';
 
-  /* 緊急連絡先 */
-  h += '<div class="p-label sp2">緊急連絡先</div>';
-  h += '<div class="p-row-flex sp4">';
-  h += '<div class="ul-flex">'+(mobile||"&nbsp;")+'</div>';
-  h += '<span style="font-size:9pt;color:#444;white-space:nowrap;padding-bottom:1px">（携帯）</span>';
-  h += '</div>';
-  h += '<div class="ul-block sp4">&nbsp;</div>';
+  /* 緊急 */
+  h+='<span class="p-label s2">緊急連絡先</span>';
+  h+='<div class="p-flex s4"><div class="uf">'+(mobile||"&nbsp;")+'</div><span style="font-size:9pt;color:#444;white-space:nowrap;padding-bottom:1px">（携帯）</span></div>';
+  h+=ub("")+"<div class='s4'></div>";
 
-  /* ========== 誓約書 ========== */
-  h += '<hr class="p-divider">';
-  h += '<div class="p-pledge-title">吉見　SMC フットボールクラブ　保護者誓約書</div>';
-  h += '<div class="p-pledge-to sp2">吉見　SMC　フットボールクラブ　指導者　様</div>';
-  h += '<div class="p-date-row sp6">';
-  h += '西暦　'+ui(fy,"56px")+'　年　'+ui(fm,"46px")+'　月　'+ui(fd,"46px")+'　日（提出日）';
-  h += '</div>';
-  h += '<div class="p-sublabel sp1">（フリガナ）</div>';
-  h += '<div class="p-label sp2">入会者</div>';
-  h += ub(name,"xl");
-  h += '<div class="sp4"></div>';
-  h += '<div class="p-body">上記の者が貴　少年団に入会しサッカー等の活動を行うに際し、貴少年団の会則を尊守するとともに、下記事項について一切の責任は　保護者が負うことを誓約します。</div>';
-  h += '<div class="p-ki">記</div>';
-  h += '<ul class="p-list">';
-  h += '<li>１、健康状態を常に把握し、安全確認の上参加させる。</li>';
-  h += '<li>２、貴少年団活動中及び、会場と自宅との経路往復中の事故等、障害について貴少年団が指定するスポーツ安全保険の適用範囲外の　補償は、貴少年団に対して一切補償請求しない。</li>';
-  h += '</ul>';
-  h += '<div class="p-ijou">以上</div>';
-  h += '<div style="display:flex;justify-content:flex-end;align-items:center;gap:8px;margin-bottom:5px">';
-  h += '<span class="hanko">印</span>';
-  h += '</div>';
-  h += '<div class="p-row-flex">';
-  h += '<span style="font-size:10pt;font-weight:bold;white-space:nowrap">保護者名</span>';
-  h += '<div class="ul-flex">'+(pname||"&nbsp;")+'</div>';
-  h += '</div>';
+  /* ===== 誓約書 ===== */
+  h+='<hr class="p-divider">';
+  h+='<div class="p-pledge-title">吉見　SMC フットボールクラブ　保護者誓約書</div>';
+  h+='<div class="p-pledge-to s3">吉見　SMC　フットボールクラブ　指導者　様</div>';
+  h+='<div class="p-date-row s5">西暦&nbsp;'+ui(fy,"54px")+'&nbsp;年&nbsp;'+ui(fm,"44px")+'&nbsp;月&nbsp;'+ui(fd,"44px")+'&nbsp;日（提出日）</div>';
+  h+='<span class="p-sub s1">（フリガナ）</span>';
+  h+='<span class="p-label s2">入会者</span>';
+  h+=ub(name,"xl")+'<div class="s4"></div>';
+  h+='<div class="p-body">上記の者が貴　少年団に入会しサッカー等の活動を行うに際し、貴少年団の会則を尊守するとともに、下記事項について一切の責任は　保護者が負うことを誓約します。</div>';
+  h+='<div class="p-ki">記</div>';
+  h+='<ul class="p-list">';
+  h+='<li>１、健康状態を常に把握し、安全確認の上参加させる。</li>';
+  h+='<li>２、貴少年団活動中及び、会場と自宅との経路往復中の事故等、障害について貴少年団が指定するスポーツ安全保険の適用範囲外の補償は、貴少年団に対して一切補償請求しない。</li>';
+  h+='</ul>';
+  h+='<div class="p-ijou">以上</div>';
+  h+='<div class="p-flex"><span style="font-size:10pt;font-weight:bold;white-space:nowrap">保護者名</span><div class="uf">'+(pname||"&nbsp;")+'</div></div>';
 
   document.getElementById("psheet").innerHTML=h;
 }
-
 function clearForm(){
   if(!confirm("入力内容をすべてクリアしますか？"))return;
-  ["fy","fm","fd","pname","pkana","kana","name","by","bm","bd","addr","school","tel","mobile"].forEach(function(id){
-    var e=document.getElementById(id);if(e)e.value="";
-  });
+  ["fy","fm","fd","pname","pkana","kana","name","by","bm","bd","addr","school","tel","mobile"].forEach(function(id){var e=document.getElementById(id);if(e)e.value="";});
   document.getElementById("grade").value="";
 }
-(function(){
-  var n=new Date();
-  document.getElementById("fy").value=n.getFullYear();
-  document.getElementById("fm").value=n.getMonth()+1;
-  document.getElementById("fd").value=n.getDate();
-})();
+(function(){var n=new Date();document.getElementById("fy").value=n.getFullYear();document.getElementById("fm").value=n.getMonth()+1;document.getElementById("fd").value=n.getDate();})();
 </script>
 </body>
 </html>
