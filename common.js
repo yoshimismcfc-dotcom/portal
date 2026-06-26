@@ -17,3 +17,23 @@ document.querySelectorAll(".tab-btn").forEach(btn => {
     });
   });
 });
+
+// ===== localStorage 利用可能チェック =====
+function storageAvailable(){
+  try{
+    var k='__smctest__';
+    localStorage.setItem(k,'1');
+    localStorage.removeItem(k);
+    return true;
+  }catch(e){return false;}
+}
+
+// ページ読み込み時にlocalStorageが使えるか確認
+window.addEventListener('DOMContentLoaded', function(){
+  if(!storageAvailable()){
+    var b=document.createElement('div');
+    b.style.cssText='position:fixed;top:0;left:0;right:0;background:#bc002d;color:#fff;text-align:center;padding:8px;font-size:.85rem;font-weight:700;z-index:9999';
+    b.textContent='⚠️ このブラウザではデータの保存ができません。Safariの「プライベートブラウズ」モードをオフにするか、Chromeをお試しください。';
+    document.body.prepend(b);
+  }
+});
