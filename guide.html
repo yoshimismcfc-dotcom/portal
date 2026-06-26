@@ -191,7 +191,7 @@
       <div class="acc-hdr" onclick="tog(this)"><div class="acc-icon">📒</div><div class="acc-title">団員名簿</div><div class="acc-arrow">▶</div></div>
       <div class="acc-body">
         <ul class="step-list">
-          <li>ホーム画面の「入団・連絡」→「団員名簿」をタップ</li>
+          <li>ホーム画面の「👨‍👩‍👦 入団・連絡」セクションの「団員名簿」をタップ</li>
           <li>学年別に団員の一覧が表示されます</li>
           <li>セルをタップして氏名・ふりがな・背番号・性別を編集できます</li>
           <li>編集後は右下の「💾 保存」ボタンを必ず押してください</li>
@@ -242,19 +242,33 @@
   <!-- ===== タブ3：コーチ専用 ===== -->
   <div class="g-tab-content" id="tab-coach">
     <div class="tip-o">🔐 パスコード：<strong>2026</strong>（コーチのみ。他の方には教えないでください）</div>
+
     <div class="acc-section">
       <div class="acc-hdr" onclick="tog(this)"><div class="acc-icon">📢</div><div class="acc-title">ガイダンス設定（全員のホーム画面にお知らせを表示）</div><div class="acc-arrow open">▶</div></div>
       <div class="acc-body open">
         <ul class="step-list">
-          <li>「コーチ専用」→パスコード入力→「ガイダンス設定」セクションを開く</li>
-          <li>青帯（INFO）：練習場所・持ち物・時間変更などのお知らせ<br>赤帯（ALERT）：熱中症警戒・緊急連絡など重要な注意事項</li>
-          <li>テキストを入力して「💾 保存」をタップ</li>
-          <li>すぐに全員のホーム画面の一番上に表示されます</li>
+          <li>「コーチ専用」→パスコード「2026」を入力してログイン</li>
+          <li>「ガイダンス設定」セクションにテキストを入力して「💾 保存」をタップ</li>
+          <li>青帯（INFO）：練習場所・持ち物・時間変更などのお知らせ</li>
+          <li>赤帯（ALERT）：熱中症警戒・緊急連絡など重要な注意事項</li>
+          <li>保存すると、すぐ全員のホーム画面の一番上に表示されます</li>
           <li>不要になったら「🗑 クリア」で消せます</li>
         </ul>
-        <div class="tip">💡 雨天で体育館に変更になる場合などに便利です！</div>
+        <div class="tip">💡 雨天で体育館変更・時間変更などのお知らせに特に便利です！</div>
       </div>
     </div>
+
+    <div class="acc-section">
+      <div class="acc-hdr" onclick="tog(this)"><div class="acc-icon">📊</div><div class="acc-title">試合調整</div><div class="acc-arrow">▶</div></div>
+      <div class="acc-body">
+        <ul class="step-list">
+          <li>「コーチ専用」→「試合調整表を開く」をタップ</li>
+          <li>ふれあい芝グラウンド大会の参加チーム調整表が開きます</li>
+          <li>チーム名・日程・OK/NG を入力して管理できます</li>
+        </ul>
+      </div>
+    </div>
+
     <div class="acc-section">
       <div class="acc-hdr" onclick="tog(this)"><div class="acc-icon">📋</div><div class="acc-title">大会要綱・対戦表の作成</div><div class="acc-arrow">▶</div></div>
       <div class="acc-body">
@@ -267,47 +281,72 @@
         </ul>
         <div class="sec-title">📊 対戦表</div>
         <ul class="step-list">
-          <li>「📊 対戦表」タブで「コート数」「開始時刻」「1試合の時間」を設定</li>
+          <li>「📊 対戦表」タブでコート数・開始時刻・1試合の時間を設定</li>
           <li>チーム数を選択し、各チームの名前を入力</li>
-          <li>「📊 対戦表を生成する」をタップ → 自動でスケジュール・順位表・総当り票が生成されます</li>
+          <li>「📊 対戦表を生成する」をタップ → スケジュール・順位表・総当り票が自動生成されます</li>
           <li>「🖨 印刷・PDF（A4横）」をタップしてPDF保存・印刷</li>
         </ul>
-        <div class="tip-o">⚠️ 要綱と対戦表は別々に印刷されます。タブを切り替えてそれぞれ「印刷・PDF」ボタンを押してください。</div>
+        <div class="tip-o">⚠️ 要綱と対戦表は別タブ・別々に印刷します。タブを切り替えてそれぞれ「印刷・PDF」を押してください。</div>
       </div>
     </div>
+
+    <div class="acc-section">
+      <div class="acc-hdr" onclick="tog(this)"><div class="acc-icon">🔗</div><div class="acc-title">練習メニューURL管理</div><div class="acc-arrow">▶</div></div>
+      <div class="acc-body">
+        <ul class="step-list">
+          <li>「コーチ専用」→「練習メニュー」セクションを開く</li>
+          <li>ラベル（例：4年生 パス練習）とURLを入力して「＋」ボタンをタップ</li>
+          <li>追加されたURLはボタン一つでブラウザで開けます</li>
+          <li>不要になったら🗑ボタンで削除できます</li>
+        </ul>
+      </div>
+    </div>
+
+    <div class="acc-section">
+      <div class="acc-hdr" onclick="tog(this)"><div class="acc-icon">📝</div><div class="acc-title">練習日誌</div><div class="acc-arrow">▶</div></div>
+      <div class="acc-body">
+        <ul class="step-list">
+          <li>「コーチ専用」→「練習日誌を開く」をタップ</li>
+          <li>「＋ 日誌を追加」で日付・学年・天気・練習内容・気づき・タグを記録</li>
+          <li>タグをタップで選択（パス・シュート・守備など）</li>
+          <li>キーワード検索・学年フィルターで過去の記録を絞り込めます</li>
+          <li>「📥 エクスポート」でCSV形式でダウンロードできます</li>
+        </ul>
+      </div>
+    </div>
+
+    <div class="acc-section">
+      <div class="acc-hdr" onclick="tog(this)"><div class="acc-icon">📁</div><div class="acc-title">データフォルダ・会議資料</div><div class="acc-arrow">▶</div></div>
+      <div class="acc-body">
+        <ul class="step-list">
+          <li>「コーチ専用」→「データフォルダ」→「📁 Googleドライブを開く」でチームデータフォルダへ</li>
+          <li>「会議資料」→「📄 会議資料を開く」で議案書・議事録などの会議資料フォルダへ</li>
+          <li>どちらもGoogleドライブで管理しています。ファイルの追加・編集はドライブ側で行ってください</li>
+        </ul>
+      </div>
+    </div>
+
     <div class="acc-section">
       <div class="acc-hdr" onclick="tog(this)"><div class="acc-icon">🔑</div><div class="acc-title">アカウント管理</div><div class="acc-arrow">▶</div></div>
       <div class="acc-body">
         <ul class="step-list">
-          <li>「コーチ専用」→「アカウント管理」をタップ</li>
-          <li>チームの各サービスのID・パスワードが一覧で確認できます</li>
-          <li>パスワードは初期状態では「●●●●」で隠れています</li>
-          <li>「表示」ボタンをタップで個別表示、「一括表示」ボタンで全件表示できます</li>
-          <li>「＋ アカウントを追加」で新しいアカウントを追加できます</li>
+          <li>「コーチ専用」→「アカウント管理を開く」をタップ</li>
+          <li>Google・LINE・Instagram・CANVAなど各サービスのID・パスワードを一覧で確認できます</li>
+          <li>パスワードは初期状態で「●●●●」と隠れています。「表示」ボタンで個別表示できます</li>
+          <li>「＋ アカウントを追加」で新しいアカウントを随時追加できます</li>
         </ul>
-        <div class="tip-o">⚠️ アカウント情報は他の方に見せないよう注意してください。</div>
+        <div class="tip-o">⚠️ アカウント情報はコーチ以外に見せないよう注意してください。</div>
       </div>
     </div>
+
     <div class="acc-section">
       <div class="acc-hdr" onclick="tog(this)"><div class="acc-icon">📧</div><div class="acc-title">Gmailを開く・Googleカレンダーを編集する</div><div class="acc-arrow">▶</div></div>
       <div class="acc-body">
         <ul class="step-list">
           <li>「コーチ専用」→「外部ツール」の「Gmail を開く」または「Googleカレンダー（編集）」をタップ</li>
           <li>Googleのログイン画面が開きます（アカウント：yoshimi.smc.fc@gmail.com）</li>
-          <li>初回はパスワードを入力してログイン。「パスワードを保存」を選ぶと次回から楽になります</li>
+          <li>初回はパスワードを入力。「パスワードを保存」を選ぶと次回から楽になります</li>
           <li>カレンダーで予定を追加・変更すると、チームカレンダーページに自動で反映されます</li>
-        </ul>
-      </div>
-    </div>
-    <div class="acc-section">
-      <div class="acc-hdr" onclick="tog(this)"><div class="acc-icon">📝</div><div class="acc-title">練習日誌</div><div class="acc-arrow">▶</div></div>
-      <div class="acc-body">
-        <ul class="step-list">
-          <li>「コーチ専用」→「練習日誌を開く」をタップ</li>
-          <li>「＋ 日誌を追加」で日付・学年・天気・練習内容・タグを記録</li>
-          <li>タグをタップで選択（パス・シュートなど）</li>
-          <li>キーワード検索・学年フィルターで過去の記録を絞り込めます</li>
-          <li>「📥 エクスポート」でCSV形式でダウンロードできます</li>
         </ul>
       </div>
     </div>
