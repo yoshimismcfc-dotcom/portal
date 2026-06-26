@@ -6,12 +6,21 @@
   <title>説明書・ヘルプ｜吉見SMC FC</title>
   <link rel="stylesheet" href="common.css">
   <style>
-    /* ===== メインタブ ===== */
-    .guide-tab-bar{display:flex;gap:0;margin-bottom:20px;border-radius:var(--r8);overflow:hidden;border:1px solid var(--line-2)}
-    .guide-tab-btn{flex:1;padding:11px 6px;font:inherit;font-size:.82rem;font-weight:900;background:var(--surface-lt);color:#6aaccc;border:none;cursor:pointer;transition:.15s;display:flex;align-items:center;justify-content:center;gap:4px;line-height:1.3;text-align:center}
-    .guide-tab-btn:not(:last-child){border-right:1px solid var(--line-2)}
-    .guide-tab-btn.active{background:linear-gradient(135deg,#003087,#0050cc);color:#fff}
-    .guide-page{display:none}.guide-page.active{display:block}
+    /* ===== タブ ===== */
+    .g-tab-bar{
+      display:flex;gap:0;margin-bottom:20px;
+      border-radius:var(--r8);overflow:hidden;border:1px solid var(--line-2);
+      flex-wrap:wrap;
+    }
+    .g-tab-btn{
+      flex:1;min-width:80px;padding:11px 6px;font:inherit;font-size:.8rem;font-weight:900;
+      background:var(--surface-lt);color:#6aaccc;border:none;cursor:pointer;
+      transition:.15s;display:flex;align-items:center;justify-content:center;
+      gap:4px;border-right:1px solid var(--line-2);
+    }
+    .g-tab-btn:last-child{border-right:none}
+    .g-tab-btn.active{background:linear-gradient(135deg,#003087,#0050cc);color:#fff}
+    .g-tab-content{display:none}.g-tab-content.active{display:block}
 
     /* ===== アコーディオン ===== */
     .acc-section{background:var(--surface-lt);border:1px solid var(--line-2);border-radius:var(--r12);margin-bottom:10px;overflow:hidden}
@@ -19,33 +28,38 @@
     .acc-hdr:hover{background:rgba(255,107,43,.08)}
     .acc-icon{font-size:1.25rem;flex-shrink:0}
     .acc-title{font-size:.9rem;font-weight:900;color:#fff;flex:1}
-    .acc-arrow{font-size:.75rem;color:var(--ink-3);transition:transform .2s;flex-shrink:0}
+    .acc-arrow{font-size:.75rem;color:var(--ink-3);transition:transform .2s}
     .acc-arrow.open{transform:rotate(90deg)}
     .acc-body{display:none;padding:14px 16px;border-top:1px solid var(--line)}
     .acc-body.open{display:block}
 
-    /* ===== コンテンツスタイル ===== */
+    /* ===== ステップリスト ===== */
     .step-list{list-style:none;padding:0;margin:0 0 10px;counter-reset:step}
-    .step-list li{display:flex;align-items:flex-start;gap:10px;font-size:.85rem;color:#c8e8ff;line-height:1.65;padding:6px 0;border-bottom:1px solid rgba(255,255,255,.06)}
-    .step-list li::before{counter-increment:step;content:counter(step);background:var(--orange);color:#fff;border-radius:50%;width:20px;height:20px;min-width:20px;display:flex;align-items:center;justify-content:center;font-size:.7rem;font-weight:900;margin-top:1px}
-    .tip-box{background:rgba(0,212,255,.08);border:1px solid rgba(0,212,255,.25);border-radius:var(--r8);padding:10px 13px;font-size:.8rem;color:#a0d4f0;line-height:1.7;margin-top:8px}
-    .warn-box{background:rgba(255,107,43,.08);border:1px solid rgba(255,107,43,.3);border-radius:var(--r8);padding:10px 13px;font-size:.8rem;color:#ffc09a;line-height:1.7;margin-top:8px}
-    .feat-table{width:100%;border-collapse:collapse;font-size:.82rem;margin-top:8px}
-    .feat-table th{background:#003087;color:#fff;padding:6px 8px;text-align:left;font-size:.75rem;font-weight:900;white-space:nowrap}
-    .feat-table td{border-bottom:1px solid rgba(255,255,255,.07);padding:7px 8px;color:#c8e8ff;vertical-align:top}
-    .feat-table tr:nth-child(even) td{background:rgba(255,255,255,.03)}
-    .feat-table td:first-child{color:#fff;font-weight:700;white-space:nowrap}
-    .sec-title{font-size:.88rem;font-weight:900;color:var(--cyan);margin:12px 0 6px;padding-left:8px;border-left:3px solid var(--cyan)}
-    .os-label{display:inline-block;font-size:.72rem;font-weight:900;padding:2px 8px;border-radius:4px;margin-bottom:6px}
-    .ios-l{background:rgba(0,212,255,.2);color:var(--cyan)}
-    .and-l{background:rgba(0,255,136,.15);color:var(--green)}
-
-    /* ===== 全機能一覧 ===== */
-    .func-card{background:var(--surface-lt);border:1px solid var(--line-2);border-radius:var(--r8);padding:12px 14px;margin-bottom:8px}
-    .func-card-title{font-size:.88rem;font-weight:900;color:#fff;margin-bottom:4px;display:flex;align-items:center;gap:6px}
-    .func-card-desc{font-size:.8rem;color:#94c4e4;line-height:1.6}
-    .badge-user{background:rgba(0,255,136,.15);color:#00ff88;border:1px solid rgba(0,255,136,.3);border-radius:4px;font-size:.62rem;font-weight:900;padding:1px 6px;margin-left:auto;white-space:nowrap}
-    .badge-coach{background:rgba(255,107,43,.15);color:var(--orange);border:1px solid rgba(255,107,43,.3);border-radius:4px;font-size:.62rem;font-weight:900;padding:1px 6px;margin-left:auto;white-space:nowrap}
+    .step-list li{
+      display:flex;align-items:flex-start;gap:10px;
+      font-size:.84rem;color:#c8e8ff;line-height:1.65;
+      padding:5px 0;border-bottom:1px solid rgba(255,255,255,.05);
+    }
+    .step-list li:last-child{border-bottom:none}
+    .step-list li::before{
+      counter-increment:step;content:counter(step);
+      background:var(--orange);color:#fff;border-radius:50%;
+      width:20px;height:20px;min-width:20px;
+      display:flex;align-items:center;justify-content:center;
+      font-size:.7rem;font-weight:900;margin-top:2px;
+    }
+    /* ===== 機能テーブル ===== */
+    .ft{width:100%;border-collapse:collapse;font-size:.82rem;margin-top:8px}
+    .ft th{background:#003087;color:#fff;padding:7px 9px;text-align:left;font-size:.75rem;font-weight:900;border-bottom:2px solid rgba(255,255,255,.2)}
+    .ft td{border-bottom:1px solid rgba(255,255,255,.07);padding:8px 9px;color:#c8e8ff;vertical-align:top}
+    .ft tr:nth-child(even) td{background:rgba(255,255,255,.03)}
+    .ft td:first-child{font-weight:700;color:#fff;white-space:nowrap;font-size:.8rem}
+    /* ===== チップ ===== */
+    .tip{background:rgba(0,212,255,.08);border:1px solid rgba(0,212,255,.22);border-radius:var(--r8);padding:10px 13px;font-size:.8rem;color:#a0d4f0;line-height:1.75;margin:8px 0}
+    .tip-o{background:rgba(255,107,43,.08);border:1px solid rgba(255,107,43,.25);border-radius:var(--r8);padding:10px 13px;font-size:.8rem;color:#ffc8a0;line-height:1.75;margin:8px 0}
+    .tip-g{background:rgba(0,200,100,.08);border:1px solid rgba(0,200,100,.25);border-radius:var(--r8);padding:10px 13px;font-size:.8rem;color:#a0f0c0;line-height:1.75;margin:8px 0}
+    .sec-title{font-size:.85rem;font-weight:900;color:var(--cyan);margin:12px 0 6px}
+    .sec-title-g{font-size:.85rem;font-weight:900;color:var(--green);margin:12px 0 6px}
   </style>
 </head>
 <body>
@@ -62,293 +76,391 @@
   <div class="hero-band">
     <div class="hero-emoji">📖</div>
     <div><div class="hero-title">説明書・ヘルプ</div>
-      <div class="hero-sub">このポータルの使い方をていねいに説明します。タブを選んで読んでください。</div></div>
+      <div class="hero-sub">タブを選んで使い方を確認してください。</div></div>
   </div>
 
-  <!-- メインタブ -->
-  <div class="guide-tab-bar">
-    <button class="guide-tab-btn active" onclick="switchGuide('basic',this)">🏠<br>基本の使い方</button>
-    <button class="guide-tab-btn"        onclick="switchGuide('functions',this)">📋<br>全機能一覧</button>
-    <button class="guide-tab-btn"        onclick="switchGuide('pdf',this)">📄<br>PDF・印刷</button>
-    <button class="guide-tab-btn"        onclick="switchGuide('install',this)">📲<br>アプリ化</button>
-    <button class="guide-tab-btn"        onclick="switchGuide('coach',this)">🔒<br>コーチ向け</button>
+  <!-- タブバー -->
+  <div class="g-tab-bar">
+    <button class="g-tab-btn active" onclick="switchTab('basic',this)">🏠 基本</button>
+    <button class="g-tab-btn" onclick="switchTab('func',this)">⚡ 機能一覧</button>
+    <button class="g-tab-btn" onclick="switchTab('coach',this)">🔒 コーチ</button>
+    <button class="g-tab-btn" onclick="switchTab('pdf',this)">📄 PDF保存</button>
+    <button class="g-tab-btn" onclick="switchTab('install',this)">📲 インストール</button>
+    <button class="g-tab-btn" onclick="switchTab('trouble',this)">🆘 困ったとき</button>
   </div>
 
-  <!-- ===== 基本の使い方 ===== -->
-  <div class="guide-page active" id="gp-basic">
-
+  <!-- ===== タブ1：基本 ===== -->
+  <div class="g-tab-content active" id="tab-basic">
     <div class="acc-section">
-      <div class="acc-hdr" onclick="togAcc(this)">
-        <div class="acc-icon">📱</div>
-        <div class="acc-title">このアプリの開き方</div>
-        <div class="acc-arrow open">▶</div>
-      </div>
+      <div class="acc-hdr" onclick="tog(this)"><div class="acc-icon">📱</div><div class="acc-title">このポータルとは？</div><div class="acc-arrow open">▶</div></div>
       <div class="acc-body open">
+        <p style="font-size:.85rem;color:#c8e8ff;line-height:1.7;margin:0 0 8px">吉見SMCサッカースポーツ少年団の<strong style="color:#fff">団員・保護者・コーチ全員</strong>が使えるチーム専用のウェブアプリです。</p>
         <ul class="step-list">
-          <li>iPhoneはSafari、AndroidはChromeブラウザを開く（LINEのブラウザはNG）</li>
-          <li>アドレスバーに次のURLを入力してアクセス：<br><strong style="color:var(--cyan)">https://yoshimismcfc-dotcom.github.io/portal/</strong></li>
-          <li>ホーム画面が表示されたら完了！</li>
+          <li><strong style="color:#fff">アプリのダウンロード不要！</strong>　スマートフォンのブラウザで開くだけで使えます。</li>
+          <li>予定・出欠・天気・名簿など、よく使う情報に素早くアクセスできます。</li>
+          <li>コーチはガイダンス設定・大会要綱作成・アカウント管理などができます。</li>
         </ul>
-        <div class="tip-box">💡 ブックマークに追加しておくと便利です。または「アプリ化」タブの手順でホーム画面に追加するとアイコンから開けます。</div>
+        <div class="tip">🌐 URL：<strong>https://yoshimismcfc-dotcom.github.io/portal/</strong><br>ブックマークしておくと便利です！</div>
       </div>
     </div>
-
     <div class="acc-section">
-      <div class="acc-hdr" onclick="togAcc(this)">
-        <div class="acc-icon">🏠</div>
-        <div class="acc-title">ホーム画面の見方</div>
-        <div class="acc-arrow">▶</div>
-      </div>
+      <div class="acc-hdr" onclick="tog(this)"><div class="acc-icon">🔍</div><div class="acc-title">アクセス方法</div><div class="acc-arrow">▶</div></div>
       <div class="acc-body">
-        <table class="feat-table">
+        <div class="sec-title">🍎 iPhone の場合</div>
+        <ul class="step-list">
+          <li><strong>Safari</strong>（ブラウザ）を開く（Chromeは一部機能が使えません）</li>
+          <li>アドレスバーに <strong>https://yoshimismcfc-dotcom.github.io/portal/</strong> と入力</li>
+          <li>ホーム画面が表示されたら完了！</li>
+        </ul>
+        <div class="sec-title-g">🤖 Android の場合</div>
+        <ul class="step-list">
+          <li><strong>Chrome</strong>（ブラウザ）を開く</li>
+          <li>アドレスバーに <strong>https://yoshimismcfc-dotcom.github.io/portal/</strong> と入力</li>
+          <li>ホーム画面が表示されたら完了！</li>
+        </ul>
+        <div class="tip-o">💡 毎回URLを入力するのが面倒な方は「ホーム画面に追加」するとアイコンをタップするだけで開けます（「📲 インストール」タブを参照）。</div>
+      </div>
+    </div>
+    <div class="acc-section">
+      <div class="acc-hdr" onclick="tog(this)"><div class="acc-icon">🏠</div><div class="acc-title">ホーム画面の見方</div><div class="acc-arrow">▶</div></div>
+      <div class="acc-body">
+        <table class="ft">
           <thead><tr><th>セクション</th><th>内容</th></tr></thead>
           <tbody>
             <tr><td>⚡ よく使う</td><td>カレンダー・出欠確認・天気WBGT・やることリスト</td></tr>
             <tr><td>🏟️ 試合・大会</td><td>ピッチサイズ・審判ガイド・当番表・ユニフォーム管理</td></tr>
-            <tr><td>👨‍👩‍👦 入団・連絡</td><td>写真アルバム・入団申込書・団員名簿・コーチ専用</td></tr>
-            <tr><td>🔗 SNS・外部リンク</td><td>LINE・Instagram・HP・注文リンク・この説明書</td></tr>
+            <tr><td>👨‍👩‍👦 入団・連絡</td><td>団員名簿・写真アルバム・入団申込書・コーチ専用</td></tr>
+            <tr><td>🔗 SNS・外部リンク</td><td>LINE登録・LINEシェア・Instagram・HP・注文リンク</td></tr>
+            <tr><td>📱 アプリとして使う</td><td>ホーム画面への追加手順</td></tr>
           </tbody>
         </table>
-        <div class="tip-box">📢 ページ上部にコーチからのお知らせ（青帯）や注意事項（赤帯）が表示されます。練習1時間前には雨・熱中症の自動アラートも出ます。</div>
+        <div class="tip">📢 ホーム画面の一番上にコーチからの<strong style="color:#60c0ff">青いお知らせ</strong>や<strong style="color:#ff8080">赤い注意事項</strong>が表示されることがあります。練習前には必ず確認してください。</div>
+        <div class="tip">🌧️ 練習開始1時間前に雨予報・熱中症の自動アラートが自動で表示されます（屋外練習の場合）。</div>
       </div>
     </div>
+  </div>
 
+  <!-- ===== タブ2：機能一覧 ===== -->
+  <div class="g-tab-content" id="tab-func">
     <div class="acc-section">
-      <div class="acc-hdr" onclick="togAcc(this)">
-        <div class="acc-icon">📅</div>
-        <div class="acc-title">チームカレンダーの使い方</div>
-        <div class="acc-arrow">▶</div>
-      </div>
+      <div class="acc-hdr" onclick="tog(this)"><div class="acc-icon">📅</div><div class="acc-title">チームカレンダー</div><div class="acc-arrow">▶</div></div>
       <div class="acc-body">
         <ul class="step-list">
-          <li>ホームの「チームカレンダー」をタップ</li>
-          <li>Googleカレンダーが全画面で開きます</li>
-          <li>画面右上のボタンで「月・週・日」表示を切り替えられます</li>
-          <li>予定をタップすると詳細が見られます</li>
+          <li>ホーム画面の「チームカレンダー」をタップ</li>
+          <li>Googleカレンダーが全画面で表示されます</li>
+          <li>画面上部のボタンで月・週・日表示を切り替えできます</li>
+          <li>予定の追加・変更はコーチがGoogle側で行うと自動で反映されます</li>
         </ul>
-        <div class="tip-box">📌 予定の追加・変更はコーチがGoogle側で行います。このページには自動的に反映されます。</div>
+        <div class="tip-o">⚠️ このページからは予定を追加できません。追加はコーチ専用の「Googleカレンダー（編集）」から行ってください。</div>
       </div>
     </div>
-
     <div class="acc-section">
-      <div class="acc-hdr" onclick="togAcc(this)">
-        <div class="acc-icon">✋</div>
-        <div class="acc-title">出欠確認の方法</div>
-        <div class="acc-arrow">▶</div>
-      </div>
+      <div class="acc-hdr" onclick="tog(this)"><div class="acc-icon">✋</div><div class="acc-title">出欠確認</div><div class="acc-arrow">▶</div></div>
       <div class="acc-body">
         <ul class="step-list">
-          <li>ホームの「出欠確認」をタップ</li>
-          <li>自分に合ったボタンを選ぶ：「団員」または「コーチ（練習参加 / 試合帯同）」</li>
-          <li>調整さんのページが開くので〇△×で回答して送信</li>
+          <li>ホーム画面の「出欠確認」をタップ</li>
+          <li>「団員」または「コーチ」の自分に合ったボタンをタップ</li>
+          <li>「調整さん」のページが開きます。〇△×を選んで回答してください</li>
+          <li>回答を変更したい場合は同じ操作で上書きできます</li>
         </ul>
-        <div class="warn-box">⚠️ 団員用とコーチ用で回答先が違います。必ず自分に合った方を選んでください。</div>
+        <div class="tip">👆 コーチ用は「練習参加」「試合帯同」の2種類があります。間違えないよう注意してください。</div>
       </div>
     </div>
-
     <div class="acc-section">
-      <div class="acc-hdr" onclick="togAcc(this)">
-        <div class="acc-icon">🌤️</div>
-        <div class="acc-title">天気・WBGTの見方</div>
-        <div class="acc-arrow">▶</div>
-      </div>
+      <div class="acc-hdr" onclick="tog(this)"><div class="acc-icon">🌤️</div><div class="acc-title">天気・WBGT（熱中症判定）</div><div class="acc-arrow">▶</div></div>
       <div class="acc-body">
         <ul class="step-list">
-          <li>ホームの「天気・WBGT」をタップ</li>
-          <li>「現在地の気象を取得」をタップ（位置情報の許可が必要です）</li>
+          <li>ホーム画面の「天気・WBGT」をタップ</li>
+          <li>「現在地の気象を取得」ボタンをタップ（位置情報の許可が必要です）</li>
           <li>現在のWBGT値と今後8時間の予報が色付きで表示されます</li>
+          <li>画面下部の表で判定基準と対処法を確認できます</li>
         </ul>
-        <table class="feat-table" style="margin-top:8px">
-          <thead><tr><th>WBGT</th><th>レベル</th><th>目安</th></tr></thead>
+        <table class="ft" style="margin-top:8px">
+          <thead><tr><th>WBGT</th><th>レベル</th><th>対応</th></tr></thead>
           <tbody>
-            <tr><td>31℃以上</td><td><span style="color:#ff4466">🔴 危険</span></td><td>原則運動中止</td></tr>
-            <tr><td>28〜31℃</td><td><span style="color:#ff8800">🟠 厳重警戒</span></td><td>激しい運動禁止</td></tr>
-            <tr><td>25〜28℃</td><td><span style="color:#ffcc00">🟡 警戒</span></td><td>積極的に休憩</td></tr>
-            <tr><td>21〜25℃</td><td><span style="color:#4488ff">🔵 注意</span></td><td>給水を短く</td></tr>
-            <tr><td>21℃未満</td><td><span style="color:#00ff88">🟢 ほぼ安全</span></td><td>通常活動可</td></tr>
+            <tr><td>31℃以上</td><td style="color:#ff6680">🔴 危険</td><td>原則運動中止</td></tr>
+            <tr><td>28〜31℃</td><td style="color:#ffaa44">🟠 厳重警戒</td><td>激しい運動禁止・15分ごとに休憩</td></tr>
+            <tr><td>25〜28℃</td><td style="color:#ffcc00">🟡 警戒</td><td>積極的に休憩</td></tr>
+            <tr><td>21〜25℃</td><td style="color:#4488ff">🔵 注意</td><td>こまめに水分補給</td></tr>
+            <tr><td>21℃未満</td><td style="color:#00ff88">🟢 ほぼ安全</td><td>通常活動可</td></tr>
           </tbody>
         </table>
       </div>
     </div>
-
     <div class="acc-section">
-      <div class="acc-hdr" onclick="togAcc(this)">
-        <div class="acc-icon">📒</div>
-        <div class="acc-title">団員名簿の使い方</div>
-        <div class="acc-arrow">▶</div>
-      </div>
+      <div class="acc-hdr" onclick="tog(this)"><div class="acc-icon">📒</div><div class="acc-title">団員名簿</div><div class="acc-arrow">▶</div></div>
       <div class="acc-body">
         <ul class="step-list">
-          <li>ホームの「団員名簿」をタップ</li>
+          <li>ホーム画面の「入団・連絡」→「団員名簿」をタップ</li>
           <li>学年別に団員の一覧が表示されます</li>
-          <li>セルをタップすると氏名・ふりがな・背番号・性別を編集できます</li>
-          <li>編集したら「💾 保存」を必ず押してください</li>
-          <li>「📥 CSV出力」で名簿データをファイル出力できます</li>
+          <li>セルをタップして氏名・ふりがな・背番号・性別を編集できます</li>
+          <li>編集後は右下の「💾 保存」ボタンを必ず押してください</li>
+          <li>「📥 CSV出力」でエクスポートもできます</li>
         </ul>
-        <div class="warn-box">⚠️ データはお使いの端末のブラウザに保存されます。端末やブラウザが変わると引き継がれません。</div>
+        <div class="tip-o">⚠️ データはお使いの端末に保存されます。端末・ブラウザが変わるとデータは引き継がれません。</div>
       </div>
     </div>
-
+    <div class="acc-section">
+      <div class="acc-hdr" onclick="tog(this)"><div class="acc-icon">📌</div><div class="acc-title">やることリスト</div><div class="acc-arrow">▶</div></div>
+      <div class="acc-body">
+        <ul class="step-list">
+          <li>ホーム画面の「やることリスト」をタップ</li>
+          <li>「＋ タスクを追加」でやること・担当者・期限・備考を入力</li>
+          <li>カード左の丸をタップで完了/未完了を切り替えできます</li>
+          <li>上部のフィルターで「未着手」「進行中」「完了」「保留」に絞れます</li>
+          <li>期限が過ぎたタスクは⚠️赤字で表示されます</li>
+        </ul>
+      </div>
+    </div>
+    <div class="acc-section">
+      <div class="acc-hdr" onclick="tog(this)"><div class="acc-icon">👕</div><div class="acc-title">ユニフォーム貸出管理</div><div class="acc-arrow">▶</div></div>
+      <div class="acc-body">
+        <ul class="step-list">
+          <li>ホーム画面の「試合・大会」→「ユニフォーム貸出」をタップ</li>
+          <li>「＋ ユニフォームを追加」で背番号・選手名・サイズ・カラーを登録</li>
+          <li>各行の「貸出」ボタンをタップして借りる人の名前と貸出日を入力</li>
+          <li>返却時は「返却」ボタンをタップ</li>
+          <li>「📋 貸出履歴」で過去の貸出・返却を確認できます</li>
+        </ul>
+      </div>
+    </div>
+    <div class="acc-section">
+      <div class="acc-hdr" onclick="tog(this)"><div class="acc-icon">📄</div><div class="acc-title">入会申込書</div><div class="acc-arrow">▶</div></div>
+      <div class="acc-body">
+        <ul class="step-list">
+          <li>「入団・連絡」→「体験・入団申込」をタップ</li>
+          <li>「✏️ 入力フォーム」で必要事項を入力</li>
+          <li>「👁 プレビュー」で仕上がりを確認</li>
+          <li>「🖨 印刷・PDF」をタップして印刷ダイアログを開く</li>
+          <li>iPhone：2本指でピンチアウト →「PDFに保存」<br>Android：送信先を「PDF形式で保存」に変更</li>
+          <li>保存したPDFをLINEやメールで送ることができます</li>
+        </ul>
+      </div>
+    </div>
   </div>
 
-  <!-- ===== 全機能一覧 ===== -->
-  <div class="guide-page" id="gp-functions">
-    <p style="font-size:.82rem;color:var(--ink-3);margin-bottom:12px">このポータルで使えるすべての機能の一覧です。</p>
-
-    <div class="sec-title">⚡ よく使う</div>
-    <div class="func-card"><div class="func-card-title">📅 チームカレンダー<span class="badge-user">全員</span></div><div class="func-card-desc">Googleカレンダーで試合・練習の予定を全画面で確認できます。</div></div>
-    <div class="func-card"><div class="func-card-title">✋ 出欠確認<span class="badge-user">全員</span></div><div class="func-card-desc">「調整さん」で団員・コーチ別に出欠を回答できます。</div></div>
-    <div class="func-card"><div class="func-card-title">🌤️ 天気・WBGT<span class="badge-user">全員</span></div><div class="func-card-desc">現在地のWBGT（熱中症指数）と8時間予報を自動取得して表示します。</div></div>
-    <div class="func-card"><div class="func-card-title">📌 やることリスト<span class="badge-user">全員</span></div><div class="func-card-desc">誰が・何をやるかのタスクを管理。担当者・期限・ステータス・備考を記録できます。</div></div>
-
-    <div class="sec-title">🏟️ 試合・大会</div>
-    <div class="func-card"><div class="func-card-title">📐 ピッチサイズ<span class="badge-user">全員</span></div><div class="func-card-desc">8人制・低学年の標準コートサイズと設営図を確認できます。</div></div>
-    <div class="func-card"><div class="func-card-title">🟡 審判ガイド<span class="badge-user">全員</span></div><div class="func-card-desc">主審・副審のジェスチャーを初心者でも分かるよう図解しています。</div></div>
-    <div class="func-card"><div class="func-card-title">📋 当番・荷物チェック<span class="badge-user">保護者</span></div><div class="func-card-desc">当番記録と持ち物チェックリストを管理。アイテムの追加・削除ができます。</div></div>
-    <div class="func-card"><div class="func-card-title">👕 ユニフォーム貸出<span class="badge-coach">コーチ</span></div><div class="func-card-desc">8色のカラー別フォルダで一覧管理。背番号・選手名・貸出先を記録。削除も可能。</div></div>
-
-    <div class="sec-title">👨‍👩‍👦 入団・連絡</div>
-    <div class="func-card"><div class="func-card-title">📸 写真・動画アルバム<span class="badge-user">全員</span></div><div class="func-card-desc">Googleドライブで共有されているチームの写真・動画を確認できます。</div></div>
-    <div class="func-card"><div class="func-card-title">⚽ 体験・入団申込<span class="badge-user">全員</span></div><div class="func-card-desc">入会申込書をスマホで入力→プレビュー確認→PDF保存・印刷できます。</div></div>
-    <div class="func-card"><div class="func-card-title">📒 団員名簿<span class="badge-coach">コーチ</span></div><div class="func-card-desc">学年別に団員を管理。背番号・性別の編集、CSV出力が可能。</div></div>
-    <div class="func-card"><div class="func-card-title">🔒 コーチ専用<span class="badge-coach">コーチ</span></div><div class="func-card-desc">パスコード2026でログイン。ガイダンス設定・大会要綱・練習日誌・アカウント管理など。</div></div>
-
-    <div class="sec-title">🔑 コーチ専用の中の機能</div>
-    <div class="func-card"><div class="func-card-title">📢 ガイダンス設定<span class="badge-coach">コーチ</span></div><div class="func-card-desc">ホーム画面のお知らせ（青帯/赤帯）を入力・保存すると全員のホームにすぐ反映されます。</div></div>
-    <div class="func-card"><div class="func-card-title">📋 大会要綱・対戦表<span class="badge-coach">コーチ</span></div><div class="func-card-desc">入力するだけで要綱と対戦表を自動生成。A4縦（要綱）・A4横（対戦表）でPDF出力できます。</div></div>
-    <div class="func-card"><div class="func-card-title">📊 試合調整<span class="badge-coach">コーチ</span></div><div class="func-card-desc">ふれあいG大会の参加チーム調整表。タップでOK/NG/確認中を切り替えられます。</div></div>
-    <div class="func-card"><div class="func-card-title">📝 練習日誌<span class="badge-coach">コーチ</span></div><div class="func-card-desc">日付・天気・メニュー・タグを記録。検索・フィルター・CSV出力に対応。</div></div>
-    <div class="func-card"><div class="func-card-title">🔑 アカウントリスト<span class="badge-coach">コーチ</span></div><div class="func-card-desc">各サービスのID/パスワードを管理。パスワードは目のアイコンで表示/非表示を切り替えられます。追加・編集・削除が可能。</div></div>
-    <div class="func-card"><div class="func-card-title">📧 Gmail・📅 Googleカレンダー<span class="badge-coach">コーチ</span></div><div class="func-card-desc">タップするとGmailとGoogleカレンダーの編集画面に直接アクセスできます。</div></div>
+  <!-- ===== タブ3：コーチ専用 ===== -->
+  <div class="g-tab-content" id="tab-coach">
+    <div class="tip-o">🔐 パスコード：<strong>2026</strong>（コーチのみ。他の方には教えないでください）</div>
+    <div class="acc-section">
+      <div class="acc-hdr" onclick="tog(this)"><div class="acc-icon">📢</div><div class="acc-title">ガイダンス設定（全員のホーム画面にお知らせを表示）</div><div class="acc-arrow open">▶</div></div>
+      <div class="acc-body open">
+        <ul class="step-list">
+          <li>「コーチ専用」→パスコード入力→「ガイダンス設定」セクションを開く</li>
+          <li>青帯（INFO）：練習場所・持ち物・時間変更などのお知らせ<br>赤帯（ALERT）：熱中症警戒・緊急連絡など重要な注意事項</li>
+          <li>テキストを入力して「💾 保存」をタップ</li>
+          <li>すぐに全員のホーム画面の一番上に表示されます</li>
+          <li>不要になったら「🗑 クリア」で消せます</li>
+        </ul>
+        <div class="tip">💡 雨天で体育館に変更になる場合などに便利です！</div>
+      </div>
+    </div>
+    <div class="acc-section">
+      <div class="acc-hdr" onclick="tog(this)"><div class="acc-icon">📋</div><div class="acc-title">大会要綱・対戦表の作成</div><div class="acc-arrow">▶</div></div>
+      <div class="acc-body">
+        <div class="sec-title">📄 大会要綱</div>
+        <ul class="step-list">
+          <li>「コーチ専用」→「大会要綱・対戦表を作成する」をタップ</li>
+          <li>「📄 大会要綱」タブで大会名・日程・場所・ルールなどを入力</li>
+          <li>「👁 要綱プレビューを表示」をタップして内容を確認</li>
+          <li>「🖨 印刷・PDF（A4縦）」をタップしてPDF保存・印刷</li>
+        </ul>
+        <div class="sec-title">📊 対戦表</div>
+        <ul class="step-list">
+          <li>「📊 対戦表」タブで「コート数」「開始時刻」「1試合の時間」を設定</li>
+          <li>チーム数を選択し、各チームの名前を入力</li>
+          <li>「📊 対戦表を生成する」をタップ → 自動でスケジュール・順位表・総当り票が生成されます</li>
+          <li>「🖨 印刷・PDF（A4横）」をタップしてPDF保存・印刷</li>
+        </ul>
+        <div class="tip-o">⚠️ 要綱と対戦表は別々に印刷されます。タブを切り替えてそれぞれ「印刷・PDF」ボタンを押してください。</div>
+      </div>
+    </div>
+    <div class="acc-section">
+      <div class="acc-hdr" onclick="tog(this)"><div class="acc-icon">🔑</div><div class="acc-title">アカウント管理</div><div class="acc-arrow">▶</div></div>
+      <div class="acc-body">
+        <ul class="step-list">
+          <li>「コーチ専用」→「アカウント管理」をタップ</li>
+          <li>チームの各サービスのID・パスワードが一覧で確認できます</li>
+          <li>パスワードは初期状態では「●●●●」で隠れています</li>
+          <li>「表示」ボタンをタップで個別表示、「一括表示」ボタンで全件表示できます</li>
+          <li>「＋ アカウントを追加」で新しいアカウントを追加できます</li>
+        </ul>
+        <div class="tip-o">⚠️ アカウント情報は他の方に見せないよう注意してください。</div>
+      </div>
+    </div>
+    <div class="acc-section">
+      <div class="acc-hdr" onclick="tog(this)"><div class="acc-icon">📧</div><div class="acc-title">Gmailを開く・Googleカレンダーを編集する</div><div class="acc-arrow">▶</div></div>
+      <div class="acc-body">
+        <ul class="step-list">
+          <li>「コーチ専用」→「外部ツール」の「Gmail を開く」または「Googleカレンダー（編集）」をタップ</li>
+          <li>Googleのログイン画面が開きます（アカウント：yoshimi.smc.fc@gmail.com）</li>
+          <li>初回はパスワードを入力してログイン。「パスワードを保存」を選ぶと次回から楽になります</li>
+          <li>カレンダーで予定を追加・変更すると、チームカレンダーページに自動で反映されます</li>
+        </ul>
+      </div>
+    </div>
+    <div class="acc-section">
+      <div class="acc-hdr" onclick="tog(this)"><div class="acc-icon">📝</div><div class="acc-title">練習日誌</div><div class="acc-arrow">▶</div></div>
+      <div class="acc-body">
+        <ul class="step-list">
+          <li>「コーチ専用」→「練習日誌を開く」をタップ</li>
+          <li>「＋ 日誌を追加」で日付・学年・天気・練習内容・タグを記録</li>
+          <li>タグをタップで選択（パス・シュートなど）</li>
+          <li>キーワード検索・学年フィルターで過去の記録を絞り込めます</li>
+          <li>「📥 エクスポート」でCSV形式でダウンロードできます</li>
+        </ul>
+      </div>
+    </div>
   </div>
 
-  <!-- ===== PDF・印刷 ===== -->
-  <div class="guide-page" id="gp-pdf">
-    <div class="notice-bar" style="margin-bottom:14px">📄 印刷ボタンを押すと印刷ダイアログが開きます。そこからPDFに保存もできます。</div>
-
-    <div class="sec-title" style="margin-top:0">🍎 iPhoneでPDFに保存する手順</div>
-    <ul class="step-list">
-      <li>アプリ内の「🖨 印刷・PDF」ボタンをタップ</li>
-      <li>印刷プレビュー画面が開きます</li>
-      <li>プレビュー画面で<strong style="color:#fff">2本指でピンチアウト（広げる操作）</strong>します</li>
-      <li>PDFプレビューに変わったら、左下の「共有ボタン」をタップ</li>
-      <li>「PDFに保存」を選んで保存場所を選択</li>
-      <li>保存したPDFをLINEやメールに添付して送信できます</li>
-    </ul>
-    <div class="tip-box">💡 「ファイル」アプリに保存されます。LINEのトークから「＋」→「ファイル」で送信できます。</div>
-
-    <div class="sec-title">🤖 AndroidでPDFに保存する手順</div>
-    <ul class="step-list">
-      <li>アプリ内の「🖨 印刷・PDF」ボタンをタップ</li>
-      <li>印刷ダイアログが開きます</li>
-      <li>送信先（プリンター名が出ている部分）をタップして「<strong style="color:#fff">PDF形式で保存</strong>」に変更</li>
-      <li>対戦表の場合は「向き」を「<strong style="color:#fff">横</strong>」に変更</li>
-      <li>ダウンロードボタン（↓）をタップして保存</li>
-      <li>「共有」からLINEやメールで送信できます</li>
-    </ul>
-
-    <div class="sec-title">📋 PDF出力できるもの一覧</div>
-    <table class="feat-table">
-      <thead><tr><th>機能</th><th>向き</th><th>用途</th></tr></thead>
-      <tbody>
-        <tr><td>⚽ 入会申込書</td><td>A4縦</td><td>入団時の申込書・誓約書（A4一枚）</td></tr>
-        <tr><td>📄 大会要綱</td><td>A4縦</td><td>大会要項の配布・告知用</td></tr>
-        <tr><td>📊 対戦表</td><td>A4横</td><td>当日の試合スケジュール・順位表・総当り票</td></tr>
-      </tbody>
-    </table>
-    <div class="warn-box">⚠️ 対戦表と要綱は<strong>別々のタブ</strong>になっているので、それぞれ別に印刷・PDF保存してください。同時に印刷されることはありません。</div>
+  <!-- ===== タブ4：PDF保存 ===== -->
+  <div class="g-tab-content" id="tab-pdf">
+    <div class="tip">💡 印刷ボタンを押すと「印刷ダイアログ」が開きます。そこからPDFに保存できます。LINEやメールで送ることも可能です。</div>
+    <div class="acc-section">
+      <div class="acc-hdr" onclick="tog(this)"><div class="acc-icon">🍎</div><div class="acc-title">iPhone（Safari）でPDFに保存する方法</div><div class="acc-arrow open">▶</div></div>
+      <div class="acc-body open">
+        <ul class="step-list">
+          <li>「🖨 印刷・PDF」ボタンをタップ</li>
+          <li>印刷プレビュー画面が表示されます</li>
+          <li>プレビューを<strong>2本指でピンチアウト（広げる操作）</strong>します</li>
+          <li>PDFのプレビューに切り替わります</li>
+          <li>左下の「共有」ボタン（□↑マーク）をタップ</li>
+          <li>「PDFに保存」または「ファイルに保存」をタップ → 保存完了！</li>
+          <li>保存したPDFをLINEやメールに添付して送れます</li>
+        </ul>
+        <div class="tip-g">✅ iPhoneは「Safariブラウザ」でのみPDF保存できます。Chromeアプリでは非対応です。</div>
+      </div>
+    </div>
+    <div class="acc-section">
+      <div class="acc-hdr" onclick="tog(this)"><div class="acc-icon">🤖</div><div class="acc-title">Android（Chrome）でPDFに保存する方法</div><div class="acc-arrow">▶</div></div>
+      <div class="acc-body">
+        <ul class="step-list">
+          <li>「🖨 印刷・PDF」ボタンをタップ</li>
+          <li>印刷ダイアログが表示されます</li>
+          <li>「送信先」（または「プリンター」）をタップ</li>
+          <li>「<strong>PDF形式で保存</strong>」を選択</li>
+          <li>対戦表などA4横の場合は「向き」を「<strong>横</strong>」に変更</li>
+          <li>「保存」をタップ → ダウンロードフォルダに保存されます</li>
+          <li>保存したPDFをLINEやメールで送れます</li>
+        </ul>
+      </div>
+    </div>
+    <div class="acc-section">
+      <div class="acc-hdr" onclick="tog(this)"><div class="acc-icon">📤</div><div class="acc-title">PDFをLINEで送る方法</div><div class="acc-arrow">▶</div></div>
+      <div class="acc-body">
+        <div class="sec-title">🍎 iPhone の場合</div>
+        <ul class="step-list">
+          <li>LINEアプリを開き、送りたいトーク画面を開く</li>
+          <li>テキスト入力欄左の「＋」をタップ</li>
+          <li>「ファイル」をタップ</li>
+          <li>「iCloud Drive」または「ファイル」から保存したPDFを選択</li>
+          <li>「送信」をタップ</li>
+        </ul>
+        <div class="sec-title-g">🤖 Android の場合</div>
+        <ul class="step-list">
+          <li>LINEアプリを開き、送りたいトーク画面を開く</li>
+          <li>テキスト入力欄左の「＋」をタップ</li>
+          <li>「ファイル」をタップ</li>
+          <li>ダウンロードフォルダから保存したPDFを選択</li>
+          <li>「送信」をタップ</li>
+        </ul>
+      </div>
+    </div>
   </div>
 
-  <!-- ===== アプリ化 ===== -->
-  <div class="guide-page" id="gp-install">
-    <div class="notice-bar" style="margin-bottom:14px">📲 ホーム画面に追加するとアプリのように全画面で使えます。アプリのダウンロードは不要です！</div>
-
-    <div class="sec-title" style="margin-top:0"><span class="os-label ios-l">🍎 iPhone / iPad</span>　Safariのみ対応</div>
-    <ul class="step-list">
-      <li>Safariでこのページを開く（ChromeやLINEブラウザでは手順が異なります）</li>
-      <li>画面下部中央の「共有ボタン（□に↑の矢印）」をタップ</li>
-      <li>メニューをスクロールして「ホーム画面に追加」を選択</li>
-      <li>名前を確認して右上の「追加」をタップ</li>
-      <li>ホーム画面にサッカーボールのアイコンが追加されます</li>
-    </ul>
-    <div class="tip-box">✅ 追加後はアイコンをタップするとアプリのように全画面で開きます。URLを入力する必要はありません。</div>
-
-    <div class="sec-title"><span class="os-label and-l">🤖 Android</span>　Chromeのみ対応</div>
-    <ul class="step-list">
-      <li>Chromeでこのページを開く</li>
-      <li>画面右上の「⋮（メニュー）」をタップ</li>
-      <li>「アプリをインストール」または「ホーム画面に追加」を選択</li>
-      <li>「インストール」をタップ</li>
-      <li>ホーム画面にアイコンが追加されます</li>
-    </ul>
-    <div class="tip-box">✅ インストール後はアプリと同じように起動でき、オフライン時も一部機能が使えます。</div>
-
-    <div class="warn-box">⚠️ LINEのブラウザからはホーム画面への追加ができません。SafariまたはChromeで開き直してください。</div>
+  <!-- ===== タブ5：インストール ===== -->
+  <div class="g-tab-content" id="tab-install">
+    <div class="tip">📲 ホーム画面に追加すると、アイコンをタップするだけでアプリのように全画面で起動できます。毎回URLを入力する必要がなくなります。</div>
+    <div class="acc-section">
+      <div class="acc-hdr" onclick="tog(this)"><div class="acc-icon">🍎</div><div class="acc-title">iPhone でホーム画面に追加する（Safariのみ）</div><div class="acc-arrow open">▶</div></div>
+      <div class="acc-body open">
+        <ul class="step-list">
+          <li><strong>Safari</strong>でポータルのページを開く（Chromeアプリは非対応）</li>
+          <li>画面下部の「<strong>共有ボタン</strong>（□↑マーク）」をタップ</li>
+          <li>下にスクロールして「<strong>ホーム画面に追加</strong>」をタップ</li>
+          <li>名前を確認して「<strong>追加</strong>」をタップ</li>
+          <li>ホーム画面にアイコンが追加されます！</li>
+        </ul>
+        <div class="tip-g">✅ アイコンをタップするとURLバーなしの全画面で起動します。オフラインでも一部機能が使えます。</div>
+      </div>
+    </div>
+    <div class="acc-section">
+      <div class="acc-hdr" onclick="tog(this)"><div class="acc-icon">🤖</div><div class="acc-title">Android でホーム画面に追加する（Chromeのみ）</div><div class="acc-arrow">▶</div></div>
+      <div class="acc-body">
+        <ul class="step-list">
+          <li><strong>Chrome</strong>でポータルのページを開く</li>
+          <li>右上の「<strong>メニューボタン（⋮）</strong>」をタップ</li>
+          <li>「<strong>アプリをインストール</strong>」または「<strong>ホーム画面に追加</strong>」をタップ</li>
+          <li>「<strong>インストール</strong>」をタップ</li>
+          <li>ホーム画面にアイコンが追加されます！</li>
+        </ul>
+        <div class="tip-g">✅ アプリのように動作し、通常のウェブサイトより快適に使えます。</div>
+      </div>
+    </div>
   </div>
 
-  <!-- ===== コーチ向け ===== -->
-  <div class="guide-page" id="gp-coach">
-    <div class="tip-box" style="margin-bottom:14px">🔐 コーチ専用エリアのパスコード：<strong style="color:#fff;font-size:1.1rem">2026</strong>　（コーチのみ配布。他の方には教えないでください）</div>
-
-    <div class="sec-title" style="margin-top:0">📢 ガイダンス設定（お知らせをホームに表示する）</div>
-    <ul class="step-list">
-      <li>コーチ専用エリアに入り「ガイダンス設定」を探す</li>
-      <li>青帯（お知らせ）または赤帯（注意事項）に表示したい内容を入力</li>
-      <li>「💾 保存」をタップ → 即座に全員のホーム画面に反映されます</li>
-      <li>不要になったら「🗑 クリア」をタップ</li>
-    </ul>
-    <div class="tip-box">💡 例：「6/29（日）は平方スポーツ広場に変更です。8:00集合。」のように入力してください。</div>
-
-    <div class="sec-title">📋 大会要綱・対戦表の作り方</div>
-    <ul class="step-list">
-      <li>コーチ専用エリアの「大会要綱・対戦表を作成する」をタップ</li>
-      <li>「📄 大会要綱」タブで大会情報を入力し「プレビューを表示」</li>
-      <li>「📊 対戦表」タブでコート数・開始時刻・チーム名を入力し「生成する」をタップ</li>
-      <li>各タブに「🖨 印刷・PDF」ボタンがあるので別々にPDF化できます</li>
-    </ul>
-    <div class="warn-box">⚠️ 要綱はA4縦・対戦表はA4横で出力されます。別々のタブで独立して印刷してください。</div>
-
-    <div class="sec-title">🔑 アカウントリストの使い方</div>
-    <ul class="step-list">
-      <li>コーチ専用エリアの「アカウントリスト」セクションを開く</li>
-      <li>各サービスのID・パスワードが一覧で表示されます</li>
-      <li>パスワードは「👁」ボタンをタップすると表示/非表示を切り替えられます</li>
-      <li>「＋ アカウントを追加」ボタンで新しいサービスを追加できます</li>
-      <li>各行の「✏️」で編集、「🗑」で削除ができます</li>
-    </ul>
-
-    <div class="sec-title">📧 Gmail・Googleカレンダーを開く</div>
-    <ul class="step-list">
-      <li>コーチ専用エリアの「外部ツール」セクションにある「Gmail を開く」をタップ</li>
-      <li>初回はGoogleのログイン画面が開くので、yoshimi.smc.fc@gmail.comでログイン</li>
-      <li>パスワードをスマホに保存しておくと次回からタップだけでログインできます</li>
-      <li>「Googleカレンダー（編集）」から予定の追加・変更・削除ができます</li>
-    </ul>
-
-    <div class="sec-title">📝 練習日誌の使い方</div>
-    <ul class="step-list">
-      <li>コーチ専用エリアから「練習日誌」をタップ</li>
-      <li>「＋ 日誌を追加」で日付・学年・天気・メニュー・タグを入力</li>
-      <li>キーワード検索・学年フィルターで過去の記録を絞り込めます</li>
-      <li>「📥 エクスポート」でCSVファイルとして保存できます</li>
-    </ul>
+  <!-- ===== タブ6：困ったとき ===== -->
+  <div class="g-tab-content" id="tab-trouble">
+    <div class="acc-section">
+      <div class="acc-hdr" onclick="tog(this)"><div class="acc-icon">❓</div><div class="acc-title">ページが正しく表示されない</div><div class="acc-arrow open">▶</div></div>
+      <div class="acc-body open">
+        <ul class="step-list">
+          <li>ページを下に引っ張って更新（プルリフレッシュ）してみてください</li>
+          <li>ブラウザのキャッシュをクリアしてみてください<br>iPhone Safari：設定→Safari→「履歴とWebサイトデータを消去」<br>Android Chrome：メニュー→設定→プライバシー→閲覧データを削除</li>
+          <li>アドレスバーのURLが正しいか確認してください<br><strong>https://yoshimismcfc-dotcom.github.io/portal/</strong></li>
+        </ul>
+      </div>
+    </div>
+    <div class="acc-section">
+      <div class="acc-hdr" onclick="tog(this)"><div class="acc-icon">❓</div><div class="acc-title">印刷・PDFボタンを押しても何も起きない</div><div class="acc-arrow">▶</div></div>
+      <div class="acc-body">
+        <ul class="step-list">
+          <li>大会要綱・対戦表の場合：まず「プレビューを表示」または「対戦表を生成する」ボタンを先に押してください</li>
+          <li>プレビューが表示された状態で印刷ボタンを押すと印刷ダイアログが開きます</li>
+          <li>ポップアップがブロックされている場合は、ブラウザの設定でこのサイトのポップアップを許可してください</li>
+        </ul>
+      </div>
+    </div>
+    <div class="acc-section">
+      <div class="acc-hdr" onclick="tog(this)"><div class="acc-icon">❓</div><div class="acc-title">位置情報の取得が失敗する（天気WBGT）</div><div class="acc-arrow">▶</div></div>
+      <div class="acc-body">
+        <ul class="step-list">
+          <li>iPhone：設定→プライバシー→位置情報サービス→Safari（またはChrome）→「このAppの使用中のみ許可」に変更</li>
+          <li>Android：設定→アプリ→Chrome→権限→位置情報→「アプリの使用中のみ許可」に変更</li>
+          <li>ブラウザでページを開き直して再試行してください</li>
+        </ul>
+      </div>
+    </div>
+    <div class="acc-section">
+      <div class="acc-hdr" onclick="tog(this)"><div class="acc-icon">❓</div><div class="acc-title">入力したデータが消えた</div><div class="acc-arrow">▶</div></div>
+      <div class="acc-body">
+        <p style="font-size:.84rem;color:#c8e8ff;line-height:1.7;margin:0 0 8px">このアプリのデータ（名簿・ユニフォーム・日誌など）は<strong style="color:#fff">ブラウザのlocalStorage</strong>に保存されています。</p>
+        <p style="font-size:.84rem;color:#ffc8a0;line-height:1.7;margin:0">以下の場合にデータが消えることがあります：</p>
+        <ul style="font-size:.82rem;color:#c8e8ff;padding-left:1.2em;margin:6px 0 0;line-height:1.8">
+          <li>ブラウザの「閲覧データを消去」を行った場合</li>
+          <li>端末を変えた場合（データは別の端末に引き継がれません）</li>
+          <li>ブラウザアプリをアンインストールした場合</li>
+        </ul>
+        <div class="tip-o" style="margin-top:8px">💡 重要なデータ（名簿など）は定期的に「CSV出力」してバックアップを取ることをおすすめします。</div>
+      </div>
+    </div>
   </div>
 
 </main>
 <footer class="site-footer">YOSHIMI SMC FC — SMART PORTAL</footer>
 <script>
-function switchGuide(id, btn){
-  document.querySelectorAll(".guide-page").forEach(function(p){p.classList.remove("active");});
-  document.querySelectorAll(".guide-tab-btn").forEach(function(b){b.classList.remove("active");});
-  document.getElementById("gp-"+id).classList.add("active");
+function switchTab(id, btn){
+  document.querySelectorAll(".g-tab-content").forEach(function(t){t.classList.remove("active");});
+  document.querySelectorAll(".g-tab-btn").forEach(function(b){b.classList.remove("active");});
+  document.getElementById("tab-"+id).classList.add("active");
   btn.classList.add("active");
 }
-function togAcc(hdr){
+function tog(hdr){
   var body=hdr.nextElementSibling;
   var icon=hdr.querySelector(".acc-arrow");
-  var isOpen=body.classList.contains("open");
-  body.classList.toggle("open",!isOpen);
-  icon.classList.toggle("open",!isOpen);
+  var open=body.classList.contains("open");
+  body.classList.toggle("open",!open);
+  icon.classList.toggle("open",!open);
 }
 </script>
 </body>
