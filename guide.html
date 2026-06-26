@@ -1,0 +1,206 @@
+<!doctype html>
+<html lang="ja">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>説明書・ヘルプ｜吉見SMC FC</title>
+  <link rel="stylesheet" href="common.css">
+  <style>
+    .guide-section{background:var(--surface-lt);border:1px solid var(--line-2);border-radius:var(--r12);margin-bottom:14px;overflow:hidden}
+    .guide-sec-hdr{
+      display:flex;align-items:center;gap:10px;padding:13px 16px;
+      cursor:pointer;user-select:none;background:rgba(0,0,0,.2);transition:.15s;
+    }
+    .guide-sec-hdr:hover{background:rgba(255,107,43,.08)}
+    .guide-sec-icon{font-size:1.3rem;flex-shrink:0}
+    .guide-sec-title{font-size:.92rem;font-weight:900;color:#fff;flex:1}
+    .guide-sec-toggle{font-size:.8rem;color:var(--ink-3);transition:transform .2s}
+    .guide-sec-toggle.open{transform:rotate(90deg)}
+    .guide-sec-body{display:none;padding:14px 16px;border-top:1px solid var(--line)}
+    .guide-sec-body.open{display:block}
+    .step-list{list-style:none;padding:0;margin:0 0 10px;counter-reset:step}
+    .step-list li{
+      display:flex;align-items:flex-start;gap:10px;
+      font-size:.85rem;color:#c8e8ff;line-height:1.6;padding:5px 0;
+      border-bottom:1px solid rgba(255,255,255,.06);
+    }
+    .step-list li::before{
+      counter-increment:step;content:counter(step);
+      background:var(--orange);color:#fff;border-radius:50%;
+      width:20px;height:20px;display:flex;align-items:center;justify-content:center;
+      font-size:.72rem;font-weight:900;flex-shrink:0;margin-top:2px;
+    }
+    .tip-box{background:rgba(0,212,255,.08);border:1px solid rgba(0,212,255,.25);border-radius:var(--r8);padding:10px 13px;font-size:.8rem;color:#a0d4f0;line-height:1.7;margin-top:8px}
+    .feat-table{width:100%;border-collapse:collapse;font-size:.82rem;margin-top:8px}
+    .feat-table th{background:#003087;color:#fff;padding:6px 8px;text-align:left;font-size:.75rem;font-weight:900}
+    .feat-table td{border-bottom:1px solid rgba(255,255,255,.07);padding:7px 8px;color:#c8e8ff;vertical-align:top}
+    .feat-table tr:nth-child(even) td{background:rgba(255,255,255,.03)}
+    .feat-table td:first-child{color:#fff;font-weight:700;white-space:nowrap}
+    .pdf-dl-btn{
+      display:flex;align-items:center;gap:10px;
+      background:linear-gradient(135deg,#003087,#0050cc);
+      border-radius:var(--r12);padding:14px 18px;
+      color:#fff;font-weight:900;font-size:.95rem;
+      text-decoration:none;margin-bottom:16px;
+      border:1px solid rgba(255,255,255,.15);
+      transition:.18s;
+    }
+    .pdf-dl-btn:hover{filter:brightness(1.1);transform:translateY(-1px)}
+  </style>
+</head>
+<body>
+<header class="site-header">
+  <div class="header-inner">
+    <a class="header-logo" href="index.html">
+      <div class="logo-mark">⚽</div>
+      <div><span class="logo-name">吉見SMC FC</span><span class="logo-sub">SMART PORTAL</span></div>
+    </a>
+  </div>
+</header>
+<main class="page-wrap">
+  <a class="back-btn" href="index.html">ホームに戻る</a>
+  <div class="hero-band">
+    <div class="hero-emoji">📖</div>
+    <div><div class="hero-title">説明書・ヘルプ</div>
+      <div class="hero-sub">ポータルの使い方ガイドです。タップして各項目を開いてください。</div></div>
+  </div>
+
+  <div class="notice-bar blue">
+    📄 より詳しい説明書（PDF版・全8ページ）はコーチ専用エリアからダウンロードできます。
+  </div>
+
+  <!-- アクセス -->
+  <div class="guide-section">
+    <div class="guide-sec-hdr" onclick="tog(this)">
+      <div class="guide-sec-icon">📱</div>
+      <div class="guide-sec-title">アクセス方法・基本的な使い方</div>
+      <div class="guide-sec-toggle open">▶</div>
+    </div>
+    <div class="guide-sec-body open">
+      <ul class="step-list">
+        <li>iPhoneはSafari、AndroidはChromeでこのURLを開く：<br><strong style="color:var(--cyan)">https://yoshimismcfc-dotcom.github.io/portal/</strong></li>
+        <li>ホーム画面が表示されます。カードをタップして各機能を使ってください。</li>
+        <li>よく使う方はブックマーク or ホーム画面に追加すると便利です（7章参照）。</li>
+      </ul>
+      <div class="tip-box">💡 アプリのダウンロードは不要！ブラウザで開くだけで使えます。</div>
+    </div>
+  </div>
+
+  <!-- よく使う -->
+  <div class="guide-section">
+    <div class="guide-sec-hdr" onclick="tog(this)">
+      <div class="guide-sec-icon">⚡</div>
+      <div class="guide-sec-title">よく使う機能の使い方</div>
+      <div class="guide-sec-toggle">▶</div>
+    </div>
+    <div class="guide-sec-body">
+      <table class="feat-table">
+        <thead><tr><th>機能</th><th>使い方</th></tr></thead>
+        <tbody>
+          <tr><td>📅 カレンダー</td><td>タップして開くだけ。月・週・日で表示切り替えできます。予定追加はコーチがGoogle側で行います。</td></tr>
+          <tr><td>✋ 出欠確認</td><td>「団員」か「コーチ」を選んでタップ → 調整さんが開くので〇△×を入力。</td></tr>
+          <tr><td>🌤️ 天気・WBGT</td><td>「現在地の気象を取得」をタップ（位置情報の許可が必要）。今後8時間の熱中症リスクも表示。</td></tr>
+          <tr><td>📒 団員名簿</td><td>セルをタップして氏名・背番号などを編集。「保存」ボタンで確定。データは端末に保存されます。</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  <!-- 試合 -->
+  <div class="guide-section">
+    <div class="guide-sec-hdr" onclick="tog(this)">
+      <div class="guide-sec-icon">🏟️</div>
+      <div class="guide-sec-title">試合・大会の機能</div>
+      <div class="guide-sec-toggle">▶</div>
+    </div>
+    <div class="guide-sec-body">
+      <table class="feat-table">
+        <thead><tr><th>機能</th><th>使い方</th></tr></thead>
+        <tbody>
+          <tr><td>📐 ピッチサイズ</td><td>8人制・低学年のコートサイズと設営方法を図解。初めての方でも分かります。</td></tr>
+          <tr><td>🟡 審判ガイド</td><td>ジェスチャーと動き方を図解。初心者向けの丁寧な説明付き。</td></tr>
+          <tr><td>📋 当番表</td><td>当番の記録と持ち物チェックリスト。追加・削除が可能。</td></tr>
+          <tr><td>👕 ユニフォーム</td><td>カラー別フォルダで一覧管理。貸出・返却・削除ができます。</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  <!-- コーチ -->
+  <div class="guide-section">
+    <div class="guide-sec-hdr" onclick="tog(this)">
+      <div class="guide-sec-icon">🔒</div>
+      <div class="guide-sec-title">コーチ専用エリア（パスコード：2026）</div>
+      <div class="guide-sec-toggle">▶</div>
+    </div>
+    <div class="guide-sec-body">
+      <ul class="step-list">
+        <li>ホーム画面の「コーチ専用」をタップ → パスコード「2026」を入力</li>
+        <li>ガイダンス設定でホーム画面のお知らせを編集できます（保存すると即座に反映）</li>
+        <li>大会要綱・対戦表を入力だけで自動生成 → PDFで保存・印刷できます</li>
+        <li>Gmail・Googleカレンダーへのリンクもあります</li>
+      </ul>
+    </div>
+  </div>
+
+  <!-- PDF -->
+  <div class="guide-section">
+    <div class="guide-sec-hdr" onclick="tog(this)">
+      <div class="guide-sec-icon">📄</div>
+      <div class="guide-sec-title">PDF保存・送信の方法</div>
+      <div class="guide-sec-toggle">▶</div>
+    </div>
+    <div class="guide-sec-body">
+      <div style="font-size:.85rem;font-weight:900;color:var(--cyan);margin-bottom:6px">🍎 iPhone（Safari）</div>
+      <ul class="step-list">
+        <li>「🖨 印刷・PDF」ボタンをタップ</li>
+        <li>印刷プレビューが開いたら 2本指でピンチアウト（広げる動作）</li>
+        <li>PDFプレビューになったら左下の共有ボタン →「PDFに保存」</li>
+        <li>LINEやメールに添付して送信できます</li>
+      </ul>
+      <div style="font-size:.85rem;font-weight:900;color:var(--green);margin-bottom:6px;margin-top:10px">🤖 Android（Chrome）</div>
+      <ul class="step-list">
+        <li>「🖨 印刷・PDF」ボタンをタップ</li>
+        <li>印刷ダイアログで送信先を「PDF形式で保存」に変更</li>
+        <li>対戦表の場合は向きを「横」に設定してから保存</li>
+        <li>保存したPDFをLINE・メールで送信</li>
+      </ul>
+    </div>
+  </div>
+
+  <!-- ホーム追加 -->
+  <div class="guide-section">
+    <div class="guide-sec-hdr" onclick="tog(this)">
+      <div class="guide-sec-icon">📲</div>
+      <div class="guide-sec-title">アプリとしてホーム画面に追加する方法</div>
+      <div class="guide-sec-toggle">▶</div>
+    </div>
+    <div class="guide-sec-body">
+      <div style="font-size:.85rem;font-weight:900;color:var(--cyan);margin-bottom:6px">🍎 iPhone（Safariのみ対応）</div>
+      <ul class="step-list">
+        <li>Safariでこのページを開く</li>
+        <li>画面下部の「共有ボタン（□↑）」をタップ</li>
+        <li>「ホーム画面に追加」を選択 →「追加」をタップ</li>
+      </ul>
+      <div style="font-size:.85rem;font-weight:900;color:var(--green);margin-bottom:6px;margin-top:10px">🤖 Android（Chromeのみ対応）</div>
+      <ul class="step-list">
+        <li>Chromeでこのページを開く</li>
+        <li>右上メニュー（⋮）→「アプリをインストール」または「ホーム画面に追加」</li>
+        <li>「インストール」をタップ</li>
+      </ul>
+    </div>
+  </div>
+
+</main>
+<footer class="site-footer">YOSHIMI SMC FC — SMART PORTAL</footer>
+<script>
+function tog(hdr){
+  var body=hdr.nextElementSibling;
+  var icon=hdr.querySelector(".guide-sec-toggle");
+  var open=body.classList.contains("open");
+  body.classList.toggle("open",!open);
+  icon.classList.toggle("open",!open);
+}
+</script>
+</body>
+</html>

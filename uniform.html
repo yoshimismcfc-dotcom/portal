@@ -6,64 +6,83 @@
   <title>ユニフォーム貸出｜吉見SMC FC</title>
   <link rel="stylesheet" href="common.css">
   <style>
+    /* ===== 統計バー ===== */
     .stat-row{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-bottom:16px}
     .stat-card{background:var(--surface-lt);border-radius:var(--r8);padding:12px;text-align:center;border:1px solid var(--line)}
     .stat-card .sv{font-size:1.6rem;font-weight:900;color:#fff}
     .stat-card .sl{font-size:.7rem;color:var(--ink-3);margin-top:2px}
-    /* フォルダ */
-    .color-folder{margin-bottom:16px;border-radius:var(--r12);overflow:hidden;border:1px solid var(--line-2)}
-    .cf-header{
-      display:flex;align-items:center;gap:12px;padding:12px 16px;
-      cursor:pointer;user-select:none;transition:.15s;
-    }
+
+    /* ===== カラーフォルダ ===== */
+    .color-folder{margin-bottom:14px;border-radius:var(--r12);overflow:hidden;border:1px solid var(--line-2)}
+    .cf-header{display:flex;align-items:center;gap:10px;padding:11px 14px;cursor:pointer;user-select:none;transition:.15s}
     .cf-header:hover{filter:brightness(1.1)}
-    .cf-swatch{width:22px;height:22px;border-radius:50%;flex-shrink:0;border:2px solid rgba(255,255,255,.3);box-shadow:0 0 8px rgba(0,0,0,.4)}
-    .cf-name{font-size:.92rem;font-weight:900;color:#fff;flex:1}
-    .cf-stats{display:flex;gap:10px;font-size:.74rem;flex-shrink:0}
+    .cf-swatch{width:18px;height:18px;border-radius:50%;flex-shrink:0;border:2px solid rgba(255,255,255,.35);box-shadow:0 0 6px rgba(0,0,0,.5)}
+    .cf-name{font-size:.9rem;font-weight:900;color:#fff;flex:1}
+    .cf-stats{display:flex;gap:8px;font-size:.72rem;flex-shrink:0}
     .cf-free{color:#00ff88;font-weight:700}
     .cf-lent{color:#ff4466;font-weight:700}
-    .cf-total{color:var(--ink-3)}
-    .cf-toggle{font-size:.8rem;color:var(--ink-3);transition:transform .2s;flex-shrink:0}
+    .cf-total{color:rgba(255,255,255,.65)}
+    .cf-toggle{font-size:.75rem;color:rgba(255,255,255,.6);transition:transform .2s;flex-shrink:0}
     .cf-toggle.open{transform:rotate(90deg)}
-    .cf-body{display:none;padding:12px;background:rgba(0,0,0,.25)}
+    .cf-body{display:none;background:#0a1824}
     .cf-body.open{display:block}
-    /* カード */
-    .uni-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(110px,1fr));gap:9px}
-    .uni-card{
-      border-radius:var(--r8);border:1px solid var(--line);
-      padding:10px 8px;text-align:center;cursor:pointer;transition:.15s;
-      position:relative;overflow:hidden;
+
+    /* ===== 一覧テーブル ===== */
+    .uni-table{width:100%;border-collapse:collapse;font-size:.82rem}
+    .uni-table thead tr{background:#003087}
+    .uni-table th{
+      color:#fff;font-weight:900;font-size:.75rem;
+      padding:8px 8px;text-align:center;white-space:nowrap;
+      border-bottom:2px solid rgba(255,255,255,.2);
     }
-    /* ユニフォームストライプ背景 */
-    .uni-card::before{
-      content:"";position:absolute;inset:0;opacity:.18;pointer-events:none;
-      background:repeating-linear-gradient(
-        var(--stripe-angle,90deg),
-        var(--stripe-c1,transparent) 0,var(--stripe-c1,transparent) 8px,
-        var(--stripe-c2,transparent) 8px,var(--stripe-c2,transparent) 16px
-      );
+    .uni-table th:first-child{text-align:left;padding-left:12px}
+    .uni-table tbody tr{
+      border-bottom:1px solid rgba(255,255,255,.07);
+      transition:.12s;cursor:pointer;
     }
-    .uni-card:hover{transform:translateY(-2px);box-shadow:var(--shadow)}
-    .uni-card.free{border-color:rgba(0,255,136,.4)}
-    .uni-card.lent{border-color:rgba(255,68,102,.45)}
-    .uni-num{font-size:1.7rem;font-weight:900;color:#fff;line-height:1;position:relative;z-index:1}
-    .uni-player{font-size:.68rem;color:var(--cyan);margin:2px 0;min-height:13px;position:relative;z-index:1}
-    .uni-size{font-size:.65rem;color:var(--ink-3);position:relative;z-index:1}
-    .uni-stat{font-size:.74rem;font-weight:900;margin:4px 0;position:relative;z-index:1}
-    .uni-who{font-size:.63rem;color:var(--ink-3);margin-top:1px;position:relative;z-index:1}
-    .uni-edit-btn{margin-top:5px;font-size:.6rem;height:20px;padding:0 6px;border-radius:4px;position:relative;z-index:1}
-    /* モーダル */
+    .uni-table tbody tr:nth-child(even){background:rgba(255,255,255,.03)}
+    .uni-table tbody tr:hover{background:rgba(255,107,43,.1)}
+    .uni-table td{
+      padding:9px 8px;color:#e0f0ff;text-align:center;
+      vertical-align:middle;
+    }
+    .uni-table td:first-child{text-align:left;padding-left:12px;font-weight:700;color:#fff}
+    .uni-table td:nth-child(2){font-size:1.05rem;font-weight:900;color:#fff}
+    /* ステータスバッジ */
+    .badge-free{display:inline-block;background:rgba(0,255,136,.15);color:#00ff88;border:1px solid rgba(0,255,136,.35);border-radius:99px;padding:2px 9px;font-size:.72rem;font-weight:700;white-space:nowrap}
+    .badge-lent{display:inline-block;background:rgba(255,68,102,.15);color:#ff6680;border:1px solid rgba(255,68,102,.35);border-radius:99px;padding:2px 9px;font-size:.72rem;font-weight:700;white-space:nowrap}
+    .who-text{font-size:.75rem;color:#94c4e4;margin-top:2px}
+    /* アクションボタン列 */
+    .uni-actions{display:flex;gap:5px;justify-content:center;align-items:center}
+    .action-btn{
+      border:1px solid;border-radius:6px;padding:4px 9px;
+      font-size:.7rem;font-weight:700;cursor:pointer;
+      background:none;transition:.14s;white-space:nowrap;
+    }
+    .action-btn.lend-btn{color:var(--orange);border-color:rgba(255,107,43,.45)}
+    .action-btn.lend-btn:hover{background:rgba(255,107,43,.15)}
+    .action-btn.return-btn{color:#00ff88;border-color:rgba(0,255,136,.4)}
+    .action-btn.return-btn:hover{background:rgba(0,255,136,.12)}
+    .action-btn.edit-btn{color:var(--cyan);border-color:rgba(0,212,255,.35)}
+    .action-btn.edit-btn:hover{background:rgba(0,212,255,.1)}
+    .action-btn.del-btn{color:#ff6680;border-color:rgba(255,68,102,.35)}
+    .action-btn.del-btn:hover{background:rgba(255,68,102,.12)}
+
+    /* ===== モーダル ===== */
     .modal-bg{position:fixed;inset:0;background:rgba(0,0,0,.82);display:none;place-items:center;z-index:200;backdrop-filter:blur(6px);padding:16px}
     .modal-bg.open{display:grid}
-    .modal{background:var(--surface-lt);border:1px solid var(--line-2);border-radius:var(--r16);padding:22px;width:min(440px,100%);box-shadow:var(--shadow-lg);max-height:90vh;overflow-y:auto}
+    .modal{background:var(--surface-lt);border:1px solid var(--line-2);border-radius:var(--r16);padding:22px;width:min(420px,100%);box-shadow:var(--shadow-lg);max-height:90vh;overflow-y:auto}
     .modal h3{font-size:.95rem;font-weight:900;color:#fff;margin-bottom:14px}
     .modal-btns{display:flex;gap:8px;justify-content:flex-end;margin-top:14px;flex-wrap:wrap}
     .fg2{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+    /* カラーパレット */
     .color-palette{display:flex;gap:8px;flex-wrap:wrap;margin-top:6px;margin-bottom:6px}
     .cp-sw{width:28px;height:28px;border-radius:50%;border:3px solid transparent;cursor:pointer;transition:.12s;flex-shrink:0;box-shadow:0 2px 6px rgba(0,0,0,.4)}
     .cp-sw.sel{border-color:#fff;box-shadow:0 0 0 2px var(--orange),0 2px 6px rgba(0,0,0,.4)}
+    /* 履歴 */
     .hist-item{background:rgba(255,255,255,.04);border-radius:var(--r8);padding:8px 12px;font-size:.78rem;display:flex;align-items:center;gap:7px;margin-bottom:5px;flex-wrap:wrap}
     @media(max-width:400px){.fg2{grid-template-columns:1fr}}
+    @media(max-width:520px){.uni-table{font-size:.75rem}.uni-table th,.uni-table td{padding:7px 5px}}
   </style>
 </head>
 <body>
@@ -81,19 +100,22 @@
     <div class="hero-emoji">👕</div>
     <div>
       <div class="hero-title">ユニフォーム貸出管理</div>
-      <div class="hero-sub">カラー別フォルダで背番号・選手名・貸出先を管理します。</div>
+      <div class="hero-sub">カラー別フォルダで一覧管理。背番号・選手名・貸出先を記録します。</div>
     </div>
   </div>
   <div class="notice-bar">💾 データはこのブラウザ（端末）に保存されます。</div>
+
   <div class="stat-row" id="stat-row"></div>
-  <div style="display:flex;gap:8px;margin-bottom:16px;flex-wrap:wrap">
+
+  <div style="display:flex;gap:8px;margin-bottom:14px;flex-wrap:wrap">
     <button class="btn btn-primary" onclick="openAdd()">＋ ユニフォームを追加</button>
     <button class="btn btn-outline btn-sm" onclick="showHistory()">📋 貸出履歴</button>
   </div>
+
   <div id="color-folders"></div>
 </main>
 
-<!-- 追加/編集 -->
+<!-- 追加/編集モーダル -->
 <div class="modal-bg" id="modal-add">
   <div class="modal">
     <h3 id="add-title">ユニフォームを追加</h3>
@@ -110,7 +132,7 @@
         <option>SS</option><option>S</option><option>M</option><option>L</option><option>XL</option>
       </select></div>
     <div class="form-group">
-      <label class="form-label">カラー（フォルダ分け）</label>
+      <label class="form-label">カラー</label>
       <div class="color-palette" id="cp"></div>
       <div style="display:flex;gap:8px;margin-top:6px;align-items:center">
         <input class="form-control" id="u-cname" placeholder="色の名前" style="flex:1">
@@ -127,7 +149,7 @@
   </div>
 </div>
 
-<!-- 貸出/返却 -->
+<!-- 貸出/返却モーダル -->
 <div class="modal-bg" id="modal-lend">
   <div class="modal">
     <h3 id="lend-title">貸出・返却</h3>
@@ -149,7 +171,7 @@
   </div>
 </div>
 
-<!-- 履歴 -->
+<!-- 履歴モーダル -->
 <div class="modal-bg" id="modal-hist">
   <div class="modal">
     <h3>📋 貸出履歴</h3>
@@ -162,27 +184,21 @@
 <script>
 var KU="smc_uniform_v3",KH="smc_uniform_hist_v1";
 var editId=null,lendId=null;
-
-// 指定のユニフォームカラー（背番号の縦ストライプイメージ）
 var PALETTE=[
-  {name:"オレンジ赤縦じま", c1:"#e85c1e",c2:"#bc002d",code:"#e85c1e",angle:0},
-  {name:"白赤",              c1:"#ffffff",c2:"#bc002d",code:"#dd1122",angle:0},
-  {name:"白",                c1:"#e0e8f0",c2:"#c0ccdc",code:"#d0dce8",angle:0},
-  {name:"水色ピンク",        c1:"#4ab8e8",c2:"#f06090",code:"#4ab8e8",angle:0},
-  {name:"水色オレンジ",      c1:"#4ab8e8",c2:"#ff8c00",code:"#2090cc",angle:0},
-  {name:"オレンジ",          c1:"#ff8c00",c2:"#ffb347",code:"#ff8c00",angle:0},
-  {name:"黄色",              c1:"#f5d300",c2:"#ffec60",code:"#e6c800",angle:0},
-  {name:"緑",                c1:"#228b22",c2:"#32cd32",code:"#228b22",angle:0},
+  {name:"オレンジ赤縦じま",c1:"#e85c1e",c2:"#bc002d",code:"#e85c1e"},
+  {name:"白赤",            c1:"#f0f0f0",c2:"#bc002d",code:"#dd1122"},
+  {name:"白",              c1:"#e0e8f0",c2:"#c0ccdc",code:"#d0dce8"},
+  {name:"水色ピンク",      c1:"#4ab8e8",c2:"#f06090",code:"#4ab8e8"},
+  {name:"水色オレンジ",    c1:"#4ab8e8",c2:"#ff8c00",code:"#2090cc"},
+  {name:"オレンジ",        c1:"#ff8c00",c2:"#ffb347",code:"#ff8c00"},
+  {name:"黄色",            c1:"#f5d300",c2:"#ffec60",code:"#e6c800"},
+  {name:"緑",              c1:"#228b22",c2:"#32cd32",code:"#228b22"},
 ];
-
 function loadU(){try{return JSON.parse(localStorage.getItem(KU))||[];}catch(e){return[];}}
 function saveU(d){localStorage.setItem(KU,JSON.stringify(d));}
 function loadH(){try{return JSON.parse(localStorage.getItem(KH))||[];}catch(e){return[];}}
 function saveH(d){localStorage.setItem(KH,JSON.stringify(d));}
-
-function getColorDef(cname){
-  return PALETTE.find(function(p){return p.name===cname;})||{c1:"#555",c2:"#777",code:"#555",angle:0};
-}
+function getPalette(cname){return PALETTE.find(function(p){return p.name===cname;})||{c1:"#555",c2:"#777",code:"#555"};}
 
 function renderStats(){
   var d=loadU(),total=d.length,free=d.filter(function(u){return !u.lentTo;}).length;
@@ -194,45 +210,54 @@ function renderStats(){
 
 function renderFolders(){
   var data=loadU();
-  // パレット順にフォルダ並べる
+  // パレット順でグループ化
   var map={};
-  PALETTE.forEach(function(p){map[p.name]={code:p.code,c1:p.c1,c2:p.c2,angle:p.angle,items:[]};});
-  map["その他"]={code:"#555",c1:"#555",c2:"#777",angle:0,items:[]};
+  PALETTE.forEach(function(p){map[p.name]={p:p,items:[]};});
+  map["その他"]={p:{code:"#666",c1:"#555",c2:"#777"},items:[]};
   data.forEach(function(u){
     var k=u.cname||"その他";
-    if(!map[k])map[k]={code:u.ccode||"#555",c1:u.ccode||"#555",c2:"#777",angle:0,items:[]};
+    if(!map[k])map[k]={p:{code:u.ccode||"#666",c1:u.ccode||"#555",c2:"#777"},items:[]};
     map[k].items.push(u);
   });
-  var container=document.getElementById("color-folders");
-  var html="";
+  var container=document.getElementById("color-folders"),html="";
   Object.keys(map).forEach(function(cname,fi){
     var cg=map[cname];
     if(!cg.items.length)return;
+    // 背番号順ソート
     var items=cg.items.slice().sort(function(a,b){return Number(a.num)-Number(b.num);});
     var free=items.filter(function(u){return !u.lentTo;}).length;
     var lent=items.length-free;
     var bodyId="cfb"+fi;
-    var headerBg="linear-gradient(135deg,"+cg.c1+","+cg.c2+")";
+    var hdrGrad="linear-gradient(135deg,"+cg.p.c1+","+cg.p.c2+")";
 
-    var cards=items.map(function(u){
+    // テーブル行生成
+    var rows=items.map(function(u){
       var isLent=!!u.lentTo;
-      var cd=getColorDef(u.cname);
-      return '<div class="uni-card '+(isLent?"lent":"free")+'" onclick="openLend(\''+u.id+'\''+')"'
-        +' style="background:'+cd.c1+';'
-        +'--stripe-c1:'+cd.c1+';--stripe-c2:'+cd.c2+';--stripe-angle:0deg">'
-        +'<div class="uni-num">#'+u.num+'</div>'
-        +(u.player?'<div class="uni-player">'+u.player+'</div>':'<div class="uni-player"></div>')
-        +'<div class="uni-size">'+u.size+'</div>'
-        +(u.memo?'<div style="font-size:.6rem;color:rgba(255,255,255,.6);position:relative;z-index:1">'+u.memo+'</div>':"")
-        +'<div class="uni-stat" style="color:'+(isLent?"#ff8888":"#00ff88")+'">'+(isLent?"🔴 貸出中":"🟢 在庫")+'</div>'
-        +(isLent?'<div class="uni-who">'+u.lentTo+'</div>':"")
-        +'<button class="btn btn-outline btn-sm uni-edit-btn" onclick="event.stopPropagation();openEdit(\''+u.id+'\')">✏️</button>'
-        +'</div>';
+      var statusBadge=isLent
+        ?'<span class="badge-lent">貸出中</span><div class="who-text">'+u.lentTo+(u.lentDate?"<br>"+u.lentDate+"〜":"")+'</div>'
+        :'<span class="badge-free">在庫あり</span>';
+      var lendReturnBtn=isLent
+        ?'<button class="action-btn return-btn" onclick="event.stopPropagation();openLend(\''+u.id+'\')">返却</button>'
+        :'<button class="action-btn lend-btn" onclick="event.stopPropagation();openLend(\''+u.id+'\')">貸出</button>';
+      return '<tr>'
+        +'<td><span style="font-size:1.1rem;font-weight:900;color:#fff">#'+u.num+'</span>'
+        +(u.player?'<div style="font-size:.72rem;color:#94c4e4;margin-top:1px">'+u.player+'</div>':'')
+        +'</td>'
+        +'<td><span style="background:'+cg.p.code+';border-radius:99px;padding:1px 8px;font-size:.72rem;color:#fff;font-weight:700">'+cname+'</span></td>'
+        +'<td>'+u.size+'</td>'
+        +'<td>'+(u.memo?u.memo:'—')+'</td>'
+        +'<td>'+statusBadge+'</td>'
+        +'<td><div class="uni-actions">'
+        +lendReturnBtn
+        +'<button class="action-btn edit-btn" onclick="event.stopPropagation();openEdit(\''+u.id+'\')">編集</button>'
+        +'<button class="action-btn del-btn" onclick="event.stopPropagation();confirmDel(\''+u.id+'\')">削除</button>'
+        +'</div></td>'
+        +'</tr>';
     }).join("");
 
     html+='<div class="color-folder">'
-      +'<div class="cf-header" style="background:'+headerBg+'" onclick="toggleFolder(\''+bodyId+'\')">'
-      +'<div class="cf-swatch" style="background:'+cg.code+'"></div>'
+      +'<div class="cf-header" style="background:'+hdrGrad+'" onclick="toggleFolder(\''+bodyId+'\')">'
+      +'<div class="cf-swatch" style="background:'+cg.p.code+'"></div>'
       +'<div class="cf-name">'+cname+'</div>'
       +'<div class="cf-stats">'
       +'<span class="cf-total">全'+items.length+'着</span>'
@@ -242,11 +267,19 @@ function renderFolders(){
       +'<span class="cf-toggle open" id="ft'+bodyId+'">▶</span>'
       +'</div>'
       +'<div class="cf-body open" id="'+bodyId+'">'
-      +'<div class="uni-grid">'+cards+'</div>'
+      +'<div style="overflow-x:auto">'
+      +'<table class="uni-table">'
+      +'<thead><tr>'
+      +'<th>背番号 / 名前</th><th>カラー</th><th>サイズ</th><th>メモ</th><th>状態</th><th>操作</th>'
+      +'</tr></thead>'
+      +'<tbody>'+rows+'</tbody>'
+      +'</table>'
+      +'</div>'
       +'</div>'
       +'</div>';
   });
-  container.innerHTML=html||'<div style="text-align:center;color:var(--ink-3);padding:36px;font-size:.88rem">ユニフォームがありません。「＋ ユニフォームを追加」から登録してください。</div>';
+  document.getElementById("color-folders").innerHTML=html||
+    '<div style="text-align:center;color:var(--ink-3);padding:36px;font-size:.88rem">ユニフォームがありません。「＋ ユニフォームを追加」から登録してください。</div>';
 }
 
 function toggleFolder(id){
@@ -296,8 +329,7 @@ function openEdit(id){
 function saveUni(){
   var num=document.getElementById("u-num").value.trim();
   if(!num){alert("背番号を入力してください");return;}
-  var data=loadU();
-  var id=editId||("u"+Date.now());
+  var data=loadU(),id=editId||("u"+Date.now());
   var exist=data.find(function(x){return x.id===id;});
   var entry=Object.assign(exist||{},{
     id:id,num:num,
@@ -313,6 +345,12 @@ function saveUni(){
 function deleteUni(){
   if(!editId||!confirm("削除しますか？"))return;
   saveU(loadU().filter(function(x){return x.id!==editId;}));closeM("modal-add");render();
+}
+function confirmDel(id){
+  var u=loadU().find(function(x){return x.id===id;});
+  if(!u)return;
+  if(!confirm("#"+u.num+(u.player?" "+u.player:"")+" を削除しますか？"))return;
+  saveU(loadU().filter(function(x){return x.id!==id;}));render();
 }
 
 function openLend(id){
@@ -337,22 +375,22 @@ function openLend(id){
 function doLend(){
   var name=document.getElementById("l-name").value.trim();
   if(!name){alert("氏名を入力してください");return;}
-  var data=loadU();var u=data.find(function(x){return x.id===lendId;});if(!u)return;
+  var data=loadU(),u=data.find(function(x){return x.id===lendId;});if(!u)return;
   u.lentTo=name;u.lentDate=document.getElementById("l-date").value;u.retDate=document.getElementById("l-ret").value;
   saveU(data);
   var h=loadH();h.push({type:"貸出",date:u.lentDate,num:u.num,cname:u.cname,player:u.player||"",name:name,retDate:u.retDate||""});saveH(h);
   closeM("modal-lend");render();
 }
 function doReturn(){
-  var data=loadU();var u=data.find(function(x){return x.id===lendId;});if(!u)return;
+  var data=loadU(),u=data.find(function(x){return x.id===lendId;});if(!u)return;
   var h=loadH();h.push({type:"返却",date:new Date().toISOString().slice(0,10),num:u.num,cname:u.cname,player:u.player||"",name:u.lentTo,retDate:""});saveH(h);
   delete u.lentTo;delete u.lentDate;delete u.retDate;
   saveU(data);closeM("modal-lend");render();
 }
 function showHistory(){
   var h=loadH().reverse();
-  var list=document.getElementById("hist-list");
-  list.innerHTML=!h.length?'<div style="color:var(--ink-3);text-align:center;padding:20px">履歴がありません。</div>'
+  document.getElementById("hist-list").innerHTML=!h.length
+    ?'<div style="color:var(--ink-3);text-align:center;padding:20px">履歴がありません。</div>'
     :h.map(function(x){
       return '<div class="hist-item">'
         +'<span style="color:'+(x.type==="貸出"?"#ffaa66":"#66ffaa")+';font-weight:900;white-space:nowrap">'+x.type+'</span>'

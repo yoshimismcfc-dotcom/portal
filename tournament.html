@@ -177,7 +177,7 @@
       </div>
       <div style="display:flex;gap:8px;margin-top:10px;flex-wrap:wrap">
         <button class="btn btn-primary" onclick="buildYoukou()" style="flex:1">👁 要綱プレビューを表示</button>
-        <button class="btn btn-outline btn-sm no-print" onclick="printPortrait()">🖨 印刷・PDF（A4縦）</button>
+        <button class="btn btn-cyan btn-sm no-print" onclick="buildAndPrintPortrait()" id="you-print-btn" disabled>🖨 印刷・PDF（A4縦）</button>
       </div>
     </div>
     <div class="pdf-guide" id="y-guide">
@@ -211,7 +211,7 @@
       <div id="team-inputs"></div>
       <div style="display:flex;gap:8px;margin-top:10px;flex-wrap:wrap">
         <button class="btn btn-primary" onclick="buildTaisen()" style="flex:1">📊 対戦表を生成する</button>
-        <button class="btn btn-outline btn-sm no-print" onclick="printLandscape()">🖨 印刷・PDF（A4横）</button>
+        <button class="btn btn-cyan btn-sm no-print" onclick="buildAndPrintLandscape()" id="tai-print-btn" disabled>🖨 印刷・PDF（A4横）</button>
       </div>
     </div>
     <div class="pdf-guide" id="t-guide">
@@ -495,6 +495,14 @@ function buildTaisen(){
 }
 
 /* ===== 印刷 ===== */
+function buildAndPrintPortrait(){
+  buildYoukou();
+  setTimeout(function(){printPortrait();},600);
+}
+function buildAndPrintLandscape(){
+  buildTaisen();
+  setTimeout(function(){printLandscape();},600);
+}
 function printPortrait(){
   var s=document.getElementById('pOS');
   if(!s){s=document.createElement('style');s.id='pOS';document.head.appendChild(s);}

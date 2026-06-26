@@ -6,36 +6,43 @@
   <title>チームカレンダー｜吉見SMC FC</title>
   <link rel="stylesheet" href="common.css">
   <style>
-    .calendar-wrap {
+    /* page-wrapの最大幅制限を解除して全幅活用 */
+    .page-wrap { max-width: 100% !important; padding: 10px 4px 30px !important; }
+    .cal-outer {
       border-radius: var(--r12);
       overflow: hidden;
-      box-shadow: var(--shadow-md);
+      border: 1px solid var(--line-2);
+      box-shadow: var(--shadow);
+      background: #fff;
+      /* ビューポート幅いっぱいに広げる */
+      width: 100%;
     }
-    .calendar-wrap iframe {
+    .cal-outer iframe {
       display: block;
       width: 100%;
-      height: 600px;
+      height: calc(100vh - 180px);
+      min-height: 520px;
       border: none;
     }
+    /* モバイルでの最低高さ確保 */
+    @media (max-width: 600px) {
+      .cal-outer iframe { height: 70vh; min-height: 400px; }
+    }
+    /* パネルも幅いっぱいに */
+    .panel { max-width: 100%; }
   </style>
 </head>
 <body>
-
 <header class="site-header">
   <div class="header-inner">
     <a class="header-logo" href="index.html">
       <div class="logo-mark">⚽</div>
-      <div>
-        <span class="logo-name">吉見SMC FC</span>
-        <span class="logo-sub">SMART PORTAL</span>
-      </div>
+      <div><span class="logo-name">吉見SMC FC</span><span class="logo-sub">SMART PORTAL</span></div>
     </a>
   </div>
 </header>
-
 <main class="page-wrap">
   <a class="back-btn" href="index.html">ホームに戻る</a>
-
   <div class="hero-band">
     <div class="hero-emoji">📅</div>
     <div>
@@ -43,25 +50,14 @@
       <div class="hero-sub">練習・試合・イベントの予定を一元管理。Google側で更新すると自動反映されます。</div>
     </div>
   </div>
-
-  <div class="panel">
-    <div class="panel-title">チーム予定表</div>
-    <div class="calendar-wrap">
-      <iframe src="https://calendar.google.com/calendar/embed?height=600&wkst=1&ctz=Asia%2FTokyo&showPrint=0&src=eW9zaGltaS5zbWMuZmNAZ21haWwuY29t&src=ZmNlZmY4MjEzODJlMTRhYjhjNTA0YTIwZTEyNjI3M2U0ZmM1ODgzYmYzODdhN2FlMzAyNjJjYTZlOGM5ZWMwNUBncm91cC5jYWxlbmRhci5nb29nbGUuY29t&src=YjkwYmQ4MTAwMWNkMDk2MzU1MWM4Y2Q0NGViNTM1MzFkMTU4N2YzYWI4NzU5MzE4ZTgwMjNkYTY1YjdiMDhlZUBncm91cC5jYWxlbmRhci5nb29nbGUuY29t&src=MWU1YTdkN2ZkOTFjYTg0OTg3YjE5ODBhNjU3NmQ3MDM0ZjQzMWU3OTA2N2ZlMmM4ZTFhMzhmZWIwNmZlMjI5MkBncm91cC5jYWxlbmRhci5nb29nbGUuY29t&src=Zjg1OGY0MzMxN2JhYTFmZmIwY2UxMTEwYjAzYzZlY2FjM2JmMTBhNWQ1MzY3NDI0YTBiOWZjNTM4YjUwZWZjZkBncm91cC5jYWxlbmRhci5nb29nbGUuY29t&src=NzNiNzM1YmRlNWI5ZDIyZjI3M2M0ODBlNTcyMTg4NWQ1MWUxOWZlZGFkZTcxZGYwN2M1MjFlOTlmNmQ1M2YzYUBncm91cC5jYWxlbmRhci5nb29nbGUuY29t&src=MDFkMjJiNzA4ZDYzMjA5OGY0NWRkN2JjMWJlMGNhZTg4ZWZmMDBlNGQyZTRiOWYwNzdjOGQ3MGJjY2E0NmRlMEBncm91cC5jYWxlbmRhci5nb29nbGUuY29t&src=Y2NkODMzMGJiM2I2ZWZiOGY5MGEzNmUxNjU1YWMwNDU5ZGRiZTA0NzE1NTMyNTM2N2JiMGZlZGRkMWVhZTgzZEBncm91cC5jYWxlbmRhci5nb29nbGUuY29t&src=amEuamFwYW5lc2UjaG9saWRheUBncm91cC52LmNhbGVuZGFyLmdvb2dsZS5jb20&color=%23616161&color=%23f09300&color=%23d50000&color=%238e24aa&color=%230b8043&color=%237cb342&color=%23e4c441&color=%234285f4&color=%23616161"
-        frameborder="0" scrolling="no" allowfullscreen>
-      </iframe>
-    </div>
+  <div class="cal-outer">
+    <iframe src="https://calendar.google.com/calendar/embed?height=600&wkst=1&ctz=Asia%2FTokyo&showPrint=0&src=eW9zaGltaS5zbWMuZmNAZ21haWwuY29t&src=ZmNlZmY4MjEzODJlMTRhYjhjNTA0YTIwZTEyNjI3M2U0ZmM1ODgzYmYzODdhN2FlMzAyNjJjYTZlOGM5ZWMwNUBncm91cC5jYWxlbmRhci5nb29nbGUuY29t&src=YjkwYmQ4MTAwMWNkMDk2MzU1MWM4Y2Q0NGViNTM1MzFkMTU4N2YzYWI4NzU5MzE4ZTgwMjNkYTY1YjdiMDhlZUBncm91cC5jYWxlbmRhci5nb29nbGUuY29t&src=MWU1YTdkN2ZkOTFjYTg0OTg3YjE5ODBhNjU3NmQ3MDM0ZjQzMWU3OTA2N2ZlMmM4ZTFhMzhmZWIwNmZlMjI5MkBncm91cC5jYWxlbmRhci5nb29nbGUuY29t&src=Zjg1OGY0MzMxN2JhYTFmZmIwY2UxMTEwYjAzYzZlY2FjM2JmMTBhNWQ1MzY3NDI0YTBiOWZjNTM4YjUwZWZjZkBncm91cC5jYWxlbmRhci5nb29nbGUuY29t&src=NzNiNzM1YmRlNWI5ZDIyZjI3M2M0ODBlNTcyMTg4NWQ1MWUxOWZlZGFkZTcxZGYwN2M1MjFlOTlmNmQ1M2YzYUBncm91cC5jYWxlbmRhci5nb29nbGUuY29t&src=MDFkMjJiNzA4ZDYzMjA5OGY0NWRkN2JjMWJlMGNhZTg4ZWZmMDBlNGQyZTRiOWYwNzdjOGQ3MGJjY2E0NmRlMEBncm91cC5jYWxlbmRhci5nb29nbGUuY29t&src=Y2NkODMzMGJiM2I2ZWZiOGY5MGEzNmUxNjU1YWMwNDU5ZGRiZTA0NzE1NTMyNTM2N2JiMGZlZGRkMWVhZTgzZEBncm91cC5jYWxlbmRhci5nb29nbGUuY29t&src=amEuamFwYW5lc2UjaG9saWRheUBncm91cC52LmNhbGVuZGFyLmdvb2dsZS5jb20&color=%23616161&color=%23f09300&color=%23d50000&color=%238e24aa&color=%230b8043&color=%237cb342&color=%23e4c441&color=%234285f4&color=%23616161"
+      frameborder="0" scrolling="no" allowfullscreen></iframe>
   </div>
-
-  <div class="notice-bar">
-    📌 予定変更はGoogle側で更新してください。このページに自動で反映されます。
+  <div class="notice-bar" style="margin-top:12px">
+    📌 予定の追加・変更はGoogle側で行ってください。このページに自動で反映されます。
   </div>
-
 </main>
-
-<footer class="site-footer">
-  吉見SMCサッカースポーツ少年団｜スマートポータル
-</footer>
-
+<footer class="site-footer">YOSHIMI SMC FC — SMART PORTAL</footer>
 </body>
 </html>
