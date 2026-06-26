@@ -291,3 +291,100 @@ select.form-control option{background:var(--surface-lt);color:#ffffff}
   .page-wrap{padding:14px 12px 44px}
 }
 @media(max-width:380px){.card-grid{grid-template-columns:1fr}}
+
+/* =====================================================
+   ⚽ サッカー日本代表デザイン追加要素
+   ===================================================== */
+
+/* 日本代表カラー */
+:root {
+  --japan-blue:   #003087;
+  --japan-blue-2: #0050cc;
+  --japan-red:    #bc002d;
+  --field-green:  #2d7a2d;
+  --field-line:   rgba(255,255,255,.85);
+}
+
+/* ピッチ風背景グリッド（セクション区切りに使用） */
+.pitch-divider {
+  position: relative;
+  height: 40px;
+  margin: 8px 0 20px;
+  overflow: hidden;
+  border-radius: var(--r8);
+  background: linear-gradient(135deg, #1a5c1a 0%, #2d7a2d 50%, #1a5c1a 100%);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 12px;
+  font-size: .7rem;
+  font-weight: 900;
+  color: rgba(255,255,255,.8);
+  letter-spacing: .15em;
+}
+.pitch-divider::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background:
+    repeating-linear-gradient(90deg, rgba(255,255,255,.08) 0px, rgba(255,255,255,.08) 1px, transparent 1px, transparent 60px),
+    repeating-linear-gradient(0deg, rgba(255,255,255,.06) 0px, rgba(255,255,255,.06) 1px, transparent 1px, transparent 30px);
+}
+.pitch-divider span { position: relative; z-index: 1; }
+
+/* ユニフォームストライプカード背景 */
+.card-stripe-v {
+  background: repeating-linear-gradient(
+    90deg,
+    transparent 0px, transparent 8px,
+    rgba(255,255,255,.05) 8px, rgba(255,255,255,.05) 9px
+  );
+}
+.card-stripe-h {
+  background: repeating-linear-gradient(
+    0deg,
+    transparent 0px, transparent 6px,
+    rgba(255,255,255,.04) 6px, rgba(255,255,255,.04) 7px
+  );
+}
+
+/* 日本代表エンブレム風ヘッダー装飾 */
+.japan-header-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  background: linear-gradient(135deg, var(--japan-blue), var(--japan-blue-2));
+  border: 1px solid rgba(255,255,255,.2);
+  border-radius: 99px;
+  padding: 3px 12px 3px 8px;
+  font-size: .65rem;
+  font-weight: 900;
+  color: #fff;
+  letter-spacing: .1em;
+  box-shadow: 0 2px 12px rgba(0,48,135,.6);
+}
+.japan-header-badge::before { content: "⚽"; font-size: .8rem; }
+
+/* セクションヘッドのサッカー風アイコンオーバーライド */
+.section-head .section-icon.si-pitch {
+  background: linear-gradient(135deg, #1a5c1a, #2d7a2d);
+  box-shadow: 0 0 10px rgba(45,122,45,.6);
+}
+.section-head .section-icon.si-japan {
+  background: linear-gradient(135deg, var(--japan-blue), var(--japan-blue-2));
+  box-shadow: 0 0 10px rgba(0,48,135,.6);
+}
+
+/* ボールアイコン点滅（重要アラート用） */
+@keyframes ball-bounce {
+  0%,100% { transform: translateY(0); }
+  50%      { transform: translateY(-4px); }
+}
+.ball-bounce { animation: ball-bounce 1.2s ease-in-out infinite; display: inline-block; }
+
+/* 日本代表カラーのバッジ */
+.badge-japan {
+  background: linear-gradient(135deg, var(--japan-blue), var(--japan-blue-2));
+  color: #fff;
+  border: 1px solid rgba(255,255,255,.25);
+}

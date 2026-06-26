@@ -5,7 +5,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>吉見SMC FC スマートポータル</title>
   <link rel="manifest" href="manifest.json">
-  <meta name="theme-color" content="#ff6b2b">
+  <meta name="theme-color" content="#003087">
   <meta name="mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
@@ -13,32 +13,114 @@
   <link rel="apple-touch-icon" href="icon.svg">
   <link rel="stylesheet" href="common.css">
   <style>
-    .japan-stripe{height:4px;background:linear-gradient(90deg,#003087 33%,#fff 33%,#fff 66%,#003087 66%)}
-    .portal-header{text-align:center;padding:22px 16px 16px;margin-bottom:20px;background:linear-gradient(180deg,rgba(0,48,135,.18),transparent);border-bottom:1px solid rgba(0,212,255,.18);position:relative}
-    .portal-header::after{content:"";position:absolute;bottom:0;left:10%;right:10%;height:1px;background:linear-gradient(90deg,transparent,rgba(0,212,255,.4),transparent)}
-    .portal-eyebrow{font-size:.6rem;font-weight:900;letter-spacing:.2em;color:var(--cyan);margin-bottom:6px;display:flex;align-items:center;justify-content:center;gap:10px}
-    .portal-eyebrow::before,.portal-eyebrow::after{content:"";flex:1;max-width:48px;height:1px;background:linear-gradient(90deg,transparent,var(--cyan))}
-    .portal-eyebrow::after{background:linear-gradient(90deg,var(--cyan),transparent)}
-    .portal-header h1{font-size:clamp(1rem,3.8vw,1.35rem);font-weight:900;color:#fff;letter-spacing:.04em;line-height:1.25;text-shadow:0 0 24px rgba(0,48,135,.8),0 0 48px rgba(0,212,255,.3)}
-    .portal-header .sub{font-size:.7rem;color:var(--ink-3);margin-top:4px}
-    .japan-accent{display:flex;align-items:center;gap:8px;justify-content:center;margin-bottom:6px}
-    .japan-accent .jline{width:28px;height:2px;background:#003087;border-radius:1px}
-    /* 使い方 */
-    .howto-section{background:rgba(255,255,255,.03);border:1px solid var(--line);border-radius:var(--r12);padding:16px 18px;margin-bottom:0}
-    .howto-title{font-size:.85rem;font-weight:900;color:var(--cyan);margin-bottom:10px;display:flex;align-items:center;gap:6px}
-    .howto-item{margin-bottom:12px}
-    .howto-item .hi-label{font-size:.8rem;font-weight:900;color:#fff;margin-bottom:4px;display:flex;align-items:center;gap:6px}
-    .howto-item .hi-label .os-badge{font-size:.65rem;padding:2px 6px;border-radius:4px;font-weight:700}
-    .hi-ios .os-badge{background:rgba(0,212,255,.18);color:var(--cyan)}
-    .hi-android .os-badge{background:rgba(0,255,136,.15);color:var(--green)}
-    .howto-item .hi-steps{font-size:.76rem;color:#a8d4f0;line-height:1.9}
-    .howto-item .hi-steps span{display:flex;align-items:baseline;gap:6px}
-    .howto-item .hi-steps .step-num{background:var(--orange);color:#fff;border-radius:99px;width:16px;height:16px;display:inline-flex;align-items:center;justify-content:center;font-size:.62rem;font-weight:900;flex-shrink:0}
-    .howto-note{font-size:.7rem;color:var(--ink-3);margin-top:6px;line-height:1.6;padding-top:6px;border-top:1px solid var(--line)}
+    /* ===== ヘッダーストライプ（日本代表カラー） ===== */
+    .japan-bar { height:5px; background:linear-gradient(90deg,#003087 0%,#003087 50%,#bc002d 50%,#bc002d 100%); }
+
+    /* ===== ヒーローエリア ===== */
+    .portal-hero {
+      position: relative; overflow: hidden;
+      background: linear-gradient(160deg, #003087 0%, #0050cc 45%, #001a4f 100%);
+      border-radius: var(--r16); margin-bottom: 20px;
+      padding: 28px 20px 24px; text-align: center;
+      box-shadow: 0 8px 32px rgba(0,48,135,.5), 0 0 0 1px rgba(255,255,255,.08);
+    }
+    /* ピッチグリッド背景 */
+    .portal-hero::before {
+      content: "";
+      position: absolute; inset: 0; pointer-events: none;
+      background:
+        repeating-linear-gradient(0deg,   rgba(255,255,255,.04) 0px, rgba(255,255,255,.04) 1px, transparent 1px, transparent 32px),
+        repeating-linear-gradient(90deg,  rgba(255,255,255,.04) 0px, rgba(255,255,255,.04) 1px, transparent 1px, transparent 32px);
+    }
+    /* 円（センターサークル風） */
+    .portal-hero::after {
+      content: "";
+      position: absolute; left: 50%; top: 50%; width: 260px; height: 260px;
+      border: 1px solid rgba(255,255,255,.08); border-radius: 50%;
+      transform: translate(-50%,-50%); pointer-events: none;
+    }
+    .hero-badge {
+      display: inline-flex; align-items: center; gap: 6px;
+      background: rgba(255,255,255,.12); border: 1px solid rgba(255,255,255,.2);
+      border-radius: 99px; padding: 3px 14px; font-size: .62rem;
+      font-weight: 900; color: rgba(255,255,255,.85); letter-spacing: .12em;
+      margin-bottom: 10px;
+    }
+    .hero-badge::before { content: "🇯🇵"; font-size: .8rem; }
+    .portal-hero h1 {
+      font-size: clamp(1.05rem, 4vw, 1.4rem); font-weight: 900; color: #fff;
+      letter-spacing: .04em; line-height: 1.25; margin-bottom: 6px;
+      text-shadow: 0 2px 12px rgba(0,0,0,.4);
+      position: relative; z-index: 1;
+    }
+    .portal-hero .sub { font-size: .72rem; color: rgba(255,255,255,.65); position: relative; z-index: 1; }
+    .hero-emblem {
+      font-size: 2.8rem; margin-bottom: 8px; position: relative; z-index: 1;
+      filter: drop-shadow(0 0 12px rgba(255,255,255,.3));
+      animation: ball-bounce 2s ease-in-out infinite;
+    }
+    /* 赤白ストライプ下部装飾 */
+    .hero-stripe-bottom {
+      position: absolute; bottom: 0; left: 0; right: 0; height: 4px;
+      background: linear-gradient(90deg,
+        #bc002d 0%, #bc002d 20%, #fff 20%, #fff 40%,
+        #003087 40%, #003087 60%, #fff 60%, #fff 80%, #bc002d 80%);
+    }
+
+    /* ===== ピッチ風セクション区切り ===== */
+    .pitch-section-divider {
+      height: 32px; margin: 4px 0 16px;
+      background: linear-gradient(90deg, #1a5c1a, #2d8c2d, #1a5c1a);
+      border-radius: var(--r8); position: relative; overflow: hidden;
+      display: flex; align-items: center; justify-content: center;
+    }
+    .pitch-section-divider::before {
+      content: "";
+      position: absolute; inset: 0;
+      background: repeating-linear-gradient(90deg,transparent 0,transparent 59px,rgba(255,255,255,.15) 59px,rgba(255,255,255,.15) 60px);
+    }
+    .pitch-section-divider .psd-text {
+      position: relative; z-index: 1; font-size: .62rem; font-weight: 900;
+      color: rgba(255,255,255,.8); letter-spacing: .14em;
+    }
+
+    /* ===== アラートバナー ===== */
+    .auto-alert {
+      border-radius: var(--r12); padding: 14px 16px; margin-bottom: 14px;
+      border: 1px solid; display: none; gap: 10px; flex-direction: column;
+    }
+    .auto-alert.show { display: flex; }
+    .auto-alert.alert-rain {
+      background: rgba(68,136,255,.12); border-color: rgba(68,136,255,.4);
+    }
+    .auto-alert.alert-heat {
+      background: rgba(255,68,68,.12); border-color: rgba(255,68,68,.4);
+    }
+    .alert-title { font-size: .88rem; font-weight: 900; display: flex; align-items: center; gap: 7px; }
+    .alert-rain  .alert-title { color: #93c5fd; }
+    .alert-heat  .alert-title { color: #fca5a5; }
+    .alert-body  { font-size: .8rem; line-height: 1.75; }
+    .alert-rain  .alert-body  { color: #bfdbfe; }
+    .alert-heat  .alert-body  { color: #fecaca; }
+
+    /* ===== 使い方 ===== */
+    .howto-section { background: rgba(255,255,255,.03); border: 1px solid var(--line); border-radius: var(--r12); padding: 16px 18px; }
+    .howto-item { margin-bottom: 12px; }
+    .howto-item:last-child { margin-bottom: 0; }
+    .hi-label { font-size: .8rem; font-weight: 900; color: #fff; margin-bottom: 5px; display: flex; align-items: center; gap: 6px; }
+    .os-badge { font-size: .65rem; padding: 2px 7px; border-radius: 4px; font-weight: 700; }
+    .hi-ios    .os-badge { background: rgba(0,212,255,.18); color: var(--cyan); }
+    .hi-android .os-badge { background: rgba(0,255,136,.15); color: var(--green); }
+    .hi-steps { font-size: .76rem; color: #a8d4f0; line-height: 2; }
+    .hi-steps span { display: flex; align-items: baseline; gap: 6px; }
+    .step-num { background: var(--orange); color: #fff; border-radius: 99px; width: 16px; height: 16px; display: inline-flex; align-items: center; justify-content: center; font-size: .6rem; font-weight: 900; flex-shrink: 0; }
+    .howto-note { font-size: .7rem; color: var(--ink-3); margin-top: 8px; line-height: 1.7; padding-top: 8px; border-top: 1px solid var(--line); }
   </style>
 </head>
 <body>
-<div class="japan-stripe"></div>
+<!-- 日本代表カラーバー -->
+<div class="japan-bar"></div>
+
 <header class="site-header">
   <div class="header-inner">
     <a class="header-logo" href="index.html">
@@ -50,7 +132,7 @@
 
 <main class="page-wrap">
 
-  <!-- ガイダンス・注意事項 -->
+  <!-- ガイダンス・注意事項（コーチ設定） -->
   <div id="home-guidance" class="dynamic-notice guidance" style="display:none">
     <span class="notice-label">📢 INFO</span><span id="guidance-text"></span>
   </div>
@@ -58,19 +140,28 @@
     <span class="notice-label">⚠️ ALERT</span><span id="warning-text"></span>
   </div>
 
-  <!-- タイトル -->
-  <div class="portal-header">
-    <div class="japan-accent">
-      <div class="jline"></div><span>⚽</span><div class="jline"></div>
-    </div>
-    <div class="portal-eyebrow">JUNIOR SOCCER SMART PORTAL</div>
+  <!-- 天気自動アラート -->
+  <div class="auto-alert alert-rain" id="auto-rain">
+    <div class="alert-title">🌧️ 雨の予報があります</div>
+    <div class="alert-body" id="auto-rain-body"></div>
+  </div>
+  <div class="auto-alert alert-heat" id="auto-heat">
+    <div class="alert-title">🌡️ <span class="ball-bounce">⚠️</span> 熱中症に注意が必要です</div>
+    <div class="alert-body" id="auto-heat-body"></div>
+  </div>
+
+  <!-- ヒーロー -->
+  <div class="portal-hero">
+    <div class="hero-emblem">⚽</div>
+    <div class="hero-badge">YOSHIMI SMC FOOTBALL CLUB</div>
     <h1>吉見SMCサッカースポーツ少年団</h1>
     <div class="sub">団員・保護者・コーチのためのチームポータル</div>
+    <div class="hero-stripe-bottom"></div>
   </div>
 
   <!-- QUICK ACCESS -->
-  <div class="section-head"><div class="section-icon">⚡</div><h2>QUICK ACCESS</h2><div class="section-divider"></div></div>
-  <div class="card-grid">
+  <div class="pitch-section-divider"><span class="psd-text">⚡ QUICK ACCESS</span></div>
+  <div class="card-grid" style="margin-bottom:20px">
     <a class="menu-card accent" href="calendar.html"><div class="card-icon">📅</div><div class="card-label">チームカレンダー</div><div class="card-desc">試合・練習の予定</div><span class="card-badge">Google</span></a>
     <a class="menu-card" href="attendance.html"><div class="card-icon">✋</div><div class="card-label">出欠確認</div><div class="card-desc">団員・コーチ別に回答</div></a>
     <a class="menu-card accent" href="weather.html"><div class="card-icon">🌤️</div><div class="card-label">天気・WBGT</div><div class="card-desc">8時間予報＋熱中症判定</div><span class="card-badge">GPS</span></a>
@@ -78,8 +169,8 @@
   </div>
 
   <!-- MATCH & OPS -->
-  <div class="section-head"><div class="section-icon">🏟️</div><h2>MATCH & OPS</h2><div class="section-divider"></div></div>
-  <div class="card-grid">
+  <div class="pitch-section-divider"><span class="psd-text">🏟️ MATCH &amp; OPS</span></div>
+  <div class="card-grid" style="margin-bottom:20px">
     <a class="menu-card" href="pitch.html"><div class="card-icon">📐</div><div class="card-label">ピッチサイズ</div><div class="card-desc">8人制・低学年・設営図</div></a>
     <a class="menu-card" href="referee.html"><div class="card-icon">🟡</div><div class="card-label">審判ガイド</div><div class="card-desc">ジェスチャー・役割</div></a>
     <a class="menu-card" href="duty.html"><div class="card-icon">📋</div><div class="card-label">当番表</div><div class="card-desc">随時入力・荷物チェック</div></a>
@@ -87,8 +178,8 @@
   </div>
 
   <!-- MEMBERS -->
-  <div class="section-head"><div class="section-icon">👨‍👩‍👦</div><h2>MEMBERS</h2><div class="section-divider"></div></div>
-  <div class="card-grid">
+  <div class="pitch-section-divider"><span class="psd-text">👨‍👩‍👦 MEMBERS</span></div>
+  <div class="card-grid" style="margin-bottom:20px">
     <a class="menu-card" href="album.html"><div class="card-icon">📸</div><div class="card-label">写真・動画</div><div class="card-desc">アルバム・試合動画</div></a>
     <a class="menu-card" href="join.html"><div class="card-icon">⚽</div><div class="card-label">体験・入団</div><div class="card-desc">申込書・A4印刷</div></a>
     <a class="menu-card accent" href="coach.html"><div class="card-icon">🔒</div><div class="card-label">コーチ専用</div><div class="card-desc">練習メニュー・資料</div></a>
@@ -96,28 +187,28 @@
   </div>
 
   <!-- LINKS -->
-  <div class="section-head"><div class="section-icon">🔗</div><h2>LINKS</h2><div class="section-divider"></div></div>
-  <div class="card-grid">
+  <div class="pitch-section-divider"><span class="psd-text">🔗 LINKS</span></div>
+  <div class="card-grid" style="margin-bottom:20px">
     <a class="menu-card" href="https://www.instagram.com/yoshimi.smc.fc?igsh=Y3NlNWd0MndzZ2Mw&utm_source=qr" target="_blank" rel="noopener"><div class="card-icon">📷</div><div class="card-label">Instagram</div><div class="card-desc">チームの活動写真</div></a>
     <a class="menu-card accent" href="https://lin.ee/RZ53mSm" target="_blank" rel="noopener"><div class="card-icon">💬</div><div class="card-label">LINEを登録</div><div class="card-desc">公式LINEに友だち追加</div><span class="card-badge">友だち追加</span></a>
     <a class="menu-card" href="https://line.me/R/nv/recommendOA/@097pvkaq" target="_blank" rel="noopener"><div class="card-icon">🔗</div><div class="card-label">LINEをシェア</div><div class="card-desc">友達にLINEを紹介する</div><span class="card-badge">シェア</span></a>
     <a class="menu-card" href="https://yoshimi-smc.studio.site/" target="_blank" rel="noopener"><div class="card-icon">🌐</div><div class="card-label">ホームページ</div><div class="card-desc">チーム公式サイト</div><span class="card-badge">外部</span></a>
   </div>
 
-  <!-- 使い方（アプリとして使う） -->
-  <div class="section-head"><div class="section-icon">📱</div><h2>アプリとして使う方法</h2><div class="section-divider"></div></div>
+  <!-- アプリとして使う方法 -->
+  <div class="pitch-section-divider" style="margin-bottom:14px"><span class="psd-text">📱 アプリとして使う方法</span></div>
   <div class="howto-section">
     <div class="howto-item hi-ios">
-      <div class="hi-label"><span class="os-badge">🍎 iPhone / iPad</span>（Safari使用）</div>
+      <div class="hi-label"><span class="os-badge">🍎 iPhone / iPad</span>（Safariのみ対応）</div>
       <div class="hi-steps">
         <span><span class="step-num">1</span>Safariでこのページを開く</span>
-        <span><span class="step-num">2</span>画面下部の「共有ボタン（□に↑）」をタップ</span>
+        <span><span class="step-num">2</span>画面下部の「共有ボタン（□↑）」をタップ</span>
         <span><span class="step-num">3</span>「ホーム画面に追加」を選択</span>
         <span><span class="step-num">4</span>「追加」をタップ → ホーム画面にアイコンが追加されます</span>
       </div>
     </div>
     <div class="howto-item hi-android" style="margin-top:10px">
-      <div class="hi-label"><span class="os-badge">🤖 Android</span>（Chrome使用）</div>
+      <div class="hi-label"><span class="os-badge">🤖 Android</span>（Chromeのみ対応）</div>
       <div class="hi-steps">
         <span><span class="step-num">1</span>Chromeでこのページを開く</span>
         <span><span class="step-num">2</span>右上メニュー（⋮）をタップ</span>
@@ -126,20 +217,133 @@
       </div>
     </div>
     <div class="howto-note">
-      ※ ホーム画面に追加するとアプリのように全画面で起動し、一部の機能はオフラインでも使えます。<br>
-      ※ iPhoneはSafari（Chromeは非対応）、AndroidはChromeで行ってください。
+      ※ ホーム画面に追加するとアプリのように全画面で起動します。オフライン時も一部機能が使えます。<br>
+      ※ iPhoneはSafariブラウザのみ、AndroidはChromeブラウザのみ対応しています。
     </div>
   </div>
 
 </main>
-<div class="japan-stripe"></div>
+
+<div class="japan-bar"></div>
 <footer class="site-footer">YOSHIMI SMC FC — SMART PORTAL</footer>
 
 <script>
+// コーチ設定ガイダンス表示
 var g=localStorage.getItem("smc_guidance"),w=localStorage.getItem("smc_warning");
 if(g){document.getElementById("guidance-text").textContent=g;document.getElementById("home-guidance").style.display="flex";}
 if(w){document.getElementById("warning-text").textContent=w;document.getElementById("home-warning").style.display="flex";}
+
+// Service Worker
 if("serviceWorker" in navigator){navigator.serviceWorker.register("/portal/sw.js").catch(function(){});}
+
+// ===== 天気自動アラート =====
+// 練習スケジュール定義
+var SCHEDULES = [
+  {day:3, name:"水曜練習（体育館）", start:"18:00", end:"21:00", indoor:true},  // 水曜
+  {day:4, name:"木曜練習（体育館）", start:"17:30", end:"20:30", indoor:true},  // 木曜
+  {day:6, name:"土曜練習", start:"07:00", end:"10:30", indoor:false},            // 土曜
+  {day:0, name:"日曜練習", start:"07:00", end:"10:30", indoor:false},            // 日曜
+];
+
+function estimateWBGT(t,h){return 0.735*t+0.0374*h+0.00292*t*h-4.064;}
+
+function getNextSchedule(){
+  var now=new Date();
+  // 今日か今後3日以内の練習を探す
+  for(var offset=0;offset<4;offset++){
+    var d=new Date(now); d.setDate(d.getDate()+offset);
+    var dow=d.getDay();
+    for(var i=0;i<SCHEDULES.length;i++){
+      var s=SCHEDULES[i];
+      if(s.day===dow){
+        // 練習開始1時間前かどうか
+        var parts=s.start.split(":");
+        var practiceStart=new Date(d);
+        practiceStart.setHours(parseInt(parts[0]),parseInt(parts[1]),0,0);
+        var alertTime=new Date(practiceStart.getTime()-60*60*1000); // 1時間前
+        // 今がalertTime以降 かつ練習開始前ならアラート対象
+        if(now>=alertTime && now<practiceStart || offset>0){
+          return {schedule:s, date:d, practiceStart:practiceStart, offset:offset};
+        }
+      }
+    }
+  }
+  return null;
+}
+
+function checkWeatherAlert(){
+  if(!navigator.geolocation)return;
+  var info=getNextSchedule();
+  if(!info)return;
+
+  navigator.geolocation.getCurrentPosition(function(pos){
+    var lat=pos.coords.latitude,lon=pos.coords.longitude;
+    var url="https://api.open-meteo.com/v1/forecast?latitude="+lat+"&longitude="+lon
+      +"&hourly=temperature_2m,relative_humidity_2m,weathercode,precipitation_probability"
+      +"&timezone=Asia/Tokyo&forecast_days=3";
+    fetch(url).then(function(r){return r.json();}).then(function(data){
+      // 練習時間帯のデータを抽出
+      var hours=data.hourly;
+      var practiceDate=info.date;
+      var startH=parseInt(info.schedule.start.split(":")[0]);
+      var endH=parseInt(info.schedule.end.split(":")[0]);
+      var dateStr=practiceDate.getFullYear()+"-"
+        +String(practiceDate.getMonth()+1).padStart(2,"0")+"-"
+        +String(practiceDate.getDate()).padStart(2,"0");
+
+      var rainMax=0,wbgtMax=0,hasRain=false;
+      hours.time.forEach(function(t,i){
+        if(t.startsWith(dateStr)){
+          var h=parseInt(t.slice(11,13));
+          if(h>=startH && h<=endH){
+            var pp=hours.precipitation_probability[i]||0;
+            var wc=hours.weathercode[i]||0;
+            var wbgt=estimateWBGT(hours.temperature_2m[i],hours.relative_humidity_2m[i]);
+            if(pp>40||wc>=51)hasRain=true;
+            if(pp>rainMax)rainMax=pp;
+            if(wbgt>wbgtMax)wbgtMax=wbgt;
+          }
+        }
+      });
+
+      var dow=["日","月","火","水","木","金","土"][practiceDate.getDay()];
+      var label=info.offset===0?"本日":"明日（"+dow+"）";
+      var sname=info.schedule.name;
+      var isIndoor=info.schedule.indoor;
+
+      // 雨アラート
+      if(hasRain && !isIndoor){
+        var rainBody=label+"の"+sname+"（"+info.schedule.start+"〜"+info.schedule.end+"）に雨の予報（降水確率"+rainMax+"%）があります。\n\n";
+        rainBody+="【準備のお願い】\n";
+        rainBody+="・室内用シューズを忘れずにご用意ください\n";
+        rainBody+="・練習時間・場所が変更になる場合があります\n";
+        rainBody+="・土曜：北小体育館 ／ 日曜：北小体育館（他団体使用時は利用不可）\n";
+        rainBody+="・雨天時は月によって時間が変わります（奇偶月で入替）\n";
+        rainBody+="  ▶ 奇数月(5/7/9/11/1/3月)：6〜4年 8:00〜10:00 ／ 3年〜年長 10:00〜12:00\n";
+        rainBody+="  ▶ 偶数月(4/6/8/10/12/2月)：3年〜年長 8:00〜10:00 ／ 6〜4年 10:00〜12:00";
+        document.getElementById("auto-rain-body").textContent=rainBody;
+        document.getElementById("auto-rain").classList.add("show");
+      }
+
+      // 熱中症アラート
+      if(wbgtMax>=25 && !isIndoor){
+        var heatLv=wbgtMax>=31?"危険":wbgtMax>=28?"厳重警戒":"警戒";
+        var heatBody=label+"の"+sname+"の時間帯にWBGT "+wbgtMax.toFixed(1)+"℃（"+heatLv+"）の予報があります。\n\n";
+        heatBody+="【準備のお願い】\n";
+        heatBody+="・水筒は2本以上、スポーツドリンクも持参してください\n";
+        heatBody+="・帽子（日除け帽）を必ず着用してください\n";
+        heatBody+="・日焼け止めを塗ってきてください\n";
+        heatBody+="・保冷剤・タオルがあると助かります";
+        if(wbgtMax>=31)heatBody+="\n⚠️ WBGT31℃以上は活動中止基準です。当日の判断にご注意ください。";
+        document.getElementById("auto-heat-body").textContent=heatBody;
+        document.getElementById("auto-heat").classList.add("show");
+      }
+    }).catch(function(){});
+  },function(){},{ timeout:8000,maximumAge:1800000 }); // 30分キャッシュ
+}
+
+// ページロード時に自動チェック
+window.addEventListener("DOMContentLoaded",function(){checkWeatherAlert();});
 </script>
 </body>
 </html>

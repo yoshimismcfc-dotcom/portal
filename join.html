@@ -9,15 +9,15 @@
     .page-tab-bar{display:flex;gap:0;margin-bottom:20px;border-radius:var(--r8);overflow:hidden;border:1px solid var(--line-2)}
     .page-tab-btn{flex:1;padding:12px 8px;font:inherit;font-size:.88rem;font-weight:900;background:var(--surface-lt);color:#6aaccc;border:none;cursor:pointer;transition:.15s;display:flex;align-items:center;justify-content:center;gap:6px}
     .page-tab-btn:not(:last-child){border-right:1px solid var(--line-2)}
-    .page-tab-btn.active{background:linear-gradient(135deg,var(--orange),var(--orange-2));color:#fff}
+    .page-tab-btn.active{background:linear-gradient(135deg,#003087,#0050cc);color:#fff}
     .fg2{display:grid;grid-template-columns:1fr 1fr;gap:12px}
     .fg3{display:grid;grid-template-columns:1fr 1fr 1fr;gap:12px}
-    .fst{font-size:.75rem;font-weight:900;color:var(--cyan);letter-spacing:.1em;text-transform:uppercase;margin:14px 0 8px;padding-bottom:5px;border-bottom:1px solid var(--line)}
+    .fst{font-size:.72rem;font-weight:900;color:var(--cyan);letter-spacing:.1em;text-transform:uppercase;margin:14px 0 8px;padding-bottom:5px;border-bottom:1px solid var(--line)}
     @media(max-width:480px){.fg2,.fg3{grid-template-columns:1fr}}
     #form-area{display:block}
     #preview-area{display:none}
 
-    /* ===== 印刷設定 ===== */
+    /* ===== 印刷 ===== */
     @page{size:A4 portrait;margin:0}
     @media print{
       *{-webkit-print-color-adjust:exact;print-color-adjust:exact}
@@ -27,71 +27,56 @@
       #form-area{display:none!important}
       #preview-area{display:block!important;padding:0!important;margin:0!important}
       .psheet{
-        width:210mm!important;height:297mm!important;
-        padding:10mm 15mm 8mm!important;
-        margin:0!important;box-shadow:none!important;border-radius:0!important;
-        page-break-inside:avoid!important;overflow:hidden!important;
+        width:210mm!important;min-height:297mm!important;height:297mm!important;
+        padding:14mm 18mm 10mm!important;margin:0!important;
+        box-shadow:none!important;border-radius:0!important;
+        overflow:hidden!important;page-break-inside:avoid!important;
       }
     }
 
-    /* ===== プレビュー用シート ===== */
+    /* ===== プレビュー画面 ===== */
     .psheet{
       background:#fff;color:#111;
       font-family:"Yu Mincho","Hiragino Mincho ProN","MS Mincho",serif;
       font-size:9.5pt;line-height:1.5;
       border-radius:12px;
-      box-shadow:0 24px 64px rgba(0,0,0,.4),0 0 0 1px rgba(0,0,0,.08);
-      padding:20px 28px 16px;
-      max-width:680px;margin:0 auto;
-      overflow:hidden;
+      box-shadow:0 24px 64px rgba(0,0,0,.45),0 0 0 1px rgba(0,0,0,.1);
+      padding:22px 28px 16px;max-width:680px;margin:0 auto;overflow:hidden;
     }
 
-    /* --- ヘッダー --- */
-    .ps-hd{
-      text-align:center;
-      border-bottom:3px double #000;
-      padding-bottom:8px;margin-bottom:10px;
+    /* ===== 書式スタイル（実物に忠実） ===== */
+    .ps-main-title{
+      text-align:center;font-size:13.5pt;font-weight:bold;
+      letter-spacing:.06em;text-decoration:underline;
+      margin-bottom:14px;
     }
-    .ps-hd-title{font-size:14pt;font-weight:bold;letter-spacing:.1em;margin-bottom:0}
-    .ps-hd-date{font-size:9pt;margin-top:3px}
-
-    /* --- フィールド --- */
-    .ps-row{display:flex;align-items:baseline;gap:6px;margin-bottom:4px;font-size:9.5pt}
-    .ps-label{font-size:9.5pt;font-weight:bold;white-space:nowrap;min-width:72px}
-    .ps-val{
-      border-bottom:1px solid #333;flex:1;
-      min-height:19px;padding:0 3px 1px;
-      font-size:10pt;
-    }
-    .ps-val.lg{font-size:12pt;font-weight:bold}
-    .ps-sublabel{font-size:8.5pt;color:#444;margin-bottom:1px}
-    .ps-uline{border-bottom:1px solid #333;display:block;min-height:19px;margin-bottom:3px;padding:0 3px 1px;font-size:10pt}
-    .ps-uline.lg{font-size:12pt;font-weight:bold}
+    .ps-date-row{display:flex;align-items:baseline;gap:5px;font-size:9.5pt;margin-bottom:10px}
+    .ps-ul{border-bottom:1px solid #333;display:inline-block;min-height:16px;padding:0 2px 1px;font-size:9.5pt}
+    .ps-full-ul{border-bottom:1px solid #333;display:block;min-height:17px;margin-bottom:3px;padding:0 2px 1px;font-size:10pt}
+    .ps-full-ul.lg{font-size:12pt;font-weight:bold}
+    .ps-intro{font-size:9.5pt;margin-bottom:8px}
+    .ps-label{font-size:9.5pt;font-weight:bold;margin-bottom:1px}
+    .ps-sublabel{font-size:8pt;color:#444;margin-bottom:2px;padding-left:4px}
     .ps-stamp{
-      width:28px;height:28px;border-radius:50%;border:1px solid #666;
+      width:26px;height:26px;border-radius:50%;border:1px solid #555;
       display:inline-flex;align-items:center;justify-content:center;
-      font-size:8pt;color:#888;flex-shrink:0;vertical-align:middle;
+      font-size:7.5pt;color:#777;vertical-align:middle;flex-shrink:0;
     }
-    .ps-birth{display:flex;align-items:baseline;gap:4px;font-size:9.5pt;margin-bottom:4px}
-    .ps-bval{border-bottom:1px solid #333;display:inline-block;min-height:18px;padding:0 2px;font-size:10pt}
-    .ps-addr-row{margin-bottom:4px}
-    .ps-school-row{display:flex;align-items:baseline;gap:8px;margin-bottom:4px;font-size:9.5pt}
-
-    /* --- 区切り --- */
-    .ps-divider{border:none;border-top:2px solid #000;margin:8px 0 7px}
-
-    /* --- 誓約書 --- */
-    .ps-pledge-title{text-align:center;font-size:13pt;font-weight:bold;letter-spacing:.06em;text-decoration:underline;margin-bottom:4px}
-    .ps-pledge-to{font-size:9.5pt;margin-bottom:3px}
-    .ps-pledge-date{font-size:9.5pt;margin-bottom:4px}
-    .ps-pledge-body{font-size:9pt;line-height:1.75;margin-bottom:4px}
-    .ps-ki{text-align:center;font-size:9.5pt;font-weight:bold;letter-spacing:1em;margin:4px 0}
-    .ps-pledge-list{list-style:none;padding:0;margin:0 0 4px}
-    .ps-pledge-list li{font-size:9pt;line-height:1.8;padding-left:0}
+    .ps-birth-row{display:flex;align-items:baseline;gap:5px;font-size:9.5pt;margin-bottom:6px}
+    .ps-school-row{display:flex;align-items:baseline;gap:6px;margin-bottom:6px;font-size:9.5pt}
+    .ps-row-flex{display:flex;align-items:center;gap:8px;margin-bottom:6px;font-size:9.5pt}
+    .ps-divider{border:none;border-top:1.5px solid #000;margin:10px 0 8px}
+    .ps-pledge-title{text-align:center;font-size:12pt;font-weight:bold;letter-spacing:.04em;text-decoration:underline;margin-bottom:5px}
+    .ps-pledge-to{font-size:9.5pt;margin-bottom:2px;padding-left:14px}
+    .ps-pledge-body{font-size:9pt;line-height:1.75;margin:5px 0}
+    .ps-ki{text-align:center;font-size:9.5pt;font-weight:bold;letter-spacing:1em;margin:5px 0 3px}
+    .ps-list{list-style:none;padding:0;margin:0 0 5px}
+    .ps-list li{font-size:9pt;line-height:1.85}
     .ps-ijou{text-align:right;font-size:9pt;margin-bottom:3px}
-    .ps-sign{display:flex;align-items:center;gap:8px;font-size:9.5pt;margin-top:3px}
-    .ps-sign-line{border-bottom:1px solid #333;flex:1;min-height:19px;padding:0 3px;font-size:10pt;font-weight:bold}
-    .ps-note{text-align:center;font-size:7.5pt;color:#888;margin-top:5px;border-top:1px solid #ddd;padding-top:4px}
+    .ps-sign-row{display:flex;align-items:center;gap:8px;margin-top:4px;font-size:9.5pt}
+    .ps-sign-line{border-bottom:1px solid #333;flex:1;min-height:18px;padding:0 3px;font-size:10pt;font-weight:bold}
+    .ps-note{text-align:center;font-size:7pt;color:#888;margin-top:6px;border-top:1px solid #ddd;padding-top:5px}
+    .mb2{margin-bottom:2px}.mb4{margin-bottom:4px}.mb6{margin-bottom:6px}.mb8{margin-bottom:8px}
   </style>
 </head>
 <body>
@@ -105,25 +90,24 @@
 </header>
 <main class="page-wrap">
   <a class="back-btn" href="index.html">ホームに戻る</a>
-  <div class="hero-band">
-    <div class="hero-emoji">⚽</div>
+  <div class="hero-band" style="background:linear-gradient(135deg,rgba(0,48,135,.25),rgba(0,80,204,.1))">
+    <div class="hero-emoji">📄</div>
     <div><div class="hero-title">入会申込書</div>
       <div class="hero-sub">入力後にプレビューを確認し、A4一枚で印刷できます。</div></div>
   </div>
 
-  <!-- タブ -->
   <div class="page-tab-bar no-print">
     <button class="page-tab-btn active" id="btn-form"    onclick="showTab('form')">✏️ 入力フォーム</button>
     <button class="page-tab-btn"        id="btn-preview" onclick="showTab('preview')">👁 プレビュー</button>
     <button class="page-tab-btn"        id="btn-print"   onclick="doPrint()">🖨 印刷（A4）</button>
   </div>
 
-  <!-- ===== 入力フォーム ===== -->
+  <!-- 入力フォーム -->
   <div id="form-area">
     <div class="panel">
-      <div class="fst">📅 提出日</div>
+      <div class="fst">📅 作成日（西暦）</div>
       <div class="fg3">
-        <div class="form-group"><label class="form-label">西暦（年）</label>
+        <div class="form-group"><label class="form-label">年</label>
           <input class="form-control" id="fy" type="number" placeholder="2026" style="text-align:center"></div>
         <div class="form-group"><label class="form-label">月</label>
           <input class="form-control" id="fm" type="number" min="1" max="12" placeholder="月" style="text-align:center"></div>
@@ -176,15 +160,15 @@
       </div>
     </div>
     <div style="display:flex;gap:10px;flex-wrap:wrap">
-      <button class="btn btn-primary btn-lg" onclick="showTab('preview')" style="flex:1">👁 プレビューを確認する</button>
+      <button class="btn btn-lg" onclick="showTab('preview')" style="flex:1;background:linear-gradient(135deg,#003087,#0050cc);color:#fff;font-weight:900">👁 プレビューを確認する</button>
       <button class="btn btn-outline" onclick="clearForm()">🗑 クリア</button>
     </div>
   </div>
 
-  <!-- ===== プレビュー ===== -->
+  <!-- プレビュー -->
   <div id="preview-area">
-    <div class="panel no-print" style="margin-bottom:12px;padding:10px 14px">
-      <p style="color:#a8d4f0;font-size:.84rem;margin:0">👇 内容を確認し「🖨 印刷（A4）」で印刷してください。A4一枚に収まります。</p>
+    <div class="panel no-print" style="margin-bottom:14px;padding:11px 16px">
+      <p style="color:#a8d4f0;font-size:.84rem;margin:0">👇 A4一枚で印刷されます。「🖨 印刷（A4）」をタップしてください。</p>
     </div>
     <div class="psheet" id="psheet"></div>
   </div>
@@ -201,120 +185,97 @@ function showTab(t){
 }
 function doPrint(){build();document.getElementById("form-area").style.display="none";document.getElementById("preview-area").style.display="block";setTimeout(function(){window.print();},300);}
 function g(id){var e=document.getElementById(id);return e?e.value.trim():"";}
-function v(val){return val||"";}
+function ul(v,w){return '<span class="ps-ul" style="min-width:'+(w||"100px")+'">'+(v||"")+'</span>';}
+function full(v,cls){return '<div class="ps-full-ul'+(cls?" "+cls:"")+'">'+(v||"")+'</div>';}
 
 function build(){
-  var fy=g("fy")||"　　　　",fm=g("fm")||"　　",fd=g("fd")||"　　";
+  var fy=g("fy")||"　　　",fm=g("fm")||"　",fd=g("fd")||"　";
   var pname=g("pname"),pkana=g("pkana");
   var kana=g("kana"),name=g("name");
-  var by=g("by")||"　　　　",bm=g("bm")||"　　",bd=g("bd")||"　　";
+  var by=g("by")||"　　　",bm=g("bm")||"　",bd=g("bd")||"　";
   var addr=g("addr"),school=g("school"),grade=g("grade");
   var tel=g("tel"),mobile=g("mobile");
 
-  function uline(val,cls){
-    return '<div class="ps-uline'+(cls?" "+cls:"")+'">'+(v(val))+'</div>';
-  }
-
   var h="";
 
-  /* ========== 申込書 ========== */
-  h+='<div class="ps-hd">';
-  h+='<div class="ps-hd-title">吉見　SMC　フットボールクラブ　入会申込書</div>';
-  h+='<div class="ps-hd-date">西暦　'+fy+'　年　'+fm+'　月　'+fd+'　日</div>';
-  h+='</div>';
+  /* ===== 申込書タイトル ===== */
+  h+='<div class="ps-main-title">吉見　SMC　フットボールクラブ　入会申込書</div>';
 
-  h+='<div style="font-size:9.5pt;margin-bottom:5px">吉見 SMC フットボールクラブ　に入会を希望致します。</div>';
-  h+='<div class="ps-row" style="margin-bottom:6px"><span>西暦</span><span>'+fy+'</span><span>年</span><span>'+fm+'</span><span>月</span><span>'+fd+'</span><span>日（提出日）</span></div>';
+  /* 日付1行目 */
+  h+='<div class="ps-date-row mb2">西暦 '+ul(fy,"50px")+' 年 '+ul(fm,"28px")+' 月 <span style="font-size:8pt">・</span> '+ul(fd,"28px")+' 日</div>';
+
+  h+='<div class="ps-intro mb4">吉見 SMC フットボールクラブ　に入会を希望致します。</div>';
+
+  /* 提出日 */
+  h+='<div class="ps-date-row mb6">西暦 '+ul(fy,"50px")+' 年 '+ul(fm,"40px")+' 月 '+ul(fd,"40px")+' 日(提出日)</div>';
 
   /* 保護者名 */
-  h+='<div class="ps-label">保護者名</div>';
+  h+='<div class="ps-label mb1">保護者者名</div>';
   h+='<div style="display:flex;align-items:center;gap:8px;margin-bottom:2px">';
-  h+='<div class="ps-uline lg" style="flex:1">'+v(pname)+'</div>';
-  h+='<span class="ps-stamp">印</span>';
-  h+='</div>';
-  h+='<div class="ps-sublabel">（フリガナ）</div>';
-  h+=uline(pkana);
+  h+=full(pname).replace('</div>','');
+  h+='<span class="ps-stamp">印</span></div>';
+  h+='<div class="ps-sublabel mb1">(フリガナ)</div>';
+  h+=full(pkana)+'<div class="mb4"></div>';
 
   /* 入会者 */
-  h+='<div class="ps-label" style="margin-top:3px">入会者</div>';
-  h+='<div class="ps-sublabel">（フリガナ）</div>';
-  h+=uline(kana);
-  h+=uline(name,"lg");
+  h+='<div class="ps-label mb1">入会者</div>';
+  h+='<div class="ps-sublabel mb1">(西暦で記入)</div>';
+  h+=full(name,"lg")+'<div class="mb2"></div>';
+  h+=full(kana)+'<div class="mb2"></div>';
 
   /* 生年月日 */
-  h+='<div class="ps-sublabel">（西暦で記入）</div>';
-  h+='<div class="ps-label">生年月日</div>';
-  h+='<div class="ps-birth">';
-  h+='<span class="ps-bval" style="min-width:70px">'+by+'</span>年';
-  h+='<span class="ps-bval" style="min-width:40px">'+bm+'</span>月';
-  h+='<span class="ps-bval" style="min-width:40px">'+bd+'</span>日';
-  h+='</div>';
+  h+='<div class="ps-label mb1">生年月日</div>';
+  h+='<div class="ps-birth-row mb6">'+ul(by,"60px")+' 年 '+ul(bm,"36px")+' 月 '+ul(bd,"36px")+' 日</div>';
 
   /* 住所 */
-  h+='<div class="ps-label">住所　〒</div>';
-  h+=uline(addr);
-  h+='<div style="border-bottom:1px solid #333;min-height:18px;margin-bottom:3px"></div>';
+  h+='<div class="ps-row-flex mb2"><span class="ps-label">住所</span><span>〒</span><span style="border-bottom:1px solid #333;flex:1;min-height:16px;padding:0 3px">'+(addr||"")+'</span></div>';
+  h+='<div style="border-bottom:1px solid #333;min-height:16px;margin-bottom:6px"></div>';
 
   /* 学校 */
-  h+='<div class="ps-label">学校名・学年</div>';
-  h+='<div class="ps-school-row">';
-  h+='<div class="ps-uline" style="flex:1">'+v(school)+'</div>';
-  h+='<div class="ps-uline" style="min-width:60px">'+v(grade)+(grade?"年生":"　　年生")+'</div>';
+  h+='<div class="ps-label mb1">学校名・学年</div>';
+  h+='<div style="display:flex;align-items:baseline;gap:8px;margin-bottom:6px">';
+  h+='<span style="border-bottom:1px solid #333;flex:1;min-height:16px;padding:0 3px">'+(school||'')+'</span>';
+  h+='<span style="border-bottom:1px solid #333;min-width:50px;min-height:16px;padding:0 3px">'+(grade?grade:'　')+'</span><span>年生</span>';
   h+='</div>';
 
   /* 電話 */
-  h+='<div class="ps-label">電話番号</div>';
-  h+=uline(tel);
+  h+='<div class="ps-label mb1">電話番号</div>';
+  h+=full(tel)+'<div class="mb2"></div>';
 
   /* 緊急 */
-  h+='<div class="ps-row">';
-  h+='<span class="ps-label">緊急連絡先</span>';
-  h+='<div class="ps-val">'+v(mobile)+'</div>';
-  h+='<span style="font-size:8.5pt;color:#555;white-space:nowrap">（携帯）</span>';
-  h+='</div>';
-  h+='<div style="border-bottom:1px solid #333;min-height:16px;margin-bottom:4px"></div>';
+  h+='<div class="ps-label mb1">緊急連絡先</div>';
+  h+='<div class="ps-row-flex mb2"><span style="border-bottom:1px solid #333;flex:1;min-height:16px;padding:0 3px">'+(mobile||"")+'</span><span style="font-size:8.5pt;color:#444;white-space:nowrap">(携帯)</span></div>';
+  h+='<div style="border-bottom:1px solid #333;min-height:14px;margin-bottom:6px"></div>';
 
-  /* ========== 誓約書 ========== */
+  /* ===== 誓約書 ===== */
   h+='<hr class="ps-divider">';
   h+='<div class="ps-pledge-title">吉見　SMC フットボールクラブ　保護者誓約書</div>';
-  h+='<div class="ps-pledge-to">吉見　SMC　フットボールクラブ　指導者　様</div>';
-  h+='<div class="ps-pledge-date">西暦　'+fy+'　年　'+fm+'　月　'+fd+'　日（提出日）</div>';
+  h+='<div class="ps-pledge-to mb4">吉見　SMC　フットボールクラブ　指導者　様</div>';
+  h+='<div class="ps-date-row mb4">西暦 '+ul(fy,"50px")+' 年 '+ul(fm,"46px")+' 月 '+ul(fd,"46px")+' 日(提出日)</div>';
 
-  h+='<div class="ps-sublabel">（フリガナ）</div>';
-  h+='<div class="ps-label">入会者</div>';
-  h+=uline(name,"lg");
+  h+='<div class="ps-sublabel mb1">(フリガナ)</div>';
+  h+='<div class="ps-label mb1">入会者</div>';
+  h+=full(name,"lg")+'<div class="mb4"></div>';
 
   h+='<div class="ps-pledge-body">上記の者が貴　少年団に入会しサッカー等の活動を行うに際し、貴少年団の会則を尊守するとともに、下記事項について一切の責任は　保護者が負うことを誓約します。</div>';
-
   h+='<div class="ps-ki">記</div>';
-  h+='<ul class="ps-pledge-list">';
+  h+='<ul class="ps-list">';
   h+='<li>１、健康状態を常に把握し、安全確認の上参加させる。</li>';
   h+='<li>２、貴少年団活動中及び、会場と自宅との経路往復中の事故等、障害について貴少年団が指定するスポーツ安全保険の適用範囲外の　補償は、貴少年団に対して一切補償請求しない。</li>';
   h+='</ul>';
   h+='<div class="ps-ijou">以上</div>';
-
   h+='<div style="display:flex;justify-content:flex-end;margin-bottom:3px"><span class="ps-stamp">印</span></div>';
-  h+='<div class="ps-sign">';
-  h+='<span class="ps-label">保護者名</span>';
-  h+='<div class="ps-sign-line">'+v(pname)+'</div>';
-  h+='</div>';
-  h+='<div class="ps-note">※個人情報は入会後の活動管理のみに使用し、第三者へは提供いたしません。</div>';
+  h+='<div class="ps-sign-row"><span class="ps-label">保護者名</span><div class="ps-sign-line">'+(pname||"")+'</div></div>';
+  h+='<div class="ps-note">※ 個人情報は入会後の活動管理のみに使用し、第三者へは提供いたしません。</div>';
 
   document.getElementById("psheet").innerHTML=h;
 }
-
 function clearForm(){
   if(!confirm("入力内容をすべてクリアしますか？"))return;
-  ["fy","fm","fd","pname","pkana","kana","name","by","bm","bd","addr","school","tel","mobile"].forEach(function(id){
-    var e=document.getElementById(id);if(e)e.value="";
-  });
+  ["fy","fm","fd","pname","pkana","kana","name","by","bm","bd","addr","school","tel","mobile"].forEach(function(id){var e=document.getElementById(id);if(e)e.value="";});
   document.getElementById("grade").value="";
 }
-(function(){
-  var now=new Date();
-  document.getElementById("fy").value=now.getFullYear();
-  document.getElementById("fm").value=now.getMonth()+1;
-  document.getElementById("fd").value=now.getDate();
-})();
+(function(){var now=new Date();document.getElementById("fy").value=now.getFullYear();document.getElementById("fm").value=now.getMonth()+1;document.getElementById("fd").value=now.getDate();})();
 </script>
-</body></html>
+</body>
+</html>

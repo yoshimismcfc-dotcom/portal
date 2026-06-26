@@ -3,38 +3,44 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>天気・WBGT自動判定｜吉見SMC FC</title>
+  <title>天気・WBGT｜吉見SMC FC</title>
   <link rel="stylesheet" href="common.css">
   <style>
-    .weather-hero{
-      background:linear-gradient(135deg,var(--surface-lt),var(--surface));
-      border:1px solid var(--line-2);border-radius:var(--r16);
-      padding:20px;margin-bottom:16px;
-    }
-    .wbgt-big{
-      text-align:center;padding:24px 16px;border-radius:var(--r12);
-      transition:background .4s,color .4s;margin-bottom:12px;
-    }
-    .wbgt-num{font-size:3.6rem;font-weight:900;line-height:1}
-    .wbgt-lv{font-size:1.5rem;font-weight:900;margin:6px 0}
-    .wbgt-msg{font-size:.86rem;line-height:1.65;max-width:360px;margin:0 auto;opacity:.9}
-    .wbgt-meta{font-size:.72rem;opacity:.6;margin-top:8px}
-    .forecast-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:8px;margin-bottom:16px}
-    .fc-card{
-      background:var(--surface-lt);border-radius:var(--r8);
-      border:1px solid var(--line);padding:10px 8px;text-align:center;
-    }
-    .fc-time{font-size:.68rem;color:var(--ink-3);margin-bottom:4px}
-    .fc-icon{font-size:1.6rem;margin-bottom:4px}
-    .fc-temp{font-size:.9rem;font-weight:900;color:#fff}
-    .fc-hum{font-size:.7rem;color:var(--ink-3)}
-    .fc-wbgt{font-size:.72rem;font-weight:900;margin-top:3px;padding:2px 6px;border-radius:4px;display:inline-block}
-    .level-table-wrap{overflow-x:auto}
-    .level-dot{width:10px;height:10px;border-radius:50%;display:inline-block;margin-right:5px;vertical-align:middle}
+    .japan-bar{height:4px;background:linear-gradient(90deg,#003087 50%,#bc002d 50%)}
+    .wbgt-big{text-align:center;padding:24px 16px;border-radius:var(--r12);transition:all .4s;margin-bottom:12px;border:1px solid rgba(255,255,255,.1)}
+    .wbgt-num{font-size:3.8rem;font-weight:900;line-height:1}
+    .wbgt-lv{font-size:1.4rem;font-weight:900;margin:6px 0}
+    .wbgt-msg{font-size:.85rem;line-height:1.7;max-width:360px;margin:0 auto;opacity:.92}
+    .wbgt-meta{font-size:.7rem;opacity:.6;margin-top:8px}
+    .forecast-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:8px;margin-bottom:4px}
+    .fc-card{background:var(--surface-lt);border-radius:var(--r8);border:1px solid var(--line);padding:10px 7px;text-align:center}
+    .fc-time{font-size:.67rem;color:var(--ink-3);margin-bottom:3px}
+    .fc-icon{font-size:1.55rem;margin-bottom:3px}
+    .fc-temp{font-size:.82rem;font-weight:900;color:#fff}
+    .fc-wbgt{font-size:.7rem;font-weight:900;margin-top:3px;padding:2px 5px;border-radius:4px;display:inline-block}
+    .lv-dot{width:10px;height:10px;border-radius:50%;display:inline-block;margin-right:5px;vertical-align:middle}
     @media(max-width:480px){.forecast-grid{grid-template-columns:repeat(2,1fr)}}
+
+    /* 熱中症注意事項カード */
+    .heat-tip-card{
+      background:linear-gradient(135deg,rgba(255,107,43,.12),rgba(255,68,102,.08));
+      border:1px solid rgba(255,107,43,.35);border-radius:var(--r12);
+      padding:16px;margin-bottom:14px;
+    }
+    .heat-tip-title{font-size:.9rem;font-weight:900;color:#ff8855;margin-bottom:10px;display:flex;align-items:center;gap:7px}
+    .heat-tip-grid{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+    .heat-tip-item{background:rgba(0,0,0,.2);border-radius:var(--r8);padding:10px 11px}
+    .heat-tip-item .ht-icon{font-size:1.3rem;margin-bottom:4px}
+    .heat-tip-item .ht-label{font-size:.78rem;font-weight:900;color:#fff;margin-bottom:2px}
+    .heat-tip-item .ht-desc{font-size:.7rem;color:#c8e8ff;line-height:1.5}
+    @media(max-width:420px){.heat-tip-grid{grid-template-columns:1fr}}
+
+    /* 症状早見表 */
+    .symptom-table td,.symptom-table th{padding:7px 9px;font-size:.78rem}
   </style>
 </head>
 <body>
+<div class="japan-bar"></div>
 <header class="site-header">
   <div class="header-inner">
     <a class="header-logo" href="index.html">
@@ -49,17 +55,17 @@
     <div class="hero-emoji">🌤️</div>
     <div>
       <div class="hero-title">天気・WBGT 自動判定</div>
-      <div class="hero-sub">現在地の気象を自動取得。今後8時間の予報とWBGT熱中症リスクを表示します。</div>
+      <div class="hero-sub">現在地の気象を自動取得。8時間予報と熱中症リスクを表示します。</div>
     </div>
   </div>
 
-  <div style="display:flex;gap:8px;margin-bottom:14px;flex-wrap:wrap">
+  <div style="display:flex;gap:8px;margin-bottom:12px;flex-wrap:wrap">
     <button class="btn btn-primary" id="fetch-btn" onclick="fetchWeather()" style="flex:1">📍 現在地の気象を取得</button>
     <button class="btn btn-outline btn-sm" onclick="fetchWeather()">🔄 更新</button>
   </div>
   <p id="status-msg" style="font-size:.82rem;color:var(--ink-3);margin-bottom:10px;min-height:1.2em"></p>
 
-  <!-- 現在のWBGT -->
+  <!-- WBGT現在値 -->
   <div class="wbgt-big" id="wbgt-display" style="background:var(--surface-lt);color:var(--ink)">
     <div class="wbgt-num" id="wbgt-val">—</div>
     <div class="wbgt-lv" id="wbgt-lv">取得ボタンを押してください</div>
@@ -67,124 +73,176 @@
     <div class="wbgt-meta" id="wbgt-meta"></div>
   </div>
 
-  <!-- 今後8時間予報 -->
+  <!-- 8時間予報 -->
   <div class="panel">
-    <div class="panel-title">📅 今後8時間の予報</div>
+    <div class="panel-title">⏱️ 今後8時間の予報</div>
     <div class="forecast-grid" id="forecast-grid">
-      <div style="grid-column:1/-1;text-align:center;color:var(--ink-3);font-size:.85rem;padding:16px">気象データを取得すると表示されます</div>
+      <div style="grid-column:1/-1;text-align:center;color:var(--ink-3);font-size:.84rem;padding:16px">気象データを取得すると表示されます</div>
     </div>
   </div>
 
-  <!-- 判定基準表 -->
+  <!-- WBGT判定基準 -->
   <div class="panel">
-    <div class="panel-title">判定基準（日本スポーツ協会準拠）</div>
-    <div class="level-table-wrap">
-      <table class="data-table">
+    <div class="panel-title">📊 WBGT判定基準（日本スポーツ協会準拠）</div>
+    <div style="overflow-x:auto">
+      <table class="data-table symptom-table">
         <thead><tr><th>WBGT</th><th>レベル</th><th>活動の目安</th></tr></thead>
         <tbody>
-          <tr><td><span class="level-dot" style="background:#ff4466"></span>31℃以上</td><td><span class="badge badge-red">危険</span></td><td>原則運動中止。日陰待機・保護者連絡。</td></tr>
-          <tr><td><span class="level-dot" style="background:#ff8800"></span>28〜31℃</td><td><span class="badge badge-yellow">厳重警戒</span></td><td>激しい運動禁止。15分ごとに給水・休憩。</td></tr>
-          <tr><td><span class="level-dot" style="background:#ffcc00"></span>25〜28℃</td><td><span class="badge badge-yellow">警戒</span></td><td>積極的に休憩。体調不良者を早期確認。</td></tr>
-          <tr><td><span class="level-dot" style="background:#4488ff"></span>21〜25℃</td><td><span class="badge badge-blue">注意</span></td><td>給水間隔を短く。体調変化に注意。</td></tr>
-          <tr><td><span class="level-dot" style="background:#00ff88"></span>21℃未満</td><td><span class="badge badge-green">ほぼ安全</span></td><td>通常活動可。水分補給は忘れずに。</td></tr>
+          <tr><td><span class="lv-dot" style="background:#ff4466"></span>31℃以上</td><td><span class="badge badge-red">危険</span></td><td>原則運動中止。日陰で安静・保護者に連絡。</td></tr>
+          <tr><td><span class="lv-dot" style="background:#ff8800"></span>28〜31℃</td><td><span class="badge badge-yellow">厳重警戒</span></td><td>激しい運動禁止。15分ごとに給水・休憩。</td></tr>
+          <tr><td><span class="lv-dot" style="background:#ffcc00"></span>25〜28℃</td><td><span class="badge badge-yellow">警戒</span></td><td>積極的に休憩を増やす。体調不良者を早期確認。</td></tr>
+          <tr><td><span class="lv-dot" style="background:#4488ff"></span>21〜25℃</td><td><span class="badge badge-blue">注意</span></td><td>給水間隔を短く。体調変化に気を配る。</td></tr>
+          <tr><td><span class="lv-dot" style="background:#00ff88"></span>21℃未満</td><td><span class="badge badge-green">ほぼ安全</span></td><td>通常活動可。水分補給は忘れずに。</td></tr>
         </tbody>
       </table>
     </div>
-    <p style="font-size:.72rem;color:var(--ink-3);margin-top:8px">※ 推定式：WBGT≈0.735×気温+0.0374×湿度+0.00292×気温×湿度−4.064（屋外・日射あり）<br>気象データ：Open-Meteo API（無料・無登録）使用。±2〜3℃の誤差が生じる場合があります。</p>
+    <p style="font-size:.7rem;color:var(--ink-3);margin-top:8px">※ WBGT推定式：0.735×気温+0.0374×湿度+0.00292×気温×湿度−4.064（屋外・日射あり想定）。Open-Meteo API使用。実測値との誤差±2〜3℃あり。</p>
+  </div>
+
+  <!-- ⚽ 熱中症予防のポイント（サッカー少年団向け） -->
+  <div class="heat-tip-card">
+    <div class="heat-tip-title">⚽ サッカー少年団での熱中症予防のポイント</div>
+    <div class="heat-tip-grid">
+      <div class="heat-tip-item">
+        <div class="ht-icon">🧴</div>
+        <div class="ht-label">水分補給</div>
+        <div class="ht-desc">練習前・中・後に必ず補給。水筒は2本（水＋スポーツドリンク）持参。のどが渇く前に飲む習慣を。</div>
+      </div>
+      <div class="heat-tip-item">
+        <div class="ht-icon">🧢</div>
+        <div class="ht-label">帽子・日よけ</div>
+        <div class="ht-desc">日除け帽や首に濡れタオルを着用。ウォームアップ前から被ること。直射日光を避ける。</div>
+      </div>
+      <div class="heat-tip-item">
+        <div class="ht-icon">🧊</div>
+        <div class="ht-label">冷却グッズ</div>
+        <div class="ht-desc">保冷剤・冷却スプレーをクーラーボックスで持参。首・脇の下・太ももの付け根を冷やすと効果的。</div>
+      </div>
+      <div class="heat-tip-item">
+        <div class="ht-icon">⏱️</div>
+        <div class="ht-label">休憩の取り方</div>
+        <div class="ht-desc">WBGT25℃以上は30分ごとに5分休憩。28℃以上は15分ごと。必ず日陰で休憩する。</div>
+      </div>
+      <div class="heat-tip-item">
+        <div class="ht-icon">👀</div>
+        <div class="ht-label">体調チェック</div>
+        <div class="ht-desc">練習前に「昨夜よく眠れたか」「朝食を食べたか」「今日の体調は？」を確認。不調なら無理させない。</div>
+      </div>
+      <div class="heat-tip-item">
+        <div class="ht-icon">🚨</div>
+        <div class="ht-label">緊急対応</div>
+        <div class="ht-desc">ふらつき・顔が赤い・意識がおかしいときは即日陰へ。体を冷やしながら119番。一人にしない。</div>
+      </div>
+      <div class="heat-tip-item">
+        <div class="ht-icon">🌙</div>
+        <div class="ht-label">前日の準備</div>
+        <div class="ht-desc">十分な睡眠・朝食をとる。起床後すぐコップ1杯の水を飲む。暑い日が続くほど体に負担が溜まる。</div>
+      </div>
+      <div class="heat-tip-item">
+        <div class="ht-icon">🏃</div>
+        <div class="ht-label">暑熱順化</div>
+        <div class="ht-desc">夏の初めは強度を落として体を慣らす（暑熱順化）。急に炎天下で激しい練習はしない。</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- 症状別対処法 -->
+  <div class="panel">
+    <div class="panel-title">🩺 熱中症の症状と対処法</div>
+    <div style="overflow-x:auto">
+      <table class="data-table symptom-table">
+        <thead><tr><th>重症度</th><th>主な症状</th><th>対処法</th></tr></thead>
+        <tbody>
+          <tr>
+            <td><span class="badge badge-yellow">軽度</span></td>
+            <td>めまい・立ちくらみ・筋肉のけいれん・大量の汗</td>
+            <td>日陰で安静・スポーツドリンクを補給・休憩後様子見</td>
+          </tr>
+          <tr>
+            <td><span class="badge" style="background:rgba(255,136,0,.2);color:#ff8800;border:1px solid rgba(255,136,0,.4)">中度</span></td>
+            <td>頭痛・吐き気・嘔吐・体がだるい・集中できない</td>
+            <td>日陰に移動し体を冷やす・水分補給・保護者に連絡・医療機関受診を検討</td>
+          </tr>
+          <tr>
+            <td><span class="badge badge-red">重度</span></td>
+            <td>意識がない・会話がおかしい・高体温（40℃以上）・けいれん</td>
+            <td><strong style="color:#ff4466">即座に119番！</strong> 体を冷やしながら救急車を待つ。一人にしない。</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
   </div>
 
   <div class="notice-bar">
     💡 実測WBGTは環境省「<a href="https://www.wbgt.env.go.jp/" target="_blank" rel="noopener" style="color:var(--orange);font-weight:700">熱中症予防情報サイト</a>」でも確認できます。
   </div>
 </main>
+<div class="japan-bar"></div>
 <footer class="site-footer">YOSHIMI SMC FC — SMART PORTAL</footer>
 <script>
 var LEVELS=[
-  {min:31,label:"危険",     color:"#ff4466",bg:"rgba(255,68,102,.15)",  msg:"原則運動中止。日陰で安静にし、保護者へ連絡してください。"},
-  {min:28,label:"厳重警戒", color:"#ff8800",bg:"rgba(255,136,0,.12)",   msg:"激しい運動は避けてください。15分ごとに給水・休憩をとってください。"},
-  {min:25,label:"警戒",     color:"#ffcc00",bg:"rgba(255,204,0,.12)",   msg:"積極的に休憩を増やしてください。体調不良者を早期に確認してください。"},
-  {min:21,label:"注意",     color:"#4488ff",bg:"rgba(68,136,255,.12)",  msg:"給水間隔を短くしましょう。体調の変化に気を配ってください。"},
-  {min:-99,label:"ほぼ安全",color:"#00ff88",bg:"rgba(0,255,136,.1)",   msg:"通常の活動が可能です。水分補給は忘れずに行いましょう。"},
+  {min:31, label:"危険",     color:"#ff4466",bg:"rgba(255,68,102,.18)",  msg:"⛔ 原則運動中止。日陰で安静にし、すぐに保護者へ連絡してください。体を冷やしながら救急車を呼ぶ準備を。"},
+  {min:28, label:"厳重警戒", color:"#ff8800",bg:"rgba(255,136,0,.14)",   msg:"⚠️ 激しい運動は禁止。15分ごとに給水・休憩。体調不良者がいたら即座に対応。"},
+  {min:25, label:"警戒",     color:"#ffcc00",bg:"rgba(255,204,0,.13)",   msg:"🔶 積極的に休憩を増やしてください。水分・塩分補給を忘れずに。体調変化に注意。"},
+  {min:21, label:"注意",     color:"#4488ff",bg:"rgba(68,136,255,.13)",  msg:"💧 給水間隔を短くしましょう。体調の変化に気を配ってください。"},
+  {min:-99,label:"ほぼ安全", color:"#00ff88",bg:"rgba(0,255,136,.1)",    msg:"✅ 通常の活動が可能です。水分補給は忘れずに行いましょう。"},
 ];
-var WEATHER_ICONS={0:"☀️",1:"🌤️",2:"⛅",3:"☁️",45:"🌫️",48:"🌫️",51:"🌦️",53:"🌦️",55:"🌧️",61:"🌧️",63:"🌧️",65:"🌧️",80:"🌦️",81:"🌧️",82:"⛈️",95:"⛈️",99:"⛈️"};
-
-function estimateWBGT(t,h){return 0.735*t+0.0374*h+0.00292*t*h-4.064;}
-function getLevel(wbgt){return LEVELS.find(function(l){return wbgt>=l.min;})||LEVELS[4];}
-
-function showWBGT(wbgt,meta){
-  var lv=getLevel(wbgt);
-  var d=document.getElementById("wbgt-display");
-  document.getElementById("wbgt-val").textContent=wbgt.toFixed(1)+"℃";
-  document.getElementById("wbgt-lv").textContent=lv.label;
-  document.getElementById("wbgt-msg").textContent=lv.msg;
+var WI={0:"☀️",1:"🌤️",2:"⛅",3:"☁️",45:"🌫️",48:"🌫️",51:"🌦️",53:"🌦️",55:"🌧️",61:"🌧️",63:"🌧️",65:"🌧️",80:"🌦️",81:"🌧️",82:"⛈️",95:"⛈️",99:"⛈️"};
+function wbgt(t,h){return 0.735*t+0.0374*h+0.00292*t*h-4.064;}
+function lv(w){return LEVELS.find(function(l){return w>=l.min;})||LEVELS[4];}
+function showWBGT(w,meta){
+  var l=lv(w),d=document.getElementById("wbgt-display");
+  document.getElementById("wbgt-val").textContent=w.toFixed(1)+"℃";
+  document.getElementById("wbgt-lv").textContent=l.label;
+  document.getElementById("wbgt-msg").textContent=l.msg;
   document.getElementById("wbgt-meta").textContent=meta||"";
-  d.style.background=lv.bg; d.style.color=lv.color;
+  d.style.background=l.bg;d.style.color=l.color;
 }
-
 function fetchWeather(){
-  var btn=document.getElementById("fetch-btn");
-  var status=document.getElementById("status-msg");
-  btn.disabled=true; btn.textContent="📍 位置情報を取得中…";
-  status.textContent="";
+  var btn=document.getElementById("fetch-btn"),st=document.getElementById("status-msg");
+  btn.disabled=true;btn.textContent="📍 位置情報を取得中…";st.textContent="";
   if(!navigator.geolocation){
-    status.textContent="このブラウザは位置情報に対応していません。";
+    st.textContent="このブラウザは位置情報に対応していません。";
     btn.disabled=false;btn.textContent="📍 現在地の気象を取得";return;
   }
   navigator.geolocation.getCurrentPosition(function(pos){
     var lat=pos.coords.latitude,lon=pos.coords.longitude;
-    status.textContent="気象データを取得中…";
+    st.textContent="気象データを取得中…";
     var url="https://api.open-meteo.com/v1/forecast?latitude="+lat+"&longitude="+lon
       +"&current=temperature_2m,relative_humidity_2m,weathercode"
       +"&hourly=temperature_2m,relative_humidity_2m,weathercode"
       +"&timezone=Asia/Tokyo&forecast_days=1";
     fetch(url).then(function(r){return r.json();}).then(function(data){
-      var t=data.current.temperature_2m;
-      var h=data.current.relative_humidity_2m;
-      var wbgt=estimateWBGT(t,h);
-      var now=new Date();
-      var timeStr=now.getHours()+"時"+String(now.getMinutes()).padStart(2,"0")+"分";
-      showWBGT(wbgt,"📍 現在地  気温"+t+"℃ / 湿度"+h+"%  "+timeStr+"現在");
-      status.textContent="";
-      btn.textContent="🔄 再取得";
-
-      // 予報（現在から8時間）
-      var hours=data.hourly;
-      var nowH=now.getHours();
-      var grid=document.getElementById("forecast-grid");
+      var t=data.current.temperature_2m,h=data.current.relative_humidity_2m,w=wbgt(t,h);
+      var now=new Date(),ts=now.getHours()+"時"+String(now.getMinutes()).padStart(2,"0")+"分";
+      showWBGT(w,"📍 現在地  気温"+t+"℃ / 湿度"+h+"%  "+ts+"現在");
+      st.textContent="";btn.textContent="🔄 再取得";
+      var hours=data.hourly,grid=document.getElementById("forecast-grid"),cnt=0;
       grid.innerHTML="";
-      var count=0;
-      for(var i=0;i<hours.time.length&&count<8;i++){
-        var hTime=new Date(hours.time[i]);
-        if(hTime<=now) continue;
-        var ht=hours.temperature_2m[i];
-        var hh=hours.relative_humidity_2m[i];
-        var hw=estimateWBGT(ht,hh);
-        var hlv=getLevel(hw);
-        var icon=WEATHER_ICONS[hours.weathercode[i]]||"🌤️";
-        var hLabel=hTime.getHours()+"時";
-        var card='<div class="fc-card">'
-          +'<div class="fc-time">'+hLabel+'</div>'
-          +'<div class="fc-icon">'+icon+'</div>'
+      for(var i=0;i<hours.time.length&&cnt<8;i++){
+        var hT=new Date(hours.time[i]);
+        if(hT<=now)continue;
+        var ht=hours.temperature_2m[i],hh=hours.relative_humidity_2m[i],hw=wbgt(ht,hh),hl=lv(hw);
+        grid.innerHTML+='<div class="fc-card">'
+          +'<div class="fc-time">'+hT.getHours()+'時</div>'
+          +'<div class="fc-icon">'+(WI[hours.weathercode[i]]||"🌤️")+'</div>'
           +'<div class="fc-temp">'+ht+'℃ / '+hh+'%</div>'
-          +'<div class="fc-wbgt" style="background:'+hlv.bg+';color:'+hlv.color+'">'+hw.toFixed(1)+'℃ '+hlv.label+'</div>'
+          +'<div class="fc-wbgt" style="background:'+hl.bg+';color:'+hl.color+'">'+hw.toFixed(1)+'℃ '+hl.label+'</div>'
           +'</div>';
-        grid.innerHTML+=card;
-        count++;
+        cnt++;
       }
-      if(count===0) grid.innerHTML='<div style="grid-column:1/-1;text-align:center;color:var(--ink-3);font-size:.85rem;padding:16px">予報データがありません。</div>';
+      if(!cnt)grid.innerHTML='<div style="grid-column:1/-1;text-align:center;color:var(--ink-3);font-size:.84rem;padding:16px">予報データがありません。</div>';
       btn.disabled=false;
     }).catch(function(){
-      status.textContent="気象データの取得に失敗しました。時間をおいて再試行してください。";
-      btn.disabled=false;btn.textContent="📍 現在地の気象を取得";
+      st.textContent="気象データの取得に失敗しました。";btn.disabled=false;btn.textContent="📍 現在地の気象を取得";
     });
-  },function(err){
-    var msgs={1:"位置情報の使用が拒否されました。",2:"位置情報を取得できませんでした。",3:"タイムアウトしました。"};
-    status.textContent=msgs[err.code]||"位置情報の取得に失敗しました。";
+  },function(e){
+    var m={1:"位置情報の使用が拒否されました。",2:"位置情報を取得できませんでした。",3:"タイムアウトしました。"};
+    document.getElementById("status-msg").textContent=m[e.code]||"位置情報の取得に失敗しました。";
     btn.disabled=false;btn.textContent="📍 現在地の気象を取得";
   },{timeout:10000});
 }
-
-// 自動取得
 window.addEventListener("DOMContentLoaded",function(){fetchWeather();});
 </script>
-</body></html>
+</body>
+</html>
