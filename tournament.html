@@ -177,7 +177,7 @@
       </div>
       <div style="display:flex;gap:8px;margin-top:10px;flex-wrap:wrap">
         <button class="btn btn-primary" onclick="buildYoukou()" style="flex:1">👁 要綱プレビューを表示</button>
-        <button class="btn btn-cyan btn-sm no-print" onclick="buildAndPrintPortrait()" id="you-print-btn" disabled>🖨 印刷・PDF（A4縦）</button>
+        <button class="btn btn-cyan btn-sm no-print" onclick="buildAndPrintPortrait()" id="you-print-btn">🖨 印刷・PDF（A4縦）</button>
       </div>
     </div>
     <div class="pdf-guide" id="y-guide">
@@ -211,7 +211,7 @@
       <div id="team-inputs"></div>
       <div style="display:flex;gap:8px;margin-top:10px;flex-wrap:wrap">
         <button class="btn btn-primary" onclick="buildTaisen()" style="flex:1">📊 対戦表を生成する</button>
-        <button class="btn btn-cyan btn-sm no-print" onclick="buildAndPrintLandscape()" id="tai-print-btn" disabled>🖨 印刷・PDF（A4横）</button>
+        <button class="btn btn-cyan btn-sm no-print" onclick="buildAndPrintLandscape()" id="tai-print-btn">🖨 印刷・PDF（A4横）</button>
       </div>
     </div>
     <div class="pdf-guide" id="t-guide">
@@ -497,23 +497,34 @@ function buildTaisen(){
 /* ===== 印刷 ===== */
 function buildAndPrintPortrait(){
   buildYoukou();
-  setTimeout(function(){printPortrait();},600);
+  // プレビュー表示後にやや余裕を持って印刷ダイアログを開く
+  setTimeout(function(){
+    var s=document.getElementById('pOS');
+    if(!s){s=document.createElement('style');s.id='pOS';document.head.appendChild(s);}
+    s.textContent='@page{size:A4 portrait;margin:10mm 12mm}';
+    window.print();
+  },800);
 }
 function buildAndPrintLandscape(){
   buildTaisen();
-  setTimeout(function(){printLandscape();},600);
+  setTimeout(function(){
+    var s=document.getElementById('pOS');
+    if(!s){s=document.createElement('style');s.id='pOS';document.head.appendChild(s);}
+    s.textContent='@page{size:A4 landscape;margin:8mm 10mm}';
+    window.print();
+  },800);
 }
 function printPortrait(){
   var s=document.getElementById('pOS');
   if(!s){s=document.createElement('style');s.id='pOS';document.head.appendChild(s);}
   s.textContent='@page{size:A4 portrait;margin:10mm 12mm}';
-  setTimeout(function(){window.print();},150);
+  window.print();
 }
 function printLandscape(){
   var s=document.getElementById('pOS');
   if(!s){s=document.createElement('style');s.id='pOS';document.head.appendChild(s);}
   s.textContent='@page{size:A4 landscape;margin:8mm 10mm}';
-  setTimeout(function(){window.print();},150);
+  window.print();
 }
 
 /* ===== 初期化 ===== */

@@ -174,7 +174,12 @@ function doPrint(){
   document.getElementById("form-area").style.display="none";
   document.getElementById("preview-area").style.display="block";
   document.getElementById("btn-print").classList.add("active");
-  setTimeout(function(){window.print();},300);
+  // レンダリング完了を待ってから印刷ダイアログを開く
+  requestAnimationFrame(function(){
+    requestAnimationFrame(function(){
+      window.print();
+    });
+  });
 }
 function gv(id){var e=document.getElementById(id);return e?e.value.trim():"";}
 function ui(v,w){return '<span class="ui" style="min-width:'+(w||"50px")+'">'+(v||"&nbsp;")+'</span>';}
