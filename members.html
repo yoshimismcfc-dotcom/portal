@@ -4,6 +4,7 @@
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>団員名簿｜吉見SMC FC</title>
+  <script src="firebase-config.js"></script>
   <link rel="stylesheet" href="common.css">
   <style>
     .roster-wrap{overflow-x:auto;-webkit-overflow-scrolling:touch;border-radius:var(--r12);border:1px solid var(--line-2)}
@@ -161,21 +162,18 @@ var INIT={
 // ===== 初期化 =====
 // localStorageにデータがあればそちらを使う。なければINITを使う。
 // 強制リセットは一切しない。
-function loadData(){
-  try{
-    var s = localStorage.getItem(KEY);
-    if(s){
-      var parsed = JSON.parse(s);
-      if(parsed && typeof parsed === "object" && !Array.isArray(parsed)){
-        return parsed;
-      }
-    }
-  }catch(e){ console.error("loadData error:", e); }
-  // データなし→INITのディープコピーを返す（INITは変更しない）
-  return JSON.parse(JSON.stringify(INIT));
-}
-var data=loadData();
-var editGrade=null,editRow=null;
+var data = JSON.parse(JSON.stringify(INIT));
+var editGrade=null, editRow=null;
+
+// Firebase or localStorageからデータをリアルタイムで読み込み
+dbListen("members", function(val){
+  if(val && typeof val === "object" && !Array.isArray(val)){
+    data = val;
+  } else {
+    data = JSON.parse(JSON.stringify(INIT));
+  }
+  renderTable();
+}, KEY, JSON.parse(JSON.stringify(INIT)));
 
 function renderTable(){
   var tbl=document.getElementById("roster-table");
@@ -252,31 +250,22 @@ function deleteEntry(){
   autoSave(); // 削除後に自動保存
 }
 function autoSave(){
-  try{
-    localStorage.setItem(KEY, JSON.stringify(data));
-    var msg=document.getElementById("save-msg");
+  var msg=document.getElementById("save-msg");
+  if(msg) msg.textContent="💾 保存中…";
+  dbSave("members", data, KEY, function(){
     if(msg){
-      msg.textContent="✅ 自動保存しました（"+new Date().toLocaleTimeString("ja-JP",{hour:"2-digit",minute:"2-digit"})+"）";
+      msg.textContent="✅ 自動保存（"+new Date().toLocaleTimeString("ja-JP",{hour:"2-digit",minute:"2-digit"})+"）";
       setTimeout(function(){if(msg)msg.textContent="";},2500);
     }
-  }catch(e){console.error("保存エラー",e);}
+  });
 }
 function saveData(){
-  try{
-    localStorage.setItem(KEY, JSON.stringify(data));
-    // 確認のため読み戻し
-    var check = JSON.parse(localStorage.getItem(KEY));
-    var msg=document.getElementById("save-msg");
-    if(check){
-      msg.textContent="✅ 保存しました（"+new Date().toLocaleTimeString("ja-JP",{hour:"2-digit",minute:"2-digit"})+"）";
-    }else{
-      msg.textContent="⚠️ 保存に失敗しました。ブラウザの設定を確認してください。";
-      msg.style.color="var(--red)";
-    }
-    setTimeout(function(){msg.textContent="";msg.style.color="";},3000);
-  }catch(e){
-    alert("保存エラー: "+e.message);
-  }
+  var msg = document.getElementById("save-msg");
+  msg.textContent = "💾 保存中…";
+  dbSave("members", data, KEY, function(){
+    msg.textContent = "✅ 保存しました（"+new Date().toLocaleTimeString("ja-JP",{hour:"2-digit",minute:"2-digit"})+"）";
+    setTimeout(function(){msg.textContent="";},3000);
+  });
 }
 function exportCSV(){
   var csv="\uFEFF学年,No,氏名,ふりがな,背番号,性別\n";
@@ -290,6 +279,6 @@ function exportCSV(){
   a.download="smc_members_2026.csv";a.click();
 }
 document.getElementById("edit-modal").addEventListener("click",function(e){if(e.target.id==="edit-modal")closeModal();});
-renderTable();
+// renderTable()はdbListenのコールバックで呼ばれる
 </script>
 </body></html>

@@ -1,0 +1,194 @@
+<!doctype html>
+<html lang="ja">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Firebase設定｜吉見SMC FC</title>
+  <link rel="stylesheet" href="common.css">
+  <style>
+    .step-card{background:var(--surface-lt);border:1px solid var(--line-2);border-radius:var(--r12);padding:16px 18px;margin-bottom:14px}
+    .step-num{background:var(--orange);color:#fff;border-radius:50%;width:28px;height:28px;display:inline-flex;align-items:center;justify-content:center;font-weight:900;font-size:.9rem;margin-right:8px;flex-shrink:0}
+    .step-title{font-size:.95rem;font-weight:900;color:#fff;display:flex;align-items:center;margin-bottom:10px}
+    .step-body{font-size:.84rem;color:#c8e8ff;line-height:1.8}
+    .step-body ul{padding-left:1.2em;margin:4px 0}
+    .code-box{background:#0a1824;border:1px solid rgba(0,212,255,.3);border-radius:var(--r8);padding:12px;font-family:monospace;font-size:.8rem;color:#00ff88;margin:8px 0;overflow-x:auto;white-space:pre}
+    .warn-box{background:rgba(255,68,102,.1);border:1px solid rgba(255,68,102,.3);border-radius:var(--r8);padding:10px 13px;font-size:.8rem;color:#ffaaaa;line-height:1.7;margin:8px 0}
+    .ok-box{background:rgba(0,255,136,.1);border:1px solid rgba(0,255,136,.3);border-radius:var(--r8);padding:10px 13px;font-size:.8rem;color:#a0f0c0;line-height:1.7;margin:8px 0}
+    .status-row{display:flex;gap:10px;align-items:center;padding:12px;background:rgba(0,0,0,.2);border-radius:var(--r8);margin-top:12px}
+    .status-dot{width:12px;height:12px;border-radius:50%;flex-shrink:0}
+    .status-dot.ok{background:#00ff88;box-shadow:0 0 8px #00ff88}
+    .status-dot.ng{background:#ff4466;box-shadow:0 0 8px #ff4466}
+    .status-dot.wait{background:#ffcc00;animation:pulse 1.2s infinite}
+    @keyframes pulse{0%,100%{opacity:1}50%{opacity:.4}}
+  </style>
+</head>
+<body>
+<header class="site-header">
+  <div class="header-inner">
+    <a class="header-logo" href="index.html">
+      <div class="logo-mark">⚽</div>
+      <div><span class="logo-name">吉見SMC FC</span><span class="logo-sub">SMART PORTAL</span></div>
+    </a>
+  </div>
+</header>
+<main class="page-wrap">
+  <a class="back-btn" href="coach.html">コーチ専用に戻る</a>
+  <div class="hero-band">
+    <div class="hero-emoji">☁️</div>
+    <div><div class="hero-title">クラウド保存（Firebase）設定</div>
+      <div class="hero-sub">設定すると全員でデータを共有できるようになります。1回だけの作業です。</div></div>
+  </div>
+
+  <!-- 現在の接続状況 -->
+  <div class="panel">
+    <div class="panel-title">📡 現在の接続状況</div>
+    <div class="status-row" id="status-row">
+      <div class="status-dot wait" id="status-dot"></div>
+      <span id="status-text" style="color:#ffcc00;font-size:.88rem;font-weight:700">確認中...</span>
+    </div>
+  </div>
+
+  <div class="notice-bar">
+    ⏱ 設定作業は10〜15分ほどかかります。スマートフォンよりパソコンで行うと簡単です。
+  </div>
+
+  <!-- STEP 1 -->
+  <div class="step-card">
+    <div class="step-title"><span class="step-num">1</span>Firebaseにアクセス</div>
+    <div class="step-body">
+      <ul>
+        <li>下のリンクをタップして Firebase Console を開く</li>
+        <li>Googleアカウント（yoshimi.smc.fc@gmail.com）でログイン</li>
+      </ul>
+      <a class="btn btn-primary" href="https://console.firebase.google.com/" target="_blank" rel="noopener" style="margin-top:6px;display:inline-flex">🌐 Firebaseを開く</a>
+    </div>
+  </div>
+
+  <!-- STEP 2 -->
+  <div class="step-card">
+    <div class="step-title"><span class="step-num">2</span>プロジェクトを作成</div>
+    <div class="step-body">
+      <ul>
+        <li>「プロジェクトを追加」をクリック</li>
+        <li>プロジェクト名：<strong style="color:#fff">yoshimi-smc-portal</strong> と入力</li>
+        <li>Googleアナリティクス：「無効」でOK</li>
+        <li>「プロジェクトを作成」→「続行」</li>
+      </ul>
+    </div>
+  </div>
+
+  <!-- STEP 3 -->
+  <div class="step-card">
+    <div class="step-title"><span class="step-num">3</span>Realtime Databaseを作成</div>
+    <div class="step-body">
+      <ul>
+        <li>左メニューの「構築」→「<strong style="color:#fff">Realtime Database</strong>」をクリック</li>
+        <li>「データベースを作成」をクリック</li>
+        <li>ロケーション：<strong style="color:#fff">Asia (asia-southeast1)</strong> を選択</li>
+        <li>「<strong style="color:#fff">テストモードで開始する</strong>」を選択 → 「有効にする」</li>
+      </ul>
+      <div class="warn-box">⚠️ テストモードは30日で期限切れになります。期限切れになったら「ルール」タブで読み書き許可の日付を延長してください。</div>
+    </div>
+  </div>
+
+  <!-- STEP 4 -->
+  <div class="step-card">
+    <div class="step-title"><span class="step-num">4</span>セキュリティルールを設定</div>
+    <div class="step-body">
+      <ul>
+        <li>Realtime Database 画面の「<strong style="color:#fff">ルール</strong>」タブをクリック</li>
+        <li>下記のルールをコピーして貼り付ける</li>
+      </ul>
+      <div class="code-box">{
+  "rules": {
+    ".read": true,
+    ".write": true
+  }
+}</div>
+      <ul>
+        <li>「公開」ボタンをクリック</li>
+      </ul>
+    </div>
+  </div>
+
+  <!-- STEP 5 -->
+  <div class="step-card">
+    <div class="step-title"><span class="step-num">5</span>アプリを登録して設定値を取得</div>
+    <div class="step-body">
+      <ul>
+        <li>左メニューの「プロジェクトの概要」をクリック</li>
+        <li>「<strong style="color:#fff">&lt;/&gt;</strong>」（ウェブ）アイコンをクリック</li>
+        <li>アプリのニックネーム：<strong style="color:#fff">portal</strong> と入力</li>
+        <li>「アプリを登録」をクリック</li>
+        <li>表示されたコードの中から下記の値をコピーする</li>
+      </ul>
+      <div class="code-box">const firebaseConfig = {
+  apiKey: "AIzaSy...",          ← これをコピー
+  authDomain: "yoshimi-smc-portal.firebaseapp.com",
+  databaseURL: "https://yoshimi-smc-portal-default-rtdb.firebaseio.com",
+  projectId: "yoshimi-smc-portal",
+  storageBucket: "yoshimi-smc-portal.appspot.com",
+  messagingSenderId: "123456789",
+  appId: "1:123456789:web:abc..."
+};</div>
+    </div>
+  </div>
+
+  <!-- STEP 6 -->
+  <div class="step-card">
+    <div class="step-title"><span class="step-num">6</span>firebase-config.js に設定値を入力</div>
+    <div class="step-body">
+      <ul>
+        <li>GitHubの下記ファイルを開く：<br>
+          <a class="btn btn-outline btn-sm" href="https://github.com/yoshimismcfc-dotcom/portal/edit/main/firebase-config.js" target="_blank" rel="noopener" style="margin-top:4px;display:inline-flex">✏️ firebase-config.js を編集</a>
+        </li>
+        <li><strong style="color:#ff8888">YOUR_API_KEY</strong> などの部分を<br>STEPで取得した実際の値に書き換える</li>
+        <li>「Commit changes」をクリックして保存</li>
+      </ul>
+      <div class="ok-box">✅ 数分後にサイトが更新され、この画面の「接続状況」が緑に変わります！</div>
+    </div>
+  </div>
+
+  <div class="notice-bar blue" style="margin-top:6px">
+    💡 設定が分からない場合はClaude（このアプリを作ったAI）に<br>「Firebaseの設定値をfirebase-config.jsに入れてください」と送ってください。
+  </div>
+
+</main>
+<footer class="site-footer">YOSHIMI SMC FC — SMART PORTAL</footer>
+<script src="firebase-config.js"></script>
+<script>
+// 接続状況確認
+function checkStatus(){
+  var dot=document.getElementById("status-dot");
+  var txt=document.getElementById("status-text");
+  if(typeof FIREBASE_CONFIG === "undefined" || FIREBASE_CONFIG.apiKey === "YOUR_API_KEY"){
+    dot.className="status-dot ng";
+    txt.style.color="#ff6680";
+    txt.textContent="⚠️ Firebase未設定 — localStorageのみで動作中（データは端末内にのみ保存）";
+    return;
+  }
+  txt.textContent="Firebaseに接続中...";
+  var timeout=setTimeout(function(){
+    dot.className="status-dot ng";
+    txt.style.color="#ff6680";
+    txt.textContent="❌ Firebase接続失敗 — 設定値を確認してください";
+  },8000);
+  onFirebaseReady(function(db){
+    clearTimeout(timeout);
+    db.ref(".info/connected").on("value",function(snap){
+      if(snap.val()){
+        dot.className="status-dot ok";
+        txt.style.color="#00ff88";
+        txt.textContent="✅ Firebaseに接続完了！データはクラウドに保存・共有されます";
+      }else{
+        dot.className="status-dot ng";
+        txt.style.color="#ff6680";
+        txt.textContent="❌ Firebase未接続 — ネットワークを確認してください";
+      }
+    });
+  });
+}
+checkStatus();
+</script>
+</body>
+</html>

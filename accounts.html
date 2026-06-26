@@ -4,6 +4,7 @@
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>アカウント管理｜吉見SMC FC</title>
+  <script src="firebase-config.js"></script>
   <link rel="stylesheet" href="common.css">
   <style>
     .acc-table-wrap{overflow-x:auto}
@@ -115,15 +116,17 @@ var INIT_DATA=[
   {id:"a8",type:"Instagram",        note:"チーム公式Instagram",                  accId:"yoshimi.smc.fc@gmail.com",   pw:"yoshimi20000101", url:"https://www.instagram.com/yoshimi.smc.fc"},
 ];
 
-function loadAcc(){
-  try{
-    var d=JSON.parse(localStorage.getItem(KEY));
-    if(d&&d.length)return d;
-  }catch(e){}
-  localStorage.setItem(KEY,JSON.stringify(INIT_DATA));
-  return INIT_DATA;
+var _accData = null;
+function loadAcc(){ return _accData || INIT_DATA; }
+function saveAccData(d){
+  _accData = d;
+  dbSave("accounts", d, KEY, null);
 }
-function saveAccData(d){localStorage.setItem(KEY,JSON.stringify(d));}
+// リアルタイム同期
+dbListen("accounts", function(val){
+  _accData = Array.isArray(val) && val.length ? val : INIT_DATA;
+  renderTable();
+}, KEY, INIT_DATA);
 
 function renderTable(){
   var data=loadAcc();
@@ -210,7 +213,7 @@ function confirmDel(id){
 function closeModal(){document.getElementById("modal").classList.remove("open");}
 document.getElementById("modal").addEventListener("click",function(e){if(e.target.id==="modal")closeModal();});
 function escH(s){return String(s||"").replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;").replace(/"/g,"&quot;");}
-renderTable();
+// renderTable()はdbListenで呼ばれる
 </script>
 </body>
 </html>

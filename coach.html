@@ -4,6 +4,7 @@
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>コーチ専用｜吉見SMC FC</title>
+  <script src="firebase-config.js"></script>
   <link rel="stylesheet" href="common.css">
   <style>
     .lock-wrap{max-width:380px;margin:0 auto}
@@ -77,6 +78,10 @@
   <!-- コーチコンテンツ -->
   <div id="coach-content">
     <div class="notice-bar green">✅ コーチ専用エリアへようこそ。</div>
+    <div id="cloud-status-bar" class="notice-bar" style="background:rgba(255,204,0,.12);border-color:rgba(255,204,0,.35);color:#ffcc00;display:flex;justify-content:space-between;align-items:center">
+      <span id="cloud-status-text">☁️ クラウド接続状況を確認中...</span>
+      <a href="firebase-setup.html" class="btn btn-outline btn-sm" style="font-size:.7rem;height:26px;padding:0 8px;flex-shrink:0">⚙️ 設定</a>
+    </div>
 
     <!-- ===== ガイダンス設定 ===== -->
     <div class="section-head"><div class="section-icon">📢</div><h2>ガイダンス設定</h2><div class="section-divider"></div></div>
@@ -257,14 +262,19 @@ function loadNoticeInputs(){
   document.getElementById("warning-preview").textContent=w||"（未設定）";
 }
 function saveNotice(t){
-  var key=t==="guidance"?"smc_guidance":"smc_warning";
+  var lKey=t==="guidance"?"smc_guidance":"smc_warning";
+  var dbKey=t==="guidance"?"guidance":"warning";
   var val=document.getElementById(t+"-input").value.trim();
-  if(val)localStorage.setItem(key,val);else localStorage.removeItem(key);
+  dbSave("notices/"+dbKey, val||null, lKey, null);
+  if(val)localStorage.setItem(lKey,val);else localStorage.removeItem(lKey);
   document.getElementById(t+"-preview").textContent=val||"（未設定）";
   flash(t==="guidance"?"ガイダンスを保存しました":"注意事項を保存しました");
 }
 function clearNotice(t){
-  localStorage.removeItem(t==="guidance"?"smc_guidance":"smc_warning");
+  var lKey=t==="guidance"?"smc_guidance":"smc_warning";
+  var dbKey=t==="guidance"?"guidance":"warning";
+  dbSave("notices/"+dbKey, null, lKey, null);
+  localStorage.removeItem(lKey);
   document.getElementById(t+"-input").value="";
   document.getElementById(t+"-preview").textContent="（未設定）";
 }
@@ -308,6 +318,29 @@ function renderUrls(){
       +'</div></div>';
   }).join("");
 }
+
+// クラウド接続状況確認
+(function(){
+  var bar=document.getElementById("cloud-status-bar");
+  var txt=document.getElementById("cloud-status-text");
+  if(!bar||!txt)return;
+  if(typeof FIREBASE_CONFIG==="undefined"||FIREBASE_CONFIG.apiKey==="YOUR_API_KEY"){
+    bar.style.background="rgba(255,68,102,.1)";bar.style.borderColor="rgba(255,68,102,.3)";
+    txt.style.color="#ff8888";
+    txt.textContent="⚠️ Firebaseが未設定です — データは端末内にのみ保存されます。「設定」から設定してください。";
+    return;
+  }
+  onFirebaseReady(function(db){
+    db.ref(".info/connected").on("value",function(snap){
+      if(snap.val()){
+        bar.style.background="rgba(0,255,136,.1)";bar.style.borderColor="rgba(0,255,136,.3)";
+        txt.style.color="#00ff88";txt.textContent="✅ クラウド接続中 — データはリアルタイムで全員と共有されます";
+      }else{
+        txt.textContent="🔄 クラウドへの再接続を試みています...";
+      }
+    });
+  });
+})();
 </script>
 </body>
 </html>

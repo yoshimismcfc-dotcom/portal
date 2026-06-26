@@ -11,6 +11,7 @@
   <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
   <meta name="apple-mobile-web-app-title" content="SMC FC">
   <link rel="apple-touch-icon" href="icon.svg">
+  <script src="firebase-config.js"></script>
   <link rel="stylesheet" href="common.css">
   <style>
     .portal-hero{position:relative;overflow:hidden;background:linear-gradient(160deg,#003087 0%,#0050cc 45%,#001a4f 100%);border-radius:var(--r16);margin-bottom:20px;padding:26px 20px 22px;text-align:center;box-shadow:0 8px 32px rgba(0,48,135,.5),0 0 0 1px rgba(255,255,255,.08)}
@@ -140,6 +141,16 @@
 </main>
 <footer class="site-footer">YOSHIMI SMC FC — SMART PORTAL</footer>
 <script>
+// ガイダンスをFirebaseからリアルタイム取得
+dbListen("notices/guidance", function(val){
+  var el=document.getElementById("home-guidance"),tx=document.getElementById("guidance-text");
+  if(val){tx.textContent=val;el.style.display="flex";}else{el.style.display="none";}
+}, "smc_guidance", null);
+dbListen("notices/warning", function(val){
+  var el=document.getElementById("home-warning"),tx=document.getElementById("warning-text");
+  if(val){tx.textContent=val;el.style.display="flex";}else{el.style.display="none";}
+}, "smc_warning", null);
+// フォールバック：localStorageからも表示
 var g=localStorage.getItem("smc_guidance"),w=localStorage.getItem("smc_warning");
 if(g){document.getElementById("guidance-text").textContent=g;document.getElementById("home-guidance").style.display="flex";}
 if(w){document.getElementById("warning-text").textContent=w;document.getElementById("home-warning").style.display="flex";}

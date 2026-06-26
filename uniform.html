@@ -4,6 +4,7 @@
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>ユニフォーム貸出｜吉見SMC FC</title>
+  <script src="firebase-config.js"></script>
   <link rel="stylesheet" href="common.css">
   <style>
     /* ===== 統計バー ===== */
@@ -184,6 +185,28 @@
 <script>
 var KU="smc_uniform_v3",KH="smc_uniform_hist_v1";
 var editId=null,lendId=null;
+var _unifData=[], _histData=[];
+
+function loadU(){ return _unifData; }
+function saveU(d){
+  _unifData=d;
+  dbSave("uniform", d, KU, null);
+}
+function loadH(){ return _histData; }
+function saveH(d){
+  _histData=d;
+  dbSave("uniform_hist", d, KH, null);
+}
+
+// リアルタイム同期
+dbListen("uniform", function(val){
+  _unifData = Array.isArray(val) ? val : [];
+  render();
+}, KU, []);
+dbListen("uniform_hist", function(val){
+  _histData = Array.isArray(val) ? val : [];
+}, KH, []);
+
 var PALETTE=[
   {name:"オレンジ赤縦じま",c1:"#e85c1e",c2:"#bc002d",code:"#e85c1e"},
   {name:"白赤",            c1:"#f0f0f0",c2:"#bc002d",code:"#dd1122"},
@@ -194,10 +217,7 @@ var PALETTE=[
   {name:"黄色",            c1:"#f5d300",c2:"#ffec60",code:"#e6c800"},
   {name:"緑",              c1:"#228b22",c2:"#32cd32",code:"#228b22"},
 ];
-function loadU(){try{return JSON.parse(localStorage.getItem(KU))||[];}catch(e){return[];}}
-function saveU(d){localStorage.setItem(KU,JSON.stringify(d));}
-function loadH(){try{return JSON.parse(localStorage.getItem(KH))||[];}catch(e){return[];}}
-function saveH(d){localStorage.setItem(KH,JSON.stringify(d));}
+// loadU/saveU/loadH/saveH は上部で定義済み
 function getPalette(cname){return PALETTE.find(function(p){return p.name===cname;})||{c1:"#555",c2:"#777",code:"#555"};}
 
 function renderStats(){
@@ -407,7 +427,7 @@ function closeM(id){document.getElementById(id).classList.remove("open");}
   document.getElementById(id).addEventListener("click",function(e){if(e.target.id===id)closeM(id);});
 });
 function render(){renderStats();renderFolders();}
-render();
+// render()はdbListenで呼ばれる
 </script>
 </body>
 </html>

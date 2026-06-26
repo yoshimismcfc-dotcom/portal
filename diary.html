@@ -4,6 +4,7 @@
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>練習日誌｜吉見SMC FC</title>
+  <script src="firebase-config.js"></script>
   <link rel="stylesheet" href="common.css">
   <style>
     .diary-list{display:grid;gap:10px}
@@ -129,8 +130,19 @@
 <script>
 var KEY="smc_diary_v1";
 var editId=null;
-function load(){try{return JSON.parse(localStorage.getItem(KEY))||[];}catch(e){return[];}}
-function save(d){localStorage.setItem(KEY,JSON.stringify(d));}
+var _diaryData=[];
+
+function load(){ return _diaryData; }
+function save(d){
+  _diaryData=d;
+  dbSave("diary", d, KEY, null);
+}
+
+// リアルタイム同期
+dbListen("diary", function(val){
+  _diaryData = Array.isArray(val) ? val : [];
+  renderList();
+}, KEY, []);
 
 function renderList(){
   var q=document.getElementById("search-input").value.trim().toLowerCase();
@@ -234,6 +246,6 @@ function exportDiary(){
   a.download="smc_diary.csv";a.click();
 }
 document.getElementById("modal").addEventListener("click",function(e){if(e.target.id==="modal")closeModal();});
-renderList();
+// renderList()はdbListenで呼ばれる
 </script>
 </body></html>

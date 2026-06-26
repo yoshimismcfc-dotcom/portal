@@ -4,6 +4,7 @@
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>やることリスト｜吉見SMC FC</title>
+  <script src="firebase-config.js"></script>
   <link rel="stylesheet" href="common.css">
   <style>
     /* ===== フィルター・ステータスタブ ===== */
@@ -171,9 +172,19 @@
 <script>
 var KEY = "smc_todo_v1";
 var editId = null, currentFilter = "all";
+var _todoData = [];
 
-function load(){ try{ return JSON.parse(localStorage.getItem(KEY))||[]; }catch(e){ return []; } }
-function save(d){ localStorage.setItem(KEY, JSON.stringify(d)); }
+function load(){ return _todoData; }
+function save(d){
+  _todoData = d;
+  dbSave("todo", d, KEY, null);
+}
+
+// リアルタイム同期
+dbListen("todo", function(val){
+  _todoData = Array.isArray(val) ? val : [];
+  renderStats(); renderList();
+}, KEY, []);
 
 var STATUS_MAP = {
   todo:{ label:"未着手", cls:"sb-todo" },
@@ -325,10 +336,8 @@ function closeModal(){ document.getElementById("modal").classList.remove("open")
 document.getElementById("modal").addEventListener("click", function(e){ if(e.target.id==="modal") closeModal(); });
 
 function render(){ renderStats(); renderList(); }
-render();
-
 // サンプルデータ（初回のみ）
-if(!load().length){
+if(!_todoData.length){
   var samples=[
     {id:"s1",created:Date.now()-86400000*3,title:"7月大会の要綱・対戦表を作成する",who:"片山コーチ",due:"2026-06-30",status:"wip",note:"対戦表ページから自動生成できます"},
     {id:"s2",created:Date.now()-86400000*2,title:"体験入団の問い合わせに返信する",who:"",due:"2026-06-28",status:"todo",note:"yoshimi.smc.fc@gmail.com に問い合わせあり"},

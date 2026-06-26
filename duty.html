@@ -4,6 +4,7 @@
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>当番表｜吉見SMC FC</title>
+  <script src="firebase-config.js"></script>
   <link rel="stylesheet" href="common.css">
   <style>
     .duty-row{display:grid;grid-template-columns:1fr 1fr 1fr 1fr auto;gap:8px;align-items:end}
@@ -143,6 +144,7 @@ document.querySelectorAll(".tab-btn").forEach(function(btn){
 
 // ===== 荷物チェックリスト =====
 var CHECK_KEY = "smc_checklist_v1";
+var _checkData = null;
 var DEFAULT_ITEMS = [
   {id:1,name:"ベンチ",icon:"🪑",done:false},
   {id:2,name:"タープ",icon:"⛺",done:false},
@@ -152,10 +154,11 @@ var DEFAULT_ITEMS = [
   {id:6,name:"シート",icon:"🛖",done:false},
 ];
 function loadChecks(){
+  if(_checkData !== null) return _checkData;
   try{var s=localStorage.getItem(CHECK_KEY);if(s)return JSON.parse(s);}catch(e){}
   return JSON.parse(JSON.stringify(DEFAULT_ITEMS));
 }
-function saveChecks(data){localStorage.setItem(CHECK_KEY,JSON.stringify(data));}
+function saveChecks(data){ _checkData=data; dbSave("checklist", data, CHECK_KEY, null); }
 function renderChecks(){
   var data=loadChecks();
   var list=document.getElementById("check-list");
@@ -206,8 +209,9 @@ function clearAllChecks(){
 
 // ===== 当番表 =====
 var DUTY_KEY="smc_duty_v1";
-function loadDuty(){try{return JSON.parse(localStorage.getItem(DUTY_KEY))||[];}catch(e){return[];}}
-function saveDuty(d){localStorage.setItem(DUTY_KEY,JSON.stringify(d));}
+var _dutyData=[];
+function loadDuty(){ return _dutyData; }
+function saveDuty(d){_dutyData=d; dbSave("duty", d, DUTY_KEY, null);}
 function addDuty(){
   var date=document.getElementById("duty-date").value;
   var grade=document.getElementById("duty-grade").value;
