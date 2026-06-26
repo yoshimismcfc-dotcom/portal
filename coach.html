@@ -141,16 +141,31 @@
       <a class="coach-btn c-cyan" href="https://accounts.google.com/AccountChooser?Email=yoshimi.smc.fc%40gmail.com&continue=https%3A%2F%2Fmail.google.com%2Fmail%2F" target="_blank" rel="noopener">
         <div class="cb-icon">📧</div>
         <div class="cb-label">Gmail を開く</div>
-        <div class="cb-desc">yoshimi.smc.fc@gmail.com<br>タップ→ログイン→受信トレイ</div>
+        <div class="cb-desc">yoshimi.smc.fc@gmail.com</div>
       </a>
       <a class="coach-btn c-green" href="https://accounts.google.com/AccountChooser?Email=yoshimi.smc.fc%40gmail.com&continue=https%3A%2F%2Fcalendar.google.com%2Fcalendar%2Fr" target="_blank" rel="noopener">
         <div class="cb-icon">📅</div>
         <div class="cb-label">Googleカレンダー（編集）</div>
         <div class="cb-desc">予定の追加・変更・削除</div>
       </a>
+      <a class="coach-btn" href="https://account.line.biz/login?redirectUri=https%3A%2F%2Fmanager.line.biz%2Faccount%2F%40979eflea" target="_blank" rel="noopener">
+        <div class="cb-icon">💬</div>
+        <div class="cb-label">LINE公式アカウント管理</div>
+        <div class="cb-desc">ビジネスアカウントから運用</div>
+      </a>
+      <a class="coach-btn" href="https://www.koga-seven.jp/hokusai/user/login.php" target="_blank" rel="noopener">
+        <div class="cb-icon">⚽</div>
+        <div class="cb-label">北彩リーグ</div>
+        <div class="cb-desc">yoshimi.smc.fc@outlook.jp</div>
+      </a>
     </div>
-    <div class="notice-bar" style="margin-bottom:16px;font-size:.78rem">
-      💡 初回はGoogleアカウントへのログインが必要です。iPhoneはiCloudキーチェーン、AndroidはGoogleパスワードマネージャーに保存しておくと次回からワンタップでログインできます。
+
+    <!-- ===== アカウントリスト ===== -->
+    <div class="section-head"><div class="section-icon">🔑</div><h2>アカウントリスト</h2><div class="section-divider"></div></div>
+    <div class="notice-bar" style="margin-bottom:12px;font-size:.78rem">⚠️ このページはパスコードで保護されていますが、取り扱いにはご注意ください。</div>
+    <div id="account-list-wrap"></div>
+    <div style="margin-bottom:16px">
+      <button class="btn btn-primary btn-sm" onclick="openAccAdd()">＋ アカウントを追加</button>
     </div>
 
     <!-- ===== データフォルダ ===== -->
@@ -284,6 +299,137 @@ function renderUrls(){
       +'</div></div>';
   }).join("");
 }
+
+/* ===== アカウントリスト ===== */
+var ACC_KEY = "smc_accounts_v1";
+function loadAcc(){try{return JSON.parse(localStorage.getItem(ACC_KEY))||[];}catch(e){return[];}}
+function saveAcc(d){localStorage.setItem(ACC_KEY,JSON.stringify(d));}
+
+// 初期データ（初回のみ）
+(function(){
+  if(!loadAcc().length){
+    saveAcc([
+      {id:"a1",kind:"Google ID",note:"Gmail・Googleカレンダー共通",url:"https://mail.google.com/",account:"yoshimi.smc.fc@gmail.com",pass:"yoshimi20000101"},
+      {id:"a2",kind:"公式LINE",note:"ビジネスアカウントからログイン",url:"https://account.line.biz/login",account:"yoshimi.smc.fc@gmail.com",pass:"yoshimi20000101"},
+      {id:"a3",kind:"CANVA",note:"画像作成サイト",url:"https://www.canva.com/",account:"yoshimi.smc.fc@gmail.com",pass:"yoshimi20000101"},
+      {id:"a4",kind:"Outlookメール",note:"北彩リーグのみで使用",url:"https://outlook.live.com/",account:"yoshimi.smc.fc@outlook.jp",pass:"yoshimi20000101"},
+      {id:"a5",kind:"北彩リーグ",note:"",url:"https://www.koga-seven.jp/hokusai/user/login.php",account:"yoshimi.smc.fc@outlook.jp",pass:"yoshimi20000101"},
+      {id:"a6",kind:"Instagram",note:"",url:"https://www.instagram.com/yoshimi.smc.fc",account:"yoshimi.smc.fc@gmail.com",pass:"yoshimi20000101"},
+      {id:"a7",kind:"STUDIO（HP）",note:"ホームページ管理",url:"https://studio.design/ja",account:"yoshimi.smc.fc@gmail.com",pass:"yoshimi20000101"},
+    ]);
+  }
+})();
+
+var accEditId = null;
+function renderAccounts(){
+  var el=document.getElementById("account-list-wrap");
+  if(!el)return;
+  var data=loadAcc();
+  if(!data.length){el.innerHTML='<div style="color:var(--ink-3);font-size:.85rem;padding:12px">アカウントがありません。</div>';return;}
+  var html='<div style="overflow-x:auto"><table style="width:100%;border-collapse:collapse;font-size:.8rem">'
+    +'<thead><tr style="background:#003087">'
+    +'<th style="color:#fff;padding:7px 9px;text-align:left;white-space:nowrap">種類</th>'
+    +'<th style="color:#fff;padding:7px 9px;text-align:left;white-space:nowrap">アカウント</th>'
+    +'<th style="color:#fff;padding:7px 9px;text-align:left;white-space:nowrap">パスワード</th>'
+    +'<th style="color:#fff;padding:7px 9px;text-align:left;white-space:nowrap">備考</th>'
+    +'<th style="color:#fff;padding:7px 9px;text-align:left;white-space:nowrap">操作</th>'
+    +'</tr></thead><tbody>';
+  data.forEach(function(a,i){
+    var bg=i%2===0?"rgba(255,255,255,.04)":"rgba(0,0,0,.15)";
+    var urlBtn=a.url?'<a href="'+a.url+'" target="_blank" rel="noopener" style="color:var(--orange);font-size:.68rem;text-decoration:none">🔗 開く</a>':'';
+    html+='<tr style="background:'+bg+';border-bottom:1px solid rgba(255,255,255,.07)">'
+      +'<td style="padding:7px 9px;color:#fff;font-weight:700;white-space:nowrap">'+escA(a.kind)+'<br>'+urlBtn+'</td>'
+      +'<td style="padding:7px 9px;color:#94c4e4;font-family:monospace;font-size:.75rem">'+escA(a.account)+'</td>'
+      +'<td style="padding:7px 9px;color:#ffcc66;font-family:monospace;font-size:.75rem" class="pass-cell" data-pass="'+escA(a.pass)+'">'
+      +'<span class="pass-mask">••••••••</span>'
+      +'<button onclick="togglePass(this)" style="background:none;border:none;color:var(--cyan);cursor:pointer;font-size:.7rem;margin-left:5px">👁</button>'
+      +'</td>'
+      +'<td style="padding:7px 9px;color:var(--ink-3);font-size:.75rem">'+escA(a.note)+'</td>'
+      +'<td style="padding:7px 9px;white-space:nowrap">'
+      +'<button onclick="openAccEdit(''+a.id+'')" style="background:none;border:1px solid rgba(0,212,255,.35);color:var(--cyan);border-radius:5px;padding:3px 8px;font-size:.68rem;cursor:pointer;margin-right:4px">✏️</button>'
+      +'<button onclick="delAcc(''+a.id+'')" style="background:none;border:1px solid rgba(255,68,102,.35);color:#ff6680;border-radius:5px;padding:3px 8px;font-size:.68rem;cursor:pointer">🗑</button>'
+      +'</td>'
+      +'</tr>';
+  });
+  html+='</tbody></table></div>';
+  el.innerHTML=html;
+}
+function escA(s){return String(s||"").replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;").replace(/"/g,"&quot;");}
+function togglePass(btn){
+  var cell=btn.parentElement;
+  var mask=cell.querySelector(".pass-mask");
+  if(mask.textContent==="••••••••"){mask.textContent=cell.dataset.pass;}
+  else{mask.textContent="••••••••";}
+}
+function openAccAdd(){
+  accEditId=null;
+  document.getElementById("acc-modal-title").textContent="アカウントを追加";
+  document.getElementById("acc-del-btn").style.display="none";
+  ["acc-kind","acc-note","acc-url","acc-account","acc-pass"].forEach(function(id){document.getElementById(id).value="";});
+  document.getElementById("acc-modal").classList.add("open");
+}
+function openAccEdit(id){
+  var a=loadAcc().find(function(x){return x.id===id;});if(!a)return;
+  accEditId=id;
+  document.getElementById("acc-modal-title").textContent="アカウントを編集";
+  document.getElementById("acc-del-btn").style.display="inline-flex";
+  document.getElementById("acc-kind").value=a.kind||"";
+  document.getElementById("acc-note").value=a.note||"";
+  document.getElementById("acc-url").value=a.url||"";
+  document.getElementById("acc-account").value=a.account||"";
+  document.getElementById("acc-pass").value=a.pass||"";
+  document.getElementById("acc-modal").classList.add("open");
+}
+function saveAcc2(){
+  var kind=document.getElementById("acc-kind").value.trim();
+  if(!kind){alert("種類を入力してください");return;}
+  var data=loadAcc(),id=accEditId||("ac"+Date.now());
+  var exist=data.find(function(x){return x.id===id;});
+  var entry=Object.assign(exist||{id:id},{
+    kind:kind,note:document.getElementById("acc-note").value.trim(),
+    url:document.getElementById("acc-url").value.trim(),
+    account:document.getElementById("acc-account").value.trim(),
+    pass:document.getElementById("acc-pass").value,
+  });
+  if(!exist)data.push(entry);
+  saveAcc(data);closeAccModal();renderAccounts();
+}
+function delAcc(id){
+  if(!confirm("削除しますか？"))return;
+  saveAcc(loadAcc().filter(function(x){return x.id!==id;}));renderAccounts();
+}
+function delAccModal(){
+  if(!accEditId||!confirm("削除しますか？"))return;
+  saveAcc(loadAcc().filter(function(x){return x.id!==accEditId;}));
+  closeAccModal();renderAccounts();
+}
+function closeAccModal(){document.getElementById("acc-modal").classList.remove("open");}
+document.addEventListener("DOMContentLoaded",function(){
+  var m=document.getElementById("acc-modal");
+  if(m)m.addEventListener("click",function(e){if(e.target.id==="acc-modal")closeAccModal();});
+  renderAccounts();
+});
 </script>
+<!-- アカウントモーダル -->
+<div class="modal-bg" id="acc-modal">
+  <div class="modal">
+    <h3 id="acc-modal-title">アカウントを追加</h3>
+    <div class="form-group"><label class="form-label">種類（サービス名）<span style="color:var(--red)">*</span></label>
+      <input class="form-control" id="acc-kind" placeholder="例：Gmail、北彩リーグ"></div>
+    <div class="form-group"><label class="form-label">備考</label>
+      <input class="form-control" id="acc-note" placeholder="例：北彩リーグのみで使用"></div>
+    <div class="form-group"><label class="form-label">URL</label>
+      <input class="form-control" id="acc-url" type="url" placeholder="https://..."></div>
+    <div class="form-group"><label class="form-label">アカウントID（メールアドレス等）</label>
+      <input class="form-control" id="acc-account" placeholder="例：yoshimi.smc.fc@gmail.com"></div>
+    <div class="form-group"><label class="form-label">パスワード</label>
+      <input class="form-control" id="acc-pass" placeholder="パスワードを入力"></div>
+    <div class="modal-btns">
+      <button class="btn btn-outline btn-sm" id="acc-del-btn" style="color:var(--red);border-color:rgba(255,68,102,.4);display:none" onclick="delAccModal()">🗑 削除</button>
+      <button class="btn btn-outline" onclick="closeAccModal()">キャンセル</button>
+      <button class="btn btn-primary" onclick="saveAcc2()">💾 保存</button>
+    </div>
+  </div>
+</div>
 </body>
 </html>

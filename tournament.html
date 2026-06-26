@@ -30,7 +30,9 @@
       body,html{background:#fff!important;margin:0;padding:0}
       .site-header,.back-btn,.hero-band,.doc-tab-bar,.no-print,.site-footer,.panel,.notice-bar,.pdf-guide{display:none!important}
       .page-wrap{padding:0!important;max-width:100%!important;margin:0!important}
-      .doc-section{display:block!important}
+      /* アクティブなセクションのみ印刷・非アクティブは完全非表示 */
+      .doc-section{display:none!important}
+      .doc-section.active{display:block!important}
       /* 要綱 */
       .req-sheet{box-shadow:none!important;border-radius:0!important;margin:0!important;padding:0!important;max-width:100%!important;background:#fff!important;color:#000!important;width:100%!important}
       .req-sheet *{color:#000!important}
