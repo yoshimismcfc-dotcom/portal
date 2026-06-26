@@ -6,51 +6,98 @@
   <title>大会要綱・対戦表｜吉見SMC FC</title>
   <link rel="stylesheet" href="common.css">
   <style>
+    /* ====== タブ ====== */
     .doc-tab-bar{display:flex;gap:0;margin-bottom:20px;border-radius:var(--r8);overflow:hidden;border:1px solid var(--line-2)}
-    .doc-tab-btn{flex:1;padding:11px 8px;font:inherit;font-size:.85rem;font-weight:900;background:var(--surface-lt);color:#6aaccc;border:none;cursor:pointer;transition:.15s;display:flex;align-items:center;justify-content:center;gap:6px}
+    .doc-tab-btn{flex:1;padding:12px 8px;font:inherit;font-size:.88rem;font-weight:900;background:var(--surface-lt);color:#6aaccc;border:none;cursor:pointer;transition:.15s;display:flex;align-items:center;justify-content:center;gap:6px}
     .doc-tab-btn:not(:last-child){border-right:1px solid var(--line-2)}
     .doc-tab-btn.active{background:linear-gradient(135deg,#003087,#0050cc);color:#fff}
+    .doc-section{display:none}.doc-section.active{display:block}
     .fg2{display:grid;grid-template-columns:1fr 1fr;gap:12px}
     .fg3{display:grid;grid-template-columns:1fr 1fr 1fr;gap:10px}
     .sec{font-size:.72rem;font-weight:900;color:var(--cyan);letter-spacing:.1em;text-transform:uppercase;margin:14px 0 8px;padding-bottom:5px;border-bottom:1px solid var(--line)}
-    .doc-section{display:none}.doc-section.active{display:block}
 
-    /* === 印刷 === */
-    @page{size:A4 portrait;margin:12mm 14mm}
+    /* ====== 印刷 ====== */
+    @page{size:A4 landscape;margin:10mm 12mm}
     @media print{
       *{-webkit-print-color-adjust:exact;print-color-adjust:exact}
-      body,html{background:#fff!important;font-family:"Yu Mincho","Hiragino Mincho ProN",serif!important}
+      body,html{background:#fff!important;font-family:"Yu Gothic","Hiragino Kaku Gothic ProN",sans-serif!important}
       .site-header,.back-btn,.hero-band,.doc-tab-bar,.no-print,.site-footer,.panel,.notice-bar{display:none!important}
       .page-wrap{padding:0!important;max-width:100%!important;margin:0!important}
       .doc-section{display:block!important}
-      .print-sheet{box-shadow:none!important;border-radius:0!important;padding:0!important;max-width:100%!important;background:#fff!important;color:#000!important}
-      .schedule-table th,.schedule-table td{font-size:8.5pt!important}
-      .rank-table th,.rank-table td{font-size:8.5pt!important}
+      .print-doc{box-shadow:none!important;border-radius:0!important;padding:0!important;max-width:100%!important;background:#fff!important;color:#000!important;margin:0!important}
+      .print-doc *{color:#000!important}
     }
 
-    /* 要綱プレビュー */
-    .print-sheet{background:#fff;color:#111;border-radius:12px;box-shadow:0 20px 60px rgba(0,0,0,.4);padding:22px 26px;max-width:700px;margin:0 auto;font-family:"Yu Mincho","Hiragino Mincho ProN",serif;font-size:10pt;line-height:1.6}
-    .req-title{text-align:center;font-size:15pt;font-weight:bold;margin-bottom:12px;letter-spacing:.06em}
-    .req-table{width:100%;border-collapse:collapse;margin-bottom:12px}
-    .req-table th,.req-table td{border:1px solid #888;padding:5px 8px;font-size:9.5pt}
-    .req-table th{background:#eef2fa;font-weight:bold;white-space:nowrap;min-width:60px}
-    .req-section{margin-bottom:8px}
-    .req-section-title{font-weight:bold;font-size:10pt;margin-bottom:3px}
-    .req-list{margin:0;padding-left:1em;font-size:9.5pt;line-height:1.8}
-    .req-divider{border:none;border-top:1px solid #ccc;margin:8px 0}
+    /* ====== 要綱プレビュー ====== */
+    .print-doc{
+      background:#fff;color:#111;
+      font-family:"Yu Gothic","Hiragino Kaku Gothic ProN",Meiryo,sans-serif;
+      font-size:10pt;line-height:1.6;
+      border-radius:12px;
+      box-shadow:0 20px 60px rgba(0,0,0,.5),0 0 0 1px rgba(0,0,0,.1);
+      padding:22px 26px 18px;
+      max-width:860px;margin:0 auto;
+    }
+    .req-title{
+      text-align:center;font-size:15pt;font-weight:bold;
+      margin-bottom:14px;letter-spacing:.06em;
+      padding-bottom:8px;border-bottom:2px solid #003087;color:#003087;
+    }
+    .req-info-table{width:100%;border-collapse:collapse;margin-bottom:12px}
+    .req-info-table th,.req-info-table td{border:1px solid #999;padding:6px 10px;font-size:9.5pt}
+    .req-info-table th{background:#003087;color:#fff;font-weight:bold;width:60px;text-align:center}
+    .req-num{
+      font-size:10pt;font-weight:bold;color:#003087;
+      margin:8px 0 3px;
+      display:flex;align-items:center;gap:6px;
+    }
+    .req-num::before{content:"";display:block;width:3px;height:14px;background:#003087;border-radius:2px}
+    .req-items{margin:0;padding-left:1.2em;font-size:9.5pt;line-height:1.85;color:#111}
+    .req-items li{margin-bottom:1px}
+    .req-contact{
+      background:#f0f4ff;border:1px solid #c0cce8;border-radius:6px;
+      padding:8px 12px;margin-top:10px;font-size:9.5pt;
+    }
+    .req-contact-title{font-weight:bold;color:#003087;margin-bottom:4px}
 
-    /* 対戦表プレビュー */
-    .schedule-table{width:100%;border-collapse:collapse;font-size:9pt;margin-bottom:14px}
-    .schedule-table th,.schedule-table td{border:1px solid #888;padding:5px 7px;text-align:center;vertical-align:middle}
-    .schedule-table th{background:#003087;color:#fff;font-weight:bold;font-size:8.5pt}
-    .schedule-table .score-cell{background:#fff9e6;min-width:36px}
-    .schedule-table .home-cell{text-align:left;padding-left:8px}
-    .schedule-table .away-cell{text-align:right;padding-right:8px}
-    .rank-table{width:100%;border-collapse:collapse;font-size:9pt;margin-bottom:10px}
-    .rank-table th,.rank-table td{border:1px solid #888;padding:5px 7px;text-align:center}
-    .rank-table th{background:#1a5c1a;color:#fff;font-size:8.5pt;font-weight:bold}
-    .block-title{font-size:11pt;font-weight:bold;margin:10px 0 5px;color:#003087;border-left:4px solid #003087;padding-left:8px}
-    .team-chip{display:inline-flex;align-items:center;gap:4px;padding:3px 10px;border-radius:99px;font-size:.75rem;background:rgba(0,48,135,.12);border:1px solid rgba(0,48,135,.3);color:#fff;margin:2px}
+    /* ====== 対戦表スタイル ====== */
+    .taisen-wrap{background:#fff;color:#111;font-family:"Yu Gothic","Hiragino Kaku Gothic ProN",Meiryo,sans-serif;border-radius:12px;box-shadow:0 20px 60px rgba(0,0,0,.5),0 0 0 1px rgba(0,0,0,.1);padding:20px 22px;max-width:920px;margin:0 auto;font-size:9.5pt}
+    .tai-header{text-align:center;margin-bottom:10px}
+    .tai-header .tai-title{font-size:14pt;font-weight:bold;color:#003087;margin-bottom:2px}
+    .tai-header .tai-sub{font-size:9pt;color:#555}
+    .block-header{
+      background:linear-gradient(135deg,#003087,#0050cc);color:#fff;
+      font-size:10pt;font-weight:bold;padding:5px 12px;border-radius:4px;
+      margin:12px 0 6px;display:inline-block;
+    }
+    /* スケジュール表 */
+    .sched-table{width:100%;border-collapse:collapse;margin-bottom:12px;font-size:9pt}
+    .sched-table th{background:#003087;color:#fff;padding:5px 6px;text-align:center;font-size:8.5pt;border:1px solid #0050cc}
+    .sched-table td{border:1px solid #ccc;padding:5px 6px;text-align:center;vertical-align:middle}
+    .sched-table .td-home{text-align:left;padding-left:8px;font-weight:500}
+    .sched-table .td-away{text-align:right;padding-right:8px;font-weight:500}
+    .sched-table .td-score{background:#fffbe6;min-width:32px}
+    .sched-table .td-vs{background:#f5f5f5;color:#888;font-size:8pt}
+    .sched-table .tr-break td{background:#e8f0fe;font-weight:bold;text-align:center;color:#003087}
+    .sched-table .tr-closing td{background:#fef3e2;font-weight:bold;text-align:center;color:#e65c00}
+    .sched-table .tr-final td{background:#f9f0ff}
+    .sched-table .tr-alt{background:#fafcff}
+    /* 順位表 */
+    .rank-table{width:100%;border-collapse:collapse;margin-bottom:10px;font-size:9pt}
+    .rank-table th{background:#1a5c1a;color:#fff;padding:5px 6px;text-align:center;font-size:8pt;border:1px solid #2d7a2d}
+    .rank-table td{border:1px solid #ccc;padding:5px 6px;text-align:center}
+    .rank-table .td-name{text-align:left;padding-left:8px;font-weight:500}
+    .rank-table .tr-alt{background:#f6fff6}
+    /* 総当たり表 */
+    .round-table{border-collapse:collapse;font-size:8.5pt;margin-bottom:14px}
+    .round-table th,.round-table td{border:1px solid #ccc;padding:4px 6px;text-align:center;min-width:50px}
+    .round-table th{background:#555;color:#fff;font-weight:bold}
+    .round-table .th-team{background:#333;color:#fff}
+    .round-table .td-self{background:#d0d0d0}
+    .round-table .td-score{background:#fffbe6}
+    /* 2ブロック横並び */
+    .blocks-row{display:grid;grid-template-columns:1fr 1fr;gap:20px}
+    @media(max-width:680px){.blocks-row{grid-template-columns:1fr}}
   </style>
 </head>
 <body>
@@ -67,135 +114,195 @@
   <div class="hero-band">
     <div class="hero-emoji">📋</div>
     <div><div class="hero-title">大会要綱・対戦表</div>
-      <div class="hero-sub">入力するとプレビューが表示され、印刷（A4）できます。</div></div>
+      <div class="hero-sub">入力するとプレビューが表示され、A4で印刷できます。</div></div>
   </div>
 
   <div class="doc-tab-bar no-print">
-    <button class="doc-tab-btn active" onclick="switchDoc('youkou')">📄 大会要綱</button>
-    <button class="doc-tab-btn"        onclick="switchDoc('taisen')">📊 対戦表</button>
+    <button class="doc-tab-btn active" id="tbtn-y" onclick="switchDoc('youkou',this)">📄 大会要綱</button>
+    <button class="doc-tab-btn"        id="tbtn-t" onclick="switchDoc('taisen',this)">📊 対戦表</button>
   </div>
 
   <!-- ===== 大会要綱 ===== -->
   <div class="doc-section active" id="doc-youkou">
     <div class="panel no-print">
-      <div class="sec">基本情報</div>
+
+      <!-- 入力フォームを白背景で読みやすく -->
+      <style>
+        #doc-youkou input,#doc-youkou select,#doc-youkou textarea{
+          background:#1e3a5a!important;color:#ffffff!important;
+          border-color:rgba(0,212,255,.35)!important;
+        }
+        #doc-youkou input::placeholder,#doc-youkou textarea::placeholder{color:rgba(255,255,255,.35)!important}
+        #doc-youkou .form-label{color:#7dd3fc!important;font-weight:900}
+        #doc-youkou .form-control:focus{border-color:var(--orange)!important;background:#1e4a6a!important}
+      </style>
+
+      <div class="sec">📌 基本情報</div>
       <div class="fg2">
-        <div class="form-group"><label class="form-label">大会名</label><input class="form-control" id="y-title" value="U9 吉見SMC大会" placeholder="例：U9 吉見SMC大会"></div>
-        <div class="form-group"><label class="form-label">カテゴリー</label><input class="form-control" id="y-cat" value="U9（3年生以下※4年生女子も参加可）" placeholder="例：U9（3年生以下）"></div>
+        <div class="form-group"><label class="form-label">大会名</label><input class="form-control" id="y-title" value="U9 吉見SMC大会"></div>
+        <div class="form-group"><label class="form-label">カテゴリー</label><input class="form-control" id="y-cat" value="U9（3年生以下 ※4年生女子も参加可）"></div>
       </div>
-      <div class="fg2">
+      <div class="fg3">
         <div class="form-group"><label class="form-label">期日</label><input class="form-control" id="y-date" type="date"></div>
         <div class="form-group"><label class="form-label">場所</label><input class="form-control" id="y-place" value="吉見ふれあい広場 天然芝グラウンド"></div>
+        <div class="form-group"><label class="form-label">主催</label><input class="form-control" id="y-host" value="吉見SMC"></div>
       </div>
       <div class="fg2">
         <div class="form-group"><label class="form-label">受付</label><input class="form-control" id="y-uketsuke" value="8:00より受付（参加費徴収）"></div>
-        <div class="form-group"><label class="form-label">主催</label><input class="form-control" id="y-host" value="吉見SMC"></div>
+        <div class="form-group"><label class="form-label">参加費</label><input class="form-control" id="y-fee" value="1チーム5,000円（受付にて集金）"></div>
       </div>
 
-      <div class="sec">試合方法・ルール</div>
+      <div class="sec">⚽ 試合ルール</div>
       <div class="fg3">
-        <div class="form-group"><label class="form-label">競技形式</label><input class="form-control" id="y-format" value="8人制"></div>
+        <div class="form-group"><label class="form-label">競技形式</label><input class="form-control" id="y-format" value="8人制（最少6名）"></div>
         <div class="form-group"><label class="form-label">試合時間</label><input class="form-control" id="y-time" value="15分ハーフ（15-5-15分）"></div>
-        <div class="form-group"><label class="form-label">最少人数</label><input class="form-control" id="y-minp" value="6名以上"></div>
+        <div class="form-group"><label class="form-label">選手交代</label><input class="form-control" id="y-sub" value="自由（再出場可）"></div>
       </div>
+      <div class="form-group"><label class="form-label">順位決定</label><input class="form-control" id="y-rank" value="勝3点・分1点・負0点 → 勝点→得失点差→総得点→当該対戦→抽選"></div>
       <div class="fg2">
-        <div class="form-group"><label class="form-label">参加費</label><input class="form-control" id="y-fee" value="1チーム5,000円"></div>
+        <div class="form-group"><label class="form-label">審判</label><input class="form-control" id="y-ref" value="当該チームで相談（1審・2審・3審）"></div>
         <div class="form-group"><label class="form-label">表彰</label><input class="form-control" id="y-award" value="1〜3位にトロフィー・優秀選手賞：各チーム1名"></div>
       </div>
       <div class="fg2">
-        <div class="form-group"><label class="form-label">選手交代</label><input class="form-control" id="y-sub" value="自由（再出場可）"></div>
-        <div class="form-group"><label class="form-label">審判</label><input class="form-control" id="y-ref" value="当該チームで相談（1審・2審・3審）"></div>
+        <div class="form-group"><label class="form-label">雨天時</label><input class="form-control" id="y-rain" value="当日AM6:00頃に実施可否を判断し、各チームへ連絡します。"></div>
+        <div class="form-group"><label class="form-label">駐車場</label><input class="form-control" id="y-parking" value="会場周辺に3か所。路上駐車は禁止。乗り合わせにご協力ください。"></div>
       </div>
-      <div class="form-group"><label class="form-label">順位決定方法</label><input class="form-control" id="y-rank" value="勝3点・分1点・負0点 → 勝点→得失点差→総得点→当該対戦→抽選"></div>
-      <div class="form-group"><label class="form-label">雨天時</label><input class="form-control" id="y-rain" value="当日AM6:00頃に実施可否を判断し各チームへ連絡します。"></div>
 
-      <div class="sec">お問い合わせ</div>
+      <div class="sec">📞 問い合わせ</div>
       <div class="fg2">
-        <div class="form-group"><label class="form-label">代表者名</label><input class="form-control" id="y-rep" value="吉見SMC代表 片山孝俊"></div>
+        <div class="form-group"><label class="form-label">代表者名</label><input class="form-control" id="y-rep" value="吉見SMC代表　片山孝俊"></div>
         <div class="form-group"><label class="form-label">電話・メール</label><input class="form-control" id="y-contact" value="090-3595-1970 / yoshimi.smc.fc@gmail.com"></div>
       </div>
 
-      <div style="display:flex;gap:10px;flex-wrap:wrap;margin-top:6px">
+      <div style="display:flex;gap:8px;margin-top:12px;flex-wrap:wrap">
         <button class="btn btn-primary" onclick="buildYoukou()" style="flex:1">👁 要綱プレビューを表示</button>
-        <button class="btn btn-outline btn-sm" onclick="printDoc()">🖨 印刷（A4）</button>
+        <button class="btn btn-outline btn-sm no-print" onclick="window.print()">🖨 印刷（A4）</button>
       </div>
     </div>
-
-    <!-- 要綱プレビュー -->
-    <div class="print-sheet" id="youkou-preview" style="display:none;margin-top:14px"></div>
+    <div id="youkou-preview" style="margin-top:16px;display:none"></div>
   </div>
 
   <!-- ===== 対戦表 ===== -->
   <div class="doc-section" id="doc-taisen">
     <div class="panel no-print">
-      <div class="sec">大会設定</div>
+
+      <style>
+        #doc-taisen input,#doc-taisen select{
+          background:#1e3a5a!important;color:#ffffff!important;
+          border-color:rgba(0,212,255,.35)!important;
+        }
+        #doc-taisen input::placeholder{color:rgba(255,255,255,.35)!important}
+        #doc-taisen .form-label{color:#7dd3fc!important;font-weight:900}
+        #doc-taisen .form-control:focus{border-color:var(--orange)!important;background:#1e4a6a!important}
+      </style>
+
+      <div class="sec">📌 大会基本情報</div>
       <div class="fg3">
         <div class="form-group"><label class="form-label">大会名</label><input class="form-control" id="t-title" value="U9 吉見SMC大会"></div>
         <div class="form-group"><label class="form-label">期日</label><input class="form-control" id="t-date" type="date"></div>
         <div class="form-group"><label class="form-label">場所</label><input class="form-control" id="t-place" value="吉見ふれあい広場"></div>
       </div>
+
+      <div class="sec">⏱ 試合設定</div>
       <div class="fg3">
-        <div class="form-group"><label class="form-label">コート面数</label>
+        <div class="form-group"><label class="form-label">コート数</label>
           <select class="form-control" id="t-courts" onchange="updateTeamInputs()">
-            <option value="1">1面</option><option value="2" selected>2面（A・B面）</option>
+            <option value="1">1面</option>
+            <option value="2" selected>2面（A・B面）</option>
           </select></div>
-        <div class="form-group"><label class="form-label">試合開始時刻</label><input class="form-control" id="t-starttime" value="08:30"></div>
-        <div class="form-group"><label class="form-label">1試合あたりの時間（分）</label><input class="form-control" id="t-gametime" type="number" value="40" min="20" max="90"></div>
+        <div class="form-group"><label class="form-label">開始時刻</label><input class="form-control" id="t-start" value="08:30"></div>
+        <div class="form-group"><label class="form-label">1試合の枠（分）</label><input class="form-control" id="t-min" type="number" value="40" min="20" max="120"></div>
       </div>
 
-      <div class="sec">チーム設定</div>
+      <div class="sec">⚽ チーム設定</div>
       <div id="team-inputs"></div>
 
-      <button class="btn btn-primary" onclick="buildTaisen()" style="width:100%;margin-top:10px">📊 対戦表を生成する</button>
-      <div style="display:flex;gap:8px;margin-top:8px">
-        <button class="btn btn-outline btn-sm no-print" onclick="printDoc()" style="flex:1">🖨 印刷（A4）</button>
+      <div style="display:flex;gap:8px;margin-top:12px;flex-wrap:wrap">
+        <button class="btn btn-primary" onclick="buildTaisen()" style="flex:1">📊 対戦表を生成する</button>
+        <button class="btn btn-outline btn-sm no-print" onclick="window.print()">🖨 印刷（A4横）</button>
       </div>
     </div>
-
-    <!-- 対戦表プレビュー -->
-    <div id="taisen-preview" style="margin-top:14px"></div>
+    <div id="taisen-preview" style="margin-top:16px"></div>
   </div>
 
 </main>
 <footer class="site-footer no-print">YOSHIMI SMC FC — SMART PORTAL</footer>
 <script>
-/* ===== タブ切り替え ===== */
-function switchDoc(id){
+/* ===== タブ ===== */
+function switchDoc(id,el){
   document.querySelectorAll(".doc-section").forEach(function(s){s.classList.remove("active");});
   document.querySelectorAll(".doc-tab-btn").forEach(function(b){b.classList.remove("active");});
   document.getElementById("doc-"+id).classList.add("active");
-  event.currentTarget.classList.add("active");
+  el.classList.add("active");
 }
 
-/* ===== 要綱 ===== */
+/* ===== 共通 ===== */
 function gv(id){var e=document.getElementById(id);return e?e.value.trim():"";}
+function addMins(t,m){var p=t.split(":");var h=+p[0],mn=+p[1]+m;h+=Math.floor(mn/60);mn%=60;return String(h%24).padStart(2,"0")+":"+String(mn).padStart(2,"0");}
 
+/* ===== 要綱 ===== */
 function buildYoukou(){
-  var title=gv("y-title"),date=gv("y-date"),place=gv("y-place");
-  var dateStr=date?new Date(date+"T00:00:00").toLocaleDateString("ja-JP",{year:"numeric",month:"long",day:"numeric",weekday:"short"}):("　　　　年　月　日");
+  var title=gv("y-title");
+  var dateVal=gv("y-date");
+  var dateStr=dateVal?new Date(dateVal+"T00:00:00").toLocaleDateString("ja-JP",{year:"numeric",month:"long",day:"numeric",weekday:"short"}):("　　年　月　日（　）");
   var h="";
+  h+='<div class="print-doc">';
   h+='<div class="req-title">'+title+'　大会要項</div>';
-  h+='<table class="req-table"><tbody>';
+  h+='<table class="req-info-table"><tbody>';
   h+='<tr><th>期日</th><td>'+dateStr+'</td><th>場所</th><td>'+gv("y-place")+'</td></tr>';
   h+='<tr><th>受付</th><td>'+gv("y-uketsuke")+'</td><th>主催</th><td>'+gv("y-host")+'</td></tr>';
   h+='</tbody></table>';
-  h+='<div style="font-weight:bold;font-size:10.5pt;margin-bottom:6px">開催要項</div>';
-  h+='<div class="req-section"><div class="req-section-title">１）目的</div><ul class="req-list"><li>試合を通して少年少女サッカーの普及を目指します。</li><li>チーム間の友好と親善を図り、サッカーの楽しさを知ってもらいます。</li><li>試合経験を通して、選手相互の技術向上を図ります。</li></ul></div>';
-  h+='<div class="req-section"><div class="req-section-title">２）対象学年</div><ul class="req-list"><li>'+gv("y-cat")+'</li></ul></div>';
-  h+='<div class="req-section"><div class="req-section-title">３）試合方法</div><ul class="req-list"><li>'+gv("y-format")+'で実施します。試合成立人数は'+gv("y-minp")+'。</li><li>競技時間は'+gv("y-time")+'を基本とします。</li><li>暑熱時は、飲水タイム（ランニング）を設けてください。</li></ul></div>';
-  h+='<div class="req-section"><div class="req-section-title">４）選手交代</div><ul class="req-list"><li>選手交代は'+gv("y-sub")+'とします。できるだけ多くの選手が出場できるようご配慮ください。</li></ul></div>';
-  h+='<div class="req-section"><div class="req-section-title">５）ルール</div><ul class="req-list"><li>日本サッカー協会8人制競技規則に準じます。</li><li>順位決定方法：'+gv("y-rank")+'</li><li>ユニフォームは正副いずれかを用意。ビブス対応可。</li></ul></div>';
-  h+='<div class="req-section"><div class="req-section-title">６）審判</div><ul class="req-list"><li>'+gv("y-ref")+'して決めてください。審判服の着用をお願いします。</li></ul></div>';
-  h+='<div class="req-section"><div class="req-section-title">７）参加費</div><ul class="req-list"><li>'+gv("y-fee")+'・受付にて集金します。</li></ul></div>';
-  h+='<div class="req-section"><div class="req-section-title">８）表彰</div><ul class="req-list"><li>'+gv("y-award")+'</li></ul></div>';
-  h+='<div class="req-section"><div class="req-section-title">９）注意事項</div><ul class="req-list"><li>代表者会議を8:00より行いますので本部に集合してください。</li><li>熱中症・感染症には十分に気をつけてください。対応は各チームでお願いします。</li><li>会場周辺での路上駐車は一切行わないよう、チーム単位で周知徹底をお願いします。</li><li>ゴミは各チームで持ち帰りをお願いします。</li></ul></div>';
-  h+='<div class="req-section"><div class="req-section-title">10）雨天時</div><ul class="req-list"><li>'+gv("y-rain")+'</li></ul></div>';
-  h+='<hr class="req-divider">';
-  h+='<div style="font-weight:bold;font-size:10pt;margin-bottom:4px">お問い合わせ</div>';
-  h+='<table class="req-table"><tbody>';
-  h+='<tr><th>代表</th><td>'+gv("y-rep")+'</td></tr>';
-  h+='<tr><th>電話・メール</th><td>'+gv("y-contact")+'</td></tr>';
-  h+='</tbody></table>';
+  h+='<div style="font-weight:bold;font-size:11pt;margin-bottom:6px;color:#003087;border-bottom:1px solid #c0cce8;padding-bottom:4px">開催要項</div>';
+
+  function sec(n,title,items){
+    var r='<div class="req-num">'+n+'）'+title+'</div><ul class="req-items">';
+    items.forEach(function(i){r+='<li>'+i+'</li>';});
+    r+='</ul>';return r;
+  }
+
+  h+=sec(1,"目的",[
+    "試合を通して少年少女サッカーの普及を目指します。",
+    "チーム間の友好と親善を図り、サッカーの楽しさを知ってもらいます。",
+    "試合経験を通して、選手相互の技術向上を図ります。"
+  ]);
+  h+=sec(2,"対象学年",[gv("y-cat")]);
+  h+=sec(3,"試合方法",[
+    gv("y-format")+"で実施します。",
+    "競技時間は"+gv("y-time")+"を基本とします。",
+    "暑熱時は、飲水タイム（ランニング）を設けてください。"
+  ]);
+  h+=sec(4,"選手交代",[
+    "選手交代は"+gv("y-sub")+"。",
+    "できるだけ多くの選手が出場できるようご配慮ください。"
+  ]);
+  h+=sec(5,"ルール",[
+    "日本サッカー協会8人制競技規則に準じます。",
+    "細かな運用は、当日の進行状況により主催者判断で調整します。",
+    "順位決定方法："+gv("y-rank"),
+    "ユニフォームは正副いずれかを用意。ビブス対応可。"
+  ]);
+  h+=sec(6,"審判",[
+    gv("y-ref")+"して決めてください。",
+    "審判服の着用をお願いします。笛・時計等は各自ご準備ください。"
+  ]);
+  h+=sec(7,"開閉会式",[
+    "開会式は行いません。試合開始までに各チーム集合してください。",
+    "閉会時は、全体で集合して閉会式を行います。"
+  ]);
+  h+=sec(8,"参加費",[gv("y-fee")]);
+  h+=sec(9,"表彰",[gv("y-award")]);
+  h+=sec(10,"注意事項",[
+    "代表者会議を8:00より行いますので本部に集合してください。",
+    "熱中症・感染症には十分に気をつけてください。対応は各チームでお願いします。",
+    gv("y-parking"),
+    "ゴミは各チームで持ち帰りをお願いします。"
+  ]);
+  h+=sec(11,"雨天時",[gv("y-rain")]);
+
+  h+='<div class="req-contact"><div class="req-contact-title">📞 お問い合わせ</div>';
+  h+='代表：'+gv("y-rep")+'　／　'+gv("y-contact")+'</div>';
+  h+='</div>';
+
   var pv=document.getElementById("youkou-preview");
   pv.innerHTML=h;pv.style.display="block";
   pv.scrollIntoView({behavior:"smooth",block:"start"});
@@ -206,143 +313,161 @@ function updateTeamInputs(){
   var courts=+gv("t-courts");
   var html="";
   for(var c=0;c<courts;c++){
-    var label=courts===1?"チーム":["Aブロック","Bブロック"][c];
-    html+='<div style="margin-bottom:14px">';
-    html+='<div style="font-size:.82rem;font-weight:900;color:var(--cyan);margin-bottom:8px">'+label+'（チーム数・チーム名）</div>';
-    html+='<div class="form-group"><label class="form-label">チーム数</label>';
-    html+='<select class="form-control" id="t-count-'+c+'" onchange="updateTeamNames('+c+')">';
+    var label=courts===1?"チーム一覧":["Aブロック","Bブロック"][c];
+    html+='<div style="margin-bottom:16px">';
+    html+='<div style="font-size:.84rem;font-weight:900;color:var(--cyan);margin-bottom:8px">'+label+'</div>';
+    html+='<div class="fg3" style="margin-bottom:8px">';
+    html+='<div class="form-group" style="margin:0"><label class="form-label">チーム数</label>';
+    html+='<select class="form-control" id="cnt-'+c+'" onchange="updateNames('+c+')">';
     for(var n=2;n<=8;n++)html+='<option value="'+n+'"'+(n===4?" selected":"")+'>'+n+'チーム</option>';
     html+='</select></div>';
-    html+='<div id="t-names-'+c+'" style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:8px"></div>';
+    html+='</div>';
+    html+='<div id="names-'+c+'" style="display:grid;grid-template-columns:1fr 1fr;gap:8px"></div>';
     html+='</div>';
   }
   document.getElementById("team-inputs").innerHTML=html;
-  for(var c2=0;c2<courts;c2++)updateTeamNames(c2);
+  for(var c2=0;c2<courts;c2++)updateNames(c2);
 }
 
-function updateTeamNames(c){
-  var n=+document.getElementById("t-count-"+c).value;
-  var defaults=[["吉見A","川里","滑川","A4","","","",""],["吉見B","鴻巣ドルフィンズ","川島","本庄ホッパーズ","","","",""]];
-  var defs=defaults[c]||[];
+var DEF_TEAMS=[
+  ["吉見A","川里","滑川","A4","","","",""],
+  ["吉見B","鴻巣ドルフィンズ","川島","本庄ホッパーズ","","","",""]
+];
+function updateNames(c){
+  var n=+document.getElementById("cnt-"+c).value;
+  var defs=DEF_TEAMS[c]||[];
   var html="";
   for(var i=0;i<n;i++){
     html+='<div class="form-group" style="margin:0"><label class="form-label">チーム'+(i+1)+'</label>';
-    html+='<input class="form-control" id="t-team-'+c+'-'+i+'" value="'+(defs[i]||"")+'" placeholder="チーム名"></div>';
+    html+='<input class="form-control" id="t-'+c+'-'+i+'" value="'+(defs[i]||"")+'" placeholder="チーム名"></div>';
   }
-  document.getElementById("t-names-"+c).innerHTML=html;
-}
-
-function addMins(timeStr,mins){
-  var p=timeStr.split(":");var h=+p[0],m=+p[1];m+=mins;h+=Math.floor(m/60);m=m%60;
-  return String(h%24).padStart(2,"0")+":"+String(m).padStart(2,"0");
+  document.getElementById("names-"+c).innerHTML=html;
 }
 
 function buildTaisen(){
-  var courts=+gv("t-courts");
-  var gameMin=+gv("t-gametime")||40;
-  var startTime=gv("t-starttime")||"08:30";
+  var courts=+gv("t-courts"),gmin=+gv("t-min")||40,st=gv("t-start")||"08:30";
   var title=gv("t-title"),dateVal=gv("t-date"),place=gv("t-place");
-  var dateStr=dateVal?new Date(dateVal+"T00:00:00").toLocaleDateString("ja-JP",{year:"numeric",month:"long",day:"numeric",weekday:"short"}):("　　　　年　月　日");
+  var dateStr=dateVal?new Date(dateVal+"T00:00:00").toLocaleDateString("ja-JP",{year:"numeric",month:"long",day:"numeric",weekday:"short"}):"";
 
   var blocks=[];
   for(var c=0;c<courts;c++){
-    var n=+document.getElementById("t-count-"+c).value;
-    var teams=[];
-    for(var i=0;i<n;i++){
-      var el=document.getElementById("t-team-"+c+"-"+i);
-      teams.push(el?el.value.trim()||("チーム"+(i+1)):("チーム"+(i+1)));
-    }
-    // 総当たり組み合わせ生成
+    var n=+document.getElementById("cnt-"+c).value,teams=[];
+    for(var i=0;i<n;i++){var el=document.getElementById("t-"+c+"-"+i);teams.push(el?el.value.trim()||"チーム"+(i+1):"チーム"+(i+1));}
     var matches=[];
     for(var a=0;a<teams.length;a++)for(var b=a+1;b<teams.length;b++)matches.push([a,b]);
     blocks.push({label:courts===1?"":["Aブロック","Bブロック"][c],teams:teams,matches:matches});
   }
 
-  // スケジュール（A・B交互）
-  var schedItems=[];
+  // スケジュール組み立て（両コート交互）
+  var schedRows=[];
   var maxM=Math.max.apply(null,blocks.map(function(b){return b.matches.length;}));
-  var curTime=startTime;
+  var cur=st;
   for(var mi=0;mi<maxM;mi++){
-    for(var ci=0;ci<blocks.length;ci++){
+    for(var ci=0;ci<courts;ci++){
       if(mi<blocks[ci].matches.length){
         var m=blocks[ci].matches[mi];
-        schedItems.push({court:ci,blockIdx:ci,matchIdx:mi,home:blocks[ci].teams[m[0]],away:blocks[ci].teams[m[1]],time:curTime,cat:(courts===1?"予選":["Aブロック","Bブロック"][ci])});
+        var bLabel=courts===1?"予選":"予選("+["A","B"][ci]+"面)";
+        schedRows.push({no:schedRows.length+1,time:cur,cat:bLabel,home:blocks[ci].teams[m[0]],away:blocks[ci].teams[m[1]],blk:ci,alt:mi%2===1});
       }
     }
-    curTime=addMins(curTime,gameMin);
-    // 1セット（両コート1試合）終わったら時間進める（1コートの場合は1試合ごと）
-    if(courts===1&&mi<maxM-1){}
+    cur=addMins(cur,gmin);
   }
-
-  // 順位戦スケジュール
-  var restTime=curTime;
-  var finalStart=addMins(restTime,10);
+  // 順位戦
+  var breakTime=cur;
+  var finalStart=addMins(breakTime,10);
   var finals=[];
   if(courts===2){
     finals=[
-      {label:"4位同士",home:"A4位",away:"B4位",time:finalStart},
-      {label:"3位同士",home:"A3位",away:"B3位",time:finalStart},
+      {no:0,time:finalStart,cat:"順位戦",home:"A4位",away:"B4位",note:"4位同士",alt:false},
+      {no:0,time:finalStart,cat:"順位戦",home:"A3位",away:"B3位",note:"3位同士",alt:false},
     ];
-    var sf=addMins(finalStart,gameMin);
-    finals.push({label:"2位同士",home:"A2位",away:"B2位",time:sf});
-    finals.push({label:"1位同士",home:"A1位",away:"B1位",time:sf});
+    var sf=addMins(finalStart,gmin);
+    finals.push({no:0,time:sf,cat:"順位戦",home:"A2位",away:"B2位",note:"2位同士",alt:true});
+    finals.push({no:0,time:sf,cat:"順位戦",home:"A1位",away:"B1位",note:"1位同士",alt:true});
+    var closingTime=addMins(sf,gmin);
+  } else {
+    var closingTime=addMins(finalStart,gmin);
   }
 
-  /* HTML生成 */
-  var h='<div class="print-sheet">';
-  h+='<div class="req-title">'+title+'　対戦表</div>';
-  h+='<div style="text-align:center;font-size:9pt;color:#555;margin-bottom:10px">'+dateStr+'　'+place+'</div>';
+  var no=schedRows.length;
+  finals.forEach(function(f,i){f.no=no+i+1;});
 
-  /* スケジュール表 */
-  h+='<div class="block-title">試合スケジュール</div>';
-  h+='<table class="schedule-table"><thead><tr><th>No</th><th>時刻</th><th>区分</th><th>ホーム</th><th>得</th><th>-</th><th>得</th><th>アウェイ</th><th>備考</th></tr></thead><tbody>';
-  var no=1;
-  schedItems.forEach(function(s){
-    h+='<tr><td>'+no+'</td><td>'+s.time+'</td><td>'+s.cat+'</td>';
-    h+='<td class="home-cell">'+s.home+'</td>';
-    h+='<td class="score-cell"></td><td style="background:#f5f5f5">－</td><td class="score-cell"></td>';
-    h+='<td class="away-cell">'+s.away+'</td><td></td></tr>';
-    no++;
+  /* ===== HTML生成 ===== */
+  var h='<div class="taisen-wrap">';
+  h+='<div class="tai-header"><div class="tai-title">'+title+'　対戦表</div>';
+  h+='<div class="tai-sub">'+(dateStr?dateStr+"　":"")+place+'</div></div>';
+
+  /* スケジュール */
+  h+='<div class="block-header">📅 試合スケジュール　開始時刻：'+st+'　（1試合'+gmin+'分枠）</div>';
+  h+='<table class="sched-table"><thead><tr>';
+  h+='<th style="width:28px">No</th><th style="width:52px">開始</th><th style="width:70px">区分</th>';
+  h+='<th>ホーム</th><th style="width:32px">得点</th><th style="width:22px">-</th><th style="width:32px">得点</th>';
+  h+='<th>アウェイ</th><th style="width:52px">備考</th>';
+  h+='</tr></thead><tbody>';
+
+  schedRows.forEach(function(r){
+    h+='<tr'+(r.alt?' class="tr-alt"':"")+'>';
+    h+='<td>'+r.no+'</td><td>'+r.time+'</td><td>'+r.cat+'</td>';
+    h+='<td class="td-home">'+r.home+'</td><td class="td-score"></td><td class="td-vs">－</td><td class="td-score"></td>';
+    h+='<td class="td-away">'+r.away+'</td><td></td></tr>';
   });
-  if(finals.length){
-    h+='<tr><td colspan="9" style="background:#eef2fa;font-weight:bold;text-align:center">休憩</td></tr>';
-    finals.forEach(function(f){
-      h+='<tr><td>'+no+'</td><td>'+f.time+'</td><td>順位戦</td>';
-      h+='<td class="home-cell">'+f.home+'</td>';
-      h+='<td class="score-cell"></td><td style="background:#f5f5f5">－</td><td class="score-cell"></td>';
-      h+='<td class="away-cell">'+f.away+'</td><td>'+f.label+'</td></tr>';
-      no++;
+
+  if(courts===2){
+    h+='<tr class="tr-break"><td colspan="9">— 休 憩 —</td></tr>';
+    finals.forEach(function(f,i){
+      h+='<tr class="tr-final'+(f.alt?' tr-alt':"")+'">';
+      h+='<td>'+f.no+'</td><td>'+f.time+'</td><td>'+f.cat+'</td>';
+      h+='<td class="td-home">'+f.home+'</td><td class="td-score"></td><td class="td-vs">－</td><td class="td-score"></td>';
+      h+='<td class="td-away">'+f.away+'</td><td>'+f.note+'</td></tr>';
     });
   }
-  h+='<tr><td colspan="9" style="background:#eef2fa;font-weight:bold;text-align:center">閉会式</td></tr>';
+  h+='<tr class="tr-closing"><td colspan="9">🏆 閉会式　'+closingTime+'～</td></tr>';
   h+='</tbody></table>';
 
-  /* ブロック別順位表＋総当り表 */
-  blocks.forEach(function(blk){
-    h+='<div class="block-title">'+(blk.label||"チーム")+'順位表</div>';
-    h+='<table class="rank-table"><thead><tr><th>順位</th><th>チーム名</th><th>試合</th><th>勝</th><th>分</th><th>負</th><th>得点</th><th>失点</th><th>得失差</th><th>勝点</th></tr></thead><tbody>';
-    blk.teams.forEach(function(t){
-      h+='<tr><td>1</td><td style="text-align:left;padding-left:6px">'+t+'</td><td>0</td><td>0</td><td>0</td><td>0</td><td>0</td><td>0</td><td>0</td><td>0</td></tr>';
+  /* ブロック別 順位表＋総当り */
+  if(courts===2){
+    h+='<div class="blocks-row">';
+    blocks.forEach(function(blk){
+      h+='<div>';
+      h+='<div class="block-header">'+blk.label+' 順位表</div>';
+      h+='<table class="rank-table"><thead><tr><th>#</th><th>チーム名</th><th>試合</th><th>勝</th><th>分</th><th>負</th><th>得</th><th>失</th><th>差</th><th>勝点</th></tr></thead><tbody>';
+      blk.teams.forEach(function(t,i){
+        h+='<tr'+(i%2===1?' class="tr-alt"':"")+'><td>'+(i+1)+'</td><td class="td-name">'+t+'</td><td>0</td><td>0</td><td>0</td><td>0</td><td>0</td><td>0</td><td>0</td><td>0</td></tr>';
+      });
+      h+='</tbody></table>';
+      h+='<div style="font-size:8.5pt;font-weight:bold;margin:8px 0 4px;color:#333">'+blk.label+' 総当り票</div>';
+      h+='<table class="round-table"><thead><tr><th class="th-team" style="min-width:70px"></th>';
+      blk.teams.forEach(function(t){h+='<th>'+t+'</th>';});
+      h+='</tr></thead><tbody>';
+      blk.teams.forEach(function(t1,i){
+        h+='<tr><th class="th-team" style="text-align:left;padding-left:5px">'+t1+'</th>';
+        blk.teams.forEach(function(t2,j){
+          h+=i===j?'<td class="td-self">－</td>':'<td class="td-score"></td>';
+        });
+        h+='</tr>';
+      });
+      h+='</tbody></table></div>';
     });
+    h+='</div>';
+  } else {
+    var blk=blocks[0];
+    h+='<div class="block-header">順位表</div>';
+    h+='<table class="rank-table"><thead><tr><th>#</th><th>チーム名</th><th>試合</th><th>勝</th><th>分</th><th>負</th><th>得</th><th>失</th><th>差</th><th>勝点</th></tr></thead><tbody>';
+    blk.teams.forEach(function(t,i){h+='<tr'+(i%2===1?' class="tr-alt"':"")+'><td>'+(i+1)+'</td><td class="td-name">'+t+'</td><td>0</td><td>0</td><td>0</td><td>0</td><td>0</td><td>0</td><td>0</td><td>0</td></tr>';});
     h+='</tbody></table>';
-
-    /* 総当り表 */
-    h+='<div style="font-size:9pt;font-weight:bold;margin:6px 0 4px">'+(blk.label||"")+'総当り票</div>';
-    h+='<table class="schedule-table"><thead><tr><th></th>';
+    h+='<div style="font-size:8.5pt;font-weight:bold;margin:8px 0 4px;color:#333">総当り票</div>';
+    h+='<table class="round-table"><thead><tr><th class="th-team" style="min-width:80px"></th>';
     blk.teams.forEach(function(t){h+='<th>'+t+'</th>';});
     h+='</tr></thead><tbody>';
     blk.teams.forEach(function(t1,i){
-      h+='<tr><td style="font-weight:bold;text-align:left;padding-left:6px">'+t1+'</td>';
-      blk.teams.forEach(function(t2,j){
-        if(i===j)h+='<td style="background:#e0e0e0">－</td>';
-        else h+='<td class="score-cell"></td>';
-      });
+      h+='<tr><th class="th-team" style="text-align:left;padding-left:5px">'+t1+'</th>';
+      blk.teams.forEach(function(t2,j){h+=i===j?'<td class="td-self">－</td>':'<td class="td-score"></td>';});
       h+='</tr>';
     });
     h+='</tbody></table>';
-  });
+  }
 
-  h+='<div style="font-size:7.5pt;color:#888;margin-top:8px;text-align:right">※ 得点欄に記入すると各チームの集計が確認できます</div>';
+  h+='<div style="font-size:7.5pt;color:#888;text-align:right;margin-top:6px">※ 黄色セルに得点を記入してください</div>';
   h+='</div>';
 
   var pv=document.getElementById("taisen-preview");
@@ -350,14 +475,11 @@ function buildTaisen(){
   pv.scrollIntoView({behavior:"smooth",block:"start"});
 }
 
-function printDoc(){window.print();}
-
-/* 初期化 */
+/* ===== 初期化 ===== */
 (function(){
   var now=new Date();
-  var dateStr=now.getFullYear()+"-"+String(now.getMonth()+1).padStart(2,"0")+"-"+String(now.getDate()).padStart(2,"0");
-  var yDate=document.getElementById("y-date");if(yDate)yDate.value=dateStr;
-  var tDate=document.getElementById("t-date");if(tDate)tDate.value=dateStr;
+  var ds=now.getFullYear()+"-"+String(now.getMonth()+1).padStart(2,"0")+"-"+String(now.getDate()).padStart(2,"0");
+  ["y-date","t-date"].forEach(function(id){var e=document.getElementById(id);if(e)e.value=ds;});
   updateTeamInputs();
 })();
 </script>
