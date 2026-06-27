@@ -134,8 +134,8 @@
             <tr><td>📱 アプリとして使う</td><td>ホーム画面への追加手順</td></tr>
           </tbody>
         </table>
-        <div class="tip">📢 ホーム画面の一番上にコーチからの<strong style="color:#60c0ff">青いお知らせ</strong>や<strong style="color:#ff8080">赤い注意事項</strong>が表示されることがあります。練習前には必ず確認してください。</div>
-        <div class="tip">🌧️ 練習開始1時間前に雨予報・熱中症の自動アラートが自動で表示されます（屋外練習の場合）。</div>
+        <div class="tip">📢 ホーム画面の一番上にコーチからの<strong style="color:#60c0ff">青いお知らせ（ガイダンス）</strong>や<strong style="color:#ff8080">赤い注意事項（アラート）</strong>が表示されることがあります。練習前には必ず確認してください。</div>
+        <div class="tip">🔔 <strong>自動アラート：</strong>屋外練習の開始1時間前になると天気予報を自動取得し、<strong>降水確率40%以上</strong>なら🌧️雨アラート、<strong>WBGT 25℃以上</strong>なら🌡️熱中症アラートがホーム画面に自動で表示されます。操作は不要です。</div>
       </div>
     </div>
   </div>
@@ -187,6 +187,41 @@
         </table>
       </div>
     </div>
+    <!-- 自動アラート -->
+    <div class="acc-section">
+      <div class="acc-hdr" onclick="tog(this)"><div class="acc-icon">🔔</div><div class="acc-title">自動アラート（ホーム画面に自動で表示されるお知らせ）</div><div class="acc-arrow">▶</div></div>
+      <div class="acc-body">
+        <p style="font-size:.84rem;color:#c8e4ff;line-height:1.7;margin:0 0 10px">
+          屋外練習の<strong style="color:#fff">開始1時間前</strong>になると、天気予報を自動で取得してホーム画面にアラートを表示します。<br>
+          操作は一切不要です。ホームを開くと自動で確認されます。
+        </p>
+        <table class="ft">
+          <thead><tr><th>アラートの種類</th><th>表示条件</th><th>表示される内容</th></tr></thead>
+          <tbody>
+            <tr>
+              <td>🌧️ 雨アラート<br><span style="color:#88aaff;font-size:.72rem">青色で表示</span></td>
+              <td>降水確率<br><strong style="color:#fff">40%以上</strong></td>
+              <td>室内用シューズの案内・雨天時の会場・時間変更の案内</td>
+            </tr>
+            <tr>
+              <td>🌡️ 熱中症アラート<br><span style="color:#ff8888;font-size:.72rem">赤色で表示</span></td>
+              <td>WBGT<br><strong style="color:#fff">25℃以上</strong></td>
+              <td>帽子・水筒2本・保冷剤の案内。31℃以上は活動中止基準の警告も表示</td>
+            </tr>
+          </tbody>
+        </table>
+        <div class="tip-o" style="margin-top:8px">
+          ⚠️ アラートが表示されるのは<strong>屋外練習の日だけ</strong>です。体育館（室内）の練習日は表示されません。<br>
+          また、位置情報の許可が必要です（「現在地の天気」を取得するため）。
+        </div>
+        <div class="tip" style="margin-top:8px">
+          🔧 <strong>コーチの方へ：</strong>アラートのしきい値や練習スケジュールは<br>
+          コーチ専用エリア →「🔔 自動アラート設定」から変更できます。<br>
+          変更するとFirebaseで全員に即反映されます。
+        </div>
+      </div>
+    </div>
+
     <div class="acc-section">
       <div class="acc-hdr" onclick="tog(this)"><div class="acc-icon">📒</div><div class="acc-title">団員名簿</div><div class="acc-arrow">▶</div></div>
       <div class="acc-body">
@@ -255,6 +290,39 @@
           <li>不要になったら「🗑 クリア」で消せます</li>
         </ul>
         <div class="tip">💡 雨天で体育館変更・時間変更などのお知らせに特に便利です！</div>
+      </div>
+    </div>
+
+    <div class="acc-section">
+      <div class="acc-hdr" onclick="tog(this)"><div class="acc-icon">🔔</div><div class="acc-title">自動アラート設定（練習スケジュール・しきい値の変更）</div><div class="acc-arrow">▶</div></div>
+      <div class="acc-body">
+        <p style="font-size:.84rem;color:#c8e4ff;line-height:1.7;margin:0 0 8px">
+          ホーム画面に自動表示される「雨アラート」「熱中症アラート」の設定をここから変更できます。
+        </p>
+        <div class="sec-title">📅 練習スケジュールの追加・変更</div>
+        <ul class="step-list">
+          <li>「コーチ専用」→「🔔 自動アラート設定」→「練習スケジュール」を確認する</li>
+          <li>「✏️ 編集」で曜日・時間・室内/屋外を変更できます</li>
+          <li>「＋ 練習を追加」で新しい練習日を追加できます</li>
+          <li><strong style="color:#fff">「屋外」に設定した練習日のみ</strong>アラートが表示されます（室内はアラートなし）</li>
+        </ul>
+        <div class="sec-title">🌧️ 雨アラートのしきい値変更</div>
+        <ul class="step-list">
+          <li>「降水確率（%以上でアラート表示）」の数値を変更する</li>
+          <li>デフォルトは<strong style="color:#fff">40%</strong>。「30%から出したい」場合は30に変更</li>
+          <li>「💾 アラート設定を保存」をタップ</li>
+        </ul>
+        <div class="sec-title">🌡️ 熱中症アラートのしきい値変更</div>
+        <ul class="step-list">
+          <li>「WBGT（℃以上でアラート表示）」の数値を変更する</li>
+          <li>デフォルトは<strong style="color:#fff">25℃</strong>（警戒レベル）。厳しくしたい場合は28℃など</li>
+        </ul>
+        <div class="sec-title">🏫 雨天時の会場・時間案内の変更</div>
+        <ul class="step-list">
+          <li>「雨天時の会場名」「奇数月のスケジュール案内」「偶数月のスケジュール案内」を変更</li>
+          <li>「💾 アラート設定を保存」でFirebase経由で全員に即反映されます</li>
+        </ul>
+        <div class="tip-g">✅ 保存した設定はFirebaseでクラウド同期されます。次回ホーム画面を開いた時から新しい設定でアラートが動きます。</div>
       </div>
     </div>
 
