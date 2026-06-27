@@ -140,6 +140,101 @@
     </div>
     <div class="howto-note">※ アイコンからアプリのように全画面で起動できます。オフライン時も一部機能が使えます。</div>
   </div>
+
+  <!-- 困ったときのトラブル対応 -->
+  <div class="pitch-section-divider" style="margin-bottom:14px"><span class="psd-text">🆘 うまく表示されないとき</span><span class="psd-sub">TROUBLESHOOTING</span></div>
+  <div style="display:grid;gap:10px;margin-bottom:8px">
+
+    <!-- ページが正しく表示されない -->
+    <div style="background:var(--surface-lt);border:1px solid var(--line-2);border-radius:var(--r12);padding:14px 16px">
+      <div style="font-size:.88rem;font-weight:900;color:#fff;margin-bottom:10px;display:flex;align-items:center;gap:8px">
+        <span style="background:rgba(0,212,255,.2);border-radius:50%;width:24px;height:24px;display:flex;align-items:center;justify-content:center;font-size:.8rem;flex-shrink:0">❓</span>
+        ページが正しく表示されない・古い画面が出る
+      </div>
+      <div style="display:grid;gap:6px">
+        <div style="background:rgba(255,255,255,.04);border-radius:8px;padding:10px 12px;font-size:.8rem;color:#c8e4ff;display:flex;gap:10px;align-items:flex-start">
+          <span style="background:var(--orange);color:#fff;border-radius:50%;width:18px;height:18px;min-width:18px;display:flex;align-items:center;justify-content:center;font-size:.68rem;font-weight:900;margin-top:1px">1</span>
+          <span>画面を下に引っ張って更新（プルリフレッシュ）してみてください</span>
+        </div>
+        <div style="background:rgba(255,255,255,.04);border-radius:8px;padding:10px 12px;font-size:.8rem;color:#c8e4ff;display:flex;gap:10px;align-items:flex-start">
+          <span style="background:var(--orange);color:#fff;border-radius:50%;width:18px;height:18px;min-width:18px;display:flex;align-items:center;justify-content:center;font-size:.68rem;font-weight:900;margin-top:1px">2</span>
+          <div>キャッシュ（一時データ）を消去してください<br>
+            <span style="color:#7dd3fc">🍎 iPhone：</span>設定 → Safari →「履歴とWebサイトデータを消去」<br>
+            <span style="color:#7dd3fc">🤖 Android：</span>Chrome メニュー → 設定 → プライバシー → 閲覧データを削除
+          </div>
+        </div>
+        <div style="background:rgba(255,255,255,.04);border-radius:8px;padding:10px 12px;font-size:.8rem;color:#c8e4ff;display:flex;gap:10px;align-items:flex-start">
+          <span style="background:var(--orange);color:#fff;border-radius:50%;width:18px;height:18px;min-width:18px;display:flex;align-items:center;justify-content:center;font-size:.68rem;font-weight:900;margin-top:1px">3</span>
+          <span>URLが正しいか確認：<strong style="color:#fff">yoshimismcfc-dotcom.github.io/portal/</strong></span>
+        </div>
+      </div>
+    </div>
+
+    <!-- 印刷・PDFが動かない -->
+    <div style="background:var(--surface-lt);border:1px solid var(--line-2);border-radius:var(--r12);padding:14px 16px">
+      <div style="font-size:.88rem;font-weight:900;color:#fff;margin-bottom:10px;display:flex;align-items:center;gap:8px">
+        <span style="background:rgba(0,212,255,.2);border-radius:50%;width:24px;height:24px;display:flex;align-items:center;justify-content:center;font-size:.8rem;flex-shrink:0">❓</span>
+        🖨️ 印刷・PDFボタンを押しても何も起きない
+      </div>
+      <div style="display:grid;gap:6px">
+        <div style="background:rgba(255,255,255,.04);border-radius:8px;padding:10px 12px;font-size:.8rem;color:#c8e4ff;display:flex;gap:10px;align-items:flex-start">
+          <span style="background:var(--orange);color:#fff;border-radius:50%;width:18px;height:18px;min-width:18px;display:flex;align-items:center;justify-content:center;font-size:.68rem;font-weight:900;margin-top:1px">1</span>
+          <span>大会要綱・対戦表の場合：先に「プレビューを表示」または「対戦表を生成する」ボタンを押してからもう一度試してください</span>
+        </div>
+        <div style="background:rgba(255,255,255,.04);border-radius:8px;padding:10px 12px;font-size:.8rem;color:#c8e4ff;display:flex;gap:10px;align-items:flex-start">
+          <span style="background:var(--orange);color:#fff;border-radius:50%;width:18px;height:18px;min-width:18px;display:flex;align-items:center;justify-content:center;font-size:.68rem;font-weight:900;margin-top:1px">2</span>
+          <span>ポップアップがブロックされている場合があります。ブラウザの設定でこのサイトのポップアップを「許可」に変更してください</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- 位置情報 -->
+    <div style="background:var(--surface-lt);border:1px solid var(--line-2);border-radius:var(--r12);padding:14px 16px">
+      <div style="font-size:.88rem;font-weight:900;color:#fff;margin-bottom:10px;display:flex;align-items:center;gap:8px">
+        <span style="background:rgba(0,212,255,.2);border-radius:50%;width:24px;height:24px;display:flex;align-items:center;justify-content:center;font-size:.8rem;flex-shrink:0">❓</span>
+        🌤️ 天気・WBGTの位置情報が取得できない
+      </div>
+      <div style="display:grid;gap:6px">
+        <div style="background:rgba(255,255,255,.04);border-radius:8px;padding:10px 12px;font-size:.8rem;color:#c8e4ff;display:flex;gap:10px;align-items:flex-start">
+          <span style="background:var(--orange);color:#fff;border-radius:50%;width:18px;height:18px;min-width:18px;display:flex;align-items:center;justify-content:center;font-size:.68rem;font-weight:900;margin-top:1px">1</span>
+          <div><span style="color:#7dd3fc">🍎 iPhone：</span>設定 → プライバシー → 位置情報サービス → Safari →「このAppの使用中のみ許可」に変更</div>
+        </div>
+        <div style="background:rgba(255,255,255,.04);border-radius:8px;padding:10px 12px;font-size:.8rem;color:#c8e4ff;display:flex;gap:10px;align-items:flex-start">
+          <span style="background:var(--orange);color:#fff;border-radius:50%;width:18px;height:18px;min-width:18px;display:flex;align-items:center;justify-content:center;font-size:.68rem;font-weight:900;margin-top:1px">2</span>
+          <div><span style="color:#7dd3fc">🤖 Android：</span>設定 → アプリ → Chrome → 権限 → 位置情報 →「アプリの使用中のみ許可」に変更</div>
+        </div>
+        <div style="background:rgba(255,255,255,.04);border-radius:8px;padding:10px 12px;font-size:.8rem;color:#c8e4ff;display:flex;gap:10px;align-items:flex-start">
+          <span style="background:var(--orange);color:#fff;border-radius:50%;width:18px;height:18px;min-width:18px;display:flex;align-items:center;justify-content:center;font-size:.68rem;font-weight:900;margin-top:1px">3</span>
+          <span>設定変更後、ページを開き直してもう一度「現在地の気象を取得」をタップしてください</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- データが消えた -->
+    <div style="background:var(--surface-lt);border:1px solid var(--line-2);border-radius:var(--r12);padding:14px 16px">
+      <div style="font-size:.88rem;font-weight:900;color:#fff;margin-bottom:10px;display:flex;align-items:center;gap:8px">
+        <span style="background:rgba(0,212,255,.2);border-radius:50%;width:24px;height:24px;display:flex;align-items:center;justify-content:center;font-size:.8rem;flex-shrink:0">❓</span>
+        入力したデータが消えた・保存されていない
+      </div>
+      <div style="font-size:.8rem;color:#ffc8a0;margin-bottom:8px;line-height:1.7">
+        以下の場合にデータが消えることがあります：
+      </div>
+      <div style="display:grid;gap:5px;font-size:.8rem;color:#c8e4ff;line-height:1.7">
+        <div style="padding:4px 0;border-bottom:1px solid rgba(255,255,255,.07)">・ブラウザの「閲覧データを消去」を行った場合</div>
+        <div style="padding:4px 0;border-bottom:1px solid rgba(255,255,255,.07)">・端末を変えた場合（Firebase対応データは別端末でも見られます）</div>
+        <div style="padding:4px 0">・ブラウザアプリをアンインストールした場合</div>
+      </div>
+      <div style="background:rgba(0,212,255,.08);border:1px solid rgba(0,212,255,.2);border-radius:8px;padding:9px 12px;font-size:.78rem;color:#7dd3fc;margin-top:10px;line-height:1.7">
+        💡 名簿・アカウント・ユニフォームなどクラウド対応データはFirebaseに保存されているため、別の端末でも同じデータが確認できます。
+      </div>
+    </div>
+
+  </div>
+
+  <div style="text-align:center;margin-bottom:8px">
+    <a href="guide.html" style="font-size:.82rem;color:var(--cyan);text-decoration:underline">📖 詳しい説明書・ヘルプはこちら</a>
+  </div>
+
 </main>
 <footer class="site-footer">YOSHIMI SMC FC — SMART PORTAL</footer>
 <script>
