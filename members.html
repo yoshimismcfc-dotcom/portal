@@ -110,7 +110,7 @@
 
   <!-- 保存バー -->
   <div class="save-bar">
-    <span class="save-msg-span" id="save-msg">読み込み中...</span>
+    <span class="save-msg-span" id="save-msg"></span>
     <button class="btn btn-outline btn-sm" onclick="exportCSV()">📥 CSV出力</button>
     <button class="btn btn-primary" onclick="saveData()">💾 保存</button>
   </div>
@@ -464,23 +464,17 @@ document.getElementById("edit-modal").addEventListener("click",function(e){
    Firebase読み込み（最後に実行）
    ===================================================== */
 window.addEventListener("DOMContentLoaded", function(){
-  // まずINITで即描画
+  // INITデータで即座に描画（Firebaseを待たない）
   render();
-  var msg = document.getElementById("save-msg");
-  if(msg) msg.textContent = "☁️ データを読み込み中...";
 
-  // Firebaseから上書き
+  // Firebaseからデータが来たら上書き
   dbListen("members", function(val){
     if(val && typeof val==="object" && !Array.isArray(val) && Object.keys(val).length > 0){
       data = val;
-      if(msg) msg.textContent = "✅ クラウドから読み込みました";
     } else {
-      // Firebaseが空→INITを書き込む
       data = JSON.parse(JSON.stringify(INIT));
       dbSave("members", data, KEY, null);
-      if(msg) msg.textContent = "✅ 初期データを設定しました";
     }
-    setTimeout(function(){ if(msg) msg.textContent=""; }, 2500);
     render();
   }, KEY, null);
 });
