@@ -240,7 +240,7 @@
         <div class="url-list" id="url-list">
           <p style="color:var(--ink-3);font-size:.82rem;text-align:center;padding:12px">URLを追加するとここに表示されます。</p>
         </div>
-        <div class="modal-btns"><button class="btn btn-outline" onclick="closeM('modal-menu')">閉じる</button></div>
+        <div class="modal-btns"><button class="btn btn-outline" onclick="closeM('modal-menu')">← コーチ専用に戻る</button></div>
       </div>
     </div>
 
@@ -284,7 +284,7 @@
       </div>
     </div>
 
-        <div class="modal-btns"><button class="btn btn-outline" onclick="closeM('modal-guidance')">閉じる</button></div>
+        <div class="modal-btns"><button class="btn btn-outline" onclick="closeM('modal-guidance')">← コーチ専用に戻る</button></div>
       </div>
     </div>
 
@@ -326,7 +326,7 @@
       <button class="btn btn-primary" onclick="saveAlertSettings()" style="width:100%;margin-top:6px">💾 アラート設定を保存</button>
     </div>
         <div id="alert-save-msg" style="font-size:.82rem;color:var(--green);min-height:1.4em;margin-top:8px;text-align:center"></div>
-        <div class="modal-btns"><button class="btn btn-outline" onclick="closeM('modal-alert')">閉じる</button></div>
+        <div class="modal-btns"><button class="btn btn-outline" onclick="closeM('modal-alert')">← コーチ専用に戻る</button></div>
       </div>
     </div>
 
@@ -473,7 +473,8 @@ var DEFAULT_SETTINGS = {
     {day:6, start:"08:00", end:"10:30", indoor:false, memo:"北小グラウンド"},
     {day:0, start:"08:00", end:"10:30", indoor:false, memo:"北小グラウンド"}
   ],
-  rainThreshold: 40,
+  alertStartHour: 0,
+  rainThreshold: 30,
   heatThreshold: 25,
   rainVenue: "北小体育館",
   rainOdd:  "奇数月：6〜4年 8:00〜10:00 ／ 3年〜年長 10:00〜12:00",
@@ -493,7 +494,8 @@ function loadAlertSettings(){
 function renderScheduleList(){
   var cfg = loadAlertSettings();
   // フォームに反映
-  document.getElementById("rain-threshold").value = cfg.rainThreshold || 40;
+  document.getElementById("alert-start-hour").value = cfg.alertStartHour !== undefined ? cfg.alertStartHour : 0;
+  document.getElementById("rain-threshold").value = cfg.rainThreshold || 30;
   document.getElementById("heat-threshold").value = cfg.heatThreshold || 25;
   document.getElementById("rain-venue").value = cfg.rainVenue || "";
   document.getElementById("rain-odd").value  = cfg.rainOdd  || "";
@@ -585,7 +587,8 @@ document.getElementById("modal-sched").addEventListener("click", function(e){
 
 function saveAlertSettings(){
   var cfg = loadAlertSettings();
-  cfg.rainThreshold = parseInt(document.getElementById("rain-threshold").value) || 40;
+  cfg.alertStartHour = parseInt(document.getElementById("alert-start-hour").value) || 0;
+  cfg.rainThreshold = parseInt(document.getElementById("rain-threshold").value) || 30;
   cfg.heatThreshold = parseInt(document.getElementById("heat-threshold").value) || 25;
   cfg.rainVenue = document.getElementById("rain-venue").value.trim();
   cfg.rainOdd   = document.getElementById("rain-odd").value.trim();
