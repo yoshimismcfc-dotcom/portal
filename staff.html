@@ -138,14 +138,24 @@ function withTitle(type, name){
 
 // Firebase同期
 dbListen("staff/coach", function(val){
-  _coachData = Array.isArray(val)&&val.length ? val : JSON.parse(JSON.stringify(INIT_COACH));
+  if(Array.isArray(val) && val.length > 0){
+    _coachData = val;
+  } else {
+    _coachData = JSON.parse(JSON.stringify(INIT_COACH));
+    dbSave("staff/coach", _coachData, KEY_C, null);
+  }
   renderCoach();
-}, KEY_C, JSON.parse(JSON.stringify(INIT_COACH)));
+}, KEY_C, null);
 
 dbListen("staff/parent", function(val){
-  _parentData = Array.isArray(val)&&val.length ? val : JSON.parse(JSON.stringify(INIT_PARENT));
+  if(Array.isArray(val) && val.length > 0){
+    _parentData = val;
+  } else {
+    _parentData = JSON.parse(JSON.stringify(INIT_PARENT));
+    dbSave("staff/parent", _parentData, KEY_P, null);
+  }
   renderParent();
-}, KEY_P, JSON.parse(JSON.stringify(INIT_PARENT)));
+}, KEY_P, null);
 
 function renderCoach(){
   var list=document.getElementById("coach-list");

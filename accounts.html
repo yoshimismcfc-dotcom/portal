@@ -124,9 +124,15 @@ function saveAccData(d){
 }
 // リアルタイム同期
 dbListen("accounts", function(val){
-  _accData = Array.isArray(val) && val.length ? val : INIT_DATA;
+  if(Array.isArray(val) && val.length > 0){
+    _accData = val;
+  } else {
+    // 初回：INITデータをFirebaseに書き込む
+    _accData = JSON.parse(JSON.stringify(INIT_DATA));
+    dbSave("accounts", _accData, KEY, null);
+  }
   renderTable();
-}, KEY, INIT_DATA);
+}, KEY, null);
 
 function renderTable(){
   var data=loadAcc();

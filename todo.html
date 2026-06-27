@@ -182,7 +182,11 @@ function save(d){
 
 // リアルタイム同期
 dbListen("todo", function(val){
-  _todoData = Array.isArray(val) ? val : [];
+  if(Array.isArray(val) && val.length > 0){
+    _todoData = val;
+  } else {
+    _todoData = [];
+  }
   renderStats(); renderList();
 }, KEY, []);
 

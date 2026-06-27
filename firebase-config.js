@@ -55,23 +55,37 @@ function onFirebaseReady(cb){
 // ============================================================
 
 function dbListen(path, callback, localKey, fallback){
-  // まずlocalStorageのデータを即座に表示（高速表示）
-  try{
-    var ls = localStorage.getItem(localKey);
-    if(ls) callback(JSON.parse(ls));
-    else if(fallback !== undefined) callback(fallback);
-  }catch(e){}
+  // Firebaseが接続されていない場合はlocalStorage→fallbackの順で使用
+  if(typeof FIREBASE_CONFIG === "undefined" || FIREBASE_CONFIG.apiKey === "YOUR_API_KEY"){
+    try{
+      var ls = localStorage.getItem(localKey);
+      if(ls){
+        var parsed = JSON.parse(ls);
+        // 空オブジェクト・空配列チェック
+        var isEmpty = parsed === null || parsed === undefined ||
+          (Array.isArray(parsed) && parsed.length === 0) ||
+          (typeof parsed === "object" && !Array.isArray(parsed) && Object.keys(parsed).length === 0);
+        callback(isEmpty ? fallback : parsed);
+      } else {
+        callback(fallback);
+      }
+    }catch(e){ callback(fallback); }
+    return;
+  }
 
-  // Firebaseのリアルタイムデータで上書き
+  // Firebaseのリアルタイムデータを取得
   onFirebaseReady(function(db){
     db.ref(path).on("value", function(snap){
       var val = snap.val();
-      var data = (val !== null && val !== undefined) ? val : fallback;
-      // localStorageにも同期保存
-      try{ if(localKey) localStorage.setItem(localKey, JSON.stringify(data)); }catch(e){}
-      callback(data);
+      // nullまたは空の場合はfallbackを渡す（呼び出し元でINIT書き込みを行う）
+      callback(val !== null && val !== undefined ? val : fallback);
     }, function(err){
       console.error("[SMC Portal] dbListen error:", path, err);
+      // エラー時はlocalStorage→fallbackで対応
+      try{
+        var ls = localStorage.getItem(localKey);
+        callback(ls ? JSON.parse(ls) : fallback);
+      }catch(e){ callback(fallback); }
     });
   });
 }

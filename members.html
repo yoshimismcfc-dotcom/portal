@@ -168,12 +168,17 @@ var editGrade=null, editRow=null;
 // Firebase or localStorageからデータをリアルタイムで読み込み
 dbListen("members", function(val){
   if(val && typeof val === "object" && !Array.isArray(val)){
+    // Firebaseにデータあり → 使用
     data = val;
+    renderTable();
   } else {
+    // Firebaseにデータなし → INITを使い、同時にFirebaseに書き込む
     data = JSON.parse(JSON.stringify(INIT));
+    renderTable();
+    // 初回のみFirebaseとlocalStorageに保存
+    dbSave("members", data, KEY, null);
   }
-  renderTable();
-}, KEY, JSON.parse(JSON.stringify(INIT)));
+}, KEY, null);
 
 function renderSortedTable(){
   // 全学年のデータを1つのリストに
