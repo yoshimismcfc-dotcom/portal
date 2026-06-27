@@ -63,14 +63,25 @@
   </div>
   <div class="notice-bar">☁️ データはクラウド（Firebase）で保存・共有されます。</div>
 
-  <!-- ソートバー -->
+  <!-- フィルター・ソートバー -->
+  <div class="sort-bar" style="margin-bottom:6px">
+    <span class="sort-lbl">学年：</span>
+    <button class="sort-btn on" id="gf-all"  onclick="setGrade('all')">全学年</button>
+    <button class="sort-btn"    id="gf-6"    onclick="setGrade('6年')">6年</button>
+    <button class="sort-btn"    id="gf-5"    onclick="setGrade('5年')">5年</button>
+    <button class="sort-btn"    id="gf-4"    onclick="setGrade('4年')">4年</button>
+    <button class="sort-btn"    id="gf-3"    onclick="setGrade('3年')">3年</button>
+    <button class="sort-btn"    id="gf-2"    onclick="setGrade('2年')">2年</button>
+    <button class="sort-btn"    id="gf-1"    onclick="setGrade('1年')">1年</button>
+    <button class="sort-btn"    id="gf-nen"  onclick="setGrade('年長')">年長</button>
+    <span id="grade-badge" style="font-size:.72rem;color:var(--cyan);margin-left:4px"></span>
+  </div>
   <div class="sort-bar">
     <span class="sort-lbl">並び替え：</span>
-    <button class="sort-btn on"  id="sb-none"   onclick="setSort('none')">学年順</button>
-    <button class="sort-btn"     id="sb-kana"   onclick="setSort('kana')">あいうえお順</button>
-    <button class="sort-btn"     id="sb-num"    onclick="setSort('num')">背番号順</button>
-    <button class="sort-btn"     id="sb-gender" onclick="setSort('gender')">男女別</button>
-    <span id="grade-badge" style="font-size:.72rem;color:var(--cyan);margin-left:4px"></span>
+    <button class="sort-btn on" id="sb-none"   onclick="setSort('none')">学年順</button>
+    <button class="sort-btn"    id="sb-kana"   onclick="setSort('kana')">あいうえお順</button>
+    <button class="sort-btn"    id="sb-num"    onclick="setSort('num')">背番号順</button>
+    <button class="sort-btn"    id="sb-gender" onclick="setSort('gender')">男女別</button>
   </div>
 
   <!-- 凡例 -->
@@ -138,6 +149,7 @@ var GRADES = ["6年","5年","4年","3年","2年","1年","年長"];
 var KEY    = "smc_members_v4";
 var ROWS   = 14;
 var currentSort = "none";
+var currentGrade = "all";
 var editGrade = null, editRow = null;
 
 /* ----- 初期データ ----- */
@@ -224,15 +236,16 @@ function render(){
 function renderGrid(){
   var tbl = document.getElementById("roster-table");
   if(!tbl) return;
+  var showGrades = currentGrade==="all" ? GRADES : [currentGrade];
   var h = "<thead><tr><th class='col-no'>#</th>";
-  GRADES.forEach(function(g){
+  showGrades.forEach(function(g){
     var cnt = (data[g]||[]).filter(function(m){return m&&m.name;}).length;
     h += "<th class='grade-head'>"+g+"<br><span style='font-size:.62rem;font-weight:400;color:rgba(255,255,255,.6)'>"+cnt+"名</span></th>";
   });
   h += "</tr></thead><tbody>";
   for(var r=0; r<ROWS; r++){
     h += "<tr><td class='col-no'>"+(r+1)+"</td>";
-    GRADES.forEach(function(g){
+    showGrades.forEach(function(g){
       var m = (data[g]||[])[r];
       if(m && m.name){
         var girl = m.gender === "f";
@@ -254,7 +267,8 @@ function renderGrid(){
 
 function renderList(){
   var all = [];
-  GRADES.forEach(function(g){
+  var targetGrades = currentGrade==="all" ? GRADES : [currentGrade];
+  targetGrades.forEach(function(g){
     (data[g]||[]).forEach(function(m,r){
       if(m && m.name) all.push({name:m.name,kana:m.kana||"",num:m.num||"",gender:m.gender,grade:g,row:r});
     });
@@ -289,6 +303,24 @@ function setSort(s){
     var el = document.getElementById("sb-"+k);
     if(el) el.className = "sort-btn" + (k===s?" on":"");
   });
+  render();
+}
+function setGrade(g){
+  currentGrade = g;
+  // ボタンのon切り替え
+  var ids = {"all":"gf-all","6年":"gf-6","5年":"gf-5","4年":"gf-4","3年":"gf-3","2年":"gf-2","1年":"gf-1","年長":"gf-nen"};
+  Object.keys(ids).forEach(function(k){
+    var el = document.getElementById(ids[k]);
+    if(el) el.className = "sort-btn" + (k===g?" on":"");
+  });
+  // 特定学年を選択 → ソートをリスト表示に自動切り替え
+  if(g !== "all" && currentSort === "none"){
+    currentSort = "kana";
+    ["none","kana","num","gender"].forEach(function(k){
+      var el = document.getElementById("sb-"+k);
+      if(el) el.className = "sort-btn" + (k==="kana"?" on":"");
+    });
+  }
   render();
 }
 
