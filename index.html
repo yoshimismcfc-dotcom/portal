@@ -143,96 +143,125 @@
 
   <!-- 困ったときのトラブル対応 -->
   <div class="pitch-section-divider" style="margin-bottom:14px"><span class="psd-text">🆘 うまく表示されないとき</span><span class="psd-sub">TROUBLESHOOTING</span></div>
-  <div style="display:grid;gap:10px;margin-bottom:8px">
+  <div style="font-size:.76rem;color:var(--ink-3);margin-bottom:10px;text-align:center">▼ 項目をタップすると解決手順が表示されます</div>
+  <div style="display:grid;gap:8px;margin-bottom:12px">
 
-    <!-- ページが正しく表示されない -->
-    <div style="background:var(--surface-lt);border:1px solid var(--line-2);border-radius:var(--r12);padding:14px 16px">
-      <div style="font-size:.88rem;font-weight:900;color:#fff;margin-bottom:10px;display:flex;align-items:center;gap:8px">
-        <span style="background:rgba(0,212,255,.2);border-radius:50%;width:24px;height:24px;display:flex;align-items:center;justify-content:center;font-size:.8rem;flex-shrink:0">❓</span>
-        ページが正しく表示されない・古い画面が出る
-      </div>
-      <div style="display:grid;gap:6px">
-        <div style="background:rgba(255,255,255,.04);border-radius:8px;padding:10px 12px;font-size:.8rem;color:#c8e4ff;display:flex;gap:10px;align-items:flex-start">
-          <span style="background:var(--orange);color:#fff;border-radius:50%;width:18px;height:18px;min-width:18px;display:flex;align-items:center;justify-content:center;font-size:.68rem;font-weight:900;margin-top:1px">1</span>
-          <span>画面を下に引っ張って更新（プルリフレッシュ）してみてください</span>
+    <!-- ① ページが正しく表示されない -->
+    <div style="background:var(--surface-lt);border:1px solid var(--line-2);border-radius:var(--r12);overflow:hidden">
+      <button onclick="toggleTrouble('t1')" style="width:100%;background:none;border:none;padding:13px 16px;display:flex;align-items:center;gap:10px;cursor:pointer;text-align:left">
+        <span style="font-size:1.1rem;flex-shrink:0">📵</span>
+        <span style="font-size:.86rem;font-weight:900;color:#fff;flex:1">ページが正しく表示されない・古い画面が出る</span>
+        <span id="t1-arrow" style="color:var(--cyan);font-size:.8rem;transition:transform .2s;flex-shrink:0">▼</span>
+      </button>
+      <div id="t1" style="display:none;padding:0 14px 14px">
+        <div style="font-size:.78rem;color:#94c4e4;margin-bottom:10px;padding:8px 10px;background:rgba(0,212,255,.06);border-radius:7px;line-height:1.7">
+          スマホのブラウザは一度見たページを保存（キャッシュ）しているため、更新しても古い画面が出ることがあります。以下の順で試してください。
         </div>
-        <div style="background:rgba(255,255,255,.04);border-radius:8px;padding:10px 12px;font-size:.8rem;color:#c8e4ff;display:flex;gap:10px;align-items:flex-start">
-          <span style="background:var(--orange);color:#fff;border-radius:50%;width:18px;height:18px;min-width:18px;display:flex;align-items:center;justify-content:center;font-size:.68rem;font-weight:900;margin-top:1px">2</span>
-          <div>キャッシュ（一時データ）を消去してください<br>
-            <span style="color:#7dd3fc">🍎 iPhone：</span>設定 → Safari →「履歴とWebサイトデータを消去」<br>
-            <span style="color:#7dd3fc">🤖 Android：</span>Chrome メニュー → 設定 → プライバシー → 閲覧データを削除
+        <div style="display:grid;gap:7px">
+          <div style="background:rgba(255,255,255,.04);border-radius:8px;padding:10px 12px;font-size:.8rem;color:#c8e4ff;display:flex;gap:10px;align-items:flex-start">
+            <span style="background:var(--orange);color:#fff;border-radius:50%;width:20px;height:20px;min-width:20px;display:flex;align-items:center;justify-content:center;font-size:.7rem;font-weight:900;margin-top:1px">1</span>
+            <div><strong style="color:#fff">画面を引っ張って更新する（プルリフレッシュ）</strong><br>
+            画面の一番上から下に向かってゆっくりスワイプすると更新されます。</div>
+          </div>
+          <div style="background:rgba(255,255,255,.04);border-radius:8px;padding:10px 12px;font-size:.8rem;color:#c8e4ff;display:flex;gap:10px;align-items:flex-start">
+            <span style="background:var(--orange);color:#fff;border-radius:50%;width:20px;height:20px;min-width:20px;display:flex;align-items:center;justify-content:center;font-size:.7rem;font-weight:900;margin-top:1px">2</span>
+            <div><strong style="color:#fff">キャッシュ（一時データ）を消去する</strong><br>
+            <span style="color:#7dd3fc">🍎 iPhone の場合：</span><br>
+            「設定」アプリ → 「Safari」 → 「履歴とWebサイトデータを消去」をタップ → 「消去」<br><br>
+            <span style="color:#a0e8a0">🤖 Android の場合：</span><br>
+            Chromeアプリの右上「︙（3点メニュー）」→「設定」→「プライバシーとセキュリティ」→「閲覧データを削除」→「データを削除」</div>
+          </div>
+          <div style="background:rgba(255,255,255,.04);border-radius:8px;padding:10px 12px;font-size:.8rem;color:#c8e4ff;display:flex;gap:10px;align-items:flex-start">
+            <span style="background:var(--orange);color:#fff;border-radius:50%;width:20px;height:20px;min-width:20px;display:flex;align-items:center;justify-content:center;font-size:.7rem;font-weight:900;margin-top:1px">3</span>
+            <div><strong style="color:#fff">URLが正しいか確認する</strong><br>
+            ブラウザのアドレスバーに以下のURLを直接入力してください：<br>
+            <span style="color:var(--cyan);font-weight:700">yoshimismcfc-dotcom.github.io/portal/</span></div>
           </div>
         </div>
-        <div style="background:rgba(255,255,255,.04);border-radius:8px;padding:10px 12px;font-size:.8rem;color:#c8e4ff;display:flex;gap:10px;align-items:flex-start">
-          <span style="background:var(--orange);color:#fff;border-radius:50%;width:18px;height:18px;min-width:18px;display:flex;align-items:center;justify-content:center;font-size:.68rem;font-weight:900;margin-top:1px">3</span>
-          <span>URLが正しいか確認：<strong style="color:#fff">yoshimismcfc-dotcom.github.io/portal/</strong></span>
+      </div>
+    </div>
+
+    <!-- ② 印刷・PDF -->
+    <div style="background:var(--surface-lt);border:1px solid var(--line-2);border-radius:var(--r12);overflow:hidden">
+      <button onclick="toggleTrouble('t2')" style="width:100%;background:none;border:none;padding:13px 16px;display:flex;align-items:center;gap:10px;cursor:pointer;text-align:left">
+        <span style="font-size:1.1rem;flex-shrink:0">🖨️</span>
+        <span style="font-size:.86rem;font-weight:900;color:#fff;flex:1">印刷・PDFボタンを押しても何も起きない</span>
+        <span id="t2-arrow" style="color:var(--cyan);font-size:.8rem;transition:transform .2s;flex-shrink:0">▼</span>
+      </button>
+      <div id="t2" style="display:none;padding:0 14px 14px">
+        <div style="display:grid;gap:7px">
+          <div style="background:rgba(255,255,255,.04);border-radius:8px;padding:10px 12px;font-size:.8rem;color:#c8e4ff;display:flex;gap:10px;align-items:flex-start">
+            <span style="background:var(--orange);color:#fff;border-radius:50%;width:20px;height:20px;min-width:20px;display:flex;align-items:center;justify-content:center;font-size:.7rem;font-weight:900;margin-top:1px">1</span>
+            <div><strong style="color:#fff">大会要綱・対戦表の場合</strong><br>
+            印刷ボタンの前に、まず「👁 プレビューを表示」または「📊 対戦表を生成する」ボタンを押してください。プレビューが表示されてから印刷ボタンをタップしてください。</div>
+          </div>
+          <div style="background:rgba(255,255,255,.04);border-radius:8px;padding:10px 12px;font-size:.8rem;color:#c8e4ff;display:flex;gap:10px;align-items:flex-start">
+            <span style="background:var(--orange);color:#fff;border-radius:50%;width:20px;height:20px;min-width:20px;display:flex;align-items:center;justify-content:center;font-size:.7rem;font-weight:900;margin-top:1px">2</span>
+            <div><strong style="color:#fff">ポップアップが許可されているか確認する</strong><br>
+            <span style="color:#7dd3fc">🍎 iPhone：</span>設定 → Safari →「ポップアップブロック」をオフ<br>
+            <span style="color:#a0e8a0">🤖 Android：</span>Chrome右上︙→設定→サイトの設定→ポップアップとリダイレクト→「許可」</div>
+          </div>
         </div>
       </div>
     </div>
 
-    <!-- 印刷・PDFが動かない -->
-    <div style="background:var(--surface-lt);border:1px solid var(--line-2);border-radius:var(--r12);padding:14px 16px">
-      <div style="font-size:.88rem;font-weight:900;color:#fff;margin-bottom:10px;display:flex;align-items:center;gap:8px">
-        <span style="background:rgba(0,212,255,.2);border-radius:50%;width:24px;height:24px;display:flex;align-items:center;justify-content:center;font-size:.8rem;flex-shrink:0">❓</span>
-        🖨️ 印刷・PDFボタンを押しても何も起きない
-      </div>
-      <div style="display:grid;gap:6px">
-        <div style="background:rgba(255,255,255,.04);border-radius:8px;padding:10px 12px;font-size:.8rem;color:#c8e4ff;display:flex;gap:10px;align-items:flex-start">
-          <span style="background:var(--orange);color:#fff;border-radius:50%;width:18px;height:18px;min-width:18px;display:flex;align-items:center;justify-content:center;font-size:.68rem;font-weight:900;margin-top:1px">1</span>
-          <span>大会要綱・対戦表の場合：先に「プレビューを表示」または「対戦表を生成する」ボタンを押してからもう一度試してください</span>
+    <!-- ③ 位置情報 -->
+    <div style="background:var(--surface-lt);border:1px solid var(--line-2);border-radius:var(--r12);overflow:hidden">
+      <button onclick="toggleTrouble('t3')" style="width:100%;background:none;border:none;padding:13px 16px;display:flex;align-items:center;gap:10px;cursor:pointer;text-align:left">
+        <span style="font-size:1.1rem;flex-shrink:0">🌤️</span>
+        <span style="font-size:.86rem;font-weight:900;color:#fff;flex:1">天気・WBGTの位置情報が取得できない</span>
+        <span id="t3-arrow" style="color:var(--cyan);font-size:.8rem;transition:transform .2s;flex-shrink:0">▼</span>
+      </button>
+      <div id="t3" style="display:none;padding:0 14px 14px">
+        <div style="font-size:.78rem;color:#94c4e4;margin-bottom:10px;padding:8px 10px;background:rgba(0,212,255,.06);border-radius:7px;line-height:1.7">
+          天気・WBGTページでは現在地の情報を取得するため「位置情報の許可」が必要です。
         </div>
-        <div style="background:rgba(255,255,255,.04);border-radius:8px;padding:10px 12px;font-size:.8rem;color:#c8e4ff;display:flex;gap:10px;align-items:flex-start">
-          <span style="background:var(--orange);color:#fff;border-radius:50%;width:18px;height:18px;min-width:18px;display:flex;align-items:center;justify-content:center;font-size:.68rem;font-weight:900;margin-top:1px">2</span>
-          <span>ポップアップがブロックされている場合があります。ブラウザの設定でこのサイトのポップアップを「許可」に変更してください</span>
-        </div>
-      </div>
-    </div>
-
-    <!-- 位置情報 -->
-    <div style="background:var(--surface-lt);border:1px solid var(--line-2);border-radius:var(--r12);padding:14px 16px">
-      <div style="font-size:.88rem;font-weight:900;color:#fff;margin-bottom:10px;display:flex;align-items:center;gap:8px">
-        <span style="background:rgba(0,212,255,.2);border-radius:50%;width:24px;height:24px;display:flex;align-items:center;justify-content:center;font-size:.8rem;flex-shrink:0">❓</span>
-        🌤️ 天気・WBGTの位置情報が取得できない
-      </div>
-      <div style="display:grid;gap:6px">
-        <div style="background:rgba(255,255,255,.04);border-radius:8px;padding:10px 12px;font-size:.8rem;color:#c8e4ff;display:flex;gap:10px;align-items:flex-start">
-          <span style="background:var(--orange);color:#fff;border-radius:50%;width:18px;height:18px;min-width:18px;display:flex;align-items:center;justify-content:center;font-size:.68rem;font-weight:900;margin-top:1px">1</span>
-          <div><span style="color:#7dd3fc">🍎 iPhone：</span>設定 → プライバシー → 位置情報サービス → Safari →「このAppの使用中のみ許可」に変更</div>
-        </div>
-        <div style="background:rgba(255,255,255,.04);border-radius:8px;padding:10px 12px;font-size:.8rem;color:#c8e4ff;display:flex;gap:10px;align-items:flex-start">
-          <span style="background:var(--orange);color:#fff;border-radius:50%;width:18px;height:18px;min-width:18px;display:flex;align-items:center;justify-content:center;font-size:.68rem;font-weight:900;margin-top:1px">2</span>
-          <div><span style="color:#7dd3fc">🤖 Android：</span>設定 → アプリ → Chrome → 権限 → 位置情報 →「アプリの使用中のみ許可」に変更</div>
-        </div>
-        <div style="background:rgba(255,255,255,.04);border-radius:8px;padding:10px 12px;font-size:.8rem;color:#c8e4ff;display:flex;gap:10px;align-items:flex-start">
-          <span style="background:var(--orange);color:#fff;border-radius:50%;width:18px;height:18px;min-width:18px;display:flex;align-items:center;justify-content:center;font-size:.68rem;font-weight:900;margin-top:1px">3</span>
-          <span>設定変更後、ページを開き直してもう一度「現在地の気象を取得」をタップしてください</span>
+        <div style="display:grid;gap:7px">
+          <div style="background:rgba(255,255,255,.04);border-radius:8px;padding:10px 12px;font-size:.8rem;color:#c8e4ff;display:flex;gap:10px;align-items:flex-start">
+            <span style="background:#4488ff;color:#fff;border-radius:5px;width:20px;height:20px;min-width:20px;display:flex;align-items:center;justify-content:center;font-size:.7rem;font-weight:900;margin-top:1px">🍎</span>
+            <div><strong style="color:#7dd3fc">iPhone の設定手順</strong><br>
+            「設定」→「プライバシーとセキュリティ」→「位置情報サービス」→「Safari」→「このAppの使用中のみ許可」を選ぶ</div>
+          </div>
+          <div style="background:rgba(255,255,255,.04);border-radius:8px;padding:10px 12px;font-size:.8rem;color:#c8e4ff;display:flex;gap:10px;align-items:flex-start">
+            <span style="background:#3aaa5e;color:#fff;border-radius:5px;width:20px;height:20px;min-width:20px;display:flex;align-items:center;justify-content:center;font-size:.7rem;font-weight:900;margin-top:1px">🤖</span>
+            <div><strong style="color:#a0e8a0">Android の設定手順</strong><br>
+            「設定」→「アプリ」→「Chrome」→「権限」→「位置情報」→「アプリの使用中のみ許可」を選ぶ</div>
+          </div>
+          <div style="background:rgba(255,255,255,.04);border-radius:8px;padding:10px 12px;font-size:.8rem;color:#c8e4ff;display:flex;gap:10px;align-items:flex-start">
+            <span style="background:var(--orange);color:#fff;border-radius:50%;width:20px;height:20px;min-width:20px;display:flex;align-items:center;justify-content:center;font-size:.7rem;font-weight:900;margin-top:1px">3</span>
+            <div>設定変更後、天気ページを開き直して「現在地の気象を取得」ボタンをもう一度タップしてください</div>
+          </div>
         </div>
       </div>
     </div>
 
-    <!-- データが消えた -->
-    <div style="background:var(--surface-lt);border:1px solid var(--line-2);border-radius:var(--r12);padding:14px 16px">
-      <div style="font-size:.88rem;font-weight:900;color:#fff;margin-bottom:10px;display:flex;align-items:center;gap:8px">
-        <span style="background:rgba(0,212,255,.2);border-radius:50%;width:24px;height:24px;display:flex;align-items:center;justify-content:center;font-size:.8rem;flex-shrink:0">❓</span>
-        入力したデータが消えた・保存されていない
-      </div>
-      <div style="font-size:.8rem;color:#ffc8a0;margin-bottom:8px;line-height:1.7">
-        以下の場合にデータが消えることがあります：
-      </div>
-      <div style="display:grid;gap:5px;font-size:.8rem;color:#c8e4ff;line-height:1.7">
-        <div style="padding:4px 0;border-bottom:1px solid rgba(255,255,255,.07)">・ブラウザの「閲覧データを消去」を行った場合</div>
-        <div style="padding:4px 0;border-bottom:1px solid rgba(255,255,255,.07)">・端末を変えた場合（Firebase対応データは別端末でも見られます）</div>
-        <div style="padding:4px 0">・ブラウザアプリをアンインストールした場合</div>
-      </div>
-      <div style="background:rgba(0,212,255,.08);border:1px solid rgba(0,212,255,.2);border-radius:8px;padding:9px 12px;font-size:.78rem;color:#7dd3fc;margin-top:10px;line-height:1.7">
-        💡 名簿・アカウント・ユニフォームなどクラウド対応データはFirebaseに保存されているため、別の端末でも同じデータが確認できます。
+    <!-- ④ データが消えた -->
+    <div style="background:var(--surface-lt);border:1px solid var(--line-2);border-radius:var(--r12);overflow:hidden">
+      <button onclick="toggleTrouble('t4')" style="width:100%;background:none;border:none;padding:13px 16px;display:flex;align-items:center;gap:10px;cursor:pointer;text-align:left">
+        <span style="font-size:1.1rem;flex-shrink:0">💾</span>
+        <span style="font-size:.86rem;font-weight:900;color:#fff;flex:1">入力したデータが消えた・保存されていない</span>
+        <span id="t4-arrow" style="color:var(--cyan);font-size:.8rem;transition:transform .2s;flex-shrink:0">▼</span>
+      </button>
+      <div id="t4" style="display:none;padding:0 14px 14px">
+        <div style="font-size:.78rem;color:#ffc8a0;margin-bottom:10px;padding:8px 10px;background:rgba(255,107,43,.06);border-radius:7px;line-height:1.7">
+          以下の場合にデータが消えることがあります：
+        </div>
+        <div style="display:grid;gap:5px;font-size:.8rem;color:#c8e4ff;line-height:1.75;margin-bottom:10px">
+          <div style="padding:6px 10px;border-bottom:1px solid rgba(255,255,255,.07);display:flex;gap:8px"><span>・</span><span>ブラウザの「閲覧データを消去」を行った場合</span></div>
+          <div style="padding:6px 10px;border-bottom:1px solid rgba(255,255,255,.07);display:flex;gap:8px"><span>・</span><span>スマホの機種変更・端末を変えた場合</span></div>
+          <div style="padding:6px 10px;display:flex;gap:8px"><span>・</span><span>ブラウザアプリをアンインストールした場合</span></div>
+        </div>
+        <div style="background:rgba(0,212,255,.08);border:1px solid rgba(0,212,255,.2);border-radius:8px;padding:10px 12px;font-size:.78rem;color:#7dd3fc;line-height:1.7">
+          ✅ <strong style="color:#fff">Firebase対応のデータ（名簿・ユニフォーム・アカウントなど）</strong>はクラウドに保存されているため、端末が変わっても同じデータが見られます。<br><br>
+          📥 ローカル保存のデータは「CSV出力」ボタンで定期的にバックアップを取ることをおすすめします。
+        </div>
       </div>
     </div>
 
   </div>
 
   <div style="text-align:center;margin-bottom:8px">
-    <a href="guide.html" style="font-size:.82rem;color:var(--cyan);text-decoration:underline">📖 詳しい説明書・ヘルプはこちら</a>
+    <a href="guide.html" style="font-size:.82rem;color:var(--cyan);text-decoration:underline;display:inline-flex;align-items:center;gap:5px">📖 さらに詳しい説明書・ヘルプはこちら</a>
   </div>
 
 </main>
@@ -265,6 +294,13 @@ function wbgt(t,h){return 0.735*t+0.0374*h+0.00292*t*h-4.064;}
 function findNext(){var now=new Date();var scheds=ALERT_CFG.schedules||DEFAULT_SCHEDULES;for(var d=0;d<4;d++){var dt=new Date(now);dt.setDate(dt.getDate()+d);for(var i=0;i<scheds.length;i++){var s=scheds[i];if(s.day!==dt.getDay())continue;var sp=s.start.split(":");var ps=new Date(dt);ps.setHours(+sp[0],+sp[1],0,0);var at=new Date(ps.getTime()-3600000);if(now>=at||d>0)return{s:s,dt:dt,offset:d};}}return null;}
 function checkAlert(){if(!navigator.geolocation)return;var info=findNext();if(!info||info.s.indoor)return;navigator.geolocation.getCurrentPosition(function(pos){var url="https://api.open-meteo.com/v1/forecast?latitude="+pos.coords.latitude+"&longitude="+pos.coords.longitude+"&hourly=temperature_2m,relative_humidity_2m,weathercode,precipitation_probability&timezone=Asia/Tokyo&forecast_days=3";fetch(url).then(function(r){return r.json();}).then(function(data){var hours=data.hourly,sd=info.dt;var dateStr=sd.getFullYear()+"-"+String(sd.getMonth()+1).padStart(2,"0")+"-"+String(sd.getDate()).padStart(2,"0");var sh=+info.s.start.split(":")[0],eh=+info.s.end.split(":")[0];var rainMax=0,wbgtMax=0,hasRain=false;hours.time.forEach(function(t,i){if(!t.startsWith(dateStr))return;var h=+t.slice(11,13);if(h<sh||h>eh)return;var pp=hours.precipitation_probability[i]||0;var wc=hours.weathercode[i]||0;var wb=wbgt(hours.temperature_2m[i],hours.relative_humidity_2m[i]);var rainTh=ALERT_CFG.rainThreshold||40;if(pp>=rainTh||wc>=51)hasRain=true;if(pp>rainMax)rainMax=pp; if(!hasRain&&rainMax<rainTh)hasRain=false;if(wb>wbgtMax)wbgtMax=wb;});var mon=sd.getMonth()+1,isOdd=mon%2===1;var dow=["日","月","火","水","木","金","土"][sd.getDay()];var label=info.offset===0?"本日":"明日("+dow+")";if(hasRain){var venue=ALERT_CFG.rainVenue||"北小体育館";var gym=venue;var timeInfo=isOdd?(ALERT_CFG.rainOdd||""):(ALERT_CFG.rainEven||"");document.getElementById("auto-rain-body").textContent=label+"の練習に雨の予報（降水確率"+rainMax+"%）があります。\n・室内用シューズをご用意ください\n・練習時間・場所が変更になる場合があります\n・雨天時の会場："+gym+"\n・"+timeInfo;document.getElementById("auto-rain").classList.add("show");}var heatTh=ALERT_CFG.heatThreshold||25;if(wbgtMax>=heatTh){var lv=wbgtMax>=31?"危険":wbgtMax>=28?"厳重警戒":"警戒";document.getElementById("auto-heat-body").textContent=label+"の練習時間帯にWBGT "+wbgtMax.toFixed(1)+"℃（"+lv+"）の予報があります。\n・帽子を必ず着用してください\n・水筒は2本（水＋スポーツドリンク）持参してください\n・保冷剤・タオルがあると助かります"+(wbgtMax>=31?"\n⛔ WBGT31℃以上は活動中止基準です":"");document.getElementById("auto-heat").classList.add("show");}}).catch(function(){});},function(){},{timeout:8000,maximumAge:1800000});}
 window.addEventListener("DOMContentLoaded",function(){checkAlert();});
+function toggleTrouble(id){
+  var el=document.getElementById(id);
+  var arrow=document.getElementById(id+"-arrow");
+  var open=el.style.display!=="none";
+  el.style.display=open?"none":"block";
+  if(arrow) arrow.style.transform=open?"":"rotate(180deg)";
+}
 </script>
 </body>
 </html>
