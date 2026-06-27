@@ -206,22 +206,35 @@
       </a>
     </div>
 
-    <!-- ===== セクション：練習メニュー ===== -->
-    <div class="c-section-div"><div class="csd-icon">🔗</div><div class="csd-text">練習メニュー</div><div class="csd-sub">PRACTICE MENU</div></div>
-    <div class="panel" style="margin-bottom:20px">
-      <div class="url-form">
-        <div class="form-group" style="margin:0">
-          <label class="form-label">ラベル</label>
-          <input class="form-control" id="url-label" placeholder="例: 4年生 パス練習">
+    <!-- ===== セクション：データ管理 下段 ===== -->
+    <!-- 練習メニューカード（データ管理グリッドに追加できないので単独）-->
+    <div class="c-card-grid" style="margin-top:-8px">
+      <a class="c-card" href="#" onclick="openM('modal-menu');renderUrls();return false">
+        <div class="c-icon">🔗</div>
+        <div class="c-label">練習メニュー</div>
+        <div class="c-desc">URLを登録してタップで開く</div>
+      </a>
+    </div>
+
+    <!-- 練習メニュー モーダル -->
+    <div class="modal-bg" id="modal-menu">
+      <div class="modal" style="max-width:480px;width:100%">
+        <h3>🔗 練習メニュー</h3>
+        <div class="url-form">
+          <div class="form-group" style="margin:0">
+            <label class="form-label">ラベル</label>
+            <input class="form-control" id="url-label" placeholder="例: 4年生 パス練習">
+          </div>
+          <div class="form-group" style="margin:0">
+            <label class="form-label">URL</label>
+            <input class="form-control" id="url-href" type="url" placeholder="https://...">
+          </div>
+          <button class="btn btn-primary btn-sm" onclick="addUrl()" style="height:42px">＋</button>
         </div>
-        <div class="form-group" style="margin:0">
-          <label class="form-label">URL</label>
-          <input class="form-control" id="url-href" type="url" placeholder="https://...">
+        <div class="url-list" id="url-list">
+          <p style="color:var(--ink-3);font-size:.82rem;text-align:center;padding:12px">URLを追加するとここに表示されます。</p>
         </div>
-        <button class="btn btn-primary btn-sm" onclick="addUrl()" style="height:42px">＋</button>
-      </div>
-      <div class="url-list" id="url-list">
-        <p style="color:var(--ink-3);font-size:.82rem;text-align:center;padding:12px">URLを追加するとここに表示されます。</p>
+        <div class="modal-btns"><button class="btn btn-outline" onclick="closeM('modal-menu')">閉じる</button></div>
       </div>
     </div>
 
@@ -394,6 +407,14 @@ function clearNotice(t){
   document.getElementById(t+"-input").value="";
   document.getElementById(t+"-preview").textContent="（未設定）";
 }
+function openM(id){
+  var el=document.getElementById(id);
+  if(el) el.classList.add("open");
+}
+function closeM(id){
+  var el=document.getElementById(id);
+  if(el) el.classList.remove("open");
+}
 function flash(msg){
   var el=document.createElement("div");
   el.style.cssText="position:fixed;bottom:24px;right:20px;background:#00ff88;color:#000;padding:10px 18px;border-radius:8px;font-weight:700;font-size:.85rem;z-index:999;box-shadow:0 4px 16px rgba(0,0,0,.4)";
@@ -549,6 +570,7 @@ function closeSchedModal(){
   document.getElementById("modal-sched").classList.remove("open");
   renderScheduleList();
 }
+document.getElementById("modal-menu").addEventListener("click",function(e){if(e.target.id==="modal-menu")closeM("modal-menu");});
 document.getElementById("modal-guidance").addEventListener("click",function(e){if(e.target.id==="modal-guidance")closeM("modal-guidance");});
 document.getElementById("modal-alert").addEventListener("click",function(e){if(e.target.id==="modal-alert")closeM("modal-alert");});
 document.getElementById("modal-sched").addEventListener("click", function(e){
