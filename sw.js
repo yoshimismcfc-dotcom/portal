@@ -1,4 +1,4 @@
-var CACHE = "smc-portal-v1";
+var CACHE = "smc-portal-v3";
 var URLS = [
   "/portal/","/portal/index.html","/portal/common.css","/portal/common.js",
   "/portal/heat.html","/portal/attendance.html","/portal/calendar.html",
