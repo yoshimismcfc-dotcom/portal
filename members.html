@@ -102,8 +102,9 @@
 var GRADES=["6年","5年","4年","3年","2年","1年","年長"];
 var KEY="smc_members_v4";
 var ROWS=14;
+var currentSort="none";
+var editGrade=null, editRow=null;
 
-// ===== 画像の名簿に正確に合わせたデータ =====
 var INIT={
   "6年":[
     {name:"有瀧　晴一",   kana:"ありたき　はるいち",     num:"",gender:"m"},
@@ -151,137 +152,143 @@ var INIT={
     {name:"野口　陽生",   kana:"のぐち　はるき",          num:"",gender:"m"},
     null,null,null,null,null,null,null,null,null,null,null
   ],
-  "1年":[
-    null,null,null,null,null,null,null,null,null,null,null,null,null,null
-  ],
+  "1年":[null,null,null,null,null,null,null,null,null,null,null,null,null,null],
   "年長":[
     {name:"功刀　あいと", kana:"くぬぎ　あいと",          num:"",gender:"m"},
     null,null,null,null,null,null,null,null,null,null,null,null,null
   ]
 };
 
-// ===== 初期化 =====
-// localStorageにデータがあればそちらを使う。なければINITを使う。
-// 強制リセットは一切しない。
 var data = JSON.parse(JSON.stringify(INIT));
-var editGrade=null, editRow=null;
 
-// Firebase or localStorageからデータをリアルタイムで読み込み
+/* ===== Firebase読み込み ===== */
 dbListen("members", function(val){
-  if(val && typeof val === "object" && !Array.isArray(val)){
-    // Firebaseにデータあり → 使用
+  if(val && typeof val==="object" && !Array.isArray(val) && Object.keys(val).length > 0){
     data = val;
-    renderTable();
   } else {
-    // Firebaseにデータなし → INITを使い、同時にFirebaseに書き込む
     data = JSON.parse(JSON.stringify(INIT));
-    renderTable();
-    // 初回のみFirebaseとlocalStorageに保存
     dbSave("members", data, KEY, null);
   }
+  render();
 }, KEY, null);
 
-function renderSortedTable(){
-  // 全学年のデータを1つのリストに
+/* ===== 描画 ===== */
+function render(){
+  if(currentSort==="none"){
+    renderGrid();
+  } else {
+    renderList();
+  }
+}
+
+function renderGrid(){
+  var tbl = document.getElementById("roster-table");
+  var sv  = document.getElementById("sorted-view");
+  var rw  = document.querySelector(".roster-wrap");
+  if(tbl) tbl.style.display="";
+  if(rw)  rw.style.display="";
+  if(sv)  sv.style.display="none";
+  if(!tbl) return;
+
+  var h = "<thead><tr><th class='col-no'>#</th>";
+  GRADES.forEach(function(g){
+    var arr = data[g]||[];
+    var cnt = arr.filter(function(m){return m&&m.name;}).length;
+    h += "<th class='grade-head'>"+g+"<br><span style='font-size:.62rem;font-weight:400;color:rgba(255,255,255,.6)'>"+cnt+"名</span></th>";
+  });
+  h += "</tr></thead><tbody>";
+  for(var r=0; r<ROWS; r++){
+    h += "<tr><td class='col-no'>"+(r+1)+"</td>";
+    GRADES.forEach(function(g){
+      var m = (data[g]||[])[r];
+      if(m && m.name){
+        var girl = m.gender==="f";
+        var dot  = girl ? "#ff8888" : "#6aaccc";
+        h += "<td><div class='name-cell"+(girl?" girl":"")+"' onclick="openEdit('"+g+"',"+r+")">";
+        h += "<div class='kana'>"+(m.kana||"")+"</div>";
+        h += "<div class='kanji'><span class='gender-dot' style='background:"+dot+"'></span>"+m.name+"</div>";
+        if(m.num) h += "<div class='num-badge'>#"+m.num+"</div>";
+        h += "</div></td>";
+      } else {
+        h += "<td><div class='name-cell empty' onclick="openNew('"+g+"',"+r+")"></div></td>";
+      }
+    });
+    h += "</tr>";
+  }
+  h += "</tbody>";
+  tbl.innerHTML = h;
+}
+
+function renderList(){
+  var tbl = document.getElementById("roster-table");
+  var sv  = document.getElementById("sorted-view");
+  var rw  = document.querySelector(".roster-wrap");
+  if(tbl) tbl.style.display="none";
+  if(rw)  rw.style.display="none";
+  if(!sv) return;
+  sv.style.display="block";
+
   var all=[];
   GRADES.forEach(function(g){
     (data[g]||[]).forEach(function(m,r){
-      if(m&&m.name) all.push(Object.assign({},m,{_grade:g,_row:r}));
+      if(m&&m.name) all.push(Object.assign({},m,{_g:g,_r:r}));
     });
   });
-  // ソート
+
   if(currentSort==="kana"){
     all.sort(function(a,b){return (a.kana||"").localeCompare(b.kana||"","ja");});
   } else if(currentSort==="num"){
-    all.sort(function(a,b){
-      var na=parseInt(a.num)||999,nb=parseInt(b.num)||999;
-      return na-nb;
-    });
+    all.sort(function(a,b){return (parseInt(a.num)||999)-(parseInt(b.num)||999);});
   } else if(currentSort==="gender"){
     all.sort(function(a,b){
       if(a.gender===b.gender) return (a.kana||"").localeCompare(b.kana||"","ja");
-      return a.gender==="f"?-1:1;
+      return a.gender==="f" ? -1 : 1;
     });
   }
-  var wrap=document.getElementById("roster-wrap");
-  if(!wrap)return;
-  // ソート時はシングルカラムテーブルで表示
-  var h='<table class="roster-table"><thead><tr>'
+
+  var h='<table class="roster-table" style="width:100%"><thead><tr>'
     +'<th class="grade-head" style="width:60px">学年</th>'
-    +'<th class="grade-head">氏名(フリガナ)</th>'
-    +'<th class="grade-head" style="width:50px">背番号</th>'
-    +'<th class="grade-head" style="width:40px">性別</th>'
+    +'<th class="grade-head">氏名</th>'
+    +'<th class="grade-head" style="width:52px">背番号</th>'
+    +'<th class="grade-head" style="width:42px">性別</th>'
     +'</tr></thead><tbody>';
   all.forEach(function(m){
-    var genderIcon=m.gender==="f"?'<span style="color:#ff88aa">女</span>':'<span style="color:#88aaff">男</span>';
-    var numDisplay=m.num?'<span style="font-weight:900;color:#fff">'+m.num+'</span>':'—';
-    h+='<tr onclick="openEdit(''+m._grade+'','+m._row+')" style="cursor:pointer">'
-      +'<td style="text-align:center;color:var(--cyan);font-size:.75rem;font-weight:700">'+m._grade+'</td>'
-      +'<td>'
-      +(m.gender==="f"?'<span style="color:#ff88aa">':'<span style="color:#fff">')
+    var girl = m.gender==="f";
+    h += '<tr onclick="openEdit(''+m._g+'','+m._r+')" style="cursor:pointer">'
+      +'<td style="text-align:center;color:var(--cyan);font-size:.75rem;font-weight:700;padding:6px">'+m._g+'</td>'
+      +'<td style="padding:6px">'
+      +(girl ? '<span style="color:#ff8888">' : '<span style="color:#fff">')
       +m.name+'</span>'
       +'<div style="font-size:.65rem;color:var(--ink-3)">'+(m.kana||"")+'</div>'
       +'</td>'
-      +'<td style="text-align:center">'+numDisplay+'</td>'
-      +'<td style="text-align:center">'+genderIcon+'</td>'
+      +'<td style="text-align:center;padding:6px">'+(m.num?'<b style="color:#fff">#'+m.num+'</b>':'—')+'</td>'
+      +'<td style="text-align:center;padding:6px">'+(girl?'<span style="color:#ff8888">女</span>':'<span style="color:#88aaff">男</span>')+'</td>'
       +'</tr>';
   });
-  h+='</tbody></table>';
-  // ソートビュー用のコンテナに書き込む
-  var sortedView=document.getElementById("sorted-view");
-  var rosterWrap=document.querySelector(".roster-wrap");
-  if(sortedView) sortedView.innerHTML=h;
-  if(rosterWrap) rosterWrap.style.display="none";
-  if(sortedView) sortedView.style.display="block";
+  h += '</tbody></table>';
+  sv.innerHTML = h;
 }
 
-function renderTable(){
-  // ソートが学年順以外なら別ビューで表示
-  if(typeof currentSort !== "undefined" && currentSort !== "none"){
-    renderSortedTable();
-    return;
-  }
-  // 通常ビュー（学年順）
-  var rosterWrap=document.querySelector(".roster-wrap");
-  var sortedView=document.getElementById("sorted-view");
-  if(rosterWrap) rosterWrap.style.display="";
-  if(sortedView) sortedView.style.display="none";
-  var tbl=document.getElementById("roster-table");
-  if(!tbl){ console.error("roster-table not found"); return; }
-  var h="<thead><tr><th class='col-no'>#</th>";
-  GRADES.forEach(function(g){
-    var arr=data[g]||[];
-    var cnt=arr.filter(function(m){return m&&m.name;}).length;
-    h+="<th class='grade-head'>"+g+"<br><span style='font-size:.62rem;font-weight:400;color:rgba(255,255,255,.6)'>"+cnt+"名</span></th>";
+/* ===== ソートボタン ===== */
+function setSort(s){
+  currentSort = s;
+  ["sort-none","sort-kana","sort-num","sort-gender"].forEach(function(id){
+    var el=document.getElementById(id);
+    if(!el)return;
+    if(id==="sort-"+s){
+      el.style.background="var(--orange)";el.style.borderColor="var(--orange)";el.style.color="#fff";
+    } else {
+      el.style.background="";el.style.borderColor="";el.style.color="";
+    }
   });
-  h+="</tr></thead><tbody>";
-  for(var r=0;r<ROWS;r++){
-    h+="<tr><td class='col-no'>"+(r+1)+"</td>";
-    GRADES.forEach(function(g){
-      var arr=data[g]||[];
-      var m=arr[r];
-      if(m&&m.name){
-        var girl=m.gender==="f";
-        var dotColor=girl?"#ff8888":"#6aaccc";
-        h+="<td><div class='name-cell"+(girl?" girl":"")+"' onclick=\"openEdit('"+g+"',"+r+")\">";
-        h+="<div class='kana'>"+(m.kana||"")+"</div>";
-        h+="<div class='kanji'><span class='gender-dot' style='background:"+dotColor+"'></span>"+m.name+"</div>";
-        if(m.num)h+="<div class='num-badge'>#"+m.num+"</div>";
-        h+="</div></td>";
-      } else {
-        h+="<td><div class='name-cell empty' onclick=\"openNew('"+g+"',"+r+")\"></div></td>";
-      }
-    });
-    h+="</tr>";
-  }
-  h+="</tbody>";
-  tbl.innerHTML=h;
+  render();
 }
 
+/* ===== 編集モーダル ===== */
 function openEdit(g,r){
   var m=(data[g]||[])[r];
   if(!m||!m.name){openNew(g,r);return;}
-  editGrade=g;editRow=r;
+  editGrade=g; editRow=r;
   document.getElementById("edit-title").textContent=g+" "+(r+1)+"番目を編集";
   document.getElementById("edit-name").value=m.name||"";
   document.getElementById("edit-kana").value=m.kana||"";
@@ -291,7 +298,7 @@ function openEdit(g,r){
   document.getElementById("edit-modal").classList.add("open");
 }
 function openNew(g,r){
-  editGrade=g;editRow=r;
+  editGrade=g; editRow=r;
   document.getElementById("edit-title").textContent=g+" "+(r+1)+"番に追加";
   document.getElementById("edit-name").value="";
   document.getElementById("edit-kana").value="";
@@ -303,100 +310,58 @@ function openNew(g,r){
 function closeModal(){document.getElementById("edit-modal").classList.remove("open");}
 function saveEdit(){
   var name=document.getElementById("edit-name").value.trim();
-  var gender=document.querySelector("input[name='edit-gender']:checked");
-  if(!data[editGrade])data[editGrade]=[];
-  while(data[editGrade].length<=editRow)data[editGrade].push(null);
-  data[editGrade][editRow]=name?{
-    name:name,kana:document.getElementById("edit-kana").value.trim(),
-    num:document.getElementById("edit-num").value.trim(),
-    gender:gender?gender.value:"m"
-  }:null;
-  closeModal();renderTable();
-  autoSave(); // 編集後に自動保存
+  var gEl=document.querySelector("input[name='edit-gender']:checked");
+  if(!data[editGrade]) data[editGrade]=[];
+  if(name){
+    data[editGrade][editRow]={
+      name:name,
+      kana:document.getElementById("edit-kana").value.trim(),
+      num:document.getElementById("edit-num").value.trim(),
+      gender:gEl?gEl.value:"m"
+    };
+  } else {
+    data[editGrade][editRow]=null;
+  }
+  closeModal(); render(); autoSave();
 }
 function deleteEntry(){
   if(!confirm("削除しますか？"))return;
-  if(data[editGrade])data[editGrade][editRow]=null;
-  closeModal();renderTable();
-  autoSave(); // 削除後に自動保存
+  if(data[editGrade]) data[editGrade][editRow]=null;
+  closeModal(); render(); autoSave();
 }
 function autoSave(){
   var msg=document.getElementById("save-msg");
   if(msg) msg.textContent="💾 保存中…";
-  dbSave("members", data, KEY, function(){
+  dbSave("members",data,KEY,function(){
     if(msg){
-      msg.textContent="✅ 自動保存（"+new Date().toLocaleTimeString("ja-JP",{hour:"2-digit",minute:"2-digit"})+"）";
+      msg.textContent="✅ 保存しました";
       setTimeout(function(){if(msg)msg.textContent="";},2500);
     }
   });
 }
 function saveData(){
-  var msg = document.getElementById("save-msg");
-  msg.textContent = "💾 保存中…";
-  dbSave("members", data, KEY, function(){
-    msg.textContent = "✅ 保存しました（"+new Date().toLocaleTimeString("ja-JP",{hour:"2-digit",minute:"2-digit"})+"）";
-    setTimeout(function(){msg.textContent="";},3000);
+  var msg=document.getElementById("save-msg");
+  if(msg) msg.textContent="💾 保存中…";
+  dbSave("members",data,KEY,function(){
+    if(msg){
+      msg.textContent="✅ 保存しました（"+new Date().toLocaleTimeString("ja-JP",{hour:"2-digit",minute:"2-digit"})+"）";
+      setTimeout(function(){if(msg)msg.textContent="";},3000);
+    }
   });
 }
 function exportCSV(){
-  var csv="\uFEFF学年,No,氏名,ふりがな,背番号,性別\n";
+  var csv="﻿学年,氏名,フリガナ,背番号,性別
+";
   GRADES.forEach(function(g){
-    (data[g]||[]).forEach(function(m,i){
-      if(m&&m.name)csv+=g+","+(i+1)+",\""+m.name+"\",\""+(m.kana||"")+"\",\""+(m.num||"")+"\","+(m.gender==="f"?"女子":"男子")+"\n";
+    (data[g]||[]).forEach(function(m){
+      if(m&&m.name) csv+='"'+g+'","'+m.name+'","'+(m.kana||"")+'","'+(m.num||"")+'","'+(m.gender==="f"?"女":"男")+'"
+';
     });
   });
   var a=document.createElement("a");
   a.href=URL.createObjectURL(new Blob([csv],{type:"text/csv"}));
-  a.download="smc_members_2026.csv";a.click();
+  a.download="smc_members.csv"; a.click();
 }
 document.getElementById("edit-modal").addEventListener("click",function(e){if(e.target.id==="edit-modal")closeModal();});
-
-// ===== ソート機能 =====
-var currentSort = "none";
-function setSort(s){
-  currentSort = s;
-  ["sort-none","sort-kana","sort-num","sort-gender"].forEach(function(id){
-    var el=document.getElementById(id);
-    if(el) el.classList.remove("active");
-  });
-  var el=document.getElementById("sort-"+s);
-  if(el){el.classList.add("active");el.style.background="var(--orange)";el.style.borderColor="var(--orange)";el.style.color="#fff";}
-  ["sort-none","sort-kana","sort-num","sort-gender"].forEach(function(id){
-    var e=document.getElementById(id);
-    if(e&&id!=="sort-"+s){e.style.background="";e.style.borderColor="";e.style.color="";}
-  });
-  renderTable();
-}
-
-// ===== 学年自動進級（4月1日に1学年アップ） =====
-function getAdjustedGrades(){
-  var now=new Date();
-  var year=now.getFullYear();
-  var gradeUpDate=new Date(year,3,1); // 4月1日
-  // 2026年度の学年データを基準とする
-  // 4月1日以降は次の学年に進む
-  // ただし「年長」は「1年」に、「6年」は卒業（表示から除去）
-  // 基準年度: 2026年度（2026/4/1〜2027/3/31）
-  var baseYear = 2026;
-  var currentSchoolYear = now >= new Date(year,3,1) ? year : year-1;
-  var diff = currentSchoolYear - baseYear; // 何年経過したか
-
-  if(diff === 0) return null; // 変更なし
-
-  var GRADE_MAP = {"6年":"卒業","5年":"6年","4年":"5年","3年":"4年","2年":"3年","1年":"2年","年長":"1年"};
-  return {diff:diff, map:GRADE_MAP};
-}
-
-// 進級バッジ表示
-(function(){
-  var badge = document.getElementById("grade-year-badge");
-  if(!badge) return;
-  var now = new Date();
-  var year = now.getFullYear();
-  var schoolYear = now >= new Date(year,3,1) ? year : year-1;
-  badge.textContent = schoolYear + "年度";
-})();
-
-// renderTable()はdbListenのコールバックで呼ばれる
 </script>
 </body></html>
