@@ -11,11 +11,12 @@
     .roster-table{border-collapse:collapse;width:max-content;min-width:100%;font-size:.82rem}
     .roster-table th,.roster-table td{border:1px solid var(--line-2);padding:0;vertical-align:top}
     .col-no{background:rgba(0,212,255,.14);font-size:.68rem;font-weight:900;color:var(--cyan);text-align:center;padding:6px 4px;position:sticky;left:0;z-index:10;min-width:28px}
-    .grade-head{background:rgba(0,48,135,.45);color:#fff;font-size:.78rem;font-weight:900;text-align:center;padding:7px 10px;min-width:110px;white-space:nowrap}
+    .grade-head{background:rgba(0,48,135,.45);color:#fff;font-size:.78rem;font-weight:900;text-align:center;padding:7px 10px;min-width:110px;white-space:nowrap;cursor:pointer;user-select:none}
+    .grade-head:hover{background:rgba(0,80,204,.6)}
+    .grade-sort-ind{font-size:.55rem;color:var(--orange);display:block;margin-top:2px;min-height:.8em}
     .name-cell{padding:6px 8px;cursor:pointer;min-height:52px;min-width:100px}
     .name-cell:hover{background:rgba(255,107,43,.12)}
     .name-cell.empty{min-height:52px;opacity:.3}
-    .name-cell.empty:hover{background:rgba(255,255,255,.05)}
     .kana{font-size:.62rem;color:var(--ink-3);margin-bottom:2px}
     .kanji{font-size:.88rem;font-weight:700;color:#fff;display:flex;align-items:center;gap:4px}
     .kanji.girl{color:#ff8888}
@@ -24,30 +25,21 @@
     .legend-bar{display:flex;gap:12px;align-items:center;font-size:.78rem;color:var(--ink-3);padding:6px 0 8px;flex-wrap:wrap}
     .legend-dot{width:8px;height:8px;border-radius:50%;display:inline-block;margin-right:3px}
     .save-bar{display:flex;align-items:center;gap:8px;flex-wrap:wrap;padding-top:6px}
-    .save-msg-span{font-size:.82rem;color:var(--green);flex:1;min-height:1.4em}
-    .sort-bar{display:flex;gap:6px;flex-wrap:wrap;align-items:center;margin-bottom:10px}
-    .sort-lbl{font-size:.75rem;color:var(--ink-3)}
-    .sort-btn{padding:4px 10px;border-radius:99px;border:1px solid var(--line-2);background:none;color:var(--ink-3);font:inherit;font-size:.72rem;font-weight:700;cursor:pointer;transition:.15s}
+    .sort-bar{display:flex;gap:6px;flex-wrap:wrap;align-items:center;margin-bottom:8px}
+    .sort-lbl{font-size:.75rem;color:var(--ink-3);white-space:nowrap}
+    .sort-btn{padding:5px 12px;border-radius:99px;border:1px solid var(--line-2);background:none;color:var(--ink-3);font:inherit;font-size:.74rem;font-weight:700;cursor:pointer;transition:.15s}
     .sort-btn.on{background:var(--orange);border-color:var(--orange);color:#fff}
-    /* 編集モーダル */
+    .list-wrap{border-radius:var(--r8);overflow:hidden;border:1px solid var(--line-2);margin-bottom:10px}
+    .list-table{width:100%;border-collapse:collapse;font-size:.84rem}
+    .list-table th{background:#003087;color:#fff;padding:7px 9px;text-align:left;font-size:.76rem;font-weight:900}
+    .list-table td{border-bottom:1px solid rgba(255,255,255,.07);padding:9px 9px;color:#c8e8ff;vertical-align:middle;cursor:pointer}
+    .list-table tr:hover td{background:rgba(255,107,43,.08)}
     .edit-modal-bg{position:fixed;inset:0;background:rgba(0,0,0,.82);display:none;place-items:center;z-index:200;backdrop-filter:blur(6px);padding:16px}
     .edit-modal-bg.open{display:grid}
     .edit-modal{background:var(--surface-lt);border:1px solid var(--line-2);border-radius:var(--r16);padding:22px;width:min(380px,100%);box-shadow:var(--shadow-lg)}
     .edit-modal h3{font-size:.95rem;font-weight:900;color:#fff;margin-bottom:14px}
     .edit-modal-btns{display:flex;gap:8px;justify-content:flex-end;margin-top:14px;flex-wrap:wrap}
     .gender-radio{display:flex;gap:16px;font-size:.88rem;color:var(--ink)}
-    /* ドラッグ */
-    .name-cell.dragging{opacity:.4;background:rgba(255,107,43,.2)!important}
-    .name-cell.drag-over{border:2px dashed var(--orange)!important;background:rgba(255,107,43,.1)!important}
-    .name-cell[draggable="true"]{cursor:grab}
-    .name-cell[draggable="true"]:active{cursor:grabbing}
-    /* 学年ソートインジケーター */
-    .grade-head .sort-ind{font-size:.55rem;color:var(--orange);display:block;margin-top:1px}
-    /* リストビュー */
-    .list-table{width:100%;border-collapse:collapse;font-size:.84rem}
-    .list-table th{background:#003087;color:#fff;padding:7px 9px;text-align:left;font-size:.76rem;font-weight:900;position:sticky;top:0}
-    .list-table td{border-bottom:1px solid rgba(255,255,255,.07);padding:8px 9px;color:#c8e8ff;vertical-align:middle;cursor:pointer}
-    .list-table tr:hover td{background:rgba(255,107,43,.08)}
   </style>
 </head>
 <body>
@@ -70,19 +62,21 @@
   </div>
   <div class="notice-bar">☁️ データはクラウド（Firebase）で保存・共有されます。</div>
 
-  <!-- フィルター・ソートバー -->
-  <div class="sort-bar" style="margin-bottom:6px">
+  <!-- 学年フィルター -->
+  <div class="sort-bar">
     <span class="sort-lbl">学年：</span>
-    <button class="sort-btn on" id="gf-all"  onclick="setGrade('all')">全学年</button>
-    <button class="sort-btn"    id="gf-6"    onclick="setGrade('6年')">6年</button>
-    <button class="sort-btn"    id="gf-5"    onclick="setGrade('5年')">5年</button>
-    <button class="sort-btn"    id="gf-4"    onclick="setGrade('4年')">4年</button>
-    <button class="sort-btn"    id="gf-3"    onclick="setGrade('3年')">3年</button>
-    <button class="sort-btn"    id="gf-2"    onclick="setGrade('2年')">2年</button>
-    <button class="sort-btn"    id="gf-1"    onclick="setGrade('1年')">1年</button>
-    <button class="sort-btn"    id="gf-nen"  onclick="setGrade('年長')">年長</button>
-    <span id="grade-badge" style="font-size:.72rem;color:var(--cyan);margin-left:4px"></span>
+    <button class="sort-btn on" id="gf-all" onclick="setGrade('all')">全学年</button>
+    <button class="sort-btn" id="gf-6"   onclick="setGrade('6年')">6年</button>
+    <button class="sort-btn" id="gf-5"   onclick="setGrade('5年')">5年</button>
+    <button class="sort-btn" id="gf-4"   onclick="setGrade('4年')">4年</button>
+    <button class="sort-btn" id="gf-3"   onclick="setGrade('3年')">3年</button>
+    <button class="sort-btn" id="gf-2"   onclick="setGrade('2年')">2年</button>
+    <button class="sort-btn" id="gf-1"   onclick="setGrade('1年')">1年</button>
+    <button class="sort-btn" id="gf-nen" onclick="setGrade('年長')">年長</button>
+    <span id="grade-badge" style="font-size:.72rem;color:var(--cyan)"></span>
   </div>
+
+  <!-- ソート -->
   <div class="sort-bar">
     <span class="sort-lbl">並び替え：</span>
     <button class="sort-btn on" id="sb-none"   onclick="setSort('none')">学年順</button>
@@ -98,19 +92,19 @@
     <span style="color:#ffaa66">※ #番号 = 背番号</span>
   </div>
 
-  <!-- グリッドビュー（学年順） -->
+  <!-- グリッドビュー -->
   <div class="roster-wrap" id="grid-view">
     <table class="roster-table" id="roster-table"></table>
   </div>
 
-  <!-- リストビュー（ソート時） -->
-  <div id="list-view" style="display:none;border-radius:var(--r8);overflow:hidden;border:1px solid var(--line-2);margin-bottom:10px">
+  <!-- リストビュー -->
+  <div class="list-wrap" id="list-view" style="display:none">
     <table class="list-table" id="list-table"></table>
   </div>
 
   <!-- 保存バー -->
   <div class="save-bar">
-    <span class="save-msg-span" id="save-msg"></span>
+    <span style="font-size:.82rem;color:var(--green);flex:1" id="save-msg"></span>
     <button class="btn btn-outline btn-sm" onclick="exportCSV()">📥 CSV出力</button>
     <button class="btn btn-primary" onclick="saveData()">💾 保存</button>
   </div>
@@ -136,7 +130,7 @@
       <label class="form-label">性別</label>
       <div class="gender-radio">
         <label><input type="radio" name="edit-gender" value="m" id="edit-g-m" checked> 男子</label>
-        <label><input type="radio" name="edit-gender" value="f" id="edit-g-f"> 女子（赤字）</label>
+        <label><input type="radio" name="edit-gender" value="f" id="edit-g-f"> 女子</label>
       </div>
     </div>
     <div class="edit-modal-btns">
@@ -149,21 +143,13 @@
 
 <footer class="site-footer">YOSHIMI SMC FC — SMART PORTAL</footer>
 <script>
-/* =====================================================
-   団員名簿 - 完全書き直し版
-   ===================================================== */
 var GRADES = ["6年","5年","4年","3年","2年","1年","年長"];
-var KEY    = "smc_members_v4";
-var ROWS   = 14;
+var KEY = "smc_members_v4";
+var ROWS = 14;
 var currentSort = "none";
 var currentGrade = "all";
 var editGrade = null, editRow = null;
-// 学年ごとの内部ソート状態（グリッド表示時）
-var gradeSort = {}; // {grade: "none"|"kana"|"num"}
-// ドラッグ状態
-var dragGrade = null, dragIdx = null;
 
-/* ----- 初期データ ----- */
 var INIT = {
   "6年":[
     {name:"有瀧　晴一",   kana:"ありたき　はるいち",    num:"",gender:"m"},
@@ -218,20 +204,17 @@ var INIT = {
   ]
 };
 
-/* ----- 現在のデータ ----- */
 var data = JSON.parse(JSON.stringify(INIT));
 
-/* ----- 学年バッジ ----- */
+// 学年バッジ
 (function(){
   var now = new Date();
-  var sy  = now >= new Date(now.getFullYear(), 3, 1) ? now.getFullYear() : now.getFullYear()-1;
-  var el  = document.getElementById("grade-badge");
-  if(el) el.textContent = sy + "年度";
+  var sy = now >= new Date(now.getFullYear(),3,1) ? now.getFullYear() : now.getFullYear()-1;
+  var el = document.getElementById("grade-badge");
+  if(el) el.textContent = sy+"年度";
 })();
 
-/* =====================================================
-   描画関数
-   ===================================================== */
+/* ===== 描画 ===== */
 function render(){
   if(currentSort === "none"){
     document.getElementById("grid-view").style.display = "";
@@ -244,92 +227,30 @@ function render(){
   }
 }
 
-/* =====================================================
-   学年ヘッダータップでソートをサイクル
-   ===================================================== */
-function cycleGradeSort(g){
-  var cur = gradeSort[g]||"none";
-  var next = cur==="none"?"kana":cur==="kana"?"num":"none";
-  gradeSort[g] = next;
-  // そのソートに従い学年データを並べ替えて保存
-  applyGradeSort(g);
-  renderGrid();
-}
-
-function applyGradeSort(g){
-  var members = (data[g]||[]).filter(function(m){return m&&m.name;});
-  var empties = (data[g]||[]).filter(function(m){return !m||!m.name;});
-  var gs = gradeSort[g]||"none";
-  if(gs==="kana")   members.sort(function(a,b){return (a.kana||"").localeCompare(b.kana||"","ja");});
-  if(gs==="num")    members.sort(function(a,b){return (parseInt(a.num)||999)-(parseInt(b.num)||999);});
-  // nullを末尾に埋めて保存
-  data[g] = members.concat(empties.slice(0, ROWS - members.length));
-}
-
-/* =====================================================
-   ドラッグ＆ドロップで並べ替え
-   ===================================================== */
-function onDragStart(e, g, idx){
-  dragGrade = g; dragIdx = idx;
-  e.dataTransfer.effectAllowed = "move";
-  e.currentTarget.classList.add("dragging");
-}
-function onDragOver(e){
-  e.preventDefault();
-  e.dataTransfer.dropEffect = "move";
-  // drag-overクラスを付与
-  document.querySelectorAll(".name-cell.drag-over").forEach(function(el){el.classList.remove("drag-over");});
-  e.currentTarget.classList.add("drag-over");
-}
-function onDrop(e, g, idx){
-  e.preventDefault();
-  e.currentTarget.classList.remove("drag-over");
-  if(dragGrade !== g || dragIdx === idx || dragGrade === null) return;
-  // 同じ学年内で入れ替え
-  var arr = data[g] ? data[g].slice() : [];
-  var from = arr[dragIdx];
-  var to   = arr[idx];
-  arr[dragIdx] = to;
-  arr[idx]     = from;
-  data[g] = arr;
-  gradeSort[g] = "none"; // 手動並べ替え後はソートリセット
-  render();
-  // Firebaseに自動保存
-  dbSave("members", data, KEY, null);
-}
-function onDragEnd(e){
-  dragGrade = null; dragIdx = null;
-  document.querySelectorAll(".name-cell").forEach(function(el){
-    el.classList.remove("dragging","drag-over");
-  });
-}
-
 function renderGrid(){
   var tbl = document.getElementById("roster-table");
   if(!tbl) return;
-  var showGrades = currentGrade==="all" ? GRADES : [currentGrade];
+  var grades = currentGrade==="all" ? GRADES : [currentGrade];
   var h = "<thead><tr><th class='col-no'>#</th>";
-  showGrades.forEach(function(g){
+  grades.forEach(function(g){
     var cnt = (data[g]||[]).filter(function(m){return m&&m.name;}).length;
-    var gs = gradeSort[g]||"none";
-    var ind = gs==="none"?"タップでソート":gs==="kana"?"あいうえお順 ▲":"背番号順 ▲";
-    h += "<th class='grade-head' onclick='cycleGradeSort(""+g+"")' style='cursor:pointer;user-select:none'>"+g
-      +"<br><span style='font-size:.62rem;font-weight:400;color:rgba(255,255,255,.6)'>"+cnt+"名</span>"
-      +"<span class='sort-ind'>"+ind+"</span></th>";
+    h += "<th class='grade-head' onclick=\"cycleSort('"+g+"')\">"
+      +g+"<br><span style='font-size:.62rem;font-weight:400;color:rgba(255,255,255,.6)'>"+cnt+"名</span>"
+      +"<span class='grade-sort-ind' id='gsi-"+g+"'></span></th>";
   });
   h += "</tr></thead><tbody>";
   for(var r=0; r<ROWS; r++){
     h += "<tr><td class='col-no'>"+(r+1)+"</td>";
-    showGrades.forEach(function(g){
+    grades.forEach(function(g){
       var m = (data[g]||[])[r];
       if(m && m.name){
-        var girl = m.gender === "f";
+        var girl = m.gender==="f";
         var dot  = girl ? "#ff8888" : "#6aaccc";
-        h += "<td><div class='name-cell' onclick=\"openEdit('"+g+"',"+r+")\">";
-        h += "<div class='kana'>"+(m.kana||"")+"</div>";
-        h += "<div class='kanji"+(girl?" girl":"")+"'><span class='gender-dot' style='background:"+dot+"'></span>"+m.name+"</div>";
-        if(m.num) h += "<div class='num-badge'>#"+m.num+"</div>";
-        h += "</div></td>";
+        h += "<td><div class='name-cell' onclick=\"openEdit('"+g+"',"+r+")\">"
+          +"<div class='kana'>"+(m.kana||"")+"</div>"
+          +"<div class='kanji"+(girl?" girl":"")+"'><span class='gender-dot' style='background:"+dot+"'></span>"+m.name+"</div>"
+          +(m.num?"<div class='num-badge'>#"+m.num+"</div>":"")
+          +"</div></td>";
       } else {
         h += "<td><div class='name-cell empty' onclick=\"openNew('"+g+"',"+r+")\"></div></td>";
       }
@@ -341,11 +262,11 @@ function renderGrid(){
 }
 
 function renderList(){
+  var grades = currentGrade==="all" ? GRADES : [currentGrade];
   var all = [];
-  var targetGrades = currentGrade==="all" ? GRADES : [currentGrade];
-  targetGrades.forEach(function(g){
+  grades.forEach(function(g){
     (data[g]||[]).forEach(function(m,r){
-      if(m && m.name) all.push({name:m.name,kana:m.kana||"",num:m.num||"",gender:m.gender,grade:g,row:r});
+      if(m&&m.name) all.push({name:m.name,kana:m.kana||"",num:m.num||"",gender:m.gender,grade:g,row:r});
     });
   });
   if(currentSort==="kana")   all.sort(function(a,b){return a.kana.localeCompare(b.kana,"ja");});
@@ -354,49 +275,80 @@ function renderList(){
     if(a.gender===b.gender) return a.kana.localeCompare(b.kana,"ja");
     return a.gender==="f"?-1:1;
   });
-  var h = "<thead><tr><th>学年</th><th>氏名</th><th>ふりがな</th><th>#</th><th>性別</th></tr></thead><tbody>";
-  all.forEach(function(m){
-    var girl = m.gender==="f";
-    h += "<tr onclick=\"openEdit('"+m.grade+"',"+m.row+")\">";
-    h += "<td style='color:var(--cyan);font-weight:700;font-size:.76rem'>"+m.grade+"</td>";
-    h += "<td style='font-weight:900;"+(girl?"color:#ff8888":"color:#fff")+"'>"+m.name+"</td>";
-    h += "<td style='font-size:.76rem;color:var(--ink-3)'>"+m.kana+"</td>";
-    h += "<td style='text-align:center;font-weight:700;color:var(--orange)'>"+(m.num?"#"+m.num:"—")+"</td>";
-    h += "<td style='text-align:center'>"+(girl?"<span style='color:#ff8888'>女</span>":"<span style='color:#88aaff'>男</span>")+"</td>";
-    h += "</tr>";
-  });
+  var showGrade = currentGrade==="all";
+  var h = "<thead><tr>"+(showGrade?"<th style='width:52px'>学年</th>":"")
+    +"<th>氏名</th><th>ふりがな</th><th style='width:46px'>#</th><th style='width:40px'>性別</th>"
+    +"</tr></thead><tbody>";
+  if(!all.length){
+    h += "<tr><td colspan='5' style='text-align:center;color:var(--ink-3);padding:20px'>団員がいません</td></tr>";
+  } else {
+    all.forEach(function(m){
+      var girl = m.gender==="f";
+      h += "<tr onclick=\"openEdit('"+m.grade+"',"+m.row+")\">";
+      if(showGrade) h += "<td style='text-align:center;color:var(--cyan);font-weight:700;font-size:.76rem'>"+m.grade+"</td>";
+      h += "<td style='font-weight:900;"+(girl?"color:#ff8888":"color:#fff")+"'>"+m.name+"</td>"
+        +"<td style='font-size:.76rem;color:var(--ink-3)'>"+m.kana+"</td>"
+        +"<td style='text-align:center;font-weight:700;color:var(--orange)'>"+(m.num?"#"+m.num:"—")+"</td>"
+        +"<td style='text-align:center'>"+(girl?"<span style='color:#ff8888'>女</span>":"<span style='color:#88aaff'>男</span>")+"</td>"
+        +"</tr>";
+    });
+  }
   h += "</tbody>";
   document.getElementById("list-table").innerHTML = h;
 }
 
-/* =====================================================
-   ソート
-   ===================================================== */
+/* ===== 学年ヘッダータップでその学年内ソート ===== */
+var gradeSortState = {}; // {g: "none"|"kana"|"num"}
+function cycleSort(g){
+  var cur = gradeSortState[g]||"none";
+  var next = cur==="none"?"kana" : cur==="kana"?"num" : "none";
+  gradeSortState[g] = next;
+
+  // その学年内のデータを並べ替え
+  var members = (data[g]||[]).filter(function(m){return m&&m.name;});
+  if(next==="kana")   members.sort(function(a,b){return (a.kana||"").localeCompare(b.kana||"","ja");});
+  if(next==="num")    members.sort(function(a,b){return (parseInt(a.num)||999)-(parseInt(b.num)||999);});
+  // nullで埋める
+  while(members.length < ROWS) members.push(null);
+  data[g] = members;
+
+  render();
+
+  // インジケーター更新
+  var label = {"none":"","kana":"あいうえお順 ▲","num":"背番号順 ▲"};
+  var el = document.getElementById("gsi-"+g);
+  if(el) el.textContent = label[next]||"";
+
+  // 自動保存
+  dbSave("members", data, KEY, null);
+}
+
+/* ===== ソートボタン ===== */
 function setSort(s){
   currentSort = s;
   ["none","kana","num","gender"].forEach(function(k){
     var el = document.getElementById("sb-"+k);
-    if(el) el.className = "sort-btn" + (k===s?" on":"");
-  });
-  render();
-}
-function setGrade(g){
-  currentGrade = g;
-  var ids = {"all":"gf-all","6年":"gf-6","5年":"gf-5","4年":"gf-4","3年":"gf-3","2年":"gf-2","1年":"gf-1","年長":"gf-nen"};
-  Object.keys(ids).forEach(function(k){
-    var el = document.getElementById(ids[k]);
-    if(el) el.className = "sort-btn" + (k===g?" on":"");
+    if(el) el.className = "sort-btn"+(k===s?" on":"");
   });
   render();
 }
 
-/* =====================================================
-   編集モーダル
-   ===================================================== */
+/* ===== 学年フィルター ===== */
+function setGrade(g){
+  currentGrade = g;
+  var map = {"all":"gf-all","6年":"gf-6","5年":"gf-5","4年":"gf-4","3年":"gf-3","2年":"gf-2","1年":"gf-1","年長":"gf-nen"};
+  Object.keys(map).forEach(function(k){
+    var el = document.getElementById(map[k]);
+    if(el) el.className = "sort-btn"+(k===g?" on":"");
+  });
+  render();
+}
+
+/* ===== 編集モーダル ===== */
 function openEdit(g,r){
   var m = (data[g]||[])[r];
-  if(!m || !m.name){ openNew(g,r); return; }
-  editGrade = g; editRow = r;
+  if(!m||!m.name){ openNew(g,r); return; }
+  editGrade=g; editRow=r;
   document.getElementById("edit-title").textContent = g+" "+(r+1)+"番目を編集";
   document.getElementById("edit-name").value = m.name||"";
   document.getElementById("edit-kana").value = m.kana||"";
@@ -406,7 +358,7 @@ function openEdit(g,r){
   document.getElementById("edit-modal").classList.add("open");
 }
 function openNew(g,r){
-  editGrade = g; editRow = r;
+  editGrade=g; editRow=r;
   document.getElementById("edit-title").textContent = g+" "+(r+1)+"番に追加";
   document.getElementById("edit-name").value = "";
   document.getElementById("edit-kana").value = "";
@@ -417,31 +369,31 @@ function openNew(g,r){
 }
 function closeModal(){ document.getElementById("edit-modal").classList.remove("open"); }
 function saveEdit(){
-  var name  = document.getElementById("edit-name").value.trim();
-  var gEl   = document.querySelector("input[name='edit-gender']:checked");
-  if(!data[editGrade]) data[editGrade] = [];
+  var name = document.getElementById("edit-name").value.trim();
+  var gEl  = document.querySelector("input[name='edit-gender']:checked");
+  if(!data[editGrade]) data[editGrade]=[];
   data[editGrade][editRow] = name ? {
     name:name,
     kana:document.getElementById("edit-kana").value.trim(),
     num: document.getElementById("edit-num").value.trim(),
-    gender: gEl ? gEl.value : "m"
+    gender: gEl?gEl.value:"m"
   } : null;
   closeModal(); render();
-  dbSave("members", data, KEY, function(){
+  dbSave("members",data,KEY,function(){
     var m=document.getElementById("save-msg");
     if(m){m.textContent="✅ 保存しました";setTimeout(function(){m.textContent="";},2000);}
   });
 }
 function deleteEntry(){
   if(!confirm("削除しますか？")) return;
-  if(data[editGrade]) data[editGrade][editRow] = null;
+  if(data[editGrade]) data[editGrade][editRow]=null;
   closeModal(); render();
-  dbSave("members", data, KEY, null);
+  dbSave("members",data,KEY,null);
 }
 function saveData(){
   var m=document.getElementById("save-msg");
   if(m) m.textContent="💾 保存中…";
-  dbSave("members", data, KEY, function(){
+  dbSave("members",data,KEY,function(){
     if(m){m.textContent="✅ 保存しました";setTimeout(function(){m.textContent="";},2500);}
   });
 }
@@ -460,20 +412,15 @@ document.getElementById("edit-modal").addEventListener("click",function(e){
   if(e.target.id==="edit-modal") closeModal();
 });
 
-/* =====================================================
-   Firebase読み込み（最後に実行）
-   ===================================================== */
+/* ===== 起動 ===== */
 window.addEventListener("DOMContentLoaded", function(){
-  // INITデータで即座に描画（Firebaseを待たない）
-  render();
-
-  // Firebaseからデータが来たら上書き
+  render(); // INITで即描画
   dbListen("members", function(val){
-    if(val && typeof val==="object" && !Array.isArray(val) && Object.keys(val).length > 0){
+    if(val && typeof val==="object" && !Array.isArray(val) && Object.keys(val).length>0){
       data = val;
     } else {
       data = JSON.parse(JSON.stringify(INIT));
-      dbSave("members", data, KEY, null);
+      dbSave("members",data,KEY,null);
     }
     render();
   }, KEY, null);
