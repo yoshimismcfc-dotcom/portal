@@ -1,0 +1,261 @@
+<!doctype html>
+<html lang="ja">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>担当フォルダ｜吉見SMC FC</title>
+  <script src="firebase-config.js"></script>
+  <link rel="stylesheet" href="common.css">
+  <style>
+    /* タブ */
+    .staff-tab-bar{display:flex;gap:0;margin-bottom:20px;border-radius:var(--r8);overflow:hidden;border:1px solid var(--line-2)}
+    .staff-tab-btn{flex:1;padding:12px 8px;font:inherit;font-size:.88rem;font-weight:900;background:var(--surface-lt);color:#6aaccc;border:none;cursor:pointer;transition:.15s;display:flex;align-items:center;justify-content:center;gap:6px}
+    .staff-tab-btn:not(:last-child){border-right:1px solid var(--line-2)}
+    .staff-tab-btn.active{background:linear-gradient(135deg,#003087,#0050cc);color:#fff}
+    .staff-section{display:none}.staff-section.active{display:block}
+    /* カード */
+    .role-card{background:var(--surface-lt);border:1px solid var(--line-2);border-radius:var(--r12);padding:14px 16px;margin-bottom:10px;position:relative}
+    .role-card::before{content:"";position:absolute;top:0;left:0;width:3px;height:100%;background:var(--orange);border-radius:3px 0 0 3px}
+    .role-card.parent::before{background:var(--cyan)}
+    .role-label{font-size:.72rem;font-weight:900;color:var(--orange);letter-spacing:.1em;margin-bottom:4px;text-transform:uppercase}
+    .role-card.parent .role-label{color:var(--cyan)}
+    .role-name{font-size:1rem;font-weight:900;color:#fff;margin-bottom:2px}
+    .role-sub{font-size:.78rem;color:var(--ink-3);line-height:1.6}
+    .role-actions{display:flex;gap:6px;margin-top:8px;justify-content:flex-end}
+    .act-btn{border:1px solid;border-radius:6px;padding:4px 10px;font-size:.7rem;font-weight:700;cursor:pointer;background:none;transition:.15s}
+    .act-edit{color:var(--cyan);border-color:rgba(0,212,255,.35)}.act-edit:hover{background:rgba(0,212,255,.1)}
+    .act-del{color:#ff6680;border-color:rgba(255,68,102,.35)}.act-del:hover{background:rgba(255,68,102,.1)}
+    /* モーダル */
+    .modal-bg{position:fixed;inset:0;background:rgba(0,0,0,.82);display:none;place-items:center;z-index:200;backdrop-filter:blur(6px);padding:16px}
+    .modal-bg.open{display:grid}
+    .modal{background:var(--surface-lt);border:1px solid var(--line-2);border-radius:var(--r16);padding:22px;width:min(420px,100%);box-shadow:var(--shadow-lg);max-height:90vh;overflow-y:auto}
+    .modal h3{font-size:.95rem;font-weight:900;color:#fff;margin-bottom:14px}
+    .modal-btns{display:flex;gap:8px;justify-content:flex-end;margin-top:14px;flex-wrap:wrap}
+    /* グリッド */
+    .staff-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+    @media(max-width:480px){.staff-grid{grid-template-columns:1fr}}
+  </style>
+</head>
+<body>
+<header class="site-header">
+  <div class="header-inner">
+    <a class="header-logo" href="index.html">
+      <div class="logo-mark">⚽</div>
+      <div><span class="logo-name">吉見SMC FC</span><span class="logo-sub">SMART PORTAL</span></div>
+    </a>
+  </div>
+</header>
+<main class="page-wrap">
+  <a class="back-btn" href="index.html">ホームに戻る</a>
+  <div class="hero-band">
+    <div class="hero-emoji">👥</div>
+    <div><div class="hero-title">担当フォルダ</div>
+      <div class="hero-sub">コーチ・保護者の担当一覧。タップして編集・追加できます。</div></div>
+  </div>
+  <div class="notice-bar">☁️ データはクラウドで保存・共有されます。</div>
+
+  <div class="staff-tab-bar">
+    <button class="staff-tab-btn active" onclick="switchTab('coach',this)">🏃 コーチ担当</button>
+    <button class="staff-tab-btn" onclick="switchTab('parent',this)">👨‍👩‍👦 保護者担当</button>
+  </div>
+
+  <!-- コーチ -->
+  <div class="staff-section active" id="sec-coach">
+    <div style="display:flex;gap:8px;margin-bottom:14px">
+      <button class="btn btn-primary" onclick="openAdd('coach')">＋ コーチを追加</button>
+    </div>
+    <div class="staff-grid" id="coach-list"></div>
+  </div>
+
+  <!-- 保護者 -->
+  <div class="staff-section" id="sec-parent">
+    <div style="display:flex;gap:8px;margin-bottom:14px">
+      <button class="btn btn-primary" onclick="openAdd('parent')">＋ 保護者を追加</button>
+    </div>
+    <div class="staff-grid" id="parent-list"></div>
+  </div>
+</main>
+
+<!-- モーダル -->
+<div class="modal-bg" id="modal">
+  <div class="modal">
+    <h3 id="modal-title">担当者を追加</h3>
+    <input type="hidden" id="m-type">
+    <div class="form-group"><label class="form-label">役職・担当 <span style="color:var(--red)">*</span></label>
+      <input class="form-control" id="m-role" placeholder="例：監督、6年担当、会計"></div>
+    <div class="form-group"><label class="form-label">名前（敬称は自動でつきます）</label>
+      <input class="form-control" id="m-name" placeholder="例：片山"></div>
+    <div class="form-group"><label class="form-label">備考（連絡先・メモ等）</label>
+      <textarea class="form-control" id="m-note" rows="2" placeholder="例：LINE: 090-XXXX"></textarea></div>
+    <div class="modal-btns">
+      <button class="btn btn-outline btn-sm" id="del-btn" style="color:var(--red);border-color:rgba(255,68,102,.4);display:none" onclick="deleteStaff()">🗑 削除</button>
+      <button class="btn btn-outline" onclick="closeModal()">キャンセル</button>
+      <button class="btn btn-primary" onclick="saveStaff()">💾 保存</button>
+    </div>
+  </div>
+</div>
+
+<footer class="site-footer">YOSHIMI SMC FC — SMART PORTAL</footer>
+<script>
+var KEY_C="smc_staff_coach_v1", KEY_P="smc_staff_parent_v1";
+var editId=null, editType=null;
+var _coachData=[], _parentData=[];
+
+// 初期データ
+var INIT_COACH=[
+  {id:"c1", role:"代表",        name:"片山",   note:""},
+  {id:"c2", role:"監督",        name:"綿貫",   note:""},
+  {id:"c3", role:"テクニカルHC",name:"調整中", note:""},
+  {id:"c4", role:"審判部",      name:"奥本、土居", note:""},
+  {id:"c5", role:"顧問",        name:"中村、松本", note:""},
+  {id:"c6", role:"6年担当",     name:"石川",   note:""},
+  {id:"c7", role:"5年担当",     name:"上村",   note:""},
+  {id:"c8", role:"4年担当",     name:"原口",   note:""},
+  {id:"c9", role:"3年担当",     name:"柴田",   note:""},
+  {id:"ca", role:"2年担当",     name:"野口",   note:""},
+  {id:"cb", role:"1年担当",     name:"鶴崎",   note:""},
+  {id:"cc", role:"年長担当",    name:"功刀",   note:""},
+  {id:"cd", role:"事務局",      name:"武部",   note:""},
+];
+var INIT_PARENT=[
+  {id:"p1", role:"会長",       name:"長嶋",         note:""},
+  {id:"p2", role:"会計",       name:"岡野、一場",   note:""},
+  {id:"p3", role:"連絡係（高学年）", name:"石川",  note:""},
+  {id:"p4", role:"連絡係（低学年）", name:"北村、瀬戸", note:""},
+];
+
+// 敬称付与
+function withTitle(type, name){
+  if(!name) return "";
+  // 「調整中」などはそのまま
+  if(name==="調整中"||name==="未定") return name;
+  var title = type==="coach" ? "コーチ" : "さん";
+  // 複数名（「、」区切り）対応
+  return name.split("、").map(function(n){
+    return n.trim() + title;
+  }).join("、");
+}
+
+// Firebase同期
+dbListen("staff/coach", function(val){
+  _coachData = Array.isArray(val)&&val.length ? val : JSON.parse(JSON.stringify(INIT_COACH));
+  renderCoach();
+}, KEY_C, JSON.parse(JSON.stringify(INIT_COACH)));
+
+dbListen("staff/parent", function(val){
+  _parentData = Array.isArray(val)&&val.length ? val : JSON.parse(JSON.stringify(INIT_PARENT));
+  renderParent();
+}, KEY_P, JSON.parse(JSON.stringify(INIT_PARENT)));
+
+function renderCoach(){
+  var list=document.getElementById("coach-list");
+  list.innerHTML=_coachData.map(function(s){
+    return '<div class="role-card">'
+      +'<div class="role-label">'+escH(s.role)+'</div>'
+      +'<div class="role-name">'+escH(withTitle("coach",s.name))+'</div>'
+      +(s.note?'<div class="role-sub">'+escH(s.note)+'</div>':"")
+      +'<div class="role-actions">'
+      +'<button class="act-btn act-edit" onclick="openEdit(\'coach\',\''+s.id+'\')">✏️ 編集</button>'
+      +'<button class="act-btn act-del"  onclick="confirmDel(\'coach\',\''+s.id+'\')">🗑</button>'
+      +'</div></div>';
+  }).join("")||'<div style="color:var(--ink-3);font-size:.85rem;padding:16px">担当者がいません。追加してください。</div>';
+}
+
+function renderParent(){
+  var list=document.getElementById("parent-list");
+  list.innerHTML=_parentData.map(function(s){
+    return '<div class="role-card parent">'
+      +'<div class="role-label">'+escH(s.role)+'</div>'
+      +'<div class="role-name">'+escH(withTitle("parent",s.name))+'</div>'
+      +(s.note?'<div class="role-sub">'+escH(s.note)+'</div>':"")
+      +'<div class="role-actions">'
+      +'<button class="act-btn act-edit" onclick="openEdit(\'parent\',\''+s.id+'\')">✏️ 編集</button>'
+      +'<button class="act-btn act-del"  onclick="confirmDel(\'parent\',\''+s.id+'\')">🗑</button>'
+      +'</div></div>';
+  }).join("")||'<div style="color:var(--ink-3);font-size:.85rem;padding:16px">担当者がいません。追加してください。</div>';
+}
+
+function switchTab(id,btn){
+  document.querySelectorAll(".staff-section").forEach(function(s){s.classList.remove("active");});
+  document.querySelectorAll(".staff-tab-btn").forEach(function(b){b.classList.remove("active");});
+  document.getElementById("sec-"+id).classList.add("active");
+  btn.classList.add("active");
+}
+
+function openAdd(type){
+  editId=null; editType=type;
+  document.getElementById("modal-title").textContent=type==="coach"?"コーチを追加":"保護者を追加";
+  document.getElementById("del-btn").style.display="none";
+  document.getElementById("m-type").value=type;
+  ["m-role","m-name","m-note"].forEach(function(id){document.getElementById(id).value="";});
+  document.getElementById("modal").classList.add("open");
+}
+function openEdit(type,id){
+  var data=type==="coach"?_coachData:_parentData;
+  var s=data.find(function(x){return x.id===id;});
+  if(!s)return;
+  editId=id; editType=type;
+  document.getElementById("modal-title").textContent="編集";
+  document.getElementById("del-btn").style.display="inline-flex";
+  document.getElementById("m-type").value=type;
+  document.getElementById("m-role").value=s.role||"";
+  document.getElementById("m-name").value=s.name||"";
+  document.getElementById("m-note").value=s.note||"";
+  document.getElementById("modal").classList.add("open");
+}
+function saveStaff(){
+  var type=document.getElementById("m-type").value;
+  var role=document.getElementById("m-role").value.trim();
+  if(!role){alert("役職・担当を入力してください");return;}
+  var entry={
+    id: editId||("s"+Date.now()),
+    role: role,
+    name: document.getElementById("m-name").value.trim(),
+    note: document.getElementById("m-note").value.trim(),
+  };
+  if(type==="coach"){
+    var idx=_coachData.findIndex(function(x){return x.id===entry.id;});
+    if(idx>=0) _coachData[idx]=entry; else _coachData.push(entry);
+    dbSave("staff/coach",_coachData,KEY_C,null);
+    renderCoach();
+  }else{
+    var idx=_parentData.findIndex(function(x){return x.id===entry.id;});
+    if(idx>=0) _parentData[idx]=entry; else _parentData.push(entry);
+    dbSave("staff/parent",_parentData,KEY_P,null);
+    renderParent();
+  }
+  closeModal();
+}
+function deleteStaff(){
+  if(!editId||!confirm("削除しますか？"))return;
+  if(editType==="coach"){
+    _coachData=_coachData.filter(function(x){return x.id!==editId;});
+    dbSave("staff/coach",_coachData,KEY_C,null);
+    renderCoach();
+  }else{
+    _parentData=_parentData.filter(function(x){return x.id!==editId;});
+    dbSave("staff/parent",_parentData,KEY_P,null);
+    renderParent();
+  }
+  closeModal();
+}
+function confirmDel(type,id){
+  var data=type==="coach"?_coachData:_parentData;
+  var s=data.find(function(x){return x.id===id;});
+  if(!s||!confirm("「"+s.role+"："+s.name+"」を削除しますか？"))return;
+  if(type==="coach"){
+    _coachData=_coachData.filter(function(x){return x.id!==id;});
+    dbSave("staff/coach",_coachData,KEY_C,null);
+    renderCoach();
+  }else{
+    _parentData=_parentData.filter(function(x){return x.id!==id;});
+    dbSave("staff/parent",_parentData,KEY_P,null);
+    renderParent();
+  }
+}
+function closeModal(){document.getElementById("modal").classList.remove("open");}
+document.getElementById("modal").addEventListener("click",function(e){if(e.target.id==="modal")closeModal();});
+function escH(s){return String(s||"").replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;");}
+</script>
+</body>
+</html>

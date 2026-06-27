@@ -175,6 +175,55 @@ dbListen("members", function(val){
   renderTable();
 }, KEY, JSON.parse(JSON.stringify(INIT)));
 
+function renderSortedTable(){
+  // 全学年のデータを1つのリストに
+  var all=[];
+  GRADES.forEach(function(g){
+    (data[g]||[]).forEach(function(m,r){
+      if(m&&m.name) all.push(Object.assign({},m,{_grade:g,_row:r}));
+    });
+  });
+  // ソート
+  if(currentSort==="kana"){
+    all.sort(function(a,b){return (a.kana||"").localeCompare(b.kana||"","ja");});
+  } else if(currentSort==="num"){
+    all.sort(function(a,b){
+      var na=parseInt(a.num)||999,nb=parseInt(b.num)||999;
+      return na-nb;
+    });
+  } else if(currentSort==="gender"){
+    all.sort(function(a,b){
+      if(a.gender===b.gender) return (a.kana||"").localeCompare(b.kana||"","ja");
+      return a.gender==="f"?-1:1;
+    });
+  }
+  var wrap=document.getElementById("roster-wrap");
+  if(!wrap)return;
+  // ソート時はシングルカラムテーブルで表示
+  var h='<table class="roster-table"><thead><tr>'
+    +'<th class="grade-head" style="width:60px">学年</th>'
+    +'<th class="grade-head">氏名(フリガナ)</th>'
+    +'<th class="grade-head" style="width:50px">背番号</th>'
+    +'<th class="grade-head" style="width:40px">性別</th>'
+    +'</tr></thead><tbody>';
+  all.forEach(function(m){
+    var genderIcon=m.gender==="f"?'<span style="color:#ff88aa">女</span>':'<span style="color:#88aaff">男</span>';
+    var numDisplay=m.num?'<span style="font-weight:900;color:#fff">'+m.num+'</span>':'—';
+    h+='<tr onclick="openEdit(''+m._grade+'','+m._row+')" style="cursor:pointer">'
+      +'<td style="text-align:center;color:var(--cyan);font-size:.75rem;font-weight:700">'+m._grade+'</td>'
+      +'<td>'
+      +(m.gender==="f"?'<span style="color:#ff88aa">':'<span style="color:#fff">')
+      +m.name+'</span>'
+      +'<div style="font-size:.65rem;color:var(--ink-3)">'+(m.kana||"")+'</div>'
+      +'</td>'
+      +'<td style="text-align:center">'+numDisplay+'</td>'
+      +'<td style="text-align:center">'+genderIcon+'</td>'
+      +'</tr>';
+  });
+  h+='</tbody></table>';
+  wrap.innerHTML=h;
+}
+
 function renderTable(){
   var tbl=document.getElementById("roster-table");
   var h="<thead><tr><th class='col-no'>#</th>";
@@ -279,6 +328,53 @@ function exportCSV(){
   a.download="smc_members_2026.csv";a.click();
 }
 document.getElementById("edit-modal").addEventListener("click",function(e){if(e.target.id==="edit-modal")closeModal();});
+
+// ===== ソート機能 =====
+var currentSort = "none";
+function setSort(s){
+  currentSort = s;
+  ["sort-none","sort-kana","sort-num","sort-gender"].forEach(function(id){
+    var el=document.getElementById(id);
+    if(el) el.classList.remove("active");
+  });
+  var el=document.getElementById("sort-"+s);
+  if(el){el.classList.add("active");el.style.background="var(--orange)";el.style.borderColor="var(--orange)";el.style.color="#fff";}
+  ["sort-none","sort-kana","sort-num","sort-gender"].forEach(function(id){
+    var e=document.getElementById(id);
+    if(e&&id!=="sort-"+s){e.style.background="";e.style.borderColor="";e.style.color="";}
+  });
+  renderTable();
+}
+
+// ===== 学年自動進級（4月1日に1学年アップ） =====
+function getAdjustedGrades(){
+  var now=new Date();
+  var year=now.getFullYear();
+  var gradeUpDate=new Date(year,3,1); // 4月1日
+  // 2026年度の学年データを基準とする
+  // 4月1日以降は次の学年に進む
+  // ただし「年長」は「1年」に、「6年」は卒業（表示から除去）
+  // 基準年度: 2026年度（2026/4/1〜2027/3/31）
+  var baseYear = 2026;
+  var currentSchoolYear = now >= new Date(year,3,1) ? year : year-1;
+  var diff = currentSchoolYear - baseYear; // 何年経過したか
+
+  if(diff === 0) return null; // 変更なし
+
+  var GRADE_MAP = {"6年":"卒業","5年":"6年","4年":"5年","3年":"4年","2年":"3年","1年":"2年","年長":"1年"};
+  return {diff:diff, map:GRADE_MAP};
+}
+
+// 進級バッジ表示
+(function(){
+  var badge = document.getElementById("grade-year-badge");
+  if(!badge) return;
+  var now = new Date();
+  var year = now.getFullYear();
+  var schoolYear = now >= new Date(year,3,1) ? year : year-1;
+  badge.textContent = schoolYear + "年度";
+})();
+
 // renderTable()はdbListenのコールバックで呼ばれる
 </script>
 </body></html>
