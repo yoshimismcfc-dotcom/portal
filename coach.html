@@ -120,6 +120,80 @@
       </div>
     </div>
 
+    <!-- ===== 自動アラート設定 ===== -->
+    <div class="section-head"><div class="section-icon">🔔</div><h2>自動アラート設定</h2><div class="section-divider"></div></div>
+    <div class="panel">
+      <div class="panel-title">📅 練習スケジュール（屋外のみアラート対象）</div>
+      <div id="schedule-list" style="margin-bottom:10px"></div>
+      <button class="btn btn-outline btn-sm" onclick="addSchedule()">＋ 練習を追加</button>
+    </div>
+    <div class="panel" style="margin-top:12px">
+      <div class="panel-title">🌧️ 雨アラートのしきい値</div>
+      <div class="form-group">
+        <label class="form-label">降水確率（%以上でアラート表示）</label>
+        <input class="form-control" id="rain-threshold" type="number" min="10" max="100" step="5" value="40"
+               style="max-width:120px;text-align:center">
+      </div>
+      <div class="panel-title" style="margin-top:10px">🌡️ 熱中症アラートのしきい値</div>
+      <div class="form-group">
+        <label class="form-label">WBGT（℃以上でアラート表示）</label>
+        <input class="form-control" id="heat-threshold" type="number" min="15" max="40" step="1" value="25"
+               style="max-width:120px;text-align:center">
+      </div>
+      <div class="panel-title" style="margin-top:10px">🏫 雨天時の会場・時間案内</div>
+      <div class="form-group">
+        <label class="form-label">雨天時の会場名</label>
+        <input class="form-control" id="rain-venue" value="北小体育館" placeholder="例：北小体育館">
+      </div>
+      <div class="form-group">
+        <label class="form-label">奇数月のスケジュール案内</label>
+        <input class="form-control" id="rain-odd" value="奇数月：6〜4年 8:00〜10:00 ／ 3年〜年長 10:00〜12:00">
+      </div>
+      <div class="form-group">
+        <label class="form-label">偶数月のスケジュール案内</label>
+        <input class="form-control" id="rain-even" value="偶数月：3年〜年長 8:00〜10:00 ／ 6〜4年 10:00〜12:00">
+      </div>
+      <button class="btn btn-primary" onclick="saveAlertSettings()" style="width:100%;margin-top:6px">💾 アラート設定を保存</button>
+    </div>
+    <div id="alert-save-msg" style="font-size:.82rem;color:var(--green);min-height:1.4em;margin-bottom:8px;text-align:center"></div>
+
+    <!-- スケジュール追加モーダル -->
+    <div class="modal-bg" id="modal-sched">
+      <div class="modal">
+        <h3 id="sched-modal-title">練習を追加</h3>
+        <div class="form-group">
+          <label class="form-label">曜日</label>
+          <select class="form-control" id="sched-day">
+            <option value="0">日曜</option><option value="1">月曜</option><option value="2">火曜</option>
+            <option value="3">水曜</option><option value="4">木曜</option><option value="5">金曜</option>
+            <option value="6" selected>土曜</option>
+          </select>
+        </div>
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px">
+          <div class="form-group"><label class="form-label">開始時刻</label>
+            <input class="form-control" id="sched-start" type="time" value="08:00"></div>
+          <div class="form-group"><label class="form-label">終了時刻</label>
+            <input class="form-control" id="sched-end" type="time" value="10:30"></div>
+        </div>
+        <div class="form-group">
+          <label class="form-label">場所</label>
+          <select class="form-control" id="sched-indoor">
+            <option value="false">屋外（アラート対象）</option>
+            <option value="true">室内（アラートなし）</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label class="form-label">メモ（任意）</label>
+          <input class="form-control" id="sched-memo" placeholder="例：北小グラウンド">
+        </div>
+        <div class="modal-btns">
+          <button class="btn btn-outline btn-sm" id="sched-del-btn" style="color:var(--red);border-color:rgba(255,68,102,.4);display:none" onclick="deleteSchedule()">🗑 削除</button>
+          <button class="btn btn-outline" onclick="closeSchedModal()">キャンセル</button>
+          <button class="btn btn-primary" onclick="saveSchedule()">保存</button>
+        </div>
+      </div>
+    </div>
+
     <!-- ===== 試合調整 ===== -->
     <div class="section-head"><div class="section-icon">📊</div><h2>試合調整</h2><div class="section-divider"></div></div>
     <a class="coach-btn" href="game_adjust.html" style="width:100%;box-sizing:border-box;display:flex;flex-direction:row;align-items:center;gap:14px;margin-bottom:20px">
@@ -246,7 +320,7 @@ document.getElementById("lock-form").addEventListener("submit",function(e){
   if(val===PASSCODE){
     document.getElementById("lock-screen").style.display="none";
     document.getElementById("coach-content").style.display="block";
-    loadNoticeInputs(); renderUrls(); return;
+    loadNoticeInputs(); renderUrls(); renderScheduleList(); return;
   }
   var msg=document.getElementById("lock-msg");
   msg.textContent="パスコードが違います。";msg.style.color="var(--red)";
@@ -318,6 +392,147 @@ function renderUrls(){
       +'</div></div>';
   }).join("");
 }
+
+// ===== 自動アラート設定 =====
+var ALERT_KEY = "smc_alert_settings_v1";
+var editSchedIdx = null;
+
+var DEFAULT_SETTINGS = {
+  schedules: [
+    {day:3, start:"19:00", end:"21:00", indoor:true,  memo:"体育館"},
+    {day:4, start:"18:30", end:"20:30", indoor:true,  memo:"体育館"},
+    {day:6, start:"08:00", end:"10:30", indoor:false, memo:"北小グラウンド"},
+    {day:0, start:"08:00", end:"10:30", indoor:false, memo:"北小グラウンド"}
+  ],
+  rainThreshold: 40,
+  heatThreshold: 25,
+  rainVenue: "北小体育館",
+  rainOdd:  "奇数月：6〜4年 8:00〜10:00 ／ 3年〜年長 10:00〜12:00",
+  rainEven: "偶数月：3年〜年長 8:00〜10:00 ／ 6〜4年 10:00〜12:00"
+};
+
+var DAYS = ["日","月","火","水","木","金","土"];
+
+function loadAlertSettings(){
+  try{
+    var s = localStorage.getItem(ALERT_KEY);
+    if(s) return JSON.parse(s);
+  }catch(e){}
+  return JSON.parse(JSON.stringify(DEFAULT_SETTINGS));
+}
+
+function renderScheduleList(){
+  var cfg = loadAlertSettings();
+  // フォームに反映
+  document.getElementById("rain-threshold").value = cfg.rainThreshold || 40;
+  document.getElementById("heat-threshold").value = cfg.heatThreshold || 25;
+  document.getElementById("rain-venue").value = cfg.rainVenue || "";
+  document.getElementById("rain-odd").value  = cfg.rainOdd  || "";
+  document.getElementById("rain-even").value = cfg.rainEven || "";
+
+  var list = document.getElementById("schedule-list");
+  if(!list) return;
+  if(!cfg.schedules || !cfg.schedules.length){
+    list.innerHTML = '<p style="color:var(--ink-3);font-size:.82rem">練習が登録されていません。</p>';
+    return;
+  }
+  var order = [0,1,2,3,4,5,6];
+  var sorted = cfg.schedules.slice().sort(function(a,b){ return a.day - b.day; });
+  list.innerHTML = sorted.map(function(s, i){
+    var idx = cfg.schedules.indexOf(s);
+    var indoorBadge = s.indoor
+      ? '<span style="font-size:.68rem;background:rgba(0,212,255,.15);color:var(--cyan);border:1px solid rgba(0,212,255,.3);border-radius:4px;padding:1px 6px">室内</span>'
+      : '<span style="font-size:.68rem;background:rgba(0,200,80,.15);color:#00cc66;border:1px solid rgba(0,200,80,.3);border-radius:4px;padding:1px 6px">屋外⚡</span>';
+    return '<div style="display:flex;align-items:center;gap:10px;padding:9px 12px;background:rgba(255,255,255,.04);border-radius:var(--r8);margin-bottom:6px;border:1px solid var(--line)">'
+      +'<span style="font-weight:900;color:#fff;min-width:22px">'+DAYS[s.day]+'</span>'
+      +'<span style="color:#c8e4ff;font-size:.84rem">'+s.start+'〜'+s.end+'</span>'
+      +indoorBadge
+      +(s.memo ? '<span style="font-size:.75rem;color:var(--ink-3)">'+s.memo+'</span>' : '')
+      +'<button class="btn btn-outline btn-sm" onclick="editSchedule('+cfg.schedules.indexOf(s)+')" '
+      +'style="margin-left:auto;font-size:.7rem;height:26px;padding:0 8px">✏️ 編集</button>'
+      +'</div>';
+  }).join("");
+}
+
+function addSchedule(){
+  editSchedIdx = null;
+  document.getElementById("sched-modal-title").textContent = "練習を追加";
+  document.getElementById("sched-del-btn").style.display = "none";
+  document.getElementById("sched-day").value = "6";
+  document.getElementById("sched-start").value = "08:00";
+  document.getElementById("sched-end").value = "10:30";
+  document.getElementById("sched-indoor").value = "false";
+  document.getElementById("sched-memo").value = "";
+  document.getElementById("modal-sched").classList.add("open");
+}
+function editSchedule(idx){
+  var cfg = loadAlertSettings();
+  var s = cfg.schedules[idx];
+  if(!s) return;
+  editSchedIdx = idx;
+  document.getElementById("sched-modal-title").textContent = "練習を編集";
+  document.getElementById("sched-del-btn").style.display = "inline-flex";
+  document.getElementById("sched-day").value = String(s.day);
+  document.getElementById("sched-start").value = s.start;
+  document.getElementById("sched-end").value = s.end;
+  document.getElementById("sched-indoor").value = s.indoor ? "true" : "false";
+  document.getElementById("sched-memo").value = s.memo || "";
+  document.getElementById("modal-sched").classList.add("open");
+}
+function saveSchedule(){
+  var cfg = loadAlertSettings();
+  var entry = {
+    day:    parseInt(document.getElementById("sched-day").value),
+    start:  document.getElementById("sched-start").value,
+    end:    document.getElementById("sched-end").value,
+    indoor: document.getElementById("sched-indoor").value === "true",
+    memo:   document.getElementById("sched-memo").value.trim()
+  };
+  if(editSchedIdx !== null){
+    cfg.schedules[editSchedIdx] = entry;
+  } else {
+    cfg.schedules.push(entry);
+  }
+  saveAlertCfg(cfg);
+  closeSchedModal();
+}
+function deleteSchedule(){
+  if(editSchedIdx === null || !confirm("削除しますか？")) return;
+  var cfg = loadAlertSettings();
+  cfg.schedules.splice(editSchedIdx, 1);
+  saveAlertCfg(cfg);
+  closeSchedModal();
+}
+function closeSchedModal(){
+  document.getElementById("modal-sched").classList.remove("open");
+  renderScheduleList();
+}
+document.getElementById("modal-sched").addEventListener("click", function(e){
+  if(e.target.id === "modal-sched") closeSchedModal();
+});
+
+function saveAlertSettings(){
+  var cfg = loadAlertSettings();
+  cfg.rainThreshold = parseInt(document.getElementById("rain-threshold").value) || 40;
+  cfg.heatThreshold = parseInt(document.getElementById("heat-threshold").value) || 25;
+  cfg.rainVenue = document.getElementById("rain-venue").value.trim();
+  cfg.rainOdd   = document.getElementById("rain-odd").value.trim();
+  cfg.rainEven  = document.getElementById("rain-even").value.trim();
+  saveAlertCfg(cfg);
+}
+function saveAlertCfg(cfg){
+  localStorage.setItem(ALERT_KEY, JSON.stringify(cfg));
+  dbSave("alert_settings", cfg, ALERT_KEY, null);
+  var msg = document.getElementById("alert-save-msg");
+  if(msg){ msg.textContent = "✅ アラート設定を保存しました"; setTimeout(function(){ msg.textContent=""; }, 2500); }
+  renderScheduleList();
+}
+
+// 起動時に表示
+document.addEventListener("DOMContentLoaded", function(){
+  // コーチコンテンツ表示時に実行（ログイン後）
+  var orig = document.getElementById("lock-form").onsubmit;
+});
 
 // クラウド接続状況確認
 (function(){
