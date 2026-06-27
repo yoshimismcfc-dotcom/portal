@@ -6,13 +6,63 @@
   <title>ピッチサイズ｜吉見SMC FC</title>
   <link rel="stylesheet" href="common.css">
   <style>
-    .pitch-wrap{background:linear-gradient(135deg,#1a5c1a,#2d8c2d);border-radius:var(--r12);padding:18px 14px;overflow-x:auto;margin-bottom:16px;box-shadow:0 8px 32px rgba(0,0,0,.5)}
-    .pitch-wrap svg{display:block;margin:0 auto}
-    .spec-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-bottom:16px}
-    .spec-card{background:var(--surface-lt);border-radius:var(--r8);padding:12px;text-align:center;border:1px solid var(--line-2)}
-    .spec-card .sl{font-size:.7rem;color:var(--cyan);font-weight:900;letter-spacing:.06em;margin-bottom:3px}
-    .spec-card .sv{font-size:1.1rem;font-weight:900;color:#ffffff}
-    @media(max-width:480px){.spec-grid{grid-template-columns:repeat(2,1fr)}}
+    /* タブ */
+    .ptab-bar{display:flex;gap:0;margin-bottom:20px;border-radius:var(--r8);overflow:hidden;border:1px solid var(--line-2)}
+    .ptab-btn{flex:1;padding:11px 6px;font:inherit;font-size:.82rem;font-weight:900;background:var(--surface-lt);color:#6aaccc;border:none;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:4px}
+    .ptab-btn:not(:last-child){border-right:1px solid var(--line-2)}
+    .ptab-btn.active{background:linear-gradient(135deg,#003087,#0050cc);color:#fff}
+    .psec{display:none}.psec.active{display:block}
+
+    /* ピッチ図SVGラッパー */
+    .pitch-fig{background:#2d7a2d;border-radius:var(--r12);padding:16px;margin-bottom:16px;overflow-x:auto}
+    .pitch-fig svg{display:block;margin:0 auto;max-width:100%}
+
+    /* 寸法テーブル */
+    .dim-table{width:100%;border-collapse:collapse;font-size:.84rem;margin-bottom:14px}
+    .dim-table thead tr{background:#003087}
+    .dim-table th{color:#fff;font-weight:900;font-size:.75rem;padding:8px 10px;text-align:left}
+    .dim-table td{border-bottom:1px solid rgba(255,255,255,.08);padding:9px 10px;color:#c8e4ff;vertical-align:top}
+    .dim-table td:first-child{font-weight:700;color:#fff;white-space:nowrap}
+    .dim-table td:nth-child(2){color:var(--orange);font-weight:900;text-align:center;white-space:nowrap}
+    .dim-table tr:nth-child(even) td{background:rgba(255,255,255,.03)}
+
+    /* エリア説明カード */
+    .area-cards{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:16px}
+    @media(max-width:480px){.area-cards{grid-template-columns:1fr}}
+    .area-card{background:var(--surface-lt);border:1px solid var(--line-2);border-radius:var(--r12);padding:13px 14px;position:relative;overflow:hidden}
+    .area-card::before{content:"";position:absolute;top:0;left:0;width:4px;height:100%;border-radius:4px 0 0 4px}
+    .area-card.green::before{background:#2d9e2d}
+    .area-card.blue::before{background:#0050cc}
+    .area-card.orange::before{background:var(--orange)}
+    .area-card.cyan::before{background:var(--cyan)}
+    .area-card.red::before{background:#cc2200}
+    .area-card.yellow::before{background:#e6c800}
+    .ac-name{font-size:.85rem;font-weight:900;color:#fff;margin-bottom:4px}
+    .ac-size{font-size:.75rem;color:var(--orange);font-weight:700;margin-bottom:5px}
+    .ac-desc{font-size:.76rem;color:#94c4e4;line-height:1.65}
+
+    /* 設営ステップ */
+    .setup-step{background:var(--surface-lt);border:1px solid var(--line-2);border-radius:var(--r12);padding:14px 16px;margin-bottom:10px;display:flex;align-items:flex-start;gap:14px}
+    .step-num{background:var(--orange);color:#fff;border-radius:50%;width:30px;height:30px;min-width:30px;display:flex;align-items:center;justify-content:center;font-weight:900;font-size:.9rem}
+    .step-body{flex:1}
+    .step-title{font-size:.9rem;font-weight:900;color:#fff;margin-bottom:4px}
+    .step-desc{font-size:.8rem;color:#94c4e4;line-height:1.7}
+    .step-tip{background:rgba(0,212,255,.08);border:1px solid rgba(0,212,255,.2);border-radius:6px;padding:6px 10px;font-size:.75rem;color:#7dd3fc;margin-top:6px;line-height:1.6}
+
+    /* 用具カード */
+    .tools-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:14px}
+    @media(max-width:400px){.tools-grid{grid-template-columns:1fr}}
+    .tool-card{background:var(--surface-lt);border:1px solid var(--line-2);border-radius:var(--r8);padding:12px;text-align:center}
+    .tool-icon{font-size:1.8rem;margin-bottom:5px}
+    .tool-name{font-size:.82rem;font-weight:900;color:#fff;margin-bottom:3px}
+    .tool-desc{font-size:.72rem;color:#94c4e4;line-height:1.55}
+
+    /* ポイントボックス */
+    .point-box{border-radius:var(--r8);padding:11px 14px;font-size:.8rem;line-height:1.75;margin-bottom:10px}
+    .point-box.info{background:rgba(0,212,255,.08);border:1px solid rgba(0,212,255,.25);color:#a0d4f0}
+    .point-box.warn{background:rgba(255,107,43,.08);border:1px solid rgba(255,107,43,.25);color:#ffbfa0}
+    .point-box.ok  {background:rgba(0,200,100,.08);border:1px solid rgba(0,200,100,.25);color:#a0f0c0}
+    .point-box strong{color:#fff;display:block;margin-bottom:3px}
   </style>
 </head>
 <body>
@@ -26,154 +76,329 @@
 </header>
 <main class="page-wrap">
   <a class="back-btn" href="index.html">ホームに戻る</a>
-  <div class="notice-bar blue">📌 グランドを作るのが初めての方でも大丈夫！ 順番通りに進めれば設営できます。測り方のポイントも解説しています。</div>
   <div class="hero-band">
     <div class="hero-emoji">📐</div>
-    <div><div class="hero-title">ピッチサイズ</div>
-      <div class="hero-sub">グランド設営時に確認できるよう詳細な寸法を記載しています。</div></div>
+    <div>
+      <div class="hero-title">ピッチサイズ</div>
+      <div class="hero-sub">小学生8人制（JFA推奨）のコートサイズと設営方法を解説します。</div>
+    </div>
   </div>
 
-  <div class="tab-list" role="tablist">
-    <button class="tab-btn active" data-tab="p8nin">8人制（高・中学年）</button>
-    <button class="tab-btn" data-tab="p4nin">4人制（低学年）</button>
-    <button class="tab-btn" data-tab="psetup">設営のポイント</button>
+  <!-- タブ -->
+  <div class="ptab-bar">
+    <button class="ptab-btn active" onclick="switchTab('size',this)">📐 コートサイズ</button>
+    <button class="ptab-btn"        onclick="switchTab('area',this)">🔤 エリアの名前</button>
+    <button class="ptab-btn"        onclick="switchTab('setup',this)">🏗️ 設営手順</button>
   </div>
 
-  <!-- 8人制 -->
-  <div class="tab-content active" id="tab-p8nin">
-    <div class="spec-grid">
-      <div class="spec-card"><div class="sl">ピッチ幅（タッチライン）</div><div class="sv">68 m</div></div>
-      <div class="spec-card"><div class="sl">ピッチ長（ゴールライン）</div><div class="sv">50 m</div></div>
-      <div class="spec-card"><div class="sl">ゴール幅</div><div class="sv">5 m</div></div>
-      <div class="spec-card"><div class="sl">ゴール高さ</div><div class="sv">2.15 m</div></div>
-      <div class="spec-card"><div class="sl">ペナルティエリア幅</div><div class="sv">25 m</div></div>
-      <div class="spec-card"><div class="sl">ペナルティエリア深さ</div><div class="sv">12 m</div></div>
-      <div class="spec-card"><div class="sl">ゴールエリア幅</div><div class="sv">13 m</div></div>
-      <div class="spec-card"><div class="sl">ゴールエリア深さ</div><div class="sv">5.5 m</div></div>
-      <div class="spec-card"><div class="sl">センターサークル半径</div><div class="sv">7.32 m</div></div>
+  <!-- ===== タブ1：コートサイズ ===== -->
+  <div class="psec active" id="psec-size">
+    <div class="point-box info">
+      <strong>⚽ 吉見SMC FCは8人制（小学生年代）で活動しています</strong>
+      8人制は11人制のコート約半分の大きさ。大人のコート1面に2面作れます。<br>
+      日本サッカー協会（JFA）推奨サイズ：<strong style="color:var(--orange)">縦68m × 横50m</strong>
     </div>
 
-    <div class="pitch-wrap">
-      <svg viewBox="0 0 540 380" width="100%" style="max-width:580px" xmlns="http://www.w3.org/2000/svg">
-        <!-- ===== フィールド外枠 ===== -->
-        <rect x="60" y="28" width="420" height="324" fill="none" stroke="white" stroke-width="2.5"/>
+    <!-- ピッチ図 -->
+    <div class="pitch-fig">
+      <svg viewBox="0 0 340 230" width="340" height="230" xmlns="http://www.w3.org/2000/svg" style="font-family:sans-serif">
+        <!-- 芝の背景 -->
+        <rect width="340" height="230" fill="#2d7a2d"/>
+        <!-- 芝の縞模様 -->
+        <rect x="0" y="0" width="34" height="230" fill="#328a32" opacity=".4"/>
+        <rect x="68" y="0" width="34" height="230" fill="#328a32" opacity=".4"/>
+        <rect x="136" y="0" width="34" height="230" fill="#328a32" opacity=".4"/>
+        <rect x="204" y="0" width="34" height="230" fill="#328a32" opacity=".4"/>
+        <rect x="272" y="0" width="34" height="230" fill="#328a32" opacity=".4"/>
 
-        <!-- ===== センターライン ===== -->
-        <line x1="270" y1="28" x2="270" y2="352" stroke="white" stroke-width="1.5"/>
-
-        <!-- ===== センターサークル ===== -->
-        <circle cx="270" cy="190" r="46" fill="none" stroke="white" stroke-width="1.5"/>
-        <circle cx="270" cy="190" r="3" fill="white"/>
-
-        <!-- ===== 左ゴール側 ===== -->
-        <!-- PA（左）: 幅25m→25/50*324≈162px、深さ12m→12/68*420≈74px -->
-        <rect x="60" y="109" width="74" height="162" fill="none" stroke="white" stroke-width="1.5"/>
-        <!-- ゴールエリア（左）: 幅13m→13/50*324≈84px、深さ5.5m→5.5/68*420≈34px -->
-        <rect x="60" y="148" width="34" height="84" fill="none" stroke="white" stroke-width="1.5"/>
-        <!-- ゴール本体（左）: 幅5m→5/50*324≈32px、奥行き2m -->
-        <rect x="44" y="174" width="16" height="32" fill="rgba(255,255,255,.15)" stroke="white" stroke-width="2.5"/>
-
-        <!-- ===== 右ゴール側 ===== -->
-        <rect x="406" y="109" width="74" height="162" fill="none" stroke="white" stroke-width="1.5"/>
-        <rect x="446" y="148" width="34" height="84" fill="none" stroke="white" stroke-width="1.5"/>
-        <rect x="480" y="174" width="16" height="32" fill="rgba(255,255,255,.15)" stroke="white" stroke-width="2.5"/>
-
-        <!-- ===== コーナーアーク ===== -->
-        <path d="M60,38 A10,10 0 0,1 70,28" fill="none" stroke="white" stroke-width="1.5"/>
-        <path d="M470,28 A10,10 0 0,1 480,38" fill="none" stroke="white" stroke-width="1.5"/>
-        <path d="M60,342 A10,10 0 0,0 70,352" fill="none" stroke="white" stroke-width="1.5"/>
-        <path d="M470,352 A10,10 0 0,0 480,342" fill="none" stroke="white" stroke-width="1.5"/>
-
-        <!-- ===== 寸法ラベル ===== -->
-        <!-- タッチライン（幅68m）: 上側 -->
-        <line x1="60" y1="16" x2="480" y2="16" stroke="#ffdd44" stroke-width="1.2" stroke-dasharray="4,2"/>
-        <line x1="60" y1="12" x2="60" y2="20" stroke="#ffdd44" stroke-width="1.2"/>
-        <line x1="480" y1="12" x2="480" y2="20" stroke="#ffdd44" stroke-width="1.2"/>
-        <text x="270" y="12" fill="#ffdd44" font-size="12" font-weight="bold" text-anchor="middle">タッチライン 68 m</text>
-
-        <!-- ゴールライン（長さ50m）: 右側 -->
-        <line x1="492" y1="28" x2="492" y2="352" stroke="#ffdd44" stroke-width="1.2" stroke-dasharray="4,2"/>
-        <line x1="488" y1="28" x2="496" y2="28" stroke="#ffdd44" stroke-width="1.2"/>
-        <line x1="488" y1="352" x2="496" y2="352" stroke="#ffdd44" stroke-width="1.2"/>
-        <text x="510" y="193" fill="#ffdd44" font-size="12" font-weight="bold" text-anchor="middle" transform="rotate(90,510,193)">ゴールライン 50 m</text>
-
-        <!-- PA深さ（左）-->
-        <line x1="62" y1="100" x2="136" y2="100" stroke="#aaffaa" stroke-width="1" stroke-dasharray="3,2"/>
-        <text x="99" y="97" fill="#aaffaa" font-size="10" text-anchor="middle">PA深 12m</text>
-
-        <!-- PA幅（左）-->
-        <text x="48" y="192" fill="#aaffaa" font-size="9" text-anchor="middle" transform="rotate(-90,48,192)">PA幅 25m</text>
-
-        <!-- ゴールエリア深さ（左）-->
-        <text x="79" y="197" fill="#88ddff" font-size="8.5" text-anchor="middle">GA深 5.5m</text>
-
-        <!-- ゴール幅（左）-->
-        <text x="35" y="193" fill="#88ddff" font-size="9" text-anchor="middle" transform="rotate(-90,35,193)">ゴール 5m</text>
+        <!-- コート外枠 (68m×50m → 272px×200px, margin:15,15) -->
+        <rect x="34" y="15" width="272" height="200" fill="none" stroke="#fff" stroke-width="2.5"/>
 
         <!-- センターライン -->
-        <text x="270" y="370" fill="rgba(255,255,255,.6)" font-size="10" text-anchor="middle">センターサークル 半径7.32m</text>
+        <line x1="34" y1="115" x2="306" y2="115" stroke="#fff" stroke-width="2"/>
 
-        <!-- ゴールラベル -->
-        <text x="37" y="167" fill="#ffdd44" font-size="8" font-weight="bold" text-anchor="middle">GOAL</text>
-        <text x="503" y="167" fill="#ffdd44" font-size="8" font-weight="bold" text-anchor="middle">GOAL</text>
-        <text x="37" y="217" fill="rgba(255,255,255,.5)" font-size="7.5" text-anchor="middle">H:2.15m</text>
-        <text x="503" y="217" fill="rgba(255,255,255,.5)" font-size="7.5" text-anchor="middle">H:2.15m</text>
+        <!-- センターサークル (半径7m → 28px) -->
+        <circle cx="170" cy="115" r="28" fill="none" stroke="#fff" stroke-width="2"/>
+        <!-- センタースポット -->
+        <circle cx="170" cy="115" r="2.5" fill="#fff"/>
+
+        <!-- ゴールエリア 左 (5.5m×14m → 22px×56px) -->
+        <rect x="34" y="87" width="22" height="56" fill="rgba(255,255,100,.15)" stroke="#fff" stroke-width="1.8"/>
+
+        <!-- ペナルティエリア 左 (12m×30m → 48px×120px) -->
+        <rect x="34" y="55" width="48" height="120" fill="rgba(0,100,255,.12)" stroke="#fff" stroke-width="1.8"/>
+
+        <!-- ペナルティスポット 左 (8m → 32px) -->
+        <circle cx="66" cy="115" r="2" fill="#fff"/>
+
+        <!-- ゴールエリア 右 -->
+        <rect x="284" y="87" width="22" height="56" fill="rgba(255,255,100,.15)" stroke="#fff" stroke-width="1.8"/>
+
+        <!-- ペナルティエリア 右 -->
+        <rect x="258" y="55" width="48" height="120" fill="rgba(0,100,255,.12)" stroke="#fff" stroke-width="1.8"/>
+
+        <!-- ペナルティスポット 右 -->
+        <circle cx="274" cy="115" r="2" fill="#fff"/>
+
+        <!-- コーナーアーク (半径4px) -->
+        <path d="M 34 23 A 8 8 0 0 1 42 15" fill="none" stroke="#fff" stroke-width="1.5"/>
+        <path d="M 34 207 A 8 8 0 0 0 42 215" fill="none" stroke="#fff" stroke-width="1.5"/>
+        <path d="M 306 23 A 8 8 0 0 0 298 15" fill="none" stroke="#fff" stroke-width="1.5"/>
+        <path d="M 306 207 A 8 8 0 0 1 298 215" fill="none" stroke="#fff" stroke-width="1.5"/>
+
+        <!-- ゴール 左 (5m×2.15m → 20px×8px) -->
+        <rect x="26" y="105" width="8" height="20" fill="none" stroke="#fff" stroke-width="2"/>
+        <!-- ゴール 右 -->
+        <rect x="306" y="105" width="8" height="20" fill="none" stroke="#fff" stroke-width="2"/>
+
+        <!-- 交代ゾーン（センターライン左右3m=12px） -->
+        <line x1="158" y1="215" x2="158" y2="222" stroke="#ff0" stroke-width="2"/>
+        <line x1="182" y1="215" x2="182" y2="222" stroke="#ff0" stroke-width="2"/>
+
+        <!-- 寸法ラベル -->
+        <!-- 横50m -->
+        <line x1="34" y1="8" x2="306" y2="8" stroke="#ffcc00" stroke-width="1" marker-end="url(#arr)" marker-start="url(#arr)"/>
+        <text x="170" y="6" text-anchor="middle" fill="#ffcc00" font-size="9" font-weight="bold">50m（横幅）</text>
+
+        <!-- 縦68m -->
+        <line x1="8" y1="15" x2="8" y2="215" stroke="#ffcc00" stroke-width="1"/>
+        <text x="5" y="118" text-anchor="middle" fill="#ffcc00" font-size="9" font-weight="bold" transform="rotate(-90,5,118)">68m（縦幅）</text>
+
+        <!-- 各部ラベル -->
+        <text x="58" y="112" text-anchor="middle" fill="#ffffaa" font-size="7">ペナルティ</text>
+        <text x="58" y="120" text-anchor="middle" fill="#ffffaa" font-size="7">エリア</text>
+        <text x="170" y="100" text-anchor="middle" fill="#fff" font-size="7">センターサークル</text>
+        <text x="170" y="130" text-anchor="middle" fill="#fff" font-size="7">r=7m</text>
+        <text x="44" y="112" text-anchor="middle" fill="#ffffcc" font-size="6.5">ゴール</text>
+        <text x="44" y="119" text-anchor="middle" fill="#ffffcc" font-size="6.5">エリア</text>
+        <text x="170" y="227" text-anchor="middle" fill="#ffff88" font-size="7">🔄 交代ゾーン（左右3m）</text>
+
+        <!-- ゴールサイズ -->
+        <text x="18" y="113" text-anchor="middle" fill="#fff" font-size="6">5m</text>
+        <text x="18" y="120" text-anchor="middle" fill="#fff" font-size="6">×</text>
+        <text x="18" y="127" text-anchor="middle" fill="#fff" font-size="6">2.15m</text>
       </svg>
     </div>
 
-    <div class="notice-bar">
-      📌 上記はJFA推奨寸法。会場の広さにより60×40m程度に縮小可。ゴール：幅5m × 高さ2.15m
-    </div>
+    <!-- 寸法一覧 -->
+    <table class="dim-table">
+      <thead><tr><th>部位</th><th>サイズ</th><th>説明</th></tr></thead>
+      <tbody>
+        <tr><td>コート全体</td><td>68m × 50m</td><td>縦68m・横50m（JFA推奨）。11人制の約半分の大きさ</td></tr>
+        <tr><td>ゴール</td><td>幅5m × 高さ2.15m</td><td>大人用（7.32m×2.44m）より小さめ。小学生向けサイズ</td></tr>
+        <tr><td>ペナルティエリア</td><td>縦12m × 横30m</td><td>ゴール前の青いエリア。このエリア内でのファウルはPK</td></tr>
+        <tr><td>ゴールエリア</td><td>縦5.5m × 横14m</td><td>ゴール直前の黄色いエリア。ゴールキックを蹴る場所</td></tr>
+        <tr><td>ペナルティスポット</td><td>ゴールから8m</td><td>PK（ペナルティキック）を蹴る点</td></tr>
+        <tr><td>センターサークル</td><td>半径7m</td><td>コート中央の円。キックオフ時に相手は入れない</td></tr>
+        <tr><td>コーナーアーク</td><td>半径1m</td><td>コーナーキックを蹴る範囲</td></tr>
+        <tr><td>交代ゾーン</td><td>センターライン左右3m</td><td>8人制特有のゾーン。選手交代はここを通って行う</td></tr>
+      </tbody>
+    </table>
 
-    <div class="panel">
-      <div class="panel-title">設営時の計測ポイント（8人制）</div>
-      <table class="data-table">
-        <thead><tr><th>箇所</th><th>寸法</th><th>計測方法・備考</th></tr></thead>
-        <tbody>
-          <tr><td>ピッチ全体</td><td>68m × 50m</td><td>4隅にコーナーフラッグを設置。対角線を測ると直角が確認できる</td></tr>
-          <tr><td>ペナルティエリア</td><td>25m × 12m</td><td>ゴールラインからゴール中心を基準に左右12.5mずつ取り、12m前方へ</td></tr>
-          <tr><td>ゴールエリア</td><td>13m × 5.5m</td><td>ゴール中心から左右6.5mずつ取り、5.5m前方へ</td></tr>
-          <tr><td>センターサークル</td><td>半径7.32m</td><td>ピッチ中心から7.32mの円。ロープや巻き尺で円を描く</td></tr>
-          <tr><td>ゴール本体</td><td>幅5m × 高さ2.15m</td><td>アンカーペグで必ず固定。倒れ防止必須</td></tr>
-        </tbody>
-      </table>
+    <div class="point-box warn">
+      <strong>📏 会場によってサイズが変わる場合があります</strong>
+      JFA推奨は68m×50mですが、グラウンドの広さに応じて変更されることがあります。
+      大会要綱に記載のサイズを事前に確認しましょう。
     </div>
   </div>
 
-  <!-- 4人制 -->
-  <div class="tab-content" id="tab-p4nin">
-    <div class="spec-grid">
-      <div class="spec-card"><div class="sl">ピッチ幅（タッチライン）</div><div class="sv">28〜36 m</div></div>
-      <div class="spec-card"><div class="sl">ピッチ長（ゴールライン）</div><div class="sv">20〜25 m</div></div>
-      <div class="spec-card"><div class="sl">ゴール幅</div><div class="sv">3〜4 m</div></div>
-      <div class="spec-card"><div class="sl">ゴール高さ</div><div class="sv">1.8〜2 m</div></div>
-      <div class="spec-card"><div class="sl">選手数</div><div class="sv">4人制</div></div>
-      <div class="spec-card"><div class="sl">オフサイド</div><div class="sv">なし</div></div>
+  <!-- ===== タブ2：エリアの名前 ===== -->
+  <div class="psec" id="psec-area">
+    <div class="point-box info">
+      <strong>🔤 コートの各エリアの名前と役割を覚えましょう</strong>
+      審判や指導者の指示を正しく理解するために大切です。
     </div>
-    <div class="panel">
-      <div class="panel-title">低学年の特別ルール</div>
-      <ul style="padding-left:18px;font-size:.86rem;line-height:2;color:#c8e8ff">
-        <li>オフサイドなし</li><li>GKはパントキックなし（地面から蹴る）</li>
-        <li>スローインはやり直しOK</li><li>ゴールキックはペナルティエリア内から蹴る</li>
-        <li>大会・地域により細かいルールが異なるため事前確認を</li>
-      </ul>
-    </div>
-  </div>
-
-  <!-- 設営 -->
-  <div class="tab-content" id="tab-psetup">
-    <div class="panel">
-      <div class="panel-title">設営の手順と注意点</div>
-      <div style="display:grid;gap:10px;font-size:.86rem">
-        <div style="background:rgba(0,212,255,.07);border-radius:var(--r8);padding:12px;border-left:3px solid var(--cyan)"><strong style="color:#ffffff;display:block;margin-bottom:5px">① ゴール設置（最優先）</strong><span style="color:#c8e8ff">アンカーペグ・重りで必ず固定。強風時は横倒し保管。子どもがぶら下がらないよう注意。</span></div>
-        <div style="background:rgba(0,212,255,.07);border-radius:var(--r8);padding:12px;border-left:3px solid var(--cyan)"><strong style="color:#ffffff;display:block;margin-bottom:5px">② ライン引き順序</strong><span style="color:#c8e8ff">①ゴールライン → ②タッチライン → ③センターライン → ④PA → ⑤ゴールエリア → ⑥センターサークルの順で引くと効率的。</span></div>
-        <div style="background:rgba(0,212,255,.07);border-radius:var(--r8);padding:12px;border-left:3px solid var(--cyan)"><strong style="color:#ffffff;display:block;margin-bottom:5px">③ コーナーフラッグ</strong><span style="color:#c8e8ff">4隅に設置。旗の向きは外側に倒れるように（選手への危険防止）。</span></div>
-        <div style="background:rgba(0,212,255,.07);border-radius:var(--r8);padding:12px;border-left:3px solid var(--cyan)"><strong style="color:#ffffff;display:block;margin-bottom:5px">④ 応援エリアの分離</strong><span style="color:#c8e8ff">両チームの保護者・応援エリアをタッチラインから2m以上離し、相互に分離して設置。</span></div>
-        <div style="background:rgba(255,68,102,.1);border-radius:var(--r8);padding:12px;border-left:3px solid var(--red)"><strong style="color:#ffffff;display:block;margin-bottom:5px">⑤ 救護・AED</strong><span style="color:#c8e8ff">本部テント横に救護バッグを配置。AEDの位置を試合前に全スタッフで確認する。</span></div>
+    <div class="area-cards">
+      <div class="area-card blue">
+        <div class="ac-name">⬜ ペナルティエリア</div>
+        <div class="ac-size">縦12m × 横30m</div>
+        <div class="ac-desc">ゴール前の大きなエリア。このエリア内でファウルをされると<strong style="color:#ff8888">PK（ペナルティキック）</strong>になる。GKがボールを手で持てるのもこのエリア内だけ。</div>
+      </div>
+      <div class="area-card yellow">
+        <div class="ac-name">🟡 ゴールエリア</div>
+        <div class="ac-size">縦5.5m × 横14m</div>
+        <div class="ac-desc">ペナルティエリア内のさらに小さいエリア。<strong style="color:#fff">ゴールキック</strong>はこのエリアの中か、ライン上から蹴る。</div>
+      </div>
+      <div class="area-card green">
+        <div class="ac-name">⚪ センターサークル</div>
+        <div class="ac-size">半径7m</div>
+        <div class="ac-desc">コート中央の円。<strong style="color:#fff">キックオフ</strong>はここから。キックオフの瞬間、相手チームの選手はサークル内に入れない。</div>
+      </div>
+      <div class="area-card orange">
+        <div class="ac-name">🔴 ペナルティスポット</div>
+        <div class="ac-size">ゴールから8m</div>
+        <div class="ac-desc"><strong style="color:#fff">PK</strong>を蹴る位置。ゴール前8mの点。PKは1対1でGKと勝負する最大のチャンス！</div>
+      </div>
+      <div class="area-card cyan">
+        <div class="ac-name">🔵 ハーフウェイライン</div>
+        <div class="ac-size">コートを半分に区切るライン</div>
+        <div class="ac-desc">自陣と相手陣地を分ける中央のライン。キックオフ時はこのラインを越えてはいけない。オフサイドの基準にもなる。</div>
+      </div>
+      <div class="area-card red">
+        <div class="ac-name">🚩 コーナーアーク</div>
+        <div class="ac-size">半径1m</div>
+        <div class="ac-desc">コートの4つの角にある小さなアーク（弧）。ボールがゴールラインを割った時の<strong style="color:#fff">コーナーキック</strong>はここから蹴る。</div>
+      </div>
+      <div class="area-card green">
+        <div class="ac-name">🔄 交代ゾーン</div>
+        <div class="ac-size">センターライン左右3m</div>
+        <div class="ac-desc"><strong style="color:#fff">8人制特有のエリア</strong>。選手交代はプレー中でも自由にできるが、必ずこのゾーンを通って入退場する。</div>
+      </div>
+      <div class="area-card blue">
+        <div class="ac-name">📏 タッチライン・ゴールライン</div>
+        <div class="ac-size">長辺68m・短辺50m</div>
+        <div class="ac-desc">コートの外枠のライン。長い方が<strong style="color:#fff">タッチライン</strong>（サイドライン）、短い方が<strong style="color:#fff">ゴールライン</strong>（エンドライン）。</div>
       </div>
     </div>
+    <div class="point-box ok">
+      <strong>✅ 8人制サッカーのルールの特徴</strong>
+      ・選手交代は自由（何度でも・プレー中でも可）<br>
+      ・交代ゾーンを通って入退場が必要<br>
+      ・オフサイドあり（11人制と同じ）<br>
+      ・GKはペナルティエリア内でのみ手を使える
+    </div>
   </div>
+
+  <!-- ===== タブ3：設営手順 ===== -->
+  <div class="psec" id="psec-setup">
+    <div class="point-box info">
+      <strong>🏗️ コート設営の基本ステップ（初心者向け）</strong>
+      初めてでも大丈夫！手順通りに進めれば正確なコートが引けます。
+    </div>
+
+    <div style="font-size:.82rem;font-weight:900;color:var(--cyan);margin-bottom:10px">📦 必要な道具</div>
+    <div class="tools-grid">
+      <div class="tool-card">
+        <div class="tool-icon">🪣</div>
+        <div class="tool-name">ラインカー＋石灰</div>
+        <div class="tool-desc">グラウンド用の石灰を使う。ラインの太さは12cm以内。4輪タイプが初心者向け</div>
+      </div>
+      <div class="tool-card">
+        <div class="tool-icon">📏</div>
+        <div class="tool-name">メジャー（90m以上）× 2本</div>
+        <div class="tool-desc">2本あると効率よく作業できる。90m以上の長さが必要</div>
+      </div>
+      <div class="tool-card">
+        <div class="tool-icon">🚩</div>
+        <div class="tool-name">コーナーフラッグ × 4本</div>
+        <div class="tool-desc">コートの四隅に立てる旗。必ず4本用意する</div>
+      </div>
+      <div class="tool-card">
+        <div class="tool-icon">⚽</div>
+        <div class="tool-name">ゴール × 2台</div>
+        <div class="tool-desc">小学生用（幅5m×高さ2.15m）を使用。固定・転倒防止が必須</div>
+      </div>
+    </div>
+
+    <div style="font-size:.82rem;font-weight:900;color:var(--cyan);margin:14px 0 10px">📋 設営手順</div>
+
+    <div class="setup-step">
+      <div class="step-num">1</div>
+      <div class="step-body">
+        <div class="step-title">コーナーフラッグを仮置きして外枠の大きさを決める</div>
+        <div class="step-desc">まずコートの4つの角になる場所にフラッグを仮置きします。縦68m×横50mになるようメジャーで計測します。</div>
+        <div class="step-tip">💡 縦（タッチライン）が68m、横（ゴールライン）が50mです。長い方が縦です。</div>
+      </div>
+    </div>
+
+    <div class="setup-step">
+      <div class="step-num">2</div>
+      <div class="step-body">
+        <div class="step-title">直角（90度）を確認する</div>
+        <div class="step-desc">コーナーが正確な直角でないとコートが歪みます。「3：4：5の法則」を使います。<br>コーナーから3m・4m計り、斜辺が5mになれば直角です。</div>
+        <div class="step-tip">💡 対角線の長さを測る方法も有効。2本の対角線の長さが等しければ長方形です（対角線 = √(68²+50²) ≈ 84.1m）</div>
+      </div>
+    </div>
+
+    <div class="setup-step">
+      <div class="step-num">3</div>
+      <div class="step-body">
+        <div class="step-title">外枠（タッチライン・ゴールライン）を引く</div>
+        <div class="step-desc">4つのコーナーが決まったら、外枠のラインをラインカーで引きます。メジャーに沿ってゆっくり押すとまっすぐ引けます。</div>
+        <div class="step-tip">💡 2人でメジャーを持って引っ張り、もう1人がラインカーでなぞると真っ直ぐになります。</div>
+      </div>
+    </div>
+
+    <div class="setup-step">
+      <div class="step-num">4</div>
+      <div class="step-body">
+        <div class="step-title">ハーフウェイライン（センターライン）を引く</div>
+        <div class="step-desc">タッチラインの中間点（34m地点）を両サイドで計り、線で結びます。コートを縦に半分に区切るラインです。</div>
+      </div>
+    </div>
+
+    <div class="setup-step">
+      <div class="step-num">5</div>
+      <div class="step-body">
+        <div class="step-title">センターサークルを描く</div>
+        <div class="step-desc">ハーフウェイラインとコート中央の交点がセンタースポット。ここを中心に半径7mの円を描きます。</div>
+        <div class="step-tip">💡 7mのひもの片端をセンタースポットに固定し、もう片端にラインカーをつけて回転させると円が描けます。</div>
+      </div>
+    </div>
+
+    <div class="setup-step">
+      <div class="step-num">6</div>
+      <div class="step-body">
+        <div class="step-title">ペナルティエリアとゴールエリアを引く（両端）</div>
+        <div class="step-desc">
+          <strong style="color:#fff">ペナルティエリア</strong>：ゴールラインからコート内側に12m、ゴール中心から左右各15m<br>
+          <strong style="color:#fff">ゴールエリア</strong>：ゴールラインから5.5m、ゴール中心から左右各7m
+        </div>
+        <div class="step-tip">💡 左右対称になるよう両サイドから計ります。ゴールの中心からの距離で計ると楽です。</div>
+      </div>
+    </div>
+
+    <div class="setup-step">
+      <div class="step-num">7</div>
+      <div class="step-body">
+        <div class="step-title">ペナルティスポット・コーナーアークを描く</div>
+        <div class="step-desc">
+          <strong style="color:#fff">ペナルティスポット</strong>：ゴールラインから8mの点<br>
+          <strong style="color:#fff">コーナーアーク</strong>：各コーナーから半径1mの弧
+        </div>
+      </div>
+    </div>
+
+    <div class="setup-step">
+      <div class="step-num">8</div>
+      <div class="step-body">
+        <div class="step-title">交代ゾーンのラインを引く・ゴールを設置する</div>
+        <div class="step-desc">
+          <strong style="color:#fff">交代ゾーン</strong>：ベンチ側のコート外、センターラインから左右3mに30cmの線<br>
+          <strong style="color:#fff">ゴール</strong>：転倒防止のウェイトやアンカーで固定する
+        </div>
+        <div class="step-tip">⚠️ ゴールの固定は安全上とても重要です。必ず確認してください。</div>
+      </div>
+    </div>
+
+    <div class="point-box ok">
+      <strong>✅ 設営完了チェックリスト</strong>
+      □ コーナーフラッグ4本設置<br>
+      □ ゴール2台を固定（転倒防止）<br>
+      □ 外枠・センターライン・各エリアのラインを確認<br>
+      □ ペナルティスポット・コーナーアーク確認<br>
+      □ 交代ゾーンのライン確認<br>
+      □ ラインの太さが12cm以内か確認
+    </div>
+
+    <div class="point-box warn">
+      <strong>⚠️ よくあるミスと注意点</strong>
+      ・石灰は「グラウンド用」を使う（園芸用はNG）<br>
+      ・縦横を逆に計ってしまうことが多い（縦68m・横50m）<br>
+      ・直角を取らないとコートが歪む<br>
+      ・若干のズレは許容範囲。あまり気にしすぎず進めましょう！
+    </div>
+  </div>
+
 </main>
 <footer class="site-footer">YOSHIMI SMC FC — SMART PORTAL</footer>
-<script src="common.js"></script>
-</body></html>
+<script>
+function switchTab(id, btn){
+  document.querySelectorAll(".psec").forEach(function(s){s.classList.remove("active");});
+  document.querySelectorAll(".ptab-btn").forEach(function(b){b.classList.remove("active");});
+  document.getElementById("psec-"+id).classList.add("active");
+  btn.classList.add("active");
+}
+</script>
+</body>
+</html>
