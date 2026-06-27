@@ -253,20 +253,18 @@ function renderFolders(){
     // テーブル行生成
     var rows=items.map(function(u){
       var isLent=!!u.lentTo;
-      var statusBadge=isLent
-        ?'<span class="badge-lent">貸出中</span><div class="who-text">'+u.lentTo+(u.lentDate?"<br>"+u.lentDate+"〜":"")+'</div>'
+      var statusCell=isLent
+        ?'<span class="badge-lent">貸出中</span> <span style="font-size:.72rem;color:#94c4e4">'+u.lentTo+(u.lentDate?' '+u.lentDate+'〜':'')+'</span>'
         :'<span class="badge-free">在庫あり</span>';
       var lendReturnBtn=isLent
         ?'<button class="action-btn return-btn" onclick="event.stopPropagation();openLend(\''+u.id+'\')">返却</button>'
         :'<button class="action-btn lend-btn" onclick="event.stopPropagation();openLend(\''+u.id+'\')">貸出</button>';
       return '<tr>'
-        +'<td><span style="font-size:1.1rem;font-weight:900;color:#fff">#'+u.num+'</span>'
-        +(u.player?'<div style="font-size:.72rem;color:#94c4e4;margin-top:1px">'+u.player+'</div>':'')
+        +'<td style="white-space:nowrap"><span style="font-size:1rem;font-weight:900;color:#fff">#'+u.num+'</span>'
+        +(u.player?' <span style="font-size:.78rem;color:#94c4e4">'+u.player+'</span>':'')
         +'</td>'
-        +'<td><span style="background:'+cg.p.code+';border-radius:99px;padding:1px 8px;font-size:.72rem;color:#fff;font-weight:700">'+cname+'</span></td>'
-        +'<td>'+u.size+'</td>'
-        +'<td>'+(u.memo?u.memo:'—')+'</td>'
-        +'<td>'+statusBadge+'</td>'
+        +'<td style="text-align:center;color:#fff;white-space:nowrap">'+u.size+'</td>'
+        +'<td>'+statusCell+'</td>'
         +'<td><div class="uni-actions">'
         +lendReturnBtn
         +'<button class="action-btn edit-btn" onclick="event.stopPropagation();openEdit(\''+u.id+'\')">編集</button>'
