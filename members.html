@@ -54,7 +54,7 @@
     <div><div class="hero-title">団員名簿</div>
       <div class="hero-sub">2026年度 SMC学年別名簿。氏名をタップして編集できます。</div></div>
   </div>
-  <div class="notice-bar">💾 「保存」を押すとこの端末に保存されます。セルをタップして編集できます。</div>
+  <div class="notice-bar">💾 ☁️ データはクラウド（Firebase）で保存・共有されます。セルをタップして編集できます。</div>
   <div class="panel">
     <div class="legend-bar">
       <span><span class="legend-dot" style="background:#6aaccc"></span>男子</span>
@@ -64,6 +64,7 @@
     <div class="roster-wrap">
       <table class="roster-table" id="roster-table"></table>
     </div>
+    <div id="sorted-view" style="display:none;overflow-x:auto;border-radius:var(--r12);border:1px solid var(--line-2)"></div>
     <div class="save-bar">
       <span class="save-msg" id="save-msg"></span>
       <button class="btn btn-outline btn-sm" onclick="exportCSV()">📥 CSV出力</button>
@@ -226,11 +227,27 @@ function renderSortedTable(){
       +'</tr>';
   });
   h+='</tbody></table>';
-  wrap.innerHTML=h;
+  // ソートビュー用のコンテナに書き込む
+  var sortedView=document.getElementById("sorted-view");
+  var rosterWrap=document.querySelector(".roster-wrap");
+  if(sortedView) sortedView.innerHTML=h;
+  if(rosterWrap) rosterWrap.style.display="none";
+  if(sortedView) sortedView.style.display="block";
 }
 
 function renderTable(){
+  // ソートが学年順以外なら別ビューで表示
+  if(typeof currentSort !== "undefined" && currentSort !== "none"){
+    renderSortedTable();
+    return;
+  }
+  // 通常ビュー（学年順）
+  var rosterWrap=document.querySelector(".roster-wrap");
+  var sortedView=document.getElementById("sorted-view");
+  if(rosterWrap) rosterWrap.style.display="";
+  if(sortedView) sortedView.style.display="none";
   var tbl=document.getElementById("roster-table");
+  if(!tbl){ console.error("roster-table not found"); return; }
   var h="<thead><tr><th class='col-no'>#</th>";
   GRADES.forEach(function(g){
     var arr=data[g]||[];
