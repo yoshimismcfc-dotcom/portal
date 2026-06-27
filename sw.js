@@ -1,5 +1,5 @@
-// Service Worker - キャッシュ無効版
-// 古いキャッシュをすべて削除してネットワークから直接取得する
+// Service Worker v2 - キャッシュ完全無効版
+// バージョン: 20260628
 
 self.addEventListener('install', function(e){
   self.skipWaiting();
@@ -17,5 +17,9 @@ self.addEventListener('activate', function(e){
 
 // キャッシュを使わず常にネットワークから取得
 self.addEventListener('fetch', function(e){
-  e.respondWith(fetch(e.request));
+  e.respondWith(
+    fetch(e.request, {cache: 'no-store'}).catch(function(){
+      return caches.match(e.request);
+    })
+  );
 });
