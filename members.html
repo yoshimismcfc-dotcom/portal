@@ -36,6 +36,13 @@
     .edit-modal h3{font-size:.95rem;font-weight:900;color:#fff;margin-bottom:14px}
     .edit-modal-btns{display:flex;gap:8px;justify-content:flex-end;margin-top:14px;flex-wrap:wrap}
     .gender-radio{display:flex;gap:16px;font-size:.88rem;color:var(--ink)}
+    /* ドラッグ */
+    .name-cell.dragging{opacity:.4;background:rgba(255,107,43,.2)!important}
+    .name-cell.drag-over{border:2px dashed var(--orange)!important;background:rgba(255,107,43,.1)!important}
+    .name-cell[draggable="true"]{cursor:grab}
+    .name-cell[draggable="true"]:active{cursor:grabbing}
+    /* 学年ソートインジケーター */
+    .grade-head .sort-ind{font-size:.55rem;color:var(--orange);display:block;margin-top:1px}
     /* リストビュー */
     .list-table{width:100%;border-collapse:collapse;font-size:.84rem}
     .list-table th{background:#003087;color:#fff;padding:7px 9px;text-align:left;font-size:.76rem;font-weight:900;position:sticky;top:0}
@@ -151,6 +158,10 @@ var ROWS   = 14;
 var currentSort = "none";
 var currentGrade = "all";
 var editGrade = null, editRow = null;
+// 学年ごとの内部ソート状態（グリッド表示時）
+var gradeSort = {}; // {grade: "none"|"kana"|"num"}
+// ドラッグ状態
+var dragGrade = null, dragIdx = null;
 
 /* ----- 初期データ ----- */
 var INIT = {
@@ -233,6 +244,66 @@ function render(){
   }
 }
 
+/* =====================================================
+   学年ヘッダータップでソートをサイクル
+   ===================================================== */
+function cycleGradeSort(g){
+  var cur = gradeSort[g]||"none";
+  var next = cur==="none"?"kana":cur==="kana"?"num":"none";
+  gradeSort[g] = next;
+  // そのソートに従い学年データを並べ替えて保存
+  applyGradeSort(g);
+  renderGrid();
+}
+
+function applyGradeSort(g){
+  var members = (data[g]||[]).filter(function(m){return m&&m.name;});
+  var empties = (data[g]||[]).filter(function(m){return !m||!m.name;});
+  var gs = gradeSort[g]||"none";
+  if(gs==="kana")   members.sort(function(a,b){return (a.kana||"").localeCompare(b.kana||"","ja");});
+  if(gs==="num")    members.sort(function(a,b){return (parseInt(a.num)||999)-(parseInt(b.num)||999);});
+  // nullを末尾に埋めて保存
+  data[g] = members.concat(empties.slice(0, ROWS - members.length));
+}
+
+/* =====================================================
+   ドラッグ＆ドロップで並べ替え
+   ===================================================== */
+function onDragStart(e, g, idx){
+  dragGrade = g; dragIdx = idx;
+  e.dataTransfer.effectAllowed = "move";
+  e.currentTarget.classList.add("dragging");
+}
+function onDragOver(e){
+  e.preventDefault();
+  e.dataTransfer.dropEffect = "move";
+  // drag-overクラスを付与
+  document.querySelectorAll(".name-cell.drag-over").forEach(function(el){el.classList.remove("drag-over");});
+  e.currentTarget.classList.add("drag-over");
+}
+function onDrop(e, g, idx){
+  e.preventDefault();
+  e.currentTarget.classList.remove("drag-over");
+  if(dragGrade !== g || dragIdx === idx || dragGrade === null) return;
+  // 同じ学年内で入れ替え
+  var arr = data[g] ? data[g].slice() : [];
+  var from = arr[dragIdx];
+  var to   = arr[idx];
+  arr[dragIdx] = to;
+  arr[idx]     = from;
+  data[g] = arr;
+  gradeSort[g] = "none"; // 手動並べ替え後はソートリセット
+  render();
+  // Firebaseに自動保存
+  dbSave("members", data, KEY, null);
+}
+function onDragEnd(e){
+  dragGrade = null; dragIdx = null;
+  document.querySelectorAll(".name-cell").forEach(function(el){
+    el.classList.remove("dragging","drag-over");
+  });
+}
+
 function renderGrid(){
   var tbl = document.getElementById("roster-table");
   if(!tbl) return;
@@ -240,7 +311,11 @@ function renderGrid(){
   var h = "<thead><tr><th class='col-no'>#</th>";
   showGrades.forEach(function(g){
     var cnt = (data[g]||[]).filter(function(m){return m&&m.name;}).length;
-    h += "<th class='grade-head'>"+g+"<br><span style='font-size:.62rem;font-weight:400;color:rgba(255,255,255,.6)'>"+cnt+"名</span></th>";
+    var gs = gradeSort[g]||"none";
+    var ind = gs==="none"?"タップでソート":gs==="kana"?"あいうえお順 ▲":"背番号順 ▲";
+    h += "<th class='grade-head' onclick='cycleGradeSort(""+g+"")' style='cursor:pointer;user-select:none'>"+g
+      +"<br><span style='font-size:.62rem;font-weight:400;color:rgba(255,255,255,.6)'>"+cnt+"名</span>"
+      +"<span class='sort-ind'>"+ind+"</span></th>";
   });
   h += "</tr></thead><tbody>";
   for(var r=0; r<ROWS; r++){
