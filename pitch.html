@@ -18,12 +18,13 @@
     .pitch-fig svg{display:block;margin:0 auto;max-width:100%}
 
     /* 寸法テーブル */
-    .dim-table{width:100%;border-collapse:collapse;font-size:.84rem;margin-bottom:14px}
+    .dim-table{width:100%;border-collapse:collapse;font-size:.8rem;margin-bottom:14px}
     .dim-table thead tr{background:#003087}
-    .dim-table th{color:#fff;font-weight:900;font-size:.75rem;padding:8px 10px;text-align:left}
-    .dim-table td{border-bottom:1px solid rgba(255,255,255,.08);padding:9px 10px;color:#c8e4ff;vertical-align:top}
-    .dim-table td:first-child{font-weight:700;color:#fff;white-space:nowrap}
-    .dim-table td:nth-child(2){color:var(--orange);font-weight:900;text-align:center;white-space:nowrap}
+    .dim-table th{color:#fff;font-weight:900;font-size:.72rem;padding:7px 8px;text-align:left}
+    .dim-table td{border-bottom:1px solid rgba(255,255,255,.08);padding:8px 8px;color:#c8e4ff;vertical-align:top;line-height:1.5}
+    .dim-table td:first-child{font-weight:700;color:#fff;white-space:nowrap;width:30%}
+    .dim-table td:nth-child(2){color:var(--orange);font-weight:900;width:28%;white-space:nowrap}
+    .dim-table td:nth-child(3){font-size:.76rem;width:42%}
     .dim-table tr:nth-child(even) td{background:rgba(255,255,255,.03)}
 
     /* エリア説明カード */
@@ -100,138 +101,123 @@
     </div>
 
     <!-- ピッチ図 -->
-    <div class="pitch-fig" style="padding:10px 6px;background:#2a7a2a">
-      <svg viewBox="0 0 508 370" width="100%" xmlns="http://www.w3.org/2000/svg" style="font-family:'Hiragino Kaku Gothic ProN',sans-serif;max-width:508px;display:block;margin:0 auto">
+    <div class="pitch-fig" style="padding:14px 8px;background:#2a7a2a;border-radius:12px;overflow-x:auto">
+      <svg viewBox="0 0 560 400" width="100%" xmlns="http://www.w3.org/2000/svg"
+           style="font-family:'Hiragino Kaku Gothic ProN',sans-serif;display:block;margin:0 auto;min-width:320px">
         <defs>
-          <!-- 矢印マーカー（黒） -->
-          <marker id="ab" markerWidth="6" markerHeight="6" refX="3" refY="3" orient="auto">
-            <path d="M0,0 L0,6 L6,3 z" fill="#000"/>
-          </marker>
-          <marker id="ab2" markerWidth="6" markerHeight="6" refX="3" refY="3" orient="auto-start-reverse">
-            <path d="M0,0 L0,6 L6,3 z" fill="#000"/>
-          </marker>
-          <!-- 矢印マーカー（青） -->
-          <marker id="ablue" markerWidth="6" markerHeight="6" refX="3" refY="3" orient="auto">
-            <path d="M0,0 L0,6 L6,3 z" fill="#2255cc"/>
-          </marker>
-          <marker id="ablue2" markerWidth="6" markerHeight="6" refX="3" refY="3" orient="auto-start-reverse">
-            <path d="M0,0 L0,6 L6,3 z" fill="#2255cc"/>
-          </marker>
-          <!-- 矢印マーカー（ピンク） -->
-          <marker id="apink" markerWidth="6" markerHeight="6" refX="3" refY="3" orient="auto">
-            <path d="M0,0 L0,6 L6,3 z" fill="#e0408a"/>
-          </marker>
-          <marker id="apink2" markerWidth="6" markerHeight="6" refX="3" refY="3" orient="auto-start-reverse">
-            <path d="M0,0 L0,6 L6,3 z" fill="#e0408a"/>
-          </marker>
+          <marker id="a0" markerWidth="7" markerHeight="7" refX="3.5" refY="3.5" orient="auto"><path d="M0,0 L0,7 L7,3.5 z" fill="#111"/></marker>
+          <marker id="a1" markerWidth="7" markerHeight="7" refX="3.5" refY="3.5" orient="auto-start-reverse"><path d="M0,0 L0,7 L7,3.5 z" fill="#111"/></marker>
+          <marker id="ab0" markerWidth="7" markerHeight="7" refX="3.5" refY="3.5" orient="auto"><path d="M0,0 L0,7 L7,3.5 z" fill="#2255cc"/></marker>
+          <marker id="ab1" markerWidth="7" markerHeight="7" refX="3.5" refY="3.5" orient="auto-start-reverse"><path d="M0,0 L0,7 L7,3.5 z" fill="#2255cc"/></marker>
+          <marker id="ap0" markerWidth="7" markerHeight="7" refX="3.5" refY="3.5" orient="auto"><path d="M0,0 L0,7 L7,3.5 z" fill="#d03080"/></marker>
+          <marker id="ap1" markerWidth="7" markerHeight="7" refX="3.5" refY="3.5" orient="auto-start-reverse"><path d="M0,0 L0,7 L7,3.5 z" fill="#d03080"/></marker>
         </defs>
 
-        <!-- 縮尺: 1m = 4px -->
-        <!-- コート: 68m×50m = 272px×200px -->
-        <!-- 左上コーナー: (60, 40) -->
-
-        <!-- 芝の縞模様 -->
-        <rect x="60" y="40" width="272" height="200" fill="#2d8a2d"/>
-        <rect x="60"  y="40" width="34" height="200" fill="#33963a" opacity=".7"/>
-        <rect x="128" y="40" width="34" height="200" fill="#33963a" opacity=".7"/>
-        <rect x="196" y="40" width="34" height="200" fill="#33963a" opacity=".7"/>
-        <rect x="264" y="40" width="34" height="200" fill="#33963a" opacity=".7"/>
+        <!-- 縮尺: 1m = 4px / コート68m×50m = 272×200px / 左上(70,50) -->
+        <!-- 芝の縞（背景） -->
+        <rect x="70" y="50" width="272" height="200" fill="#2d8a2d"/>
+        <rect x="70"  y="50" width="34" height="200" fill="#38a038" opacity=".6"/>
+        <rect x="138" y="50" width="34" height="200" fill="#38a038" opacity=".6"/>
+        <rect x="206" y="50" width="34" height="200" fill="#38a038" opacity=".6"/>
+        <rect x="274" y="50" width="34" height="200" fill="#38a038" opacity=".6"/>
 
         <!-- ===== コートのライン ===== -->
-        <!-- 外枠 -->
-        <rect x="60" y="40" width="272" height="200" fill="none" stroke="#fff" stroke-width="2.2"/>
+        <rect x="70" y="50" width="272" height="200" fill="none" stroke="#fff" stroke-width="2.5"/>
 
         <!-- センターライン -->
-        <line x1="196" y1="40" x2="196" y2="240" stroke="#fff" stroke-width="2"/>
+        <line x1="206" y1="50" x2="206" y2="250" stroke="#fff" stroke-width="2"/>
 
-        <!-- センターサークル (半径7m=28px) -->
-        <circle cx="196" cy="140" r="28" fill="none" stroke="#fff" stroke-width="2"/>
-        <circle cx="196" cy="140" r="2.5" fill="#fff"/>
+        <!-- センターサークル r=7m=28px -->
+        <circle cx="206" cy="150" r="28" fill="none" stroke="#fff" stroke-width="2"/>
+        <circle cx="206" cy="150" r="3" fill="#fff"/>
 
         <!-- ===== 左エリア ===== -->
-        <!-- ペナルティエリア左 (奥行12m=48px, 幅29m=116px) -->
-        <rect x="60" y="72" width="48" height="136" fill="none" stroke="#fff" stroke-width="2"/>
-        <!-- ゴールエリア左 (奥行4m=16px, 幅13m=52px) -->
-        <rect x="60" y="114" width="16" height="52" fill="none" stroke="#fff" stroke-width="2"/>
-        <!-- ペナルティスポット左 (8m=32px) -->
-        <circle cx="92" cy="140" r="2.5" fill="#fff"/>
-        <!-- ペナルティアーク左 -->
-        <path d="M 108 109 A 28 28 0 0 0 108 171" fill="none" stroke="#fff" stroke-width="2"/>
-        <!-- ゴール左 (幅5m=20px) -->
-        <rect x="44" y="130" width="16" height="20" fill="none" stroke="#fff" stroke-width="2"/>
+        <!-- ペナルティエリア: 奥行12m=48px, 幅29m=116px (両側14.5m=58px) -->
+        <rect x="70" y="92" width="48" height="116" fill="none" stroke="#fff" stroke-width="2"/>
+        <!-- ゴールエリア: 奥行4m=16px, 幅13m=52px (両側6.5m=26px) -->
+        <rect x="70" y="124" width="16" height="52" fill="none" stroke="#fff" stroke-width="2"/>
+        <!-- PKスポット: 8m=32px -->
+        <circle cx="102" cy="150" r="3" fill="#fff"/>
+        <!-- ペナルティアーク: PKスポットから半径7m=28px、ペナルティエリア外の弧 -->
+        <clipPath id="cl"><rect x="118" y="50" width="200" height="200"/></clipPath>
+        <circle cx="102" cy="150" r="28" fill="none" stroke="#fff" stroke-width="2" clip-path="url(#cl)"/>
+        <!-- ゴール左: 幅5m=20px、コート外へ -->
+        <rect x="54" y="140" width="16" height="20" fill="none" stroke="#fff" stroke-width="2"/>
 
         <!-- ===== 右エリア ===== -->
         <!-- ペナルティエリア右 -->
-        <rect x="284" y="72" width="48" height="136" fill="none" stroke="#fff" stroke-width="2"/>
+        <rect x="294" y="92" width="48" height="116" fill="none" stroke="#fff" stroke-width="2"/>
         <!-- ゴールエリア右 -->
-        <rect x="316" y="114" width="16" height="52" fill="none" stroke="#fff" stroke-width="2"/>
-        <!-- ペナルティスポット右 -->
-        <circle cx="300" cy="140" r="2.5" fill="#fff"/>
+        <rect x="326" y="124" width="16" height="52" fill="none" stroke="#fff" stroke-width="2"/>
+        <!-- PKスポット右: ゴールラインから8m=32px -->
+        <circle cx="310" cy="150" r="3" fill="#fff"/>
         <!-- ペナルティアーク右 -->
-        <path d="M 284 109 A 28 28 0 0 1 284 171" fill="none" stroke="#fff" stroke-width="2"/>
+        <clipPath id="cr"><rect x="70" y="50" width="224" height="200"/></clipPath>
+        <circle cx="310" cy="150" r="28" fill="none" stroke="#fff" stroke-width="2" clip-path="url(#cr)"/>
         <!-- ゴール右 -->
-        <rect x="332" y="130" width="16" height="20" fill="none" stroke="#fff" stroke-width="2"/>
+        <rect x="342" y="140" width="16" height="20" fill="none" stroke="#fff" stroke-width="2"/>
 
-        <!-- コーナーアーク (半径1m=4px) -->
-        <path d="M60,44 A4,4 0 0,1 64,40" fill="none" stroke="#fff" stroke-width="1.8"/>
-        <path d="M60,236 A4,4 0 0,0 64,240" fill="none" stroke="#fff" stroke-width="1.8"/>
-        <path d="M332,40 A4,4 0 0,1 336,44" fill="none" stroke="#fff" stroke-width="1.8"/>
-        <path d="M332,240 A4,4 0 0,0 336,236" fill="none" stroke="#fff" stroke-width="1.8"/>
+        <!-- コーナーアーク (r=1m=4px) -->
+        <path d="M70,54 A4,4 0 0,1 74,50" fill="none" stroke="#fff" stroke-width="2"/>
+        <path d="M70,246 A4,4 0 0,0 74,250" fill="none" stroke="#fff" stroke-width="2"/>
+        <path d="M338,50 A4,4 0 0,1 342,54" fill="none" stroke="#fff" stroke-width="2"/>
+        <path d="M338,250 A4,4 0 0,0 342,246" fill="none" stroke="#fff" stroke-width="2"/>
 
-        <!-- ===== 寸法線（黒） ===== -->
-        <!-- 1m コーナーアーク（左上） -->
-        <line x1="60" y1="33" x2="64" y2="33" stroke="#000" stroke-width="1.2" marker-start="url(#ab2)" marker-end="url(#ab)"/>
-        <text x="62" y="30" text-anchor="middle" fill="#000" font-size="9" font-weight="bold">1m</text>
+        <!-- ===== 寸法線 ===== -->
+        <!-- 1m コーナーアーク -->
+        <line x1="70" y1="43" x2="74" y2="43" stroke="#111" stroke-width="1.4" marker-start="url(#a1)" marker-end="url(#a0)"/>
+        <text x="72" y="40" text-anchor="middle" fill="#111" font-size="10" font-weight="bold">1m</text>
 
-        <!-- 12m ペナルティエリア奥行き（左） -->
-        <line x1="61" y1="53" x2="107" y2="53" stroke="#000" stroke-width="1.2" marker-start="url(#ab2)" marker-end="url(#ab)"/>
-        <text x="84" y="51" text-anchor="middle" fill="#000" font-size="9" font-weight="bold">12m</text>
+        <!-- 12m ペナルティ奥行 -->
+        <line x1="71" y1="62" x2="117" y2="62" stroke="#111" stroke-width="1.4" marker-start="url(#a1)" marker-end="url(#a0)"/>
+        <text x="94" y="59" text-anchor="middle" fill="#111" font-size="10" font-weight="bold">12m</text>
 
-        <!-- 4m ゴールエリア奥行き（左） -->
-        <line x1="61" y1="107" x2="75" y2="107" stroke="#000" stroke-width="1.2" marker-start="url(#ab2)" marker-end="url(#ab)"/>
-        <text x="68" y="104" text-anchor="middle" fill="#000" font-size="9" font-weight="bold">4m</text>
+        <!-- 4m ゴールエリア奥行 -->
+        <line x1="71" y1="116" x2="85" y2="116" stroke="#111" stroke-width="1.4" marker-start="url(#a1)" marker-end="url(#a0)"/>
+        <text x="78" y="113" text-anchor="middle" fill="#111" font-size="10" font-weight="bold">4m</text>
 
-        <!-- 8m PKスポット（左） -->
-        <line x1="49" y1="140" x2="91" y2="140" stroke="#000" stroke-width="1.2" marker-start="url(#ab2)" marker-end="url(#ab)"/>
-        <text x="70" y="154" text-anchor="middle" fill="#000" font-size="9" font-weight="bold">8m</text>
+        <!-- 8m PKスポット -->
+        <line x1="59" y1="150" x2="101" y2="150" stroke="#111" stroke-width="1.4" marker-start="url(#a1)" marker-end="url(#a0)"/>
+        <text x="80" y="166" text-anchor="middle" fill="#111" font-size="10" font-weight="bold">8m</text>
 
-        <!-- 4m ゴールエリア幅（左下） -->
-        <line x1="49" y1="130" x2="49" y2="150" stroke="#000" stroke-width="1.2" marker-start="url(#ab2)" marker-end="url(#ab)"/>
-        <text x="40" y="142" text-anchor="middle" fill="#000" font-size="9" font-weight="bold">4m</text>
+        <!-- 4m ゴールエリア幅（左縦） -->
+        <line x1="49" y1="124" x2="49" y2="150" stroke="#111" stroke-width="1.4" marker-start="url(#a1)" marker-end="url(#a0)"/>
+        <text x="41" y="140" text-anchor="middle" fill="#111" font-size="10" font-weight="bold">4m</text>
 
-        <!-- 8m ゴール幅（左下） -->
-        <line x1="36" y1="130" x2="36" y2="150" stroke="#000" stroke-width="1.2" marker-start="url(#ab2)" marker-end="url(#ab)"/>
-        <text x="27" y="142" text-anchor="middle" fill="#000" font-size="9" font-weight="bold">8m</text>
+        <!-- 8m ゴール幅（左縦） -->
+        <line x1="38" y1="140" x2="38" y2="160" stroke="#111" stroke-width="1.4" marker-start="url(#a1)" marker-end="url(#a0)"/>
+        <text x="29" y="153" text-anchor="middle" fill="#111" font-size="10" font-weight="bold">8m</text>
 
-        <!-- 29m ペナルティエリア幅（右）※実際は30m表示に合わせる -->
-        <line x1="345" y1="72" x2="345" y2="208" stroke="#000" stroke-width="1.2" marker-start="url(#ab2)" marker-end="url(#ab)"/>
-        <text x="360" y="142" text-anchor="middle" fill="#000" font-size="9" font-weight="bold">29m</text>
+        <!-- 29m ペナルティエリア幅（右縦） -->
+        <line x1="356" y1="92" x2="356" y2="208" stroke="#111" stroke-width="1.4" marker-start="url(#a1)" marker-end="url(#a0)"/>
+        <text x="370" y="153" text-anchor="middle" fill="#111" font-size="10" font-weight="bold">29m</text>
 
-        <!-- 5m ゴール幅（右） -->
-        <line x1="349" y1="130" x2="349" y2="150" stroke="#000" stroke-width="1.2" marker-start="url(#ab2)" marker-end="url(#ab)"/>
-        <text x="362" y="142" text-anchor="middle" fill="#000" font-size="9" font-weight="bold">5m</text>
+        <!-- 5m ゴール幅（右縦） -->
+        <line x1="383" y1="140" x2="383" y2="160" stroke="#111" stroke-width="1.4" marker-start="url(#a1)" marker-end="url(#a0)"/>
+        <text x="395" y="153" text-anchor="middle" fill="#111" font-size="10" font-weight="bold">5m</text>
 
-        <!-- センターサークル 半径7m（中央）-->
-        <line x1="196" y1="140" x2="216" y2="160" stroke="#000" stroke-width="1.2" marker-end="url(#ab)"/>
-        <text x="212" y="178" text-anchor="middle" fill="#000" font-size="9" font-weight="bold">半径7m</text>
+        <!-- センターサークル 半径7m -->
+        <line x1="206" y1="150" x2="226" y2="170" stroke="#111" stroke-width="1.4" marker-end="url(#a0)"/>
+        <text x="236" y="184" text-anchor="middle" fill="#111" font-size="10" font-weight="bold">半径7m</text>
 
-        <!-- ペナルティアーク 半径7m（右）-->
-        <line x1="300" y1="140" x2="315" y2="155" stroke="#000" stroke-width="1.2" marker-end="url(#ab)"/>
-        <text x="318" y="173" text-anchor="middle" fill="#000" font-size="9" font-weight="bold">半径7m</text>
+        <!-- ペナルティアーク右 半径7m -->
+        <line x1="310" y1="150" x2="325" y2="160" stroke="#111" stroke-width="1.4" marker-end="url(#a0)"/>
+        <text x="318" y="176" text-anchor="middle" fill="#111" font-size="10" font-weight="bold">半径7m</text>
 
-        <!-- ===== 寸法線（ピンク）68m ===== -->
-        <line x1="61" y1="258" x2="331" y2="258" stroke="#e0408a" stroke-width="1.5" marker-start="url(#apink2)" marker-end="url(#apink)"/>
-        <text x="196" y="272" text-anchor="middle" fill="#e0408a" font-size="11" font-weight="bold">68m</text>
+        <!-- 68m ピンク横 -->
+        <line x1="71" y1="270" x2="341" y2="270" stroke="#d03080" stroke-width="1.8" marker-start="url(#ap1)" marker-end="url(#ap0)"/>
+        <text x="206" y="284" text-anchor="middle" fill="#d03080" font-size="12" font-weight="bold">68m</text>
 
-        <!-- ゴール幅5m（下） -->
-        <line x1="44" y1="252" x2="60" y2="252" stroke="#000" stroke-width="1.2" marker-start="url(#ab2)" marker-end="url(#ab)"/>
-        <text x="52" y="267" text-anchor="middle" fill="#000" font-size="9" font-weight="bold">5m</text>
+        <!-- 5m ゴール幅（下） -->
+        <line x1="54" y1="263" x2="70" y2="263" stroke="#111" stroke-width="1.4" marker-start="url(#a1)" marker-end="url(#a0)"/>
+        <text x="62" y="278" text-anchor="middle" fill="#111" font-size="10" font-weight="bold">5m</text>
 
-        <!-- ===== 寸法線（青）50m ===== -->
-        <line x1="354" y1="41" x2="354" y2="239" stroke="#2255cc" stroke-width="1.5" marker-start="url(#ablue2)" marker-end="url(#ablue)"/>
-        <text x="372" y="143" text-anchor="middle" fill="#2255cc" font-size="11" font-weight="bold">50m</text>
+        <!-- 50m 青縦 -->
+        <line x1="430" y1="51" x2="430" y2="249" stroke="#2255cc" stroke-width="1.8" marker-start="url(#ab1)" marker-end="url(#ab0)"/>
+        <text x="447" y="153" text-anchor="middle" fill="#2255cc" font-size="12" font-weight="bold">50m</text>
       </svg>
     </div>
+
 
     </div>
 
