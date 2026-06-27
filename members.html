@@ -162,13 +162,21 @@ var INIT={
 var data = JSON.parse(JSON.stringify(INIT));
 
 /* ===== Firebase読み込み ===== */
+// デバッグ：ページ読み込み直後にINITで描画
+data = JSON.parse(JSON.stringify(INIT));
+render();
+
 dbListen("members", function(val){
+  var msg = document.getElementById("save-msg");
   if(val && typeof val==="object" && !Array.isArray(val) && Object.keys(val).length > 0){
     data = val;
+    if(msg) msg.textContent="☁️ クラウドから読み込みました";
   } else {
     data = JSON.parse(JSON.stringify(INIT));
     dbSave("members", data, KEY, null);
+    if(msg) msg.textContent="☁️ 初期データを書き込みました";
   }
+  setTimeout(function(){ if(msg) msg.textContent=""; }, 3000);
   render();
 }, KEY, null);
 
