@@ -307,20 +307,11 @@ function setSort(s){
 }
 function setGrade(g){
   currentGrade = g;
-  // ボタンのon切り替え
   var ids = {"all":"gf-all","6年":"gf-6","5年":"gf-5","4年":"gf-4","3年":"gf-3","2年":"gf-2","1年":"gf-1","年長":"gf-nen"};
   Object.keys(ids).forEach(function(k){
     var el = document.getElementById(ids[k]);
     if(el) el.className = "sort-btn" + (k===g?" on":"");
   });
-  // 特定学年を選択 → ソートをリスト表示に自動切り替え
-  if(g !== "all" && currentSort === "none"){
-    currentSort = "kana";
-    ["none","kana","num","gender"].forEach(function(k){
-      var el = document.getElementById("sb-"+k);
-      if(el) el.className = "sort-btn" + (k==="kana"?" on":"");
-    });
-  }
   render();
 }
 
