@@ -1,0 +1,187 @@
+<!doctype html>
+<html lang="ja">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>データ初期化｜吉見SMC FC</title>
+  <script src="firebase-config.js"></script>
+  <link rel="stylesheet" href="common.css">
+</head>
+<body>
+<header class="site-header">
+  <div class="header-inner">
+    <a class="header-logo" href="index.html">
+      <div class="logo-mark">⚽</div>
+      <div><span class="logo-name">吉見SMC FC</span><span class="logo-sub">DATA INIT</span></div>
+    </a>
+  </div>
+</header>
+<main class="page-wrap">
+  <div class="hero-band">
+    <div class="hero-emoji">☁️</div>
+    <div><div class="hero-title">データ初期化ツール</div>
+      <div class="hero-sub">Firebaseに初期データを書き込みます。1回だけ実行してください。</div></div>
+  </div>
+  <div class="panel">
+    <div id="status" style="font-size:.95rem;color:var(--cyan);line-height:2;margin-bottom:16px">
+      ⏳ Firebase接続待機中...
+    </div>
+    <button class="btn btn-primary btn-lg" id="run-btn" onclick="runInit()" disabled style="width:100%">
+      🚀 データをFirebaseに書き込む
+    </button>
+    <p style="font-size:.78rem;color:var(--ink-3);margin-top:10px">
+      ※ このボタンは1回だけ押してください。既存データは上書きされます。
+    </p>
+  </div>
+  <div id="result" style="margin-top:14px"></div>
+</main>
+<script>
+var MEMBERS = {
+  "6年": [
+    {name:"有瀧　晴一",   kana:"ありたき　はるいち",     num:"",gender:"m"},
+    {name:"石川　日向葵", kana:"いしかわ　ひなたあおい",  num:"",gender:"f"},
+    {name:"一場　純",     kana:"いちば　じゅん",          num:"",gender:"m"},
+    {name:"岡野　楓斗",   kana:"おかの　はやと",          num:"",gender:"m"},
+    {name:"金井　暖記",   kana:"かない　はるき",          num:"",gender:"m"},
+    {name:"笹野　陽青",   kana:"ささの　はるせ",          num:"",gender:"m"},
+    {name:"武部　陽樹",   kana:"たけべ　はるき",          num:"",gender:"m"},
+    {name:"長嶋　蓮弥",   kana:"ながしま　れんや",        num:"",gender:"m"},
+    null,null,null,null,null,null
+  ],
+  "5年": [
+    {name:"上村　夏萌",   kana:"かみむら　なつめ",        num:"",gender:"f"},
+    {name:"木村　玲菜",   kana:"きむら　れいな",          num:"",gender:"f"},
+    {name:"澤井　怜央",   kana:"さわい　れお",            num:"",gender:"m"},
+    null,null,null,null,null,null,null,null,null,null,null
+  ],
+  "4年": [
+    {name:"金井　勇記",    kana:"かない　ゆうき",         num:"",gender:"m"},
+    {name:"功刀　莉愛",    kana:"くぬぎ　りお",           num:"",gender:"f"},
+    {name:"小柳　柊真",    kana:"こやなぎ　とうま",       num:"",gender:"m"},
+    {name:"谷口　じゅんな",kana:"たにぐち　じゅんな",     num:"",gender:"f"},
+    null,null,null,null,null,null,null,null,null,null
+  ],
+  "3年": [
+    {name:"石川　幸乃羽", kana:"いしかわ　このは",        num:"",gender:"f"},
+    {name:"加藤　陸",     kana:"かとう　りく",            num:"",gender:"m"},
+    {name:"上村　葵",     kana:"かみむら　あおい",        num:"",gender:"f"},
+    {name:"北村　悠真",   kana:"きたむら　はるま",        num:"",gender:"m"},
+    {name:"木村　翔馬",   kana:"きむら　しょうま",        num:"",gender:"m"},
+    {name:"小林　蒼",     kana:"こばやし　あおい",        num:"",gender:"m"},
+    {name:"坂上　大珠",   kana:"さかうえ　たいじゅ",      num:"",gender:"m"},
+    {name:"篠田　和希",   kana:"しのだ　ともき",          num:"",gender:"m"},
+    {name:"芝嵜　理矩",   kana:"しばさき　りく",          num:"",gender:"m"},
+    {name:"柴田　凌玖",   kana:"しばた　りく",            num:"",gender:"m"},
+    {name:"瀬戸　大志",   kana:"せと　たいし",            num:"",gender:"m"},
+    {name:"武部　優樹",   kana:"たけべ　ゆうき",          num:"",gender:"m"},
+    {name:"長嶋　茉莉",   kana:"ながしま　まり",          num:"",gender:"f"},
+    null
+  ],
+  "2年": [
+    {name:"飯塚　洋介",   kana:"いいづか　ようすけ",      num:"",gender:"m"},
+    {name:"関口　夏絆",   kana:"せきぐち　なつき",        num:"",gender:"f"},
+    {name:"野口　陽生",   kana:"のぐち　はるき",          num:"",gender:"m"},
+    null,null,null,null,null,null,null,null,null,null,null
+  ],
+  "1年": [null,null,null,null,null,null,null,null,null,null,null,null,null,null],
+  "年長": [
+    {name:"功刀　あいと", kana:"くぬぎ　あいと",          num:"",gender:"m"},
+    null,null,null,null,null,null,null,null,null,null,null,null,null
+  ]
+};
+
+var COACH = [
+  {id:"c1",role:"代表",        name:"片山",       note:""},
+  {id:"c2",role:"監督",        name:"綿貫",       note:""},
+  {id:"c3",role:"テクニカルHC",name:"調整中",     note:""},
+  {id:"c4",role:"審判部",      name:"奥本、土居", note:""},
+  {id:"c5",role:"顧問",        name:"中村、松本", note:""},
+  {id:"c6",role:"6年担当",     name:"石川",       note:""},
+  {id:"c7",role:"5年担当",     name:"上村",       note:""},
+  {id:"c8",role:"4年担当",     name:"原口",       note:""},
+  {id:"c9",role:"3年担当",     name:"柴田",       note:""},
+  {id:"ca",role:"2年担当",     name:"野口",       note:""},
+  {id:"cb",role:"1年担当",     name:"鶴崎",       note:""},
+  {id:"cc",role:"年長担当",    name:"功刀",       note:""},
+  {id:"cd",role:"事務局",      name:"武部",       note:""},
+];
+var PARENT = [
+  {id:"p1",role:"会長",             name:"長嶋",       note:""},
+  {id:"p2",role:"会計",             name:"岡野、一場", note:""},
+  {id:"p3",role:"連絡係（高学年）", name:"石川",       note:""},
+  {id:"p4",role:"連絡係（低学年）", name:"北村、瀬戸", note:""},
+];
+
+function log(msg, color){
+  var s = document.getElementById("status");
+  s.innerHTML += '<div style="color:'+(color||"#c8e8ff")+'">'+msg+'</div>';
+}
+
+// Firebase接続待機
+onFirebaseReady(function(db){
+  document.getElementById("status").innerHTML = "✅ Firebaseに接続しました。「データをFirebaseに書き込む」ボタンを押してください。";
+  document.getElementById("run-btn").disabled = false;
+});
+
+// 5秒たっても接続されない場合
+setTimeout(function(){
+  var btn = document.getElementById("run-btn");
+  if(btn.disabled){
+    document.getElementById("status").innerHTML =
+      '<span style="color:#ff8888">❌ Firebase接続タイムアウト。<br>ページを再読み込みしてもう一度お試しください。<br>firebase-config.jsの設定値を確認してください。</span>';
+  }
+}, 8000);
+
+function runInit(){
+  var btn = document.getElementById("run-btn");
+  btn.disabled = true;
+  btn.textContent = "⏳ 書き込み中...";
+  document.getElementById("status").innerHTML = "⏳ Firebaseにデータを書き込んでいます...";
+
+  onFirebaseReady(function(db){
+    var done = 0, total = 3;
+    function check(){
+      done++;
+      if(done >= total){
+        btn.textContent = "✅ 完了！";
+        document.getElementById("status").innerHTML =
+          '<span style="color:#00ff88;font-size:1.1rem;font-weight:900">✅ 全データの書き込みが完了しました！</span>';
+        document.getElementById("result").innerHTML =
+          '<div class="notice-bar green" style="margin-top:4px">団員名簿・コーチ担当・保護者担当のデータをFirebaseに書き込みました。<br>'
+          +'<a href="members.html" class="btn btn-primary btn-sm" style="margin-top:8px;display:inline-flex">📒 団員名簿を確認する</a>'
+          +' <a href="staff.html" class="btn btn-outline btn-sm" style="margin-top:8px;display:inline-flex">👥 担当フォルダを確認する</a>'
+          +'</div>';
+      }
+    }
+
+    // 名簿書き込み
+    db.ref("members").set(MEMBERS).then(function(){
+      log("✅ 団員名簿の書き込み完了（"+Object.keys(MEMBERS).length+"学年）", "#00ff88");
+      check();
+    }).catch(function(e){
+      log("❌ 名簿エラー: "+e.message, "#ff8888");
+      check();
+    });
+
+    // コーチ担当書き込み
+    db.ref("staff/coach").set(COACH).then(function(){
+      log("✅ コーチ担当の書き込み完了（"+COACH.length+"名）", "#00ff88");
+      check();
+    }).catch(function(e){
+      log("❌ コーチ担当エラー: "+e.message, "#ff8888");
+      check();
+    });
+
+    // 保護者担当書き込み
+    db.ref("staff/parent").set(PARENT).then(function(){
+      log("✅ 保護者担当の書き込み完了（"+PARENT.length+"名）", "#00ff88");
+      check();
+    }).catch(function(e){
+      log("❌ 保護者担当エラー: "+e.message, "#ff8888");
+      check();
+    });
+  });
+}
+</script>
+</body>
+</html>
