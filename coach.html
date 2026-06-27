@@ -27,6 +27,40 @@
     .coach-btn .cb-label{font-size:.9rem;font-weight:900;color:#fff}
     .coach-btn .cb-desc{font-size:.7rem;color:var(--ink-3);line-height:1.4}
     @media(max-width:420px){.coach-btn-grid{grid-template-columns:1fr}}
+    /* ホーム画面と同じカードスタイル */
+    .c-card-grid{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:20px}
+    .c-card{
+      background:var(--surface-lt);border:1px solid var(--line-2);
+      border-radius:var(--r12);padding:16px 14px;
+      display:flex;flex-direction:column;gap:6px;
+      cursor:pointer;text-decoration:none;color:inherit;
+      transition:all .18s;position:relative;overflow:hidden;
+    }
+    .c-card::before{content:"";position:absolute;top:0;left:0;right:0;height:3px;background:var(--orange);border-radius:3px 3px 0 0}
+    .c-card.c-blue::before{background:#0050cc}
+    .c-card.c-green::before{background:#00aa55}
+    .c-card.c-cyan::before{background:var(--cyan)}
+    .c-card.c-purple::before{background:#8855cc}
+    .c-card.c-red::before{background:#cc2200}
+    .c-card:hover{border-color:var(--orange);transform:translateY(-2px);box-shadow:var(--shadow)}
+    .c-card.c-blue:hover{border-color:#0050cc}
+    .c-card.c-green:hover{border-color:#00aa55}
+    .c-card.c-cyan:hover{border-color:var(--cyan)}
+    .c-card.c-purple:hover{border-color:#8855cc}
+    .c-card .c-icon{font-size:1.6rem;line-height:1}
+    .c-card .c-label{font-size:.88rem;font-weight:900;color:#fff}
+    .c-card .c-desc{font-size:.7rem;color:var(--ink-3);line-height:1.45}
+    .c-badge{display:inline-block;font-size:.6rem;font-weight:900;padding:2px 7px;border-radius:99px;background:rgba(0,212,255,.2);color:var(--cyan);border:1px solid rgba(0,212,255,.3);align-self:flex-start}
+    /* セクション区切り（ホームと同スタイル） */
+    .c-section-div{
+      display:flex;align-items:center;gap:10px;
+      margin:22px 0 14px;padding:10px 14px;
+      background:linear-gradient(90deg,#1a3a20,transparent);
+      border-left:3px solid #2d9e2d;border-radius:0 8px 8px 0;
+    }
+    .c-section-div .csd-icon{font-size:1.1rem}
+    .c-section-div .csd-text{font-size:.82rem;font-weight:900;color:#fff;letter-spacing:.05em}
+    .c-section-div .csd-sub{font-size:.62rem;color:rgba(255,255,255,.45);letter-spacing:.12em;text-transform:uppercase;margin-left:4px}
     .url-list{display:grid;gap:8px}
     .url-item{background:rgba(255,255,255,.04);border:1px solid var(--line);border-radius:var(--r8);padding:10px 12px;display:flex;align-items:center;gap:10px}
     .url-item-label{font-size:.85rem;font-weight:700;color:#fff;flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
@@ -86,8 +120,115 @@
       <a href="firebase-setup.html" class="btn btn-outline btn-sm" style="font-size:.7rem;height:26px;padding:0 8px;flex-shrink:0">⚙️ 設定</a>
     </div>
 
+    <!-- ===== セクション：お知らせ管理 ===== -->
+    <div class="c-section-div"><div class="csd-icon">📢</div><div class="csd-text">お知らせ管理</div><div class="csd-sub">NOTICE</div></div>
+    <div class="c-card-grid">
+      <a class="c-card c-cyan" href="#guidance-section" onclick="document.getElementById('guidance-section').scrollIntoView({behavior:'smooth'});return false">
+        <div class="c-icon">📢</div>
+        <div class="c-label">ガイダンス設定</div>
+        <div class="c-desc">ホーム画面の青帯・赤帯お知らせ</div>
+      </a>
+      <a class="c-card c-red" href="#alert-section" onclick="document.getElementById('alert-section').scrollIntoView({behavior:'smooth'});return false">
+        <div class="c-icon">🔔</div>
+        <div class="c-label">自動アラート設定</div>
+        <div class="c-desc">雨・熱中症のしきい値・スケジュール</div>
+      </a>
+    </div>
+
+    <!-- ===== セクション：試合・大会 ===== -->
+    <div class="c-section-div"><div class="csd-icon">🏟️</div><div class="csd-text">試合・大会</div><div class="csd-sub">MATCH & TOURNAMENT</div></div>
+    <div class="c-card-grid">
+      <a class="c-card" href="game_adjust.html">
+        <div class="c-icon">📊</div>
+        <div class="c-label">試合調整</div>
+        <div class="c-desc">参加チーム・日程調整表</div>
+      </a>
+      <a class="c-card c-blue" href="tournament.html">
+        <div class="c-icon">📋</div>
+        <div class="c-label">大会要綱・対戦表</div>
+        <div class="c-desc">自動生成・PDF印刷</div>
+      </a>
+    </div>
+
+    <!-- ===== セクション：外部ツール ===== -->
+    <div class="c-section-div"><div class="csd-icon">🔧</div><div class="csd-text">外部ツール</div><div class="csd-sub">EXTERNAL TOOLS</div></div>
+    <div class="c-card-grid">
+      <a class="c-card c-cyan" href="https://accounts.google.com/AccountChooser?Email=yoshimi.smc.fc%40gmail.com&continue=https%3A%2F%2Fmail.google.com%2Fmail%2F" target="_blank" rel="noopener">
+        <div class="c-icon">📧</div>
+        <div class="c-label">Gmail</div>
+        <div class="c-desc">yoshimi.smc.fc@gmail.com</div>
+        <span class="c-badge">外部</span>
+      </a>
+      <a class="c-card c-green" href="https://accounts.google.com/AccountChooser?Email=yoshimi.smc.fc%40gmail.com&continue=https%3A%2F%2Fcalendar.google.com%2Fcalendar%2Fr" target="_blank" rel="noopener">
+        <div class="c-icon">📅</div>
+        <div class="c-label">Googleカレンダー</div>
+        <div class="c-desc">予定の追加・変更・削除</div>
+        <span class="c-badge">外部</span>
+      </a>
+      <a class="c-card" href="https://account.line.biz/login?redirectUri=https%3A%2F%2Fmanager.line.biz%2Faccount%2F%40979eflea" target="_blank" rel="noopener">
+        <div class="c-icon">💬</div>
+        <div class="c-label">LINE公式</div>
+        <div class="c-desc">投稿・メッセージ配信</div>
+        <span class="c-badge">外部</span>
+      </a>
+      <a class="c-card" href="https://www.koga-seven.jp/hokusai/user/login.php" target="_blank" rel="noopener">
+        <div class="c-icon">⚽</div>
+        <div class="c-label">北彩リーグ</div>
+        <div class="c-desc">リーグ管理システム</div>
+        <span class="c-badge">外部</span>
+      </a>
+    </div>
+
+    <!-- ===== セクション：データ管理 ===== -->
+    <div class="c-section-div"><div class="csd-icon">📁</div><div class="csd-text">データ管理</div><div class="csd-sub">DATA & FILES</div></div>
+    <div class="c-card-grid">
+      <a class="c-card c-purple" href="accounts.html">
+        <div class="c-icon">🔑</div>
+        <div class="c-label">アカウント管理</div>
+        <div class="c-desc">ID・パスワード一覧</div>
+      </a>
+      <a class="c-card" href="https://drive.google.com/drive/folders/1BOinS5PmZgnk7RYlYtLwhEGemDrQIlSJ?usp=sharing" target="_blank" rel="noopener">
+        <div class="c-icon">📁</div>
+        <div class="c-label">データフォルダ</div>
+        <div class="c-desc">Googleドライブ</div>
+        <span class="c-badge">外部</span>
+      </a>
+      <a class="c-card" href="https://drive.google.com/drive/folders/1Yo4jo2_9xV-lJA0f2QxwdNtUgBhlGNat?usp=drive_link" target="_blank" rel="noopener">
+        <div class="c-icon">📄</div>
+        <div class="c-label">会議資料</div>
+        <div class="c-desc">議案書・議事録</div>
+        <span class="c-badge">外部</span>
+      </a>
+      <a class="c-card c-cyan" href="diary.html">
+        <div class="c-icon">📝</div>
+        <div class="c-label">練習日誌</div>
+        <div class="c-desc">日付・メニュー・タグ記録</div>
+      </a>
+    </div>
+
+    <!-- ===== セクション：練習メニュー ===== -->
+    <div class="c-section-div"><div class="csd-icon">🔗</div><div class="csd-text">練習メニュー</div><div class="csd-sub">PRACTICE MENU</div></div>
+    <div class="panel" style="margin-bottom:20px">
+      <div class="url-form">
+        <div class="form-group" style="margin:0">
+          <label class="form-label">ラベル</label>
+          <input class="form-control" id="url-label" placeholder="例: 4年生 パス練習">
+        </div>
+        <div class="form-group" style="margin:0">
+          <label class="form-label">URL</label>
+          <input class="form-control" id="url-href" type="url" placeholder="https://...">
+        </div>
+        <button class="btn btn-primary btn-sm" onclick="addUrl()" style="height:42px">＋</button>
+      </div>
+      <div class="url-list" id="url-list">
+        <p style="color:var(--ink-3);font-size:.82rem;text-align:center;padding:12px">URLを追加するとここに表示されます。</p>
+      </div>
+    </div>
+
+    <!-- ===== 詳細設定エリア（スクロール先） ===== -->
+    <div class="c-section-div" id="guidance-section"><div class="csd-icon">📢</div><div class="csd-text">ガイダンス設定</div><div class="csd-sub">NOTICE SETTINGS</div></div>
     <!-- ===== ガイダンス設定 ===== -->
-    <div class="section-head"><div class="section-icon">📢</div><h2>ガイダンス設定</h2><div class="section-divider"></div></div>
+    <div class="section-head" style="display:none"><div class="section-icon">📢</div><h2>ガイダンス設定</h2><div class="section-divider"></div></div>
 
     <div class="panel">
       <div class="panel-title">📢 ガイダンス（ホーム画面に青帯で表示）</div>
@@ -124,7 +265,7 @@
     </div>
 
     <!-- ===== 自動アラート設定 ===== -->
-    <div class="section-head"><div class="section-icon">🔔</div><h2>自動アラート設定</h2><div class="section-divider"></div></div>
+    <div id="alert-section" class="c-section-div" style="margin-top:22px"><div class="csd-icon">🔔</div><div class="csd-text">自動アラート設定</div><div class="csd-sub">ALERT SETTINGS</div></div>
     <div class="panel">
       <div class="panel-title">📅 練習スケジュール（屋外のみアラート対象）</div>
       <div id="schedule-list" style="margin-bottom:10px"></div>
@@ -197,118 +338,6 @@
       </div>
     </div>
 
-    <!-- ===== 試合調整 ===== -->
-    <div class="section-head"><div class="section-icon">📊</div><h2>試合調整</h2><div class="section-divider"></div></div>
-    <a class="coach-btn" href="game_adjust.html" style="width:100%;box-sizing:border-box;display:flex;flex-direction:row;align-items:center;gap:14px;margin-bottom:20px">
-      <div class="cb-icon">📊</div>
-      <div>
-        <div class="cb-label">試合調整表を開く</div>
-        <div class="cb-desc">ふれあい芝グラウンド大会 参加チーム調整</div>
-      </div>
-    </a>
-
-    <!-- ===== 大会要綱・対戦表 ===== -->
-    <div class="section-head"><div class="section-icon">📋</div><h2>大会要綱・対戦表</h2><div class="section-divider"></div></div>
-    <a class="coach-btn c-cyan" href="tournament.html" style="width:100%;box-sizing:border-box;display:flex;flex-direction:row;align-items:center;gap:14px;margin-bottom:20px">
-      <div class="cb-icon">📋</div>
-      <div>
-        <div class="cb-label">大会要綱・対戦表を作成する</div>
-        <div class="cb-desc">入力→プレビュー→A4でPDF保存・印刷</div>
-      </div>
-    </a>
-
-    <!-- ===== 外部ツール ===== -->
-    <div class="section-head"><div class="section-icon">🔧</div><h2>外部ツール</h2><div class="section-divider"></div></div>
-    <div class="coach-btn-grid">
-      <a class="coach-btn c-cyan" href="https://accounts.google.com/AccountChooser?Email=yoshimi.smc.fc%40gmail.com&continue=https%3A%2F%2Fmail.google.com%2Fmail%2F" target="_blank" rel="noopener">
-        <div class="cb-icon">📧</div>
-        <div class="cb-label">Gmail を開く</div>
-        <div class="cb-desc">yoshimi.smc.fc@gmail.com</div>
-      </a>
-      <a class="coach-btn c-green" href="https://accounts.google.com/AccountChooser?Email=yoshimi.smc.fc%40gmail.com&continue=https%3A%2F%2Fcalendar.google.com%2Fcalendar%2Fr" target="_blank" rel="noopener">
-        <div class="cb-icon">📅</div>
-        <div class="cb-label">Googleカレンダー（編集）</div>
-        <div class="cb-desc">予定の追加・変更・削除</div>
-      </a>
-      <a class="coach-btn" href="https://account.line.biz/login?redirectUri=https%3A%2F%2Fmanager.line.biz%2Faccount%2F%40979eflea" target="_blank" rel="noopener">
-        <div class="cb-icon">💬</div>
-        <div class="cb-label">LINE公式アカウント管理</div>
-        <div class="cb-desc">投稿・メッセージ配信</div>
-      </a>
-      <a class="coach-btn" href="https://www.koga-seven.jp/hokusai/user/login.php" target="_blank" rel="noopener">
-        <div class="cb-icon">⚽</div>
-        <div class="cb-label">北彩リーグ</div>
-        <div class="cb-desc">リーグ管理システム</div>
-      </a>
-    </div>
-    <div class="notice-bar" style="margin-bottom:16px;font-size:.78rem">
-      💡 初回はGoogleアカウントへのログインが必要です。iPhoneはiCloudキーチェーンに保存すると次回からワンタップでログインできます。
-    </div>
-
-    <!-- ===== アカウントリスト ===== -->
-    <div class="section-head"><div class="section-icon">🔑</div><h2>アカウントリスト</h2><div class="section-divider"></div></div>
-    <a class="coach-btn" href="accounts.html" style="width:100%;box-sizing:border-box;display:flex;flex-direction:row;align-items:center;gap:14px;margin-bottom:20px">
-      <div class="cb-icon">🔑</div>
-      <div>
-        <div class="cb-label">アカウント管理を開く</div>
-        <div class="cb-desc">各サービスのID・パスワード一覧・追加・編集</div>
-      </div>
-    </a>
-
-    <!-- ===== データフォルダ ===== -->
-    <div class="section-head"><div class="section-icon">📁</div><h2>データフォルダ</h2><div class="section-divider"></div></div>
-    <div class="drive-card">
-      <div class="di">📁</div>
-      <div>
-        <strong>チームデータ（Googleドライブ）</strong>
-        <p>試合記録・活動資料・写真などのデータ</p>
-        <a class="btn btn-primary btn-sm"
-          href="https://drive.google.com/drive/folders/1BOinS5PmZgnk7RYlYtLwhEGemDrQIlSJ?usp=sharing"
-          target="_blank" rel="noopener">📁 Googleドライブを開く</a>
-      </div>
-    </div>
-
-    <!-- ===== 会議資料 ===== -->
-    <div class="section-head" style="margin-top:20px"><div class="section-icon">📄</div><h2>会議資料</h2><div class="section-divider"></div></div>
-    <div class="drive-card">
-      <div class="di">📄</div>
-      <div>
-        <strong>会議資料フォルダ（Googleドライブ）</strong>
-        <p>議案書・議事録・活動方針などの会議資料</p>
-        <a class="btn btn-primary btn-sm"
-          href="https://drive.google.com/drive/folders/1Yo4jo2_9xV-lJA0f2QxwdNtUgBhlGNat?usp=drive_link"
-          target="_blank" rel="noopener">📄 会議資料を開く</a>
-      </div>
-    </div>
-
-    <!-- ===== 練習メニューURL ===== -->
-    <div class="section-head"><div class="section-icon">🔗</div><h2>練習メニュー</h2><div class="section-divider"></div></div>
-    <div class="panel">
-      <div class="url-form">
-        <div class="form-group" style="margin:0">
-          <label class="form-label">ラベル</label>
-          <input class="form-control" id="url-label" placeholder="例: 4年生 パス練習">
-        </div>
-        <div class="form-group" style="margin:0">
-          <label class="form-label">URL</label>
-          <input class="form-control" id="url-href" type="url" placeholder="https://...">
-        </div>
-        <button class="btn btn-primary btn-sm" onclick="addUrl()" style="height:42px">＋</button>
-      </div>
-      <div class="url-list" id="url-list">
-        <p style="color:var(--ink-3);font-size:.82rem;text-align:center;padding:12px">URLを追加するとここに表示されます。</p>
-      </div>
-    </div>
-
-    <!-- ===== 練習日誌 ===== -->
-    <div class="section-head"><div class="section-icon">📝</div><h2>練習日誌</h2><div class="section-divider"></div></div>
-    <a class="coach-btn c-cyan" href="diary.html" style="width:100%;box-sizing:border-box;display:flex;flex-direction:row;align-items:center;gap:14px;margin-bottom:4px">
-      <div class="cb-icon">📝</div>
-      <div>
-        <div class="cb-label">練習日誌を開く</div>
-        <div class="cb-desc">日付・学年・天気・メニュー・タグ・CSV出力</div>
-      </div>
-    </a>
 
   </div><!-- /coach-content -->
 </main>
