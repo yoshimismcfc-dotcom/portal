@@ -1,0 +1,358 @@
+<!doctype html>
+<html lang="ja">
+<head>
+  <meta charset="utf-8">
+  <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
+  <meta http-equiv="Pragma" content="no-cache">
+  <meta http-equiv="Expires" content="0">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>会計・決算書｜吉見SMC FC</title>
+  <script src="firebase-config.js"></script>
+  <link rel="stylesheet" href="common.css">
+  <style>
+    .acct-tabs{display:flex;gap:0;border:1px solid var(--line-2);border-radius:var(--r8);overflow:hidden;margin-bottom:14px}
+    .acct-tab{flex:1;border:0;background:var(--surface-lt);color:var(--ink-3);font:inherit;font-size:.86rem;font-weight:900;padding:12px 8px;cursor:pointer}
+    .acct-tab.active{background:linear-gradient(135deg,#003087,#0050cc);color:#fff}
+    .acct-view{display:none}.acct-view.active{display:block}
+    .acct-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin-bottom:14px}
+    .acct-card{background:var(--surface-lt);border:1px solid var(--line);border-radius:var(--r8);padding:12px}
+    .acct-card .label{font-size:.68rem;color:var(--ink-3);font-weight:900;letter-spacing:.08em}
+    .acct-card .value{font-size:1.3rem;color:#fff;font-weight:900;margin-top:4px}
+    .acct-card.good .value{color:#00ff88}.acct-card.bad .value{color:#ff6680}
+    .acct-form-grid{display:grid;grid-template-columns:2fr 1fr 2fr 1fr;gap:10px}
+    .acct-table-wrap{overflow-x:auto;border:1px solid var(--line);border-radius:var(--r8);background:rgba(255,255,255,.03)}
+    .acct-table{width:100%;border-collapse:collapse;min-width:720px}
+    .acct-table th{background:#003087;color:#fff;font-size:.72rem;padding:8px;border-bottom:1px solid rgba(255,255,255,.16);white-space:nowrap}
+    .acct-table td{padding:7px;border-bottom:1px solid rgba(255,255,255,.07);vertical-align:middle}
+    .acct-table tr:last-child td{border-bottom:0}
+    .acct-table .form-control{min-height:38px;padding:7px 8px;font-size:.82rem;background:#1e3a5a!important;color:#fff!important;border-color:rgba(0,212,255,.3)!important}
+    .acct-table input[type=number]{text-align:right}
+    .amount-cell{text-align:right;font-weight:900;color:#fff;white-space:nowrap}
+    .section-head{display:flex;align-items:center;justify-content:space-between;gap:10px;margin:16px 0 8px}
+    .section-head h2{font-size:.92rem;color:#fff;margin:0;font-weight:900}
+    .summary-table{width:100%;border-collapse:collapse;min-width:780px}
+    .summary-table th{background:#003087;color:#fff;font-size:.72rem;padding:8px;white-space:nowrap}
+    .summary-table td{border-bottom:1px solid var(--line);padding:9px 8px;font-size:.82rem;color:var(--ink-2);text-align:right}
+    .summary-table td:first-child,.summary-table td:nth-child(2){text-align:left}
+    .summary-table tr:hover td{background:rgba(255,139,31,.06)}
+    .summary-table .name{font-weight:900;color:#fff}
+    .input-note{background:rgba(255,204,0,.1);border:1px solid rgba(255,204,0,.28);color:#ffe58a;border-radius:var(--r8);padding:10px 12px;font-size:.8rem;line-height:1.7;margin-bottom:12px}
+    .print-sheet{background:#fff;color:#111;border-radius:12px;padding:22px;box-shadow:var(--shadow);margin-top:14px}
+    .print-title{text-align:center;font-size:1.25rem;font-weight:900;color:#003087;border-bottom:2px solid #003087;padding-bottom:8px;margin-bottom:14px}
+    .print-sheet table{width:100%;border-collapse:collapse;font-size:.86rem}
+    .print-sheet th,.print-sheet td{border:1px solid #999;padding:6px 8px;color:#111}
+    .print-sheet th{background:#003087;color:#fff;text-align:center}
+    .print-sheet .right{text-align:right}
+    body[data-theme="light"] .acct-card .value,
+    body[data-theme="light"] .section-head h2,
+    body[data-theme="light"] .summary-table .name{color:var(--ink)}
+    @media(max-width:720px){
+      .acct-grid{grid-template-columns:1fr 1fr}
+      .acct-form-grid{grid-template-columns:1fr}
+      .acct-tab{font-size:.78rem;padding:10px 4px}
+    }
+    @media print{
+      body,html{background:#fff!important}
+      .site-header,.back-btn,.hero-band,.acct-tabs,.no-print,.site-footer,.panel:not(.print-only){display:none!important}
+      .page-wrap{max-width:100%!important;padding:0!important}
+      .acct-view{display:none!important}
+      #view-report{display:block!important}
+      .print-sheet{box-shadow:none!important;border-radius:0!important;margin:0!important;padding:0!important}
+    }
+  </style>
+</head>
+<body>
+<header class="site-header">
+  <div class="header-inner">
+    <a class="header-logo" href="index.html">
+      <div class="logo-mark">⚽</div>
+      <div><span class="logo-name">吉見SMC FC</span><span class="logo-sub">SMART PORTAL</span></div>
+    </a>
+  </div>
+</header>
+<main class="page-wrap">
+  <a class="back-btn no-print" href="coach.html">← コーチ専用に戻る</a>
+  <div class="hero-band no-print">
+    <div class="hero-emoji">💴</div>
+    <div>
+      <div class="hero-title">会計・決算書</div>
+      <div class="hero-sub">大会ごとの収入・支出を入力すると、収支と次大会繰越を自動計算します。</div>
+    </div>
+  </div>
+
+  <div class="input-note no-print">黄色セルの代わりに、この画面では青い入力欄を編集します。金額は「単価 × 数量」で自動計算します。1件の金額だけ入れる場合は、単価に金額、数量に 1 を入力してください。</div>
+
+  <div class="acct-tabs no-print">
+    <button class="acct-tab active" onclick="switchView('edit',this)">入力</button>
+    <button class="acct-tab" onclick="switchView('summary',this)">大会一覧</button>
+    <button class="acct-tab" onclick="switchView('report',this)">決算書</button>
+  </div>
+
+  <section class="acct-view active" id="view-edit">
+    <div class="panel no-print">
+      <div class="section-head" style="margin-top:0">
+        <h2>大会を選択</h2>
+        <div style="display:flex;gap:8px;flex-wrap:wrap">
+          <button class="btn btn-outline btn-sm" onclick="addTournament()">＋ 大会追加</button>
+          <button class="btn btn-primary btn-sm" onclick="saveData()">💾 保存</button>
+        </div>
+      </div>
+      <select class="form-control" id="tournament-select" onchange="selectTournament(this.value)"></select>
+    </div>
+
+    <div class="acct-grid" id="totals"></div>
+
+    <div class="panel no-print">
+      <div class="panel-title">大会情報</div>
+      <div class="acct-form-grid">
+        <div class="form-group"><label class="form-label">大会名</label><input class="form-control" id="f-name" oninput="editInfo('name',this.value)"></div>
+        <div class="form-group"><label class="form-label">開催日</label><input class="form-control" id="f-date" type="date" oninput="editInfo('date',this.value)"></div>
+        <div class="form-group"><label class="form-label">会場</label><input class="form-control" id="f-venue" oninput="editInfo('venue',this.value)"></div>
+        <div class="form-group"><label class="form-label">初回繰越金</label><input class="form-control" id="f-carry" type="number" inputmode="numeric" oninput="editInfo('carry',this.value)"></div>
+      </div>
+      <div style="display:flex;gap:8px;justify-content:flex-end;flex-wrap:wrap">
+        <button class="btn btn-outline btn-sm" onclick="duplicateTournament()">複製</button>
+        <button class="btn btn-outline btn-sm" style="color:var(--red);border-color:rgba(255,68,102,.4)" onclick="deleteTournament()">削除</button>
+      </div>
+    </div>
+
+    <div class="section-head no-print">
+      <h2>収入</h2>
+      <button class="btn btn-outline btn-sm" onclick="addLine('income')">＋ 収入行</button>
+    </div>
+    <div class="acct-table-wrap no-print">
+      <table class="acct-table">
+        <thead><tr><th>収入項目</th><th>単価</th><th>数量</th><th>金額</th><th>備考</th><th>操作</th></tr></thead>
+        <tbody id="income-rows"></tbody>
+      </table>
+    </div>
+
+    <div class="section-head no-print">
+      <h2>支出</h2>
+      <button class="btn btn-outline btn-sm" onclick="addLine('expense')">＋ 支出行</button>
+    </div>
+    <div class="acct-table-wrap no-print">
+      <table class="acct-table">
+        <thead><tr><th>支出項目</th><th>単価</th><th>数量</th><th>金額</th><th>備考</th><th>操作</th></tr></thead>
+        <tbody id="expense-rows"></tbody>
+      </table>
+    </div>
+  </section>
+
+  <section class="acct-view" id="view-summary">
+    <div class="panel">
+      <div class="section-head" style="margin-top:0">
+        <h2>大会一覧</h2>
+        <button class="btn btn-outline btn-sm no-print" onclick="downloadCsv()">CSV保存</button>
+      </div>
+      <div class="acct-table-wrap">
+        <table class="summary-table">
+          <thead><tr><th>大会名</th><th>開催日</th><th>前大会繰越</th><th>収入</th><th>支出</th><th>収支</th><th>次大会繰越</th></tr></thead>
+          <tbody id="summary-rows"></tbody>
+        </table>
+      </div>
+    </div>
+  </section>
+
+  <section class="acct-view" id="view-report">
+    <div class="panel no-print">
+      <div class="section-head" style="margin-top:0">
+        <h2>決算書</h2>
+        <button class="btn btn-primary btn-sm" onclick="window.print()">印刷・PDF保存</button>
+      </div>
+      <select class="form-control" id="report-select" onchange="selectTournament(this.value)"></select>
+    </div>
+    <div class="print-sheet" id="report-sheet"></div>
+  </section>
+</main>
+<footer class="site-footer no-print">YOSHIMI SMC FC — SMART PORTAL</footer>
+<script>
+var KEY="smc_accounting_v1";
+var current=0;
+var data={tournaments:[]};
+
+var EXPENSE_TEMPLATE=["トロフィー","メダル","賞品","参加賞","石灰","ラインテープ","飲み物","氷","弁当","印刷代","グラウンド使用料","審判謝礼","救急用品","雑費","その他"];
+var DEFAULT_TOURNAMENTS=[
+  {name:"20260510 U10・U8フェスティバル",date:"2026-05-10",venue:"吉見ふれあい広場グラウンド",carry:0,income:[{name:"参加費",unit:3000,qty:2,memo:""}],expense:[{name:"参加賞",unit:400,qty:3,memo:"うまい棒"},{name:"石灰",unit:600,qty:2,memo:""},{name:"グラウンド使用料",unit:1500,qty:1,memo:"ふれあいG使用料"}]},
+  {name:"20260606 U8・U12フェスティバル",date:"2026-06-06",venue:"吉見ふれあい広場グラウンド",carry:"",income:[{name:"参加費",unit:3000,qty:6,memo:""}],expense:[{name:"メダル",unit:880,qty:8,memo:"優秀賞メダル"},{name:"石灰",unit:600,qty:3,memo:""},{name:"グラウンド使用料",unit:1500,qty:1,memo:"ふれあいG使用料"}]},
+  {name:"20260704 U8吉見大会",date:"2026-07-04",venue:"吉見ふれあい広場グラウンド",carry:"",income:[{name:"参加費",unit:6000,qty:7,memo:"元シート「260704案」左端の主案を転記"}],expense:[{name:"トロフィー",unit:18095,qty:1,memo:"優勝7,700 / 準優勝5,775 / 敢闘賞4,620"},{name:"メダル",unit:880,qty:8,memo:"優秀賞メダル"},{name:"石灰",unit:600,qty:3,memo:""},{name:"印刷代",unit:220,qty:3,memo:"元データ: 印字代"},{name:"グラウンド使用料",unit:1500,qty:1,memo:"ふれあいG使用料"}]}
+];
+for(var i=4;i<=10;i++){
+  DEFAULT_TOURNAMENTS.push({name:"第"+i+"大会",date:"",venue:"",carry:"",income:[{name:"参加費",unit:"",qty:"",memo:"大会名・開催日・会場・参加費を入力してください"}],expense:EXPENSE_TEMPLATE.map(function(n){return{name:n,unit:"",qty:"",memo:""};})});
+}
+
+function clone(o){return JSON.parse(JSON.stringify(o));}
+function normalize(){
+  if(!data||!Array.isArray(data.tournaments)||!data.tournaments.length)data={tournaments:clone(DEFAULT_TOURNAMENTS)};
+  data.tournaments.forEach(function(t){
+    if(!Array.isArray(t.income))t.income=[];
+    if(!Array.isArray(t.expense))t.expense=[];
+  });
+  if(current>=data.tournaments.length)current=0;
+}
+function yen(v){return (Number(v)||0).toLocaleString("ja-JP")+"円";}
+function num(v){var n=Number(v);return isNaN(n)?0:n;}
+function lineAmount(x){return num(x.unit)*num(x.qty);}
+function total(t,kind){return (t[kind]||[]).reduce(function(s,x){return s+lineAmount(x);},0);}
+function carryAt(idx){
+  if(idx<=0)return num(data.tournaments[0].carry);
+  return closingAt(idx-1);
+}
+function balanceAt(idx){var t=data.tournaments[idx];return total(t,"income")-total(t,"expense");}
+function closingAt(idx){return carryAt(idx)+balanceAt(idx);}
+function esc(s){return String(s==null?"":s).replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;").replace(/"/g,"&quot;");}
+
+function saveData(){
+  normalize();
+  dbSave("accounting",data,KEY,function(){flash("会計データを保存しました");});
+}
+function flash(msg){
+  var el=document.createElement("div");
+  el.style.cssText="position:fixed;bottom:22px;right:18px;background:#00ff88;color:#001a10;padding:10px 16px;border-radius:8px;font-weight:900;font-size:.84rem;z-index:999;box-shadow:0 8px 24px rgba(0,0,0,.35)";
+  el.textContent="✅ "+msg;
+  document.body.appendChild(el);
+  setTimeout(function(){el.remove();},2200);
+}
+function switchView(name,btn){
+  document.querySelectorAll(".acct-view").forEach(function(v){v.classList.remove("active");});
+  document.getElementById("view-"+name).classList.add("active");
+  document.querySelectorAll(".acct-tab").forEach(function(b){b.classList.remove("active");});
+  if(btn)btn.classList.add("active");
+  renderAll();
+}
+function renderOptions(){
+  var opts=data.tournaments.map(function(t,i){return '<option value="'+i+'">'+esc(t.name||("第"+(i+1)+"大会"))+'</option>';}).join("");
+  ["tournament-select","report-select"].forEach(function(id){
+    var el=document.getElementById(id);
+    el.innerHTML=opts;
+    el.value=String(current);
+  });
+}
+function selectTournament(idx){
+  current=Number(idx)||0;
+  renderAll();
+}
+function renderInfo(){
+  var t=data.tournaments[current];
+  document.getElementById("f-name").value=t.name||"";
+  document.getElementById("f-date").value=t.date||"";
+  document.getElementById("f-venue").value=t.venue||"";
+  document.getElementById("f-carry").value=current===0?(t.carry||0):carryAt(current);
+  document.getElementById("f-carry").disabled=current!==0;
+}
+function renderTotals(){
+  var inc=total(data.tournaments[current],"income");
+  var exp=total(data.tournaments[current],"expense");
+  var bal=inc-exp;
+  var car=carryAt(current);
+  document.getElementById("totals").innerHTML=
+    '<div class="acct-card"><div class="label">前大会繰越</div><div class="value">'+yen(car)+'</div></div>'+
+    '<div class="acct-card good"><div class="label">収入合計</div><div class="value">'+yen(inc)+'</div></div>'+
+    '<div class="acct-card bad"><div class="label">支出合計</div><div class="value">'+yen(exp)+'</div></div>'+
+    '<div class="acct-card '+(bal>=0?"good":"bad")+'"><div class="label">次大会繰越</div><div class="value">'+yen(car+bal)+'</div></div>';
+}
+function renderRows(kind){
+  var rows=data.tournaments[current][kind]||[];
+  document.getElementById(kind+"-rows").innerHTML=rows.map(function(x,i){
+    return '<tr>'+
+      '<td><input class="form-control" value="'+esc(x.name)+'" oninput="editLine(\''+kind+'\','+i+',\'name\',this.value)"></td>'+
+      '<td><input class="form-control" type="number" inputmode="numeric" value="'+esc(x.unit)+'" oninput="editLine(\''+kind+'\','+i+',\'unit\',this.value)"></td>'+
+      '<td><input class="form-control" type="number" inputmode="decimal" value="'+esc(x.qty)+'" oninput="editLine(\''+kind+'\','+i+',\'qty\',this.value)"></td>'+
+      '<td class="amount-cell" id="'+kind+'-amt-'+i+'">'+yen(lineAmount(x))+'</td>'+
+      '<td><input class="form-control" value="'+esc(x.memo)+'" oninput="editLine(\''+kind+'\','+i+',\'memo\',this.value)"></td>'+
+      '<td style="text-align:center"><button class="btn btn-outline btn-sm" style="color:var(--red);border-color:rgba(255,68,102,.4)" onclick="deleteLine(\''+kind+'\','+i+')">削除</button></td>'+
+    '</tr>';
+  }).join("");
+}
+function renderSummary(){
+  document.getElementById("summary-rows").innerHTML=data.tournaments.map(function(t,i){
+    var inc=total(t,"income"),exp=total(t,"expense"),bal=inc-exp,car=carryAt(i),closing=car+bal;
+    return '<tr onclick="current='+i+';switchView(\'edit\',document.querySelector(\'.acct-tab\'))" style="cursor:pointer">'+
+      '<td class="name">'+esc(t.name)+'</td><td>'+esc(t.date||"")+'</td>'+
+      '<td>'+yen(car)+'</td><td>'+yen(inc)+'</td><td>'+yen(exp)+'</td>'+
+      '<td style="color:'+(bal>=0?'#00aa55':'#cc2244')+';font-weight:900">'+yen(bal)+'</td><td>'+yen(closing)+'</td></tr>';
+  }).join("");
+}
+function renderReport(){
+  var t=data.tournaments[current], inc=total(t,"income"), exp=total(t,"expense"), bal=inc-exp, car=carryAt(current), closing=car+bal;
+  function detailRows(kind){
+    return (t[kind]||[]).filter(function(x){return x.name||num(x.unit)||num(x.qty)||x.memo;}).map(function(x){
+      return '<tr><td>'+esc(x.name)+'</td><td class="right">'+yen(num(x.unit))+'</td><td class="right">'+esc(x.qty||"")+'</td><td class="right">'+yen(lineAmount(x))+'</td><td>'+esc(x.memo)+'</td></tr>';
+    }).join("")||'<tr><td colspan="5" style="text-align:center;color:#777">入力なし</td></tr>';
+  }
+  document.getElementById("report-sheet").innerHTML=
+    '<div class="print-title">'+esc(t.name||"大会")+' 決算報告書</div>'+
+    '<table style="margin-bottom:12px"><tr><th>開催日</th><td>'+esc(t.date||"")+'</td><th>会場</th><td>'+esc(t.venue||"")+'</td></tr>'+
+    '<tr><th>前大会繰越</th><td class="right">'+yen(car)+'</td><th>次大会繰越</th><td class="right">'+yen(closing)+'</td></tr>'+
+    '<tr><th>収入合計</th><td class="right">'+yen(inc)+'</td><th>支出合計</th><td class="right">'+yen(exp)+'</td></tr>'+
+    '<tr><th>大会収支</th><td class="right" colspan="3" style="font-weight:900">'+yen(bal)+'</td></tr></table>'+
+    '<h3 style="color:#003087;margin:12px 0 6px">収入明細</h3><table><tr><th>項目</th><th>単価</th><th>数量</th><th>金額</th><th>備考</th></tr>'+detailRows("income")+'</table>'+
+    '<h3 style="color:#003087;margin:14px 0 6px">支出明細</h3><table><tr><th>項目</th><th>単価</th><th>数量</th><th>金額</th><th>備考</th></tr>'+detailRows("expense")+'</table>';
+}
+function renderAll(){
+  normalize();renderOptions();renderInfo();renderTotals();renderRows("income");renderRows("expense");renderSummary();renderReport();
+}
+function editInfo(field,value){
+  data.tournaments[current][field]=field==="carry"?num(value):value;
+  renderOptions();renderTotals();renderSummary();renderReport();
+}
+function editLine(kind,idx,field,value){
+  data.tournaments[current][kind][idx][field]=(field==="unit"||field==="qty")?value:value;
+  var amount=document.getElementById(kind+"-amt-"+idx);
+  if(amount)amount.textContent=yen(lineAmount(data.tournaments[current][kind][idx]));
+  renderTotals();renderSummary();renderReport();
+}
+function addLine(kind){
+  data.tournaments[current][kind].push({name:"",unit:"",qty:"",memo:""});
+  renderRows(kind);
+}
+function deleteLine(kind,idx){
+  if(!confirm("この行を削除しますか？"))return;
+  data.tournaments[current][kind].splice(idx,1);
+  renderAll();
+}
+function newTournamentTemplate(n){
+  return {name:"第"+n+"大会",date:"",venue:"",carry:"",income:[{name:"参加費",unit:"",qty:"",memo:""}],expense:EXPENSE_TEMPLATE.map(function(x){return{name:x,unit:"",qty:"",memo:""};})};
+}
+function addTournament(){
+  data.tournaments.push(newTournamentTemplate(data.tournaments.length+1));
+  current=data.tournaments.length-1;
+  renderAll();saveData();
+}
+function duplicateTournament(){
+  var t=clone(data.tournaments[current]);
+  t.name=(t.name||"大会")+" コピー";
+  t.date="";
+  t.carry="";
+  data.tournaments.splice(current+1,0,t);
+  current++;
+  renderAll();saveData();
+}
+function deleteTournament(){
+  if(data.tournaments.length<=1){alert("最後の大会は削除できません");return;}
+  if(!confirm("この大会を削除しますか？"))return;
+  data.tournaments.splice(current,1);
+  current=Math.max(0,current-1);
+  renderAll();saveData();
+}
+function downloadCsv(){
+  var rows=[["大会名","開催日","前大会繰越","収入","支出","収支","次大会繰越"]];
+  data.tournaments.forEach(function(t,i){
+    var inc=total(t,"income"),exp=total(t,"expense"),bal=inc-exp,car=carryAt(i);
+    rows.push([t.name,t.date,car,inc,exp,bal,car+bal]);
+  });
+  var csv=rows.map(function(r){return r.map(function(c){return '"'+String(c==null?"":c).replace(/"/g,'""')+'"';}).join(",");}).join("\n");
+  var blob=new Blob(["\ufeff"+csv],{type:"text/csv;charset=utf-8"});
+  var a=document.createElement("a");
+  a.href=URL.createObjectURL(blob);a.download="yoshimi-smc-accounting.csv";a.click();URL.revokeObjectURL(a.href);
+}
+
+dbListen("accounting",function(val){
+  data=val&&Array.isArray(val.tournaments)?val:{tournaments:clone(DEFAULT_TOURNAMENTS)};
+  normalize();renderAll();
+},KEY,{tournaments:clone(DEFAULT_TOURNAMENTS)});
+window.addEventListener("DOMContentLoaded",function(){normalize();renderAll();});
+</script>
+<script src="common.js"></script>
+</body>
+</html>
