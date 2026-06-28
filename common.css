@@ -132,6 +132,49 @@ body.is-loading { overflow: hidden; }
   box-shadow: 0 10px 28px rgba(0, 0, 0, .22);
 }
 body[data-theme="light"] .site-header { background: rgba(255,255,255,.9); }
+body[data-theme="light"] .hero-title,
+body[data-theme="light"] .panel-title,
+body[data-theme="light"] .menu-card .card-label,
+body[data-theme="light"] .stat-card .sv,
+body[data-theme="light"] .modal h3,
+body[data-theme="light"] .edit-modal h3,
+body[data-theme="light"] .tc-title,
+body[data-theme="light"] .check-name,
+body[data-theme="light"] .kanji,
+body[data-theme="light"] .list-table td,
+body[data-theme="light"] .data-table td,
+body[data-theme="light"] [style*="color:#fff"],
+body[data-theme="light"] [style*="color: #fff"],
+body[data-theme="light"] [style*="color:#ffffff"],
+body[data-theme="light"] [style*="color: #ffffff"] {
+  color: var(--ink) !important;
+  text-shadow: none !important;
+}
+body[data-theme="light"] .hero-sub,
+body[data-theme="light"] .menu-card .card-desc,
+body[data-theme="light"] .tc-note,
+body[data-theme="light"] .tc-due,
+body[data-theme="light"] .kana,
+body[data-theme="light"] .progress-label,
+body[data-theme="light"] .empty-msg {
+  color: var(--ink-3) !important;
+}
+body[data-theme="light"] .modal,
+body[data-theme="light"] .edit-modal,
+body[data-theme="light"] .todo-card,
+body[data-theme="light"] .check-item,
+body[data-theme="light"] .stat-card,
+body[data-theme="light"] .list-wrap,
+body[data-theme="light"] .roster-wrap {
+  background: rgba(255, 255, 255, .94) !important;
+}
+body[data-theme="light"] .form-control {
+  background: #fff;
+  color: var(--ink);
+}
+body[data-theme="light"] .form-control::placeholder {
+  color: #7a8ba3;
+}
 .header-inner {
   max-width: 1080px;
   min-height: 66px;

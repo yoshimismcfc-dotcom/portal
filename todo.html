@@ -344,15 +344,7 @@ document.getElementById("modal").addEventListener("click", function(e){ if(e.tar
 
 function render(){ renderStats(); renderList(); }
 // サンプルデータ（初回のみ）
-if(!_todoData.length){
-  var samples=[
-    {id:"s1",created:Date.now()-86400000*3,title:"7月大会の要綱・対戦表を作成する",who:"片山コーチ",due:"2026-06-30",status:"wip",note:"対戦表ページから自動生成できます"},
-    {id:"s2",created:Date.now()-86400000*2,title:"体験入団の問い合わせに返信する",who:"",due:"2026-06-28",status:"todo",note:"yoshimi.smc.fc@gmail.com に問い合わせあり"},
-    {id:"s3",created:Date.now()-86400000,title:"6月の団費を集金する",who:"担当保護者",due:"",status:"hold",note:"次回練習時に集金。未回収2名あり"},
-    {id:"s4",created:Date.now()-86400000*5,title:"ユニフォームの在庫確認",who:"",due:"",status:"done",note:"完了。在庫8着確認済み"},
-  ];
-  save(samples);render();
-}
+// サンプル自動投入は入力済みデータを上書きする原因になるため停止。
 </script>
 <script src="common.js"></script>
 </body>

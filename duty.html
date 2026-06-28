@@ -207,7 +207,8 @@ function resetChecks(){
 }
 function clearAllChecks(){
   if(!confirm("リストを初期化しますか？カスタムアイテムも含めて削除されます。"))return;
-  localStorage.removeItem(CHECK_KEY); renderChecks();
+  _checkData = JSON.parse(JSON.stringify(DEFAULT_ITEMS));
+  saveChecks(_checkData); renderChecks();
 }
 
 // ===== 当番表 =====
