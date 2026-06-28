@@ -20,6 +20,11 @@
     .color-folder{margin-bottom:14px;border-radius:var(--r12);overflow:hidden;border:1px solid var(--line-2)}
     .cf-header{display:flex;align-items:center;gap:10px;padding:11px 14px;cursor:pointer;user-select:none;transition:.15s}
     .cf-header:hover{filter:brightness(1.1)}
+    .cf-header.is-light .cf-name,
+    .cf-header.is-light .cf-total,
+    .cf-header.is-light .cf-toggle{color:#071126}
+    .cf-header.is-light .cf-free{color:#007a45}
+    .cf-header.is-light .cf-lent{color:#b0122f}
     .cf-swatch{width:18px;height:18px;border-radius:50%;flex-shrink:0;border:2px solid rgba(255,255,255,.35);box-shadow:0 0 6px rgba(0,0,0,.5)}
     .cf-name{font-size:.9rem;font-weight:900;color:#fff;flex:1}
     .cf-stats{display:flex;gap:8px;font-size:.72rem;flex-shrink:0}
@@ -83,6 +88,19 @@
     .color-palette{display:flex;gap:8px;flex-wrap:wrap;margin-top:6px;margin-bottom:6px}
     .cp-sw{width:28px;height:28px;border-radius:50%;border:3px solid transparent;cursor:pointer;transition:.12s;flex-shrink:0;box-shadow:0 2px 6px rgba(0,0,0,.4)}
     .cp-sw.sel{border-color:#fff;box-shadow:0 0 0 2px var(--orange),0 2px 6px rgba(0,0,0,.4)}
+    /* 注意事項 */
+    .uniform-note{background:linear-gradient(135deg,rgba(255,139,31,.14),rgba(139,18,48,.14));border:1px solid rgba(255,139,31,.28);border-radius:var(--r12);padding:16px;margin:0 0 16px}
+    .uniform-note h2{font-size:1rem;font-weight:900;color:var(--orange-2);margin:0 0 8px}
+    .uniform-note p{margin:0 0 10px;color:var(--ink-2);line-height:1.75;font-size:.88rem}
+    .uniform-note-grid{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+    .uniform-note-box{background:rgba(255,255,255,.05);border:1px solid var(--line);border-radius:var(--r8);padding:12px}
+    .uniform-note-box h3{font-size:.86rem;color:#fff;margin:0 0 8px;font-weight:900}
+    .uniform-note-box ul{margin:0;padding-left:1.1em;color:var(--ink-2);line-height:1.7;font-size:.82rem}
+    .uniform-note-box li{margin:.15rem 0}
+    body[data-theme="light"] .uniform-note{background:linear-gradient(135deg,rgba(255,139,31,.16),rgba(139,18,48,.08));border-color:rgba(139,18,48,.22)}
+    body[data-theme="light"] .uniform-note-box{background:rgba(255,255,255,.82)}
+    body[data-theme="light"] .uniform-note-box h3{color:var(--ink)}
+    @media(max-width:640px){.uniform-note-grid{grid-template-columns:1fr}.uniform-note{padding:14px}}
     /* 履歴 */
     .hist-item{background:rgba(255,255,255,.04);border-radius:var(--r8);padding:8px 12px;font-size:.78rem;display:flex;align-items:center;gap:7px;margin-bottom:5px;flex-wrap:wrap}
     @media(max-width:400px){.fg2{grid-template-columns:1fr}}
@@ -108,6 +126,31 @@
     </div>
   </div>
   <div class="notice-bar">💾 データはこのブラウザ（端末）に保存されます。</div>
+
+  <section class="uniform-note" aria-label="ユニフォームについての注意事項">
+    <h2>ユニフォームについての注意事項</h2>
+    <p>ユニフォームは選手の皆さんへ無償で貸し出しています。チームの大切な備品ですので、ルールを守って丁寧に扱ってください。破損や紛失、ルール違反が続く場合は、今後の貸し出し方法を有償に変更する可能性があります。</p>
+    <div class="uniform-note-grid">
+      <div class="uniform-note-box">
+        <h3>着用・持ち運び</h3>
+        <ul>
+          <li>汚れや損傷を防ぐため、必要な時だけ着用してください。</li>
+          <li>試合会場へは着用せず、バッグに入れて持参してください。</li>
+          <li>試合終了後は着替えて、バッグにしまって持ち帰ってください。</li>
+          <li>食事の際は脱ぐか、上着を着て汚れを防いでください。</li>
+        </ul>
+      </div>
+      <div class="uniform-note-box">
+        <h3>洗濯・保管</h3>
+        <ul>
+          <li>背番号・胸番号は取れやすいため、裏返して洗濯ネットに入れてください。</li>
+          <li>干す時も裏返しのまま、直射日光を避けてください。</li>
+          <li>乾燥機・アイロンは使用しないでください。</li>
+          <li>長時間、濡れたまま放置しないでください。</li>
+        </ul>
+      </div>
+    </div>
+  </section>
 
   <div class="stat-row" id="stat-row"></div>
 
@@ -222,6 +265,16 @@ var PALETTE=[
 ];
 // loadU/saveU/loadH/saveH は上部で定義済み
 function getPalette(cname){return PALETTE.find(function(p){return p.name===cname;})||{c1:"#555",c2:"#777",code:"#555"};}
+function hexLightness(hex){
+  hex=String(hex||"").replace("#","");
+  if(hex.length===3)hex=hex.split("").map(function(c){return c+c;}).join("");
+  var r=parseInt(hex.slice(0,2),16),g=parseInt(hex.slice(2,4),16),b=parseInt(hex.slice(4,6),16);
+  if([r,g,b].some(function(v){return isNaN(v);}))return 0;
+  return (r*299+g*587+b*114)/1000;
+}
+function isLightFolder(p){
+  return hexLightness(p.c1)>185 || hexLightness(p.c2)>185 || hexLightness(p.code)>185;
+}
 
 function renderStats(){
   var d=loadU(),total=d.length,free=d.filter(function(u){return !u.lentTo;}).length;
@@ -252,6 +305,7 @@ function renderFolders(){
     var lent=items.length-free;
     var bodyId="cfb"+fi;
     var hdrGrad="linear-gradient(135deg,"+cg.p.c1+","+cg.p.c2+")";
+    var lightClass=isLightFolder(cg.p)?" is-light":"";
 
     // テーブル行生成
     var rows=items.map(function(u){
@@ -277,7 +331,7 @@ function renderFolders(){
     }).join("");
 
     html+='<div class="color-folder">'
-      +'<div class="cf-header" style="background:'+hdrGrad+'" onclick="toggleFolder(\''+bodyId+'\')">'
+      +'<div class="cf-header'+lightClass+'" style="background:'+hdrGrad+'" onclick="toggleFolder(\''+bodyId+'\')">'
       +'<div class="cf-swatch" style="background:'+cg.p.code+'"></div>'
       +'<div class="cf-name">'+cname+'</div>'
       +'<div class="cf-stats">'
