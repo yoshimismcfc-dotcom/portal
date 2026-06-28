@@ -567,6 +567,11 @@ select.form-control option { background: var(--navy-900); color: var(--ink); }
 @media (max-width: 420px) {
   .card-grid,
   .card-grid.col3,
-  .card-grid.col2 { grid-template-columns: 1fr; }
+  .card-grid.col2 { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 8px; }
+  .menu-card { min-height: 132px; padding: 13px 10px; }
+  .menu-card .card-icon { width: 34px; height: 34px; border-radius: 10px; font-size: 1rem; }
+  .menu-card .card-label { font-size: .88rem; }
+  .menu-card .card-desc { font-size: .72rem; }
+  .menu-card .card-badge { top: 9px; right: 9px; font-size: .58rem; padding: 2px 7px; }
   .header-action { min-width: 40px; min-height: 40px; }
 }
