@@ -6,7 +6,7 @@
   <meta http-equiv="Pragma" content="no-cache">
   <meta http-equiv="Expires" content="0">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>会計・決算書 v3｜吉見SMC FC</title>
+  <title>会計・決算書｜吉見SMC FC</title>
   <script src="firebase-config.js"></script>
   <link rel="stylesheet" href="common.css">
   <style>
@@ -180,7 +180,7 @@
         </div>
       </div>
       <div style="background:rgba(255,204,0,.1);border:1px solid rgba(255,204,0,.28);border-radius:var(--r8);padding:10px 12px;font-size:.8rem;color:#ffe58a;line-height:1.7;margin-bottom:10px">
-        💡 <strong>使い方：</strong>「入力」タブでデータを入力・保存したあと、ここで年度を選んで「💾 現在のデータをこの年度として保存」を押してください。年度ごとに独立したスナップショットが保存されます。
+        💡 「入力」タブでデータを入力・保存後、年度を選んで「💾 保存」を押してください。
       </div>
       <button class="btn btn-primary" onclick="saveAsAnnual()" style="width:100%;margin-bottom:6px">💾 現在のデータをこの年度として保存</button>
       <div id="annual-msg" style="font-size:.8rem;color:var(--green);min-height:1.2em;text-align:center;margin-bottom:4px"></div>
@@ -379,6 +379,7 @@ dbListen("accounting",function(val){
 },KEY,{tournaments:clone(DEFAULT_TOURNAMENTS)});
 window.addEventListener("DOMContentLoaded",function(){normalize();renderAll();});
 
+
 /* ============================================================
    年度累計機能（既存機能は一切変更なし・完全独立）
    ============================================================ */
@@ -393,22 +394,21 @@ function storeAnnual(d){
   dbSave("accounting_annual", d, ANNUAL_KEY, null);
 }
 
-// 年度セレクターに年度を追加
 function addAnnualYear(){
   var y = prompt("追加する年度（4桁の数字）を入力してください", String(new Date().getFullYear()+1));
   if(!y) return;
   y = y.trim();
   if(!/^\d{4}$/.test(y)){ alert("4桁の数字で入力してください（例：2027）"); return; }
   var sel = document.getElementById("annual-year");
-  for(var i=0;i<sel.options.length;i++){ if(sel.options[i].value===y){ alert(y+"年度は既にあります"); sel.value=y; renderAnnual(); return; } }
+  for(var i=0;i<sel.options.length;i++){
+    if(sel.options[i].value===y){ alert(y+"年度は既にあります"); sel.value=y; renderAnnual(); return; }
+  }
   var opt = document.createElement("option");
   opt.value = y; opt.textContent = y+"年度";
-  // 年度の大きい順に挿入
   var inserted = false;
   for(var j=0;j<sel.options.length;j++){
     if(parseInt(sel.options[j].value) < parseInt(y)){
-      sel.insertBefore(opt, sel.options[j]);
-      inserted = true; break;
+      sel.insertBefore(opt, sel.options[j]); inserted=true; break;
     }
   }
   if(!inserted) sel.appendChild(opt);
@@ -416,12 +416,10 @@ function addAnnualYear(){
   renderAnnual();
 }
 
-// 現在の入力データをスナップショットとして保存
 function saveAsAnnual(){
   var y = document.getElementById("annual-year").value;
   if(!y){ alert("年度を選択してください"); return; }
   if(!confirm(y+"年度として現在のデータを保存します。よろしいですか？")) return;
-  // データのディープコピーを保存
   var snap = {
     year: y,
     savedAt: new Date().toISOString(),
@@ -436,7 +434,6 @@ function saveAsAnnual(){
   renderAnnual();
 }
 
-// 年度累計決算書を描画
 function renderAnnual(){
   var y = document.getElementById("annual-year").value;
   var snap = (loadAnnual())[y];
@@ -446,95 +443,85 @@ function renderAnnual(){
     return;
   }
   var ts = snap.tournaments;
-  function N(v){ var n=Number(v); return isNaN(n)?0:n; }
-  function amt(x){ return N(x.unit)*N(x.qty); }
-  function tot(t,k){ return (t[k]||[]).reduce(function(s,x){return s+amt(x);},0); }
-  function carryAt(i){ return i<=0 ? N(ts[0].carry) : carryAt(i-1)+tot(ts[i-1],"income")-tot(ts[i-1],"expense"); }
+  function N2(v){ var n=Number(v); return isNaN(n)?0:n; }
+  function amt2(x){ return N2(x.unit)*N2(x.qty); }
+  function tot2(t,k){ return (t[k]||[]).reduce(function(s,x){return s+amt2(x);},0); }
+  function carryAt2(i){ return i<=0 ? N2(ts[0].carry) : carryAt2(i-1)+tot2(ts[i-1],"income")-tot2(ts[i-1],"expense"); }
   function yen2(v){ return (Number(v)||0).toLocaleString("ja-JP")+"円"; }
   function esc2(s){ return String(s==null?"":s).replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;"); }
-
   var tInc=0, tExp=0;
   var rows = ts.map(function(t,i){
-    var inc=tot(t,"income"), exp=tot(t,"expense"), bal=inc-exp, car=carryAt(i);
+    var inc=tot2(t,"income"), exp=tot2(t,"expense"), bal=inc-exp, car=carryAt2(i);
     tInc+=inc; tExp+=exp;
-    return "<tr>"
-      +"<td>"+esc2(t.name||"")+"</td>"
-      +"<td>"+esc2(t.date||"")+"</td>"
+    return "<tr><td>"+esc2(t.name||"")+"</td><td>"+esc2(t.date||"")+"</td>"
       +"<td class='right'>"+yen2(car)+"</td>"
       +"<td class='right' style='color:#004d26;font-weight:700'>"+yen2(inc)+"</td>"
       +"<td class='right' style='color:#660011;font-weight:700'>"+yen2(exp)+"</td>"
       +"<td class='right' style='font-weight:900;color:"+(bal>=0?"#003087":"#990022")+"'>"+yen2(bal)+"</td>"
-      +"<td class='right' style='font-weight:900'>"+yen2(car+bal)+"</td>"
-      +"</tr>";
+      +"<td class='right' style='font-weight:900'>"+yen2(car+bal)+"</td></tr>";
   }).join("");
-
-  var firstCarry = N(ts[0].carry);
-  var lastClosing = carryAt(ts.length-1) + tot(ts[ts.length-1],"income") - tot(ts[ts.length-1],"expense");
-  var annualBal = tInc - tExp;
-  var savedStr = snap.savedAt ? new Date(snap.savedAt).toLocaleDateString("ja-JP") : "";
-
-  sheet.innerHTML =
+  var firstCarry=N2(ts[0].carry);
+  var lastClosing=carryAt2(ts.length-1)+tot2(ts[ts.length-1],"income")-tot2(ts[ts.length-1],"expense");
+  var annualBal=tInc-tExp;
+  var savedStr=snap.savedAt ? new Date(snap.savedAt).toLocaleDateString("ja-JP") : "";
+  sheet.innerHTML=
     "<div class='print-title'>"+y+"年度 年間累計決算報告書"
-    +"<br><span style='font-size:.78rem;font-weight:400'>吉見SMCサッカースポーツ少年団　（保存日："+esc2(savedStr)+"）</span></div>"
+    +"<br><span style='font-size:.78rem;font-weight:400'>吉見SMCサッカースポーツ少年団　保存日："+esc2(savedStr)+"</span></div>"
     +"<table style='margin-bottom:12px'>"
     +"<tr><th>年度</th><td>"+y+"年度</td><th>大会数</th><td>"+ts.length+"大会</td>"
-    +"<th>期首繰越金</th><td class='right'>"+yen2(firstCarry)+"</td><th>期末残高</th><td class='right' style='font-weight:900;color:#003087'>"+yen2(lastClosing)+"</td></tr>"
+    +"<th>期首繰越金</th><td class='right'>"+yen2(firstCarry)+"</td>"
+    +"<th>期末残高</th><td class='right' style='font-weight:900;color:#003087'>"+yen2(lastClosing)+"</td></tr>"
     +"<tr><th>収入合計</th><td class='right' style='color:#004d26;font-weight:900'>"+yen2(tInc)+"</td>"
     +"<th>支出合計</th><td class='right' style='color:#660011;font-weight:900'>"+yen2(tExp)+"</td>"
     +"<th>年間収支</th><td class='right' style='font-weight:900;color:"+(annualBal>=0?"#003087":"#990022")+"'>"+yen2(annualBal)+"</td>"
-    +"<td colspan='2'></td></tr>"
-    +"</table>"
+    +"<td colspan='2'></td></tr></table>"
     +"<h3 style='color:#003087;margin:14px 0 6px'>大会別収支一覧</h3>"
     +"<div class='acct-table-wrap'><table class='summary-table'>"
     +"<thead><tr><th>大会名</th><th>開催日</th><th>前大会繰越</th><th>収入</th><th>支出</th><th>収支</th><th>次大会繰越</th></tr></thead>"
     +"<tbody>"+rows+"</tbody>"
-    +"<tfoot><tr>"
-    +"<td colspan='3' style='font-weight:900;color:#003087'>合　計</td>"
+    +"<tfoot><tr><td colspan='3' style='font-weight:900;color:#003087'>合　計</td>"
     +"<td class='right' style='font-weight:900;color:#004d26'>"+yen2(tInc)+"</td>"
     +"<td class='right' style='font-weight:900;color:#660011'>"+yen2(tExp)+"</td>"
     +"<td class='right' style='font-weight:900'>"+yen2(annualBal)+"</td>"
-    +"<td></td></tr></tfoot>"
-    +"</table></div>";
+    +"<td></td></tr></tfoot></table></div>";
 }
 
-// CSV出力
 function downloadAnnualCsv(){
   var y = document.getElementById("annual-year").value;
   var snap = (loadAnnual())[y];
-  if(!snap || !snap.tournaments){ alert("データがありません。先に保存してください。"); return; }
+  if(!snap||!snap.tournaments){ alert("データがありません。先に保存してください。"); return; }
   var ts = snap.tournaments;
-  function N(v){ var n=Number(v); return isNaN(n)?0:n; }
-  function amt(x){ return N(x.unit)*N(x.qty); }
-  function tot(t,k){ return (t[k]||[]).reduce(function(s,x){return s+amt(x);},0); }
-  function carryAt(i){ return i<=0 ? N(ts[0].carry) : carryAt(i-1)+tot(ts[i-1],"income")-tot(ts[i-1],"expense"); }
-  var rows = [["大会名","開催日","前大会繰越","収入","支出","収支","次大会繰越"]];
+  function N3(v){ var n=Number(v); return isNaN(n)?0:n; }
+  function amt3(x){ return N3(x.unit)*N3(x.qty); }
+  function tot3(t,k){ return (t[k]||[]).reduce(function(s,x){return s+amt3(x);},0); }
+  function carryAt3(i){ return i<=0?N3(ts[0].carry):carryAt3(i-1)+tot3(ts[i-1],"income")-tot3(ts[i-1],"expense"); }
+  var rows2=[["大会名","開催日","前大会繰越","収入","支出","収支","次大会繰越"]];
   ts.forEach(function(t,i){
-    var inc=tot(t,"income"),exp=tot(t,"expense"),bal=inc-exp,car=carryAt(i);
-    rows.push([t.name||"",t.date||"",car,inc,exp,bal,car+bal]);
+    var inc=tot3(t,"income"),exp=tot3(t,"expense"),bal=inc-exp,car=carryAt3(i);
+    rows2.push([t.name||"",t.date||"",car,inc,exp,bal,car+bal]);
   });
-  var csv = rows.map(function(r){
+  var lines2=rows2.map(function(r){
     return r.map(function(c){ return '"'+String(c==null?"":c).replace(/"/g,'""')+'"'; }).join(",");
-  }).join("
-");
-  var a = document.createElement("a");
-  a.href = URL.createObjectURL(new Blob(["﻿"+csv],{type:"text/csv;charset=utf-8"}));
-  a.download = y+"年度_年間累計決算書.csv"; a.click();
+  });
+  var csv2=lines2.join("\n");
+  var a=document.createElement("a");
+  a.href=URL.createObjectURL(new Blob(["\ufeff"+csv2],{type:"text/csv;charset=utf-8"}));
+  a.download=y+"年度_年間累計決算書.csv"; a.click();
 }
 
-// Firebase から年度データも読み込み
 dbListen("accounting_annual", function(val){
-  if(val && typeof val === "object" && !Array.isArray(val)){
+  if(val && typeof val==="object" && !Array.isArray(val)){
     localStorage.setItem(ANNUAL_KEY, JSON.stringify(val));
   }
-  // 保存済み年度をセレクターに反映
-  var all = loadAnnual();
-  var years = Object.keys(all).sort(function(a,b){return parseInt(b)-parseInt(a);});
-  var sel = document.getElementById("annual-year");
+  var all=loadAnnual();
+  var years=Object.keys(all).sort(function(a,b){return parseInt(b)-parseInt(a);});
+  var sel=document.getElementById("annual-year");
   if(sel && years.length){
-    sel.innerHTML = years.map(function(y){return '<option value="'+y+'">'+y+'年度</option>';}).join("");
+    sel.innerHTML=years.map(function(y){return '<option value="'+y+'">'+y+'年度</option>';}).join("");
   }
   renderAnnual();
 }, ANNUAL_KEY, {});
+
 </script>
 <script src="common.js"></script>
 </body>
