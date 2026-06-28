@@ -1,39 +1,136 @@
 // =====================================================
-// 吉見SMC FC ポータル 共通スクリプト
+// Yoshimi SMC FC Portal shared interactions
 // =====================================================
+(function () {
+  const LOGO_SRC = "assets/yoshimi-smc-logo.jpeg";
+  const TEAM_NAME = "吉見SMCサッカースポーツ少年団";
+  const PORTAL_NAME = "SMART PORTAL";
+  const THEME_KEY = "smc-portal-theme";
 
-// タブ切り替え（ページ内の .tab-btn に適用）
-document.querySelectorAll(".tab-btn").forEach(btn => {
-  btn.addEventListener("click", () => {
-    const target = btn.dataset.tab;
-    const container = btn.closest("[role='tablist']").parentElement;
-
-    container.querySelectorAll(".tab-btn").forEach(b => {
-      b.classList.toggle("active", b === btn);
-      b.setAttribute("aria-selected", String(b === btn));
-    });
-    container.querySelectorAll(".tab-content").forEach(p => {
-      p.classList.toggle("active", p.id === "tab-" + target);
-    });
-  });
-});
-
-// ===== localStorage 利用可能チェック =====
-function storageAvailable(){
-  try{
-    var k='__smctest__';
-    localStorage.setItem(k,'1');
-    localStorage.removeItem(k);
-    return true;
-  }catch(e){return false;}
-}
-
-// ページ読み込み時にlocalStorageが使えるか確認
-window.addEventListener('DOMContentLoaded', function(){
-  if(!storageAvailable()){
-    var b=document.createElement('div');
-    b.style.cssText='position:fixed;top:0;left:0;right:0;background:#bc002d;color:#fff;text-align:center;padding:8px;font-size:.85rem;font-weight:700;z-index:9999';
-    b.textContent='⚠️ このブラウザではデータの保存ができません。Safariの「プライベートブラウズ」モードをオフにするか、Chromeをお試しください。';
-    document.body.prepend(b);
+  function storageAvailable() {
+    try {
+      const key = "__smctest__";
+      localStorage.setItem(key, "1");
+      localStorage.removeItem(key);
+      return true;
+    } catch (error) {
+      return false;
+    }
   }
-});
+
+  const canStore = storageAvailable();
+
+  function getSavedTheme() {
+    if (!canStore) return "dark";
+    return localStorage.getItem(THEME_KEY) || "dark";
+  }
+
+  function applyTheme(theme) {
+    document.body.dataset.theme = theme;
+    const button = document.querySelector(".theme-toggle");
+    if (!button) return;
+    const isDark = theme === "dark";
+    button.setAttribute("aria-label", isDark ? "ライトモードに切り替え" : "ダークモードに切り替え");
+    button.querySelector(".theme-icon").textContent = isDark ? "☀" : "☾";
+  }
+
+  function buildLoader() {
+    if (document.querySelector(".portal-loader")) return;
+    document.body.classList.add("is-loading");
+    const loader = document.createElement("div");
+    loader.className = "portal-loader";
+    loader.setAttribute("aria-live", "polite");
+    loader.innerHTML = `
+      <div class="loader-card">
+        <img class="loader-logo" src="${LOGO_SRC}" alt="">
+        <div class="loader-ring" aria-hidden="true"></div>
+        <div class="loader-text">YOSHIMI SMC FC</div>
+      </div>
+    `;
+    document.body.prepend(loader);
+    window.addEventListener("load", () => {
+      window.setTimeout(() => {
+        loader.classList.add("is-hidden");
+        document.body.classList.remove("is-loading");
+      }, 180);
+    });
+    window.setTimeout(() => {
+      loader.classList.add("is-hidden");
+      document.body.classList.remove("is-loading");
+    }, 1200);
+  }
+
+  function refreshHeader() {
+    const header = document.querySelector(".site-header");
+    if (!header) return;
+    header.innerHTML = `
+      <div class="header-inner">
+        <a class="header-logo" href="index.html" aria-label="${TEAM_NAME} ホーム">
+          <span class="logo-mark"><img src="${LOGO_SRC}" alt="${TEAM_NAME} ロゴ"></span>
+          <span>
+            <span class="logo-name">${TEAM_NAME}</span>
+            <span class="logo-sub">YOSHIMI SMC FC · ${PORTAL_NAME}</span>
+          </span>
+        </a>
+        <span class="header-spacer"></span>
+        <button class="header-action theme-toggle" type="button">
+          <span class="theme-icon" aria-hidden="true">☀</span>
+        </button>
+      </div>
+    `;
+    const toggle = header.querySelector(".theme-toggle");
+    toggle.addEventListener("click", () => {
+      const next = document.body.dataset.theme === "dark" ? "light" : "dark";
+      if (canStore) localStorage.setItem(THEME_KEY, next);
+      applyTheme(next);
+    });
+  }
+
+  function refreshFooter() {
+    document.querySelectorAll(".site-footer").forEach((footer) => {
+      footer.innerHTML = `
+        <div class="footer-brand">
+          <img class="footer-logo" src="${LOGO_SRC}" alt="">
+          <span>${TEAM_NAME}</span>
+        </div>
+        <div class="footer-sub">YOSHIMI SMC FC · ${PORTAL_NAME}</div>
+      `;
+    });
+  }
+
+  function setupTabs() {
+    document.querySelectorAll(".tab-btn").forEach((button) => {
+      button.addEventListener("click", () => {
+        const target = button.dataset.tab;
+        const root = button.closest("[role='tablist']")?.parentElement || button.closest(".panel") || document;
+
+        root.querySelectorAll(".tab-btn").forEach((item) => {
+          const active = item === button;
+          item.classList.toggle("active", active);
+          item.setAttribute("aria-selected", String(active));
+        });
+        root.querySelectorAll(".tab-content").forEach((panel) => {
+          panel.classList.toggle("active", panel.id === "tab-" + target);
+        });
+      });
+    });
+  }
+
+  function showStorageWarning() {
+    if (canStore) return;
+    const banner = document.createElement("div");
+    banner.className = "notice-bar red";
+    banner.style.cssText = "position:fixed;top:70px;left:12px;right:12px;z-index:9998";
+    banner.textContent = "このブラウザではデータ保存が使えません。Safariのプライベートブラウズをオフにするか、Chromeでお試しください。";
+    document.body.prepend(banner);
+  }
+
+  document.addEventListener("DOMContentLoaded", () => {
+    buildLoader();
+    refreshHeader();
+    applyTheme(getSavedTheme());
+    refreshFooter();
+    setupTabs();
+    showStorageWarning();
+  });
+})();
