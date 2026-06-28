@@ -57,6 +57,8 @@
       .page-wrap{max-width:100%!important;padding:0!important}
       .acct-view{display:none!important}
       #view-report{display:block!important}
+      #view-annual.active{display:block!important}
+      #view-annual:not(.active){display:none!important}
       .print-sheet{box-shadow:none!important;border-radius:0!important;margin:0!important;padding:0!important}
     }
   </style>
@@ -86,13 +88,16 @@
     <button class="acct-tab active" onclick="switchView('edit',this)">入力</button>
     <button class="acct-tab" onclick="switchView('summary',this)">大会一覧</button>
     <button class="acct-tab" onclick="switchView('report',this)">決算書</button>
+    <button class="acct-tab" onclick="switchView('annual',this)">年度累計</button>
   </div>
 
   <section class="acct-view active" id="view-edit">
     <div class="panel no-print">
       <div class="section-head" style="margin-top:0">
         <h2>大会を選択</h2>
-        <div style="display:flex;gap:8px;flex-wrap:wrap">
+        <div style="display:flex;gap:8px;flex-wrap:wrap;align-items:center">
+          <select class="form-control" id="year-select" onchange="selectYear(this.value)" style="max-width:110px;height:36px;padding:4px 8px;font-size:.82rem"></select>
+          <button class="btn btn-outline btn-sm" onclick="addYear()">＋ 年度追加</button>
           <button class="btn btn-outline btn-sm" onclick="addTournament()">＋ 大会追加</button>
           <button class="btn btn-primary btn-sm" onclick="saveData()">💾 保存</button>
         </div>
@@ -164,12 +169,30 @@
     </div>
     <div class="print-sheet" id="report-sheet"></div>
   </section>
+  <section class="acct-view" id="view-annual">
+    <div class="panel no-print">
+      <div class="section-head" style="margin-top:0">
+        <h2>年度累計決算書</h2>
+        <div style="display:flex;gap:8px;flex-wrap:wrap">
+          <select class="form-control" id="annual-year-select" onchange="renderAnnual()" style="max-width:110px;height:36px;padding:4px 8px;font-size:.82rem"></select>
+          <button class="btn btn-primary btn-sm" onclick="window.print()">🖨 印刷・PDF</button>
+          <button class="btn btn-outline btn-sm" onclick="downloadAnnualCsv()">📥 CSV</button>
+        </div>
+      </div>
+    </div>
+    <div class="print-sheet" id="annual-sheet"></div>
+  </section>
 </main>
 <footer class="site-footer no-print">YOSHIMI SMC FC — SMART PORTAL</footer>
 <script>
-var KEY="smc_accounting_v1";
+var KEY="smc_accounting_v2";
 var current=0;
-var data={tournaments:[]};
+var currentYear=String(new Date().getFullYear());
+// データ構造: {years: {"2026": {tournaments:[...]}, ...}}
+// 後方互換: 旧形式{tournaments:[]}は2026年度として移行
+var allData={years:{}};
+function getYearData(y){ return allData.years[y]||(allData.years[y]={tournaments:[]}); }
+var data={tournaments:[]};  // currentYearのデータへの参照
 
 var EXPENSE_TEMPLATE=["トロフィー","メダル","賞品","参加賞","石灰","ラインテープ","飲み物","氷","弁当","印刷代","グラウンド使用料","審判謝礼","救急用品","雑費","その他"];
 var DEFAULT_TOURNAMENTS=[
@@ -183,7 +206,11 @@ for(var i=4;i<=10;i++){
 
 function clone(o){return JSON.parse(JSON.stringify(o));}
 function normalize(){
-  if(!data||!Array.isArray(data.tournaments)||!data.tournaments.length)data={tournaments:clone(DEFAULT_TOURNAMENTS)};
+  // currentYearのデータを参照
+  if(!allData.years[currentYear]||!Array.isArray(allData.years[currentYear].tournaments)||!allData.years[currentYear].tournaments.length){
+    allData.years[currentYear]={tournaments:clone(DEFAULT_TOURNAMENTS)};
+  }
+  data=allData.years[currentYear];
   data.tournaments.forEach(function(t){
     if(!Array.isArray(t.income))t.income=[];
     if(!Array.isArray(t.expense))t.expense=[];
@@ -204,7 +231,8 @@ function esc(s){return String(s==null?"":s).replace(/&/g,"&amp;").replace(/</g,"
 
 function saveData(){
   normalize();
-  dbSave("accounting",data,KEY,function(){flash("会計データを保存しました");});
+  allData.years[currentYear]=data;
+  dbSave("accounting",allData,KEY,function(){flash("会計データを保存しました");});
 }
 function flash(msg){
   var el=document.createElement("div");
@@ -290,7 +318,7 @@ function renderReport(){
     '<h3 style="color:#003087;margin:14px 0 6px">支出明細</h3><table><tr><th>項目</th><th>単価</th><th>数量</th><th>金額</th><th>備考</th></tr>'+detailRows("expense")+'</table>';
 }
 function renderAll(){
-  normalize();renderOptions();renderInfo();renderTotals();renderRows("income");renderRows("expense");renderSummary();renderReport();
+  normalize();renderYearSelect();renderOptions();renderInfo();renderTotals();renderRows("income");renderRows("expense");renderSummary();renderReport();
 }
 function editInfo(field,value){
   data.tournaments[current][field]=field==="carry"?num(value):value;
@@ -347,11 +375,118 @@ function downloadCsv(){
   a.href=URL.createObjectURL(blob);a.download="yoshimi-smc-accounting.csv";a.click();URL.revokeObjectURL(a.href);
 }
 
+function selectYear(y){
+  currentYear=y;
+  current=0;
+  normalize();
+  renderAll();
+  renderAnnualYearSelect();
+}
+function addYear(){
+  var y=prompt("追加する年度を入力してください（例：2027）",String(new Date().getFullYear()+1));
+  if(!y||!/^\d{4}$/.test(y.trim()))return;
+  y=y.trim();
+  if(allData.years[y]){alert(y+"年度は既に存在します");return;}
+  allData.years[y]={tournaments:clone(DEFAULT_TOURNAMENTS)};
+  currentYear=y;current=0;
+  normalize();renderYearSelect();renderAll();
+  saveData();
+}
+function renderYearSelect(){
+  var years=Object.keys(allData.years).sort();
+  var opts=years.map(function(y){return'<option value="'+y+'"'+(y===currentYear?" selected":"")+">"+y+"年度</option>";}).join("");
+  ["year-select","annual-year-select"].forEach(function(id){
+    var el=document.getElementById(id);
+    if(el)el.innerHTML=opts;
+  });
+}
+function renderAnnualYearSelect(){
+  var years=Object.keys(allData.years).sort();
+  var el=document.getElementById("annual-year-select");
+  if(!el)return;
+  el.innerHTML=years.map(function(y){return'<option value="'+y+'"'+(y===currentYear?" selected":"")+">"+y+"年度</option>";}).join("");
+}
+function renderAnnual(){
+  var selEl=document.getElementById("annual-year-select");
+  var y=selEl?selEl.value:currentYear;
+  var yd=allData.years[y];
+  if(!yd||!yd.tournaments||!yd.tournaments.length){
+    document.getElementById("annual-sheet").innerHTML='<p style="color:#777;text-align:center;padding:24px">データがありません</p>';
+    return;
+  }
+  var ts=yd.tournaments;
+  var totalInc=0,totalExp=0;
+  function carryAtY(i){ if(i<=0)return num(ts[0].carry); return carryAtY(i-1)+total(ts[i-1],"income")-total(ts[i-1],"expense"); }
+  var rows=ts.map(function(t,i){
+    var inc=total(t,"income"),exp=total(t,"expense"),bal=inc-exp,car=carryAtY(i),closing=car+bal;
+    totalInc+=inc;totalExp+=exp;
+    return "<tr><td>"+esc(t.name||"")+"</td><td>"+esc(t.date||"")+"</td>"
+      +"<td class="right">"+yen(car)+"</td>"
+      +"<td class="right" style="color:#006633">"+yen(inc)+"</td>"
+      +"<td class="right" style="color:#990022">"+yen(exp)+"</td>"
+      +"<td class="right" style="font-weight:900;color:"+(bal>=0?"#004499":"#990022")+"">"+yen(bal)+"</td>"
+      +"<td class="right" style="font-weight:900">"+yen(closing)+"</td></tr>";
+  }).join("");
+  var firstCarry=num(ts[0].carry);
+  var lastClosing=carryAtY(ts.length-1)+total(ts[ts.length-1],"income")-total(ts[ts.length-1],"expense");
+  document.getElementById("annual-sheet").innerHTML=
+    "<div class="print-title">"+y+"年度 年間累計決算報告書　吉見SMCサッカースポーツ少年団</div>"
+    +"<table style="margin-bottom:10px"><tr>"
+    +"<th>年度</th><td>"+y+"年度</td>"
+    +"<th>大会数</th><td>"+ts.length+"大会</td>"
+    +"<th>期首繰越</th><td class="right">"+yen(firstCarry)+"</td>"
+    +"<th>期末残高</th><td class="right" style="font-weight:900">"+yen(lastClosing)+"</td>"
+    +"</tr></table>"
+    +"<table style="margin-bottom:12px">"
+    +"<tr><th>収入合計</th><td class="right" style="color:#004d26;font-weight:900">"+yen(totalInc)+"</td>"
+    +"<th>支出合計</th><td class="right" style="color:#660011;font-weight:900">"+yen(totalExp)+"</td>"
+    +"<th>年間収支</th><td class="right" style="font-weight:900;color:"+(totalInc-totalExp>=0?"#004499":"#990022")+"">"+yen(totalInc-totalExp)+"</td></tr>"
+    +"</table>"
+    +"<h3 style="color:#003087;margin:14px 0 6px">大会別収支一覧</h3>"
+    +"<div class="acct-table-wrap"><table class="summary-table">"
+    +"<thead><tr><th>大会名</th><th>開催日</th><th>前大会繰越</th><th>収入</th><th>支出</th><th>収支</th><th>次大会繰越</th></tr></thead>"
+    +"<tbody>"+rows+"</tbody>"
+    +"<tfoot><tr><td colspan="3" style="font-weight:900;background:#f0f4ff;color:#003087">合計</td>"
+    +"<td class="right" style="font-weight:900;color:#004d26;background:#f0f4ff">"+yen(totalInc)+"</td>"
+    +"<td class="right" style="font-weight:900;color:#660011;background:#f0f4ff">"+yen(totalExp)+"</td>"
+    +"<td class="right" style="font-weight:900;background:#f0f4ff">"+yen(totalInc-totalExp)+"</td>"
+    +"<td style="background:#f0f4ff"></td></tr></tfoot>"
+    +"</table></div>";
+}
+function downloadAnnualCsv(){
+  var selEl=document.getElementById("annual-year-select");
+  var y=selEl?selEl.value:currentYear;
+  var yd=allData.years[y];
+  if(!yd||!yd.tournaments)return;
+  var ts=yd.tournaments;
+  function carryAtY(i){ if(i<=0)return num(ts[0].carry); return carryAtY(i-1)+total(ts[i-1],"income")-total(ts[i-1],"expense"); }
+  var rows=[["大会名","開催日","前大会繰越","収入","支出","収支","次大会繰越"]];
+  ts.forEach(function(t,i){
+    var inc=total(t,"income"),exp=total(t,"expense"),bal=inc-exp,car=carryAtY(i);
+    rows.push([t.name,t.date,car,inc,exp,bal,car+bal]);
+  });
+  var csv=rows.map(function(r){return r.map(function(c){return'"'+String(c==null?"":c).replace(/"/g,'""')+'"';}).join(",");}).join("\n");
+  var blob=new Blob(["\ufeff"+csv],{type:"text/csv;charset=utf-8"});
+  var a=document.createElement("a");
+  a.href=URL.createObjectURL(blob);a.download=y+"年度_会計累計.csv";a.click();URL.revokeObjectURL(a.href);
+}
+
 dbListen("accounting",function(val){
-  data=val&&Array.isArray(val.tournaments)?val:{tournaments:clone(DEFAULT_TOURNAMENTS)};
-  normalize();renderAll();
-},KEY,{tournaments:clone(DEFAULT_TOURNAMENTS)});
-window.addEventListener("DOMContentLoaded",function(){normalize();renderAll();});
+  if(val&&val.years){
+    allData=val;
+  } else if(val&&Array.isArray(val.tournaments)){
+    // 旧形式の移行（2026年度として保存）
+    allData={years:{"2026":{tournaments:val.tournaments}}};
+  } else {
+    allData={years:{}};
+  }
+  if(!allData.years[currentYear]){allData.years[currentYear]={tournaments:clone(DEFAULT_TOURNAMENTS)};}
+  normalize();renderYearSelect();renderAll();renderAnnual();
+},KEY,{years:{}});
+window.addEventListener("DOMContentLoaded",function(){
+  if(!allData.years[currentYear]){allData.years[currentYear]={tournaments:clone(DEFAULT_TOURNAMENTS)};}
+  normalize();renderYearSelect();renderAll();
+});
 </script>
 <script src="common.js"></script>
 </body>
