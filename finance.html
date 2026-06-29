@@ -134,7 +134,11 @@
   <section class="fin-view" id="view-monthly">
     <div class="panel no-print">
       <div class="panel-title">会計さんが直接支払った収入・支出を入力</div>
-      <div class="guide-box" style="margin-bottom:12px">ここは会計さんが直接受け取った団費や、会計さんが直接支払った購入分を入力します。保護者・コーチの立替分は「会計さんへ」で申請し、支払い済にすると自動で支出に入ります。</div>
+      <div class="guide-box" style="margin-bottom:12px">ここは会計さんが直接受け取った団費や、会計さんが直接支払った購入分を入力します。保護者・コーチの立替分は「会計さんへ」で申請し、支払い済にすると自動で支出に入ります。表示月を選ぶと、その月の分だけ確認できます。</div>
+      <div class="form-group">
+        <label class="form-label">表示・入力する年月</label>
+        <select class="form-control" id="ledger-month-select" onchange="selectedMonth=this.value;renderAll()"></select>
+      </div>
       <div class="fg3">
         <div class="form-group"><label class="form-label">日付</label><input class="form-control" id="l-date" type="date"></div>
         <div class="form-group"><label class="form-label">収支</label><select class="form-control" id="l-kind"><option value="income">収入</option><option value="expense">支出</option></select></div>
@@ -180,7 +184,7 @@
       <div class="panel-title">年度会計報告</div>
       <div class="fg3">
         <div class="form-group"><label class="form-label">年度</label><input class="form-control" id="f-year" value="令和6年度" oninput="editSetting('year',this.value)"></div>
-        <div class="form-group"><label class="form-label">期首残高</label><input class="form-control" id="f-opening" type="number" inputmode="numeric" oninput="editSetting('opening',this.value)"></div>
+        <div class="form-group"><label class="form-label">前年繰越金</label><input class="form-control" id="f-opening" type="number" inputmode="numeric" oninput="editSetting('opening',this.value)"></div>
         <div class="form-group"><label class="form-label">報告日</label><input class="form-control" id="f-report-date" type="date" oninput="editSetting('reportDate',this.value)"></div>
       </div>
       <div style="display:flex;gap:8px;justify-content:flex-end;flex-wrap:wrap">
@@ -206,6 +210,23 @@ function monthKey(d){return String(d||"").slice(0,7)||"日付なし";}
 function statusClass(s){return s==="了解"?"s-ok":s==="支払い済"?"s-paid":s==="差戻し"?"s-back":"s-new";}
 function sourceText(x){return x.source==="reimbursement"||x.sourceId?"立替精算":"会計さん直接";}
 function sourceClass(x){return x.source==="reimbursement"||x.sourceId?"src-reim":"src-direct";}
+function validMonth(m){return /^\d{4}-\d{2}$/.test(String(m||""));}
+function currentMonth(){return new Date().toISOString().slice(0,7);}
+function allMonths(){
+  var months=Array.from(new Set(data.ledger.map(function(x){return monthKey(x.date);}))).filter(validMonth);
+  var now=currentMonth();
+  if(months.indexOf(now)<0)months.push(now);
+  return months.sort().reverse();
+}
+function monthIncome(month){
+  return data.ledger.filter(function(x){return x.kind==="income"&&monthKey(x.date)===month;}).reduce(function(s,x){return s+num(x.amount);},0);
+}
+function monthExpense(month){
+  return data.ledger.filter(function(x){return x.kind==="expense"&&monthKey(x.date)===month;}).reduce(function(s,x){return s+num(x.amount);},0);
+}
+function carryBeforeMonth(month){
+  return allMonths().slice().reverse().filter(function(m){return m<month;}).reduce(function(s,m){return s+monthIncome(m)-monthExpense(m);},num(data.settings.opening));
+}
 function normalize(){
   if(!data||typeof data!=="object")data={};
   if(!data.settings)data.settings={year:"令和6年度",opening:0,reportDate:""};
@@ -267,7 +288,9 @@ function deleteRequest(id){
 }
 function addLedger(){
   var row={id:Date.now(),source:"direct",date:document.getElementById("l-date").value,kind:document.getElementById("l-kind").value,category:document.getElementById("l-category").value,item:document.getElementById("l-item").value.trim(),amount:num(document.getElementById("l-amount").value),note:document.getElementById("l-note").value.trim()};
+  if(!row.date&&validMonth(selectedMonth))row.date=selectedMonth+"-01";
   if(!row.date||!row.item||!row.amount){alert("日付・内容・金額を入力してください");return;}
+  selectedMonth=monthKey(row.date);
   data.ledger.unshift(row);
   ["l-item","l-amount","l-note"].forEach(function(id){document.getElementById(id).value="";});
   saveData("会計入力に追加しました");renderAll();
@@ -309,18 +332,22 @@ function renderRequest(){
   }).join("")||'<div class="mini-card"><div class="mini-meta" style="text-align:center">申請はまだありません。</div></div>';
 }
 function renderMonthly(){
-  var income=data.ledger.filter(function(x){return x.kind==="income";}).reduce(function(s,x){return s+num(x.amount);},0);
-  var expense=data.ledger.filter(function(x){return x.kind==="expense";}).reduce(function(s,x){return s+num(x.amount);},0);
-  var closing=num(data.settings.opening)+income-expense;
+  renderMonthOptions();
+  var month=selectedMonth;
+  var monthRowsData=data.ledger.filter(function(x){return monthKey(x.date)===month;});
+  var carry=carryBeforeMonth(month);
+  var income=monthIncome(month);
+  var expense=monthExpense(month);
+  var closing=carry+income-expense;
   document.getElementById("monthly-stats").innerHTML=
-    '<div class="fin-card"><div class="k">期首残高</div><div class="v">'+yen(data.settings.opening)+'</div></div>'+
-    '<div class="fin-card good"><div class="k">収入</div><div class="v">'+yen(income)+'</div></div>'+
-    '<div class="fin-card bad"><div class="k">支出</div><div class="v">'+yen(expense)+'</div></div>'+
-    '<div class="fin-card '+(closing>=0?'good':'bad')+'"><div class="k">現在残高</div><div class="v">'+yen(closing)+'</div></div>';
-  document.getElementById("ledger-rows").innerHTML=data.ledger.map(function(x){
+    '<div class="fin-card"><div class="k">前月繰越</div><div class="v">'+yen(carry)+'</div></div>'+
+    '<div class="fin-card good"><div class="k">当月収入</div><div class="v">'+yen(income)+'</div></div>'+
+    '<div class="fin-card bad"><div class="k">当月支出</div><div class="v">'+yen(expense)+'</div></div>'+
+    '<div class="fin-card '+(closing>=0?'good':'bad')+'"><div class="k">実際残高</div><div class="v">'+yen(closing)+'</div></div>';
+  document.getElementById("ledger-rows").innerHTML=monthRowsData.map(function(x){
     return '<tr><td>'+esc(x.date)+'</td><td>'+(x.kind==="income"?"収入":"支出")+'</td><td><span class="badge '+sourceClass(x)+'">'+sourceText(x)+'</span></td><td>'+esc(x.category)+'</td><td>'+esc(x.item)+'</td><td class="money">'+yen(x.amount)+'</td><td>'+esc(x.note)+'</td><td class="no-print"><button class="btn btn-outline btn-sm" style="color:var(--red);border-color:rgba(255,68,102,.4)" onclick="deleteLedger('+x.id+')">削除</button></td></tr>';
   }).join("")||'<tr><td colspan="8" style="text-align:center;color:var(--ink-3);padding:22px">会計入力はまだありません。</td></tr>';
-  document.getElementById("ledger-cards").innerHTML=data.ledger.map(function(x){
+  document.getElementById("ledger-cards").innerHTML=monthRowsData.map(function(x){
     return '<div class="mini-card">'+
       '<div class="mini-card-head"><span class="badge '+sourceClass(x)+'">'+sourceText(x)+'</span><span class="mini-money">'+yen(x.amount)+'</span></div>'+
       '<div class="mini-title">'+(x.kind==="income"?"収入":"支出")+' / '+esc(x.item)+'</div>'+
@@ -353,32 +380,35 @@ function monthRows(month){
   }).join("");
 }
 function renderMonthOptions(){
-  var months=Array.from(new Set(data.ledger.map(function(x){return monthKey(x.date);}))).filter(Boolean).sort().reverse();
-  if(!months.length)months=[new Date().toISOString().slice(0,7)];
+  var months=allMonths();
   if(!selectedMonth||months.indexOf(selectedMonth)<0)selectedMonth=months[0];
-  var el=document.getElementById("month-select");
-  if(el){
+  ["month-select","ledger-month-select"].forEach(function(id){
+    var el=document.getElementById(id);
+    if(!el)return;
     el.innerHTML=months.map(function(m){return '<option value="'+esc(m)+'">'+esc(m)+'</option>';}).join("");
     el.value=selectedMonth;
-  }
+  });
 }
 function renderMonthReport(){
   renderMonthOptions();
   var month=selectedMonth;
   var rows=data.ledger.filter(function(x){return monthKey(x.date)===month;});
-  var income=rows.filter(function(x){return x.kind==="income";}).reduce(function(s,x){return s+num(x.amount);},0);
-  var expense=rows.filter(function(x){return x.kind==="expense";}).reduce(function(s,x){return s+num(x.amount);},0);
+  var carry=carryBeforeMonth(month);
+  var income=monthIncome(month);
+  var expense=monthExpense(month);
+  var closing=carry+income-expense;
   var direct=rows.filter(function(x){return sourceText(x)==="会計さん直接";}).reduce(function(s,x){return s+num(x.amount);},0);
   var reim=rows.filter(function(x){return sourceText(x)==="立替精算";}).reduce(function(s,x){return s+num(x.amount);},0);
   document.getElementById("month-stats").innerHTML=
-    '<div class="fin-card good"><div class="k">月収入</div><div class="v">'+yen(income)+'</div></div>'+
-    '<div class="fin-card bad"><div class="k">月支出</div><div class="v">'+yen(expense)+'</div></div>'+
-    '<div class="fin-card"><div class="k">会計さん直接</div><div class="v">'+yen(direct)+'</div></div>'+
-    '<div class="fin-card warn"><div class="k">立替精算</div><div class="v">'+yen(reim)+'</div></div>';
+    '<div class="fin-card"><div class="k">前月繰越</div><div class="v">'+yen(carry)+'</div></div>'+
+    '<div class="fin-card good"><div class="k">当月収入</div><div class="v">'+yen(income)+'</div></div>'+
+    '<div class="fin-card bad"><div class="k">当月支出</div><div class="v">'+yen(expense)+'</div></div>'+
+    '<div class="fin-card '+(closing>=0?'good':'bad')+'"><div class="k">実際残高</div><div class="v">'+yen(closing)+'</div></div>';
   document.getElementById("month-report").innerHTML=
     '<div class="report-title">吉見SMC FC '+esc(month)+' 月別会計報告</div>'+
-    '<table><tr><th>収入合計</th><td class="right">'+yen(income)+'</td><th>支出合計</th><td class="right">'+yen(expense)+'</td></tr>'+
-    '<tr><th>月間収支</th><td class="right" colspan="3" style="font-weight:900">'+yen(income-expense)+'</td></tr></table>'+
+    '<table><tr><th>前月繰越</th><td class="right">'+yen(carry)+'</td><th>当月収入</th><td class="right">'+yen(income)+'</td></tr>'+
+    '<tr><th>当月支出</th><td class="right">'+yen(expense)+'</td><th>当月収支</th><td class="right">'+yen(income-expense)+'</td></tr>'+
+    '<tr><th>実際残高</th><td class="right" colspan="3" style="font-weight:900">'+yen(closing)+'</td></tr></table>'+
     '<h3 style="color:#003087;margin:12px 0 6px">収入の部</h3><table><tr><th>項目</th><th>金額</th></tr>'+rowsFromMap(sumByMonth("income",month))+'</table>'+
     '<h3 style="color:#003087;margin:12px 0 6px">支出の部</h3><table><tr><th>項目</th><th>金額</th></tr>'+rowsFromMap(sumByMonth("expense",month))+'</table>'+
     '<h3 style="color:#003087;margin:12px 0 6px">明細</h3><table><tr><th>日付</th><th>収支</th><th>入力元</th><th>項目</th><th>内容</th><th>金額</th></tr>'+monthRows(month)+'</table>';
@@ -392,9 +422,9 @@ function renderYear(){
   var closing=num(data.settings.opening)+income-expense;
   document.getElementById("year-report").innerHTML=
     '<div class="report-title">吉見SMC FC '+esc(data.settings.year||"年度")+' 会計報告</div>'+
-    '<table><tr><th>報告日</th><td>'+esc(data.settings.reportDate||"")+'</td><th>期首残高</th><td class="right">'+yen(data.settings.opening)+'</td></tr>'+
+    '<table><tr><th>報告日</th><td>'+esc(data.settings.reportDate||"")+'</td><th>前年繰越金</th><td class="right">'+yen(data.settings.opening)+'</td></tr>'+
     '<tr><th>収入合計</th><td class="right">'+yen(income)+'</td><th>支出合計</th><td class="right">'+yen(expense)+'</td></tr>'+
-    '<tr><th>年度末残高</th><td class="right" colspan="3" style="font-weight:900">'+yen(closing)+'</td></tr></table>'+
+    '<tr><th>実際残高 / 次年度繰越金</th><td class="right" colspan="3" style="font-weight:900">'+yen(closing)+'</td></tr></table>'+
     '<h3 style="color:#003087;margin:12px 0 6px">収入の部</h3><table><tr><th>項目</th><th>金額</th></tr>'+rowsFromMap(sumBy("income"))+'<tr><th>収入合計</th><th class="right">'+yen(income)+'</th></tr></table>'+
     '<h3 style="color:#003087;margin:12px 0 6px">支出の部</h3><table><tr><th>項目</th><th>金額</th></tr>'+rowsFromMap(sumBy("expense"))+'<tr><th>支出合計</th><th class="right">'+yen(expense)+'</th></tr></table>';
 }
