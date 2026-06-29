@@ -1,0 +1,309 @@
+<!doctype html>
+<html lang="ja">
+<head>
+  <meta charset="utf-8">
+  <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
+  <meta http-equiv="Pragma" content="no-cache">
+  <meta http-equiv="Expires" content="0">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>会計さんへ｜吉見SMC FC</title>
+  <script src="firebase-config.js"></script>
+  <link rel="stylesheet" href="common.css">
+  <style>
+    .fin-tabs{display:flex;border:1px solid var(--line-2);border-radius:var(--r8);overflow:hidden;margin-bottom:14px}
+    .fin-tab{flex:1;border:0;background:var(--surface-lt);color:var(--ink-3);font:inherit;font-size:.82rem;font-weight:900;padding:11px 6px;cursor:pointer}
+    .fin-tab.active{background:linear-gradient(135deg,#003087,#0050cc);color:#fff}
+    .fin-view{display:none}.fin-view.active{display:block}
+    .fin-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin-bottom:14px}
+    .fin-card{background:var(--surface-lt);border:1px solid var(--line);border-radius:var(--r8);padding:12px}
+    .fin-card .k{font-size:.68rem;color:var(--ink-3);font-weight:900;letter-spacing:.08em}
+    .fin-card .v{font-size:1.25rem;color:#fff;font-weight:900;margin-top:4px}
+    .fin-card.good .v{color:#00ff88}.fin-card.bad .v{color:#ff6680}.fin-card.warn .v{color:#ffd166}
+    .fg2{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+    .fg3{display:grid;grid-template-columns:1fr 1fr 1fr;gap:10px}
+    .table-wrap{overflow-x:auto;border:1px solid var(--line);border-radius:var(--r8);background:rgba(255,255,255,.03)}
+    .fin-table{width:100%;border-collapse:collapse;min-width:860px}
+    .fin-table th{background:#003087;color:#fff;font-size:.72rem;padding:8px;white-space:nowrap}
+    .fin-table td{border-bottom:1px solid var(--line);padding:8px;font-size:.8rem;color:var(--ink-2);vertical-align:middle}
+    .fin-table tr:last-child td{border-bottom:0}
+    .fin-table input,.fin-table select{min-height:36px}
+    .money{text-align:right;font-weight:900;color:#fff;white-space:nowrap}
+    .badge{display:inline-flex;align-items:center;border-radius:99px;padding:3px 8px;font-size:.68rem;font-weight:900;border:1px solid var(--line)}
+    .s-new{background:rgba(114,214,255,.15);color:var(--cyan);border-color:rgba(114,214,255,.35)}
+    .s-ok{background:rgba(40,199,111,.15);color:#00ff88;border-color:rgba(40,199,111,.35)}
+    .s-paid{background:rgba(255,139,31,.15);color:var(--orange-2);border-color:rgba(255,139,31,.35)}
+    .s-back{background:rgba(255,91,110,.15);color:#ff8ca0;border-color:rgba(255,91,110,.35)}
+    .guide-box{background:rgba(255,204,0,.1);border:1px solid rgba(255,204,0,.28);color:#ffe58a;border-radius:var(--r8);padding:11px 13px;font-size:.8rem;line-height:1.7;margin-bottom:12px}
+    .report-sheet{background:#fff;color:#111;border-radius:12px;padding:22px;box-shadow:var(--shadow);margin-top:14px}
+    .report-title{text-align:center;font-size:1.2rem;font-weight:900;color:#003087;border-bottom:2px solid #003087;padding-bottom:8px;margin-bottom:14px}
+    .report-sheet table{width:100%;border-collapse:collapse;font-size:.86rem;margin-bottom:12px}
+    .report-sheet th,.report-sheet td{border:1px solid #999;padding:6px 8px;color:#111}
+    .report-sheet th{background:#003087;color:#fff}
+    .report-sheet .right{text-align:right}
+    body[data-theme="light"] .fin-card .v,
+    body[data-theme="light"] .money{color:var(--ink)}
+    @media(max-width:720px){.fin-grid{grid-template-columns:1fr 1fr}.fg2,.fg3{grid-template-columns:1fr}.fin-tab{font-size:.74rem;padding:10px 3px}}
+    @media print{
+      body,html{background:#fff!important}
+      .site-header,.back-btn,.hero-band,.fin-tabs,.no-print,.site-footer,.panel{display:none!important}
+      .page-wrap{max-width:100%!important;padding:0!important}
+      .fin-view{display:none!important}
+      #view-year{display:block!important}
+      .report-sheet{box-shadow:none!important;border-radius:0!important;margin:0!important;padding:0!important}
+    }
+  </style>
+</head>
+<body>
+<header class="site-header">
+  <div class="header-inner">
+    <a class="header-logo" href="index.html">
+      <div class="logo-mark">⚽</div>
+      <div><span class="logo-name">吉見SMC FC</span><span class="logo-sub">SMART PORTAL</span></div>
+    </a>
+  </div>
+</header>
+<main class="page-wrap">
+  <a class="back-btn no-print" href="index.html">ホームに戻る</a>
+  <div class="hero-band no-print">
+    <div class="hero-emoji">💴</div>
+    <div>
+      <div class="hero-title">会計さんへ</div>
+      <div class="hero-sub">立替・購入予定の連絡、支払い状況、月次・年度会計報告をまとめます。</div>
+    </div>
+  </div>
+
+  <div class="guide-box no-print">購入前に会計さんへ相談する場合は「購入予定」、すでに立て替えた場合は「立替済」で申請してください。会計さんは一覧で「了解」「支払い済」「差戻し」を管理できます。</div>
+
+  <div class="fin-tabs no-print">
+    <button class="fin-tab active" onclick="switchView('request',this)">会計さんへ</button>
+    <button class="fin-tab" onclick="switchView('monthly',this)">月次会計</button>
+    <button class="fin-tab" onclick="switchView('year',this)">年度報告</button>
+  </div>
+
+  <section class="fin-view active" id="view-request">
+    <div class="fin-grid" id="request-stats"></div>
+    <div class="panel no-print">
+      <div class="panel-title">購入・立替を申請</div>
+      <div class="fg3">
+        <div class="form-group"><label class="form-label">申請者</label><input class="form-control" id="r-name" placeholder="例：吉見 太郎"></div>
+        <div class="form-group"><label class="form-label">購入日・予定日</label><input class="form-control" id="r-date" type="date"></div>
+        <div class="form-group"><label class="form-label">区分</label><select class="form-control" id="r-type"><option>購入予定</option><option>立替済</option></select></div>
+      </div>
+      <div class="fg3">
+        <div class="form-group"><label class="form-label">項目</label><select class="form-control" id="r-category"></select></div>
+        <div class="form-group"><label class="form-label">購入内容</label><input class="form-control" id="r-item" placeholder="例：石灰、救急用品、コピー代"></div>
+        <div class="form-group"><label class="form-label">金額</label><input class="form-control" id="r-amount" type="number" inputmode="numeric" placeholder="例：1200"></div>
+      </div>
+      <div class="form-group"><label class="form-label">備考・購入先</label><input class="form-control" id="r-note" placeholder="例：カインズで購入予定、領収書あり"></div>
+      <button class="btn btn-primary" onclick="addRequest()" style="width:100%">送信する</button>
+    </div>
+    <div class="table-wrap">
+      <table class="fin-table">
+        <thead><tr><th>状態</th><th>日付</th><th>申請者</th><th>区分</th><th>項目</th><th>内容</th><th>金額</th><th>備考</th><th class="no-print">会計さん</th></tr></thead>
+        <tbody id="request-rows"></tbody>
+      </table>
+    </div>
+  </section>
+
+  <section class="fin-view" id="view-monthly">
+    <div class="panel no-print">
+      <div class="panel-title">月次の収入・支出を入力</div>
+      <div class="fg3">
+        <div class="form-group"><label class="form-label">日付</label><input class="form-control" id="l-date" type="date"></div>
+        <div class="form-group"><label class="form-label">収支</label><select class="form-control" id="l-kind"><option value="income">収入</option><option value="expense">支出</option></select></div>
+        <div class="form-group"><label class="form-label">項目</label><select class="form-control" id="l-category"></select></div>
+      </div>
+      <div class="fg3">
+        <div class="form-group"><label class="form-label">内容</label><input class="form-control" id="l-item" placeholder="例：団費、登録費、備品"></div>
+        <div class="form-group"><label class="form-label">金額</label><input class="form-control" id="l-amount" type="number" inputmode="numeric"></div>
+        <div class="form-group"><label class="form-label">支払先・備考</label><input class="form-control" id="l-note"></div>
+      </div>
+      <button class="btn btn-primary" onclick="addLedger()" style="width:100%">月次会計に追加</button>
+    </div>
+    <div class="fin-grid" id="monthly-stats"></div>
+    <div class="table-wrap">
+      <table class="fin-table">
+        <thead><tr><th>日付</th><th>収支</th><th>項目</th><th>内容</th><th>金額</th><th>備考</th><th class="no-print">操作</th></tr></thead>
+        <tbody id="ledger-rows"></tbody>
+      </table>
+    </div>
+  </section>
+
+  <section class="fin-view" id="view-year">
+    <div class="panel no-print">
+      <div class="panel-title">年度会計報告</div>
+      <div class="fg3">
+        <div class="form-group"><label class="form-label">年度</label><input class="form-control" id="f-year" value="令和6年度" oninput="editSetting('year',this.value)"></div>
+        <div class="form-group"><label class="form-label">期首残高</label><input class="form-control" id="f-opening" type="number" inputmode="numeric" oninput="editSetting('opening',this.value)"></div>
+        <div class="form-group"><label class="form-label">報告日</label><input class="form-control" id="f-report-date" type="date" oninput="editSetting('reportDate',this.value)"></div>
+      </div>
+      <div style="display:flex;gap:8px;justify-content:flex-end;flex-wrap:wrap">
+        <button class="btn btn-outline btn-sm" onclick="downloadCsv()">CSV保存</button>
+        <button class="btn btn-primary btn-sm" onclick="window.print()">印刷・PDF保存</button>
+      </div>
+    </div>
+    <div class="report-sheet" id="year-report"></div>
+  </section>
+</main>
+<footer class="site-footer no-print">YOSHIMI SMC FC — SMART PORTAL</footer>
+<script>
+var KEY="smc_family_finance_v1";
+var CATS=["団費","入団金","大会参加費","登録費","保険料","備品","消耗品","救急用品","グラウンド・施設","審判・謝礼","印刷・事務","行事","その他"];
+var data={settings:{year:"令和6年度",opening:0,reportDate:""},requests:[],ledger:[]};
+
+function clone(o){return JSON.parse(JSON.stringify(o));}
+function num(v){var n=Number(v);return isNaN(n)?0:n;}
+function yen(v){return (Number(v)||0).toLocaleString("ja-JP")+"円";}
+function esc(s){return String(s==null?"":s).replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;").replace(/"/g,"&quot;");}
+function monthKey(d){return String(d||"").slice(0,7)||"日付なし";}
+function statusClass(s){return s==="了解"?"s-ok":s==="支払い済"?"s-paid":s==="差戻し"?"s-back":"s-new";}
+function normalize(){
+  if(!data||typeof data!=="object")data={};
+  if(!data.settings)data.settings={year:"令和6年度",opening:0,reportDate:""};
+  if(!Array.isArray(data.requests))data.requests=[];
+  if(!Array.isArray(data.ledger))data.ledger=[];
+}
+function saveData(msg){
+  normalize();
+  dbSave("family_finance",data,KEY,function(){if(msg)flash(msg);});
+}
+function flash(msg){
+  var el=document.createElement("div");
+  el.style.cssText="position:fixed;bottom:22px;right:18px;background:#00ff88;color:#001a10;padding:10px 16px;border-radius:8px;font-weight:900;font-size:.84rem;z-index:999;box-shadow:0 8px 24px rgba(0,0,0,.35)";
+  el.textContent="✅ "+msg;document.body.appendChild(el);setTimeout(function(){el.remove();},2200);
+}
+function fillCats(){
+  ["r-category","l-category"].forEach(function(id){
+    var el=document.getElementById(id);
+    el.innerHTML=CATS.map(function(c){return '<option>'+c+'</option>';}).join("");
+  });
+}
+function switchView(name,btn){
+  document.querySelectorAll(".fin-view").forEach(function(v){v.classList.remove("active");});
+  document.getElementById("view-"+name).classList.add("active");
+  document.querySelectorAll(".fin-tab").forEach(function(b){b.classList.remove("active");});
+  if(btn)btn.classList.add("active");
+  renderAll();
+}
+function addRequest(){
+  var req={
+    id:Date.now(),
+    name:document.getElementById("r-name").value.trim(),
+    date:document.getElementById("r-date").value,
+    type:document.getElementById("r-type").value,
+    category:document.getElementById("r-category").value,
+    item:document.getElementById("r-item").value.trim(),
+    amount:num(document.getElementById("r-amount").value),
+    note:document.getElementById("r-note").value.trim(),
+    status:"申請中"
+  };
+  if(!req.name||!req.item||!req.amount){alert("申請者・購入内容・金額を入力してください");return;}
+  data.requests.unshift(req);
+  ["r-name","r-item","r-amount","r-note"].forEach(function(id){document.getElementById(id).value="";});
+  saveData("申請を送信しました");renderAll();
+}
+function updateRequest(id,field,value){
+  var r=data.requests.find(function(x){return x.id===id;});if(!r)return;
+  r[field]=value;
+  if(field==="status"&&value==="支払い済"){
+    var exists=data.ledger.some(function(x){return x.sourceId===id;});
+    if(!exists)data.ledger.unshift({id:Date.now(),sourceId:id,date:r.date||new Date().toISOString().slice(0,10),kind:"expense",category:r.category,item:r.item,amount:r.amount,note:r.name+"さんへ支払い"});
+  }
+  saveData();renderAll();
+}
+function deleteRequest(id){
+  if(!confirm("この申請を削除しますか？"))return;
+  data.requests=data.requests.filter(function(x){return x.id!==id;});
+  saveData("削除しました");renderAll();
+}
+function addLedger(){
+  var row={id:Date.now(),date:document.getElementById("l-date").value,kind:document.getElementById("l-kind").value,category:document.getElementById("l-category").value,item:document.getElementById("l-item").value.trim(),amount:num(document.getElementById("l-amount").value),note:document.getElementById("l-note").value.trim()};
+  if(!row.date||!row.item||!row.amount){alert("日付・内容・金額を入力してください");return;}
+  data.ledger.unshift(row);
+  ["l-item","l-amount","l-note"].forEach(function(id){document.getElementById(id).value="";});
+  saveData("月次会計に追加しました");renderAll();
+}
+function deleteLedger(id){
+  if(!confirm("この行を削除しますか？"))return;
+  data.ledger=data.ledger.filter(function(x){return x.id!==id;});
+  saveData("削除しました");renderAll();
+}
+function editSetting(field,value){
+  data.settings[field]=field==="opening"?num(value):value;
+  saveData();renderAll();
+}
+function renderRequest(){
+  var pending=data.requests.filter(function(r){return r.status!=="支払い済";}).length;
+  var unpaid=data.requests.filter(function(r){return r.status==="了解"||r.status==="申請中";}).reduce(function(s,r){return s+num(r.amount);},0);
+  var paid=data.requests.filter(function(r){return r.status==="支払い済";}).reduce(function(s,r){return s+num(r.amount);},0);
+  document.getElementById("request-stats").innerHTML=
+    '<div class="fin-card warn"><div class="k">未完了</div><div class="v">'+pending+'件</div></div>'+
+    '<div class="fin-card bad"><div class="k">未払い目安</div><div class="v">'+yen(unpaid)+'</div></div>'+
+    '<div class="fin-card good"><div class="k">支払い済</div><div class="v">'+yen(paid)+'</div></div>'+
+    '<div class="fin-card"><div class="k">申請合計</div><div class="v">'+data.requests.length+'件</div></div>';
+  document.getElementById("request-rows").innerHTML=data.requests.map(function(r){
+    return '<tr>'+
+      '<td><span class="badge '+statusClass(r.status)+'">'+esc(r.status)+'</span></td>'+
+      '<td>'+esc(r.date)+'</td><td>'+esc(r.name)+'</td><td>'+esc(r.type)+'</td><td>'+esc(r.category)+'</td><td>'+esc(r.item)+'</td>'+
+      '<td class="money">'+yen(r.amount)+'</td><td>'+esc(r.note)+'</td>'+
+      '<td class="no-print"><select class="form-control" onchange="updateRequest('+r.id+',\'status\',this.value)">'+["申請中","了解","支払い済","差戻し"].map(function(s){return '<option '+(r.status===s?'selected':'')+'>'+s+'</option>';}).join("")+'</select><button class="btn btn-outline btn-sm" style="margin-top:6px;color:var(--red);border-color:rgba(255,68,102,.4)" onclick="deleteRequest('+r.id+')">削除</button></td>'+
+    '</tr>';
+  }).join("")||'<tr><td colspan="9" style="text-align:center;color:var(--ink-3);padding:22px">申請はまだありません。</td></tr>';
+}
+function renderMonthly(){
+  var income=data.ledger.filter(function(x){return x.kind==="income";}).reduce(function(s,x){return s+num(x.amount);},0);
+  var expense=data.ledger.filter(function(x){return x.kind==="expense";}).reduce(function(s,x){return s+num(x.amount);},0);
+  var closing=num(data.settings.opening)+income-expense;
+  document.getElementById("monthly-stats").innerHTML=
+    '<div class="fin-card"><div class="k">期首残高</div><div class="v">'+yen(data.settings.opening)+'</div></div>'+
+    '<div class="fin-card good"><div class="k">収入</div><div class="v">'+yen(income)+'</div></div>'+
+    '<div class="fin-card bad"><div class="k">支出</div><div class="v">'+yen(expense)+'</div></div>'+
+    '<div class="fin-card '+(closing>=0?'good':'bad')+'"><div class="k">現在残高</div><div class="v">'+yen(closing)+'</div></div>';
+  document.getElementById("ledger-rows").innerHTML=data.ledger.map(function(x){
+    return '<tr><td>'+esc(x.date)+'</td><td>'+(x.kind==="income"?"収入":"支出")+'</td><td>'+esc(x.category)+'</td><td>'+esc(x.item)+'</td><td class="money">'+yen(x.amount)+'</td><td>'+esc(x.note)+'</td><td class="no-print"><button class="btn btn-outline btn-sm" style="color:var(--red);border-color:rgba(255,68,102,.4)" onclick="deleteLedger('+x.id+')">削除</button></td></tr>';
+  }).join("")||'<tr><td colspan="7" style="text-align:center;color:var(--ink-3);padding:22px">月次会計の入力はまだありません。</td></tr>';
+}
+function sumBy(kind){
+  var map={};
+  data.ledger.filter(function(x){return x.kind===kind;}).forEach(function(x){map[x.category]=(map[x.category]||0)+num(x.amount);});
+  return map;
+}
+function rowsFromMap(map){
+  var keys=Object.keys(map);
+  if(!keys.length)return '<tr><td colspan="2" style="text-align:center;color:#777">入力なし</td></tr>';
+  return keys.map(function(k){return '<tr><td>'+esc(k)+'</td><td class="right">'+yen(map[k])+'</td></tr>';}).join("");
+}
+function renderYear(){
+  document.getElementById("f-year").value=data.settings.year||"";
+  document.getElementById("f-opening").value=data.settings.opening||0;
+  document.getElementById("f-report-date").value=data.settings.reportDate||"";
+  var income=data.ledger.filter(function(x){return x.kind==="income";}).reduce(function(s,x){return s+num(x.amount);},0);
+  var expense=data.ledger.filter(function(x){return x.kind==="expense";}).reduce(function(s,x){return s+num(x.amount);},0);
+  var closing=num(data.settings.opening)+income-expense;
+  document.getElementById("year-report").innerHTML=
+    '<div class="report-title">吉見SMC FC '+esc(data.settings.year||"年度")+' 会計報告</div>'+
+    '<table><tr><th>報告日</th><td>'+esc(data.settings.reportDate||"")+'</td><th>期首残高</th><td class="right">'+yen(data.settings.opening)+'</td></tr>'+
+    '<tr><th>収入合計</th><td class="right">'+yen(income)+'</td><th>支出合計</th><td class="right">'+yen(expense)+'</td></tr>'+
+    '<tr><th>年度末残高</th><td class="right" colspan="3" style="font-weight:900">'+yen(closing)+'</td></tr></table>'+
+    '<h3 style="color:#003087;margin:12px 0 6px">収入の部</h3><table><tr><th>項目</th><th>金額</th></tr>'+rowsFromMap(sumBy("income"))+'<tr><th>収入合計</th><th class="right">'+yen(income)+'</th></tr></table>'+
+    '<h3 style="color:#003087;margin:12px 0 6px">支出の部</h3><table><tr><th>項目</th><th>金額</th></tr>'+rowsFromMap(sumBy("expense"))+'<tr><th>支出合計</th><th class="right">'+yen(expense)+'</th></tr></table>';
+}
+function downloadCsv(){
+  var rows=[["日付","収支","項目","内容","金額","備考"]];
+  data.ledger.forEach(function(x){rows.push([x.date,x.kind==="income"?"収入":"支出",x.category,x.item,x.amount,x.note]);});
+  var csv=rows.map(function(r){return r.map(function(c){return '"'+String(c==null?"":c).replace(/"/g,'""')+'"';}).join(",");}).join("\n");
+  var blob=new Blob(["\ufeff"+csv],{type:"text/csv;charset=utf-8"});
+  var a=document.createElement("a");
+  a.href=URL.createObjectURL(blob);a.download="yoshimi-smc-finance.csv";a.click();URL.revokeObjectURL(a.href);
+}
+function renderAll(){normalize();renderRequest();renderMonthly();renderYear();}
+
+dbListen("family_finance",function(val){
+  data=val&&typeof val==="object"?val:data;
+  normalize();fillCats();renderAll();
+},KEY,clone(data));
+window.addEventListener("DOMContentLoaded",function(){fillCats();normalize();renderAll();});
+</script>
+<script src="common.js"></script>
+</body>
+</html>
