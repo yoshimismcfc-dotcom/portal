@@ -9,77 +9,40 @@
   <style>
     .page-wrap{max-width:100%!important;padding:10px 12px 40px!important}
 
-    /* ヘッダー */
-    .cal-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:14px;flex-wrap:wrap;gap:8px}
-    .cal-title{font-size:1.1rem;font-weight:900;color:#fff}
-    .cal-nav{display:flex;gap:6px}
-    .nav-btn{background:var(--surface-lt);border:1px solid var(--line-2);color:var(--ink);border-radius:8px;padding:7px 12px;cursor:pointer;font:inherit;font-size:.82rem;font-weight:700;transition:.15s}
-    .nav-btn:hover{border-color:var(--orange);color:var(--orange)}
-
-    /* ビュー切替 */
-    .view-tab-bar{display:flex;gap:0;border-radius:var(--r8);overflow:hidden;border:1px solid var(--line-2);margin-bottom:12px}
-    .view-tab-btn{flex:1;padding:9px 6px;font:inherit;font-size:.8rem;font-weight:900;background:var(--surface-lt);color:#6aaccc;border:none;cursor:pointer;transition:.15s}
+    /* ===== ビュー切り替えタブ ===== */
+    .view-tab-bar{display:flex;gap:0;border-radius:var(--r8);overflow:hidden;border:1px solid var(--line-2);margin-bottom:14px}
+    .view-tab-btn{flex:1;padding:10px 6px;font:inherit;font-size:.82rem;font-weight:900;background:var(--surface-lt);color:#6aaccc;border:none;cursor:pointer;transition:.15s;display:flex;align-items:center;justify-content:center;gap:5px}
     .view-tab-btn:not(:last-child){border-right:1px solid var(--line-2)}
     .view-tab-btn.active{background:linear-gradient(135deg,#003087,#0050cc);color:#fff}
 
-    /* 凡例 */
-    .legend-bar{display:flex;gap:9px;flex-wrap:wrap;margin-bottom:12px;padding:9px 13px;background:var(--surface-lt);border:1px solid var(--line-2);border-radius:var(--r8)}
-    .leg{display:flex;align-items:center;gap:5px;font-size:.73rem;color:var(--ink-3);white-space:nowrap}
-    .leg-dot{width:9px;height:9px;border-radius:50%;flex-shrink:0}
+    /* ===== 凡例 ===== */
+    .legend-bar{display:flex;gap:10px;flex-wrap:wrap;margin-bottom:12px;padding:10px 14px;background:var(--surface-lt);border:1px solid var(--line-2);border-radius:var(--r8)}
+    .leg{display:flex;align-items:center;gap:5px;font-size:.75rem;color:var(--ink-3);white-space:nowrap}
+    .leg-dot{width:10px;height:10px;border-radius:2px;flex-shrink:0}
 
-    /* 今日バー */
-    .today-notice{background:linear-gradient(135deg,rgba(0,48,135,.32),rgba(0,48,135,.1));border:1px solid rgba(0,212,255,.2);border-radius:var(--r12);padding:11px 15px;margin-bottom:12px;display:flex;align-items:center;gap:12px}
-    .tn-date{font-size:1.7rem;font-weight:900;color:#fff;line-height:1;flex-shrink:0}
-    .tn-dow{font-size:.68rem;color:var(--cyan);font-weight:700;flex-shrink:0}
-    .tn-text{font-size:.8rem;color:#c8e4ff}
+    /* ===== Googleカレンダー iframe ===== */
+    .gcal-wrap{border-radius:var(--r12);overflow:hidden;border:1px solid var(--line-2);box-shadow:var(--shadow)}
+    .gcal-wrap iframe{display:block;width:100%;height:calc(100vh - 260px);min-height:480px;border:none}
+    @media(max-width:600px){.gcal-wrap iframe{height:72vh;min-height:420px}}
 
-    /* カレンダーグリッド */
-    .cal-grid{display:grid;grid-template-columns:repeat(7,1fr);gap:1px;background:var(--line);border-radius:var(--r12);overflow:hidden;margin-bottom:14px}
-    .cal-dow{background:rgba(0,48,135,.5);text-align:center;padding:7px 3px;font-size:.68rem;font-weight:900;color:var(--cyan)}
-    .cal-dow.sat{color:#88aaff}.cal-dow.sun{color:#ff8888}
-    .cal-day{background:var(--surface-lt);padding:4px 3px;min-height:62px;cursor:default}
-    .cal-day.has-evt{cursor:pointer}
-    .cal-day.has-evt:hover{background:rgba(0,80,204,.12)}
-    .cal-day.today{background:rgba(0,48,135,.28);border-top:2px solid var(--orange)}
-    .cal-day.other-month{opacity:.35}
-    .cal-day.sat .day-num{color:#88aaff}.cal-day.sun .day-num{color:#ff8888}
-    .day-num{font-size:.74rem;font-weight:900;display:block;margin-bottom:2px}
-    .day-num.today-n{background:var(--orange);color:#fff;border-radius:50%;width:19px;height:19px;display:inline-flex;align-items:center;justify-content:center;font-size:.66rem}
-    .evt-mini{font-size:.58rem;line-height:1.45;padding:1px 4px;border-radius:3px;margin-bottom:1px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;cursor:pointer}
-    .evt-more{font-size:.58rem;color:var(--cyan);padding-left:3px}
+    /* ===== カテゴリ切り替え ===== */
+    .cat-bar{display:flex;gap:6px;flex-wrap:wrap;margin-bottom:10px}
+    .cat-btn{display:flex;align-items:center;gap:5px;padding:5px 11px;border-radius:99px;border:1px solid var(--line-2);background:none;color:var(--ink-3);font:inherit;font-size:.75rem;font-weight:700;cursor:pointer;transition:.15s}
+    .cat-btn.on{color:#fff!important}
+    .cat-btn .cat-dot{width:8px;height:8px;border-radius:50%;flex-shrink:0}
 
-    /* 週・リスト */
-    .week-list{display:flex;flex-direction:column;gap:8px;margin-bottom:14px}
-    .week-day-card{background:var(--surface-lt);border:1px solid var(--line-2);border-radius:var(--r8);padding:10px 12px}
-    .week-day-card.today{border-color:var(--orange)}
-    .wdc-head{display:flex;align-items:center;gap:8px;margin-bottom:6px;font-size:.82rem;font-weight:900;color:#fff}
-    .wdc-evt{display:flex;align-items:center;gap:7px;font-size:.78rem;color:#c8e4ff;padding:4px 0;border-bottom:1px solid rgba(255,255,255,.06)}
-    .wdc-evt:last-child{border-bottom:none}
-    .wdc-dot{width:7px;height:7px;border-radius:50%;flex-shrink:0}
-    .wdc-time{color:var(--ink-3);font-size:.7rem;min-width:80px;flex-shrink:0}
+    /* ===== 今日の予定バー ===== */
+    .today-notice{background:linear-gradient(135deg,rgba(0,48,135,.35),rgba(0,48,135,.12));border:1px solid rgba(0,212,255,.22);border-radius:var(--r12);padding:12px 16px;margin-bottom:12px;display:flex;align-items:flex-start;gap:12px}
+    .tn-left{flex-shrink:0;text-align:center}
+    .tn-date{font-size:2rem;font-weight:900;color:#fff;line-height:1}
+    .tn-dow{font-size:.72rem;color:var(--cyan);font-weight:700}
+    .tn-right{flex:1;min-width:0}
+    .tn-label{font-size:.72rem;color:var(--cyan);font-weight:900;margin-bottom:6px}
+    .tn-evt{display:flex;align-items:center;gap:8px;font-size:.82rem;color:#c8e4ff;margin-bottom:4px;line-height:1.4}
+    .tn-dot{width:7px;height:7px;border-radius:50%;flex-shrink:0}
 
-    .agenda-item{display:flex;align-items:center;gap:10px;background:var(--surface-lt);border:1px solid var(--line-2);border-radius:var(--r8);padding:10px 12px;margin-bottom:7px}
-    .ag-date{min-width:44px;text-align:center;flex-shrink:0}
-    .ag-day{font-size:1.1rem;font-weight:900;color:#fff;line-height:1}
-    .ag-dow{font-size:.6rem;color:var(--ink-3)}
-    .ag-bar{width:3px;height:30px;border-radius:3px;flex-shrink:0}
-    .ag-body{flex:1;min-width:0}
-    .ag-title{font-size:.82rem;font-weight:900;color:#fff}
-    .ag-meta{font-size:.7rem;color:var(--ink-3)}
-
-    /* モーダル */
-    .modal-bg{position:fixed;inset:0;background:rgba(0,0,0,.82);display:none;place-items:center;z-index:200;backdrop-filter:blur(6px);padding:16px}
-    .modal-bg.open{display:grid}
-    .modal{background:var(--surface-lt);border:1px solid var(--line-2);border-radius:var(--r16);padding:20px;width:min(380px,100%)}
-    .modal-bar{height:4px;border-radius:4px;margin-bottom:12px}
-    .modal-title{font-size:.95rem;font-weight:900;color:#fff;margin-bottom:8px}
-    .modal-info{font-size:.82rem;color:var(--ink-3);line-height:1.85}
-    .modal-info b{color:#c8e4ff}
-    .modal-close{width:100%;margin-top:14px;background:none;border:1px solid var(--line-2);border-radius:8px;padding:9px;color:var(--ink-3);cursor:pointer;font:inherit}
-    .modal-close:hover{border-color:var(--orange);color:var(--orange)}
-
-    .loading-msg{text-align:center;color:var(--ink-3);padding:30px;font-size:.84rem}
-    .error-msg{text-align:center;color:#ff6680;padding:20px;font-size:.84rem;background:rgba(255,68,102,.08);border:1px solid rgba(255,68,102,.25);border-radius:var(--r8)}
+    /* ===== ヒント ===== */
+    .tip-bar{display:flex;gap:8px;align-items:flex-start;background:rgba(255,204,0,.07);border:1px solid rgba(255,204,0,.2);border-radius:var(--r8);padding:9px 12px;font-size:.78rem;color:#ffe58a;line-height:1.65;margin-top:10px}
   </style>
 </head>
 <body>
@@ -97,291 +60,89 @@
     <div class="hero-emoji">📅</div>
     <div>
       <div class="hero-title">チームカレンダー</div>
-      <div class="hero-sub">練習・試合・大会の予定。Googleカレンダーと自動連携しています。</div>
+      <div class="hero-sub">練習・試合・大会・行事の予定。Google側で更新すると自動反映されます。</div>
     </div>
   </div>
 
+  <!-- 今日の日付表示 -->
   <div class="today-notice">
-    <div class="tn-date" id="tn-date">--</div>
-    <div class="tn-dow" id="tn-dow">---</div>
-    <div class="tn-text" id="tn-text">読み込み中...</div>
-  </div>
-
-  <div class="cal-header">
-    <div class="cal-title" id="cal-title">読み込み中...</div>
-    <div class="cal-nav">
-      <button class="nav-btn" onclick="navMonth(-1)">◀</button>
-      <button class="nav-btn" onclick="goToday()" style="font-size:.74rem">今月</button>
-      <button class="nav-btn" onclick="navMonth(1)">▶</button>
+    <div class="tn-left">
+      <div class="tn-date" id="tn-date">--</div>
+      <div class="tn-dow" id="tn-dow">---</div>
+    </div>
+    <div class="tn-right">
+      <div class="tn-label">📅 今日の日付</div>
+      <div class="tn-evt" id="tn-info">
+        <span class="tn-dot" style="background:var(--cyan)"></span>
+        <span>Googleカレンダーで予定を確認してください</span>
+      </div>
     </div>
   </div>
 
+  <!-- ビュー切り替え -->
   <div class="view-tab-bar">
     <button class="view-tab-btn active" onclick="setView('month',this)">📅 月表示</button>
     <button class="view-tab-btn" onclick="setView('week',this)">📆 週表示</button>
     <button class="view-tab-btn" onclick="setView('agenda',this)">📋 リスト</button>
   </div>
 
+  <!-- 凡例（カテゴリ色） -->
   <div class="legend-bar">
-    <span class="leg"><span class="leg-dot" style="background:#616161"></span>全体</span>
-    <span class="leg"><span class="leg-dot" style="background:#f09300"></span>U12</span>
+    <span class="leg"><span class="leg-dot" style="background:#222;border:1px solid #666"></span>全体</span>
+    <span class="leg"><span class="leg-dot" style="background:#8e24aa"></span>U12</span>
     <span class="leg"><span class="leg-dot" style="background:#d50000"></span>U11</span>
-    <span class="leg"><span class="leg-dot" style="background:#8e24aa"></span>U10</span>
-    <span class="leg"><span class="leg-dot" style="background:#0b8043"></span>U9</span>
+    <span class="leg"><span class="leg-dot" style="background:#f4511e"></span>U10</span>
+    <span class="leg"><span class="leg-dot" style="background:#f6c026"></span>U9</span>
     <span class="leg"><span class="leg-dot" style="background:#7cb342"></span>U8</span>
-    <span class="leg"><span class="leg-dot" style="background:#e4c441"></span>U7</span>
-    <span class="leg"><span class="leg-dot" style="background:#4285f4"></span>その他</span>
+    <span class="leg"><span class="leg-dot" style="background:#0b8043"></span>U7</span>
   </div>
 
-  <div id="cal-content"><div class="loading-msg">📅 カレンダーを読み込み中...</div></div>
+  <!-- Googleカレンダー本体 -->
+  <div class="gcal-wrap">
+    <iframe id="gcal-iframe"
+      src="https://calendar.google.com/calendar/embed?height=600&wkst=1&ctz=Asia%2FTokyo&showPrint=0&showTitle=0&showNav=1&showDate=1&showTabs=0&showCalendars=0&mode=MONTH&src=eW9zaGltaS5zbWMuZmNAZ21haWwuY29t&src=ZmNlZmY4MjEzODJlMTRhYjhjNTA0YTIwZTEyNjI3M2U0ZmM1ODgzYmYzODdhN2FlMzAyNjJjYTZlOGM5ZWMwNUBncm91cC5jYWxlbmRhci5nb29nbGUuY29t&src=YjkwYmQ4MTAwMWNkMDk2MzU1MWM4Y2Q0NGViNTM1MzFkMTU4N2YzYWI4NzU5MzE4ZTgwMjNkYTY1YjdiMDhlZUBncm91cC5jYWxlbmRhci5nb29nbGUuY29t&src=MWU1YTdkN2ZkOTFjYTg0OTg3YjE5ODBhNjU3NmQ3MDM0ZjQzMWU3OTA2N2ZlMmM4ZTFhMzhmZWIwNmZlMjI5MkBncm91cC5jYWxlbmRhci5nb29nbGUuY29t&src=Zjg1OGY0MzMxN2JhYTFmZmIwY2UxMTEwYjAzYzZlY2FjM2JmMTBhNWQ1MzY3NDI0YTBiOWZjNTM4YjUwZWZjZkBncm91cC5jYWxlbmRhci5nb29nbGUuY29t&src=NzNiNzM1YmRlNWI5ZDIyZjI3M2M0ODBlNTcyMTg4NWQ1MWUxOWZlZGFkZTcxZGYwN2M1MjFlOTlmNmQ1M2YzYUBncm91cC5jYWxlbmRhci5nb29nbGUuY29t&src=MDFkMjJiNzA4ZDYzMjA5OGY0NWRkN2JjMWJlMGNhZTg4ZWZmMDBlNGQyZTRiOWYwNzdjOGQ3MGJjY2E0NmRlMEBncm91cC5jYWxlbmRhci5nb29nbGUuY29t&src=Y2NkODMzMGJiM2I2ZWZiOGY5MGEzNmUxNjU1YWMwNDU5ZGRiZTA0NzE1NTMyNTM2N2JiMGZlZGRkMWVhZTgzZEBncm91cC5jYWxlbmRhci5nb29nbGUuY29t&src=amEuamFwYW5lc2UjaG9saWRheUBncm91cC52LmNhbGVuZGFyLmdvb2dsZS5jb20&color=%23616161&color=%23f09300&color=%23d50000&color=%238e24aa&color=%230b8043&color=%237cb342&color=%23e4c441&color=%234285f4&color=%23616161"
+      frameborder="0" scrolling="no" allowfullscreen></iframe>
+  </div>
 
+  <div class="tip-bar">
+    💡 <div>予定の追加・変更はコーチ専用エリアの「Googleカレンダー（編集）」から行ってください。このページに自動で反映されます。<br>
+    「週表示」「リスト」に切り替えると時間・場所の詳細が見やすくなります。</div>
+  </div>
 </main>
-
-<div class="modal-bg" id="modal" onclick="if(event.target.id==='modal')document.getElementById('modal').classList.remove('open')">
-  <div class="modal">
-    <div class="modal-bar" id="m-bar"></div>
-    <div class="modal-title" id="m-title"></div>
-    <div class="modal-info" id="m-info"></div>
-    <button class="modal-close" onclick="document.getElementById('modal').classList.remove('open')">閉じる</button>
-  </div>
-</div>
-
 <footer class="site-footer">YOSHIMI SMC FC — SMART PORTAL</footer>
 <script src="common.js"></script>
 <script>
-/* ===== 設定 ===== */
-var API_KEY = "AIzaSyCzJUtjC4ODuw2zO7yg4KR6TqILE05_jNk";
-var CALENDARS = [
-  {id:"yoshimi.smc.fc@gmail.com", color:"#616161", label:"全体"},
-  {id:"fceff821382e14ab8c504a20e126273e4fc5883bf387a7ae30262ca6e8c9ec05@group.calendar.google.com", color:"#f09300", label:"U12"},
-  {id:"b90bd81001cd0963551c8cd44eb53531d1587f3ab8759318e8023da65b7b08ee@group.calendar.google.com", color:"#d50000", label:"U11"},
-  {id:"1e5a7d7fd91ca84987b1980a6576d7034f431e79067fe2c8e1a38feb06fe2292@group.calendar.google.com", color:"#8e24aa", label:"U10"},
-  {id:"f858f43317baa1ffb0ce1110b03c6ecac3bf10a5d5367424a0b9fc538b50efcf@group.calendar.google.com", color:"#0b8043", label:"U9"},
-  {id:"73b735bde5b9d22f273c480e5721885d51e19fedade71df07c521e99f6d53f3a@group.calendar.google.com", color:"#7cb342", label:"U8"},
-  {id:"01d22b708d632098f45dd7bc1be0cae88eff00e4d2e4b9f077c8d70bcca46de0@group.calendar.google.com", color:"#e4c441", label:"U7"},
-  {id:"ccd8330bb3b6efb8f90a36e1655ac0459ddbe047155325367bb0feddd1eae83d@group.calendar.google.com", color:"#4285f4", label:"その他"},
-  {id:"ja.japanese#holiday@group.v.calendar.google.com", color:"#888", label:"祝日"}
-];
-
-var currentDate = new Date();
-var currentView = "month";
-var allEvents = [];
-
-/* ===== 今日表示 ===== */
+// 今日の日付表示
 (function(){
   var now = new Date();
   var DAYS = ["日","月","火","水","木","金","土"];
   document.getElementById("tn-date").textContent = now.getDate();
-  document.getElementById("tn-dow").textContent = DAYS[now.getDay()]+"曜";
+  document.getElementById("tn-dow").textContent = DAYS[now.getDay()]+"曜日";
 })();
 
-/* ===== イベント取得 ===== */
-function fetchEvents(){
-  var startOfMonth = new Date(currentDate.getFullYear(), currentDate.getMonth()-1, 1);
-  var endOfMonth = new Date(currentDate.getFullYear(), currentDate.getMonth()+2, 0);
-  var timeMin = startOfMonth.toISOString();
-  var timeMax = endOfMonth.toISOString();
+// ビュー切り替え
+var BASE_SRC = "https://calendar.google.com/calendar/embed?height=600&wkst=1&ctz=Asia%2FTokyo&showPrint=0&showTitle=0&showNav=1&showDate=1&showTabs=0&showCalendars=0"
+  + "&src=eW9zaGltaS5zbWMuZmNAZ21haWwuY29t"
+  + "&src=ZmNlZmY4MjEzODJlMTRhYjhjNTA0YTIwZTEyNjI3M2U0ZmM1ODgzYmYzODdhN2FlMzAyNjJjYTZlOGM5ZWMwNUBncm91cC5jYWxlbmRhci5nb29nbGUuY29t"
+  + "&src=YjkwYmQ4MTAwMWNkMDk2MzU1MWM4Y2Q0NGViNTM1MzFkMTU4N2YzYWI4NzU5MzE4ZTgwMjNkYTY1YjdiMDhlZUBncm91cC5jYWxlbmRhci5nb29nbGUuY29t"
+  + "&src=MWU1YTdkN2ZkOTFjYTg0OTg3YjE5ODBhNjU3NmQ3MDM0ZjQzMWU3OTA2N2ZlMmM4ZTFhMzhmZWIwNmZlMjI5MkBncm91cC5jYWxlbmRhci5nb29nbGUuY29t"
+  + "&src=Zjg1OGY0MzMxN2JhYTFmZmIwY2UxMTEwYjAzYzZlY2FjM2JmMTBhNWQ1MzY3NDI0YTBiOWZjNTM4YjUwZWZjZkBncm91cC5jYWxlbmRhci5nb29nbGUuY29t"
+  + "&src=NzNiNzM1YmRlNWI5ZDIyZjI3M2M0ODBlNTcyMTg4NWQ1MWUxOWZlZGFkZTcxZGYwN2M1MjFlOTlmNmQ1M2YzYUBncm91cC5jYWxlbmRhci5nb29nbGUuY29t"
+  + "&src=MDFkMjJiNzA4ZDYzMjA5OGY0NWRkN2JjMWJlMGNhZTg4ZWZmMDBlNGQyZTRiOWYwNzdjOGQ3MGJjY2E0NmRlMEBncm91cC5jYWxlbmRhci5nb29nbGUuY29t"
+  + "&src=Y2NkODMzMGJiM2I2ZWZiOGY5MGEzNmUxNjU1YWMwNDU5ZGRiZTA0NzE1NTMyNTM2N2JiMGZlZGRkMWVhZTgzZEBncm91cC5jYWxlbmRhci5nb29nbGUuY29t"
+  + "&src=amEuamFwYW5lc2UjaG9saWRheUBncm91cC52LmNhbGVuZGFyLmdvb2dsZS5jb20"
+  + "&color=%23616161&color=%23f09300&color=%23d50000&color=%238e24aa&color=%230b8043&color=%237cb342&color=%23e4c441&color=%234285f4&color=%23616161";
 
-  document.getElementById("cal-content").innerHTML = '<div class="loading-msg">📅 カレンダーを読み込み中...</div>';
+var MODE_MAP = {month:"MONTH", week:"WEEK", agenda:"AGENDA"};
 
-  var promises = CALENDARS.map(function(cal){
-    var url = "https://www.googleapis.com/calendar/v3/calendars/"
-      + encodeURIComponent(cal.id) + "/events?key=" + API_KEY
-      + "&timeMin=" + encodeURIComponent(timeMin)
-      + "&timeMax=" + encodeURIComponent(timeMax)
-      + "&singleEvents=true&orderBy=startTime&maxResults=100";
-    return fetch(url).then(function(res){
-      if(!res.ok) return {items:[]};
-      return res.json();
-    }).then(function(data){
-      return (data.items||[]).map(function(ev){
-        return {
-          title: ev.summary || "(無題)",
-          start: ev.start.dateTime || ev.start.date,
-          end: ev.end.dateTime || ev.end.date,
-          allDay: !ev.start.dateTime,
-          location: ev.location || "",
-          color: cal.color,
-          calLabel: cal.label
-        };
-      });
-    }).catch(function(){ return []; });
-  });
-
-  Promise.all(promises).then(function(results){
-    allEvents = [].concat.apply([], results);
-    render();
-  });
-}
-
-/* ===== ナビゲーション ===== */
-function navMonth(diff){
-  currentDate.setMonth(currentDate.getMonth()+diff);
-  fetchEvents();
-}
-function goToday(){
-  currentDate = new Date();
-  fetchEvents();
-}
-function setView(v, btn){
-  currentView = v;
+function setView(mode, btn){
   document.querySelectorAll(".view-tab-btn").forEach(function(b){b.classList.remove("active");});
   btn.classList.add("active");
-  render();
+  var iframe = document.getElementById("gcal-iframe");
+  iframe.src = BASE_SRC + "&mode=" + MODE_MAP[mode];
+  // リスト表示は高さを伸ばす
+  iframe.style.height = mode === "agenda" ? "calc(100vh - 200px)" : "";
 }
-
-/* ===== 日付ユーティリティ ===== */
-function ymd(d){ return d.getFullYear()+"-"+String(d.getMonth()+1).padStart(2,"0")+"-"+String(d.getDate()).padStart(2,"0"); }
-function eventsOnDate(dateStr){
-  return allEvents.filter(function(ev){
-    var s = ev.start.slice(0,10);
-    var e = ev.end.slice(0,10);
-    return dateStr >= s && dateStr < (ev.allDay ? e : (e === s ? e+"x" : e)) || (dateStr===s);
-  }).filter(function(ev){
-    // allDay複数日対応 + 通常イベント
-    var s = ev.start.slice(0,10), e = ev.end.slice(0,10);
-    if(ev.allDay) return dateStr >= s && dateStr < e;
-    return s === dateStr;
-  });
-}
-
-/* ===== 描画 ===== */
-function render(){
-  var y = currentDate.getFullYear(), m = currentDate.getMonth();
-  document.getElementById("cal-title").textContent = y+"年 "+(m+1)+"月";
-  var todayStr = ymd(new Date());
-
-  if(currentView === "month") renderMonth(y, m, todayStr);
-  else if(currentView === "week") renderWeek(todayStr);
-  else renderAgenda(todayStr);
-
-  // 今日のテキスト更新
-  var todayEvts = eventsOnDate(todayStr);
-  var tnText = document.getElementById("tn-text");
-  if(todayEvts.length){
-    tnText.innerHTML = todayEvts.slice(0,2).map(function(ev){
-      return '<span style="color:'+ev.color+'">●</span> '+esc(ev.title);
-    }).join("　");
-  } else {
-    tnText.textContent = "本日の予定はありません";
-  }
-}
-
-function renderMonth(y, m, todayStr){
-  var first = new Date(y, m, 1);
-  var startDow = first.getDay();
-  var daysInMonth = new Date(y, m+1, 0).getDate();
-  var daysInPrevMonth = new Date(y, m, 0).getDate();
-
-  var html = '<div class="cal-grid">';
-  ["日","月","火","水","木","金","土"].forEach(function(d,i){
-    html += '<div class="cal-dow'+(i===0?" sun":i===6?" sat":"")+'">'+d+'</div>';
-  });
-
-  // 前月の空白
-  for(var i=0;i<startDow;i++){
-    var pd = daysInPrevMonth - startDow + i + 1;
-    html += '<div class="cal-day other-month"><span class="day-num">'+pd+'</span></div>';
-  }
-  // 今月
-  for(var d=1; d<=daysInMonth; d++){
-    var dateStr = y+"-"+String(m+1).padStart(2,"0")+"-"+String(d).padStart(2,"0");
-    var dow = new Date(y,m,d).getDay();
-    var evts = eventsOnDate(dateStr);
-    var isToday = dateStr === todayStr;
-    html += '<div class="cal-day'+(isToday?" today":"")+(dow===0?" sun":dow===6?" sat":"")+(evts.length?" has-evt":"")+'">';
-    html += '<span class="day-num'+(isToday?" today-n":"")+'">'+d+'</span>';
-    evts.slice(0,3).forEach(function(ev){
-      html += '<div class="evt-mini" style="background:'+hexToRgba(ev.color,.22)+';color:'+ev.color+'" onclick="showEvt(\''+esc(ev.title)+'\',\''+ev.color+'\',\''+esc(ev.calLabel)+'\',\''+formatTime(ev)+'\',\''+esc(ev.location)+'\')">'+esc(ev.title)+'</div>';
-    });
-    if(evts.length>3) html += '<div class="evt-more">+'+(evts.length-3)+'件</div>';
-    html += '</div>';
-  }
-  // 翌月の空白
-  var totalCells = startDow + daysInMonth;
-  var remain = (7 - (totalCells % 7)) % 7;
-  for(var i=1;i<=remain;i++){
-    html += '<div class="cal-day other-month"><span class="day-num">'+i+'</span></div>';
-  }
-  html += '</div>';
-  document.getElementById("cal-content").innerHTML = html;
-}
-
-function renderWeek(todayStr){
-  var base = new Date(currentDate);
-  var dow = base.getDay();
-  var startOfWeek = new Date(base); startOfWeek.setDate(base.getDate()-dow);
-  var html = '<div class="week-list">';
-  for(var i=0;i<7;i++){
-    var d = new Date(startOfWeek); d.setDate(startOfWeek.getDate()+i);
-    var dateStr = ymd(d);
-    var DAYS = ["日","月","火","水","木","金","土"];
-    var evts = eventsOnDate(dateStr);
-    var isToday = dateStr === todayStr;
-    html += '<div class="week-day-card'+(isToday?" today":"")+'">';
-    html += '<div class="wdc-head">'+(d.getMonth()+1)+'/'+d.getDate()+'（'+DAYS[d.getDay()]+'）'+(isToday?' <span style="color:var(--orange);font-size:.7rem">今日</span>':'')+'</div>';
-    if(evts.length){
-      evts.forEach(function(ev){
-        html += '<div class="wdc-evt" onclick="showEvt(\''+esc(ev.title)+'\',\''+ev.color+'\',\''+esc(ev.calLabel)+'\',\''+formatTime(ev)+'\',\''+esc(ev.location)+'\')">'
-          +'<span class="wdc-dot" style="background:'+ev.color+'"></span>'
-          +'<span class="wdc-time">'+formatTime(ev)+'</span>'
-          +'<span>'+esc(ev.title)+'</span></div>';
-      });
-    } else {
-      html += '<div style="color:var(--ink-3);font-size:.74rem;padding:4px 0">予定なし</div>';
-    }
-    html += '</div>';
-  }
-  html += '</div>';
-  document.getElementById("cal-content").innerHTML = html;
-}
-
-function renderAgenda(todayStr){
-  var future = allEvents.filter(function(ev){ return ev.start.slice(0,10) >= todayStr; })
-    .sort(function(a,b){ return a.start.localeCompare(b.start); });
-  if(!future.length){
-    document.getElementById("cal-content").innerHTML = '<p style="color:var(--ink-3);text-align:center;padding:24px;font-size:.84rem">今後の予定がありません</p>';
-    return;
-  }
-  var html = '';
-  future.slice(0,30).forEach(function(ev){
-    var d = new Date(ev.start.slice(0,10)+"T00:00:00");
-    var DAYS = ["日","月","火","水","木","金","土"];
-    html += '<div class="agenda-item" onclick="showEvt(\''+esc(ev.title)+'\',\''+ev.color+'\',\''+esc(ev.calLabel)+'\',\''+formatTime(ev)+'\',\''+esc(ev.location)+'\')">'
-      +'<div class="ag-date"><div class="ag-day">'+d.getDate()+'</div><div class="ag-dow">'+(d.getMonth()+1)+'/'+d.getDate()+' '+DAYS[d.getDay()]+'</div></div>'
-      +'<div class="ag-bar" style="background:'+ev.color+'"></div>'
-      +'<div class="ag-body"><div class="ag-title">'+esc(ev.title)+'</div><div class="ag-meta">'+formatTime(ev)+(ev.location?' '+esc(ev.location):'')+'</div></div>'
-      +'</div>';
-  });
-  document.getElementById("cal-content").innerHTML = html;
-}
-
-/* ===== ユーティリティ ===== */
-function formatTime(ev){
-  if(ev.allDay) return "終日";
-  var s = new Date(ev.start), e = new Date(ev.end);
-  function hm(d){ return String(d.getHours()).padStart(2,"0")+":"+String(d.getMinutes()).padStart(2,"0"); }
-  return hm(s)+"〜"+hm(e);
-}
-function hexToRgba(hex, a){
-  var h = hex.replace("#","");
-  var r = parseInt(h.substring(0,2),16), g = parseInt(h.substring(2,4),16), b = parseInt(h.substring(4,6),16);
-  return "rgba("+r+","+g+","+b+","+a+")";
-}
-function esc(s){ return String(s||"").replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;").replace(/'/g,"&#39;"); }
-
-/* ===== モーダル ===== */
-function showEvt(title, color, label, time, location){
-  document.getElementById("m-bar").style.background = color;
-  document.getElementById("m-title").textContent = title;
-  document.getElementById("m-info").innerHTML =
-    "<b>カテゴリ：</b>"+label+"<br><b>時間：</b>"+time
-    + (location ? "<br><b>場所：</b>"+location : "");
-  document.getElementById("modal").classList.add("open");
-}
-
-/* ===== 初期化 ===== */
-fetchEvents();
 </script>
 </body>
 </html>
