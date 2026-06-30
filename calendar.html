@@ -43,6 +43,19 @@
 
     /* ===== ヒント ===== */
     .tip-bar{display:flex;gap:8px;align-items:flex-start;background:rgba(255,204,0,.07);border:1px solid rgba(255,204,0,.2);border-radius:var(--r8);padding:9px 12px;font-size:.78rem;color:#ffe58a;line-height:1.65;margin-top:10px}
+
+    /* ===== 今後の予定 ===== */
+    .upcoming-head{display:flex;align-items:center;gap:8px;margin:18px 0 10px}
+    .upcoming-head .uh-icon{font-size:1.1rem}
+    .upcoming-head .uh-text{font-size:.88rem;font-weight:900;color:var(--cyan)}
+    .ag-item{display:flex;align-items:center;gap:12px;background:var(--surface-lt);border:1px solid var(--line-2);border-radius:var(--r10);padding:11px 14px;margin-bottom:8px}
+    .ag-date{min-width:42px;text-align:center;flex-shrink:0}
+    .ag-day{font-size:1.3rem;font-weight:900;color:#fff;line-height:1}
+    .ag-dow{font-size:.66rem;color:var(--ink-3);font-weight:700}
+    .ag-bar{width:4px;height:34px;border-radius:4px;flex-shrink:0}
+    .ag-body{flex:1;min-width:0}
+    .ag-title{font-size:.86rem;font-weight:900;color:#fff}
+    .ag-meta{font-size:.72rem;color:var(--ink-3);margin-top:1px}
   </style>
 </head>
 <body>
@@ -104,6 +117,11 @@
       frameborder="0" scrolling="no" allowfullscreen></iframe>
   </div>
 
+  <div class="upcoming-head"><span class="uh-icon">📋</span><span class="uh-text">今後の予定</span></div>
+  <div id="upcoming-list">
+    <p style="color:var(--ink-3);text-align:center;padding:16px;font-size:.82rem">読み込み中...</p>
+  </div>
+
   <div class="tip-bar">
     💡 <div>予定の追加・変更はコーチ専用エリアの「Googleカレンダー（編集）」から行ってください。このページに自動で反映されます。<br>
     「週表示」「リスト」に切り替えると時間・場所の詳細が見やすくなります。</div>
@@ -143,6 +161,88 @@ function setView(mode, btn){
   // リスト表示は高さを伸ばす
   iframe.style.height = mode === "agenda" ? "calc(100vh - 200px)" : "";
 }
+
+/* ===== 今後の予定（API経由で取得） ===== */
+var UP_API_KEY = "AIzaSyCzJUtjC4ODuw2zO7yg4KR6TqILE05_jNk";
+var UP_CALENDARS = [
+  {id:"yoshimi.smc.fc@gmail.com", color:"#616161", label:"全体"},
+  {id:"fceff821382e14ab8c504a20e126273e4fc5883bf387a7ae30262ca6e8c9ec05@group.calendar.google.com", color:"#f09300", label:"U12"},
+  {id:"b90bd81001cd0963551c8cd44eb53531d1587f3ab8759318e8023da65b7b08ee@group.calendar.google.com", color:"#d50000", label:"U11"},
+  {id:"1e5a7d7fd91ca84987b1980a6576d7034f431e79067fe2c8e1a38feb06fe2292@group.calendar.google.com", color:"#8e24aa", label:"U10"},
+  {id:"f858f43317baa1ffb0ce1110b03c6ecac3bf10a5d5367424a0b9fc538b50efcf@group.calendar.google.com", color:"#0b8043", label:"U9"},
+  {id:"73b735bde5b9d22f273c480e5721885d51e19fedade71df07c521e99f6d53f3a@group.calendar.google.com", color:"#7cb342", label:"U8"},
+  {id:"01d22b708d632098f45dd7bc1be0cae88eff00e4d2e4b9f077c8d70bcca46de0@group.calendar.google.com", color:"#e4c441", label:"U7"},
+  {id:"ccd8330bb3b6efb8f90a36e1655ac0459ddbe047155325367bb0feddd1eae83d@group.calendar.google.com", color:"#4285f4", label:"その他"}
+];
+
+function uesc(s){ return String(s||"").replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;"); }
+
+function loadUpcoming(){
+  var now = new Date();
+  var weekLater = new Date(now); weekLater.setDate(now.getDate()+7);
+  var timeMin = now.toISOString();
+  var timeMax = weekLater.toISOString();
+
+  var promises = UP_CALENDARS.map(function(cal){
+    var url = "https://www.googleapis.com/calendar/v3/calendars/"
+      + encodeURIComponent(cal.id) + "/events?key=" + UP_API_KEY
+      + "&timeMin=" + encodeURIComponent(timeMin)
+      + "&timeMax=" + encodeURIComponent(timeMax)
+      + "&singleEvents=true&orderBy=startTime&maxResults=20";
+    return fetch(url).then(function(res){ return res.ok ? res.json() : {items:[]}; })
+      .then(function(data){
+        return (data.items||[]).map(function(ev){
+          return {
+            title: ev.summary || "(無題)",
+            start: ev.start.dateTime || ev.start.date,
+            end: ev.end.dateTime || ev.end.date,
+            allDay: !ev.start.dateTime,
+            location: ev.location || "",
+            color: cal.color,
+            label: cal.label
+          };
+        });
+      }).catch(function(){ return []; });
+  });
+
+  Promise.all(promises).then(function(results){
+    var events = [].concat.apply([], results);
+    events.sort(function(a,b){ return a.start.localeCompare(b.start); });
+    renderUpcoming(events);
+  }).catch(function(){
+    document.getElementById("upcoming-list").innerHTML =
+      '<p style="color:var(--ink-3);text-align:center;padding:16px;font-size:.82rem">予定を取得できませんでした。</p>';
+  });
+}
+
+function renderUpcoming(events){
+  var wrap = document.getElementById("upcoming-list");
+  if(!events.length){
+    wrap.innerHTML = '<p style="color:var(--ink-3);text-align:center;padding:16px;font-size:.82rem">今後1週間の予定はありません。</p>';
+    return;
+  }
+  var DAYS = ["日","月","火","水","木","金","土"];
+  wrap.innerHTML = events.slice(0,10).map(function(ev){
+    var d = new Date(ev.start.slice(0,10)+"T00:00:00");
+    var timeStr;
+    if(ev.allDay){
+      timeStr = "終日";
+    } else {
+      var s = new Date(ev.start), e = new Date(ev.end);
+      function hm(t){ return String(t.getHours()).padStart(2,"0")+":"+String(t.getMinutes()).padStart(2,"0"); }
+      timeStr = hm(s)+"〜"+hm(e);
+    }
+    return '<div class="ag-item">'
+      +'<div class="ag-date"><div class="ag-day">'+d.getDate()+'</div><div class="ag-dow">'+DAYS[d.getDay()]+'</div></div>'
+      +'<div class="ag-bar" style="background:'+ev.color+'"></div>'
+      +'<div class="ag-body">'
+      +'<div class="ag-title">'+uesc(ev.title)+(ev.label==="全体"?'':' ('+uesc(ev.label)+')')+'</div>'
+      +'<div class="ag-meta">'+timeStr+(ev.location?'　'+uesc(ev.location):'')+'</div>'
+      +'</div></div>';
+  }).join("");
+}
+
+loadUpcoming();
 </script>
 </body>
 </html>
