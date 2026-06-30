@@ -164,6 +164,20 @@ function setView(mode, btn){
   iframe.style.height = mode === "agenda" ? "calc(100vh - 200px)" : "";
 }
 
+/* ===== 上のカレンダーを該当日付にジャンプ ===== */
+function jumpToDate(y, m, d){
+  var iframe = document.getElementById("gcal-iframe");
+  var dateStr = y + String(m).padStart(2,"0") + String(d).padStart(2,"0");
+  // 週表示でその日付を開く
+  iframe.src = BASE_SRC + "&mode=WEEK&dates=" + dateStr + "%2F" + dateStr;
+  // タブも「週表示」にハイライト
+  document.querySelectorAll(".view-tab-btn").forEach(function(b,i){
+    b.classList.toggle("active", i===1);
+  });
+  // ページ上部のカレンダーまでスクロール
+  document.querySelector(".gcal-wrap").scrollIntoView({behavior:"smooth", block:"start"});
+}
+
 /* ===== 今後の予定（API経由で取得） ===== */
 var UP_API_KEY = "AIzaSyCzJUtjC4ODuw2zO7yg4KR6TqILE05_jNk";
 var UP_CALENDARS = [
@@ -234,19 +248,14 @@ function renderUpcoming(events){
       function hm(t){ return String(t.getHours()).padStart(2,"0")+":"+String(t.getMinutes()).padStart(2,"0"); }
       timeStr = hm(s)+"〜"+hm(e);
     }
-    // Googleカレンダーの該当日付に飛ぶURL（agendaビューでその日付を開く）
-    var dateCompact = ev.start.slice(0,10).replace(/-/g,"");
-    var gcalUrl = "https://calendar.google.com/calendar/u/0/r/day/"
-      + d.getFullYear() + "/" + (d.getMonth()+1) + "/" + d.getDate();
-
-    return '<div class="ag-item" onclick="window.open(\''+gcalUrl+'\',\'_blank\')">'
+    return '<div class="ag-item" onclick="jumpToDate(\''+d.getFullYear()+'\',\''+(d.getMonth()+1)+'\',\''+d.getDate()+'\')">'
       +'<div class="ag-date"><div class="ag-day">'+d.getDate()+'</div><div class="ag-dow">'+DAYS[d.getDay()]+'</div></div>'
       +'<div class="ag-bar" style="background:'+ev.color+'"></div>'
       +'<div class="ag-body">'
       +'<div class="ag-title">'+uesc(ev.title)+(ev.label==="全体"?'':' ('+uesc(ev.label)+')')+'</div>'
       +'<div class="ag-meta">'+timeStr+(ev.location?'　'+uesc(ev.location):'')+'</div>'
       +'</div>'
-      +'<div style="color:var(--ink-3);font-size:.8rem;flex-shrink:0">›</div>'
+      +'<div style="color:var(--ink-3);font-size:.8rem;flex-shrink:0">↑</div>'
       +'</div>';
   }).join("");
 }
