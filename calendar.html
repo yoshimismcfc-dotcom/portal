@@ -48,7 +48,9 @@
     .upcoming-head{display:flex;align-items:center;gap:8px;margin:18px 0 10px}
     .upcoming-head .uh-icon{font-size:1.1rem}
     .upcoming-head .uh-text{font-size:.88rem;font-weight:900;color:var(--cyan)}
-    .ag-item{display:flex;align-items:center;gap:12px;background:var(--surface-lt);border:1px solid var(--line-2);border-radius:var(--r10);padding:11px 14px;margin-bottom:8px}
+    .ag-item{display:flex;align-items:center;gap:12px;background:var(--surface-lt);border:1px solid var(--line-2);border-radius:var(--r10);padding:11px 14px;margin-bottom:8px;cursor:pointer;transition:.15s}
+    .ag-item:hover{border-color:var(--orange);background:rgba(255,107,43,.07)}
+    .ag-item:active{transform:scale(.98)}
     .ag-date{min-width:42px;text-align:center;flex-shrink:0}
     .ag-day{font-size:1.3rem;font-weight:900;color:#fff;line-height:1}
     .ag-dow{font-size:.66rem;color:var(--ink-3);font-weight:700}
@@ -232,13 +234,20 @@ function renderUpcoming(events){
       function hm(t){ return String(t.getHours()).padStart(2,"0")+":"+String(t.getMinutes()).padStart(2,"0"); }
       timeStr = hm(s)+"〜"+hm(e);
     }
-    return '<div class="ag-item">'
+    // Googleカレンダーの該当日付に飛ぶURL（agendaビューでその日付を開く）
+    var dateCompact = ev.start.slice(0,10).replace(/-/g,"");
+    var gcalUrl = "https://calendar.google.com/calendar/u/0/r/day/"
+      + d.getFullYear() + "/" + (d.getMonth()+1) + "/" + d.getDate();
+
+    return '<div class="ag-item" onclick="window.open(\''+gcalUrl+'\',\'_blank\')">'
       +'<div class="ag-date"><div class="ag-day">'+d.getDate()+'</div><div class="ag-dow">'+DAYS[d.getDay()]+'</div></div>'
       +'<div class="ag-bar" style="background:'+ev.color+'"></div>'
       +'<div class="ag-body">'
       +'<div class="ag-title">'+uesc(ev.title)+(ev.label==="全体"?'':' ('+uesc(ev.label)+')')+'</div>'
       +'<div class="ag-meta">'+timeStr+(ev.location?'　'+uesc(ev.location):'')+'</div>'
-      +'</div></div>';
+      +'</div>'
+      +'<div style="color:var(--ink-3);font-size:.8rem;flex-shrink:0">›</div>'
+      +'</div>';
   }).join("");
 }
 
