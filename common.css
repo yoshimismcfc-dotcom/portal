@@ -618,3 +618,276 @@ select.form-control option { background: var(--navy-900); color: var(--ink); }
   .menu-card .card-badge { top: 9px; right: 9px; font-size: .58rem; padding: 2px 7px; }
   .header-action { min-width: 40px; min-height: 40px; }
 }
+
+/* ===================================================
+   ライトモード追加スタイル（文字色・背景色の完全対応）
+   =================================================== */
+
+/* ダーク系背景色を白系に */
+body[data-theme="light"] .hero-band,
+body[data-theme="light"] .panel,
+body[data-theme="light"] .notice-bar,
+body[data-theme="light"] .acc-section,
+body[data-theme="light"] .acc-hdr,
+body[data-theme="light"] .acc-body,
+body[data-theme="light"] .role-card,
+body[data-theme="light"] .event-card,
+body[data-theme="light"] .req-card,
+body[data-theme="light"] .sum-box,
+body[data-theme="light"] .area-card,
+body[data-theme="light"] .setup-step,
+body[data-theme="light"] .tool-card,
+body[data-theme="light"] .g-tab-content,
+body[data-theme="light"] .staff-section,
+body[data-theme="light"] .c-card,
+body[data-theme="light"] .url-item,
+body[data-theme="light"] .drive-card,
+body[data-theme="light"] .sched-item {
+  background: rgba(255,255,255,.92) !important;
+  border-color: rgba(13,29,64,.15) !important;
+}
+
+/* 白文字 → ダーク文字 */
+body[data-theme="light"] .hero-title,
+body[data-theme="light"] .hero-sub,
+body[data-theme="light"] .panel-title,
+body[data-theme="light"] .ac-name,
+body[data-theme="light"] .ac-desc,
+body[data-theme="light"] .acc-title,
+body[data-theme="light"] .step-title,
+body[data-theme="light"] .step-desc,
+body[data-theme="light"] .ac-size,
+body[data-theme="light"] .req-name,
+body[data-theme="light"] .req-meta,
+body[data-theme="light"] .c-label,
+body[data-theme="light"] .c-desc,
+body[data-theme="light"] .role-label,
+body[data-theme="light"] .role-name,
+body[data-theme="light"] .role-sub,
+body[data-theme="light"] .url-label,
+body[data-theme="light"] .url-link,
+body[data-theme="light"] .sum-lbl,
+body[data-theme="light"] .sum-val,
+body[data-theme="light"] .event-name,
+body[data-theme="light"] .event-date,
+body[data-theme="light"] .sort-lbl,
+body[data-theme="light"] .legend-bar,
+body[data-theme="light"] .grade-head,
+body[data-theme="light"] .dim-table td,
+body[data-theme="light"] .ft td,
+body[data-theme="light"] .rpt-table td,
+body[data-theme="light"] .ledger-table td,
+body[data-theme="light"] .acc-table td,
+body[data-theme="light"] .list-table td,
+body[data-theme="light"] .uni-table td,
+body[data-theme="light"] .dim-table tfoot td,
+body[data-theme="light"] .rpt-table tfoot td,
+body[data-theme="light"] [style*="color:#c8e4ff"],
+body[data-theme="light"] [style*="color:#c8e8ff"],
+body[data-theme="light"] [style*="color:#94c4e4"],
+body[data-theme="light"] [style*="color:#a0d4f0"],
+body[data-theme="light"] [style*="color:#7dd3fc"],
+body[data-theme="light"] [style*="color:#ffe58a"],
+body[data-theme="light"] [style*="color:#ffc8a0"],
+body[data-theme="light"] [style*="color:#a0f0c0"],
+body[data-theme="light"] [style*="color:#a0e8a0"] {
+  color: var(--ink) !important;
+}
+
+/* テーブルヘッダーはダーク維持（見やすいため） */
+body[data-theme="light"] .dim-table thead tr,
+body[data-theme="light"] .rpt-table th,
+body[data-theme="light"] .ledger-table th,
+body[data-theme="light"] .acc-table thead tr,
+body[data-theme="light"] .list-table th,
+body[data-theme="light"] .uni-table th,
+body[data-theme="light"] .ft th,
+body[data-theme="light"] .grade-head,
+body[data-theme="light"] .summary-table th {
+  background: #003087 !important;
+  color: #fff !important;
+}
+
+/* セクション区切り */
+body[data-theme="light"] .pitch-section-divider,
+body[data-theme="light"] .c-section-div {
+  background: rgba(0,48,135,.08) !important;
+  border-left-color: #003087 !important;
+}
+body[data-theme="light"] .psd-text,
+body[data-theme="light"] .csd-text {
+  color: #003087 !important;
+}
+body[data-theme="light"] .psd-sub,
+body[data-theme="light"] .csd-sub {
+  color: rgba(0,48,135,.5) !important;
+}
+
+/* タブ */
+body[data-theme="light"] .g-tab-btn,
+body[data-theme="light"] .tab-btn,
+body[data-theme="light"] .ptab-btn,
+body[data-theme="light"] .staff-tab-btn,
+body[data-theme="light"] .acct-tab,
+body[data-theme="light"] .sort-btn,
+body[data-theme="light"] .f-btn {
+  background: rgba(255,255,255,.85) !important;
+  color: #003087 !important;
+  border-color: rgba(13,29,64,.2) !important;
+}
+body[data-theme="light"] .g-tab-btn.active,
+body[data-theme="light"] .tab-btn.active,
+body[data-theme="light"] .ptab-btn.active,
+body[data-theme="light"] .staff-tab-btn.active,
+body[data-theme="light"] .acct-tab.active,
+body[data-theme="light"] .sort-btn.on,
+body[data-theme="light"] .f-btn.on {
+  background: linear-gradient(135deg,#003087,#0050cc) !important;
+  color: #fff !important;
+  border-color: #003087 !important;
+}
+
+/* ボタン */
+body[data-theme="light"] .btn-outline {
+  border-color: rgba(13,29,64,.3) !important;
+  color: var(--ink) !important;
+}
+body[data-theme="light"] .btn-outline:hover {
+  background: rgba(13,29,64,.06) !important;
+}
+
+/* カード系 */
+body[data-theme="light"] .menu-card {
+  background: rgba(255,255,255,.9) !important;
+  border-color: rgba(13,29,64,.15) !important;
+}
+body[data-theme="light"] .menu-card .card-label { color: var(--ink) !important; }
+body[data-theme="light"] .menu-card .card-desc  { color: var(--ink-3) !important; }
+
+/* ノーティスバー */
+body[data-theme="light"] .notice-bar {
+  background: rgba(0,48,135,.07) !important;
+  border-color: rgba(0,48,135,.2) !important;
+  color: #003087 !important;
+}
+body[data-theme="light"] .notice-bar.green {
+  background: rgba(0,150,80,.08) !important;
+  border-color: rgba(0,150,80,.25) !important;
+  color: #00602a !important;
+}
+
+/* チップ・ポイントボックス */
+body[data-theme="light"] .tip,
+body[data-theme="light"] .point-box.info,
+body[data-theme="light"] .step-tip {
+  background: rgba(0,100,220,.06) !important;
+  border-color: rgba(0,100,220,.2) !important;
+  color: #003087 !important;
+}
+body[data-theme="light"] .tip-o,
+body[data-theme="light"] .point-box.warn {
+  background: rgba(200,80,0,.06) !important;
+  border-color: rgba(200,80,0,.2) !important;
+  color: #7a3000 !important;
+}
+body[data-theme="light"] .tip-g,
+body[data-theme="light"] .point-box.ok {
+  background: rgba(0,150,60,.06) !important;
+  border-color: rgba(0,150,60,.2) !important;
+  color: #004d1a !important;
+}
+body[data-theme="light"] .warn-box {
+  background: rgba(180,0,0,.06) !important;
+  border-color: rgba(180,0,0,.2) !important;
+  color: #7a0000 !important;
+}
+
+/* フォーム */
+body[data-theme="light"] .form-control {
+  background: #fff !important;
+  color: var(--ink) !important;
+  border-color: rgba(13,29,64,.25) !important;
+}
+body[data-theme="light"] .form-label { color: var(--ink-2) !important; }
+
+/* ヒーローバンド */
+body[data-theme="light"] .hero-band {
+  background: linear-gradient(135deg, rgba(0,48,135,.09), rgba(0,48,135,.04)) !important;
+  border-color: rgba(0,48,135,.15) !important;
+}
+body[data-theme="light"] .hero-title { color: #10172a !important; }
+body[data-theme="light"] .hero-sub   { color: #5d6f86 !important; }
+
+/* モーダル */
+body[data-theme="light"] .modal-bg .modal,
+body[data-theme="light"] .edit-modal-bg .edit-modal {
+  background: #f8fbff !important;
+  border-color: rgba(13,29,64,.15) !important;
+}
+body[data-theme="light"] .modal h3,
+body[data-theme="light"] .edit-modal h3 { color: #10172a !important; }
+
+/* アコーディオン矢印 */
+body[data-theme="light"] .acc-arrow { color: var(--ink-3) !important; }
+
+/* 名簿テーブル */
+body[data-theme="light"] .roster-table td { color: var(--ink) !important; }
+body[data-theme="light"] .name-cell .kana  { color: var(--ink-3) !important; }
+body[data-theme="light"] .name-cell .kanji { color: var(--ink) !important; }
+body[data-theme="light"] .name-cell.girl .kanji { color: #c0004a !important; }
+body[data-theme="light"] .num-badge { color: #c04400 !important; }
+
+/* バッジ */
+body[data-theme="light"] .card-badge {
+  background: rgba(0,48,135,.12) !important;
+  color: #003087 !important;
+  border-color: rgba(0,48,135,.25) !important;
+}
+
+/* パスワードセル */
+body[data-theme="light"] .pw-text { color: #003087 !important; }
+body[data-theme="light"] .pw-toggle {
+  border-color: rgba(0,48,135,.3) !important;
+  color: #003087 !important;
+}
+
+/* アカウントテーブル */
+body[data-theme="light"] .acc-table td { color: var(--ink) !important; }
+body[data-theme="light"] .acc-table td:first-child { color: var(--ink) !important; }
+body[data-theme="light"] .acc-link { color: var(--orange) !important; }
+
+/* ピッチ図の寸法テーブル */
+body[data-theme="light"] .dim-size { color: var(--orange) !important; }
+
+/* フッター */
+body[data-theme="light"] .site-footer { color: var(--ink-3) !important; }
+
+/* ソートバー */
+body[data-theme="light"] .sort-bar .sort-lbl { color: var(--ink-3) !important; }
+
+/* 担当フォルダ */
+body[data-theme="light"] .ac-name { color: #10172a !important; }
+body[data-theme="light"] .ac-size { color: #c04400 !important; }
+body[data-theme="light"] .ac-desc { color: #5d6f86 !important; }
+
+/* 年度バッジ */
+body[data-theme="light"] #grade-badge { color: #003087 !important; }
+
+/* 会計ページ */
+body[data-theme="light"] .req-amount { color: #c04400 !important; }
+body[data-theme="light"] .ev-income  { color: #006633 !important; }
+body[data-theme="light"] .ev-expense { color: #990022 !important; }
+body[data-theme="light"] .ev-balance { color: #003087 !important; }
+
+/* inlineのstyle背景色（ダーク系）を上書き */
+body[data-theme="light"] [style*="background:rgba(0,0,0"],
+body[data-theme="light"] [style*="background: rgba(0,0,0"],
+body[data-theme="light"] [style*="background:rgba(0,48,135"],
+body[data-theme="light"] [style*="background: rgba(0,48,135"] {
+  background: rgba(0,48,135,.06) !important;
+}
+body[data-theme="light"] [style*="background:rgba(255,255,255,.04)"],
+body[data-theme="light"] [style*="background:rgba(255,255,255,.03)"],
+body[data-theme="light"] [style*="background:rgba(255,255,255,.05)"] {
+  background: rgba(0,0,0,.03) !important;
+}
