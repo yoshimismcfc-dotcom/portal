@@ -236,7 +236,7 @@ function renderUpcoming(events){
       +'<div class="ag-date"><div class="ag-day">'+d.getDate()+'</div><div class="ag-dow">'+DAYS[d.getDay()]+'</div></div>'
       +'<div class="ag-bar" style="background:'+ev.color+'"></div>'
       +'<div class="ag-body">'
-      +'<div class="ag-title">'+uesc(ev.title)+(ev.label==="全体"?'':' ('+uesc(ev.label)+')')+'</div>'
+      +'<div class="ag-title">'+uesc(ev.title)+'</div>'
       +'<div class="ag-meta">'+timeStr+(ev.location?'　'+uesc(ev.location):'')+'</div>'
       +'</div>'
       +'</div>';
