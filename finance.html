@@ -190,7 +190,7 @@
       <div class="help-grid">
         <div class="help-card good">
           <strong>収入に入れる例</strong>
-          <p>団費、登録料・保険料、大会参加費、寄付など、チームにお金が入ったもの。</p>
+          <p>団費、大会参加費、寄付など、チームにお金が入ったもの。</p>
         </div>
         <div class="help-card warn">
           <strong>支出に入れる例</strong>
@@ -229,7 +229,7 @@
   </section>
 
   <section class="fin-view" id="view-collection">
-    <div class="guide-box no-print">団員名簿と連動して、登録料・保険料、前期・後期会費、遠征費などの集金状況を確認できます。登録料・保険料は1,000円、会費は3年生以下7,000円・4年生以上8,000円を初期表示します。兄弟割引や個別調整がある場合は、団員ごとの金額欄で変更してください。支払い済にすると、会計入力の収入にも自動で反映されます。</div>
+    <div class="guide-box no-print">団員名簿と連動して、前期・後期会費、遠征費、大会参加費などの集金状況を確認できます。会費は3年生以下7,000円・4年生以上8,000円を初期表示します。兄弟割引や個別調整がある場合は、団員ごとの金額欄で変更してください。支払い済にすると、会計入力の収入にも自動で反映されます。</div>
     <div class="fin-grid" id="collection-stats"></div>
     <div class="panel no-print">
       <div class="panel-title">集金項目を追加</div>
@@ -357,7 +357,6 @@ function emptyYear(y,opening){
 }
 function defaultCollections(){
   return [
-    {id:Date.now()+1,title:"登録料・保険料",amount:1000,due:"",note:"初期金額は1,000円です。必要に応じて団員ごとの金額を変更してください。",payments:{}},
     {id:Date.now()+2,title:"前期会費",amount:0,due:"",note:"初期金額は3年生以下7,000円、4年生以上8,000円です。兄弟割引は団員ごとの金額欄で変更してください。",payments:{}},
     {id:Date.now()+3,title:"後期会費",amount:0,due:"",note:"初期金額は3年生以下7,000円、4年生以上8,000円です。兄弟割引は団員ごとの金額欄で変更してください。",payments:{}}
   ];
@@ -415,10 +414,10 @@ function normalize(){
   if(!selectedCollectionId&&yd.collections.length)selectedCollectionId=yd.collections[0].id;
 }
 function ensureBasicCollections(yd){
+  yd.collections=yd.collections.filter(function(c){return c.title!=="登録料・保険料";});
   yd.collections.forEach(function(c){
     if(c.title==="前期団費")c.title="前期会費";
     if(c.title==="後期団費")c.title="後期会費";
-    if(c.title==="登録料・保険料"&&!num(c.amount))c.amount=1000;
   });
   var titles=yd.collections.map(function(c){return c.title;});
   defaultCollections().forEach(function(base){
