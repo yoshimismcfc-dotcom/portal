@@ -257,6 +257,29 @@ function renderDutyTable(){
 document.getElementById("duty-date").value=new Date().toISOString().slice(0,10);
 renderChecks();
 renderDutyTable();
+
+/* ===== 当番表LINEコピー ===== */
+function copyDutyList(){
+  var items = JSON.parse(localStorage.getItem("smc_duty_v2")||"[]");
+  if(!items.length){alert("当番が登録されていません");return;}
+  var sorted = items.slice().sort(function(a,b){return (a.date||"").localeCompare(b.date||"");});
+  var DAYS=["日","月","火","水","木","金","土"];
+  var t="【当番表】
+
+";
+  sorted.forEach(function(d){
+    var dt=new Date(d.date+"T00:00:00");
+    t+="📅 "+d.date+"（"+DAYS[dt.getDay()]+"）
+";
+    t+="   担当："+d.name+"
+";
+    if(d.note) t+="   備考："+d.note+"
+";
+    t+="
+";
+  });
+  navigator.clipboard.writeText(t).then(function(){alert("当番表をコピーしました！LINEに貼り付けてください。");}).catch(function(){alert("コピーできませんでした。");});
+}
 </script>
 <script src="common.js"></script>
 </body></html>
