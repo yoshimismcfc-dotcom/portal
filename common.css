@@ -891,3 +891,71 @@ body[data-theme="light"] [style*="background:rgba(255,255,255,.03)"],
 body[data-theme="light"] [style*="background:rgba(255,255,255,.05)"] {
   background: rgba(0,0,0,.03) !important;
 }
+
+/* ===== SMCチームカラー カードグラデーション ===== */
+
+/* オレンジ系（よく使う・重要ページ）*/
+.menu-card.c-orange {
+  background: linear-gradient(145deg, rgba(246,139,31,.22), rgba(180,60,0,.12), var(--surface));
+  border-color: rgba(246,139,31,.45);
+}
+.menu-card.c-orange::before {
+  background: linear-gradient(90deg, #f68b1f, #c84400);
+}
+.menu-card.c-orange:hover { border-color: rgba(246,139,31,.75); }
+.menu-card.c-orange .card-icon { filter: drop-shadow(0 0 6px rgba(246,139,31,.5)); }
+
+/* 赤系（試合・競技・コーチ専用）*/
+.menu-card.c-red {
+  background: linear-gradient(145deg, rgba(180,20,20,.22), rgba(100,5,5,.12), var(--surface));
+  border-color: rgba(200,40,40,.4);
+}
+.menu-card.c-red::before {
+  background: linear-gradient(90deg, #cc1a1a, #880000);
+}
+.menu-card.c-red:hover { border-color: rgba(220,60,60,.7); }
+.menu-card.c-red .card-icon { filter: drop-shadow(0 0 6px rgba(200,40,40,.5)); }
+
+/* 紺系（名簿・情報・一般ページ）*/
+.menu-card.c-navy {
+  background: linear-gradient(145deg, rgba(0,50,140,.22), rgba(0,20,80,.12), var(--surface));
+  border-color: rgba(0,80,200,.35);
+}
+.menu-card.c-navy::before {
+  background: linear-gradient(90deg, #0050cc, #002266);
+}
+.menu-card.c-navy:hover { border-color: rgba(0,100,220,.65); }
+.menu-card.c-navy .card-icon { filter: drop-shadow(0 0 6px rgba(0,80,200,.45)); }
+
+/* ゴールド系（会計・外部・SNS）*/
+.menu-card.c-gold {
+  background: linear-gradient(145deg, rgba(200,150,0,.2), rgba(120,80,0,.1), var(--surface));
+  border-color: rgba(220,170,0,.38);
+}
+.menu-card.c-gold::before {
+  background: linear-gradient(90deg, #ddaa00, #886600);
+}
+.menu-card.c-gold:hover { border-color: rgba(220,170,0,.65); }
+.menu-card.c-gold .card-icon { filter: drop-shadow(0 0 6px rgba(200,150,0,.45)); }
+
+/* シアン系（天気・安全）*/
+.menu-card.c-cyan {
+  background: linear-gradient(145deg, rgba(0,180,200,.18), rgba(0,80,120,.1), var(--surface));
+  border-color: rgba(0,200,220,.35);
+}
+.menu-card.c-cyan::before {
+  background: linear-gradient(90deg, #00c8dc, #005577);
+}
+.menu-card.c-cyan:hover { border-color: rgba(0,200,220,.65); }
+.menu-card.c-cyan .card-icon { filter: drop-shadow(0 0 6px rgba(0,180,200,.5)); }
+
+/* 緑系（スケジュール・カレンダー）*/
+.menu-card.c-green {
+  background: linear-gradient(145deg, rgba(0,160,80,.18), rgba(0,60,30,.1), var(--surface));
+  border-color: rgba(0,180,90,.35);
+}
+.menu-card.c-green::before {
+  background: linear-gradient(90deg, #00b450, #004420);
+}
+.menu-card.c-green:hover { border-color: rgba(0,180,90,.65); }
+.menu-card.c-green .card-icon { filter: drop-shadow(0 0 6px rgba(0,160,80,.5)); }
