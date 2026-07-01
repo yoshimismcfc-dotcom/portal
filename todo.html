@@ -109,7 +109,7 @@
       <div class="hero-sub">誰が・何をやるかを記録。忘れずに、チーム全員でタスクを共有できます。</div>
     </div>
   </div>
-  <div class="notice-bar">💾 データはこのブラウザ（端末）に保存されます。</div>
+  <div class="notice-bar">☁️ データはFirebase（クラウド）で保存・共有されます。</div>
 
   <!-- 統計 -->
   <div class="stat-row" id="stat-row"></div>
@@ -118,6 +118,7 @@
   <div style="display:flex;gap:8px;margin-bottom:12px;flex-wrap:wrap">
     <button class="btn btn-primary" onclick="openNew()" style="flex:1">＋ タスクを追加</button>
     <button class="btn btn-outline btn-sm" onclick="clearDone()">✅ 完了済みを削除</button>
+    <button class="btn btn-outline btn-sm" onclick="copyTodoList()">📋 LINEコピー</button>
   </div>
 
   <!-- フィルター -->
@@ -345,6 +346,21 @@ document.getElementById("modal").addEventListener("click", function(e){ if(e.tar
 function render(){ renderStats(); renderList(); }
 // サンプルデータ（初回のみ）
 // サンプル自動投入は入力済みデータを上書きする原因になるため停止。
+function copyTodoList(){
+  var active = _todoData.filter(function(t){ return t.status !== "done"; });
+  if(!active.length){ alert("未完了のタスクがありません"); return; }
+  var STATUS = {todo:"⬜ 未着手", wip:"🔄 進行中", hold:"⏸ 保留"};
+  var t = "【やることリスト】\n\n";
+  active.forEach(function(item){
+    t += (STATUS[item.status]||"⬜") + " " + item.title + "\n";
+    if(item.who)  t += "   担当：" + item.who  + "\n";
+    if(item.due)  t += "   期限：" + item.due  + "\n";
+    if(item.note) t += "   メモ：" + item.note + "\n";
+  });
+  navigator.clipboard.writeText(t)
+    .then(function(){ alert("コピーしました！LINEに貼り付けてください。"); })
+    .catch(function(){ alert("コピーできませんでした。"); });
+}
 </script>
 <script src="common.js"></script>
 </body>
