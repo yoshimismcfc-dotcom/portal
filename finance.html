@@ -198,7 +198,7 @@
         </div>
       </div>
       <ol class="step-list">
-        <li>入力する年月を選びます。</li>
+        <li>入力する年月を選びます。年度内の4月から翌年3月まで選べます。</li>
         <li>日付、収入/支出、項目、内容、金額を入力します。</li>
         <li>月別報告と年度報告に自動で集計されます。</li>
       </ol>
@@ -266,6 +266,7 @@
         <div class="form-group" style="margin:0">
           <label class="form-label">表示する月</label>
           <select class="form-control" id="month-select" onchange="selectedMonth=this.value;renderAll()"></select>
+          <div class="field-help">表示年度の4月から翌年3月まで選べます。</div>
         </div>
         <button class="btn btn-outline btn-sm" onclick="downloadCsv()">CSV保存</button>
       </div>
@@ -306,6 +307,11 @@ function num(v){var n=Number(v);return isNaN(n)?0:n;}
 function yen(v){return (Number(v)||0).toLocaleString("ja-JP")+"円";}
 function esc(s){return String(s==null?"":s).replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;").replace(/"/g,"&quot;");}
 function monthKey(d){return String(d||"").slice(0,7)||"日付なし";}
+function monthLabel(m){
+  if(!/^\d{4}-\d{2}$/.test(String(m||"")))return m;
+  var p=String(m).split("-");
+  return Number(p[0])+"年"+Number(p[1])+"月";
+}
 function statusClass(s){return s==="了解"?"s-ok":s==="支払い済"?"s-paid":s==="差戻し"?"s-back":"s-new";}
 function isCollectionEntry(x){return x.source==="collection"||String(x.sourceId||"").indexOf("collection:")===0;}
 function sourceText(x){return isCollectionEntry(x)?"集金":(x.source==="reimbursement"||x.sourceId?"立替精算":"会計さん直接");}
@@ -329,6 +335,17 @@ function fiscalYearFromDate(d){
 }
 function fiscalYearLabel(y){return y+"年度";}
 function currentFiscalYearLabel(){return fiscalYearLabel(fiscalYearFromDate(new Date()));}
+function fiscalStartYear(label){
+  var m=String(label||"").match(/(\d{4})/);
+  return m?Number(m[1]):FISCAL_START_YEAR;
+}
+function fiscalMonths(label){
+  var y=fiscalStartYear(label);
+  var months=[];
+  for(var i=4;i<=12;i++)months.push(y+"-"+String(i).padStart(2,"0"));
+  for(var j=1;j<=3;j++)months.push((y+1)+"-"+String(j).padStart(2,"0"));
+  return months;
+}
 function allowedYearNames(){
   var current=Math.max(FISCAL_START_YEAR,fiscalYearFromDate(new Date()));
   var names=[];
@@ -351,11 +368,7 @@ function yearData(){
 }
 function yearNames(){return allowedYearNames();}
 function allMonths(){
-  var yd=yearData();
-  var months=Array.from(new Set(yd.ledger.map(function(x){return monthKey(x.date);}))).filter(validMonth);
-  var now=currentMonth();
-  if(months.indexOf(now)<0)months.push(now);
-  return months.sort().reverse();
+  return fiscalMonths(data.activeYear);
 }
 function monthIncome(month){
   return yearData().ledger.filter(function(x){return x.kind==="income"&&monthKey(x.date)===month;}).reduce(function(s,x){return s+num(x.amount);},0);
@@ -364,7 +377,7 @@ function monthExpense(month){
   return yearData().ledger.filter(function(x){return x.kind==="expense"&&monthKey(x.date)===month;}).reduce(function(s,x){return s+num(x.amount);},0);
 }
 function carryBeforeMonth(month){
-  return allMonths().slice().reverse().filter(function(m){return m<month;}).reduce(function(s,m){return s+monthIncome(m)-monthExpense(m);},num(yearData().settings.opening));
+  return allMonths().filter(function(m){return m<month;}).reduce(function(s,m){return s+monthIncome(m)-monthExpense(m);},num(yearData().settings.opening));
 }
 function normalize(){
   if(!data||typeof data!=="object")data={};
@@ -636,7 +649,7 @@ function syncCollectionLedger(c,key,member,pay){
       category:collectionCategory(c),
       item:c.title+" / "+member.name,
       amount:paymentAmount(c,member,pay),
-      note:(pay.method||"")+" "+(pay.note||"")
+      note:pay.note||""
     });
   }
 }
@@ -646,7 +659,7 @@ function setPayment(cid,encodedKey,field,value){
   var key=decodeURIComponent(encodedKey);
   var member=memberList().find(function(m){return m.key===key;})||{name:key};
   if(!c.payments)c.payments={};
-  if(!c.payments[key])c.payments[key]={status:"unpaid",method:"",date:"",note:"",amount:defaultPaymentAmount(c,member)};
+  if(!c.payments[key])c.payments[key]={status:"unpaid",date:"",note:"",amount:defaultPaymentAmount(c,member)};
   c.payments[key][field]=value;
   if(field==="amount")c.payments[key][field]=num(value);
   if(field==="status"&&value==="paid"&&!c.payments[key].date)c.payments[key].date=new Date().toISOString().slice(0,10);
@@ -711,15 +724,14 @@ function renderCollection(){
     '<div class="guide-box">基本金額：'+collectionAmountLabel(c)+' / 期限：'+esc(c.due||"未設定")+'<br>'+esc(c.note||"")+'</div>'+
     '<div class="table-wrap" style="overflow:visible">'+members.map(function(m){
       var key=encodeURIComponent(m.key);
-      var pay=(c.payments&&c.payments[m.key])||{status:"unpaid",method:"",date:"",note:""};
+      var pay=(c.payments&&c.payments[m.key])||{status:"unpaid",date:"",note:""};
       var amount=paymentAmount(c,m,pay,members);
       return '<div class="member-pay-row">'+
         '<div><div class="member-name">'+esc(m.name)+'</div><div class="member-sub">'+esc(m.grade)+' '+esc(m.kana)+'</div></div>'+
         '<div>'+paymentBadge(pay.status)+'</div>'+
-        '<div style="display:grid;grid-template-columns:1fr 1fr 1fr 1fr;gap:6px;min-width:min(520px,100%)">'+
+        '<div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:6px;min-width:min(420px,100%)">'+
           '<select class="form-control" onchange="setPayment('+c.id+',\''+key+'\',\'status\',this.value)"><option value="unpaid" '+(pay.status==="unpaid"?"selected":"")+'>未納</option><option value="paid" '+(pay.status==="paid"?"selected":"")+'>支払い済</option><option value="exempt" '+(pay.status==="exempt"?"selected":"")+'>免除</option></select>'+
           '<input class="form-control" type="number" inputmode="numeric" value="'+esc(amount)+'" onchange="setPayment('+c.id+',\''+key+'\',\'amount\',this.value)" aria-label="金額">'+
-          '<select class="form-control" onchange="setPayment('+c.id+',\''+key+'\',\'method\',this.value)"><option value="" '+(!pay.method?"selected":"")+'>方法</option><option '+(pay.method==="現金"?"selected":"")+'>現金</option><option '+(pay.method==="振込"?"selected":"")+'>振込</option><option '+(pay.method==="PayPay"?"selected":"")+'>PayPay</option><option '+(pay.method==="その他"?"selected":"")+'>その他</option></select>'+
           '<input class="form-control" type="date" value="'+esc(pay.date||"")+'" onchange="setPayment('+c.id+',\''+key+'\',\'date\',this.value)">'+
         '</div>'+
       '</div>';
@@ -751,11 +763,13 @@ function monthRows(month){
 }
 function renderMonthOptions(){
   var months=allMonths();
-  if(!selectedMonth||months.indexOf(selectedMonth)<0)selectedMonth=months[0];
+  var now=currentMonth();
+  if(!selectedMonth)selectedMonth=months.indexOf(now)>=0?now:months[0];
+  if(months.indexOf(selectedMonth)<0)selectedMonth=months[0];
   ["month-select","ledger-month-select"].forEach(function(id){
     var el=document.getElementById(id);
     if(!el)return;
-    el.innerHTML=months.map(function(m){return '<option value="'+esc(m)+'">'+esc(m)+'</option>';}).join("");
+    el.innerHTML=months.map(function(m){return '<option value="'+esc(m)+'">'+esc(monthLabel(m))+'</option>';}).join("");
     el.value=selectedMonth;
   });
 }
