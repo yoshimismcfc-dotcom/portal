@@ -118,6 +118,9 @@
     </div>
     <div class="form-group"><label class="form-label">集合時間</label>
       <input class="form-control" id="m-time" type="time" value="07:30"></div>
+    <div class="form-group"><label class="form-label">備考</label>
+      <textarea class="form-control" id="m-note" rows="2" placeholder="例：弁当注文あり・雨天中止の場合は前日18時に連絡"></textarea>
+    </div>
     <div class="modal-btns">
       <button class="btn btn-outline btn-sm" id="m-del-btn" style="color:var(--red);border-color:rgba(255,68,102,.4);display:none" onclick="deleteMatch()">🗑 削除</button>
       <button class="btn btn-outline" onclick="closeModal('modal-match')">キャンセル</button>
@@ -277,6 +280,7 @@ function openAddMatch(){
   document.getElementById("m-date").value = new Date().toISOString().slice(0,10);
   document.getElementById("m-venue").value = "";
   document.getElementById("m-time").value = "07:30";
+  document.getElementById("m-note").value = "";
   document.getElementById("modal-match").classList.add("open");
 }
 function openEditMatch(id){
@@ -289,6 +293,7 @@ function openEditMatch(id){
   document.getElementById("m-date").value = m.date||"";
   document.getElementById("m-venue").value = m.venue||"";
   document.getElementById("m-time").value = m.time||"07:30";
+  document.getElementById("m-note").value = m.note||"";
   document.getElementById("modal-match").classList.add("open");
 }
 function saveMatch(){
@@ -296,13 +301,14 @@ function saveMatch(){
   if(!name){ alert("大会名を入力してください"); return; }
   if(_editMatchId){
     var m = _data.find(function(x){ return x.id===_editMatchId; });
-    if(m){ m.name=name; m.date=document.getElementById("m-date").value; m.venue=document.getElementById("m-venue").value.trim(); m.time=document.getElementById("m-time").value; }
+    if(m){ m.name=name; m.date=document.getElementById("m-date").value; m.venue=document.getElementById("m-venue").value.trim(); m.time=document.getElementById("m-time").value; m.note=document.getElementById("m-note").value.trim(); }
   } else {
     _data.push({
       id: "match"+Date.now(), name:name,
       date:document.getElementById("m-date").value,
       venue:document.getElementById("m-venue").value.trim(),
       time:document.getElementById("m-time").value,
+      note:document.getElementById("m-note").value.trim(),
       duties: DUTY_TEMPLATE.map(function(d){ return Object.assign({},d); })
     });
   }
@@ -355,7 +361,9 @@ function copyToClipboard(id){
   var m = _data.find(function(x){ return x.id===id; });
   if(!m) return;
   var text = "【"+m.name+" 任務分担】\n";
-  if(m.date) text += "📅 "+m.date+(m.venue?" 📍"+m.venue:"")+(m.time?" 集合"+m.time:"")+"\n\n";
+  if(m.date) text += "📅 "+m.date+(m.venue?" 📍"+m.venue:"")+(m.time?" 集合"+m.time:"")+"\n";
+  if(m.note) text += "📝 "+m.note+"\n";
+  text += "\n";
   (m.duties||[]).forEach(function(d){
     if(d.status==="na") return;
     var st = d.status==="done"?"✅":"⏳";
