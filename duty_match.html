@@ -4,63 +4,78 @@
   <meta charset="utf-8">
   <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>大会任務分担 v2｜吉見SMC FC</title>
+  <title>大会任務分担 v3｜吉見SMC FC</title>
   <script src="firebase-config.js"></script>
   <link rel="stylesheet" href="common.css">
   <style>
-    /* ===== カード ===== */
-    .match-card{background:var(--surface-lt);border:1px solid var(--line-2);border-radius:var(--r12);margin-bottom:14px;overflow:hidden}
-    .match-card-head{background:linear-gradient(135deg,#003087,#0050cc);padding:12px 16px;display:flex;align-items:center;gap:10px;cursor:pointer;user-select:none}
-    .match-card-head.open{background:linear-gradient(135deg,#003087,#0050cc)}
-    .mch-info{flex:1;min-width:0}
-    .mch-name{font-size:.9rem;font-weight:900;color:#fff}
-    .mch-date{font-size:.74rem;color:rgba(255,255,255,.7);margin-top:1px}
-    .mch-arrow{color:rgba(255,255,255,.6);font-size:.9rem;transition:.2s;flex-shrink:0}
-    .mch-arrow.open{transform:rotate(180deg)}
-    .mch-body{display:none;padding:0}
-    .mch-body.open{display:block}
+    /* カード */
+    .mc{background:var(--surface-lt);border:1px solid var(--line-2);border-radius:var(--r12);margin-bottom:12px;overflow:hidden}
+    .mc-head{background:linear-gradient(135deg,#003087,#0050cc);padding:11px 14px;display:flex;align-items:center;gap:10px;cursor:pointer;user-select:none}
+    .mc-name{font-size:.9rem;font-weight:900;color:#fff;flex:1;min-width:0}
+    .mc-sub{font-size:.72rem;color:rgba(255,255,255,.65);margin-top:1px}
+    .mc-prog{text-align:right;font-size:.8rem;font-weight:900;flex-shrink:0}
+    .mc-arrow{color:rgba(255,255,255,.5);transition:.2s;flex-shrink:0;font-size:.85rem}
+    .mc-edit-btn{background:none;border:1px solid rgba(255,255,255,.25);color:rgba(255,255,255,.7);border-radius:6px;padding:3px 8px;font-size:.7rem;cursor:pointer;flex-shrink:0}
+    .mc-body{display:none;padding:10px 12px 14px}
+    .mc-body.open{display:block}
 
-    /* ===== 任務テーブル ===== */
-    .duty-table{width:100%;border-collapse:collapse;font-size:.82rem}
-    .duty-table th{background:rgba(0,48,135,.5);color:#c8e4ff;font-size:.72rem;font-weight:900;padding:8px 10px;text-align:left;border-bottom:1px solid var(--line)}
-    .duty-table td{padding:9px 10px;border-bottom:1px solid rgba(255,255,255,.06);vertical-align:middle;color:#c8e4ff}
-    .duty-table tr:last-child td{border-bottom:none}
-    .duty-table tr:hover td{background:rgba(0,212,255,.04)}
-    .duty-icon{font-size:1.1rem;flex-shrink:0}
-    .duty-name{font-size:.84rem;font-weight:900;color:#fff}
-    .duty-name-cell{display:flex;align-items:center;gap:8px}
-    .duty-person{font-size:.84rem;font-weight:700}
-    .duty-person.assigned{color:#fff}
-    .duty-person.empty{color:var(--ink-3);font-style:italic}
-    .duty-time{font-size:.74rem;color:var(--cyan);white-space:nowrap}
-    .duty-status{display:inline-flex;align-items:center;gap:4px;font-size:.7rem;font-weight:900;padding:3px 9px;border-radius:99px;white-space:nowrap}
-    .status-done{background:rgba(0,204,102,.2);color:#00cc66;border:1px solid rgba(0,204,102,.35)}
-    .status-yet{background:rgba(255,204,0,.15);color:#ffcc00;border:1px solid rgba(255,204,0,.3)}
-    .status-na{background:rgba(255,255,255,.08);color:#96a9c4;border:1px solid rgba(255,255,255,.12)}
-    .edit-btn{background:none;border:1px solid rgba(0,212,255,.3);color:var(--cyan);border-radius:6px;padding:4px 10px;font:inherit;font-size:.7rem;cursor:pointer;white-space:nowrap}
-    .edit-btn:hover{background:rgba(0,212,255,.1)}
+    /* 任務テーブル */
+    .dt-wrap{overflow-x:auto;border-radius:8px;border:1px solid var(--line-2);margin-bottom:10px}
+    .dt{width:100%;border-collapse:collapse;font-size:.82rem;min-width:520px}
+    .dt th{background:rgba(0,48,135,.45);color:#c8e4ff;font-size:.72rem;font-weight:900;padding:7px 10px;text-align:left;white-space:nowrap}
+    .dt td{border-bottom:1px solid rgba(255,255,255,.06);padding:0;vertical-align:middle}
+    .dt tr:last-child td{border-bottom:none}
+    .dt tr:hover td{background:rgba(0,212,255,.04)}
 
-    /* ===== 全体サマリー ===== */
-    .summary-bar{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:14px}
-    .sum-chip{background:var(--surface-lt);border:1px solid var(--line-2);border-radius:var(--r8);padding:8px 14px;text-align:center;flex:1;min-width:80px}
-    .sum-num{font-size:1.2rem;font-weight:900}
-    .sum-lbl{font-size:.68rem;color:var(--ink-3);margin-top:2px}
+    /* 任務行 - タップして編集 */
+    .duty-row-inner{display:flex;align-items:center;padding:8px 10px;gap:8px;cursor:pointer;width:100%}
+    .duty-row-inner:hover{background:rgba(255,107,43,.07)}
+    .d-icon{font-size:1rem;flex-shrink:0;width:22px;text-align:center}
+    .d-label{font-size:.84rem;font-weight:700;color:#fff;flex:1;min-width:80px}
+    .d-memo{font-size:.7rem;color:var(--ink-3);display:block;margin-top:1px}
 
-    /* ===== モーダル ===== */
+    /* 担当者タブ群 */
+    .persons-wrap{display:flex;flex-wrap:wrap;gap:5px;align-items:center;flex:1;min-width:0}
+    .person-chip{display:inline-flex;align-items:center;gap:4px;background:rgba(0,80,200,.25);border:1px solid rgba(0,130,255,.3);color:#88ccff;border-radius:99px;padding:3px 10px;font-size:.74rem;font-weight:700;white-space:nowrap}
+    .person-chip .del-p{background:none;border:none;color:rgba(255,255,255,.4);cursor:pointer;font-size:.75rem;padding:0 0 0 3px;line-height:1}
+    .person-chip .del-p:hover{color:#ff6680}
+    .person-empty{color:var(--ink-3);font-size:.74rem;font-style:italic}
+
+    /* 状態バッジ（小さく） */
+    .st{display:inline-block;font-size:.7rem;font-weight:900;padding:2px 8px;border-radius:99px;white-space:nowrap;flex-shrink:0}
+    .st-done{background:rgba(0,204,102,.2);color:#00cc66;border:1px solid rgba(0,204,102,.3)}
+    .st-yet {background:rgba(255,204,0,.15);color:#ffcc00;border:1px solid rgba(255,204,0,.25)}
+    .st-na  {background:rgba(255,255,255,.07);color:#96a9c4;border:1px solid rgba(255,255,255,.12)}
+
+    /* サマリー */
+    .sum-bar{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:12px}
+    .sum-chip{background:var(--surface-lt);border:1px solid var(--line-2);border-radius:var(--r8);padding:7px 12px;text-align:center;flex:1;min-width:70px}
+    .sum-n{font-size:1.15rem;font-weight:900}
+    .sum-l{font-size:.65rem;color:var(--ink-3);margin-top:1px}
+
+    /* ボタン類 */
+    .add-match-btn{border:1px dashed var(--line-2);border-radius:var(--r12);padding:14px;text-align:center;cursor:pointer;margin-bottom:12px;transition:.15s}
+    .add-match-btn:hover{border-color:var(--orange);background:rgba(255,107,43,.05)}
+    .add-duty-row{display:flex;align-items:center;gap:6px;padding:6px 10px;cursor:pointer;color:var(--cyan);font-size:.78rem;font-weight:700;border-top:1px dashed rgba(0,212,255,.2);margin-top:4px}
+    .add-duty-row:hover{background:rgba(0,212,255,.06)}
+
+    /* モーダル */
     .modal-bg{position:fixed;inset:0;background:rgba(0,0,0,.85);display:none;place-items:center;z-index:200;backdrop-filter:blur(6px);padding:14px}
     .modal-bg.open{display:grid}
     .modal{background:var(--surface-lt);border:1px solid var(--line-2);border-radius:var(--r16);padding:20px;width:min(480px,100%);max-height:92vh;overflow-y:auto}
     .modal h3{font-size:.95rem;font-weight:900;color:#fff;margin-bottom:14px}
     .modal-btns{display:flex;gap:8px;justify-content:flex-end;margin-top:14px;flex-wrap:wrap}
     .g2{display:grid;grid-template-columns:1fr 1fr;gap:10px}
-    @media(max-width:460px){.g2{grid-template-columns:1fr}}
+    @media(max-width:440px){.g2{grid-template-columns:1fr}}
 
-    /* ===== 大会追加フォーム ===== */
-    .add-match-panel{background:var(--surface-lt);border:1px dashed var(--line-2);border-radius:var(--r12);padding:14px 16px;margin-bottom:14px;cursor:pointer;text-align:center;transition:.15s}
-    .add-match-panel:hover{border-color:var(--orange);background:rgba(255,107,43,.05)}
+    /* 担当者追加エリア（モーダル内） */
+    .person-add-row{display:flex;gap:6px;margin-bottom:8px}
+    .person-chips-edit{display:flex;flex-wrap:wrap;gap:5px;min-height:28px;padding:6px;background:rgba(0,0,0,.15);border-radius:8px;border:1px solid var(--line)}
+    .person-chip-edit{display:inline-flex;align-items:center;gap:4px;background:rgba(0,80,200,.3);border:1px solid rgba(0,130,255,.4);color:#88ccff;border-radius:99px;padding:3px 10px;font-size:.76rem;font-weight:700}
+    .person-chip-edit .dp{background:none;border:none;color:rgba(255,100,100,.7);cursor:pointer;font-size:.8rem;padding:0 0 0 4px}
 
-    /* ===== 担当者バッジ ===== */
-    .person-badge{display:inline-block;background:rgba(0,80,200,.25);border:1px solid rgba(0,130,255,.3);color:#88ccff;border-radius:99px;padding:2px 10px;font-size:.72rem;font-weight:700;margin:0 2px}
+    /* 状態セレクト（小さく） */
+    .st-select{border-radius:6px;border:1px solid var(--line-2);background:var(--surface-lt);color:var(--ink);font:inherit;font-size:.78rem;padding:4px 8px;cursor:pointer}
   </style>
 </head>
 <body>
@@ -78,52 +93,47 @@
     <div class="hero-emoji">📋</div>
     <div>
       <div class="hero-title">大会任務分担</div>
-      <div class="hero-sub">大会ごとの担当者・準備物・時間を一覧で管理します。</div>
+      <div class="hero-sub">大会ごとの担当者・準備物を管理。タップして編集。</div>
     </div>
   </div>
-  <div class="notice-bar">☁️ データはFirebaseでクラウド保存・全員と共有されます。</div>
+  <div class="notice-bar">☁️ Firebaseでクラウド保存・全員と共有されます。</div>
 
-  <!-- サマリー -->
-  <div class="summary-bar">
-    <div class="sum-chip"><div class="sum-num" id="sum-total" style="color:var(--cyan)">0</div><div class="sum-lbl">登録大会数</div></div>
-    <div class="sum-chip"><div class="sum-num" id="sum-done" style="color:#00cc66">0</div><div class="sum-lbl">確定済み任務</div></div>
-    <div class="sum-chip"><div class="sum-num" id="sum-yet" style="color:#ffcc00">0</div><div class="sum-lbl">未確定任務</div></div>
+  <div class="sum-bar">
+    <div class="sum-chip"><div class="sum-n" id="s-total" style="color:var(--cyan)">0</div><div class="sum-l">登録大会数</div></div>
+    <div class="sum-chip"><div class="sum-n" id="s-done" style="color:#00cc66">0</div><div class="sum-l">確定</div></div>
+    <div class="sum-chip"><div class="sum-n" id="s-yet" style="color:#ffcc00">0</div><div class="sum-l">未確定</div></div>
   </div>
 
-  <!-- 大会追加ボタン -->
-  <div class="add-match-panel" onclick="openAddMatch()">
-    <span style="font-size:1.4rem">＋</span>
-    <div style="font-size:.84rem;font-weight:900;color:var(--orange);margin-top:4px">大会を追加する</div>
-    <div style="font-size:.74rem;color:var(--ink-3)">大会名・日付・会場を登録して任務を割り当てます</div>
+  <div class="add-match-btn" onclick="openAddMatch()">
+    <div style="font-size:1.3rem">＋</div>
+    <div style="font-size:.84rem;font-weight:900;color:var(--orange)">大会を追加</div>
   </div>
 
-  <!-- 大会リスト -->
   <div id="match-list"></div>
-
 </main>
 
 <!-- 大会追加/編集モーダル -->
 <div class="modal-bg" id="modal-match">
   <div class="modal">
-    <h3 id="modal-match-title">大会を追加</h3>
+    <h3 id="mm-title">大会を追加</h3>
     <div class="form-group">
       <label class="form-label">大会名 <span style="color:var(--red)">*</span></label>
-      <input class="form-control" id="m-name" placeholder="例：北彩リーグ第1節">
+      <input class="form-control" id="mm-name" placeholder="例：北彩リーグ第1節">
     </div>
     <div class="g2">
-      <div class="form-group"><label class="form-label">開催日 <span style="color:var(--red)">*</span></label>
-        <input class="form-control" id="m-date" type="date"></div>
+      <div class="form-group"><label class="form-label">開催日</label>
+        <input class="form-control" id="mm-date" type="date"></div>
       <div class="form-group"><label class="form-label">会場</label>
-        <input class="form-control" id="m-venue" placeholder="例：北小グラウンド"></div>
+        <input class="form-control" id="mm-venue" placeholder="例：北小グラウンド"></div>
     </div>
     <div class="form-group"><label class="form-label">集合時間</label>
-      <input class="form-control" id="m-time" type="time" value="07:30"></div>
+      <input class="form-control" id="mm-time" type="time" value="07:30"></div>
     <div class="form-group"><label class="form-label">備考</label>
-      <textarea class="form-control" id="m-note" rows="2" placeholder="例：弁当注文あり・雨天中止の場合は前日18時に連絡"></textarea>
+      <textarea class="form-control" id="mm-note" rows="2" placeholder="例：弁当注文あり・雨天中止は前日18時連絡"></textarea>
     </div>
     <div class="modal-btns">
-      <button class="btn btn-outline btn-sm" id="m-del-btn" style="color:var(--red);border-color:rgba(255,68,102,.4);display:none" onclick="deleteMatch()">🗑 削除</button>
-      <button class="btn btn-outline" onclick="closeModal('modal-match')">キャンセル</button>
+      <button class="btn btn-outline btn-sm" id="mm-del" style="color:var(--red);border-color:rgba(255,68,102,.4);display:none" onclick="deleteMatch()">🗑 削除</button>
+      <button class="btn btn-outline" onclick="closeM('modal-match')">キャンセル</button>
       <button class="btn btn-primary" onclick="saveMatch()">保存</button>
     </div>
   </div>
@@ -132,27 +142,44 @@
 <!-- 任務編集モーダル -->
 <div class="modal-bg" id="modal-duty">
   <div class="modal">
-    <h3 id="modal-duty-title">任務を編集</h3>
+    <h3 id="md-title">任務を編集</h3>
     <div class="form-group">
-      <label class="form-label">担当者</label>
-      <input class="form-control" id="d-person" placeholder="例：武部コーチ、岡野さん">
+      <label class="form-label">任務名 <span style="color:var(--red)">*</span></label>
+      <div style="display:flex;gap:8px">
+        <select class="form-control" id="md-icon" style="max-width:60px;text-align:center">
+          <option>📋</option><option>🏆</option><option>🟡</option><option>🔑</option>
+          <option>📸</option><option>🚩</option><option>🏅</option><option>🎯</option>
+          <option>📢</option><option>🚗</option><option>💴</option><option>⚽</option>
+          <option>📝</option><option>🔧</option><option>📣</option>
+        </select>
+        <input class="form-control" id="md-label" placeholder="例：審判の手配">
+      </div>
+    </div>
+    <div class="form-group">
+      <label class="form-label">担当者（複数可・ひとりずつ追加）</label>
+      <div class="person-add-row">
+        <input class="form-control" id="md-person-input" placeholder="例：武部コーチ" style="flex:1" onkeydown="if(event.key==='Enter'){addPerson();event.preventDefault();}">
+        <button class="btn btn-outline btn-sm" onclick="addPerson()">＋ 追加</button>
+      </div>
+      <div class="person-chips-edit" id="md-persons"></div>
     </div>
     <div class="g2">
       <div class="form-group"><label class="form-label">時間・目安</label>
-        <input class="form-control" id="d-time" placeholder="例：7:30まで・前日"></div>
+        <input class="form-control" id="md-time" placeholder="例：7:30・前日"></div>
       <div class="form-group"><label class="form-label">状態</label>
-        <select class="form-control" id="d-status">
-          <option value="yet">⏳ 未確定</option>
-          <option value="done">✅ 確定</option>
-          <option value="na">— 対象外</option>
+        <select class="form-control st-select" id="md-status">
+          <option value="yet">⏳ 未</option>
+          <option value="done">✅ 確</option>
+          <option value="na">— 外</option>
         </select>
       </div>
     </div>
     <div class="form-group"><label class="form-label">メモ</label>
-      <textarea class="form-control" id="d-memo" rows="2" placeholder="例：前日に本部倉庫から持ち出し"></textarea>
+      <textarea class="form-control" id="md-memo" rows="2" placeholder="例：前日に本部倉庫から持ち出し"></textarea>
     </div>
     <div class="modal-btns">
-      <button class="btn btn-outline" onclick="closeModal('modal-duty')">キャンセル</button>
+      <button class="btn btn-outline btn-sm" id="md-del" style="color:var(--red);border-color:rgba(255,68,102,.4);display:none" onclick="deleteDuty()">🗑 任務を削除</button>
+      <button class="btn btn-outline" onclick="closeM('modal-duty')">キャンセル</button>
       <button class="btn btn-primary" onclick="saveDuty()">保存</button>
     </div>
   </div>
@@ -160,26 +187,23 @@
 
 <footer class="site-footer">YOSHIMI SMC FC — SMART PORTAL</footer>
 <script>
-var KEY = "smc_duty_match_v1";
-
-// 任務テンプレート（毎大会共通）
+var KEY = "smc_duty_match_v3";
 var DUTY_TEMPLATE = [
-  {key:"shinpan",   icon:"🟡", label:"審判の手配",           person:"", time:"", memo:"", status:"yet"},
-  {key:"trophy",    icon:"🏆", label:"トロフィー・メダル用意", person:"", time:"", memo:"", status:"yet"},
-  {key:"card",      icon:"📋", label:"審判カード用意",         person:"", time:"", memo:"", status:"yet"},
-  {key:"sekkai",    icon:"⬜", label:"石灰の準備",            person:"", time:"", memo:"", status:"yet"},
-  {key:"kagi",      icon:"🔑", label:"鍵の受け取り・施錠",    person:"", time:"", memo:"", status:"yet"},
-  {key:"goal",      icon:"⚽", label:"ゴール設置・撤収",       person:"", time:"", memo:"", status:"yet"},
-  {key:"photo",     icon:"📸", label:"写真・記録係",           person:"", time:"", memo:"", status:"yet"},
-  {key:"firstaid",  icon:"🏥", label:"救急セット持参",         person:"", time:"", memo:"", status:"yet"},
-  {key:"snack",     icon:"🥤", label:"飲み物・おやつ手配",     person:"", time:"", memo:"", status:"yet"},
-  {key:"cleanup",   icon:"🧹", label:"グラウンド整備・後片付け",person:"", time:"", memo:"", status:"yet"},
+  {key:"youkou",  icon:"📝", label:"要項作成",       persons:[], time:"", memo:"", status:"yet"},
+  {key:"taisen",  icon:"📋", label:"対戦表作成",      persons:[], time:"", memo:"", status:"yet"},
+  {key:"shinpan", icon:"🟡", label:"審判の手配",      persons:[], time:"", memo:"", status:"yet"},
+  {key:"trophy",  icon:"🏆", label:"トロフィー・メダル用意", persons:[], time:"", memo:"", status:"yet"},
+  {key:"card",    icon:"🏅", label:"審判カード用意",  persons:[], time:"", memo:"", status:"yet"},
+  {key:"sekkai",  icon:"⬜", label:"石灰の準備",      persons:[], time:"", memo:"", status:"yet"},
+  {key:"kagi",    icon:"🔑", label:"鍵の受け取り・施錠", persons:[], time:"", memo:"", status:"yet"},
+  {key:"photo",   icon:"📸", label:"写真・記録係",    persons:[], time:"", memo:"", status:"yet"},
 ];
 
-var _data = []; // [{id, name, date, venue, time, duties:[...DUTY_TEMPLATE copy]}]
+var _data = [];
 var _editMatchId = null;
 var _editDutyMatchId = null;
 var _editDutyKey = null;
+var _editPersons = [];
 
 /* ===== Firebase ===== */
 dbListen("duty_match", function(val){
@@ -187,76 +211,80 @@ dbListen("duty_match", function(val){
   render();
 }, KEY, []);
 
-function save(){
-  localStorage.setItem(KEY, JSON.stringify(_data));
-  dbSave("duty_match", _data, KEY, null);
-}
+function save(){ localStorage.setItem(KEY, JSON.stringify(_data)); dbSave("duty_match", _data, KEY, null); }
 
 /* ===== 描画 ===== */
+function esc(s){ return String(s||"").replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;"); }
+
+function stBadge(st){
+  if(st==="done") return '<span class="st st-done">✅ 確</span>';
+  if(st==="na")   return '<span class="st st-na">— 外</span>';
+  return '<span class="st st-yet">⏳ 未</span>';
+}
+
 function render(){
   var sorted = _data.slice().sort(function(a,b){ return (a.date||"").localeCompare(b.date||""); });
-  var totalDone = 0, totalYet = 0;
+  var td=0, ty=0;
   sorted.forEach(function(m){
     (m.duties||[]).forEach(function(d){
-      if(d.status==="done") totalDone++;
-      else if(d.status==="yet") totalYet++;
+      if(d.status==="done") td++;
+      else if(d.status==="yet") ty++;
     });
   });
-  document.getElementById("sum-total").textContent = sorted.length;
-  document.getElementById("sum-done").textContent = totalDone;
-  document.getElementById("sum-yet").textContent = totalYet;
+  document.getElementById("s-total").textContent = sorted.length;
+  document.getElementById("s-done").textContent = td;
+  document.getElementById("s-yet").textContent = ty;
 
   var wrap = document.getElementById("match-list");
   if(!sorted.length){
-    wrap.innerHTML = '<p style="color:var(--ink-3);text-align:center;padding:24px;font-size:.84rem">大会が登録されていません。<br>「＋ 大会を追加する」から登録してください。</p>';
+    wrap.innerHTML='<p style="color:var(--ink-3);text-align:center;padding:24px;font-size:.84rem">大会が登録されていません。</p>';
     return;
   }
+
   wrap.innerHTML = sorted.map(function(m){
-    var duties = m.duties || DUTY_TEMPLATE.map(function(d){ return Object.assign({},d); });
-    var doneCount = duties.filter(function(d){ return d.status==="done"; }).length;
-    var totalCount = duties.filter(function(d){ return d.status!=="na"; }).length;
+    var duties = m.duties || DUTY_TEMPLATE.map(function(d){ return JSON.parse(JSON.stringify(d)); });
+    var done = duties.filter(function(d){ return d.status==="done"; }).length;
+    var total = duties.filter(function(d){ return d.status!=="na"; }).length;
+    var pct = total>0 ? Math.round(done/total*100) : 0;
+    var progColor = pct===100?"#00cc66":pct>60?"var(--cyan)":"#ffcc00";
 
     var rows = duties.map(function(d){
-      var statusBadge = d.status==="done"
-        ? '<span class="duty-status status-done">✅ 確定</span>'
-        : d.status==="na"
-        ? '<span class="duty-status status-na">— 対象外</span>'
-        : '<span class="duty-status status-yet">⏳ 未確定</span>';
-      return '<tr>'
-        +'<td><div class="duty-name-cell"><span class="duty-icon">'+d.icon+'</span><span class="duty-name">'+esc(d.label)+'</span></div></td>'
-        +'<td><span class="duty-person '+(d.person?"assigned":"empty")+'">'+(d.person?esc(d.person):"未定")+'</span></td>'
-        +'<td class="duty-time">'+(d.time?esc(d.time):"—")+'</td>'
-        +'<td>'+statusBadge+'</td>'
-        +'<td>'+(d.memo?'<span style="font-size:.72rem;color:var(--ink-3)">'+esc(d.memo)+'</span>':'')+'</td>'
-        +'<td><button class="edit-btn" onclick="openEditDuty(\''+m.id+'\',\''+d.key+'\')">✏️ 編集</button></td>'
-        +'</tr>';
+      var chips = (d.persons||[]).length
+        ? (d.persons||[]).map(function(p){ return '<span class="person-chip">'+esc(p)+'</span>'; }).join("")
+        : '<span class="person-empty">未定</span>';
+      var timeStr = d.time ? '<span style="font-size:.7rem;color:var(--cyan);white-space:nowrap">'+esc(d.time)+'</span>' : '';
+      return '<tr><td>'
+        +'<div class="duty-row-inner" onclick="openEditDuty(\''+m.id+'\',\''+d.key+'\')">'
+        +'<span class="d-icon">'+d.icon+'</span>'
+        +'<div style="flex:1;min-width:80px"><span class="d-label">'+esc(d.label)+'</span>'
+        +(d.memo?'<span class="d-memo">'+esc(d.memo)+'</span>':'')
+        +'</div>'
+        +'<div class="persons-wrap">'+chips+'</div>'
+        +timeStr
+        +stBadge(d.status)
+        +'</div>'
+        +'</td></tr>';
     }).join("");
 
-    var progress = totalCount>0 ? Math.round(doneCount/totalCount*100) : 0;
-    var progressColor = progress===100?"#00cc66":progress>50?"#ffcc00":"var(--cyan)";
-
-    return '<div class="match-card" id="card-'+m.id+'">'
-      +'<div class="match-card-head" onclick="toggleCard(\''+m.id+'\')">'
-      +'<div class="mch-info">'
-      +'<div class="mch-name">'+esc(m.name)+'</div>'
-      +'<div class="mch-date">'+(m.date||"")+(m.venue?' 📍'+esc(m.venue):'')+(m.time?' 集合:'+esc(m.time):'')+'</div>'
+    return '<div class="mc" id="mc-'+m.id+'">'
+      +'<div class="mc-head" onclick="toggleCard(\''+m.id+'\')">'
+      +'<div style="flex:1;min-width:0">'
+      +'<div class="mc-name">'+esc(m.name)+'</div>'
+      +'<div class="mc-sub">'+(m.date||"")+(m.venue?' 📍'+esc(m.venue):'')+(m.time?' 集合'+esc(m.time):'')+'</div>'
+      +(m.note?'<div class="mc-sub" style="color:#ffe58a">📝 '+esc(m.note)+'</div>':'')
       +'</div>'
-      +'<div style="text-align:right;flex-shrink:0">'
-      +'<div style="font-size:.78rem;font-weight:900;color:'+progressColor+'">'+doneCount+'/'+totalCount+'</div>'
-      +'<div style="font-size:.62rem;color:rgba(255,255,255,.5)">確定済み</div>'
+      +'<div class="mc-prog" style="color:'+progColor+'">'+done+'/'+total+'</div>'
+      +'<button class="mc-edit-btn" onclick="event.stopPropagation();openEditMatch(\''+m.id+'\')">✏️</button>'
+      +'<span class="mc-arrow" id="arr-'+m.id+'">▼</span>'
       +'</div>'
-      +'<div style="margin-left:10px;flex-shrink:0;display:flex;gap:6px;align-items:center">'
-      +'<button onclick="event.stopPropagation();openEditMatch(\''+m.id+'\')" style="background:none;border:1px solid rgba(255,255,255,.2);color:rgba(255,255,255,.6);border-radius:6px;padding:4px 8px;font-size:.7rem;cursor:pointer">✏️</button>'
-      +'<span class="mch-arrow" id="arrow-'+m.id+'">▼</span>'
-      +'</div></div>'
-      +'<div class="mch-body" id="body-'+m.id+'">'
-      +'<div style="overflow-x:auto">'
-      +'<table class="duty-table">'
-      +'<thead><tr><th>任務</th><th>担当者</th><th>時間・目安</th><th>状態</th><th>メモ</th><th></th></tr></thead>'
+      +'<div class="mc-body" id="body-'+m.id+'">'
+      +'<div class="dt-wrap"><table class="dt">'
+      +'<thead><tr><th>任務 / 担当者 / 状態</th></tr></thead>'
       +'<tbody>'+rows+'</tbody>'
       +'</table></div>'
-      +'<div style="padding:10px 14px;display:flex;gap:8px;justify-content:flex-end">'
-      +'<button class="btn btn-outline btn-sm" onclick="copyToClipboard(\''+m.id+'\')">📋 テキストコピー</button>'
+      +'<div class="add-duty-row" onclick="openAddDuty(\''+m.id+'\')">＋ 任務を追加</div>'
+      +'<div style="display:flex;gap:8px;padding:6px 0 0;justify-content:flex-end">'
+      +'<button class="btn btn-outline btn-sm" onclick="copyText(\''+m.id+'\')">📋 LINEコピー</button>'
       +'</div>'
       +'</div></div>';
   }).join("");
@@ -264,126 +292,150 @@ function render(){
 
 /* ===== アコーディオン ===== */
 function toggleCard(id){
-  var body = document.getElementById("body-"+id);
-  var arrow = document.getElementById("arrow-"+id);
-  var isOpen = body.classList.contains("open");
-  body.classList.toggle("open", !isOpen);
-  if(arrow) arrow.style.transform = isOpen?"":"rotate(180deg)";
+  var b = document.getElementById("body-"+id);
+  var a = document.getElementById("arr-"+id);
+  var open = b.classList.toggle("open");
+  if(a) a.style.transform = open?"rotate(180deg)":"";
+}
+function openCard(id){
+  var b = document.getElementById("body-"+id);
+  var a = document.getElementById("arr-"+id);
+  if(b && !b.classList.contains("open")){ b.classList.add("open"); if(a) a.style.transform="rotate(180deg)"; }
 }
 
-/* ===== 大会追加/編集 ===== */
+/* ===== 大会 ===== */
 function openAddMatch(){
   _editMatchId = null;
-  document.getElementById("modal-match-title").textContent = "大会を追加";
-  document.getElementById("m-del-btn").style.display = "none";
-  document.getElementById("m-name").value = "";
-  document.getElementById("m-date").value = new Date().toISOString().slice(0,10);
-  document.getElementById("m-venue").value = "";
-  document.getElementById("m-time").value = "07:30";
-  document.getElementById("m-note").value = "";
+  document.getElementById("mm-title").textContent = "大会を追加";
+  document.getElementById("mm-del").style.display = "none";
+  ["mm-name","mm-venue","mm-note"].forEach(function(id){ document.getElementById(id).value=""; });
+  document.getElementById("mm-date").value = new Date().toISOString().slice(0,10);
+  document.getElementById("mm-time").value = "07:30";
   document.getElementById("modal-match").classList.add("open");
 }
 function openEditMatch(id){
-  var m = _data.find(function(x){ return x.id===id; });
-  if(!m) return;
+  var m = _data.find(function(x){ return x.id===id; }); if(!m) return;
   _editMatchId = id;
-  document.getElementById("modal-match-title").textContent = "大会を編集";
-  document.getElementById("m-del-btn").style.display = "inline-flex";
-  document.getElementById("m-name").value = m.name||"";
-  document.getElementById("m-date").value = m.date||"";
-  document.getElementById("m-venue").value = m.venue||"";
-  document.getElementById("m-time").value = m.time||"07:30";
-  document.getElementById("m-note").value = m.note||"";
+  document.getElementById("mm-title").textContent = "大会を編集";
+  document.getElementById("mm-del").style.display = "inline-flex";
+  document.getElementById("mm-name").value = m.name||"";
+  document.getElementById("mm-date").value = m.date||"";
+  document.getElementById("mm-venue").value = m.venue||"";
+  document.getElementById("mm-time").value = m.time||"07:30";
+  document.getElementById("mm-note").value = m.note||"";
   document.getElementById("modal-match").classList.add("open");
 }
 function saveMatch(){
-  var name = document.getElementById("m-name").value.trim();
+  var name = document.getElementById("mm-name").value.trim();
   if(!name){ alert("大会名を入力してください"); return; }
   if(_editMatchId){
     var m = _data.find(function(x){ return x.id===_editMatchId; });
-    if(m){ m.name=name; m.date=document.getElementById("m-date").value; m.venue=document.getElementById("m-venue").value.trim(); m.time=document.getElementById("m-time").value; m.note=document.getElementById("m-note").value.trim(); }
+    if(m){ m.name=name; m.date=document.getElementById("mm-date").value; m.venue=document.getElementById("mm-venue").value.trim(); m.time=document.getElementById("mm-time").value; m.note=document.getElementById("mm-note").value.trim(); }
   } else {
-    _data.push({
-      id: "match"+Date.now(), name:name,
-      date:document.getElementById("m-date").value,
-      venue:document.getElementById("m-venue").value.trim(),
-      time:document.getElementById("m-time").value,
-      note:document.getElementById("m-note").value.trim(),
-      duties: DUTY_TEMPLATE.map(function(d){ return Object.assign({},d); })
-    });
+    _data.push({ id:"m"+Date.now(), name:name, date:document.getElementById("mm-date").value, venue:document.getElementById("mm-venue").value.trim(), time:document.getElementById("mm-time").value, note:document.getElementById("mm-note").value.trim(), duties:DUTY_TEMPLATE.map(function(d){ return JSON.parse(JSON.stringify(d)); }) });
   }
-  save(); closeModal("modal-match"); render();
+  save(); closeM("modal-match"); render();
 }
 function deleteMatch(){
-  if(!_editMatchId||!confirm("この大会の任務分担を削除しますか？")) return;
+  if(!_editMatchId||!confirm("削除しますか？")) return;
   _data = _data.filter(function(x){ return x.id!==_editMatchId; });
-  save(); closeModal("modal-match"); render();
+  save(); closeM("modal-match"); render();
 }
 
-/* ===== 任務編集 ===== */
+/* ===== 担当者（モーダル内） ===== */
+function renderPersonChips(){
+  var wrap = document.getElementById("md-persons");
+  wrap.innerHTML = _editPersons.map(function(p,i){
+    return '<span class="person-chip-edit">'+esc(p)+'<button class="dp" onclick="removePerson('+i+')">×</button></span>';
+  }).join("");
+}
+function addPerson(){
+  var inp = document.getElementById("md-person-input");
+  var val = inp.value.trim();
+  if(!val) return;
+  if(_editPersons.indexOf(val)===-1) _editPersons.push(val);
+  inp.value = "";
+  renderPersonChips();
+}
+function removePerson(i){
+  _editPersons.splice(i,1);
+  renderPersonChips();
+}
+
+/* ===== 任務 ===== */
 function openEditDuty(matchId, dutyKey){
-  _editDutyMatchId = matchId;
-  _editDutyKey = dutyKey;
-  var m = _data.find(function(x){ return x.id===matchId; });
-  if(!m) return;
-  var d = (m.duties||[]).find(function(x){ return x.key===dutyKey; });
-  if(!d) return;
-  document.getElementById("modal-duty-title").textContent = d.icon+" "+d.label;
-  document.getElementById("d-person").value = d.person||"";
-  document.getElementById("d-time").value = d.time||"";
-  document.getElementById("d-status").value = d.status||"yet";
-  document.getElementById("d-memo").value = d.memo||"";
+  var m = _data.find(function(x){ return x.id===matchId; }); if(!m) return;
+  var d = (m.duties||[]).find(function(x){ return x.key===dutyKey; }); if(!d) return;
+  _editDutyMatchId = matchId; _editDutyKey = dutyKey;
+  _editPersons = (d.persons||[]).slice();
+  document.getElementById("md-title").textContent = d.icon+" "+d.label;
+  document.getElementById("md-icon").value = d.icon;
+  document.getElementById("md-label").value = d.label;
+  document.getElementById("md-time").value = d.time||"";
+  document.getElementById("md-status").value = d.status||"yet";
+  document.getElementById("md-memo").value = d.memo||"";
+  document.getElementById("md-del").style.display = "inline-flex";
+  document.getElementById("md-person-input").value = "";
+  renderPersonChips();
+  document.getElementById("modal-duty").classList.add("open");
+}
+function openAddDuty(matchId){
+  var m = _data.find(function(x){ return x.id===matchId; }); if(!m) return;
+  _editDutyMatchId = matchId; _editDutyKey = null;
+  _editPersons = [];
+  document.getElementById("md-title").textContent = "任務を追加";
+  document.getElementById("md-icon").value = "📋";
+  document.getElementById("md-label").value = "";
+  document.getElementById("md-time").value = "";
+  document.getElementById("md-status").value = "yet";
+  document.getElementById("md-memo").value = "";
+  document.getElementById("md-del").style.display = "none";
+  document.getElementById("md-person-input").value = "";
+  renderPersonChips();
   document.getElementById("modal-duty").classList.add("open");
 }
 function saveDuty(){
-  var m = _data.find(function(x){ return x.id===_editDutyMatchId; });
-  if(!m) return;
-  var d = (m.duties||[]).find(function(x){ return x.key===_editDutyKey; });
-  if(!d) return;
-  d.person = document.getElementById("d-person").value.trim();
-  d.time   = document.getElementById("d-time").value.trim();
-  d.status = document.getElementById("d-status").value;
-  d.memo   = document.getElementById("d-memo").value.trim();
-  save(); closeModal("modal-duty"); render();
-  // 閉じた後もそのカードを開いた状態に
-  setTimeout(function(){
-    var body = document.getElementById("body-"+_editDutyMatchId);
-    var arrow = document.getElementById("arrow-"+_editDutyMatchId);
-    if(body && !body.classList.contains("open")){
-      body.classList.add("open");
-      if(arrow) arrow.style.transform = "rotate(180deg)";
-    }
-  }, 100);
+  var label = document.getElementById("md-label").value.trim();
+  if(!label){ alert("任務名を入力してください"); return; }
+  var m = _data.find(function(x){ return x.id===_editDutyMatchId; }); if(!m) return;
+  if(!m.duties) m.duties=[];
+  var entry = { key: _editDutyKey||"d"+Date.now(), icon:document.getElementById("md-icon").value, label:label, persons:_editPersons.slice(), time:document.getElementById("md-time").value.trim(), status:document.getElementById("md-status").value, memo:document.getElementById("md-memo").value.trim() };
+  if(_editDutyKey){
+    var idx = m.duties.findIndex(function(x){ return x.key===_editDutyKey; });
+    if(idx>=0) m.duties[idx]=entry; else m.duties.push(entry);
+  } else { m.duties.push(entry); }
+  save(); closeM("modal-duty"); render();
+  setTimeout(function(){ openCard(_editDutyMatchId); },80);
+}
+function deleteDuty(){
+  if(!confirm("この任務を削除しますか？")) return;
+  var m = _data.find(function(x){ return x.id===_editDutyMatchId; }); if(!m) return;
+  m.duties = (m.duties||[]).filter(function(x){ return x.key!==_editDutyKey; });
+  save(); closeM("modal-duty"); render();
+  setTimeout(function(){ openCard(_editDutyMatchId); },80);
 }
 
-/* ===== テキストコピー（LINE貼り付け用） ===== */
-function copyToClipboard(id){
-  var m = _data.find(function(x){ return x.id===id; });
-  if(!m) return;
-  var text = "【"+m.name+" 任務分担】\n";
-  if(m.date) text += "📅 "+m.date+(m.venue?" 📍"+m.venue:"")+(m.time?" 集合"+m.time:"")+"\n";
-  if(m.note) text += "📝 "+m.note+"\n";
-  text += "\n";
+/* ===== LINEコピー ===== */
+function copyText(id){
+  var m = _data.find(function(x){ return x.id===id; }); if(!m) return;
+  var t = "【"+m.name+"】\n";
+  if(m.date) t += "📅 "+m.date+(m.venue?" 📍"+m.venue:"")+(m.time?" 集合"+m.time:"")+"\n";
+  if(m.note) t += "📝 "+m.note+"\n";
+  t += "\n";
   (m.duties||[]).forEach(function(d){
     if(d.status==="na") return;
-    var st = d.status==="done"?"✅":"⏳";
-    text += st+" "+d.icon+" "+d.label+"\n";
-    if(d.person) text += "   担当："+d.person+"\n";
-    if(d.time)   text += "   時間："+d.time+"\n";
-    if(d.memo)   text += "   メモ："+d.memo+"\n";
+    t += (d.status==="done"?"✅":"⏳")+" "+d.icon+" "+d.label+"\n";
+    if((d.persons||[]).length) t += "   担当："+d.persons.join("・")+"\n";
+    if(d.time) t += "   時間："+d.time+"\n";
+    if(d.memo) t += "   メモ："+d.memo+"\n";
   });
-  navigator.clipboard.writeText(text).then(function(){
-    alert("クリップボードにコピーしました。\nLINEなどに貼り付けてご利用ください。");
-  }).catch(function(){
-    alert("コピーできませんでした。");
-  });
+  navigator.clipboard.writeText(t).then(function(){ alert("コピーしました！LINEに貼り付けてください。"); }).catch(function(){ alert("コピーできませんでした。"); });
 }
 
-/* ===== 共通 ===== */
-function closeModal(id){ document.getElementById(id).classList.remove("open"); }
-function esc(s){ return String(s||"").replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;"); }
-document.getElementById("modal-match").addEventListener("click",function(e){if(e.target.id==="modal-match")closeModal("modal-match");});
-document.getElementById("modal-duty").addEventListener("click",function(e){if(e.target.id==="modal-duty")closeModal("modal-duty");});
+/* ===== モーダル共通 ===== */
+function closeM(id){ document.getElementById(id).classList.remove("open"); }
+document.getElementById("modal-match").addEventListener("click",function(e){if(e.target.id==="modal-match")closeM("modal-match");});
+document.getElementById("modal-duty").addEventListener("click",function(e){if(e.target.id==="modal-duty")closeM("modal-duty");});
 </script>
 </body>
 </html>
