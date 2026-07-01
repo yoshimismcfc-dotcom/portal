@@ -1,0 +1,563 @@
+<!doctype html>
+<html lang="ja">
+<head>
+  <meta charset="utf-8">
+  <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>会計・立替申請｜吉見SMC FC</title>
+  <script src="firebase-config.js"></script>
+  <link rel="stylesheet" href="common.css">
+  <style>
+    .tab-bar{display:flex;gap:0;border-radius:var(--r8);overflow:hidden;border:1px solid var(--line-2);margin-bottom:18px}
+    .tab-btn{flex:1;padding:11px 6px;font:inherit;font-size:.8rem;font-weight:900;background:var(--surface-lt);color:#6aaccc;border:none;cursor:pointer;transition:.15s;display:flex;align-items:center;justify-content:center;gap:4px}
+    .tab-btn:not(:last-child){border-right:1px solid var(--line-2)}
+    .tab-btn.active{background:linear-gradient(135deg,#003087,#0050cc);color:#fff}
+    .tab-sec{display:none}.tab-sec.active{display:block}
+    /* 申請カード */
+    .req-card{background:var(--surface-lt);border:1px solid var(--line-2);border-radius:var(--r12);padding:14px 16px;margin-bottom:10px;position:relative}
+    .req-card.pending::before{content:"";position:absolute;top:0;left:0;width:4px;height:100%;background:#ffcc00;border-radius:4px 0 0 4px}
+    .req-card.approved::before{content:"";position:absolute;top:0;left:0;width:4px;height:100%;background:#00cc66;border-radius:4px 0 0 4px}
+    .req-card.paid::before{content:"";position:absolute;top:0;left:0;width:4px;height:100%;background:#0088ff;border-radius:4px 0 0 4px}
+    .req-card.rejected::before{content:"";position:absolute;top:0;left:0;width:4px;height:100%;background:#ff4466;border-radius:4px 0 0 4px}
+    .req-header{display:flex;align-items:flex-start;gap:10px;margin-bottom:6px}
+    .req-name{font-size:.9rem;font-weight:900;color:#fff;flex:1}
+    .req-amount{font-size:1.1rem;font-weight:900;color:var(--orange)}
+    .req-meta{font-size:.74rem;color:var(--ink-3);line-height:1.7}
+    .status-badge{display:inline-flex;align-items:center;gap:4px;font-size:.72rem;font-weight:900;padding:3px 10px;border-radius:99px;flex-shrink:0}
+    .status-badge.pending{background:rgba(255,204,0,.2);color:#ffcc00;border:1px solid rgba(255,204,0,.4)}
+    .status-badge.approved{background:rgba(0,204,102,.2);color:#00cc66;border:1px solid rgba(0,204,102,.4)}
+    .status-badge.paid{background:rgba(0,136,255,.2);color:#0088ff;border:1px solid rgba(0,136,255,.4)}
+    .status-badge.rejected{background:rgba(255,68,102,.2);color:#ff4466;border:1px solid rgba(255,68,102,.4)}
+    .req-actions{display:flex;gap:6px;margin-top:10px;flex-wrap:wrap}
+    .act-btn{border:1px solid;border-radius:6px;padding:5px 12px;font-size:.74rem;font-weight:700;cursor:pointer;background:none;transition:.15s;white-space:nowrap}
+    .act-approve{color:#00cc66;border-color:rgba(0,204,102,.4)}.act-approve:hover{background:rgba(0,204,102,.1)}
+    .act-paid{color:#0088ff;border-color:rgba(0,136,255,.4)}.act-paid:hover{background:rgba(0,136,255,.1)}
+    .act-reject{color:#ff4466;border-color:rgba(255,68,102,.4)}.act-reject:hover{background:rgba(255,68,102,.1)}
+    .act-edit{color:var(--cyan);border-color:rgba(0,212,255,.4)}.act-edit:hover{background:rgba(0,212,255,.1)}
+    .act-del{color:#ff4466;border-color:rgba(255,68,102,.3)}.act-del:hover{background:rgba(255,68,102,.08)}
+    /* フィルターバー */
+    .filter-bar{display:flex;gap:6px;flex-wrap:wrap;margin-bottom:12px}
+    .f-btn{padding:5px 12px;border-radius:99px;border:1px solid var(--line-2);background:none;color:var(--ink-3);font:inherit;font-size:.76rem;font-weight:700;cursor:pointer;transition:.15s}
+    .f-btn.on{background:var(--orange);border-color:var(--orange);color:#fff}
+    /* 月次レポートテーブル */
+    .rpt-table{width:100%;border-collapse:collapse;font-size:.82rem}
+    .rpt-table th{background:#003087;color:#fff;padding:7px 9px;text-align:left;font-size:.74rem;font-weight:900}
+    .rpt-table td{border-bottom:1px solid rgba(255,255,255,.07);padding:8px 9px;color:#c8e4ff;vertical-align:top}
+    .rpt-table tr:nth-child(even) td{background:rgba(255,255,255,.03)}
+    .rpt-table td.num{text-align:right;font-weight:700;color:#fff}
+    .rpt-table tfoot td{font-weight:900;color:#fff;background:rgba(0,48,135,.4);padding:9px}
+    .rpt-table tfoot td.num{color:var(--orange);font-size:.95rem}
+    /* サマリーグリッド */
+    .sum-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-bottom:14px}
+    .sum-box{background:var(--surface-lt);border:1px solid var(--line-2);border-radius:var(--r8);padding:10px;text-align:center}
+    .sum-lbl{font-size:.68rem;color:var(--ink-3);margin-bottom:4px}
+    .sum-val{font-size:.95rem;font-weight:900}
+    /* モーダル */
+    .modal-bg{position:fixed;inset:0;background:rgba(0,0,0,.85);display:none;place-items:center;z-index:200;backdrop-filter:blur(6px);padding:14px}
+    .modal-bg.open{display:grid}
+    .modal{background:var(--surface-lt);border:1px solid var(--line-2);border-radius:var(--r16);padding:20px;width:min(460px,100%);max-height:92vh;overflow-y:auto;box-shadow:var(--shadow-lg)}
+    .modal h3{font-size:.95rem;font-weight:900;color:#fff;margin-bottom:14px}
+    .modal-btns{display:flex;gap:8px;justify-content:flex-end;margin-top:14px;flex-wrap:wrap}
+    .g2{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+    @media(max-width:460px){.g2{grid-template-columns:1fr}}
+  </style>
+</head>
+<body>
+<header class="site-header">
+  <div class="header-inner">
+    <a class="header-logo" href="index.html">
+      <div class="logo-mark">⚽</div>
+      <div><span class="logo-name">吉見SMC FC</span><span class="logo-sub">SMART PORTAL</span></div>
+    </a>
+  </div>
+</header>
+<main class="page-wrap">
+  <a class="back-btn" href="index.html">ホームに戻る</a>
+  <div class="hero-band">
+    <div class="hero-emoji">💴</div>
+    <div>
+      <div class="hero-title">会計・立替申請</div>
+      <div class="hero-sub">立替払いの申請・承認・会計報告をここで管理します。</div>
+    </div>
+  </div>
+  <div class="notice-bar">☁️ データはFirebaseでクラウド保存・共有されます。</div>
+
+  <div class="tab-bar">
+    <button class="tab-btn active" onclick="switchTab('request',this)">💴 立替申請</button>
+    <button class="tab-btn" onclick="switchTab('monthly',this)">📊 月次報告</button>
+    <button class="tab-btn" onclick="switchTab('annual',this)">📋 年度報告</button>
+  </div>
+
+  <!-- ===== 立替申請タブ ===== -->
+  <div class="tab-sec active" id="tab-request">
+    <div style="display:flex;gap:8px;margin-bottom:10px;flex-wrap:wrap">
+      <button class="btn btn-primary" onclick="openAdd()">＋ 立替申請する</button>
+      <div style="flex:1;min-width:120px">
+        <input class="form-control" id="search-input" placeholder="🔍 名前・品目で検索" oninput="renderList()" style="height:40px">
+      </div>
+    </div>
+    <!-- フィルター -->
+    <div class="filter-bar">
+      <button class="f-btn on" id="f-all"      onclick="setFilter('all',this)">すべて</button>
+      <button class="f-btn"    id="f-pending"  onclick="setFilter('pending',this)">⏳ 申請中</button>
+      <button class="f-btn"    id="f-approved" onclick="setFilter('approved',this)">✅ 承認済</button>
+      <button class="f-btn"    id="f-paid"     onclick="setFilter('paid',this)">💰 支払済</button>
+      <button class="f-btn"    id="f-rejected" onclick="setFilter('rejected',this)">❌ 却下</button>
+    </div>
+    <!-- 集計 -->
+    <div class="sum-grid">
+      <div class="sum-box"><div class="sum-lbl">申請中</div><div class="sum-val" id="cnt-pending" style="color:#ffcc00">0件</div></div>
+      <div class="sum-box"><div class="sum-lbl">承認済（未払い）</div><div class="sum-val" id="cnt-approved" style="color:#00cc66">0件</div></div>
+      <div class="sum-box"><div class="sum-lbl">未払い合計</div><div class="sum-val" id="sum-approved" style="color:var(--orange)">¥0</div></div>
+    </div>
+    <div id="req-list"></div>
+  </div>
+
+  <!-- ===== 月次報告タブ ===== -->
+  <div class="tab-sec" id="tab-monthly">
+    <div style="display:flex;gap:8px;align-items:center;margin-bottom:14px;flex-wrap:wrap">
+      <select class="form-control" id="monthly-year" style="max-width:100px;height:36px;padding:4px 8px;font-size:.82rem" onchange="renderMonthly()"></select>
+      <select class="form-control" id="monthly-month" style="max-width:80px;height:36px;padding:4px 8px;font-size:.82rem" onchange="renderMonthly()"></select>
+      <button class="btn btn-outline btn-sm" onclick="exportMonthlyCsv()">📥 CSV</button>
+      <button class="btn btn-primary btn-sm" onclick="window.print()">🖨 印刷</button>
+    </div>
+    <div id="monthly-content"></div>
+  </div>
+
+  <!-- ===== 年度報告タブ ===== -->
+  <div class="tab-sec" id="tab-annual">
+    <div style="display:flex;gap:8px;align-items:center;margin-bottom:14px;flex-wrap:wrap">
+      <select class="form-control" id="annual-year2" style="max-width:100px;height:36px;padding:4px 8px;font-size:.82rem" onchange="renderAnnual()"></select>
+      <button class="btn btn-outline btn-sm" onclick="exportAnnualCsv()">📥 CSV</button>
+      <button class="btn btn-primary btn-sm" onclick="window.print()">🖨 印刷</button>
+    </div>
+    <div id="annual-content"></div>
+  </div>
+</main>
+
+<!-- 申請モーダル -->
+<div class="modal-bg" id="modal-req">
+  <div class="modal">
+    <h3 id="modal-req-title">立替払いを申請する</h3>
+    <div class="form-group">
+      <label class="form-label">申請者氏名 <span style="color:var(--red)">*</span></label>
+      <input class="form-control" id="req-person" placeholder="例：武部 陽樹の保護者">
+    </div>
+    <div class="g2">
+      <div class="form-group"><label class="form-label">購入日 <span style="color:var(--red)">*</span></label>
+        <input class="form-control" id="req-date" type="date"></div>
+      <div class="form-group"><label class="form-label">金額（円） <span style="color:var(--red)">*</span></label>
+        <input class="form-control" id="req-amount" type="number" min="0" step="1" placeholder="1500"></div>
+    </div>
+    <div class="form-group">
+      <label class="form-label">品目・購入内容 <span style="color:var(--red)">*</span></label>
+      <input class="form-control" id="req-item" placeholder="例：試合用ビブス×10枚">
+    </div>
+    <div class="form-group">
+      <label class="form-label">費目カテゴリ</label>
+      <select class="form-control" id="req-category">
+        <option value="活動費">活動費（弁当・飲み物）</option>
+        <option value="試合参加費">試合参加費</option>
+        <option value="審判更新・講習">審判更新・講習受講料</option>
+        <option value="保険料">保険料</option>
+        <option value="登録料">登録料</option>
+        <option value="事務費">事務費</option>
+        <option value="交際費">交際費</option>
+        <option value="用具費">用具費</option>
+        <option value="卒団費">卒団費</option>
+        <option value="主催大会運営費">主催大会運営費</option>
+        <option value="その他">その他</option>
+      </select>
+    </div>
+    <div class="form-group">
+      <label class="form-label">備考・メモ</label>
+      <textarea class="form-control" id="req-memo" rows="2" placeholder="例：北彩リーグ第1節の審判謝礼として"></textarea>
+    </div>
+    <div class="modal-btns">
+      <button class="btn btn-outline btn-sm" id="req-del-btn" style="color:var(--red);border-color:rgba(255,68,102,.4);display:none" onclick="deleteReq()">🗑 削除</button>
+      <button class="btn btn-outline" onclick="closeModal('modal-req')">キャンセル</button>
+      <button class="btn btn-primary" onclick="saveReq()">📨 申請する</button>
+    </div>
+  </div>
+</div>
+
+<!-- 承認コメントモーダル -->
+<div class="modal-bg" id="modal-comment">
+  <div class="modal">
+    <h3 id="comment-title">コメント・メモ</h3>
+    <div class="form-group">
+      <label class="form-label">コメント（任意）</label>
+      <textarea class="form-control" id="comment-text" rows="3" placeholder="例：領収書を受け取りました"></textarea>
+    </div>
+    <div class="modal-btns">
+      <button class="btn btn-outline" onclick="closeModal('modal-comment')">キャンセル</button>
+      <button class="btn btn-primary" id="comment-ok-btn" onclick="">確定</button>
+    </div>
+  </div>
+</div>
+
+<footer class="site-footer">YOSHIMI SMC FC — SMART PORTAL</footer>
+<script>
+var KEY = "smc_kaikei_v1";
+var _data = []; // [{id,person,date,amount,item,category,memo,status,comment,paidAt}]
+var _filter = "all";
+var _editId = null;
+var _commentCallback = null;
+
+var CATEGORIES = ["活動費","試合参加費","審判更新・講習","保険料","登録料","事務費","交際費","用具費","卒団費","主催大会運営費","その他"];
+var STATUS_LABEL = {pending:"⏳ 申請中", approved:"✅ 承認済", paid:"💰 支払済", rejected:"❌ 却下"};
+
+/* ===== Firebase ===== */
+dbListen("kaikei", function(val){
+  _data = Array.isArray(val) ? val : [];
+  renderList(); renderSummary();
+  initSelects();
+}, KEY, []);
+
+function save(){
+  localStorage.setItem(KEY, JSON.stringify(_data));
+  dbSave("kaikei", _data, KEY, null);
+}
+
+/* ===== フィルター ===== */
+function setFilter(f, btn){
+  _filter = f;
+  document.querySelectorAll(".f-btn").forEach(function(b){ b.classList.remove("on"); });
+  btn.classList.add("on");
+  renderList();
+}
+
+/* ===== 申請一覧 ===== */
+function renderList(){
+  var q = (document.getElementById("search-input")||{value:""}).value.toLowerCase();
+  var list = _data.filter(function(r){
+    if(_filter !== "all" && r.status !== _filter) return false;
+    if(q && !(r.person||"").toLowerCase().includes(q) && !(r.item||"").toLowerCase().includes(q)) return false;
+    return true;
+  }).sort(function(a,b){ return (b.date||"").localeCompare(a.date||""); });
+
+  var wrap = document.getElementById("req-list");
+  if(!list.length){
+    wrap.innerHTML = '<p style="color:var(--ink-3);text-align:center;padding:24px;font-size:.84rem">該当する申請がありません。</p>';
+    return;
+  }
+  wrap.innerHTML = list.map(function(r){
+    var statusBadge = '<span class="status-badge '+r.status+'">'+STATUS_LABEL[r.status]+'</span>';
+    var actions = '';
+    if(r.status === 'pending'){
+      actions += '<button class="act-btn act-approve" onclick="changeStatus(\''+r.id+'\',\'approved\')">✅ 承認する</button>';
+      actions += '<button class="act-btn act-reject" onclick="changeStatus(\''+r.id+'\',\'rejected\')">❌ 却下</button>';
+      actions += '<button class="act-btn act-edit" onclick="openEdit(\''+r.id+'\')">✏️ 編集</button>';
+    } else if(r.status === 'approved'){
+      actions += '<button class="act-btn act-paid" onclick="changeStatus(\''+r.id+'\',\'paid\')">💰 支払済にする</button>';
+      actions += '<button class="act-btn act-edit" onclick="openEdit(\''+r.id+'\')">✏️ 編集</button>';
+    } else {
+      actions += '<button class="act-btn act-edit" onclick="openEdit(\''+r.id+'\')">✏️ 編集</button>';
+    }
+    actions += '<button class="act-btn act-del" onclick="confirmDel(\''+r.id+'\')">🗑</button>';
+
+    return '<div class="req-card '+r.status+'">'
+      +'<div class="req-header">'
+      +'<div>'
+      +'<div class="req-name">'+esc(r.person||"")+'</div>'
+      +'<div class="req-meta">'+esc(r.date||"")+'　'+esc(r.category||"")+'　'+esc(r.item||"")+'</div>'
+      +(r.memo?'<div class="req-meta" style="color:#94c4e4">📝 '+esc(r.memo)+'</div>':'')
+      +(r.comment?'<div class="req-meta" style="color:#ffcc88">💬 '+esc(r.comment)+'</div>':'')
+      +(r.paidAt?'<div class="req-meta">支払日：'+esc(r.paidAt)+'</div>':'')
+      +'</div>'
+      +'<div style="text-align:right;flex-shrink:0">'
+      +'<div class="req-amount">¥'+Number(r.amount||0).toLocaleString()+'</div>'
+      +statusBadge
+      +'</div></div>'
+      +'<div class="req-actions">'+actions+'</div>'
+      +'</div>';
+  }).join("");
+
+  renderSummary();
+}
+
+function renderSummary(){
+  var pending  = _data.filter(function(r){ return r.status==='pending'; });
+  var approved = _data.filter(function(r){ return r.status==='approved'; });
+  var sumApproved = approved.reduce(function(s,r){ return s+Number(r.amount||0); }, 0);
+  document.getElementById("cnt-pending").textContent  = pending.length+"件";
+  document.getElementById("cnt-approved").textContent = approved.length+"件";
+  document.getElementById("sum-approved").textContent = "¥"+sumApproved.toLocaleString();
+}
+
+/* ===== ステータス変更 ===== */
+function changeStatus(id, status){
+  var r = _data.find(function(x){ return x.id===id; });
+  if(!r) return;
+  if(status === 'approved' && !confirm(r.person+'さんの「'+r.item+'」¥'+Number(r.amount).toLocaleString()+'を承認しますか？')) return;
+  if(status === 'paid'){
+    openComment("支払い完了メモ（任意）", function(comment){
+      r.status = status; r.paidAt = new Date().toISOString().slice(0,10);
+      if(comment) r.comment = comment;
+      save(); renderList();
+    });
+    return;
+  }
+  if(status === 'rejected'){
+    openComment("却下の理由（任意）", function(comment){
+      r.status = status;
+      if(comment) r.comment = comment;
+      save(); renderList();
+    });
+    return;
+  }
+  r.status = status;
+  save(); renderList();
+}
+
+/* ===== 申請追加/編集 ===== */
+function openAdd(){
+  _editId = null;
+  document.getElementById("modal-req-title").textContent = "💴 立替払いを申請する";
+  document.getElementById("req-del-btn").style.display = "none";
+  document.getElementById("req-person").value = "";
+  document.getElementById("req-date").value = new Date().toISOString().slice(0,10);
+  document.getElementById("req-amount").value = "";
+  document.getElementById("req-item").value = "";
+  document.getElementById("req-category").value = "活動費";
+  document.getElementById("req-memo").value = "";
+  document.getElementById("modal-req").classList.add("open");
+}
+function openEdit(id){
+  var r = _data.find(function(x){ return x.id===id; });
+  if(!r) return;
+  _editId = id;
+  document.getElementById("modal-req-title").textContent = "✏️ 申請を編集";
+  document.getElementById("req-del-btn").style.display = "inline-flex";
+  document.getElementById("req-person").value = r.person||"";
+  document.getElementById("req-date").value = r.date||"";
+  document.getElementById("req-amount").value = r.amount||"";
+  document.getElementById("req-item").value = r.item||"";
+  document.getElementById("req-category").value = r.category||"活動費";
+  document.getElementById("req-memo").value = r.memo||"";
+  document.getElementById("modal-req").classList.add("open");
+}
+function saveReq(){
+  var person = document.getElementById("req-person").value.trim();
+  var date   = document.getElementById("req-date").value;
+  var amount = parseInt(document.getElementById("req-amount").value)||0;
+  var item   = document.getElementById("req-item").value.trim();
+  if(!person||!date||!amount||!item){ alert("氏名・日付・金額・品目は必須です"); return; }
+  if(_editId){
+    var r = _data.find(function(x){ return x.id===_editId; });
+    if(r){ r.person=person; r.date=date; r.amount=amount; r.item=item; r.category=document.getElementById("req-category").value; r.memo=document.getElementById("req-memo").value.trim(); }
+  } else {
+    _data.push({id:"req"+Date.now(), person:person, date:date, amount:amount, item:item,
+      category:document.getElementById("req-category").value, memo:document.getElementById("req-memo").value.trim(),
+      status:"pending", comment:"", paidAt:""});
+  }
+  save(); closeModal("modal-req"); renderList();
+}
+function deleteReq(){
+  if(!_editId||!confirm("削除しますか？")) return;
+  _data = _data.filter(function(x){ return x.id!==_editId; });
+  save(); closeModal("modal-req"); renderList();
+}
+function confirmDel(id){
+  var r = _data.find(function(x){ return x.id===id; });
+  if(!r||!confirm("「"+r.item+"」を削除しますか？")) return;
+  _data = _data.filter(function(x){ return x.id!==id; });
+  save(); renderList();
+}
+
+/* ===== コメントモーダル ===== */
+function openComment(title, cb){
+  document.getElementById("comment-title").textContent = title;
+  document.getElementById("comment-text").value = "";
+  _commentCallback = cb;
+  document.getElementById("comment-ok-btn").onclick = function(){
+    var txt = document.getElementById("comment-text").value.trim();
+    closeModal("modal-comment");
+    if(_commentCallback) _commentCallback(txt);
+  };
+  document.getElementById("modal-comment").classList.add("open");
+}
+
+/* ===== セレクター初期化 ===== */
+function initSelects(){
+  var now = new Date();
+  var curY = now.getFullYear();
+  var years = [];
+  for(var y=curY;y>=curY-3;y--) years.push(y);
+
+  ["monthly-year","annual-year2"].forEach(function(id){
+    var sel = document.getElementById(id);
+    if(!sel) return;
+    sel.innerHTML = years.map(function(y){return'<option value="'+y+'">'+y+'年</option>';}).join("");
+    sel.value = curY;
+  });
+
+  var msel = document.getElementById("monthly-month");
+  if(msel){
+    msel.innerHTML = Array.from({length:12},function(_,i){
+      var m=i+1; return'<option value="'+m+'">'+(m<10?"0"+m:m)+'月</option>';
+    }).join("");
+    msel.value = now.getMonth()+1;
+  }
+  renderMonthly(); renderAnnual();
+}
+
+/* ===== 月次報告 ===== */
+function renderMonthly(){
+  var y = parseInt(document.getElementById("monthly-year").value);
+  var m = parseInt(document.getElementById("monthly-month").value);
+  var pad = function(n){ return n<10?"0"+n:n; };
+  var prefix = y+"-"+pad(m);
+  var items = _data.filter(function(r){ return (r.date||"").startsWith(prefix); });
+  var paid = items.filter(function(r){ return r.status==="paid"; });
+  var approved = items.filter(function(r){ return r.status==="approved"; });
+  var pending = items.filter(function(r){ return r.status==="pending"; });
+
+  // カテゴリ別集計（支払済のみ）
+  var catMap = {};
+  paid.forEach(function(r){
+    var cat = r.category||"その他";
+    catMap[cat] = (catMap[cat]||0) + Number(r.amount||0);
+  });
+  var totalPaid = paid.reduce(function(s,r){ return s+Number(r.amount||0); }, 0);
+  var totalApproved = approved.reduce(function(s,r){ return s+Number(r.amount||0); }, 0);
+  var totalPending = pending.reduce(function(s,r){ return s+Number(r.amount||0); }, 0);
+
+  var wrap = document.getElementById("monthly-content");
+  var html = '<div style="font-size:.92rem;font-weight:900;color:#fff;margin-bottom:12px">'+y+"年"+m+"月 月次会計報告</div>";
+  html += '<div class="sum-grid" style="margin-bottom:14px">'
+    +'<div class="sum-box"><div class="sum-lbl">支払済</div><div class="sum-val" style="color:#0088ff">¥'+totalPaid.toLocaleString()+'</div></div>'
+    +'<div class="sum-box"><div class="sum-lbl">承認済（未払）</div><div class="sum-val" style="color:#00cc66">¥'+totalApproved.toLocaleString()+'</div></div>'
+    +'<div class="sum-box"><div class="sum-lbl">申請中</div><div class="sum-val" style="color:#ffcc00">¥'+totalPending.toLocaleString()+'</div></div>'
+    +'</div>';
+
+  // 費目別集計表
+  if(Object.keys(catMap).length){
+    html += '<div style="font-size:.82rem;font-weight:900;color:var(--cyan);margin-bottom:6px">費目別支出（支払済）</div>';
+    html += '<table class="rpt-table" style="margin-bottom:14px"><thead><tr><th>費目</th><th style="text-align:right">金額</th></tr></thead><tbody>';
+    Object.keys(catMap).forEach(function(cat){
+      html += '<tr><td>'+esc(cat)+'</td><td class="num">¥'+catMap[cat].toLocaleString()+'</td></tr>';
+    });
+    html += '</tbody><tfoot><tr><td>合計</td><td class="num">¥'+totalPaid.toLocaleString()+'</td></tr></tfoot></table>';
+  }
+
+  // 明細一覧
+  if(items.length){
+    html += '<div style="font-size:.82rem;font-weight:900;color:var(--cyan);margin-bottom:6px">明細一覧</div>';
+    html += '<table class="rpt-table"><thead><tr><th>日付</th><th>申請者</th><th>品目</th><th>費目</th><th style="text-align:right">金額</th><th>状態</th></tr></thead><tbody>';
+    items.sort(function(a,b){ return (a.date||"").localeCompare(b.date||""); }).forEach(function(r){
+      var sty = r.status==="paid"?"color:#0088ff":r.status==="approved"?"color:#00cc66":r.status==="rejected"?"color:#ff4466":"color:#ffcc00";
+      html += '<tr><td style="white-space:nowrap">'+esc(r.date||"")+'</td><td>'+esc(r.person||"")+'</td><td>'+esc(r.item||"")+'</td><td style="font-size:.74rem">'+esc(r.category||"")+'</td><td class="num">¥'+Number(r.amount||0).toLocaleString()+'</td><td style="font-size:.74rem;'+sty+'">'+STATUS_LABEL[r.status||"pending"]+'</td></tr>';
+    });
+    html += '</tbody></table>';
+  } else {
+    html += '<p style="color:var(--ink-3);text-align:center;padding:20px;font-size:.84rem">この月のデータがありません</p>';
+  }
+  wrap.innerHTML = html;
+}
+
+/* ===== 年度報告 ===== */
+function renderAnnual(){
+  var y = parseInt(document.getElementById("annual-year2").value);
+  // 年度：4月〜翌3月
+  var items = _data.filter(function(r){
+    if(!r.date) return false;
+    var d = new Date(r.date);
+    var fy = d.getMonth()>=3 ? d.getFullYear() : d.getFullYear()-1;
+    return fy === y;
+  });
+  var paid = items.filter(function(r){ return r.status==="paid"; });
+  var totalPaid = paid.reduce(function(s,r){ return s+Number(r.amount||0); }, 0);
+
+  // カテゴリ別集計（支払済）
+  var catMap = {};
+  CATEGORIES.forEach(function(c){ catMap[c]=0; });
+  paid.forEach(function(r){ var cat=r.category||"その他"; catMap[cat]=(catMap[cat]||0)+Number(r.amount||0); });
+
+  var wrap = document.getElementById("annual-content");
+  var html = '<div style="font-size:.92rem;font-weight:900;color:#fff;margin-bottom:4px">'+y+"年度 年間会計報告</div>";
+  html += '<div style="font-size:.76rem;color:var(--ink-3);margin-bottom:12px">'+y+"年4月〜"+(y+1)+"年3月</div>";
+
+  // 支出の部
+  html += '<div style="font-size:.82rem;font-weight:900;color:var(--cyan);margin-bottom:6px">支出の部（支払済）</div>';
+  html += '<table class="rpt-table" style="margin-bottom:14px"><thead><tr><th>費目</th><th style="text-align:right">金額</th></tr></thead><tbody>';
+  CATEGORIES.forEach(function(cat){
+    if(catMap[cat]){
+      html += '<tr><td>'+esc(cat)+'</td><td class="num">¥'+catMap[cat].toLocaleString()+'</td></tr>';
+    }
+  });
+  html += '</tbody><tfoot><tr><td>支出合計</td><td class="num">¥'+totalPaid.toLocaleString()+'</td></tr></tfoot></table>';
+
+  // 月別集計
+  html += '<div style="font-size:.82rem;font-weight:900;color:var(--cyan);margin-bottom:6px">月別集計</div>';
+  html += '<table class="rpt-table" style="margin-bottom:14px"><thead><tr><th>月</th><th style="text-align:right">支払済</th><th style="text-align:right">件数</th></tr></thead><tbody>';
+  var months = [4,5,6,7,8,9,10,11,12,1,2,3];
+  months.forEach(function(m){
+    var my = m<4 ? y+1 : y;
+    var pad = m<10?"0"+m:m;
+    var prefix = my+"-"+pad;
+    var mItems = paid.filter(function(r){ return (r.date||"").startsWith(prefix); });
+    var mTotal = mItems.reduce(function(s,r){ return s+Number(r.amount||0); },0);
+    if(mTotal || mItems.length){
+      html += '<tr><td>'+my+"年"+m+"月</td><td class='num'>¥"+mTotal.toLocaleString()+'</td><td class="num">'+mItems.length+'件</td></tr>';
+    }
+  });
+  html += '</tbody><tfoot><tr><td>年間合計</td><td class="num">¥'+totalPaid.toLocaleString()+'</td><td class="num">'+paid.length+'件</td></tr></tfoot></table>';
+
+  // 申請中・未払い
+  var unpaid = items.filter(function(r){ return r.status==='approved'; });
+  if(unpaid.length){
+    var uTotal = unpaid.reduce(function(s,r){ return s+Number(r.amount||0); },0);
+    html += '<div style="background:rgba(255,204,0,.1);border:1px solid rgba(255,204,0,.3);border-radius:var(--r8);padding:10px 12px;font-size:.8rem;color:#ffe58a;margin-bottom:10px">'
+      +'⚠️ 承認済・未払いの申請が'+unpaid.length+'件（合計 ¥'+uTotal.toLocaleString()+'）あります。</div>';
+  }
+  wrap.innerHTML = html;
+}
+
+/* ===== CSV出力 ===== */
+function exportMonthlyCsv(){
+  var y = parseInt(document.getElementById("monthly-year").value);
+  var m = parseInt(document.getElementById("monthly-month").value);
+  var pad = function(n){ return n<10?"0"+n:n; };
+  var prefix = y+"-"+pad(m);
+  var items = _data.filter(function(r){ return (r.date||"").startsWith(prefix); });
+  csvDownload(items, y+"年"+m+"月_立替報告");
+}
+function exportAnnualCsv(){
+  var y = parseInt(document.getElementById("annual-year2").value);
+  var items = _data.filter(function(r){
+    if(!r.date) return false;
+    var d=new Date(r.date); var fy=d.getMonth()>=3?d.getFullYear():d.getFullYear()-1; return fy===y;
+  });
+  csvDownload(items, y+"年度_会計報告");
+}
+function csvDownload(items, filename){
+  var rows=[["日付","申請者","品目","費目","金額","状態","コメント","支払日"]];
+  items.sort(function(a,b){return (a.date||"").localeCompare(b.date||"");}).forEach(function(r){
+    rows.push([r.date||"",r.person||"",r.item||"",r.category||"",r.amount||0,STATUS_LABEL[r.status||"pending"],r.comment||"",r.paidAt||""]);
+  });
+  var csv=rows.map(function(r){return r.map(function(c){return'"'+String(c).replace(/"/g,'""')+'"';}).join(",");}).join("\n");
+  var a=document.createElement("a");
+  a.href=URL.createObjectURL(new Blob(["\ufeff"+csv],{type:"text/csv;charset=utf-8"}));
+  a.download=filename+".csv"; a.click();
+}
+
+/* ===== タブ切り替え ===== */
+function switchTab(id, btn){
+  document.querySelectorAll(".tab-sec").forEach(function(s){ s.classList.remove("active"); });
+  document.querySelectorAll(".tab-btn").forEach(function(b){ b.classList.remove("active"); });
+  document.getElementById("tab-"+id).classList.add("active");
+  btn.classList.add("active");
+  if(id==="monthly") renderMonthly();
+  if(id==="annual")  renderAnnual();
+}
+
+/* ===== 共通 ===== */
+function closeModal(id){ document.getElementById(id).classList.remove("open"); }
+function esc(s){ return String(s||"").replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;"); }
+document.getElementById("modal-req").addEventListener("click",function(e){if(e.target.id==="modal-req")closeModal("modal-req");});
+document.getElementById("modal-comment").addEventListener("click",function(e){if(e.target.id==="modal-comment")closeModal("modal-comment");});
+window.addEventListener("DOMContentLoaded", function(){ initSelects(); });
+</script>
+</body>
+</html>
