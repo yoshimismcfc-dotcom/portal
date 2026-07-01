@@ -181,18 +181,26 @@ var _todoData = [];
 function load(){ return _todoData; }
 function save(d){
   _todoData = d;
+  localStorage.setItem(KEY, JSON.stringify(d));
   dbSave("todo", d, KEY, null);
 }
 
 // リアルタイム同期
-dbListen("todo", function(val){
-  if(Array.isArray(val) && val.length > 0){
-    _todoData = val;
-  } else {
-    _todoData = [];
-  }
+// localStorageからも読み込む（オフライン対応）
+try {
+  var _local = JSON.parse(localStorage.getItem(KEY) || "[]");
+  if(Array.isArray(_local) && _local.length > 0) _todoData = _local;
+} catch(e) {}
+
+window.addEventListener("DOMContentLoaded", function(){
   renderStats(); renderList();
-}, KEY, []);
+  dbListen("todo", function(val){
+    if(Array.isArray(val) && val.length > 0){
+      _todoData = val;
+    }
+    renderStats(); renderList();
+  }, KEY, []);
+});
 
 var STATUS_MAP = {
   todo:{ label:"未着手", cls:"sb-todo" },
