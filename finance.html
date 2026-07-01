@@ -58,6 +58,14 @@
     .member-pay-row:last-child{border-bottom:0}
     .member-name{font-weight:900;color:#fff;font-size:.86rem}
     .member-sub{font-size:.7rem;color:var(--ink-3)}
+    .help-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:12px}
+    .help-card{background:var(--surface-lt);border:1px solid var(--line);border-radius:var(--r8);padding:12px}
+    .help-card strong{display:block;color:#fff;font-size:.88rem;margin-bottom:6px}
+    .help-card p{margin:0;color:var(--ink-3);font-size:.78rem;line-height:1.65}
+    .help-card.good{border-color:rgba(40,199,111,.32)}
+    .help-card.warn{border-color:rgba(246,139,31,.35)}
+    .step-list{margin:8px 0 0;padding-left:1.2em;color:var(--ink-2);font-size:.78rem;line-height:1.65}
+    .field-help{font-size:.7rem;color:var(--ink-3);line-height:1.5;margin-top:4px}
     .section-head{display:flex;align-items:center;justify-content:space-between;gap:10px;margin:16px 0 8px}
     .section-head h2{font-size:.92rem;color:#fff;margin:0;font-weight:900}
     .guide-box{background:rgba(255,204,0,.1);border:1px solid rgba(255,204,0,.28);color:#ffe58a;border-radius:var(--r8);padding:11px 13px;font-size:.8rem;line-height:1.7;margin-bottom:12px}
@@ -72,14 +80,15 @@
     body[data-theme="light"] .mini-title,
     body[data-theme="light"] .mini-money,
     body[data-theme="light"] .collection-title,
-    body[data-theme="light"] .member-name{color:var(--ink)}
+    body[data-theme="light"] .member-name,
+    body[data-theme="light"] .help-card strong{color:var(--ink)}
     @media(max-width:720px){
       .fin-tabs{grid-template-columns:1fr 1fr}
       .fin-tab{border-bottom:1px solid var(--line)}
       .fin-tab:nth-child(2n){border-right:0}
       .fin-tab:last-child{grid-column:1 / -1;border-bottom:0}
       .fin-grid{grid-template-columns:1fr 1fr}
-      .fg2,.fg3,.month-select-row,.collection-layout{grid-template-columns:1fr}
+      .fg2,.fg3,.month-select-row,.collection-layout,.help-grid{grid-template-columns:1fr}
       .member-pay-row{grid-template-columns:1fr;gap:7px}
       .fin-tab{font-size:.76rem;padding:10px 4px}
       .table-wrap.mobile-cards{display:none}
@@ -116,18 +125,14 @@
 
   <div class="panel no-print">
     <div class="panel-title">年度切り替え</div>
-    <div class="fg3">
+    <div class="fg2">
       <div class="form-group"><label class="form-label">表示する年度</label><select class="form-control" id="year-select" onchange="switchFiscalYear(this.value)"></select></div>
-      <div class="form-group"><label class="form-label">新しい年度名</label><input class="form-control" id="new-year-name" placeholder="例：2027年度"></div>
-      <div class="form-group"><label class="form-label">前年繰越金</label><input class="form-control" id="new-year-opening" type="number" inputmode="numeric" placeholder="自動入力可"></div>
+      <div class="form-group"><label class="form-label">前年繰越金</label><input class="form-control" id="fiscal-opening-quick" type="number" inputmode="numeric" oninput="editSetting('opening',this.value)" placeholder="2026年度の開始残高"></div>
     </div>
-    <div style="display:flex;gap:8px;flex-wrap:wrap;justify-content:flex-end">
-      <button class="btn btn-outline btn-sm" onclick="prepareNextYear()">現在の残高を繰越に入れる</button>
-      <button class="btn btn-primary btn-sm" onclick="addFiscalYear()">年度を追加</button>
-    </div>
+    <div class="guide-box" style="margin:10px 0 0">年度は2026年度から次年度まで自動で表示します。4月1日以降は新しい年度が自動で選択されます。開始残高は「前年繰越金」に入力してください。</div>
   </div>
 
-  <div class="guide-box no-print">購入前に会計さんへ相談する場合は「購入予定」、すでに立て替えた場合は「立替済」で申請してください。会計さんは一覧で「了解」「支払い済」「差戻し」を管理できます。</div>
+  <div class="guide-box no-print">迷った時は「誰がお金を払ったか」で分けてください。保護者・コーチが買う予定、または立て替えたものは「会計さんへ」。会計さんが直接受け取った・直接支払ったものは「会計入力」です。</div>
 
   <div class="fin-tabs no-print">
     <button class="fin-tab active" onclick="switchView('request',this)">会計さんへ</button>
@@ -140,19 +145,34 @@
   <section class="fin-view active" id="view-request">
     <div class="fin-grid" id="request-stats"></div>
     <div class="panel no-print">
-      <div class="panel-title">購入・立替を申請</div>
+      <div class="panel-title">会計さんへ相談・立替精算を送る</div>
+      <div class="help-grid">
+        <div class="help-card warn">
+          <strong>購入前に相談する時</strong>
+          <p>「購入予定」を選びます。例：石灰を買ってよいか、救急用品を買ってよいかを会計さんに確認したい時。</p>
+        </div>
+        <div class="help-card good">
+          <strong>すでに立て替えた時</strong>
+          <p>「立替済」を選びます。会計さんが「支払い済」にすると、会計入力の支出へ自動で入ります。</p>
+        </div>
+      </div>
+      <ol class="step-list">
+        <li>申請者、日付、購入内容、金額を入力します。</li>
+        <li>領収書がある場合は、備考に「領収書あり」と書きます。</li>
+        <li>会計さんは右側の状態を「了解」「支払い済」「差戻し」に変更します。</li>
+      </ol>
       <div class="fg3">
         <div class="form-group"><label class="form-label">申請者</label><input class="form-control" id="r-name" placeholder="例：吉見 太郎"></div>
-        <div class="form-group"><label class="form-label">購入日・予定日</label><input class="form-control" id="r-date" type="date"></div>
-        <div class="form-group"><label class="form-label">区分</label><select class="form-control" id="r-type"><option>購入予定</option><option>立替済</option></select></div>
+        <div class="form-group"><label class="form-label">購入日・購入予定日</label><input class="form-control" id="r-date" type="date"><div class="field-help">まだ買っていない場合は、買う予定の日で大丈夫です。</div></div>
+        <div class="form-group"><label class="form-label">申請の種類</label><select class="form-control" id="r-type"><option>購入予定</option><option>立替済</option></select><div class="field-help">購入予定＝事前相談、立替済＝あとで返金してほしいもの。</div></div>
       </div>
       <div class="fg3">
         <div class="form-group"><label class="form-label">項目</label><select class="form-control" id="r-category"></select></div>
-        <div class="form-group"><label class="form-label">購入内容</label><input class="form-control" id="r-item" placeholder="例：石灰、救急用品、コピー代"></div>
-        <div class="form-group"><label class="form-label">金額</label><input class="form-control" id="r-amount" type="number" inputmode="numeric" placeholder="例：1200"></div>
+        <div class="form-group"><label class="form-label">何を買うか</label><input class="form-control" id="r-item" placeholder="例：石灰、救急用品、コピー代"></div>
+        <div class="form-group"><label class="form-label">金額</label><input class="form-control" id="r-amount" type="number" inputmode="numeric" placeholder="例：1200"><div class="field-help">だいたいの金額でもOK。確定後に会計さんが確認します。</div></div>
       </div>
-      <div class="form-group"><label class="form-label">備考・購入先</label><input class="form-control" id="r-note" placeholder="例：カインズで購入予定、領収書あり"></div>
-      <button class="btn btn-primary" onclick="addRequest()" style="width:100%">送信する</button>
+      <div class="form-group"><label class="form-label">購入先・領収書メモ</label><input class="form-control" id="r-note" placeholder="例：カインズで購入予定、領収書あり、PayPayで支払い"></div>
+      <button class="btn btn-primary" onclick="addRequest()" style="width:100%">会計さんへ送る</button>
     </div>
     <div class="table-wrap mobile-cards">
       <table class="fin-table">
@@ -165,23 +185,38 @@
 
   <section class="fin-view" id="view-monthly">
     <div class="panel no-print">
-      <div class="panel-title">会計さんが直接支払った収入・支出を入力</div>
-      <div class="guide-box" style="margin-bottom:12px">ここは会計さんが直接受け取った団費や、会計さんが直接支払った購入分を入力します。保護者・コーチの立替分は「会計さんへ」で申請し、支払い済にすると自動で支出に入ります。表示月を選ぶと、その月の分だけ確認できます。</div>
+      <div class="panel-title">通帳・現金の動きを入力する</div>
+      <div class="guide-box" style="margin-bottom:12px">ここは会計さんが実際に管理しているお金の記録です。団費を受け取ったら「収入」、備品代や登録費を支払ったら「支出」を選びます。保護者・コーチの立替精算は「会計さんへ」で支払い済にすると自動で入るため、二重入力しないでください。</div>
+      <div class="help-grid">
+        <div class="help-card good">
+          <strong>収入に入れる例</strong>
+          <p>団費、登録料・保険料、大会参加費、寄付など、チームにお金が入ったもの。</p>
+        </div>
+        <div class="help-card warn">
+          <strong>支出に入れる例</strong>
+          <p>グラウンド代、備品、消耗品、審判謝礼、登録費など、チームのお金から支払ったもの。</p>
+        </div>
+      </div>
+      <ol class="step-list">
+        <li>入力する年月を選びます。</li>
+        <li>日付、収入/支出、項目、内容、金額を入力します。</li>
+        <li>月別報告と年度報告に自動で集計されます。</li>
+      </ol>
       <div class="form-group">
         <label class="form-label">表示・入力する年月</label>
         <select class="form-control" id="ledger-month-select" onchange="selectedMonth=this.value;renderAll()"></select>
       </div>
       <div class="fg3">
         <div class="form-group"><label class="form-label">日付</label><input class="form-control" id="l-date" type="date"></div>
-        <div class="form-group"><label class="form-label">収支</label><select class="form-control" id="l-kind"><option value="income">収入</option><option value="expense">支出</option></select></div>
+        <div class="form-group"><label class="form-label">お金の動き</label><select class="form-control" id="l-kind"><option value="income">収入（入ってきたお金）</option><option value="expense">支出（払ったお金）</option></select></div>
         <div class="form-group"><label class="form-label">項目</label><select class="form-control" id="l-category"></select></div>
       </div>
       <div class="fg3">
-        <div class="form-group"><label class="form-label">内容</label><input class="form-control" id="l-item" placeholder="例：団費、登録費、備品"></div>
+        <div class="form-group"><label class="form-label">内容</label><input class="form-control" id="l-item" placeholder="例：4月団費、ボール購入、グラウンド代"></div>
         <div class="form-group"><label class="form-label">金額</label><input class="form-control" id="l-amount" type="number" inputmode="numeric"></div>
-        <div class="form-group"><label class="form-label">支払先・備考</label><input class="form-control" id="l-note"></div>
+        <div class="form-group"><label class="form-label">相手先・メモ</label><input class="form-control" id="l-note" placeholder="例：吉見町、カインズ、現金、振込"></div>
       </div>
-      <button class="btn btn-primary" onclick="addLedger()" style="width:100%">会計入力に追加</button>
+      <button class="btn btn-primary" onclick="addLedger()" style="width:100%">通帳・現金の記録に追加</button>
     </div>
     <div class="fin-grid" id="monthly-stats"></div>
     <div class="table-wrap mobile-cards">
@@ -194,7 +229,7 @@
   </section>
 
   <section class="fin-view" id="view-collection">
-    <div class="guide-box no-print">団員名簿と連動して、前期・後期の団費や遠征費などの集金状況を確認できます。支払い済にすると、会計入力の収入にも自動で反映されます。</div>
+    <div class="guide-box no-print">団員名簿と連動して、登録料・保険料、前期・後期会費、遠征費などの集金状況を確認できます。登録料・保険料は1,000円、会費は3年生以下7,000円・4年生以上8,000円を初期表示します。兄弟割引や個別調整がある場合は、団員ごとの金額欄で変更してください。支払い済にすると、会計入力の収入にも自動で反映されます。</div>
     <div class="fin-grid" id="collection-stats"></div>
     <div class="panel no-print">
       <div class="panel-title">集金項目を追加</div>
@@ -264,6 +299,7 @@ var selectedMonth="";
 var membersData={};
 var selectedCollectionId=null;
 var GRADES=["6年","5年","4年","3年","2年","1年","年長"];
+var FISCAL_START_YEAR=2026;
 
 function clone(o){return JSON.parse(JSON.stringify(o));}
 function num(v){var n=Number(v);return isNaN(n)?0:n;}
@@ -275,6 +311,7 @@ function isCollectionEntry(x){return x.source==="collection"||String(x.sourceId|
 function sourceText(x){return isCollectionEntry(x)?"集金":(x.source==="reimbursement"||x.sourceId?"立替精算":"会計さん直接");}
 function sourceClass(x){return isCollectionEntry(x)?"src-collection":(x.source==="reimbursement"||x.sourceId?"src-reim":"src-direct");}
 function memberKey(m){return [m.grade||"",m.name||"",m.kana||""].join("|");}
+function gradeNumber(g){var m=String(g||"").match(/\d/);return m?Number(m[0]):0;}
 function memberList(){
   var list=[];
   GRADES.forEach(function(g){
@@ -286,11 +323,33 @@ function memberList(){
 }
 function validMonth(m){return /^\d{4}-\d{2}$/.test(String(m||""));}
 function currentMonth(){return new Date().toISOString().slice(0,7);}
+function fiscalYearFromDate(d){
+  var y=d.getFullYear();
+  return (d.getMonth()+1)>=4?y:y-1;
+}
+function fiscalYearLabel(y){return y+"年度";}
+function currentFiscalYearLabel(){return fiscalYearLabel(fiscalYearFromDate(new Date()));}
+function allowedYearNames(){
+  var current=Math.max(FISCAL_START_YEAR,fiscalYearFromDate(new Date()));
+  var names=[];
+  for(var y=FISCAL_START_YEAR;y<=current+1;y++)names.push(fiscalYearLabel(y));
+  return names;
+}
+function emptyYear(y,opening){
+  return {settings:{year:y,opening:num(opening),reportDate:""},requests:[],ledger:[],collections:[]};
+}
+function defaultCollections(){
+  return [
+    {id:Date.now()+1,title:"登録料・保険料",amount:1000,due:"",note:"初期金額は1,000円です。必要に応じて団員ごとの金額を変更してください。",payments:{}},
+    {id:Date.now()+2,title:"前期会費",amount:0,due:"",note:"初期金額は3年生以下7,000円、4年生以上8,000円です。兄弟割引は団員ごとの金額欄で変更してください。",payments:{}},
+    {id:Date.now()+3,title:"後期会費",amount:0,due:"",note:"初期金額は3年生以下7,000円、4年生以上8,000円です。兄弟割引は団員ごとの金額欄で変更してください。",payments:{}}
+  ];
+}
 function yearData(){
   normalize();
   return data.years[data.activeYear];
 }
-function yearNames(){return Object.keys(data.years||{}).sort();}
+function yearNames(){return allowedYearNames();}
 function allMonths(){
   var yd=yearData();
   var months=Array.from(new Set(yd.ledger.map(function(x){return monthKey(x.date);}))).filter(validMonth);
@@ -316,8 +375,16 @@ function normalize(){
     data={activeYear:legacyYear,years:{}};
     data.years[legacyYear]={settings:legacySettings,requests:Array.isArray(old.requests)?old.requests:[],ledger:Array.isArray(old.ledger)?old.ledger:[],collections:[]};
   }
-  if(!data.activeYear||!data.years[data.activeYear])data.activeYear=yearNames()[0]||"2026年度";
-  if(!data.years[data.activeYear])data.years[data.activeYear]={settings:{year:data.activeYear,opening:0,reportDate:""},requests:[],ledger:[],collections:[]};
+  allowedYearNames().forEach(function(y){
+    if(!data.years[y])data.years[y]=emptyYear(y,0);
+  });
+  var autoYear=currentFiscalYearLabel();
+  if(data.autoFiscalYear!==autoYear){
+    data.activeYear=autoYear;
+    data.autoFiscalYear=autoYear;
+  }
+  if(!data.activeYear||!data.years[data.activeYear])data.activeYear=autoYear;
+  if(!data.years[data.activeYear])data.years[data.activeYear]=emptyYear(data.activeYear,0);
   yearNames().forEach(function(y){
     var yd=data.years[y];
     if(!yd.settings)yd.settings={year:y,opening:0,reportDate:""};
@@ -326,15 +393,24 @@ function normalize(){
     if(!Array.isArray(yd.ledger))yd.ledger=[];
     if(!Array.isArray(yd.collections))yd.collections=[];
     if(!yd.collections.length){
-      yd.collections=[
-        {id:Date.now()+1,title:"前期団費",amount:0,due:"",note:"金額を設定してください",payments:{}},
-        {id:Date.now()+2,title:"後期団費",amount:0,due:"",note:"金額を設定してください",payments:{}}
-      ];
+      yd.collections=defaultCollections();
     }
     yd.collections.forEach(function(c){if(!c.payments)c.payments={};});
+    ensureBasicCollections(yd);
   });
   var yd=data.years[data.activeYear];
   if(!selectedCollectionId&&yd.collections.length)selectedCollectionId=yd.collections[0].id;
+}
+function ensureBasicCollections(yd){
+  yd.collections.forEach(function(c){
+    if(c.title==="前期団費")c.title="前期会費";
+    if(c.title==="後期団費")c.title="後期会費";
+    if(c.title==="登録料・保険料"&&!num(c.amount))c.amount=1000;
+  });
+  var titles=yd.collections.map(function(c){return c.title;});
+  defaultCollections().forEach(function(base){
+    if(titles.indexOf(base.title)<0)yd.collections.push(base);
+  });
 }
 function saveData(msg){
   normalize();
@@ -364,36 +440,16 @@ function renderFiscalYearControls(){
     select.innerHTML=names.map(function(y){return '<option value="'+esc(y)+'">'+esc(y)+'</option>';}).join("");
     select.value=data.activeYear;
   }
+  var opening=document.getElementById("fiscal-opening-quick");
+  if(opening)opening.value=yearData().settings.opening||0;
 }
 function switchFiscalYear(y){
   if(!data.years[y])return;
   data.activeYear=y;
+  data.autoFiscalYear=currentFiscalYearLabel();
   selectedMonth="";
   selectedCollectionId=null;
   saveData();
-  renderAll();
-}
-function prepareNextYear(){
-  var y=data.activeYear;
-  document.getElementById("new-year-opening").value=yearClosing(y);
-  var m=String(y).match(/(\d{4})/);
-  if(m)document.getElementById("new-year-name").value=(Number(m[1])+1)+"年度";
-}
-function addFiscalYear(){
-  var name=document.getElementById("new-year-name").value.trim();
-  if(!name){alert("新しい年度名を入力してください");return;}
-  if(data.years[name]&&!confirm("同じ年度名があります。表示年度を切り替えますか？")){
-    return;
-  }
-  if(!data.years[name]){
-    data.years[name]={settings:{year:name,opening:num(document.getElementById("new-year-opening").value),reportDate:""},requests:[],ledger:[],collections:[]};
-  }
-  data.activeYear=name;
-  selectedMonth="";
-  selectedCollectionId=null;
-  document.getElementById("new-year-name").value="";
-  document.getElementById("new-year-opening").value="";
-  saveData("年度を追加しました");
   renderAll();
 }
 function switchView(name,btn){
@@ -524,6 +580,47 @@ function paymentBadge(status){
   if(status==="exempt")return '<span class="badge pay-exempt">免除</span>';
   return '<span class="badge pay-unpaid">未納</span>';
 }
+function baseCollectionAmount(c,m){
+  var title=String(c.title||"");
+  if(title.indexOf("登録")>=0||title.indexOf("保険")>=0)return num(c.amount)||1000;
+  if(title.indexOf("会費")>=0||title.indexOf("団費")>=0){
+    return gradeNumber(m.grade)>=4?8000:7000;
+  }
+  return num(c.amount);
+}
+function familyName(name){
+  var s=String(name||"").trim();
+  if(!s)return "";
+  var parts=s.split(/\s+/);
+  return parts.length>=2?parts[0]:"";
+}
+function siblingDiscount(c,m,members){
+  var title=String(c.title||"");
+  if(title.indexOf("会費")<0&&title.indexOf("団費")<0)return 0;
+  var fam=familyName(m.name);
+  if(!fam)return 0;
+  var same=members.filter(function(x){return familyName(x.name)===fam;}).sort(function(a,b){return gradeNumber(b.grade)-gradeNumber(a.grade);});
+  return same.findIndex(function(x){return x.key===m.key;})>0?1000:0;
+}
+function defaultPaymentAmount(c,m,members){
+  return Math.max(0,baseCollectionAmount(c,m)-siblingDiscount(c,m,members||memberList()));
+}
+function paymentAmount(c,m,pay,members){
+  if(pay&&pay.amount!==undefined&&pay.amount!=="")return num(pay.amount);
+  return defaultPaymentAmount(c,m,members);
+}
+function collectionAmountLabel(c){
+  var title=String(c.title||"");
+  if(title.indexOf("会費")>=0||title.indexOf("団費")>=0)return "学年別 7,000円/8,000円";
+  return yen(c.amount);
+}
+function collectionCategory(c){
+  var title=String(c.title||"");
+  if(title.indexOf("登録")>=0)return "登録費";
+  if(title.indexOf("保険")>=0)return "保険料";
+  if(title.indexOf("大会")>=0)return "大会参加費";
+  return "団費";
+}
 function collectionSourceId(cid,key){return "collection:"+cid+":"+key;}
 function syncCollectionLedger(c,key,member,pay){
   var yd=yearData();
@@ -536,9 +633,9 @@ function syncCollectionLedger(c,key,member,pay){
       sourceId:sid,
       date:pay.date||c.due||new Date().toISOString().slice(0,10),
       kind:"income",
-      category:"団費",
+      category:collectionCategory(c),
       item:c.title+" / "+member.name,
-      amount:num(c.amount),
+      amount:paymentAmount(c,member,pay),
       note:(pay.method||"")+" "+(pay.note||"")
     });
   }
@@ -549,8 +646,9 @@ function setPayment(cid,encodedKey,field,value){
   var key=decodeURIComponent(encodedKey);
   var member=memberList().find(function(m){return m.key===key;})||{name:key};
   if(!c.payments)c.payments={};
-  if(!c.payments[key])c.payments[key]={status:"unpaid",method:"",date:"",note:""};
+  if(!c.payments[key])c.payments[key]={status:"unpaid",method:"",date:"",note:"",amount:defaultPaymentAmount(c,member)};
   c.payments[key][field]=value;
+  if(field==="amount")c.payments[key][field]=num(value);
   if(field==="status"&&value==="paid"&&!c.payments[key].date)c.payments[key].date=new Date().toISOString().slice(0,10);
   syncCollectionLedger(c,key,member,c.payments[key]);
   saveData();renderAll();
@@ -582,23 +680,26 @@ function renderCollection(){
   if(c)selectedCollectionId=c.id;
   var total=members.length;
   var paid=0,exempt=0;
+  var paidAmount=0;
   members.forEach(function(m){
-    var s=(c.payments&&c.payments[m.key]&&c.payments[m.key].status)||"unpaid";
+    var pay=(c.payments&&c.payments[m.key])||{};
+    var s=pay.status||"unpaid";
     if(s==="paid")paid++;
     if(s==="exempt")exempt++;
+    if(s==="paid")paidAmount+=paymentAmount(c,m,pay,members);
   });
   var unpaid=Math.max(0,total-paid-exempt);
   document.getElementById("collection-stats").innerHTML=
     '<div class="fin-card"><div class="k">対象者</div><div class="v">'+total+'名</div></div>'+
     '<div class="fin-card good"><div class="k">支払い済</div><div class="v">'+paid+'名</div></div>'+
     '<div class="fin-card bad"><div class="k">未納</div><div class="v">'+unpaid+'名</div></div>'+
-    '<div class="fin-card"><div class="k">集金済額</div><div class="v">'+yen(paid*num(c.amount))+'</div></div>';
+    '<div class="fin-card"><div class="k">集金済額</div><div class="v">'+yen(paidAmount)+'</div></div>';
   document.getElementById("collection-list").innerHTML=yd.collections.map(function(x){
-    var ps=x.payments||{},p=0,e=0;
-    members.forEach(function(m){var s=(ps[m.key]&&ps[m.key].status)||"unpaid";if(s==="paid")p++;if(s==="exempt")e++;});
+    var ps=x.payments||{},p=0,e=0,sum=0;
+    members.forEach(function(m){var pay=ps[m.key]||{},s=pay.status||"unpaid";if(s==="paid"){p++;sum+=paymentAmount(x,m,pay,members);}if(s==="exempt")e++;});
     return '<button class="collection-btn '+(String(x.id)===String(c.id)?"active":"")+'" onclick="selectedCollectionId='+x.id+';renderAll()">'+
       '<div class="collection-title">'+esc(x.title)+'</div>'+
-      '<div class="collection-meta">'+yen(x.amount)+' / 済 '+p+'名 / 未 '+Math.max(0,total-p-e)+'名</div>'+
+      '<div class="collection-meta">'+collectionAmountLabel(x)+' / 済 '+p+'名 '+yen(sum)+' / 未 '+Math.max(0,total-p-e)+'名</div>'+
     '</button>';
   }).join("");
   document.getElementById("collection-detail-title").textContent=c.title+" 集金状況";
@@ -607,15 +708,17 @@ function renderCollection(){
     return;
   }
   document.getElementById("collection-detail").innerHTML=
-    '<div class="guide-box">金額：'+yen(c.amount)+' / 期限：'+esc(c.due||"未設定")+'<br>'+esc(c.note||"")+'</div>'+
+    '<div class="guide-box">基本金額：'+collectionAmountLabel(c)+' / 期限：'+esc(c.due||"未設定")+'<br>'+esc(c.note||"")+'</div>'+
     '<div class="table-wrap" style="overflow:visible">'+members.map(function(m){
       var key=encodeURIComponent(m.key);
       var pay=(c.payments&&c.payments[m.key])||{status:"unpaid",method:"",date:"",note:""};
+      var amount=paymentAmount(c,m,pay,members);
       return '<div class="member-pay-row">'+
         '<div><div class="member-name">'+esc(m.name)+'</div><div class="member-sub">'+esc(m.grade)+' '+esc(m.kana)+'</div></div>'+
         '<div>'+paymentBadge(pay.status)+'</div>'+
-        '<div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:6px;min-width:min(420px,100%)">'+
+        '<div style="display:grid;grid-template-columns:1fr 1fr 1fr 1fr;gap:6px;min-width:min(520px,100%)">'+
           '<select class="form-control" onchange="setPayment('+c.id+',\''+key+'\',\'status\',this.value)"><option value="unpaid" '+(pay.status==="unpaid"?"selected":"")+'>未納</option><option value="paid" '+(pay.status==="paid"?"selected":"")+'>支払い済</option><option value="exempt" '+(pay.status==="exempt"?"selected":"")+'>免除</option></select>'+
+          '<input class="form-control" type="number" inputmode="numeric" value="'+esc(amount)+'" onchange="setPayment('+c.id+',\''+key+'\',\'amount\',this.value)" aria-label="金額">'+
           '<select class="form-control" onchange="setPayment('+c.id+',\''+key+'\',\'method\',this.value)"><option value="" '+(!pay.method?"selected":"")+'>方法</option><option '+(pay.method==="現金"?"selected":"")+'>現金</option><option '+(pay.method==="振込"?"selected":"")+'>振込</option><option '+(pay.method==="PayPay"?"selected":"")+'>PayPay</option><option '+(pay.method==="その他"?"selected":"")+'>その他</option></select>'+
           '<input class="form-control" type="date" value="'+esc(pay.date||"")+'" onchange="setPayment('+c.id+',\''+key+'\',\'date\',this.value)">'+
         '</div>'+
