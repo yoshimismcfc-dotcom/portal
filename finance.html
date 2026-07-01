@@ -6,11 +6,11 @@
   <meta http-equiv="Pragma" content="no-cache">
   <meta http-equiv="Expires" content="0">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>会計さんへ｜吉見SMC FC</title>
+  <title>会計業務｜吉見SMC FC</title>
   <script src="firebase-config.js"></script>
   <link rel="stylesheet" href="common.css">
   <style>
-    .fin-tabs{display:grid;grid-template-columns:repeat(4,1fr);gap:0;border:1px solid var(--line-2);border-radius:var(--r8);overflow:hidden;margin-bottom:14px}
+    .fin-tabs{display:grid;grid-template-columns:repeat(5,1fr);gap:0;border:1px solid var(--line-2);border-radius:var(--r8);overflow:hidden;margin-bottom:14px}
     .fin-tab{border:0;background:var(--surface-lt);color:var(--ink-3);font:inherit;font-size:.8rem;font-weight:900;padding:11px 6px;cursor:pointer;min-width:0}
     .fin-tab:not(:last-child){border-right:1px solid var(--line)}
     .fin-tab.active{background:linear-gradient(135deg,#003087,#0050cc);color:#fff}
@@ -36,6 +36,10 @@
     .s-back{background:rgba(255,91,110,.15);color:#ff8ca0;border-color:rgba(255,91,110,.35)}
     .src-direct{background:rgba(40,199,111,.13);color:#00ff88;border-color:rgba(40,199,111,.35)}
     .src-reim{background:rgba(255,139,31,.13);color:var(--orange-2);border-color:rgba(255,139,31,.35)}
+    .src-collection{background:rgba(114,214,255,.13);color:var(--cyan);border-color:rgba(114,214,255,.35)}
+    .pay-paid{background:rgba(40,199,111,.14);color:#00ff88;border-color:rgba(40,199,111,.35)}
+    .pay-unpaid{background:rgba(255,91,110,.14);color:#ff8ca0;border-color:rgba(255,91,110,.35)}
+    .pay-exempt{background:rgba(150,169,196,.14);color:var(--ink-3);border-color:rgba(150,169,196,.35)}
     .card-list{display:none;gap:10px}
     .mini-card{background:var(--surface-lt);border:1px solid var(--line);border-radius:var(--r8);padding:12px}
     .mini-card-head{display:flex;align-items:center;justify-content:space-between;gap:8px;margin-bottom:7px}
@@ -44,6 +48,16 @@
     .mini-money{font-weight:900;color:#fff;font-size:1.05rem;margin-top:6px}
     .mini-actions{display:grid;grid-template-columns:1fr auto;gap:8px;margin-top:9px;align-items:center}
     .month-select-row{display:grid;grid-template-columns:1fr auto;gap:10px;align-items:end}
+    .collection-layout{display:grid;grid-template-columns:minmax(220px,.9fr) 1.6fr;gap:12px;align-items:start}
+    .collection-list{display:grid;gap:8px}
+    .collection-btn{width:100%;text-align:left;background:var(--surface-lt);border:1px solid var(--line);border-radius:var(--r8);padding:10px 12px;color:inherit;cursor:pointer}
+    .collection-btn.active{border-color:var(--orange);box-shadow:0 0 0 1px rgba(246,139,31,.25) inset}
+    .collection-title{font-weight:900;color:#fff;font-size:.88rem}
+    .collection-meta{font-size:.72rem;color:var(--ink-3);margin-top:2px}
+    .member-pay-row{display:grid;grid-template-columns:1.2fr auto auto;gap:8px;align-items:center;padding:9px 10px;border-bottom:1px solid var(--line)}
+    .member-pay-row:last-child{border-bottom:0}
+    .member-name{font-weight:900;color:#fff;font-size:.86rem}
+    .member-sub{font-size:.7rem;color:var(--ink-3)}
     .section-head{display:flex;align-items:center;justify-content:space-between;gap:10px;margin:16px 0 8px}
     .section-head h2{font-size:.92rem;color:#fff;margin:0;font-weight:900}
     .guide-box{background:rgba(255,204,0,.1);border:1px solid rgba(255,204,0,.28);color:#ffe58a;border-radius:var(--r8);padding:11px 13px;font-size:.8rem;line-height:1.7;margin-bottom:12px}
@@ -56,13 +70,17 @@
     body[data-theme="light"] .fin-card .v,
     body[data-theme="light"] .money,
     body[data-theme="light"] .mini-title,
-    body[data-theme="light"] .mini-money{color:var(--ink)}
+    body[data-theme="light"] .mini-money,
+    body[data-theme="light"] .collection-title,
+    body[data-theme="light"] .member-name{color:var(--ink)}
     @media(max-width:720px){
       .fin-tabs{grid-template-columns:1fr 1fr}
-      .fin-tab:nth-child(2){border-right:0}
-      .fin-tab:nth-child(-n+2){border-bottom:1px solid var(--line)}
+      .fin-tab{border-bottom:1px solid var(--line)}
+      .fin-tab:nth-child(2n){border-right:0}
+      .fin-tab:last-child{grid-column:1 / -1;border-bottom:0}
       .fin-grid{grid-template-columns:1fr 1fr}
-      .fg2,.fg3,.month-select-row{grid-template-columns:1fr}
+      .fg2,.fg3,.month-select-row,.collection-layout{grid-template-columns:1fr}
+      .member-pay-row{grid-template-columns:1fr;gap:7px}
       .fin-tab{font-size:.76rem;padding:10px 4px}
       .table-wrap.mobile-cards{display:none}
       .card-list{display:grid}
@@ -91,8 +109,8 @@
   <div class="hero-band no-print">
     <div class="hero-emoji">💴</div>
     <div>
-      <div class="hero-title">会計さんへ</div>
-      <div class="hero-sub">立替・購入予定の連絡、支払い状況、月次・年度会計報告をまとめます。</div>
+      <div class="hero-title">会計業務</div>
+      <div class="hero-sub">立替申請・会計入力・団費集金・月次/年度会計報告をまとめます。</div>
     </div>
   </div>
 
@@ -114,6 +132,7 @@
   <div class="fin-tabs no-print">
     <button class="fin-tab active" onclick="switchView('request',this)">会計さんへ</button>
     <button class="fin-tab" onclick="switchView('monthly',this)">会計入力</button>
+    <button class="fin-tab" onclick="switchView('collection',this)">集金</button>
     <button class="fin-tab" onclick="switchView('month',this)">月別報告</button>
     <button class="fin-tab" onclick="switchView('year',this)">年度報告</button>
   </div>
@@ -174,6 +193,34 @@
     <div class="card-list" id="ledger-cards"></div>
   </section>
 
+  <section class="fin-view" id="view-collection">
+    <div class="guide-box no-print">団員名簿と連動して、前期・後期の団費や遠征費などの集金状況を確認できます。支払い済にすると、会計入力の収入にも自動で反映されます。</div>
+    <div class="fin-grid" id="collection-stats"></div>
+    <div class="panel no-print">
+      <div class="panel-title">集金項目を追加</div>
+      <div class="fg3">
+        <div class="form-group"><label class="form-label">集金名</label><input class="form-control" id="c-title" placeholder="例：前期団費"></div>
+        <div class="form-group"><label class="form-label">1人あたり金額</label><input class="form-control" id="c-amount" type="number" inputmode="numeric" placeholder="例：12000"></div>
+        <div class="form-group"><label class="form-label">期限</label><input class="form-control" id="c-due" type="date"></div>
+      </div>
+      <div class="form-group"><label class="form-label">備考</label><input class="form-control" id="c-note" placeholder="例：兄弟割引は会計さんが免除に変更"></div>
+      <button class="btn btn-primary" onclick="addCollection()" style="width:100%">集金項目を追加</button>
+    </div>
+    <div class="collection-layout">
+      <div class="panel">
+        <div class="panel-title">集金項目</div>
+        <div class="collection-list" id="collection-list"></div>
+      </div>
+      <div class="panel">
+        <div class="section-head" style="margin-top:0">
+          <h2 id="collection-detail-title">集金状況</h2>
+          <button class="btn btn-outline btn-sm no-print" onclick="deleteCollection()" style="color:var(--red);border-color:rgba(255,68,102,.4)">項目削除</button>
+        </div>
+        <div id="collection-detail"></div>
+      </div>
+    </div>
+  </section>
+
   <section class="fin-view" id="view-month">
     <div class="panel no-print">
       <div class="section-head" style="margin-top:0">
@@ -212,8 +259,11 @@
 <script>
 var KEY="smc_family_finance_v1";
 var CATS=["団費","入団金","大会参加費","登録費","保険料","備品","消耗品","救急用品","グラウンド・施設","審判・謝礼","印刷・事務","行事","その他"];
-var data={activeYear:"2026年度",years:{"2026年度":{settings:{year:"2026年度",opening:0,reportDate:""},requests:[],ledger:[]}}};
+var data={activeYear:"2026年度",years:{"2026年度":{settings:{year:"2026年度",opening:0,reportDate:""},requests:[],ledger:[],collections:[]}}};
 var selectedMonth="";
+var membersData={};
+var selectedCollectionId=null;
+var GRADES=["6年","5年","4年","3年","2年","1年","年長"];
 
 function clone(o){return JSON.parse(JSON.stringify(o));}
 function num(v){var n=Number(v);return isNaN(n)?0:n;}
@@ -221,8 +271,19 @@ function yen(v){return (Number(v)||0).toLocaleString("ja-JP")+"円";}
 function esc(s){return String(s==null?"":s).replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;").replace(/"/g,"&quot;");}
 function monthKey(d){return String(d||"").slice(0,7)||"日付なし";}
 function statusClass(s){return s==="了解"?"s-ok":s==="支払い済"?"s-paid":s==="差戻し"?"s-back":"s-new";}
-function sourceText(x){return x.source==="reimbursement"||x.sourceId?"立替精算":"会計さん直接";}
-function sourceClass(x){return x.source==="reimbursement"||x.sourceId?"src-reim":"src-direct";}
+function isCollectionEntry(x){return x.source==="collection"||String(x.sourceId||"").indexOf("collection:")===0;}
+function sourceText(x){return isCollectionEntry(x)?"集金":(x.source==="reimbursement"||x.sourceId?"立替精算":"会計さん直接");}
+function sourceClass(x){return isCollectionEntry(x)?"src-collection":(x.source==="reimbursement"||x.sourceId?"src-reim":"src-direct");}
+function memberKey(m){return [m.grade||"",m.name||"",m.kana||""].join("|");}
+function memberList(){
+  var list=[];
+  GRADES.forEach(function(g){
+    (membersData[g]||[]).forEach(function(m){
+      if(m&&m.name)list.push({key:memberKey({grade:g,name:m.name,kana:m.kana}),grade:g,name:m.name,kana:m.kana||"",num:m.num||""});
+    });
+  });
+  return list;
+}
 function validMonth(m){return /^\d{4}-\d{2}$/.test(String(m||""));}
 function currentMonth(){return new Date().toISOString().slice(0,7);}
 function yearData(){
@@ -253,17 +314,27 @@ function normalize(){
     var legacySettings=data.settings||{year:"2026年度",opening:0,reportDate:""};
     var legacyYear=legacySettings.year||"2026年度";
     data={activeYear:legacyYear,years:{}};
-    data.years[legacyYear]={settings:legacySettings,requests:Array.isArray(old.requests)?old.requests:[],ledger:Array.isArray(old.ledger)?old.ledger:[]};
+    data.years[legacyYear]={settings:legacySettings,requests:Array.isArray(old.requests)?old.requests:[],ledger:Array.isArray(old.ledger)?old.ledger:[],collections:[]};
   }
   if(!data.activeYear||!data.years[data.activeYear])data.activeYear=yearNames()[0]||"2026年度";
-  if(!data.years[data.activeYear])data.years[data.activeYear]={settings:{year:data.activeYear,opening:0,reportDate:""},requests:[],ledger:[]};
+  if(!data.years[data.activeYear])data.years[data.activeYear]={settings:{year:data.activeYear,opening:0,reportDate:""},requests:[],ledger:[],collections:[]};
   yearNames().forEach(function(y){
     var yd=data.years[y];
     if(!yd.settings)yd.settings={year:y,opening:0,reportDate:""};
     if(!yd.settings.year)yd.settings.year=y;
     if(!Array.isArray(yd.requests))yd.requests=[];
     if(!Array.isArray(yd.ledger))yd.ledger=[];
+    if(!Array.isArray(yd.collections))yd.collections=[];
+    if(!yd.collections.length){
+      yd.collections=[
+        {id:Date.now()+1,title:"前期団費",amount:0,due:"",note:"金額を設定してください",payments:{}},
+        {id:Date.now()+2,title:"後期団費",amount:0,due:"",note:"金額を設定してください",payments:{}}
+      ];
+    }
+    yd.collections.forEach(function(c){if(!c.payments)c.payments={};});
   });
+  var yd=data.years[data.activeYear];
+  if(!selectedCollectionId&&yd.collections.length)selectedCollectionId=yd.collections[0].id;
 }
 function saveData(msg){
   normalize();
@@ -298,6 +369,7 @@ function switchFiscalYear(y){
   if(!data.years[y])return;
   data.activeYear=y;
   selectedMonth="";
+  selectedCollectionId=null;
   saveData();
   renderAll();
 }
@@ -314,10 +386,11 @@ function addFiscalYear(){
     return;
   }
   if(!data.years[name]){
-    data.years[name]={settings:{year:name,opening:num(document.getElementById("new-year-opening").value),reportDate:""},requests:[],ledger:[]};
+    data.years[name]={settings:{year:name,opening:num(document.getElementById("new-year-opening").value),reportDate:""},requests:[],ledger:[],collections:[]};
   }
   data.activeYear=name;
   selectedMonth="";
+  selectedCollectionId=null;
   document.getElementById("new-year-name").value="";
   document.getElementById("new-year-opening").value="";
   saveData("年度を追加しました");
@@ -440,6 +513,115 @@ function renderMonthly(){
     '</div>';
   }).join("")||'<div class="mini-card"><div class="mini-meta" style="text-align:center">会計入力はまだありません。</div></div>';
 }
+function currentCollection(){
+  var yd=yearData();
+  if(!yd.collections.length)return null;
+  var c=yd.collections.find(function(x){return String(x.id)===String(selectedCollectionId);});
+  return c||yd.collections[0];
+}
+function paymentBadge(status){
+  if(status==="paid")return '<span class="badge pay-paid">支払い済</span>';
+  if(status==="exempt")return '<span class="badge pay-exempt">免除</span>';
+  return '<span class="badge pay-unpaid">未納</span>';
+}
+function collectionSourceId(cid,key){return "collection:"+cid+":"+key;}
+function syncCollectionLedger(c,key,member,pay){
+  var yd=yearData();
+  var sid=collectionSourceId(c.id,key);
+  yd.ledger=yd.ledger.filter(function(x){return x.sourceId!==sid;});
+  if(pay.status==="paid"){
+    yd.ledger.unshift({
+      id:Date.now(),
+      source:"collection",
+      sourceId:sid,
+      date:pay.date||c.due||new Date().toISOString().slice(0,10),
+      kind:"income",
+      category:"団費",
+      item:c.title+" / "+member.name,
+      amount:num(c.amount),
+      note:(pay.method||"")+" "+(pay.note||"")
+    });
+  }
+}
+function setPayment(cid,encodedKey,field,value){
+  var c=yearData().collections.find(function(x){return String(x.id)===String(cid);});
+  if(!c)return;
+  var key=decodeURIComponent(encodedKey);
+  var member=memberList().find(function(m){return m.key===key;})||{name:key};
+  if(!c.payments)c.payments={};
+  if(!c.payments[key])c.payments[key]={status:"unpaid",method:"",date:"",note:""};
+  c.payments[key][field]=value;
+  if(field==="status"&&value==="paid"&&!c.payments[key].date)c.payments[key].date=new Date().toISOString().slice(0,10);
+  syncCollectionLedger(c,key,member,c.payments[key]);
+  saveData();renderAll();
+}
+function addCollection(){
+  var title=document.getElementById("c-title").value.trim();
+  var amount=num(document.getElementById("c-amount").value);
+  if(!title||!amount){alert("集金名と金額を入力してください");return;}
+  var c={id:Date.now(),title:title,amount:amount,due:document.getElementById("c-due").value,note:document.getElementById("c-note").value.trim(),payments:{}};
+  yearData().collections.unshift(c);
+  selectedCollectionId=c.id;
+  ["c-title","c-amount","c-due","c-note"].forEach(function(id){document.getElementById(id).value="";});
+  saveData("集金項目を追加しました");renderAll();
+}
+function deleteCollection(){
+  var c=currentCollection();if(!c)return;
+  if(!confirm("この集金項目を削除しますか？支払い記録も削除されます。"))return;
+  var yd=yearData();
+  yd.ledger=yd.ledger.filter(function(x){return !String(x.sourceId||"").startsWith("collection:"+c.id+":");});
+  yd.collections=yd.collections.filter(function(x){return x.id!==c.id;});
+  selectedCollectionId=yd.collections[0]?yd.collections[0].id:null;
+  saveData("集金項目を削除しました");renderAll();
+}
+function renderCollection(){
+  var yd=yearData();
+  var members=memberList();
+  if(!yd.collections.length)yd.collections.push({id:Date.now(),title:"前期団費",amount:0,due:"",note:"",payments:{}});
+  var c=currentCollection();
+  if(c)selectedCollectionId=c.id;
+  var total=members.length;
+  var paid=0,exempt=0;
+  members.forEach(function(m){
+    var s=(c.payments&&c.payments[m.key]&&c.payments[m.key].status)||"unpaid";
+    if(s==="paid")paid++;
+    if(s==="exempt")exempt++;
+  });
+  var unpaid=Math.max(0,total-paid-exempt);
+  document.getElementById("collection-stats").innerHTML=
+    '<div class="fin-card"><div class="k">対象者</div><div class="v">'+total+'名</div></div>'+
+    '<div class="fin-card good"><div class="k">支払い済</div><div class="v">'+paid+'名</div></div>'+
+    '<div class="fin-card bad"><div class="k">未納</div><div class="v">'+unpaid+'名</div></div>'+
+    '<div class="fin-card"><div class="k">集金済額</div><div class="v">'+yen(paid*num(c.amount))+'</div></div>';
+  document.getElementById("collection-list").innerHTML=yd.collections.map(function(x){
+    var ps=x.payments||{},p=0,e=0;
+    members.forEach(function(m){var s=(ps[m.key]&&ps[m.key].status)||"unpaid";if(s==="paid")p++;if(s==="exempt")e++;});
+    return '<button class="collection-btn '+(String(x.id)===String(c.id)?"active":"")+'" onclick="selectedCollectionId='+x.id+';renderAll()">'+
+      '<div class="collection-title">'+esc(x.title)+'</div>'+
+      '<div class="collection-meta">'+yen(x.amount)+' / 済 '+p+'名 / 未 '+Math.max(0,total-p-e)+'名</div>'+
+    '</button>';
+  }).join("");
+  document.getElementById("collection-detail-title").textContent=c.title+" 集金状況";
+  if(!members.length){
+    document.getElementById("collection-detail").innerHTML='<div class="guide-box">団員名簿がまだ読み込まれていません。団員名簿を登録するとここに自動で表示されます。</div>';
+    return;
+  }
+  document.getElementById("collection-detail").innerHTML=
+    '<div class="guide-box">金額：'+yen(c.amount)+' / 期限：'+esc(c.due||"未設定")+'<br>'+esc(c.note||"")+'</div>'+
+    '<div class="table-wrap" style="overflow:visible">'+members.map(function(m){
+      var key=encodeURIComponent(m.key);
+      var pay=(c.payments&&c.payments[m.key])||{status:"unpaid",method:"",date:"",note:""};
+      return '<div class="member-pay-row">'+
+        '<div><div class="member-name">'+esc(m.name)+'</div><div class="member-sub">'+esc(m.grade)+' '+esc(m.kana)+'</div></div>'+
+        '<div>'+paymentBadge(pay.status)+'</div>'+
+        '<div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:6px;min-width:min(420px,100%)">'+
+          '<select class="form-control" onchange="setPayment('+c.id+',\''+key+'\',\'status\',this.value)"><option value="unpaid" '+(pay.status==="unpaid"?"selected":"")+'>未納</option><option value="paid" '+(pay.status==="paid"?"selected":"")+'>支払い済</option><option value="exempt" '+(pay.status==="exempt"?"selected":"")+'>免除</option></select>'+
+          '<select class="form-control" onchange="setPayment('+c.id+',\''+key+'\',\'method\',this.value)"><option value="" '+(!pay.method?"selected":"")+'>方法</option><option '+(pay.method==="現金"?"selected":"")+'>現金</option><option '+(pay.method==="振込"?"selected":"")+'>振込</option><option '+(pay.method==="PayPay"?"selected":"")+'>PayPay</option><option '+(pay.method==="その他"?"selected":"")+'>その他</option></select>'+
+          '<input class="form-control" type="date" value="'+esc(pay.date||"")+'" onchange="setPayment('+c.id+',\''+key+'\',\'date\',this.value)">'+
+        '</div>'+
+      '</div>';
+    }).join("")+'</div>';
+}
 function sumBy(kind){
   var yd=yearData();
   var map={};
@@ -523,12 +705,16 @@ function downloadCsv(){
   var a=document.createElement("a");
   a.href=URL.createObjectURL(blob);a.download="yoshimi-smc-finance.csv";a.click();URL.revokeObjectURL(a.href);
 }
-function renderAll(){normalize();renderFiscalYearControls();renderRequest();renderMonthly();renderMonthReport();renderYear();}
+function renderAll(){normalize();renderFiscalYearControls();renderRequest();renderMonthly();renderCollection();renderMonthReport();renderYear();}
 
 dbListen("family_finance",function(val){
   data=val&&typeof val==="object"?val:data;
   normalize();fillCats();renderAll();
 },KEY,clone(data));
+dbListen("members",function(val){
+  membersData=val&&typeof val==="object"?val:{};
+  renderAll();
+},"smc_members_v4",{});
 window.addEventListener("DOMContentLoaded",function(){fillCats();normalize();renderAll();});
 </script>
 <script src="common.js"></script>
