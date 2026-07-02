@@ -605,10 +605,10 @@ function renderMonthly(){
     var bal = runBal;
     var dayPart = x.date ? x.date.slice(5) : "";
     return '<tr class="cb-row">'
-      +'<td class="cb-date"><span class="cb-cell editable" onclick="editCell('+x.id+','date',this)">'+esc(dayPart)+'</span></td>'
-      +'<td class="cb-summary"><span class="cb-cell editable" onclick="editCell('+x.id+','item',this)">'+esc(x.item||"")+'</span></td>'
-      +'<td class="cb-income">'+(x.kind==="income"?'<span class="cb-cell editable" onclick="editCell('+x.id+','amount',this)">'+yen(x.amount)+'</span>':'<span class="cb-cell cb-empty">—</span>')+'</td>'
-      +'<td class="cb-expense">'+(x.kind==="expense"?'<span class="cb-cell editable" onclick="editCell('+x.id+','amount',this)">'+yen(x.amount)+'</span>':'<span class="cb-cell cb-empty">—</span>')+'</td>'
+      +'<td class="cb-date"><span class="cb-cell editable" onclick="editCell('+x.id+',\'date\',this)">'+esc(dayPart)+'</span></td>'
+      +'<td class="cb-summary"><span class="cb-cell editable" onclick="editCell('+x.id+',\'item\',this)">'+esc(x.item||"")+'</span></td>'
+      +'<td class="cb-income">'+(x.kind==="income"?'<span class="cb-cell editable" onclick="editCell('+x.id+',\'amount\',this)">'+yen(x.amount)+'</span>':'<span class="cb-cell cb-empty">—</span>')+'</td>'
+      +'<td class="cb-expense">'+(x.kind==="expense"?'<span class="cb-cell editable" onclick="editCell('+x.id+',\'amount\',this)">'+yen(x.amount)+'</span>':'<span class="cb-cell cb-empty">—</span>')+'</td>'
       +'<td class="cb-balance"><span class="cb-cell">'+yen(bal)+'</span></td>'
       +'<td style="text-align:center;padding:0 4px"><button onclick="deleteLedger('+x.id+')" style="background:none;border:none;color:rgba(255,68,102,.6);cursor:pointer;font-size:.8rem;padding:6px">🗑</button></td>'
       +'</tr>';
