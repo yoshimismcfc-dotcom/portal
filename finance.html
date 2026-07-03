@@ -94,11 +94,18 @@
     .section-head{display:flex;align-items:center;justify-content:space-between;gap:10px;margin:16px 0 8px}
     .section-head h2{font-size:.92rem;color:#fff;margin:0;font-weight:900}
     .guide-box{background:rgba(255,204,0,.1);border:1px solid rgba(255,204,0,.28);color:#ffe58a;border-radius:var(--r8);padding:11px 13px;font-size:.8rem;line-height:1.7;margin-bottom:12px}
-    .report-sheet{background:#fff;color:#111;border-radius:12px;padding:22px;box-shadow:var(--shadow);margin-top:14px}
-    .report-title{text-align:center;font-size:1.2rem;font-weight:900;color:#003087;border-bottom:2px solid #003087;padding-bottom:8px;margin-bottom:14px}
-    .report-sheet table{width:100%;border-collapse:collapse;font-size:.86rem;margin-bottom:12px}
-    .report-sheet th,.report-sheet td{border:1px solid #999;padding:6px 8px;color:#111}
-    .report-sheet th{background:#003087;color:#fff}
+    .report-sheet{background:#fff;color:#172033;border-radius:8px;padding:26px;box-shadow:var(--shadow);margin-top:14px;font-family:"Yu Gothic","Meiryo",sans-serif}
+    .report-title{text-align:center;font-size:1.28rem;font-weight:900;color:#111827;border-bottom:2px solid #172033;padding-bottom:9px;margin-bottom:5px;letter-spacing:0}
+    .report-subtitle{text-align:right;color:#4b5563;font-size:.75rem;margin:0 0 16px}
+    .report-section-title{font-size:.94rem;font-weight:900;color:#172033;border-left:5px solid #f68b1f;padding:4px 0 4px 9px;margin:16px 0 7px}
+    .report-sheet table{width:100%;border-collapse:collapse;font-size:.84rem;margin-bottom:13px}
+    .report-sheet th,.report-sheet td{border:1px solid #8b95a5;padding:7px 9px;color:#111827;background:#fff}
+    .report-sheet th{background:#e9eef5;color:#172033;font-weight:900}
+    .report-sheet .report-summary th{width:24%}
+    .report-sheet .report-total th,.report-sheet .report-total td{border-top:2px solid #172033;font-weight:900}
+    .report-note{font-size:.72rem;color:#4b5563;line-height:1.6;margin-top:8px}
+    .report-signatures{display:grid;grid-template-columns:1fr 1fr;gap:32px;margin-top:28px}
+    .report-signature{border-bottom:1px solid #4b5563;padding:0 4px 16px;font-size:.78rem;color:#374151}
     .report-sheet .right{text-align:right}
     body[data-theme="light"] .fin-card .v,
     body[data-theme="light"] .money,
@@ -117,13 +124,23 @@
       .member-name{font-size:.78rem}
       .member-sub{font-size:.62rem}
     }
+    @page{size:A4 portrait;margin:12mm}
     @media print{
-      body,html{background:#fff!important}
+      body,html{background:#fff!important;color:#111!important}
+      body::before{display:none!important}
       .site-header,.back-btn,.hero-band,.fin-tabs,.no-print,.site-footer,.panel{display:none!important}
+      .fin-view>.fin-grid{display:none!important}
       .page-wrap{max-width:100%!important;padding:0!important}
       .fin-view{display:none!important}
       .fin-view.active{display:block!important}
-      .report-sheet{box-shadow:none!important;border-radius:0!important;margin:0!important;padding:0!important}
+      .report-sheet{display:block!important;box-shadow:none!important;border-radius:0!important;margin:0!important;padding:0!important;background:#fff!important;color:#111!important}
+      .report-sheet *{box-shadow:none!important;text-shadow:none!important}
+      .report-title{color:#111!important;border-color:#111!important}
+      .report-section-title{color:#111!important;border-left-color:#777!important}
+      .report-sheet table{page-break-inside:auto}
+      .report-sheet tr{break-inside:avoid;page-break-inside:avoid}
+      .report-sheet th,.report-sheet td{background:#fff!important;color:#111!important;border-color:#555!important}
+      .report-signatures{break-inside:avoid;page-break-inside:avoid}
     }
 
   </style>
@@ -926,6 +943,10 @@ function monthRows(month){
     return '<tr><td>'+esc(x.date)+'</td><td>'+(x.kind==="income"?"収入":"支出")+'</td><td>'+sourceText(x)+'</td><td>'+esc(x.category)+'</td><td>'+esc(x.item)+'</td><td class="right">'+yen(x.amount)+'</td></tr>';
   }).join("");
 }
+function reportDateLabel(value){
+  var m=String(value||"").match(/^(\d{4})-(\d{2})-(\d{2})$/);
+  return m?(Number(m[1])+"年"+Number(m[2])+"月"+Number(m[3])+"日"):"未設定";
+}
 function renderMonthOptions(){
   var months=allMonths();
   var now=currentMonth();
@@ -955,13 +976,15 @@ function renderMonthReport(){
     '<div class="fin-card bad"><div class="k">当月支出</div><div class="v">'+yen(expense)+'</div></div>'+
     '<div class="fin-card '+(closing>=0?'good':'bad')+'"><div class="k">実際残高</div><div class="v">'+yen(closing)+'</div></div>';
   document.getElementById("month-report").innerHTML=
-    '<div class="report-title">吉見SMC FC '+esc(month)+' 月別会計報告</div>'+
-    '<table><tr><th>前月繰越</th><td class="right">'+yen(carry)+'</td><th>当月収入</th><td class="right">'+yen(income)+'</td></tr>'+
+    '<div class="report-title">吉見SMC FC '+esc(monthLabel(month))+' 月別会計報告書</div>'+
+    '<div class="report-subtitle">対象年度：'+esc(data.activeYear)+'</div>'+
+    '<table class="report-summary"><tr><th>前月繰越金</th><td class="right">'+yen(carry)+'</td><th>当月収入</th><td class="right">'+yen(income)+'</td></tr>'+
     '<tr><th>当月支出</th><td class="right">'+yen(expense)+'</td><th>当月収支</th><td class="right">'+yen(income-expense)+'</td></tr>'+
-    '<tr><th>実際残高</th><td class="right" colspan="3" style="font-weight:900">'+yen(closing)+'</td></tr></table>'+
-    '<h3 style="color:#003087;margin:12px 0 6px">収入の部</h3><table><tr><th>項目</th><th>金額</th></tr>'+rowsFromMap(sumByMonth("income",month))+'</table>'+
-    '<h3 style="color:#003087;margin:12px 0 6px">支出の部</h3><table><tr><th>項目</th><th>金額</th></tr>'+rowsFromMap(sumByMonth("expense",month))+'</table>'+
-    '<h3 style="color:#003087;margin:12px 0 6px">明細</h3><table><tr><th>日付</th><th>収支</th><th>入力元</th><th>項目</th><th>内容</th><th>金額</th></tr>'+monthRows(month)+'</table>';
+    '<tr class="report-total"><th>翌月繰越金</th><td class="right" colspan="3">'+yen(closing)+'</td></tr></table>'+
+    '<div class="report-section-title">収入の部</div><table><tr><th>項目</th><th>金額</th></tr>'+rowsFromMap(sumByMonth("income",month))+'<tr class="report-total"><th>収入合計</th><td class="right">'+yen(income)+'</td></tr></table>'+
+    '<div class="report-section-title">支出の部</div><table><tr><th>項目</th><th>金額</th></tr>'+rowsFromMap(sumByMonth("expense",month))+'<tr class="report-total"><th>支出合計</th><td class="right">'+yen(expense)+'</td></tr></table>'+
+    '<div class="report-section-title">取引明細</div><table><tr><th>日付</th><th>収支</th><th>入力元</th><th>項目</th><th>内容</th><th>金額</th></tr>'+monthRows(month)+'</table>'+
+    '<div class="report-note">※ 翌月繰越金 ＝ 前月繰越金 ＋ 当月収入 － 当月支出</div>';
 }
 function renderYear(){
   var yd=yearData();
@@ -972,12 +995,15 @@ function renderYear(){
   var expense=yd.ledger.filter(function(x){return x.kind==="expense";}).reduce(function(s,x){return s+num(x.amount);},0);
   var closing=num(yd.settings.opening)+income-expense;
   document.getElementById("year-report").innerHTML=
-    '<div class="report-title">吉見SMC FC '+esc(yd.settings.year||"年度")+' 会計報告</div>'+
-    '<table><tr><th>報告日</th><td>'+esc(yd.settings.reportDate||"")+'</td><th>前年繰越金</th><td class="right">'+yen(yd.settings.opening)+'</td></tr>'+
-    '<tr><th>収入合計</th><td class="right">'+yen(income)+'</td><th>支出合計</th><td class="right">'+yen(expense)+'</td></tr>'+
-    '<tr><th>実際残高 / 次年度繰越金</th><td class="right" colspan="3" style="font-weight:900">'+yen(closing)+'</td></tr></table>'+
-    '<h3 style="color:#003087;margin:12px 0 6px">収入の部</h3><table><tr><th>項目</th><th>金額</th></tr>'+rowsFromMap(sumBy("income"))+'<tr><th>収入合計</th><th class="right">'+yen(income)+'</th></tr></table>'+
-    '<h3 style="color:#003087;margin:12px 0 6px">支出の部</h3><table><tr><th>項目</th><th>金額</th></tr>'+rowsFromMap(sumBy("expense"))+'<tr><th>支出合計</th><th class="right">'+yen(expense)+'</th></tr></table>';
+    '<div class="report-title">吉見SMC FC '+esc(yd.settings.year||data.activeYear)+' 会計報告書</div>'+
+    '<div class="report-subtitle">報告日：'+esc(reportDateLabel(yd.settings.reportDate))+'</div>'+
+    '<table class="report-summary"><tr><th>前年繰越金</th><td class="right">'+yen(yd.settings.opening)+'</td><th>収入合計</th><td class="right">'+yen(income)+'</td></tr>'+
+    '<tr><th>支出合計</th><td class="right">'+yen(expense)+'</td><th>当年度収支</th><td class="right">'+yen(income-expense)+'</td></tr>'+
+    '<tr class="report-total"><th>次年度繰越金</th><td class="right" colspan="3">'+yen(closing)+'</td></tr></table>'+
+    '<div class="report-section-title">収入の部</div><table><tr><th>項目</th><th>金額</th></tr>'+rowsFromMap(sumBy("income"))+'<tr class="report-total"><th>収入合計</th><td class="right">'+yen(income)+'</td></tr></table>'+
+    '<div class="report-section-title">支出の部</div><table><tr><th>項目</th><th>金額</th></tr>'+rowsFromMap(sumBy("expense"))+'<tr class="report-total"><th>支出合計</th><td class="right">'+yen(expense)+'</td></tr></table>'+
+    '<div class="report-note">※ 次年度繰越金 ＝ 前年繰越金 ＋ 収入合計 － 支出合計</div>'+
+    '<div class="report-signatures"><div class="report-signature">会計担当：</div><div class="report-signature">会計監査：</div></div>';
 }
 function downloadCsv(){
   var rows=[["日付","収支","項目","内容","金額","備考"]];
