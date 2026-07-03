@@ -28,6 +28,9 @@
     .acct-table .form-control{min-height:38px;padding:7px 8px;font-size:.82rem;background:#1e3a5a!important;color:#fff!important;border-color:rgba(0,212,255,.3)!important}
     .acct-table input[type=number]{text-align:right}
     .amount-cell{text-align:right;font-weight:900;color:#fff;white-space:nowrap}
+    .acct-table tfoot th,.acct-table tfoot td{padding:10px 8px;border-top:2px solid rgba(0,212,255,.42);background:rgba(0,48,135,.36)}
+    .acct-table tfoot th{text-align:right;color:#fff;font-size:.84rem;font-weight:900}
+    .acct-table tfoot .line-total{text-align:right;color:var(--cyan);font-size:1rem;font-weight:900;white-space:nowrap}
     .section-head{display:flex;align-items:center;justify-content:space-between;gap:10px;margin:16px 0 8px}
     .section-head h2{font-size:.92rem;color:#fff;margin:0;font-weight:900}
     .summary-table{width:100%;border-collapse:collapse;min-width:780px}
@@ -126,6 +129,7 @@
       <table class="acct-table">
         <thead><tr><th>収入項目</th><th>単価</th><th>数量</th><th>金額</th><th>備考</th><th>操作</th></tr></thead>
         <tbody id="income-rows"></tbody>
+        <tfoot><tr><th colspan="3">収入合計</th><td class="line-total" id="income-line-total">0円</td><td colspan="2"></td></tr></tfoot>
       </table>
     </div>
 
@@ -137,6 +141,7 @@
       <table class="acct-table">
         <thead><tr><th>支出項目</th><th>単価</th><th>数量</th><th>金額</th><th>備考</th><th>操作</th></tr></thead>
         <tbody id="expense-rows"></tbody>
+        <tfoot><tr><th colspan="3">支出合計</th><td class="line-total" id="expense-line-total">0円</td><td colspan="2"></td></tr></tfoot>
       </table>
     </div>
   </section>
@@ -289,6 +294,11 @@ function renderRows(kind){
       '<td style="text-align:center"><button class="btn btn-outline btn-sm" style="color:var(--red);border-color:rgba(255,68,102,.4)" onclick="deleteLine(\''+kind+'\','+i+')">削除</button></td>'+
     '</tr>';
   }).join("");
+  renderLineTotal(kind);
+}
+function renderLineTotal(kind){
+  var el=document.getElementById(kind+"-line-total");
+  if(el)el.textContent=yen(total(data.tournaments[current],kind));
 }
 function renderSummary(){
   document.getElementById("summary-rows").innerHTML=data.tournaments.map(function(t,i){
@@ -326,6 +336,7 @@ function editLine(kind,idx,field,value){
   data.tournaments[current][kind][idx][field]=(field==="unit"||field==="qty")?value:value;
   var amount=document.getElementById(kind+"-amt-"+idx);
   if(amount)amount.textContent=yen(lineAmount(data.tournaments[current][kind][idx]));
+  renderLineTotal(kind);
   renderTotals();renderSummary();renderReport();
 }
 function addLine(kind){
