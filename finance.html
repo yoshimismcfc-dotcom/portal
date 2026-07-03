@@ -64,19 +64,20 @@
     .help-card p{margin:0;color:var(--ink-3);font-size:.78rem;line-height:1.65}
     .help-card.good{border-color:rgba(40,199,111,.32)}
     .help-card.warn{border-color:rgba(246,139,31,.35)}
-    .ledger-entry-grid,.ledger-history-grid{display:grid;grid-template-columns:1fr 1fr;gap:12px;align-items:start;margin-bottom:14px}
-    .ledger-entry-panel{border:1px solid var(--line);border-radius:var(--r8);background:var(--surface);padding:16px}
-    .ledger-entry-panel.income{border-top:4px solid #28c76f}
-    .ledger-entry-panel.expense{border-top:4px solid #ff5b6e}
-    .ledger-entry-title{display:flex;align-items:center;justify-content:space-between;gap:8px;margin-bottom:12px;color:#fff;font-size:.96rem;font-weight:900}
-    .ledger-entry-title .entry-total{font-size:.86rem;color:var(--cyan);white-space:nowrap}
-    .ledger-record-list{display:grid;gap:8px}
-    .ledger-record{display:grid;grid-template-columns:minmax(0,1fr) auto;gap:10px;align-items:center;padding:11px 12px;border:1px solid var(--line);border-radius:var(--r8);background:var(--surface-lt)}
-    .ledger-record-title{font-size:.86rem;font-weight:900;color:#fff;line-height:1.4}
-    .ledger-record-meta{font-size:.7rem;color:var(--ink-3);line-height:1.5;margin-top:3px}
-    .ledger-record-side{text-align:right}
-    .ledger-record-amount{font-size:.94rem;font-weight:900;color:#fff;white-space:nowrap}
-    .ledger-empty{padding:18px 10px;text-align:center;color:var(--ink-3);font-size:.8rem;border:1px dashed var(--line);border-radius:var(--r8)}
+    .ledger-sheet{margin-bottom:18px}
+    .ledger-sheet-head{display:flex;align-items:center;justify-content:space-between;gap:10px;margin-bottom:8px}
+    .ledger-sheet-head h2{margin:0;color:#fff;font-size:.96rem;font-weight:900}
+    .ledger-sheet-wrap{overflow-x:auto;border:1px solid var(--line);border-radius:var(--r8);background:var(--surface)}
+    .ledger-edit-table{width:100%;min-width:760px;border-collapse:collapse}
+    .ledger-edit-table th{padding:8px;background:#003087;color:#fff;font-size:.72rem;white-space:nowrap}
+    .ledger-edit-table td{padding:7px;border-bottom:1px solid var(--line);vertical-align:middle}
+    .ledger-edit-table .form-control{min-height:38px;padding:7px 8px;font-size:.8rem;background:#1e3a5a!important;color:#fff!important;border-color:rgba(0,212,255,.3)!important}
+    .ledger-edit-table input[type=number]{text-align:right}
+    .ledger-edit-table .readonly-cell{color:var(--ink-2);font-size:.8rem}
+    .ledger-edit-table .amount-readonly{text-align:right;color:#fff;font-weight:900;white-space:nowrap}
+    .ledger-edit-table tfoot th,.ledger-edit-table tfoot td{padding:10px 8px;border-top:2px solid rgba(0,212,255,.45);background:rgba(0,48,135,.36)}
+    .ledger-edit-table tfoot th{text-align:right;font-size:.84rem}
+    .ledger-edit-table .ledger-table-total{text-align:right;color:var(--cyan);font-size:1rem;font-weight:900;white-space:nowrap}
     .step-list{margin:8px 0 0;padding-left:1.2em;color:var(--ink-2);font-size:.78rem;line-height:1.65}
     .field-help{font-size:.7rem;color:var(--ink-3);line-height:1.5;margin-top:4px}
     .section-head{display:flex;align-items:center;justify-content:space-between;gap:10px;margin:16px 0 8px}
@@ -101,7 +102,7 @@
       .fin-tab:nth-child(2n){border-right:0}
       .fin-tab:last-child{grid-column:1 / -1;border-bottom:0}
       .fin-grid{grid-template-columns:1fr 1fr}
-      .fg2,.fg3,.month-select-row,.collection-layout,.help-grid,.ledger-entry-grid,.ledger-history-grid{grid-template-columns:1fr}
+      .fg2,.fg3,.month-select-row,.collection-layout,.help-grid{grid-template-columns:1fr}
       .member-pay-row{grid-template-columns:1fr;gap:7px}
       .fin-tab{font-size:.76rem;padding:10px 4px}
       .table-wrap.mobile-cards{display:none}
@@ -222,48 +223,35 @@
       </div>
     </div>
 
-    <div class="ledger-entry-grid no-print">
-      <section class="ledger-entry-panel income">
-        <div class="ledger-entry-title"><span>収入を入力</span><span>入ってきたお金</span></div>
-        <div class="fg2">
-          <div class="form-group"><label class="form-label">日付</label><input class="form-control" id="l-income-date" type="date"></div>
-          <div class="form-group"><label class="form-label">項目</label><select class="form-control" id="l-income-category"></select></div>
-        </div>
-        <div class="form-group"><label class="form-label">内容</label><input class="form-control" id="l-income-item" placeholder="例：前期会費、大会参加費、寄付"></div>
-        <div class="fg2">
-          <div class="form-group"><label class="form-label">金額</label><input class="form-control" id="l-income-amount" type="number" inputmode="numeric" placeholder="例：8000"></div>
-          <div class="form-group"><label class="form-label">相手先・メモ</label><input class="form-control" id="l-income-note" placeholder="例：現金、振込"></div>
-        </div>
-        <button class="btn btn-green" type="button" onclick="addLedger('income')" style="width:100%">収入を追加</button>
-      </section>
-
-      <section class="ledger-entry-panel expense">
-        <div class="ledger-entry-title"><span>支出を入力</span><span>支払ったお金</span></div>
-        <div class="fg2">
-          <div class="form-group"><label class="form-label">日付</label><input class="form-control" id="l-expense-date" type="date"></div>
-          <div class="form-group"><label class="form-label">項目</label><select class="form-control" id="l-expense-category"></select></div>
-        </div>
-        <div class="form-group"><label class="form-label">内容</label><input class="form-control" id="l-expense-item" placeholder="例：ボール購入、グラウンド代"></div>
-        <div class="fg2">
-          <div class="form-group"><label class="form-label">金額</label><input class="form-control" id="l-expense-amount" type="number" inputmode="numeric" placeholder="例：2500"></div>
-          <div class="form-group"><label class="form-label">支払先・メモ</label><input class="form-control" id="l-expense-note" placeholder="例：吉見町、カインズ"></div>
-        </div>
-        <button class="btn btn-red" type="button" onclick="addLedger('expense')" style="width:100%">支出を追加</button>
-      </section>
-    </div>
-
     <div class="fin-grid" id="monthly-stats"></div>
 
-    <div class="ledger-history-grid">
-      <section class="ledger-entry-panel income">
-        <div class="ledger-entry-title"><span>入力済みの収入</span><span class="entry-total" id="monthly-income-total">0円</span></div>
-        <div class="ledger-record-list" id="income-entry-list"></div>
-      </section>
-      <section class="ledger-entry-panel expense">
-        <div class="ledger-entry-title"><span>入力済みの支出</span><span class="entry-total" id="monthly-expense-total">0円</span></div>
-        <div class="ledger-record-list" id="expense-entry-list"></div>
-      </section>
-    </div>
+    <section class="ledger-sheet no-print">
+      <div class="ledger-sheet-head">
+        <h2>収入</h2>
+        <button class="btn btn-green btn-sm" type="button" onclick="addLedgerLine('income')">＋ 収入行</button>
+      </div>
+      <div class="ledger-sheet-wrap">
+        <table class="ledger-edit-table">
+          <thead><tr><th>日付</th><th>収入項目</th><th>内容</th><th>金額</th><th>備考</th><th>操作</th></tr></thead>
+          <tbody id="income-ledger-rows"></tbody>
+          <tfoot><tr><th colspan="3">収入合計</th><td class="ledger-table-total" id="monthly-income-total">0円</td><td colspan="2"></td></tr></tfoot>
+        </table>
+      </div>
+    </section>
+
+    <section class="ledger-sheet no-print">
+      <div class="ledger-sheet-head">
+        <h2>支出</h2>
+        <button class="btn btn-red btn-sm" type="button" onclick="addLedgerLine('expense')">＋ 支出行</button>
+      </div>
+      <div class="ledger-sheet-wrap">
+        <table class="ledger-edit-table">
+          <thead><tr><th>日付</th><th>支出項目</th><th>内容</th><th>金額</th><th>備考</th><th>操作</th></tr></thead>
+          <tbody id="expense-ledger-rows"></tbody>
+          <tfoot><tr><th colspan="3">支出合計</th><td class="ledger-table-total" id="monthly-expense-total">0円</td><td colspan="2"></td></tr></tfoot>
+        </table>
+      </div>
+    </section>
   </section>
 
   <section class="fin-view" id="view-collection">
@@ -472,7 +460,7 @@ function flash(msg){
   el.textContent="✅ "+msg;document.body.appendChild(el);setTimeout(function(){el.remove();},2200);
 }
 function fillCats(){
-  ["r-category","l-income-category","l-expense-category"].forEach(function(id){
+  ["r-category"].forEach(function(id){
     var el=document.getElementById(id);
     if(el)el.innerHTML=CATS.map(function(c){return '<option>'+c+'</option>';}).join("");
   });
@@ -545,17 +533,22 @@ function deleteRequest(id){
   yd.requests=yd.requests.filter(function(x){return x.id!==id;});
   saveData("削除しました");renderAll();
 }
-function addLedger(kind){
+function addLedgerLine(kind){
   var yd=yearData();
   if(kind!=="income"&&kind!=="expense")return;
-  var prefix="l-"+kind+"-";
-  var row={id:Date.now(),source:"direct",date:document.getElementById(prefix+"date").value,kind:kind,category:document.getElementById(prefix+"category").value,item:document.getElementById(prefix+"item").value.trim(),amount:num(document.getElementById(prefix+"amount").value),note:document.getElementById(prefix+"note").value.trim()};
-  if(!row.date&&validMonth(selectedMonth))row.date=selectedMonth+"-01";
-  if(!row.date||!row.item||!row.amount){alert("日付・内容・金額を入力してください");return;}
-  selectedMonth=monthKey(row.date);
+  var row={id:Date.now(),source:"direct",date:(validMonth(selectedMonth)?selectedMonth:currentMonth())+"-01",kind:kind,category:CATS[0]||"その他",item:"",amount:0,note:""};
   yd.ledger.unshift(row);
-  [prefix+"item",prefix+"amount",prefix+"note"].forEach(function(id){document.getElementById(id).value="";});
-  saveData(kind==="income"?"収入を追加しました":"支出を追加しました");renderAll();
+  saveData();renderMonthly();
+}
+function editLedgerLine(id,field,value,saveNow){
+  var row=yearData().ledger.find(function(x){return x.id===id;});
+  if(!row||row.source!=="direct")return;
+  row[field]=field==="amount"?num(value):value;
+  renderMonthlyTotals();
+  if(saveNow){
+    saveData();
+    if(field==="date")renderMonthly();
+  }
 }
 function deleteLedger(id){
   if(!confirm("この行を削除しますか？"))return;
@@ -596,11 +589,8 @@ function renderRequest(){
     '</div>';
   }).join("")||'<div class="mini-card"><div class="mini-meta" style="text-align:center">申請はまだありません。</div></div>';
 }
-function renderMonthly(){
-  renderMonthOptions();
-  var yd=yearData();
+function renderMonthlyTotals(){
   var month=selectedMonth;
-  var monthRowsData=yd.ledger.filter(function(x){return monthKey(x.date)===month;});
   var carry=carryBeforeMonth(month);
   var income=monthIncome(month);
   var expense=monthExpense(month);
@@ -610,21 +600,40 @@ function renderMonthly(){
     '<div class="fin-card good"><div class="k">当月収入</div><div class="v">'+yen(income)+'</div></div>'+
     '<div class="fin-card bad"><div class="k">当月支出</div><div class="v">'+yen(expense)+'</div></div>'+
     '<div class="fin-card '+(closing>=0?'good':'bad')+'"><div class="k">実際残高</div><div class="v">'+yen(closing)+'</div></div>';
-  function renderRecords(kind,targetId){
-    var rows=monthRowsData.filter(function(x){return x.kind===kind;}).sort(function(a,b){return (b.date||"").localeCompare(a.date||"");});
-    document.getElementById(targetId).innerHTML=rows.map(function(x){
-      return '<div class="ledger-record">'+
-        '<div><div class="ledger-record-title">'+esc(x.item||"内容未入力")+'</div>'+
-        '<div class="ledger-record-meta">'+esc(x.date||"")+' / '+esc(x.category||"その他")+' / '+esc(sourceText(x))+(x.note?' / '+esc(x.note):'')+'</div></div>'+
-        '<div class="ledger-record-side"><div class="ledger-record-amount">'+yen(x.amount)+'</div>'+
-        '<button class="btn btn-outline btn-sm no-print" type="button" style="margin-top:5px;color:var(--red);border-color:rgba(255,91,110,.4)" onclick="deleteLedger('+x.id+')">削除</button></div>'+
-      '</div>';
-    }).join("")||'<div class="ledger-empty">この月の入力はまだありません。</div>';
-  }
-  renderRecords("income","income-entry-list");
-  renderRecords("expense","expense-entry-list");
-  document.getElementById("monthly-income-total").textContent=yen(income);
-  document.getElementById("monthly-expense-total").textContent=yen(expense);
+  var incomeTotal=document.getElementById("monthly-income-total");
+  var expenseTotal=document.getElementById("monthly-expense-total");
+  if(incomeTotal)incomeTotal.textContent=yen(income);
+  if(expenseTotal)expenseTotal.textContent=yen(expense);
+}
+function ledgerCategoryOptions(selected){
+  var cats=CATS.slice();
+  if(selected&&cats.indexOf(selected)<0)cats.unshift(selected);
+  return cats.map(function(c){return '<option value="'+esc(c)+'" '+(c===selected?'selected':'')+'>'+esc(c)+'</option>';}).join("");
+}
+function renderLedgerRows(kind,targetId){
+  var rows=yearData().ledger.filter(function(x){return x.kind===kind&&monthKey(x.date)===selectedMonth;}).sort(function(a,b){return (a.date||"").localeCompare(b.date||"")||a.id-b.id;});
+  document.getElementById(targetId).innerHTML=rows.map(function(x){
+    var direct=x.source==="direct"&&!x.sourceId;
+    if(!direct){
+      return '<tr>'+
+        '<td class="readonly-cell">'+esc(x.date||"")+'</td><td class="readonly-cell">'+esc(x.category||"その他")+'</td>'+
+        '<td class="readonly-cell">'+esc(x.item||"")+'</td><td class="amount-readonly">'+yen(x.amount)+'</td>'+
+        '<td class="readonly-cell">'+esc(x.note||"")+'</td><td><span class="badge '+sourceClass(x)+'">'+esc(sourceText(x))+'</span></td></tr>';
+    }
+    return '<tr>'+
+      '<td><input class="form-control" type="date" value="'+esc(x.date||"")+'" onchange="editLedgerLine('+x.id+',\'date\',this.value,true)"></td>'+
+      '<td><select class="form-control" onchange="editLedgerLine('+x.id+',\'category\',this.value,true)">'+ledgerCategoryOptions(x.category)+'</select></td>'+
+      '<td><input class="form-control" value="'+esc(x.item||"")+'" placeholder="内容" oninput="editLedgerLine('+x.id+',\'item\',this.value,false)" onchange="editLedgerLine('+x.id+',\'item\',this.value,true)"></td>'+
+      '<td><input class="form-control" type="number" inputmode="numeric" value="'+esc(x.amount||"")+'" placeholder="0" oninput="editLedgerLine('+x.id+',\'amount\',this.value,false)" onchange="editLedgerLine('+x.id+',\'amount\',this.value,true)"></td>'+
+      '<td><input class="form-control" value="'+esc(x.note||"")+'" placeholder="備考" oninput="editLedgerLine('+x.id+',\'note\',this.value,false)" onchange="editLedgerLine('+x.id+',\'note\',this.value,true)"></td>'+
+      '<td style="text-align:center"><button class="btn btn-outline btn-sm" type="button" style="color:var(--red);border-color:rgba(255,91,110,.4)" onclick="deleteLedger('+x.id+')">削除</button></td></tr>';
+  }).join("")||'<tr><td colspan="6" style="text-align:center;color:var(--ink-3);padding:20px">「＋ '+(kind==="income"?'収入':'支出')+'行」から入力してください。</td></tr>';
+}
+function renderMonthly(){
+  renderMonthOptions();
+  renderLedgerRows("income","income-ledger-rows");
+  renderLedgerRows("expense","expense-ledger-rows");
+  renderMonthlyTotals();
 }
 function currentCollection(){
   var yd=yearData();
