@@ -179,7 +179,7 @@
       </ol>
       <div class="fg3">
         <div class="form-group"><label class="form-label">申請者</label><input class="form-control" id="r-name" placeholder="例：吉見 太郎"></div>
-        <div class="form-group"><label class="form-label">購入日・購入予定日</label><input class="form-control" id="r-date" type="date"><div class="field-help">まだ買っていない場合は、買う予定の日で大丈夫です。</div></div>
+        <div class="form-group"><label class="form-label">購入日・購入予定日</label><input class="form-control" id="r-date" type="date"><button class="btn btn-outline btn-sm" type="button" style="margin-top:6px" onclick="document.getElementById('r-date').value=''">日付を消す</button><div class="field-help">まだ買っていない場合は、買う予定の日で大丈夫です。テストで入れた日付は「日付を消す」で空にできます。</div></div>
         <div class="form-group"><label class="form-label">申請の種類</label><select class="form-control" id="r-type"><option>購入予定</option><option>立替済</option></select><div class="field-help">購入予定＝事前相談、立替済＝あとで返金してほしいもの。</div></div>
       </div>
       <div class="fg3">
@@ -263,7 +263,7 @@
       <div class="fg3">
         <div class="form-group"><label class="form-label">集金名</label><input class="form-control" id="c-title" placeholder="例：前期団費"></div>
         <div class="form-group"><label class="form-label">1人あたり金額</label><input class="form-control" id="c-amount" type="number" inputmode="numeric" placeholder="例：12000"></div>
-        <div class="form-group"><label class="form-label">期限</label><input class="form-control" id="c-due" type="date"></div>
+        <div class="form-group"><label class="form-label">期限</label><input class="form-control" id="c-due" type="date"><button class="btn btn-outline btn-sm" type="button" style="margin-top:6px" onclick="document.getElementById('c-due').value=''">期限を消す</button></div>
       </div>
       <div class="form-group"><label class="form-label">備考</label><input class="form-control" id="c-note" placeholder="例：兄弟割引は会計さんが免除に変更"></div>
       <button class="btn btn-primary" onclick="addCollection()" style="width:100%">集金項目を追加</button>
@@ -276,7 +276,10 @@
       <div class="panel">
         <div class="section-head" style="margin-top:0">
           <h2 id="collection-detail-title">集金状況</h2>
-          <button class="btn btn-outline btn-sm no-print" onclick="deleteCollection()" style="color:var(--red);border-color:rgba(255,68,102,.4)">項目削除</button>
+          <div class="no-print" style="display:flex;gap:6px;flex-wrap:wrap;justify-content:flex-end">
+            <button class="btn btn-outline btn-sm" onclick="clearCollectionDates()">日付を全て消す</button>
+            <button class="btn btn-outline btn-sm" onclick="deleteCollection()" style="color:var(--red);border-color:rgba(255,68,102,.4)">項目削除</button>
+          </div>
         </div>
         <div id="collection-detail"></div>
       </div>
@@ -436,6 +439,7 @@ function normalize(){
     }
     yd.collections.forEach(function(c){if(!c.payments)c.payments={};});
     ensureBasicCollections(yd);
+    cleanupRequestLedgers(yd);
     rebuildCollectionLedgers(yd);
   });
   var yd=data.years[data.activeYear];
@@ -466,6 +470,11 @@ function fillCats(){
     var el=document.getElementById(id);
     if(el)el.innerHTML=CATS.map(function(c){return '<option>'+c+'</option>';}).join("");
   });
+}
+function cleanupRequestLedgers(yd){
+  if(!yd||!Array.isArray(yd.ledger)||!Array.isArray(yd.requests))return;
+  yd.ledger=yd.ledger.filter(function(x){return x.source!=="reimbursement";});
+  yd.requests=yd.requests.filter(function(r){return r.status!=="支払い済";});
 }
 function yearClosing(y){
   var yd=data.years[y]||yearData();
@@ -516,23 +525,50 @@ function addRequest(){
   };
   if(!req.name||!req.item||!req.amount){alert("申請者・購入内容・金額を入力してください");return;}
   yd.requests.unshift(req);
-  ["r-name","r-item","r-amount","r-note"].forEach(function(id){document.getElementById(id).value="";});
+  resetRequestForm();
   saveData("申請を送信しました");renderAll();
+}
+function resetRequestForm(){
+  ["r-name","r-date","r-item","r-amount","r-note"].forEach(function(id){
+    var el=document.getElementById(id);
+    if(el)el.value="";
+  });
 }
 function updateRequest(id,field,value){
   var yd=yearData();
   var r=yd.requests.find(function(x){return x.id===id;});if(!r)return;
-  r[field]=value;
   if(field==="status"&&value==="支払い済"){
-    var exists=yd.ledger.some(function(x){return x.sourceId===id;});
-    if(!exists)yd.ledger.unshift({id:Date.now(),sourceId:id,source:"reimbursement",date:r.date||new Date().toISOString().slice(0,10),kind:"expense",category:r.category,item:r.item,amount:r.amount,note:r.name+"さんへ支払い"});
+    if(!confirm("会計入力の支出へデータを送信しますか？\n\nはい：会計入力へ送り、この申請は会計さんへ一覧から消えます。\nいいえ：送信しません。")){
+      renderAll();
+      return;
+    }
+    sendRequestToLedger(r);
+    yd.requests=yd.requests.filter(function(x){return x.id!==id;});
+    saveData("会計入力へ送信しました");
+    renderAll();
+    return;
   }
+  r[field]=value;
   saveData();renderAll();
+}
+function sendRequestToLedger(r){
+  var yd=yearData();
+  yd.ledger.unshift({
+    id:Date.now(),
+    source:"direct",
+    date:r.date||new Date().toISOString().slice(0,10),
+    kind:"expense",
+    category:r.category,
+    item:r.item,
+    amount:r.amount,
+    note:(r.name?r.name+"さんへ支払い":"会計さんへから送信")+(r.note?" / "+r.note:"")
+  });
 }
 function deleteRequest(id){
   if(!confirm("この申請を削除しますか？"))return;
   var yd=yearData();
   yd.requests=yd.requests.filter(function(x){return x.id!==id;});
+  yd.ledger=yd.ledger.filter(function(x){return !(x.source==="reimbursement"&&String(x.sourceId)===String(id));});
   saveData("削除しました");renderAll();
 }
 function addLedgerLine(kind){
@@ -701,7 +737,8 @@ function rebuildCollectionLedgers(yd){
       var pay=c.payments[key]||{};
       if(pay.status!=="paid")return;
       var member=members.find(function(m){return m.key===key;})||{name:key,grade:""};
-      var date=pay.date||c.due||new Date().toISOString().slice(0,10);
+      var date=pay.date||"";
+      if(!date)return;
       var month=monthKey(date);
       if(!validMonth(month))return;
       if(!grouped[month])grouped[month]=[];
@@ -753,8 +790,19 @@ function setPayment(cid,encodedKey,field,value){
   c.payments[key][field]=value;
   if(field==="amount")c.payments[key][field]=num(value);
   if(field==="status"&&value==="paid"&&!c.payments[key].date)c.payments[key].date=new Date().toISOString().slice(0,10);
+  if(field==="date"&&!value)c.payments[key].date="";
   syncCollectionLedger(c,key,member,c.payments[key]);
   saveData();renderAll();
+}
+function clearPaymentDate(cid,encodedKey){
+  setPayment(cid,encodedKey,"date","");
+}
+function clearCollectionDates(){
+  var c=currentCollection();if(!c)return;
+  if(!confirm("この集金項目の支払い日をすべて消しますか？"))return;
+  Object.keys(c.payments||{}).forEach(function(key){c.payments[key].date="";});
+  syncCollectionLedger(c,"",{},null);
+  saveData("支払い日をリセットしました");renderAll();
 }
 function addCollection(){
   var title=document.getElementById("c-title").value.trim();
@@ -819,10 +867,11 @@ function renderCollection(){
       return '<div class="member-pay-row">'+
         '<div><div class="member-name">'+esc(m.name)+'</div><div class="member-sub">'+esc(m.grade)+' '+esc(m.kana)+'</div></div>'+
         '<div>'+paymentBadge(pay.status)+'</div>'+
-        '<div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:6px;min-width:min(420px,100%)">'+
+        '<div style="display:grid;grid-template-columns:1fr 1fr;gap:6px;min-width:min(420px,100%)">'+
           '<select class="form-control" onchange="setPayment('+c.id+',\''+key+'\',\'status\',this.value)"><option value="unpaid" '+(pay.status==="unpaid"?"selected":"")+'>未納</option><option value="paid" '+(pay.status==="paid"?"selected":"")+'>支払い済</option><option value="exempt" '+(pay.status==="exempt"?"selected":"")+'>免除</option></select>'+
           '<input class="form-control" type="number" inputmode="numeric" value="'+esc(amount)+'" onchange="setPayment('+c.id+',\''+key+'\',\'amount\',this.value)" aria-label="金額">'+
           '<input class="form-control" type="date" value="'+esc(pay.date||"")+'" onchange="setPayment('+c.id+',\''+key+'\',\'date\',this.value)">'+
+          '<button class="btn btn-outline btn-sm" type="button" onclick="clearPaymentDate('+c.id+',\''+key+'\')">日付消す</button>'+
         '</div>'+
       '</div>';
     }).join("")+'</div>';
