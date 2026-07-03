@@ -10,8 +10,8 @@
   <script src="firebase-config.js"></script>
   <link rel="stylesheet" href="common.css">
   <style>
-    .fin-tabs{display:grid;grid-template-columns:repeat(5,1fr);gap:0;border:1px solid var(--line-2);border-radius:var(--r8);overflow:hidden;margin-bottom:14px}
-    .fin-tab{border:0;background:var(--surface-lt);color:var(--ink-3);font:inherit;font-size:.8rem;font-weight:900;padding:11px 6px;cursor:pointer;min-width:0}
+    .fin-tabs{position:relative;z-index:2;display:grid;grid-template-columns:repeat(5,1fr);gap:0;border:1px solid var(--line-2);border-radius:var(--r8);overflow:hidden;margin-bottom:14px}
+    .fin-tab{position:relative;z-index:1;border:0;background:var(--surface-lt);color:var(--ink-3);font:inherit;font-size:.8rem;font-weight:900;padding:11px 6px;cursor:pointer;min-width:0;pointer-events:auto;touch-action:manipulation}
     .fin-tab:not(:last-child){border-right:1px solid var(--line)}
     .fin-tab.active{background:linear-gradient(135deg,#003087,#0050cc);color:#fff}
     .fin-view{display:none}.fin-view.active{display:block}
@@ -162,11 +162,11 @@
   <div class="guide-box no-print">迷った時は「誰がお金を払ったか」で分けてください。保護者・コーチが買う予定、または立て替えたものは「会計さんへ」。会計さんが直接受け取った・直接支払ったものは「会計入力」です。</div>
 
   <div class="fin-tabs no-print">
-    <button class="fin-tab active" onclick="switchView('request',this)">会計さんへ</button>
-    <button class="fin-tab" onclick="switchView('monthly',this)">会計入力</button>
-    <button class="fin-tab" onclick="switchView('collection',this)">集金</button>
-    <button class="fin-tab" onclick="switchView('month',this)">月別報告</button>
-    <button class="fin-tab" onclick="switchView('year',this)">年度報告</button>
+    <button class="fin-tab active" type="button" data-fin-view="request" onclick="switchView('request',this)">会計さんへ</button>
+    <button class="fin-tab" type="button" data-fin-view="monthly" onclick="switchView('monthly',this)">会計入力</button>
+    <button class="fin-tab" type="button" data-fin-view="collection" onclick="switchView('collection',this)">集金</button>
+    <button class="fin-tab" type="button" data-fin-view="month" onclick="switchView('month',this)">月別報告</button>
+    <button class="fin-tab" type="button" data-fin-view="year" onclick="switchView('year',this)">年度報告</button>
   </div>
 
   <section class="fin-view active" id="view-request">
@@ -492,8 +492,10 @@ function switchFiscalYear(y){
   renderAll();
 }
 function switchView(name,btn){
+  var target=document.getElementById("view-"+name);
+  if(!target)return;
   document.querySelectorAll(".fin-view").forEach(function(v){v.classList.remove("active");});
-  document.getElementById("view-"+name).classList.add("active");
+  target.classList.add("active");
   document.querySelectorAll(".fin-tab").forEach(function(b){b.classList.remove("active");});
   if(btn)btn.classList.add("active");
   renderAll();

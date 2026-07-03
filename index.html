@@ -103,7 +103,7 @@
     <a class="menu-card" href="members.html"><div class="card-icon">📒</div><div class="card-label">団員名簿</div><div class="card-desc">Player Directory</div></a>
     <a class="menu-card" href="join.html"><div class="card-icon">⚽</div><div class="card-label">体験・入団申込</div><div class="card-desc">Join Us!</div></a>
     <a class="menu-card" href="staff.html"><div class="card-icon">👥</div><div class="card-label">担当フォルダ</div><div class="card-desc">コーチ・保護者担当一覧</div></a>
-    <a class="menu-card" href="finance.html"><div class="card-icon">💴</div><div class="card-label">会計業務</div><div class="card-desc">立替・集金・月次・年度報告</div></a>
+    <a class="menu-card" id="finance-menu-link" href="finance.html"><div class="card-icon">💴</div><div class="card-label">会計業務</div><div class="card-desc">立替・集金・月次・年度報告</div></a>
   </div>
 
   <!-- 🏟️ 試合・大会 MATCH & TOURNAMENT -->
@@ -321,9 +321,7 @@ window.addEventListener("DOMContentLoaded",function(){checkAlert();});
 function copyAlert(type){
   var el=document.getElementById("auto-"+type+"-body");
   if(!el||!el.textContent.trim()){alert("アラートが表示されていません");return;}
-  var prefix=type==="rain"?"🌧️ 雨の予報
-":"🌡️ 熱中症注意
-";
+  var prefix=type==="rain"?"🌧️ 雨の予報\n":"🌡️ 熱中症注意\n";
   var t=prefix+el.textContent;
   navigator.clipboard.writeText(t).then(function(){alert("コピーしました！LINEに貼り付けてください。");}).catch(function(){alert("コピーできませんでした。");});
 }
