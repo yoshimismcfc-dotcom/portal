@@ -64,6 +64,19 @@
     .help-card p{margin:0;color:var(--ink-3);font-size:.78rem;line-height:1.65}
     .help-card.good{border-color:rgba(40,199,111,.32)}
     .help-card.warn{border-color:rgba(246,139,31,.35)}
+    .ledger-entry-grid,.ledger-history-grid{display:grid;grid-template-columns:1fr 1fr;gap:12px;align-items:start;margin-bottom:14px}
+    .ledger-entry-panel{border:1px solid var(--line);border-radius:var(--r8);background:var(--surface);padding:16px}
+    .ledger-entry-panel.income{border-top:4px solid #28c76f}
+    .ledger-entry-panel.expense{border-top:4px solid #ff5b6e}
+    .ledger-entry-title{display:flex;align-items:center;justify-content:space-between;gap:8px;margin-bottom:12px;color:#fff;font-size:.96rem;font-weight:900}
+    .ledger-entry-title .entry-total{font-size:.86rem;color:var(--cyan);white-space:nowrap}
+    .ledger-record-list{display:grid;gap:8px}
+    .ledger-record{display:grid;grid-template-columns:minmax(0,1fr) auto;gap:10px;align-items:center;padding:11px 12px;border:1px solid var(--line);border-radius:var(--r8);background:var(--surface-lt)}
+    .ledger-record-title{font-size:.86rem;font-weight:900;color:#fff;line-height:1.4}
+    .ledger-record-meta{font-size:.7rem;color:var(--ink-3);line-height:1.5;margin-top:3px}
+    .ledger-record-side{text-align:right}
+    .ledger-record-amount{font-size:.94rem;font-weight:900;color:#fff;white-space:nowrap}
+    .ledger-empty{padding:18px 10px;text-align:center;color:var(--ink-3);font-size:.8rem;border:1px dashed var(--line);border-radius:var(--r8)}
     .step-list{margin:8px 0 0;padding-left:1.2em;color:var(--ink-2);font-size:.78rem;line-height:1.65}
     .field-help{font-size:.7rem;color:var(--ink-3);line-height:1.5;margin-top:4px}
     .section-head{display:flex;align-items:center;justify-content:space-between;gap:10px;margin:16px 0 8px}
@@ -88,7 +101,7 @@
       .fin-tab:nth-child(2n){border-right:0}
       .fin-tab:last-child{grid-column:1 / -1;border-bottom:0}
       .fin-grid{grid-template-columns:1fr 1fr}
-      .fg2,.fg3,.month-select-row,.collection-layout,.help-grid{grid-template-columns:1fr}
+      .fg2,.fg3,.month-select-row,.collection-layout,.help-grid,.ledger-entry-grid,.ledger-history-grid{grid-template-columns:1fr}
       .member-pay-row{grid-template-columns:1fr;gap:7px}
       .fin-tab{font-size:.76rem;padding:10px 4px}
       .table-wrap.mobile-cards{display:none}
@@ -103,32 +116,6 @@
       .report-sheet{box-shadow:none!important;border-radius:0!important;margin:0!important;padding:0!important}
     }
 
-    /* ===== 現金出納帳 ===== */
-    .cashbook-wrap{border-radius:var(--r12);overflow:hidden;border:1px solid var(--line-2);margin-top:14px}
-    .cashbook-title{background:linear-gradient(135deg,#003087,#0050cc);color:#fff;font-size:.88rem;font-weight:900;padding:10px 14px;display:flex;align-items:center;gap:8px}
-    .cashbook-table{width:100%;border-collapse:collapse;font-size:.82rem}
-    .cashbook-table thead tr{background:rgba(0,48,135,.5)}
-    .cashbook-table th{color:#c8e4ff;font-size:.72rem;font-weight:900;padding:7px 8px;text-align:center;border:1px solid rgba(255,255,255,.08);white-space:nowrap}
-    .cashbook-table td{padding:0;border:1px solid rgba(255,255,255,.06);vertical-align:middle}
-    .cashbook-table tr:nth-child(even) td{background:rgba(255,255,255,.02)}
-    .cashbook-table tr:hover td{background:rgba(0,212,255,.05)}
-    .cb-cell{padding:7px 8px;min-height:36px;cursor:pointer;display:block;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
-    .cb-cell:hover{background:rgba(255,107,43,.1);border-radius:3px}
-    .cb-cell.editable::after{content:"✏️";font-size:.6rem;margin-left:4px;opacity:.4}
-    .cb-date{text-align:center;color:var(--ink-3);min-width:48px}
-    .cb-summary{text-align:left;min-width:80px;color:#c8e4ff}
-    .cb-income{text-align:right;color:#00cc66;font-weight:700;min-width:70px}
-    .cb-expense{text-align:right;color:#ff6680;font-weight:700;min-width:70px}
-    .cb-balance{text-align:right;font-weight:900;color:#fff;min-width:80px}
-    .cb-empty{color:var(--ink-3);font-size:.7rem}
-    .cb-foot{background:rgba(0,48,135,.3);font-weight:900}
-    .cb-foot td{padding:8px 8px;border-top:2px solid rgba(0,212,255,.3)}
-    .cb-add-row{display:flex;align-items:center;gap:8px;padding:10px 14px;cursor:pointer;background:rgba(0,212,255,.05);border-top:1px dashed rgba(0,212,255,.2);font-size:.8rem;color:var(--cyan);font-weight:700}
-    .cb-add-row:hover{background:rgba(0,212,255,.1)}
-    .cb-carry{background:rgba(255,255,255,.04);color:var(--ink-3);font-size:.75rem;font-style:italic}
-    /* インライン編集 */
-    .cb-input{background:rgba(0,0,0,.3);border:1px solid var(--cyan);border-radius:4px;color:#fff;font:inherit;font-size:.8rem;padding:4px 6px;width:100%;min-width:60px}
-  </style>
   </style>
 </head>
 <body>
@@ -163,8 +150,8 @@
 
   <div class="fin-tabs no-print">
     <button class="fin-tab active" type="button" data-fin-view="request" onclick="switchView('request',this)">会計さんへ</button>
-    <button class="fin-tab" type="button" data-fin-view="monthly" onclick="switchView('monthly',this)">会計入力</button>
     <button class="fin-tab" type="button" data-fin-view="collection" onclick="switchView('collection',this)">集金</button>
+    <button class="fin-tab" type="button" data-fin-view="monthly" onclick="switchView('monthly',this)">会計入力</button>
     <button class="fin-tab" type="button" data-fin-view="month" onclick="switchView('month',this)">月別報告</button>
     <button class="fin-tab" type="button" data-fin-view="year" onclick="switchView('year',this)">年度報告</button>
   </div>
@@ -212,8 +199,8 @@
 
   <section class="fin-view" id="view-monthly">
     <div class="panel no-print">
-      <div class="panel-title">通帳・現金の動きを入力する</div>
-      <div class="guide-box" style="margin-bottom:12px">ここは会計さんが実際に管理しているお金の記録です。団費を受け取ったら「収入」、備品代や登録費を支払ったら「支出」を選びます。保護者・コーチの立替精算は「会計さんへ」で支払い済にすると自動で入るため、二重入力しないでください。</div>
+      <div class="panel-title">入力する年月を選ぶ</div>
+      <div class="guide-box" style="margin-bottom:12px">会計さんが直接受け取ったお金は「収入」、会計さんがチームのお金から直接支払ったものは「支出」に入力します。保護者・コーチの立替精算は「会計さんへ」で支払い済にすると自動で入るため、二重入力しないでください。</div>
       <div class="help-grid">
         <div class="help-card good">
           <strong>収入に入れる例</strong>
@@ -226,33 +213,57 @@
       </div>
       <ol class="step-list">
         <li>入力する年月を選びます。年度内の4月から翌年3月まで選べます。</li>
-        <li>日付、収入/支出、項目、内容、金額を入力します。</li>
+        <li>下の「収入」または「支出」に、日付・項目・内容・金額を入力します。</li>
         <li>月別報告と年度報告に自動で集計されます。</li>
       </ol>
       <div class="form-group">
         <label class="form-label">表示・入力する年月</label>
         <select class="form-control" id="ledger-month-select" onchange="selectedMonth=this.value;renderAll()"></select>
       </div>
-      <div class="fg3">
-        <div class="form-group"><label class="form-label">日付</label><input class="form-control" id="l-date" type="date"></div>
-        <div class="form-group"><label class="form-label">お金の動き</label><select class="form-control" id="l-kind"><option value="income">収入（入ってきたお金）</option><option value="expense">支出（払ったお金）</option></select></div>
-        <div class="form-group"><label class="form-label">項目</label><select class="form-control" id="l-category"></select></div>
-      </div>
-      <div class="fg3">
-        <div class="form-group"><label class="form-label">内容</label><input class="form-control" id="l-item" placeholder="例：4月団費、ボール購入、グラウンド代"></div>
-        <div class="form-group"><label class="form-label">金額</label><input class="form-control" id="l-amount" type="number" inputmode="numeric"></div>
-        <div class="form-group"><label class="form-label">相手先・メモ</label><input class="form-control" id="l-note" placeholder="例：吉見町、カインズ、現金、振込"></div>
-      </div>
-      <button class="btn btn-primary" onclick="addLedger()" style="width:100%">通帳・現金の記録に追加</button>
     </div>
+
+    <div class="ledger-entry-grid no-print">
+      <section class="ledger-entry-panel income">
+        <div class="ledger-entry-title"><span>収入を入力</span><span>入ってきたお金</span></div>
+        <div class="fg2">
+          <div class="form-group"><label class="form-label">日付</label><input class="form-control" id="l-income-date" type="date"></div>
+          <div class="form-group"><label class="form-label">項目</label><select class="form-control" id="l-income-category"></select></div>
+        </div>
+        <div class="form-group"><label class="form-label">内容</label><input class="form-control" id="l-income-item" placeholder="例：前期会費、大会参加費、寄付"></div>
+        <div class="fg2">
+          <div class="form-group"><label class="form-label">金額</label><input class="form-control" id="l-income-amount" type="number" inputmode="numeric" placeholder="例：8000"></div>
+          <div class="form-group"><label class="form-label">相手先・メモ</label><input class="form-control" id="l-income-note" placeholder="例：現金、振込"></div>
+        </div>
+        <button class="btn btn-green" type="button" onclick="addLedger('income')" style="width:100%">収入を追加</button>
+      </section>
+
+      <section class="ledger-entry-panel expense">
+        <div class="ledger-entry-title"><span>支出を入力</span><span>支払ったお金</span></div>
+        <div class="fg2">
+          <div class="form-group"><label class="form-label">日付</label><input class="form-control" id="l-expense-date" type="date"></div>
+          <div class="form-group"><label class="form-label">項目</label><select class="form-control" id="l-expense-category"></select></div>
+        </div>
+        <div class="form-group"><label class="form-label">内容</label><input class="form-control" id="l-expense-item" placeholder="例：ボール購入、グラウンド代"></div>
+        <div class="fg2">
+          <div class="form-group"><label class="form-label">金額</label><input class="form-control" id="l-expense-amount" type="number" inputmode="numeric" placeholder="例：2500"></div>
+          <div class="form-group"><label class="form-label">支払先・メモ</label><input class="form-control" id="l-expense-note" placeholder="例：吉見町、カインズ"></div>
+        </div>
+        <button class="btn btn-red" type="button" onclick="addLedger('expense')" style="width:100%">支出を追加</button>
+      </section>
+    </div>
+
     <div class="fin-grid" id="monthly-stats"></div>
-    <div class="table-wrap mobile-cards">
-      <table class="fin-table">
-        <thead><tr><th>日付</th><th>収支</th><th>入力元</th><th>項目</th><th>内容</th><th>金額</th><th>備考</th><th class="no-print">操作</th></tr></thead>
-        <tbody id="ledger-rows"></tbody>
-      </table>
+
+    <div class="ledger-history-grid">
+      <section class="ledger-entry-panel income">
+        <div class="ledger-entry-title"><span>入力済みの収入</span><span class="entry-total" id="monthly-income-total">0円</span></div>
+        <div class="ledger-record-list" id="income-entry-list"></div>
+      </section>
+      <section class="ledger-entry-panel expense">
+        <div class="ledger-entry-title"><span>入力済みの支出</span><span class="entry-total" id="monthly-expense-total">0円</span></div>
+        <div class="ledger-record-list" id="expense-entry-list"></div>
+      </section>
     </div>
-    <div class="card-list" id="ledger-cards"></div>
   </section>
 
   <section class="fin-view" id="view-collection">
@@ -461,9 +472,9 @@ function flash(msg){
   el.textContent="✅ "+msg;document.body.appendChild(el);setTimeout(function(){el.remove();},2200);
 }
 function fillCats(){
-  ["r-category","l-category"].forEach(function(id){
+  ["r-category","l-income-category","l-expense-category"].forEach(function(id){
     var el=document.getElementById(id);
-    el.innerHTML=CATS.map(function(c){return '<option>'+c+'</option>';}).join("");
+    if(el)el.innerHTML=CATS.map(function(c){return '<option>'+c+'</option>';}).join("");
   });
 }
 function yearClosing(y){
@@ -534,15 +545,17 @@ function deleteRequest(id){
   yd.requests=yd.requests.filter(function(x){return x.id!==id;});
   saveData("削除しました");renderAll();
 }
-function addLedger(){
+function addLedger(kind){
   var yd=yearData();
-  var row={id:Date.now(),source:"direct",date:document.getElementById("l-date").value,kind:document.getElementById("l-kind").value,category:document.getElementById("l-category").value,item:document.getElementById("l-item").value.trim(),amount:num(document.getElementById("l-amount").value),note:document.getElementById("l-note").value.trim()};
+  if(kind!=="income"&&kind!=="expense")return;
+  var prefix="l-"+kind+"-";
+  var row={id:Date.now(),source:"direct",date:document.getElementById(prefix+"date").value,kind:kind,category:document.getElementById(prefix+"category").value,item:document.getElementById(prefix+"item").value.trim(),amount:num(document.getElementById(prefix+"amount").value),note:document.getElementById(prefix+"note").value.trim()};
   if(!row.date&&validMonth(selectedMonth))row.date=selectedMonth+"-01";
   if(!row.date||!row.item||!row.amount){alert("日付・内容・金額を入力してください");return;}
   selectedMonth=monthKey(row.date);
   yd.ledger.unshift(row);
-  ["l-item","l-amount","l-note"].forEach(function(id){document.getElementById(id).value="";});
-  saveData("会計入力に追加しました");renderAll();
+  [prefix+"item",prefix+"amount",prefix+"note"].forEach(function(id){document.getElementById(id).value="";});
+  saveData(kind==="income"?"収入を追加しました":"支出を追加しました");renderAll();
 }
 function deleteLedger(id){
   if(!confirm("この行を削除しますか？"))return;
@@ -597,81 +610,21 @@ function renderMonthly(){
     '<div class="fin-card good"><div class="k">当月収入</div><div class="v">'+yen(income)+'</div></div>'+
     '<div class="fin-card bad"><div class="k">当月支出</div><div class="v">'+yen(expense)+'</div></div>'+
     '<div class="fin-card '+(closing>=0?'good':'bad')+'"><div class="k">実際残高</div><div class="v">'+yen(closing)+'</div></div>';
-  // 残高を逐次計算
-  var runBal = carry;
-  var sorted = monthRowsData.slice().sort(function(a,b){ return (a.date||"").localeCompare(b.date||""); });
-  var totalIn = 0, totalEx = 0;
-  var rows = sorted.map(function(x){
-    if(x.kind==="income") { runBal+=num(x.amount); totalIn+=num(x.amount); }
-    else { runBal-=num(x.amount); totalEx+=num(x.amount); }
-    var bal = runBal;
-    var dayPart = x.date ? x.date.slice(5) : "";
-    return '<tr class="cb-row">'
-      +'<td class="cb-date"><span class="cb-cell editable" onclick="editCell('+x.id+',\'date\',this)">'+esc(dayPart)+'</span></td>'
-      +'<td class="cb-summary"><span class="cb-cell editable" onclick="editCell('+x.id+',\'item\',this)">'+esc(x.item||"")+'</span></td>'
-      +'<td class="cb-income">'+(x.kind==="income"?'<span class="cb-cell editable" onclick="editCell('+x.id+',\'amount\',this)">'+yen(x.amount)+'</span>':'<span class="cb-cell cb-empty">—</span>')+'</td>'
-      +'<td class="cb-expense">'+(x.kind==="expense"?'<span class="cb-cell editable" onclick="editCell('+x.id+',\'amount\',this)">'+yen(x.amount)+'</span>':'<span class="cb-cell cb-empty">—</span>')+'</td>'
-      +'<td class="cb-balance"><span class="cb-cell">'+yen(bal)+'</span></td>'
-      +'<td style="text-align:center;padding:0 4px"><button onclick="deleteLedger('+x.id+')" style="background:none;border:none;color:rgba(255,68,102,.6);cursor:pointer;font-size:.8rem;padding:6px">🗑</button></td>'
-      +'</tr>';
-  }).join("");
-  var cashbookHtml =
-    '<div class="cashbook-wrap">'
-    +'<div class="cashbook-title">📒 現金出納帳 — '+month+'<span style="margin-left:auto;font-size:.74rem;opacity:.7">タップで編集</span></div>'
-    +'<table class="cashbook-table">'
-    +'<thead><tr><th>月日</th><th>摘要</th><th>入金</th><th>出金</th><th>残高</th><th></th></tr></thead>'
-    +'<tbody>'
-    +'<tr class="cb-carry"><td colspan="4" style="padding:6px 8px;color:var(--ink-3)">前月繰越</td><td class="cb-balance"><span class="cb-cell">'+yen(carry)+'</span></td><td></td></tr>'
-    +rows
-    +'</tbody>'
-    +'<tfoot class="cb-foot"><tr>'
-    +'<td colspan="2" style="padding:8px;color:#c8e4ff;font-size:.78rem">合計</td>'
-    +'<td style="text-align:right;padding:8px;color:#00cc66">'+yen(totalIn)+'</td>'
-    +'<td style="text-align:right;padding:8px;color:#ff6680">'+yen(totalEx)+'</td>'
-    +'<td style="text-align:right;padding:8px;color:'+(closing>=0?"var(--cyan)":"#ff6680")+'">'+yen(closing)+'</td>'
-    +'<td></td>'
-    +'</tr></tfoot>'
-    +'</table>'
-    +'<div class="cb-add-row" onclick="showAddLedger()">＋ 行を追加</div>'
-    +'</div>';
-  document.getElementById("ledger-rows").innerHTML = "";
-  document.getElementById("ledger-cards").innerHTML = cashbookHtml;
-}
-/* ===== 現金出納帳インライン編集 ===== */
-function editCell(id, field, el){
-  var yd = yearData();
-  var row = yd.ledger.find(function(x){ return x.id===id; });
-  if(!row) return;
-  var currentVal = field==="date" ? (row.date||"").slice(5) : field==="amount" ? String(num(row.amount)) : (row[field]||"");
-  var input = document.createElement("input");
-  input.className = "cb-input";
-  input.value = currentVal;
-  if(field==="amount") input.type = "number";
-  var parent = el.parentNode;
-  parent.replaceChild(input, el);
-  input.focus(); input.select();
-  function commit(){
-    var val = input.value.trim();
-    if(field==="date"){
-      var year = (row.date||new Date().toISOString().slice(0,7)).slice(0,7);
-      row.date = year + "-" + (val.length===5 ? val.replace("/","-") : val.replace("/","-").padStart(5,"0"));
-    } else if(field==="amount"){
-      row.amount = parseInt(val)||0;
-    } else {
-      row[field] = val;
-    }
-    saveData(); renderMonthly();
+  function renderRecords(kind,targetId){
+    var rows=monthRowsData.filter(function(x){return x.kind===kind;}).sort(function(a,b){return (b.date||"").localeCompare(a.date||"");});
+    document.getElementById(targetId).innerHTML=rows.map(function(x){
+      return '<div class="ledger-record">'+
+        '<div><div class="ledger-record-title">'+esc(x.item||"内容未入力")+'</div>'+
+        '<div class="ledger-record-meta">'+esc(x.date||"")+' / '+esc(x.category||"その他")+' / '+esc(sourceText(x))+(x.note?' / '+esc(x.note):'')+'</div></div>'+
+        '<div class="ledger-record-side"><div class="ledger-record-amount">'+yen(x.amount)+'</div>'+
+        '<button class="btn btn-outline btn-sm no-print" type="button" style="margin-top:5px;color:var(--red);border-color:rgba(255,91,110,.4)" onclick="deleteLedger('+x.id+')">削除</button></div>'+
+      '</div>';
+    }).join("")||'<div class="ledger-empty">この月の入力はまだありません。</div>';
   }
-  input.addEventListener("blur", commit);
-  input.addEventListener("keydown", function(e){
-    if(e.key==="Enter"){ commit(); }
-    if(e.key==="Escape"){ renderMonthly(); }
-  });
-}
-function showAddLedger(){
-  // 既存の追加ボタンにスクロール
-  var btn = document.getElementById("add-ledger-btn");
-  if(btn){ btn.scrollIntoView({behavior:"smooth"}); btn.click(); }
+  renderRecords("income","income-entry-list");
+  renderRecords("expense","expense-entry-list");
+  document.getElementById("monthly-income-total").textContent=yen(income);
+  document.getElementById("monthly-expense-total").textContent=yen(expense);
 }
 function currentCollection(){
   var yd=yearData();
