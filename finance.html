@@ -78,6 +78,7 @@
     .ledger-edit-table tfoot th,.ledger-edit-table tfoot td{padding:10px 8px;border-top:2px solid rgba(0,212,255,.45);background:rgba(0,48,135,.36)}
     .ledger-edit-table tfoot th{text-align:right;font-size:.84rem}
     .ledger-edit-table .ledger-table-total{text-align:right;color:var(--cyan);font-size:1rem;font-weight:900;white-space:nowrap}
+    .detail-btn{border:1px solid rgba(114,214,255,.38);background:rgba(114,214,255,.12);color:var(--cyan);border-radius:999px;padding:6px 10px;font-size:.72rem;font-weight:900;cursor:pointer;white-space:nowrap}
     .step-list{margin:8px 0 0;padding-left:1.2em;color:var(--ink-2);font-size:.78rem;line-height:1.65}
     .field-help{font-size:.7rem;color:var(--ink-3);line-height:1.5;margin-top:4px}
     .section-head{display:flex;align-items:center;justify-content:space-between;gap:10px;margin:16px 0 8px}
@@ -435,6 +436,7 @@ function normalize(){
     }
     yd.collections.forEach(function(c){if(!c.payments)c.payments={};});
     ensureBasicCollections(yd);
+    rebuildCollectionLedgers(yd);
   });
   var yd=data.years[data.activeYear];
   if(!selectedCollectionId&&yd.collections.length)selectedCollectionId=yd.collections[0].id;
@@ -611,14 +613,15 @@ function ledgerCategoryOptions(selected){
   return cats.map(function(c){return '<option value="'+esc(c)+'" '+(c===selected?'selected':'')+'>'+esc(c)+'</option>';}).join("");
 }
 function renderLedgerRows(kind,targetId){
-  var rows=yearData().ledger.filter(function(x){return x.kind===kind&&monthKey(x.date)===selectedMonth;}).sort(function(a,b){return (a.date||"").localeCompare(b.date||"")||a.id-b.id;});
+  var rows=yearData().ledger.filter(function(x){return x.kind===kind&&monthKey(x.date)===selectedMonth;}).sort(function(a,b){return (a.date||"").localeCompare(b.date||"")||String(a.id).localeCompare(String(b.id));});
   document.getElementById(targetId).innerHTML=rows.map(function(x){
     var direct=x.source==="direct"&&!x.sourceId;
     if(!direct){
+      var action=isCollectionEntry(x)?'<button class="detail-btn" type="button" onclick="showCollectionBreakdown(\''+esc(x.sourceId||"")+'\')">内訳</button>':'<span class="badge '+sourceClass(x)+'">'+esc(sourceText(x))+'</span>';
       return '<tr>'+
         '<td class="readonly-cell">'+esc(x.date||"")+'</td><td class="readonly-cell">'+esc(x.category||"その他")+'</td>'+
         '<td class="readonly-cell">'+esc(x.item||"")+'</td><td class="amount-readonly">'+yen(x.amount)+'</td>'+
-        '<td class="readonly-cell">'+esc(x.note||"")+'</td><td><span class="badge '+sourceClass(x)+'">'+esc(sourceText(x))+'</span></td></tr>';
+        '<td class="readonly-cell">'+esc(x.note||"")+'</td><td>'+action+'</td></tr>';
     }
     return '<tr>'+
       '<td><input class="form-control" type="date" value="'+esc(x.date||"")+'" onchange="editLedgerLine('+x.id+',\'date\',this.value,true)"></td>'+
@@ -688,23 +691,57 @@ function collectionCategory(c){
   return "団費";
 }
 function collectionSourceId(cid,key){return "collection:"+cid+":"+key;}
-function syncCollectionLedger(c,key,member,pay){
-  var yd=yearData();
-  var sid=collectionSourceId(c.id,key);
-  yd.ledger=yd.ledger.filter(function(x){return x.sourceId!==sid;});
-  if(pay.status==="paid"){
-    yd.ledger.unshift({
-      id:Date.now(),
-      source:"collection",
-      sourceId:sid,
-      date:pay.date||c.due||new Date().toISOString().slice(0,10),
-      kind:"income",
-      category:collectionCategory(c),
-      item:c.title+" / "+member.name,
-      amount:paymentAmount(c,member,pay),
-      note:pay.note||""
+function rebuildCollectionLedgers(yd){
+  if(!yd||!Array.isArray(yd.ledger)||!Array.isArray(yd.collections))return;
+  yd.ledger=yd.ledger.filter(function(x){return !isCollectionEntry(x);});
+  var members=memberList();
+  yd.collections.forEach(function(c){
+    var grouped={};
+    Object.keys(c.payments||{}).forEach(function(key){
+      var pay=c.payments[key]||{};
+      if(pay.status!=="paid")return;
+      var member=members.find(function(m){return m.key===key;})||{name:key,grade:""};
+      var date=pay.date||c.due||new Date().toISOString().slice(0,10);
+      var month=monthKey(date);
+      if(!validMonth(month))return;
+      if(!grouped[month])grouped[month]=[];
+      grouped[month].push({
+        name:member.name,
+        grade:member.grade||"",
+        date:date,
+        amount:paymentAmount(c,member,pay,members),
+        note:pay.note||""
+      });
     });
-  }
+    Object.keys(grouped).sort().reverse().forEach(function(month){
+      var details=grouped[month].sort(function(a,b){return (a.grade||"").localeCompare(b.grade||"")||(a.name||"").localeCompare(b.name||"");});
+      var total=details.reduce(function(s,d){return s+num(d.amount);},0);
+      yd.ledger.unshift({
+        id:"collection-"+c.id+"-"+month,
+        source:"collection",
+        sourceId:collectionSourceId(c.id,month),
+        collectionId:c.id,
+        date:month+"-01",
+        kind:"income",
+        category:collectionCategory(c),
+        item:c.title+"（"+details.length+"名）",
+        amount:total,
+        note:"集金タブの支払い済を月ごとに合計",
+        details:details
+      });
+    });
+  });
+}
+function showCollectionBreakdown(sourceId){
+  var row=yearData().ledger.find(function(x){return x.sourceId===sourceId;});
+  if(!row||!row.details||!row.details.length){alert("内訳がありません。");return;}
+  var lines=row.details.map(function(d){
+    return (d.grade?d.grade+" ":"")+d.name+" / "+yen(d.amount)+" / "+(d.date||"日付なし")+(d.note?" / "+d.note:"");
+  });
+  alert(row.item+"\n合計 "+yen(row.amount)+"\n\n"+lines.join("\n"));
+}
+function syncCollectionLedger(c,key,member,pay){
+  rebuildCollectionLedgers(yearData());
 }
 function setPayment(cid,encodedKey,field,value){
   var c=yearData().collections.find(function(x){return String(x.id)===String(cid);});
