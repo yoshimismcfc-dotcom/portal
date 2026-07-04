@@ -7,6 +7,7 @@
   <meta http-equiv="Expires" content="0">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>大会要綱・対戦表｜吉見SMC FC</title>
+  <script src="firebase-config.js"></script>
   <link rel="stylesheet" href="common.css">
   <style>
     /* ====== タブ ====== */
@@ -120,6 +121,22 @@
     /* コート別スケジュール横並び */
     .courts-row{display:grid;grid-template-columns:1fr 1fr;gap:16px}
     @media(max-width:600px){.courts-row{grid-template-columns:1fr}}
+
+    /* ===== 保存・読み込みモーダル ===== */
+    .save-modal-bg{position:fixed;inset:0;background:rgba(0,0,0,.85);display:none;place-items:center;z-index:300;backdrop-filter:blur(6px);padding:14px}
+    .save-modal-bg.open{display:grid}
+    .save-modal{background:var(--surface-lt);border:1px solid var(--line-2);border-radius:var(--r16);padding:20px;width:min(480px,100%);max-height:92vh;overflow-y:auto}
+    .save-modal h3{font-size:.95rem;font-weight:900;color:#fff;margin-bottom:14px}
+    .saved-item{display:flex;align-items:center;gap:10px;background:rgba(255,255,255,.04);border:1px solid var(--line-2);border-radius:var(--r8);padding:10px 12px;margin-bottom:8px;cursor:pointer;transition:.15s}
+    .saved-item:hover{border-color:var(--orange);background:rgba(255,107,43,.07)}
+    .saved-item-info{flex:1;min-width:0}
+    .saved-item-name{font-size:.86rem;font-weight:900;color:#fff;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+    .saved-item-meta{font-size:.72rem;color:var(--ink-3);margin-top:2px}
+    .saved-item-del{background:none;border:none;color:rgba(255,68,102,.6);cursor:pointer;font-size:.85rem;padding:4px 6px;border-radius:4px;flex-shrink:0}
+    .saved-item-del:hover{color:#ff4466;background:rgba(255,68,102,.1)}
+    /* 折り返し対応 */
+    .wrap-flex{display:flex;flex-wrap:wrap;gap:8px;align-items:center}
+    .btn-group{display:flex;flex-wrap:wrap;gap:8px;margin-top:10px}
   </style>
 </head>
 <body>
@@ -229,6 +246,35 @@
   </div>
 
 </main>
+
+<!-- 保存モーダル -->
+<div class="save-modal-bg" id="modal-save" onclick="if(event.target.id==='modal-save')closeSaveModal()">
+  <div class="save-modal">
+    <h3 id="save-modal-title">💾 保存</h3>
+    <div class="form-group">
+      <label class="form-label">保存名 <span style="color:var(--red)">*</span></label>
+      <input class="form-control" id="save-name-input" placeholder="例：北彩リーグ第1節 U10">
+    </div>
+    <div style="display:flex;gap:8px;justify-content:flex-end;margin-top:12px;flex-wrap:wrap">
+      <button class="btn btn-outline btn-sm" onclick="closeSaveModal()">キャンセル</button>
+      <button class="btn btn-primary btn-sm" onclick="execSave()">💾 クラウドに保存</button>
+    </div>
+  </div>
+</div>
+
+<!-- 読込モーダル -->
+<div class="save-modal-bg" id="modal-load" onclick="if(event.target.id==='modal-load')closeLoadModal()">
+  <div class="save-modal">
+    <h3 id="load-modal-title">📂 保存済みデータを読み込む</h3>
+    <div id="saved-list">
+      <p style="color:var(--ink-3);text-align:center;padding:20px;font-size:.84rem">保存されたデータがありません。</p>
+    </div>
+    <div style="display:flex;justify-content:flex-end;margin-top:10px">
+      <button class="btn btn-outline btn-sm" onclick="closeLoadModal()">閉じる</button>
+    </div>
+  </div>
+</div>
+
 <footer class="site-footer no-print">YOSHIMI SMC FC — SMART PORTAL</footer>
 <script>
 /* ===== タブ ===== */
@@ -578,6 +624,150 @@ function printLandscape(){
   ["y-date","t-date"].forEach(function(id){var e=document.getElementById(id);if(e)e.value=ds;});
   updateTeamInputs();
 })();
+
+/* ===== クラウド保存・読込 ===== */
+var SAVE_KEY = "tournament_saves";
+var _saveType = "youkou"; // "youkou" or "taisen"
+var _allSaves = {};
+
+// Firebase読込
+dbListen("tournament_saves", function(val){
+  _allSaves = (val && typeof val==="object") ? val : {};
+}, SAVE_KEY, {});
+
+// 要綱フィールドを収集
+var YOUKOU_FIELDS = ["y-title","y-cat","y-date","y-place","y-host",
+  "y-uketsuke","y-fee","y-format","y-time","y-sub","y-rank",
+  "y-ref","y-award","y-rain","y-parking","y-rep","y-contact"];
+
+// 対戦表フィールドを収集
+var TAISEN_FIELDS = ["t-title","t-date","t-place","t-min","t-courts","t-start","t-guide"];
+
+function collectFields(fields){
+  var data = {};
+  fields.forEach(function(id){
+    var el = document.getElementById(id);
+    if(el) data[id] = el.value;
+  });
+  return data;
+}
+function applyFields(data){
+  Object.keys(data).forEach(function(id){
+    var el = document.getElementById(id);
+    if(el) el.value = data[id];
+  });
+}
+
+// 保存モーダルを開く
+function openSaveModal(type){
+  _saveType = type;
+  document.getElementById("save-modal-title").textContent = type==="youkou"?"💾 要綱を保存":"💾 対戦表を保存";
+  var titleField = type==="youkou" ? document.getElementById("y-title") : document.getElementById("t-title");
+  document.getElementById("save-name-input").value = (titleField ? titleField.value : "") || "";
+  document.getElementById("modal-save").classList.add("open");
+  setTimeout(function(){ document.getElementById("save-name-input").focus(); }, 100);
+}
+function closeSaveModal(){ document.getElementById("modal-save").classList.remove("open"); }
+
+// 保存実行
+function execSave(){
+  var name = document.getElementById("save-name-input").value.trim();
+  if(!name){ alert("保存名を入力してください"); return; }
+  var fields = _saveType==="youkou" ? YOUKOU_FIELDS : TAISEN_FIELDS;
+  var entry = {
+    name: name,
+    type: _saveType,
+    savedAt: new Date().toISOString(),
+    data: collectFields(fields)
+  };
+  // チーム数やチーム名も保存（対戦表）
+  if(_saveType==="taisen"){
+    var teamInputs = document.querySelectorAll("[id^='t-'][id*='-0']");
+    var teams = [];
+    for(var i=0;i<16;i++){
+      var el = document.getElementById("t-team-"+i);
+      if(el) teams.push(el.value);
+    }
+    entry.data.teams = JSON.stringify(teams);
+    var cntEl = document.getElementById("t-teamcount");
+    if(cntEl) entry.data["t-teamcount"] = cntEl.value;
+  }
+  var id = "sv_" + Date.now();
+  _allSaves[id] = entry;
+  localStorage.setItem(SAVE_KEY, JSON.stringify(_allSaves));
+  dbSave("tournament_saves", _allSaves, SAVE_KEY, function(){
+    closeSaveModal();
+    alert("「"+name+"」を保存しました！");
+  });
+}
+
+// 読込モーダルを開く
+function openLoadModal(type){
+  _saveType = type;
+  document.getElementById("load-modal-title").textContent = type==="youkou"?"📂 保存済み要綱":"📂 保存済み対戦表";
+  renderSavedList(type);
+  document.getElementById("modal-load").classList.add("open");
+}
+function closeLoadModal(){ document.getElementById("modal-load").classList.remove("open"); }
+
+function renderSavedList(type){
+  var items = Object.entries(_allSaves)
+    .filter(function(e){ return e[1].type===type; })
+    .sort(function(a,b){ return (b[1].savedAt||"").localeCompare(a[1].savedAt||""); });
+  var wrap = document.getElementById("saved-list");
+  if(!items.length){
+    wrap.innerHTML = "<p style=\"color:var(--ink-3);text-align:center;padding:20px;font-size:.84rem\">保存されたデータがありません。</p>";
+    return;
+  }
+  var html2 = "";
+  items.forEach(function(e){
+    var id=e[0], item=e[1];
+    var dateStr = item.savedAt ? new Date(item.savedAt).toLocaleString("ja-JP") : "";
+    html2 += "<div class=\"saved-item\">";
+    html2 += "<div class=\"saved-item-info\" onclick=\"loadSave('" + id + "')\">";
+    html2 += "<div class=\"saved-item-name\">" + esc2(item.name) + "</div>";
+    html2 += "<div class=\"saved-item-meta\">" + dateStr + "</div>";
+    html2 += "</div>";
+    html2 += "<button class=\"saved-item-del\" onclick=\"deleteSave('" + id + "')\">🗑</button>";
+    html2 += "</div>";
+  });
+  wrap.innerHTML = html2;
+}
+
+function esc2(s){ return String(s||"").replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;"); }
+
+// データ読込
+function loadSave(id){
+  var item = _allSaves[id];
+  if(!item){ alert("データが見つかりません"); return; }
+  if(!confirm("「"+item.name+"」を読み込みますか？現在の入力内容は上書きされます。")) return;
+  applyFields(item.data||{});
+  // チーム情報復元（対戦表）
+  if(item.type==="taisen" && item.data.teams){
+    try{
+      var teams = JSON.parse(item.data.teams);
+      teams.forEach(function(v,i){
+        var el = document.getElementById("t-team-"+i);
+        if(el) el.value = v;
+      });
+    }catch(e){}
+  }
+  closeLoadModal();
+  // プレビューを自動更新
+  if(item.type==="youkou") buildYoukou();
+  else buildTaisen();
+  alert("「"+item.name+"」を読み込みました！");
+}
+
+// 削除
+function deleteSave(id){
+  var item = _allSaves[id];
+  if(!item||!confirm("「"+item.name+"」を削除しますか？")) return;
+  delete _allSaves[id];
+  localStorage.setItem(SAVE_KEY, JSON.stringify(_allSaves));
+  dbSave("tournament_saves", _allSaves, SAVE_KEY, null);
+  renderSavedList(_saveType);
+}
 </script>
 <script src="common.js"></script>
 </body>
