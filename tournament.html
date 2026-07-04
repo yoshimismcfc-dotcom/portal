@@ -193,11 +193,6 @@
         <div class="form-group"><label class="form-label">受付</label><input class="form-control" id="y-uketsuke" value="8:00より受付（参加費徴収）"></div>
         <div class="form-group"><label class="form-label">参加費</label><input class="form-control" id="y-fee" value="1チーム5,000円（受付にて集金）"></div>
       </div>
-      <!-- カスタム項目追加エリア -->
-      <div id="custom-rows-wrap"></div>
-      <div class="add-row-btn" onclick="addCustomRow()">
-        ＋ 項目を追加（基本情報に行を追加できます）
-      </div>
       <div class="sec">⚽ 試合ルール</div>
       <div class="fg3">
         <div class="form-group"><label class="form-label">競技形式</label><input class="form-control" id="y-format" value="8人制（最少6名）"></div>
@@ -212,6 +207,11 @@
       <div class="fg2">
         <div class="form-group"><label class="form-label">雨天時</label><textarea class="form-control" id="y-rain" rows="3" style="resize:vertical;min-height:96px">当日AM6:00頃に実施可否を判断し、各チームへ連絡します。</textarea></div>
         <div class="form-group"><label class="form-label">駐車場</label><textarea class="form-control" id="y-parking" rows="3" style="resize:vertical;min-height:96px">会場周辺に3か所。路上駐車禁止。乗り合わせにご協力ください。</textarea></div>
+      </div>
+      <!-- カスタム項目追加エリア -->
+      <div id="custom-rows-wrap"></div>
+      <div class="add-row-btn" onclick="addCustomRow()">
+        ＋ 基本情報に項目を追加する
       </div>
       <div class="sec">📞 問い合わせ</div>
       <div class="fg2">
@@ -572,11 +572,18 @@ function buildTaisen(){
 /* ===== LINEコピー ===== */
 function getYoukouText(){
   var f=function(id){var el=document.getElementById(id);return el?el.value.trim():"";};
-  var t="【"+f("youkou-title")+"】\n";
-  if(f("youkou-date"))  t+="📅 "+f("youkou-date")+"\n";
-  if(f("youkou-venue")) t+="📍 "+f("youkou-venue")+"\n";
-  if(f("youkou-time"))  t+="⏰ "+f("youkou-time")+"\n";
-  if(f("youkou-note"))  t+="\n"+f("youkou-note")+"\n";
+  var t="【"+f("y-title")+"】\n";
+  if(f("y-cat"))     t+="カテゴリー："+f("y-cat")+"\n";
+  if(f("y-date"))    t+="📅 "+f("y-date")+"\n";
+  if(f("y-place"))   t+="📍 "+f("y-place")+"\n";
+  if(f("y-host"))    t+="主催："+f("y-host")+"\n";
+  if(f("y-uketsuke"))t+="受付："+f("y-uketsuke")+"\n";
+  if(f("y-fee"))     t+="参加費："+f("y-fee")+"\n";
+  if(f("y-format"))  t+="競技形式："+f("y-format")+"\n";
+  if(f("y-time"))    t+="試合時間："+f("y-time")+"\n";
+  if(f("y-rain"))    t+="雨天時："+f("y-rain")+"\n";
+  if(f("y-rep"))     t+="\n担当："+f("y-rep")+"\n";
+  if(f("y-contact")) t+="連絡先："+f("y-contact")+"\n";
   return t;
 }
 function getTaisenText(){
