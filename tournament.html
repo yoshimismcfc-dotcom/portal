@@ -502,38 +502,26 @@ function buildTaisen(){
 /* ===== LINEコピー ===== */
 function getYoukouText(){
   var f=function(id){var el=document.getElementById(id);return el?el.value.trim():"";};
-  var t="【"+f("youkou-title")+"】
-";
-  if(f("youkou-date")) t+="📅 "+f("youkou-date")+"
-";
-  if(f("youkou-venue")) t+="📍 "+f("youkou-venue")+"
-";
-  if(f("youkou-time")) t+="⏰ "+f("youkou-time")+"
-";
-  if(f("youkou-note")) t+="
-"+f("youkou-note")+"
-";
+  var t="【"+f("youkou-title")+"】\n";
+  if(f("youkou-date"))  t+="📅 "+f("youkou-date")+"\n";
+  if(f("youkou-venue")) t+="📍 "+f("youkou-venue")+"\n";
+  if(f("youkou-time"))  t+="⏰ "+f("youkou-time")+"\n";
+  if(f("youkou-note"))  t+="\n"+f("youkou-note")+"\n";
   return t;
 }
 function getTaisenText(){
   var f=function(id){var el=document.getElementById(id);return el?el.value.trim():"";};
-  var t="【"+f("taisen-title")+"】 対戦表
-";
-  if(f("taisen-date")) t+="📅 "+f("taisen-date")+"
-";
-  if(f("taisen-venue")) t+="📍 "+f("taisen-venue")+"
-";
-  // 対戦表のゲーム情報を取得
+  var t="【"+f("taisen-title")+"】 対戦表\n";
+  if(f("taisen-date"))  t+="📅 "+f("taisen-date")+"\n";
+  if(f("taisen-venue")) t+="📍 "+f("taisen-venue")+"\n";
   var rows=document.querySelectorAll(".taisen-game-row");
   if(rows.length){
-    t+="
-";
+    t+="\n";
     rows.forEach(function(r){
       var cells=r.querySelectorAll("td,th");
       var line=[];
       cells.forEach(function(c){if(c.textContent.trim())line.push(c.textContent.trim());});
-      if(line.length) t+=line.join(" vs ")+"
-";
+      if(line.length) t+=line.join(" vs ")+"\n";
     });
   }
   return t;
