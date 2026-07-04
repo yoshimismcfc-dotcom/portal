@@ -689,6 +689,33 @@ function renderMonthly(){
   renderLedgerRows("expense","expense-ledger-rows");
   renderMonthlyTotals();
 }
+function copyMonthly(){
+  var year  = document.getElementById("sel-year")  ? document.getElementById("sel-year").value  : new Date().getFullYear();
+  var month = document.getElementById("sel-month") ? document.getElementById("sel-month").value : (new Date().getMonth()+1);
+  var pad = function(n){ return n<10?"0"+n:String(n); };
+  var prefix = year+"-"+pad(month);
+  var yd = yearData();
+  var rows = (yd.ledger||[]).filter(function(x){ return (x.date||"").startsWith(prefix); })
+    .sort(function(a,b){ return (a.date||"").localeCompare(b.date||""); });
+  if(!rows.length){ alert("この月のデータがありません"); return; }
+  var t = "【"+year+"年"+month+"月 現金出納帳】\n\n";
+  t += "月日　　摘要　　　　　入金　　出金\n";
+  t += "────────────────────\n";
+  rows.forEach(function(r){
+    var day = (r.date||"").slice(5);
+    var amt = "¥"+Number(r.amount||0).toLocaleString();
+    var inc = r.kind==="income" ? amt : "";
+    var exp = r.kind==="expense" ? amt : "";
+    t += day+"  "+r.item+"  "+inc+"  "+exp+"\n";
+  });
+  var totalIn  = rows.filter(function(r){return r.kind==="income"; }).reduce(function(s,r){return s+num(r.amount);},0);
+  var totalExp = rows.filter(function(r){return r.kind==="expense";}).reduce(function(s,r){return s+num(r.amount);},0);
+  t += "────────────────────\n";
+  t += "収入合計：¥"+totalIn.toLocaleString()+"　支出合計：¥"+totalExp.toLocaleString();
+  navigator.clipboard.writeText(t)
+    .then(function(){ alert("出納帳をコピーしました！LINEに貼り付けてください。"); })
+    .catch(function(){ alert("コピーできませんでした。"); });
+}
 function currentCollection(){
   var yd=yearData();
   if(!yd.collections.length)return null;

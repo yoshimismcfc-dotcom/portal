@@ -92,6 +92,7 @@
   <div class="tab-sec active" id="tab-request">
     <div style="display:flex;gap:8px;margin-bottom:10px;flex-wrap:wrap">
       <button class="btn btn-primary" onclick="openAdd()">＋ 立替申請する</button>
+      <button class="btn btn-outline btn-sm" onclick="copyKaikeiList()">📋 LINEコピー</button>
       <div style="flex:1;min-width:120px">
         <input class="form-control" id="search-input" placeholder="🔍 名前・品目で検索" oninput="renderList()" style="height:40px">
       </div>
@@ -558,6 +559,25 @@ function esc(s){ return String(s||"").replace(/&/g,"&amp;").replace(/</g,"&lt;")
 document.getElementById("modal-req").addEventListener("click",function(e){if(e.target.id==="modal-req")closeModal("modal-req");});
 document.getElementById("modal-comment").addEventListener("click",function(e){if(e.target.id==="modal-comment")closeModal("modal-comment");});
 window.addEventListener("DOMContentLoaded", function(){ initSelects(); });
+
+function copyKaikeiList(){
+  var pending = _data.filter(function(r){ return r.status==="pending"||r.status==="approved"; });
+  if(!pending.length){ alert("申請中・承認済みの立替はありません"); return; }
+  var STATUS = {pending:"⏳申請中", approved:"✅承認済（未払い）"};
+  var t = "【立替払い一覧】\n\n";
+  var total = 0;
+  pending.forEach(function(r){
+    t += STATUS[r.status]+" "+r.person+"\n";
+    t += "   "+r.item+" ¥"+Number(r.amount||0).toLocaleString()+"\n";
+    if(r.date) t += "   購入日："+r.date+"\n";
+    t += "\n";
+    total += Number(r.amount||0);
+  });
+  t += "合計：¥"+total.toLocaleString();
+  navigator.clipboard.writeText(t)
+    .then(function(){ alert("コピーしました！LINEに貼り付けてください。"); })
+    .catch(function(){ alert("コピーできませんでした。"); });
+}
 </script>
 </body>
 </html>

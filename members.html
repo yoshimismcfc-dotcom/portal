@@ -428,6 +428,24 @@ window.addEventListener("DOMContentLoaded", function(){
     render();
   }, KEY, null);
 });
+
+function copyMemberList(){
+  var grades = ["1年","2年","3年","4年","5年","6年"];
+  var t = "【団員名簿】\n\n";
+  grades.forEach(function(g){
+    var members = (_roster||[]).filter(function(m){ return m.grade===g && m.name; });
+    if(members.length){
+      t += "■ "+g+"（"+members.length+"名）\n";
+      members.forEach(function(m){
+        t += "  "+m.num+" "+m.name+(m.kana?" ("+m.kana+")":"")+"\n";
+      });
+      t += "\n";
+    }
+  });
+  navigator.clipboard.writeText(t)
+    .then(function(){ alert("名簿をコピーしました！LINEに貼り付けてください。"); })
+    .catch(function(){ alert("コピーできませんでした。"); });
+}
 </script>
 <script src="common.js"></script>
 </body>
