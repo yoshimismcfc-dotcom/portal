@@ -1,0 +1,28 @@
+name: Update SW Version on Push
+
+on:
+  push:
+    branches: [main]
+
+jobs:
+  update-version:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Update sw.js version timestamp
+        run: |
+          VERSION=$(date +%Y%m%d%H%M%S)
+          sed -i "s|// バージョン: [0-9]*|// バージョン: $VERSION|" sw.js
+          sed -i "s|const CACHE_VERSION = '[^']*'|const CACHE_VERSION = '$VERSION'|" sw.js
+          echo "Updated version to $VERSION"
+
+      - name: Commit if changed
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git diff --quiet sw.js || (git add sw.js && git commit -m "Auto: sw.js version $VERSION [skip ci]")
+          git push
