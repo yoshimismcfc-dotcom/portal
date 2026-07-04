@@ -504,6 +504,11 @@ function buildTaisen(){
       h+='</tr></thead><tbody>';
       var no=1;
       schedsByTime.forEach(function(slot,si){
+if(slot.isBreak){
+          var bEnd=addMins(slot.time,slot.breakMin);
+          h+="<tr><td colspan=\"7\" class=\"tr-break-td\">"+slot.breakLabel+"\u3000（"+slot.breakMin+"分）\u3000"+slot.time+"〜"+bEnd+"</td></tr>";
+          return;
+        }
         slot.games.forEach(function(g){
           if(g.blkIdx===blk.idx){
             h+='<tr'+(si%2===1?' class="tr-alt-bg"':"")+'>';
@@ -583,6 +588,11 @@ function buildTaisen(){
     h+='<th class="sched-th">アウェイ</th><th class="sched-th" style="width:60px">備考</th>';
     h+='</tr></thead><tbody>';
     schedsByTime.forEach(function(slot,si){
+if(slot.isBreak){
+        var bEnd=addMins(slot.time,slot.breakMin);
+        h+="<tr><td colspan=\"7\" class=\"tr-break-td\">"+slot.breakLabel+"\u3000（"+slot.breakMin+"分）\u3000"+slot.time+"〜"+bEnd+"</td></tr>";
+        return;
+      }
       slot.games.forEach(function(g,gi){
         h+='<tr'+(si%2===1?' class="tr-alt-bg"':"")+'>';
         h+='<td>'+(si+1)+'</td><td>'+slot.time+'</td>';
