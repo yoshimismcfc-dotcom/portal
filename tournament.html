@@ -142,6 +142,14 @@
     .saved-item-del:hover{color:#ff4466;background:rgba(255,68,102,.1)}
     /* 折り返し対応 */
     .wrap-flex{display:flex;flex-wrap:wrap;gap:8px;align-items:center}
+    /* カスタム項目行 */
+    .custom-row{display:flex;gap:6px;align-items:flex-start;margin-bottom:8px}
+    .custom-row .custom-label{flex:0 0 110px;min-width:80px}
+    .custom-row .custom-val{flex:1;min-width:0}
+    .custom-row .del-row-btn{background:none;border:1px solid rgba(255,68,102,.4);color:#ff6680;border-radius:6px;padding:5px 8px;cursor:pointer;font-size:.8rem;flex-shrink:0;line-height:1;margin-top:2px}
+    .custom-row .del-row-btn:hover{background:rgba(255,68,102,.1)}
+    .add-row-btn{display:flex;align-items:center;gap:6px;padding:7px 12px;background:rgba(0,212,255,.07);border:1px dashed rgba(0,212,255,.3);border-radius:var(--r8);color:var(--cyan);font-size:.8rem;font-weight:700;cursor:pointer;width:100%;margin-top:4px;box-sizing:border-box}
+    .add-row-btn:hover{background:rgba(0,212,255,.13)}
     .btn-group{display:flex;flex-wrap:wrap;gap:6px;margin-top:10px;width:100%;box-sizing:border-box}
   </style>
 </head>
@@ -183,6 +191,11 @@
       <div class="fg2">
         <div class="form-group"><label class="form-label">受付</label><input class="form-control" id="y-uketsuke" value="8:00より受付（参加費徴収）"></div>
         <div class="form-group"><label class="form-label">参加費</label><input class="form-control" id="y-fee" value="1チーム5,000円（受付にて集金）"></div>
+      </div>
+      <!-- カスタム項目追加エリア -->
+      <div id="custom-rows-wrap"></div>
+      <div class="add-row-btn" onclick="addCustomRow()">
+        ＋ 項目を追加（基本情報に行を追加できます）
       </div>
       <div class="sec">⚽ 試合ルール</div>
       <div class="fg3">
@@ -631,6 +644,46 @@ function printLandscape(){
   updateTeamInputs();
 })();
 
+/* ===== カスタム項目（基本情報） ===== */
+var _customRows = []; // [{id, label, val}]
+
+function addCustomRow(label, val){
+  var id = "cr_" + Date.now() + "_" + Math.random().toString(36).slice(2,6);
+  _customRows.push({id:id, label:label||"", val:val||""});
+  renderCustomRows();
+}
+
+function removeCustomRow(id){
+  _customRows = _customRows.filter(function(r){ return r.id!==id; });
+  renderCustomRows();
+}
+
+function renderCustomRows(){
+  var wrap = document.getElementById("custom-rows-wrap");
+  if(!wrap) return;
+  if(!_customRows.length){ wrap.innerHTML=""; return; }
+  var html2 = "";
+  _customRows.forEach(function(r, idx){
+    html2 += "<div class=\"custom-row\">";
+    html2 += "<input class=\"form-control custom-label\" placeholder=\"項目名\" value=\"" + esc3(r.label) + "\"";
+    html2 += " oninput=\"_customRows[" + idx + "].label=this.value\">";
+    html2 += "<textarea class=\"form-control custom-val\" rows=\"2\" placeholder=\"内容\"";
+    html2 += " oninput=\"_customRows[" + idx + "].val=this.value;autoResize(this)\">";
+    html2 += esc3(r.val);
+    html2 += "</textarea>";
+    html2 += "<button class=\"del-row-btn\" onclick=\"_customRows.splice(" + idx + ",1);renderCustomRows()\">🗑</button>";
+    html2 += "</div>";
+  });
+  wrap.innerHTML = html2;
+  wrap.querySelectorAll("textarea").forEach(function(el){ autoResize(el); });
+}
+
+function getCustomRows(){
+  return _customRows.filter(function(r){ return r.label.trim()||r.val.trim(); });
+}
+
+function esc3(s){ return String(s||"").replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;").replace(/"/g,"&quot;"); }
+
 /* ===== クラウド保存・読込 ===== */
 var SAVE_KEY = "tournament_saves";
 var _saveType = "youkou"; // "youkou" or "taisen"
@@ -684,7 +737,8 @@ function execSave(){
     name: name,
     type: _saveType,
     savedAt: new Date().toISOString(),
-    data: collectFields(fields)
+    data: collectFields(fields),
+    customRows: _saveType==="youkou" ? JSON.parse(JSON.stringify(_customRows)) : []
   };
   // チーム数やチーム名も保存（対戦表）
   if(_saveType==="taisen"){
@@ -757,6 +811,11 @@ function loadSave(id){
         if(el) el.value = v;
       });
     }catch(e){}
+  }
+  // カスタム行を復元
+  if(item.type==="youkou" && Array.isArray(item.customRows)){
+    _customRows = item.customRows;
+    renderCustomRows();
   }
   closeLoadModal();
   // プレビューを自動更新
