@@ -218,9 +218,12 @@
         <div class="form-group"><label class="form-label">代表者名</label><textarea class="form-control" id="y-rep" rows="2" style="resize:vertical;min-height:64px">吉見SMC代表　片山孝俊</textarea></div>
         <div class="form-group"><label class="form-label">電話・メール</label><textarea class="form-control" id="y-contact" rows="2" style="resize:vertical;min-height:64px">090-3595-1970 / yoshimi.smc.fc@gmail.com</textarea></div>
       </div>
-      <div style="display:flex;gap:8px;margin-top:10px;flex-wrap:wrap">
-        <button class="btn btn-primary" onclick="buildYoukou()" style="flex:1">👁 要綱プレビューを表示</button>
-        <button class="btn btn-cyan btn-sm no-print" onclick="buildAndPrintPortrait()" id="you-print-btn">🖨 印刷・PDF（A4縦）</button>
+      <div class="btn-group">
+        <button class="btn btn-primary" onclick="buildYoukou()" style="flex:1 1 140px">👁 プレビュー</button>
+        <button class="btn btn-outline btn-sm" onclick="openSaveModal('youkou')">💾 保存</button>
+        <button class="btn btn-outline btn-sm" onclick="openLoadModal('youkou')">📂 読込</button>
+        <button class="btn btn-cyan btn-sm no-print" onclick="buildAndPrintPortrait()" id="you-print-btn">🖨 印刷・PDF</button>
+        <button class="btn btn-outline btn-sm" onclick="copyYoukou()">📋 LINE</button>
       </div>
     </div>
     <div class="pdf-guide" id="y-guide">
