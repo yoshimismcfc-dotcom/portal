@@ -30,6 +30,10 @@
     .role-main   {background:rgba(255,107,43,.2);color:#ffaa66;border:1px solid rgba(255,107,43,.4)}
     .role-assist {background:rgba(0,212,255,.15);color:var(--cyan);border:1px solid rgba(0,212,255,.4)}
     .role-4th    {background:rgba(0,255,136,.12);color:#66ffaa;border:1px solid rgba(0,255,136,.35)}
+    .rule-card{display:flex;gap:12px;background:rgba(255,255,255,.04);border:1px solid var(--line-2);border-radius:var(--r8);padding:12px 14px;align-items:flex-start}
+    .rule-num{background:var(--orange);color:#fff;border-radius:50%;width:26px;height:26px;min-width:26px;display:flex;align-items:center;justify-content:center;font-size:.78rem;font-weight:900;flex-shrink:0;margin-top:1px}
+    .rule-body{flex:1;min-width:0}
+    .rule-title{font-size:.86rem;font-weight:900;color:#fff;margin-bottom:6px}
   </style>
 </head>
 <body>
@@ -279,6 +283,114 @@
             <strong>ファウル報告</strong><p>旗を垂直に立てて主審に知らせる</p>
           </div>
         </div>
+
+      <!-- 副審8つの心得 -->
+      <div class="guide-section" style="margin-top:18px">
+        <h3 style="display:flex;align-items:center;gap:8px;margin-bottom:14px">
+          <span style="background:var(--orange);color:#fff;border-radius:50%;width:26px;height:26px;display:inline-flex;align-items:center;justify-content:center;font-size:.78rem;font-weight:900;flex-shrink:0">8</span>
+          副審の心得
+        </h3>
+        <div style="display:flex;flex-direction:column;gap:10px">
+
+          <div class="rule-card">
+            <div class="rule-num">1</div>
+            <div class="rule-body">
+              <div class="rule-title">キックオフ前のゴール・ネット確認</div>
+              <ul class="guide-list">
+                <li>ゴールネットとゴールの位置確認は必ず行う。</li>
+                <li>フラッグを使わず<strong>手で直接確認</strong>する。</li>
+              </ul>
+            </div>
+          </div>
+
+          <div class="rule-card">
+            <div class="rule-num">2</div>
+            <div class="rule-body">
+              <div class="rule-title">判定はゴールライン・コーナーアークまで走る</div>
+              <ul class="guide-list">
+                <li>ゴールラインのアウト確認はラインまで走り込み、ゴールキック・コーナーキックの合図を主審に送る。明らかにアウトの場合はライン手前でフラッグアップも可。</li>
+                <li>サイドラインが明らかにアウトの時は即、方向の合図をしてよい。</li>
+                <li>きわどいアウトの時は<strong>真上にフラッグアップ</strong>して主審に知らせる。指す方向の手でアップすると分かりやすい。</li>
+                <li>ゴールキック時：ボールがゴールエリア内にあるか・相手選手がペナルティエリアに侵入していないか確認。</li>
+                <li>GKのパントキック時：ペナルティエリア内で蹴られているか確認後、即オフサイドラインへ移動。</li>
+              </ul>
+            </div>
+          </div>
+
+          <div class="rule-card">
+            <div class="rule-num">3</div>
+            <div class="rule-body">
+              <div class="rule-title">フラッグテクニック — 分かりやすくシグナルする</div>
+              <ul class="guide-list">
+                <li>主審に見やすく。方向を指すフラッグの持ち替えは<strong>腰から下</strong>で行う。</li>
+                <li>フラッグは基本<strong>左手</strong>に持つ。右手に持つのは、オフサイド・ゴールキック・コーナーキック・攻撃側スローイン・ハーフウェイラインに向かう時のみ。</li>
+                <li>方向を指す時は静止してピッチに正対する。ポイントに早く入ることが重要。（競技規則 P78〜80）</li>
+              </ul>
+            </div>
+          </div>
+
+          <div class="rule-card">
+            <div class="rule-num">4</div>
+            <div class="rule-body">
+              <div class="rule-title">キックオフ前に主審と打ち合わせする</div>
+              <ul class="guide-list">
+                <li><strong>オフサイドの判定</strong>：フラッグアップのタイミング（カテゴリーが上がるほどギリギリになる）。</li>
+                <li>主審からのオフサイドキャンセル合図の確認。</li>
+                <li>ファールへの介入・ブラインドサイドへの介入合図。</li>
+                <li>微妙なゴールインの合図の確認。</li>
+              </ul>
+            </div>
+          </div>
+
+          <div class="rule-card">
+            <div class="rule-num">5</div>
+            <div class="rule-body">
+              <div class="rule-title">サイドステップの活用</div>
+              <ul class="guide-list">
+                <li>争点に早く入り、<strong>サイドステップ体勢</strong>をとる（ピッチに正対するために重要）。</li>
+                <li>早く走る時もフラッグをバタつかせない。</li>
+              </ul>
+            </div>
+          </div>
+
+          <div class="rule-card">
+            <div class="rule-num">6</div>
+            <div class="rule-body">
+              <div class="rule-title">ペナルティキック時の位置取り</div>
+              <ul class="guide-list">
+                <li>試合中のPK：<strong>ゴールラインとペナルティエリアの交点</strong>に立ち、ゴールインの確認とGKの足の動きを確認。</li>
+                <li>PK戦：<strong>ゴールラインとゴールエリアの交点</strong>に立つ。</li>
+                <li>キック前にGKが動きゴールインしなかった場合はフラッグアップして主審に知らせる。</li>
+              </ul>
+            </div>
+          </div>
+
+          <div class="rule-card">
+            <div class="rule-num">7</div>
+            <div class="rule-body">
+              <div class="rule-title">試合結果をブッキングする</div>
+              <ul class="guide-list">
+                <li>記録カードの記入タイミングは試合前の打ち合わせで決める（希望されない時は省略可）。</li>
+                <li>記録項目：得点者No・時間、懲戒（チーム・No・時間）など。</li>
+              </ul>
+            </div>
+          </div>
+
+          <div class="rule-card">
+            <div class="rule-num">8</div>
+            <div class="rule-body">
+              <div class="rule-title">メンバー表・選手証のチェック</div>
+              <ul class="guide-list">
+                <li>無理に並ばせず、<strong>準備の出来た選手からチェック</strong>する。</li>
+                <li>2名でメンバー表と用具を分担すると正確に早くできる。</li>
+                <li>スマートな対応が信頼につながる。</li>
+              </ul>
+            </div>
+          </div>
+
+        </div>
+      </div>
+
       </div>
     </div>
   </div>
