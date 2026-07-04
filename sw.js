@@ -1,11 +1,5 @@
-// Service Worker v3 - キャッシュ解除版
-// バージョン: 20260703
-
-function clearAllCaches(){
-  return caches.keys().then(function(keys){
-    return Promise.all(keys.map(function(k){ return caches.delete(k); }));
-  });
-}
+// Service Worker v5 - 完全キャッシュ無効
+// バージョン: 20260704
 
 self.addEventListener('install', function(e){
   self.skipWaiting();
@@ -13,7 +7,9 @@ self.addEventListener('install', function(e){
 
 self.addEventListener('activate', function(e){
   e.waitUntil(
-    clearAllCaches().then(function(){
+    caches.keys().then(function(keys){
+      return Promise.all(keys.map(function(k){ return caches.delete(k); }));
+    }).then(function(){
       return self.clients.claim();
     }).then(function(){
       return self.registration.unregister();
@@ -21,7 +17,10 @@ self.addEventListener('activate', function(e){
   );
 });
 
-// キャッシュを使わず常にネットワークから取得
 self.addEventListener('fetch', function(e){
-  e.respondWith(fetch(e.request, {cache: 'no-store'}));
+  e.respondWith(
+    fetch(e.request, {cache: 'no-store'}).catch(function(){
+      return caches.match(e.request);
+    })
+  );
 });
