@@ -135,30 +135,11 @@
   });
 })();
 
-/* ===== Service Worker 自動更新登録 ===== */
+/* ===== Service Worker 登録（キャッシュ無効化のみ・リロードなし） ===== */
 (function(){
   if(!('serviceWorker' in navigator)) return;
-  // 既存のSWを全て解除してから新しいものを登録
+  // 全SWを解除してキャッシュクリア（リロードは行わない）
   navigator.serviceWorker.getRegistrations().then(function(regs){
-    var unregs = regs.map(function(r){ return r.unregister(); });
-    return Promise.all(unregs);
-  }).then(function(){
-    // sw.jsを再登録（バージョン付きURLでキャッシュを回避）
-    return navigator.serviceWorker.register('/portal/sw.js?v=' + Date.now());
-  }).then(function(reg){
-    // 新しいSWが来たら即座に更新を適用
-    reg.addEventListener('updatefound', function(){
-      var newWorker = reg.installing;
-      if(newWorker){
-        newWorker.addEventListener('statechange', function(){
-          if(newWorker.state === 'installed' && navigator.serviceWorker.controller){
-            // ページをリロードして最新版を反映
-            window.location.reload();
-          }
-        });
-      }
-    });
-  }).catch(function(err){
-    console.log('SW登録エラー:', err);
-  });
+    return Promise.all(regs.map(function(r){ return r.unregister(); }));
+  }).catch(function(){});
 })();
