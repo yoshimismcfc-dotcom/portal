@@ -2,11 +2,26 @@
 <html lang="ja">
 <head>
   <meta charset="utf-8">
-  <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
+  <script>
+    // Service Worker・キャッシュを強制削除
+    if('serviceWorker' in navigator){
+      navigator.serviceWorker.getRegistrations().then(function(regs){
+        regs.forEach(function(r){ r.unregister(); });
+      });
+    }
+    if('caches' in window){
+      caches.keys().then(function(keys){
+        keys.forEach(function(k){ caches.delete(k); });
+      });
+    }
+  </script>
+  <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate, max-age=0">
   <meta http-equiv="Pragma" content="no-cache">
-  <meta http-equiv="Expires" content="0">
+  <meta http-equiv="Expires" content="-1">
+  <meta name="version" content="v4-20260704">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>大会要綱・対戦表｜吉見SMC FC</title>
+  <title>大会要綱・対戦表 v5｜吉見SMC FC</title>
+  <script src="firebase-config.js"></script>
   <link rel="stylesheet" href="common.css">
   <style>
     /* ====== タブ ====== */
@@ -15,11 +30,18 @@
     .doc-tab-btn:not(:last-child){border-right:1px solid var(--line-2)}
     .doc-tab-btn.active{background:linear-gradient(135deg,#003087,#0050cc);color:#fff}
     .doc-section{display:none}.doc-section.active{display:block}
-    .fg2{display:grid;grid-template-columns:1fr 1fr;gap:12px}
-    .fg3{display:grid;grid-template-columns:1fr 1fr 1fr;gap:10px}
+    .fg2{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,240px),1fr));gap:10px}
+    .fg3{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,180px),1fr));gap:10px}
+    .fg1{display:flex;flex-direction:column;gap:10px}
     .sec{font-size:.72rem;font-weight:900;color:var(--cyan);letter-spacing:.1em;text-transform:uppercase;margin:14px 0 8px;padding-bottom:5px;border-bottom:1px solid var(--line)}
     /* 入力欄 視認性改善 */
-    #doc-youkou .form-control,#doc-taisen .form-control{background:#1e3a5a!important;color:#fff!important;border-color:rgba(0,212,255,.4)!important}
+    #doc-youkou .form-control,#doc-taisen .form-control{background:#1e3a5a!important;color:#fff!important;border-color:rgba(0,212,255,.4)!important;max-width:100%;box-sizing:border-box;word-break:break-word;overflow-wrap:break-word}
+    #doc-youkou textarea.form-control,#doc-taisen textarea.form-control{line-height:1.6;word-break:break-word;white-space:pre-wrap;overflow-wrap:break-word}
+    #doc-youkou .panel,#doc-taisen .panel{overflow:hidden;word-break:break-word}
+    #doc-youkou .form-group,#doc-taisen .form-group{min-width:0;overflow:hidden}
+    #youkou-preview,#taisen-preview{overflow-x:auto;-webkit-overflow-scrolling:touch}
+    #youkou-preview > *,#taisen-preview > *{min-width:300px}
+    
     #doc-youkou .form-control::placeholder,#doc-taisen .form-control::placeholder{color:rgba(255,255,255,.3)!important}
     #doc-youkou .form-label,#doc-taisen .form-label{color:#7dd3fc!important;font-weight:900}
     #doc-youkou .form-control:focus,#doc-taisen .form-control:focus{border-color:var(--orange)!important;background:#1e4a6a!important}
@@ -66,7 +88,7 @@
     .req-title{text-align:center;font-size:15pt;font-weight:bold;margin-bottom:12px;letter-spacing:.06em;padding-bottom:8px;border-bottom:2px solid #003087;color:#003087}
     .req-info{width:100%;border-collapse:collapse;margin-bottom:10px}
     .req-info th,.req-info td{border:1px solid #999;padding:5px 9px;font-size:9.5pt}
-    .req-info th{background:#003087;color:#fff;font-weight:bold;width:60px;text-align:center}
+    .req-info th{background:#003087;color:#fff;font-weight:bold;white-space:nowrap;text-align:center;padding:5px 8px}
     .req-num{font-size:10pt;font-weight:bold;color:#003087;margin:7px 0 2px;display:flex;align-items:center;gap:6px}
     .req-num::before{content:"";display:block;width:3px;height:14px;background:#003087;border-radius:2px}
     .req-li{margin:0;padding-left:1.4em;font-size:9.5pt;line-height:1.85;color:#111}
@@ -89,10 +111,10 @@
     .block-hd{background:#003087;color:#fff;font-size:9.5pt;font-weight:bold;padding:4px 10px;border-radius:4px;margin:10px 0 5px;display:inline-block}
     /* スケジュール表 */
     .st{width:100%;border-collapse:collapse;margin-bottom:10px}
-    .st .sched-th{background:#003087;color:#fff;padding:5px 5px;text-align:center;font-size:8pt;border:1px solid #0050cc;white-space:nowrap}
+    .st .sched-th{background:#003087;color:#fff;padding:4px 4px;text-align:center;font-size:7.5pt;border:1px solid #0050cc;white-space:normal;word-break:break-all}
     .st td{border:1px solid #ccc;padding:5px 6px;text-align:center;vertical-align:middle;font-size:8.5pt}
-    .st .td-home{text-align:left;padding-left:7px;font-weight:500}
-    .st .td-away{text-align:right;padding-right:7px;font-weight:500}
+    .st .td-home{text-align:left;padding-left:5px;font-weight:500;word-break:break-all;max-width:80px}
+    .st .td-away{text-align:right;padding-right:5px;font-weight:500;word-break:break-all;max-width:80px}
     .st .td-score{background:#fffbe6;min-width:28px}
     .st .td-vs{background:#f0f0f0;color:#888;font-size:7.5pt}
     .st .tr-alt-bg td{background:#f8fbff}
@@ -108,8 +130,8 @@
     .rt .rank-alt{background:#f6fff6}
     /* 総当り票 */
     .rct{border-collapse:collapse;margin-bottom:12px;font-size:8pt}
-    .rct th,.rct td{border:1px solid #ccc;padding:4px 6px;text-align:center;min-width:44px}
-    .rct .round-th-h{background:#333;color:#fff;font-weight:bold;text-align:left;padding-left:6px;min-width:70px}
+    .rct th,.rct td{border:1px solid #ccc;padding:3px 4px;text-align:center;min-width:36px;font-size:7.5pt;word-break:break-all}
+    .rct .round-th-h{background:#333;color:#fff;font-weight:bold;text-align:left;padding-left:6px;min-width:60px;max-width:90px;word-break:break-all}
     .rct .round-th-t{background:#555;color:#fff;font-weight:bold}
     .rct .td-self{background:#d0d0d0}
     .rct .td-score{background:#fffbe6}
@@ -119,6 +141,30 @@
     /* コート別スケジュール横並び */
     .courts-row{display:grid;grid-template-columns:1fr 1fr;gap:16px}
     @media(max-width:600px){.courts-row{grid-template-columns:1fr}}
+
+    /* ===== 保存・読み込みモーダル ===== */
+    .save-modal-bg{position:fixed;inset:0;background:rgba(0,0,0,.85);display:none;place-items:center;z-index:300;backdrop-filter:blur(6px);padding:14px}
+    .save-modal-bg.open{display:grid}
+    .save-modal{background:var(--surface-lt);border:1px solid var(--line-2);border-radius:var(--r16);padding:20px;width:min(480px,100%);max-height:92vh;overflow-y:auto}
+    .save-modal h3{font-size:.95rem;font-weight:900;color:#fff;margin-bottom:14px}
+    .saved-item{display:flex;align-items:center;gap:10px;background:rgba(255,255,255,.04);border:1px solid var(--line-2);border-radius:var(--r8);padding:10px 12px;margin-bottom:8px;cursor:pointer;transition:.15s}
+    .saved-item:hover{border-color:var(--orange);background:rgba(255,107,43,.07)}
+    .saved-item-info{flex:1;min-width:0}
+    .saved-item-name{font-size:.86rem;font-weight:900;color:#fff;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+    .saved-item-meta{font-size:.72rem;color:var(--ink-3);margin-top:2px}
+    .saved-item-del{background:none;border:none;color:rgba(255,68,102,.6);cursor:pointer;font-size:.85rem;padding:4px 6px;border-radius:4px;flex-shrink:0}
+    .saved-item-del:hover{color:#ff4466;background:rgba(255,68,102,.1)}
+    /* 折り返し対応 */
+    .wrap-flex{display:flex;flex-wrap:wrap;gap:8px;align-items:center}
+    /* カスタム項目行 */
+    .custom-row{display:flex;gap:6px;align-items:flex-start;margin-bottom:8px}
+    .custom-row .custom-label{flex:0 0 110px;min-width:80px}
+    .custom-row .custom-val{flex:1;min-width:0}
+    .custom-row .del-row-btn{background:none;border:1px solid rgba(255,68,102,.4);color:#ff6680;border-radius:6px;padding:5px 8px;cursor:pointer;font-size:.8rem;flex-shrink:0;line-height:1;margin-top:2px}
+    .custom-row .del-row-btn:hover{background:rgba(255,68,102,.1)}
+    .add-row-btn{display:flex;align-items:center;gap:6px;padding:7px 12px;background:rgba(0,212,255,.07);border:1px dashed rgba(0,212,255,.3);border-radius:var(--r8);color:var(--cyan);font-size:.8rem;font-weight:700;cursor:pointer;width:100%;margin-top:4px;box-sizing:border-box}
+    .add-row-btn:hover{background:rgba(0,212,255,.13)}
+    .btn-group{display:flex;flex-wrap:wrap;gap:6px;margin-top:10px;width:100%;box-sizing:border-box}
   </style>
 </head>
 <body>
@@ -166,23 +212,32 @@
         <div class="form-group"><label class="form-label">試合時間</label><input class="form-control" id="y-time" value="15分ハーフ（15-5-15分）"></div>
         <div class="form-group"><label class="form-label">選手交代</label><input class="form-control" id="y-sub" value="自由（再出場可）"></div>
       </div>
-      <div class="form-group"><label class="form-label">順位決定</label><input class="form-control" id="y-rank" value="勝3点・分1点・負0点 → 勝点→得失点差→総得点→当該対戦→抽選"></div>
+      <div class="form-group"><label class="form-label">順位決定</label><textarea class="form-control" id="y-rank" rows="2" style="resize:vertical;min-height:64px">勝3点・分1点・負0点 → 勝点→得失点差→総得点→当該対戦→抽選</textarea></div>
       <div class="fg2">
-        <div class="form-group"><label class="form-label">審判</label><input class="form-control" id="y-ref" value="当該チームで相談（1審・2審・3審）"></div>
-        <div class="form-group"><label class="form-label">表彰</label><input class="form-control" id="y-award" value="1〜3位にトロフィー・優秀選手賞：各チーム1名"></div>
+        <div class="form-group"><label class="form-label">審判</label><textarea class="form-control" id="y-ref" rows="2" style="resize:vertical;min-height:64px">当該チームで相談（1審・2審・3審）</textarea></div>
+        <div class="form-group"><label class="form-label">表彰</label><textarea class="form-control" id="y-award" rows="2" style="resize:vertical;min-height:64px">1〜3位にトロフィー・優秀選手賞：各チーム1名</textarea></div>
       </div>
       <div class="fg2">
-        <div class="form-group"><label class="form-label">雨天時</label><input class="form-control" id="y-rain" value="当日AM6:00頃に実施可否を判断し、各チームへ連絡します。"></div>
-        <div class="form-group"><label class="form-label">駐車場</label><input class="form-control" id="y-parking" value="会場周辺に3か所。路上駐車禁止。乗り合わせにご協力ください。"></div>
+        <div class="form-group"><label class="form-label">雨天時</label><textarea class="form-control" id="y-rain" rows="3" style="resize:vertical;min-height:96px">当日AM6:00頃に実施可否を判断し、各チームへ連絡します。</textarea></div>
+        <div class="form-group"><label class="form-label">駐車場</label><textarea class="form-control" id="y-parking" rows="3" style="resize:vertical;min-height:96px">会場周辺に3か所。路上駐車禁止。乗り合わせにご協力ください。</textarea></div>
       </div>
+      <!-- カスタム項目追加エリア -->
       <div class="sec">📞 問い合わせ</div>
       <div class="fg2">
-        <div class="form-group"><label class="form-label">代表者名</label><input class="form-control" id="y-rep" value="吉見SMC代表　片山孝俊"></div>
-        <div class="form-group"><label class="form-label">電話・メール</label><input class="form-control" id="y-contact" value="090-3595-1970 / yoshimi.smc.fc@gmail.com"></div>
+        <div class="form-group"><label class="form-label">代表者名</label><textarea class="form-control" id="y-rep" rows="2" style="resize:vertical;min-height:64px">吉見SMC代表　片山孝俊</textarea></div>
+        <div class="form-group"><label class="form-label">電話・メール</label><textarea class="form-control" id="y-contact" rows="2" style="resize:vertical;min-height:64px">090-3595-1970 / yoshimi.smc.fc@gmail.com</textarea></div>
       </div>
-      <div style="display:flex;gap:8px;margin-top:10px;flex-wrap:wrap">
-        <button class="btn btn-primary" onclick="buildYoukou()" style="flex:1">👁 要綱プレビューを表示</button>
-        <button class="btn btn-cyan btn-sm no-print" onclick="buildAndPrintPortrait()" id="you-print-btn">🖨 印刷・PDF（A4縦）</button>
+      <!-- カスタム項目 -->
+      <div id="custom-rows-wrap" style="margin-bottom:6px"></div>
+      <div class="add-row-btn" onclick="addCustomRow()" style="margin-bottom:12px">
+        ＋ 基本情報に項目を追加する
+      </div>
+      <div class="btn-group">
+        <button class="btn btn-primary" onclick="buildYoukou()" style="flex:1 1 140px">👁 プレビュー</button>
+        <button class="btn btn-outline btn-sm" onclick="openSaveModal('youkou')">💾 保存</button>
+        <button class="btn btn-outline btn-sm" onclick="openLoadModal('youkou')">📂 読込</button>
+        <button class="btn btn-cyan btn-sm no-print" onclick="buildAndPrintPortrait()" id="you-print-btn">🖨 印刷・PDF</button>
+        <button class="btn btn-outline btn-sm" onclick="copyYoukou()">📋 LINE</button>
       </div>
     </div>
     <div class="pdf-guide" id="y-guide">
@@ -197,13 +252,13 @@
   <div class="doc-section" id="doc-taisen">
     <div class="panel no-print">
       <div class="sec">📌 大会基本情報</div>
-      <div class="fg3">
+      <div class="fg1">
         <div class="form-group"><label class="form-label">大会名</label><input class="form-control" id="t-title" value="U9 吉見SMC大会"></div>
         <div class="form-group"><label class="form-label">期日</label><input class="form-control" id="t-date" type="date"></div>
         <div class="form-group"><label class="form-label">場所</label><input class="form-control" id="t-place" value="吉見ふれあい広場"></div>
       </div>
       <div class="sec">⏱ 試合設定</div>
-      <div class="fg3">
+      <div class="fg1">
         <div class="form-group"><label class="form-label">コート数</label>
           <select class="form-control" id="t-courts" onchange="updateTeamInputs()">
             <option value="1">1面</option>
@@ -212,9 +267,24 @@
         <div class="form-group"><label class="form-label">開始時刻</label><input class="form-control" id="t-start" value="08:30"></div>
         <div class="form-group"><label class="form-label">1試合の枠（分）</label><input class="form-control" id="t-min" type="number" value="40" min="20" max="120"></div>
       </div>
-      <div class="fg2">
-        <div class="form-group"><label class="form-label">昼食開始（任意）</label><input class="form-control" id="t-lunch-start" placeholder="例：12:00"></div>
-        <div class="form-group"><label class="form-label">昼食時間（分・任意）</label><input class="form-control" id="t-lunch-min" type="number" min="0" max="120" placeholder="例：40。なしなら空欄"></div>
+      <div class="sec">🍱 昼食休憩（任意）</div>
+      <div class="fg1">
+        <div style="display:flex;align-items:center;gap:10px;flex-wrap:wrap">
+          <label style="display:flex;align-items:center;gap:6px;font-size:.84rem;color:#c8e4ff;cursor:pointer">
+            <input type="checkbox" id="lunch-enable" onchange="toggleLunch()" style="width:18px;height:18px;cursor:pointer">
+            <span>昼食休憩を入れる</span>
+          </label>
+        </div>
+        <div id="lunch-settings" style="display:none;margin-top:8px">
+          <div class="fg2" style="margin-bottom:0">
+            <div class="form-group"><label class="form-label">休憩開始時刻</label>
+              <input class="form-control" id="lunch-start" type="time" value="12:00"></div>
+            <div class="form-group"><label class="form-label">休憩時間（分）</label>
+              <input class="form-control" id="lunch-min" type="number" value="60" min="10" max="120"></div>
+          </div>
+          <div class="form-group" style="margin-top:8px"><label class="form-label">表示テキスト</label>
+            <input class="form-control" id="lunch-label" value="🍱 昼食休憩"></div>
+        </div>
       </div>
       <div class="sec">⚽ チーム設定</div>
       <div id="team-inputs"></div>
@@ -232,6 +302,35 @@
   </div>
 
 </main>
+
+<!-- 保存モーダル -->
+<div class="save-modal-bg" id="modal-save" onclick="if(event.target.id==='modal-save')closeSaveModal()">
+  <div class="save-modal">
+    <h3 id="save-modal-title">💾 保存</h3>
+    <div class="form-group">
+      <label class="form-label">保存名 <span style="color:var(--red)">*</span></label>
+      <input class="form-control" id="save-name-input" placeholder="例：北彩リーグ第1節 U10">
+    </div>
+    <div style="display:flex;gap:8px;justify-content:flex-end;margin-top:12px;flex-wrap:wrap">
+      <button class="btn btn-outline btn-sm" onclick="closeSaveModal()">キャンセル</button>
+      <button class="btn btn-primary btn-sm" onclick="execSave()">💾 クラウドに保存</button>
+    </div>
+  </div>
+</div>
+
+<!-- 読込モーダル -->
+<div class="save-modal-bg" id="modal-load" onclick="if(event.target.id==='modal-load')closeLoadModal()">
+  <div class="save-modal">
+    <h3 id="load-modal-title">📂 保存済みデータを読み込む</h3>
+    <div id="saved-list">
+      <p style="color:var(--ink-3);text-align:center;padding:20px;font-size:.84rem">保存されたデータがありません。</p>
+    </div>
+    <div style="display:flex;justify-content:flex-end;margin-top:10px">
+      <button class="btn btn-outline btn-sm" onclick="closeLoadModal()">閉じる</button>
+    </div>
+  </div>
+</div>
+
 <footer class="site-footer no-print">YOSHIMI SMC FC — SMART PORTAL</footer>
 <script>
 /* ===== タブ ===== */
@@ -253,9 +352,6 @@ function fmtDate(val){
   if(!val)return "";
   var d=new Date(val+"T00:00:00");
   return d.toLocaleDateString("ja-JP",{year:"numeric",month:"long",day:"numeric",weekday:"short"});
-}
-function isTimeText(v){
-  return /^([01]?\d|2[0-3]):[0-5]\d$/.test(String(v||"").trim());
 }
 
 /* ===== 要綱 ===== */
@@ -320,12 +416,14 @@ function updateNames(c){
 }
 
 /* ===== 対戦表生成 ===== */
+function toggleLunch(){
+  var cb = document.getElementById("lunch-enable");
+  document.getElementById("lunch-settings").style.display = cb.checked ? "block" : "none";
+}
+
 function buildTaisen(){
   var courts=+gv("t-courts"),gmin=+gv("t-min")||40,st=gv("t-start")||"08:30";
   var title=gv("t-title"),dateStr=fmtDate(gv("t-date")),place=gv("t-place");
-  var lunchInput=gv("t-lunch-start");
-  var lunchMin=Math.max(0,+gv("t-lunch-min")||0);
-  var hasLunch=lunchMin>0;
 
   // ブロックデータ収集
   var blocks=[];
@@ -345,11 +443,31 @@ function buildTaisen(){
 
   /* ---- スケジュール組み立て ---- */
   // 2コートの場合：同じ時刻に各コートで1試合ずつ進行
-  var schedsByTime=[]; // [{time, games:[{blkIdx,home,away}]}]
+  // 昼食休憩の設定を取得
+  var lunchEnabled = document.getElementById("lunch-enable").checked;
+  var lunchStart  = lunchEnabled ? gv("lunch-start") : "";
+  var lunchMin    = lunchEnabled ? (+gv("lunch-min")||60) : 0;
+  var lunchLabel  = lunchEnabled ? (gv("lunch-label")||"🍱 昼食休憩") : "";
+  var lunchInserted = false;
+
+  function toMins(t){ var p=t.split(":"); return +p[0]*60+ +p[1]; }
+
+  var schedsByTime=[]; // [{time, games:[{blkIdx,home,away}], isBreak, breakLabel}]
   var maxM=Math.max.apply(null,blocks.map(function(b){return b.matches.length;}));
   var cur=st;
   for(var mi=0;mi<maxM;mi++){
-    var slot={time:cur,games:[]};
+    // 昼食休憩チェック：次の試合開始前に休憩時刻をまたぐか
+    if(lunchEnabled && !lunchInserted && lunchStart){
+      var curMins  = toMins(cur);
+      var lunchMins = toMins(lunchStart);
+      if(curMins >= lunchMins){
+        // 休憩行を挿入
+        schedsByTime.push({time:lunchStart, games:[], isBreak:true, breakLabel:lunchLabel, breakMin:lunchMin});
+        cur = addMins(lunchStart, lunchMin);
+        lunchInserted = true;
+      }
+    }
+    var slot={time:cur,games:[],isBreak:false};
     for(var ci=0;ci<courts;ci++){
       if(mi<blocks[ci].matches.length){
         var m=blocks[ci].matches[mi];
@@ -359,11 +477,10 @@ function buildTaisen(){
     schedsByTime.push(slot);
     cur=addMins(cur,gmin);
   }
-  var restStart=hasLunch?(isTimeText(lunchInput)?lunchInput:cur):cur;
-  var finalStart=hasLunch?addMins(restStart,lunchMin):cur;
+  var restStart=cur;
+  var finalStart=addMins(restStart,10);
   var sf=addMins(finalStart,gmin);
   var closingTime=addMins(sf,gmin);
-  var lunchLabel="昼食休憩　"+restStart+"〜"+finalStart;
 
   /* ---- HTML生成 ---- */
   var h='<div class="tai-sheet">';
@@ -387,6 +504,11 @@ function buildTaisen(){
       h+='</tr></thead><tbody>';
       var no=1;
       schedsByTime.forEach(function(slot,si){
+if(slot.isBreak){
+          var bEnd=addMins(slot.time,slot.breakMin);
+          h+="<tr><td colspan=\"7\" class=\"tr-break-td\">"+slot.breakLabel+"\u3000（"+slot.breakMin+"分）\u3000"+slot.time+"〜"+bEnd+"</td></tr>";
+          return;
+        }
         slot.games.forEach(function(g){
           if(g.blkIdx===blk.idx){
             h+='<tr'+(si%2===1?' class="tr-alt-bg"':"")+'>';
@@ -399,7 +521,6 @@ function buildTaisen(){
           }
         });
       });
-      if(hasLunch)h+='<tr><td colspan="7" class="tr-break-td">'+lunchLabel+'</td></tr>';
       h+='</tbody></table>';
 
       /* 順位表 */
@@ -442,7 +563,7 @@ function buildTaisen(){
     h+='<th class="sched-th" style="width:26px">得</th><th class="sched-th" style="width:18px">-</th><th class="sched-th" style="width:26px">得</th>';
     h+='<th class="sched-th">アウェイ</th><th class="sched-th" style="width:55px">備考</th>';
     h+='</tr></thead><tbody>';
-    if(hasLunch)h+='<tr><td colspan="9" class="tr-break-td">'+lunchLabel+'</td></tr>';
+    h+='<tr><td colspan="9" class="tr-break-td">— 休 憩 —</td></tr>';
     var fn=1;
     [[finalStart,"A4位","B4位","4位同士"],[finalStart,"A3位","B3位","3位同士"],
      [sf,"A2位","B2位","2位同士"],[sf,"A1位","B1位","1位同士"]].forEach(function(f,i){
@@ -467,6 +588,11 @@ function buildTaisen(){
     h+='<th class="sched-th">アウェイ</th><th class="sched-th" style="width:60px">備考</th>';
     h+='</tr></thead><tbody>';
     schedsByTime.forEach(function(slot,si){
+if(slot.isBreak){
+        var bEnd=addMins(slot.time,slot.breakMin);
+        h+="<tr><td colspan=\"7\" class=\"tr-break-td\">"+slot.breakLabel+"\u3000（"+slot.breakMin+"分）\u3000"+slot.time+"〜"+bEnd+"</td></tr>";
+        return;
+      }
       slot.games.forEach(function(g,gi){
         h+='<tr'+(si%2===1?' class="tr-alt-bg"':"")+'>';
         h+='<td>'+(si+1)+'</td><td>'+slot.time+'</td>';
@@ -475,7 +601,6 @@ function buildTaisen(){
         h+='<td class="td-away">'+g.away+'</td><td></td></tr>';
       });
     });
-    if(hasLunch)h+='<tr><td colspan="8" class="tr-break-td">'+lunchLabel+'</td></tr>';
     h+='<tr><td colspan="8" class="tr-closing-td">🏆 閉会式　'+closingTime+'～</td></tr>';
     h+='</tbody></table>';
 
@@ -516,27 +641,32 @@ function buildTaisen(){
 function getYoukouText(){
   var f=function(id){var el=document.getElementById(id);return el?el.value.trim():"";};
   var t="【"+f("y-title")+"】\n";
-  if(f("y-date")) t+="📅 "+f("y-date")+"\n";
-  if(f("y-place")) t+="📍 "+f("y-place")+"\n";
-  if(f("y-time")) t+="⏰ "+f("y-time")+"\n";
-  if(f("y-rank")) t+="\n順位決定："+f("y-rank")+"\n";
+  if(f("y-cat"))     t+="カテゴリー："+f("y-cat")+"\n";
+  if(f("y-date"))    t+="📅 "+f("y-date")+"\n";
+  if(f("y-place"))   t+="📍 "+f("y-place")+"\n";
+  if(f("y-host"))    t+="主催："+f("y-host")+"\n";
+  if(f("y-uketsuke"))t+="受付："+f("y-uketsuke")+"\n";
+  if(f("y-fee"))     t+="参加費："+f("y-fee")+"\n";
+  if(f("y-format"))  t+="競技形式："+f("y-format")+"\n";
+  if(f("y-time"))    t+="試合時間："+f("y-time")+"\n";
+  if(f("y-rain"))    t+="雨天時："+f("y-rain")+"\n";
+  if(f("y-rep"))     t+="\n担当："+f("y-rep")+"\n";
+  if(f("y-contact")) t+="連絡先："+f("y-contact")+"\n";
   return t;
 }
 function getTaisenText(){
   var f=function(id){var el=document.getElementById(id);return el?el.value.trim():"";};
-  var t="【"+f("t-title")+"】 対戦表\n";
-  if(f("t-date")) t+="📅 "+f("t-date")+"\n";
-  if(f("t-place")) t+="📍 "+f("t-place")+"\n";
-  if((+f("t-lunch-min")||0)>0) t+="🍱 昼食 "+(f("t-lunch-start")||"予選終了後")+"から（"+f("t-lunch-min")+"分）\n";
-  // 対戦表のゲーム情報を取得
-  var rows=document.querySelectorAll("#taisen-preview .st tbody tr");
+  var t="【"+f("taisen-title")+"】 対戦表\n";
+  if(f("taisen-date"))  t+="📅 "+f("taisen-date")+"\n";
+  if(f("taisen-venue")) t+="📍 "+f("taisen-venue")+"\n";
+  var rows=document.querySelectorAll(".taisen-game-row");
   if(rows.length){
     t+="\n";
     rows.forEach(function(r){
       var cells=r.querySelectorAll("td,th");
       var line=[];
       cells.forEach(function(c){if(c.textContent.trim())line.push(c.textContent.trim());});
-      if(line.length) t+=line.join(" / ")+"\n";
+      if(line.length) t+=line.join(" vs ")+"\n";
     });
   }
   return t;
@@ -592,6 +722,196 @@ function printLandscape(){
   ["y-date","t-date"].forEach(function(id){var e=document.getElementById(id);if(e)e.value=ds;});
   updateTeamInputs();
 })();
+
+/* ===== カスタム項目（基本情報） ===== */
+var _customRows = []; // [{id, label, val}]
+
+function addCustomRow(label, val){
+  var id = "cr_" + Date.now() + "_" + Math.random().toString(36).slice(2,6);
+  _customRows.push({id:id, label:label||"", val:val||""});
+  renderCustomRows();
+}
+
+function removeCustomRow(id){
+  _customRows = _customRows.filter(function(r){ return r.id!==id; });
+  renderCustomRows();
+}
+
+function renderCustomRows(){
+  var wrap = document.getElementById("custom-rows-wrap");
+  if(!wrap) return;
+  if(!_customRows.length){ wrap.innerHTML=""; return; }
+  var html2 = "";
+  _customRows.forEach(function(r, idx){
+    html2 += "<div class=\"custom-row\">";
+    html2 += "<input class=\"form-control custom-label\" placeholder=\"項目名\" value=\"" + esc3(r.label) + "\"";
+    html2 += " oninput=\"_customRows[" + idx + "].label=this.value\">";
+    html2 += "<textarea class=\"form-control custom-val\" rows=\"2\" placeholder=\"内容\"";
+    html2 += " oninput=\"_customRows[" + idx + "].val=this.value;autoResize(this)\">";
+    html2 += esc3(r.val);
+    html2 += "</textarea>";
+    html2 += "<button class=\"del-row-btn\" onclick=\"_customRows.splice(" + idx + ",1);renderCustomRows()\">🗑</button>";
+    html2 += "</div>";
+  });
+  wrap.innerHTML = html2;
+  wrap.querySelectorAll("textarea").forEach(function(el){ autoResize(el); });
+}
+
+function getCustomRows(){
+  return _customRows.filter(function(r){ return r.label.trim()||r.val.trim(); });
+}
+
+function esc3(s){ return String(s||"").replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;").replace(/"/g,"&quot;"); }
+
+/* ===== クラウド保存・読込 ===== */
+var SAVE_KEY = "tournament_saves";
+var _saveType = "youkou"; // "youkou" or "taisen"
+var _allSaves = {};
+
+// Firebase読込
+dbListen("tournament_saves", function(val){
+  _allSaves = (val && typeof val==="object") ? val : {};
+}, SAVE_KEY, {});
+
+// 要綱フィールドを収集
+var YOUKOU_FIELDS = ["y-title","y-cat","y-date","y-place","y-host",
+  "y-uketsuke","y-fee","y-format","y-time","y-sub","y-rank",
+  "y-ref","y-award","y-rain","y-parking","y-rep","y-contact"];
+
+// 対戦表フィールドを収集
+var TAISEN_FIELDS = ["t-title","t-date","t-place","t-min","t-courts","t-start","t-guide"];
+
+function collectFields(fields){
+  var data = {};
+  fields.forEach(function(id){
+    var el = document.getElementById(id);
+    if(el) data[id] = el.value;
+  });
+  return data;
+}
+function applyFields(data){
+  Object.keys(data).forEach(function(id){
+    var el = document.getElementById(id);
+    if(el) el.value = data[id];
+  });
+}
+
+// 保存モーダルを開く
+function openSaveModal(type){
+  _saveType = type;
+  document.getElementById("save-modal-title").textContent = type==="youkou"?"💾 要綱を保存":"💾 対戦表を保存";
+  var titleField = type==="youkou" ? document.getElementById("y-title") : document.getElementById("t-title");
+  document.getElementById("save-name-input").value = (titleField ? titleField.value : "") || "";
+  document.getElementById("modal-save").classList.add("open");
+  setTimeout(function(){ document.getElementById("save-name-input").focus(); }, 100);
+}
+function closeSaveModal(){ document.getElementById("modal-save").classList.remove("open"); }
+
+// 保存実行
+function execSave(){
+  var name = document.getElementById("save-name-input").value.trim();
+  if(!name){ alert("保存名を入力してください"); return; }
+  var fields = _saveType==="youkou" ? YOUKOU_FIELDS : TAISEN_FIELDS;
+  var entry = {
+    name: name,
+    type: _saveType,
+    savedAt: new Date().toISOString(),
+    data: collectFields(fields),
+    customRows: _saveType==="youkou" ? JSON.parse(JSON.stringify(_customRows)) : []
+  };
+  // チーム数やチーム名も保存（対戦表）
+  if(_saveType==="taisen"){
+    var teamInputs = document.querySelectorAll("[id^='t-'][id*='-0']");
+    var teams = [];
+    for(var i=0;i<16;i++){
+      var el = document.getElementById("t-team-"+i);
+      if(el) teams.push(el.value);
+    }
+    entry.data.teams = JSON.stringify(teams);
+    var cntEl = document.getElementById("t-teamcount");
+    if(cntEl) entry.data["t-teamcount"] = cntEl.value;
+  }
+  var id = "sv_" + Date.now();
+  _allSaves[id] = entry;
+  localStorage.setItem(SAVE_KEY, JSON.stringify(_allSaves));
+  dbSave("tournament_saves", _allSaves, SAVE_KEY, function(){
+    closeSaveModal();
+    alert("「"+name+"」を保存しました！");
+  });
+}
+
+// 読込モーダルを開く
+function openLoadModal(type){
+  _saveType = type;
+  document.getElementById("load-modal-title").textContent = type==="youkou"?"📂 保存済み要綱":"📂 保存済み対戦表";
+  renderSavedList(type);
+  document.getElementById("modal-load").classList.add("open");
+}
+function closeLoadModal(){ document.getElementById("modal-load").classList.remove("open"); }
+
+function renderSavedList(type){
+  var items = Object.entries(_allSaves)
+    .filter(function(e){ return e[1].type===type; })
+    .sort(function(a,b){ return (b[1].savedAt||"").localeCompare(a[1].savedAt||""); });
+  var wrap = document.getElementById("saved-list");
+  if(!items.length){
+    wrap.innerHTML = "<p style=\"color:var(--ink-3);text-align:center;padding:20px;font-size:.84rem\">保存されたデータがありません。</p>";
+    return;
+  }
+  var html2 = "";
+  items.forEach(function(e){
+    var id=e[0], item=e[1];
+    var dateStr = item.savedAt ? new Date(item.savedAt).toLocaleString("ja-JP") : "";
+    html2 += "<div class=\"saved-item\">";
+    html2 += "<div class=\"saved-item-info\" onclick=\"loadSave('" + id + "')\">";
+    html2 += "<div class=\"saved-item-name\">" + esc2(item.name) + "</div>";
+    html2 += "<div class=\"saved-item-meta\">" + dateStr + "</div>";
+    html2 += "</div>";
+    html2 += "<button class=\"saved-item-del\" onclick=\"deleteSave('" + id + "')\">🗑</button>";
+    html2 += "</div>";
+  });
+  wrap.innerHTML = html2;
+}
+
+function esc2(s){ return String(s||"").replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;"); }
+
+// データ読込
+function loadSave(id){
+  var item = _allSaves[id];
+  if(!item){ alert("データが見つかりません"); return; }
+  if(!confirm("「"+item.name+"」を読み込みますか？現在の入力内容は上書きされます。")) return;
+  applyFields(item.data||{});
+  // チーム情報復元（対戦表）
+  if(item.type==="taisen" && item.data.teams){
+    try{
+      var teams = JSON.parse(item.data.teams);
+      teams.forEach(function(v,i){
+        var el = document.getElementById("t-team-"+i);
+        if(el) el.value = v;
+      });
+    }catch(e){}
+  }
+  // カスタム行を復元
+  if(item.type==="youkou" && Array.isArray(item.customRows)){
+    _customRows = item.customRows;
+    renderCustomRows();
+  }
+  closeLoadModal();
+  // プレビューを自動更新
+  if(item.type==="youkou") buildYoukou();
+  else buildTaisen();
+  alert("「"+item.name+"」を読み込みました！");
+}
+
+// 削除
+function deleteSave(id){
+  var item = _allSaves[id];
+  if(!item||!confirm("「"+item.name+"」を削除しますか？")) return;
+  delete _allSaves[id];
+  localStorage.setItem(SAVE_KEY, JSON.stringify(_allSaves));
+  dbSave("tournament_saves", _allSaves, SAVE_KEY, null);
+  renderSavedList(_saveType);
+}
 </script>
 <script src="common.js"></script>
 </body>
