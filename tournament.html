@@ -456,14 +456,15 @@ function buildTaisen(){
   var maxM=Math.max.apply(null,blocks.map(function(b){return b.matches.length;}));
   var cur=st;
   for(var mi=0;mi<maxM;mi++){
-    // 昼食休憩チェック：次の試合開始前に休憩時刻をまたぐか
+    // 昼食休憩チェック
     if(lunchEnabled && !lunchInserted && lunchStart){
-      var curMins  = toMins(cur);
+      var nextMins  = toMins(cur);
       var lunchMins = toMins(lunchStart);
-      if(curMins >= lunchMins){
-        // 休憩行を挿入
+      // 次の試合開始が昼食開始時刻以降になった → この試合の前に昼食行を挿入
+      if(nextMins >= lunchMins){
+        var lunchEnd = addMins(lunchStart, lunchMin);
         schedsByTime.push({time:lunchStart, games:[], isBreak:true, breakLabel:lunchLabel, breakMin:lunchMin});
-        cur = addMins(lunchStart, lunchMin);
+        cur = lunchEnd; // 昼食後の時刻から試合再開
         lunchInserted = true;
       }
     }
