@@ -298,7 +298,7 @@ function renderTable() {
   h += "<th class='th-date th-tantou'>担当</th></tr>";
   h += "<tr><th class='col-fixed th-cat' style='color:#8ac8e8'>カテゴリー / 目標</th>";
   dates.forEach(function(d) {
-    h += "<th class='th-cat'>" + d.cat + "<br><span style='color:#ffaa66;font-weight:900'>目標 " + d.target + "チーム</span></th>";
+    h += "<th class='th-cat' style='cursor:pointer' onclick=\"openEditDate('" + d.id + "')\" title='タップして編集'>" + d.cat + "<br><span style='color:#ffaa66;font-weight:900'>目標 " + d.target + "チーム</span><span style='font-size:.6rem;color:#6aaccc;display:block'>✏️ タップして編集</span></th>";
   });
   h += "<th class='th-cat'></th></tr></thead><tbody>";
 
@@ -367,7 +367,8 @@ function addTeam() {
 function addDate() {
   var dateVal = document.getElementById("new-date").value;
   var cat = document.getElementById("new-cat").value.trim() || "未設定";
-  var target = Number(document.getElementById("new-target").value) || 3;
+  var targetVal = document.getElementById("new-target").value;
+  var target = targetVal === "" ? 1 : Math.max(0, Number(targetVal));
   if (!dateVal) { alert("日付を入力してください"); return; }
   var d = new Date(dateVal);
   var label = (d.getMonth()+1) + "/" + d.getDate() + "（" + ["日","月","火","水","木","金","土"][d.getDay()] + "）";
