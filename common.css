@@ -891,3 +891,24 @@ body[data-theme="light"] [style*="background:rgba(255,255,255,.03)"],
 body[data-theme="light"] [style*="background:rgba(255,255,255,.05)"] {
   background: rgba(0,0,0,.03) !important;
 }
+
+/* ===== LINEコピーボタン共通スタイル ===== */
+.btn-line-copy {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  background: linear-gradient(135deg, #00b900, #009900);
+  color: #fff !important;
+  border: none;
+  border-radius: var(--r8);
+  padding: 7px 14px;
+  font: inherit;
+  font-size: .8rem;
+  font-weight: 900;
+  cursor: pointer;
+  transition: .15s;
+  white-space: nowrap;
+}
+.btn-line-copy:hover { background: linear-gradient(135deg,#00d000,#00aa00); transform: translateY(-1px); }
+.btn-line-copy:active { transform: scale(.97); }
+.btn-line-copy.sm { font-size: .74rem; padding: 5px 11px; }

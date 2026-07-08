@@ -237,7 +237,7 @@
         <button class="btn btn-outline btn-sm" onclick="openSaveModal('youkou')">💾 保存</button>
         <button class="btn btn-outline btn-sm" onclick="openLoadModal('youkou')">📂 読込</button>
         <button class="btn btn-cyan btn-sm no-print" onclick="buildAndPrintPortrait()" id="you-print-btn">🖨 印刷・PDF</button>
-        <button class="btn btn-outline btn-sm" onclick="copyYoukou()">📋 LINE</button>
+        <button class="btn-line-copy sm" onclick="copyYoukou()">📋 LINEコピー</button>
       </div>
     </div>
     <div class="pdf-guide" id="y-guide">
@@ -288,9 +288,12 @@
       </div>
       <div class="sec">⚽ チーム設定</div>
       <div id="team-inputs"></div>
-      <div style="display:flex;gap:8px;margin-top:10px;flex-wrap:wrap">
-        <button class="btn btn-primary" onclick="buildTaisen()" style="flex:1">📊 対戦表を生成する</button>
-        <button class="btn btn-cyan btn-sm no-print" onclick="buildAndPrintLandscape()" id="tai-print-btn">🖨 印刷・PDF（A4横）</button>
+      <div class="btn-group">
+        <button class="btn btn-primary" onclick="buildTaisen()" style="flex:1 1 140px">📊 対戦表を生成</button>
+        <button class="btn btn-outline btn-sm" onclick="openSaveModal('taisen')">💾 保存</button>
+        <button class="btn btn-outline btn-sm" onclick="openLoadModal('taisen')">📂 読込</button>
+        <button class="btn btn-cyan btn-sm no-print" onclick="buildAndPrintLandscape()" id="tai-print-btn">🖨 印刷・PDF</button>
+        <button class="btn-line-copy sm" onclick="copyTaisen()">📋 LINEコピー</button>
       </div>
     </div>
     <div class="pdf-guide" id="t-guide">
@@ -443,14 +446,15 @@ function buildTaisen(){
 
   /* ---- スケジュール組み立て ---- */
   // 2コートの場合：同じ時刻に各コートで1試合ずつ進行
+  // toMins：時刻文字列(HH:MM)を分に変換
+  function toMins(t){ var p=t.split(":"); return +p[0]*60+ +p[1]; }
+
   // 昼食休憩の設定を取得
   var lunchEnabled = document.getElementById("lunch-enable").checked;
   var lunchStart  = lunchEnabled ? gv("lunch-start") : "";
   var lunchMin    = lunchEnabled ? (+gv("lunch-min")||60) : 0;
   var lunchLabel  = lunchEnabled ? (gv("lunch-label")||"🍱 昼食休憩") : "";
   var lunchInserted = false;
-
-  function toMins(t){ var p=t.split(":"); return +p[0]*60+ +p[1]; }
 
   var schedsByTime=[]; // [{time, games:[{blkIdx,home,away}], isBreak, breakLabel}]
   var maxM=Math.max.apply(null,blocks.map(function(b){return b.matches.length;}));

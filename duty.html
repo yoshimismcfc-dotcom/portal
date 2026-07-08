@@ -114,7 +114,7 @@
     </div>
     <div class="panel">
       <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:14px;flex-wrap:wrap;gap:8px">
-        <div class="panel-title" style="margin:0;padding:0;border:none">当番一覧 <span id="duty-count" style="font-size:.78rem;color:#6aaccc;font-weight:400"></span></div>
+        <div class="panel-title" style="margin:0;padding:0;border:none;display:flex;align-items:center;justify-content:space-between">当番一覧 <span id="duty-count" style="font-size:.78rem;color:#6aaccc;font-weight:400"></span><button class="btn-line-copy sm" onclick="copyDutyList()">📋 LINEコピー</button></div>
         <select class="form-control" id="filter-grade" onchange="renderDutyTable()" style="height:34px;width:auto;font-size:.8rem">
           <option value="">全学年</option>
           <option>1年</option><option>2年</option><option>3年</option><option>4年</option>
