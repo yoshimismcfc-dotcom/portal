@@ -5,6 +5,7 @@
   <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>チームカレンダー｜吉見SMC FC</title>
+  <script src="firebase-config.js"></script>
   <link rel="stylesheet" href="common.css">
   <style>
     .page-wrap{max-width:100%!important;padding:10px 12px 40px!important}
@@ -43,6 +44,16 @@
 
     /* ===== ヒント ===== */
     .tip-bar{display:flex;gap:8px;align-items:flex-start;background:rgba(255,204,0,.07);border:1px solid rgba(255,204,0,.2);border-radius:var(--r8);padding:9px 12px;font-size:.78rem;color:#ffe58a;line-height:1.65;margin-top:10px}
+    .auto-alert{border-radius:var(--r12);padding:12px 14px;margin-bottom:12px;border:1px solid;display:none;gap:8px;flex-direction:column}
+    .auto-alert.show{display:flex}
+    .auto-alert.alert-rain{background:rgba(68,136,255,.12);border-color:rgba(68,136,255,.4)}
+    .auto-alert.alert-heat{background:rgba(255,68,68,.12);border-color:rgba(255,68,68,.4)}
+    .alert-title{font-size:.88rem;font-weight:900;display:flex;align-items:center;gap:7px}
+    .alert-rain .alert-title{color:#93c5fd}
+    .alert-heat .alert-title{color:#fca5a5}
+    .alert-body{font-size:.8rem;line-height:1.7;white-space:pre-line}
+    .alert-rain .alert-body{color:#bfdbfe}
+    .alert-heat .alert-body{color:#fecaca}
 
     /* ===== 今後の予定 ===== */
     .upcoming-head{display:flex;align-items:center;gap:8px;margin:18px 0 10px}
@@ -75,6 +86,20 @@
       <div class="hero-title">チームカレンダー</div>
       <div class="hero-sub">練習・試合・大会・行事の予定。Google側で更新すると自動反映されます。</div>
     </div>
+  </div>
+
+  <div id="page-guidance" class="dynamic-notice guidance" style="display:none"><span class="notice-label">📢 INFO</span><span id="guidance-text"></span></div>
+  <div id="page-warning"  class="dynamic-notice warning"  style="display:none"><span class="notice-label">⚠️ ALERT</span><span id="warning-text"></span></div>
+  <div class="auto-alert alert-rain" id="auto-rain">
+    <div style="display:flex;align-items:center;justify-content:space-between;gap:8px">
+      <div class="alert-title" style="flex:1">🌧️ 雨の予報 — 屋外練習の方は準備を</div>
+      <button onclick="copyAlert('rain')" class="btn-line-copy sm" style="flex-shrink:0">📋 LINEコピー</button>
+    </div>
+    <div class="alert-body" id="auto-rain-body"></div>
+  </div>
+  <div class="auto-alert alert-heat" id="auto-heat">
+    <div class="alert-title">🌡️ 熱中症注意 — 準備をしっかりと</div>
+    <div class="alert-body" id="auto-heat-body"></div>
   </div>
 
   <!-- 今日の日付表示 -->
@@ -130,6 +155,16 @@
 <footer class="site-footer">YOSHIMI SMC FC — SMART PORTAL</footer>
 <script src="common.js"></script>
 <script>
+function setNotice(id,textId,val,display){
+  var el=document.getElementById(id),tx=document.getElementById(textId);
+  if(!el||!tx)return;
+  if(val){tx.textContent=val;el.style.display=display||"flex";}else{el.style.display="none";}
+}
+dbListen("notices/guidance",function(val){setNotice("page-guidance","guidance-text",val);},"smc_guidance",null);
+dbListen("notices/warning",function(val){setNotice("page-warning","warning-text",val);},"smc_warning",null);
+setNotice("page-guidance","guidance-text",localStorage.getItem("smc_guidance"));
+setNotice("page-warning","warning-text",localStorage.getItem("smc_warning"));
+
 // 今日の日付表示
 (function(){
   var now = new Date();
@@ -244,6 +279,62 @@ function renderUpcoming(events){
 }
 
 loadUpcoming();
+
+var ALERT_KEY="smc_alert_settings_v1";
+var DEFAULT_SCHEDULES=[{day:3,start:"19:00",end:"21:00",indoor:true},{day:4,start:"18:30",end:"20:30",indoor:true},{day:6,start:"08:00",end:"10:30",indoor:false},{day:0,start:"08:00",end:"10:30",indoor:false}];
+var DEFAULT_ALERT_CFG={schedules:DEFAULT_SCHEDULES,rainThreshold:30,heatThreshold:25,rainVenue:"北小体育館",rainOdd:"奇数月：6〜4年 8:00〜10:00 ／ 3年〜年長 10:00〜12:00",rainEven:"偶数月：3年〜年長 8:00〜10:00 ／ 6〜4年 10:00〜12:00"};
+var ALERT_CFG=DEFAULT_ALERT_CFG;
+dbListen("alert_settings",function(val){
+  if(val&&val.schedules)ALERT_CFG=val;
+  else{try{var s=localStorage.getItem(ALERT_KEY);if(s)ALERT_CFG=JSON.parse(s);}catch(e){}}
+},ALERT_KEY,null);
+function wbgt(t,h){return 0.735*t+0.0374*h+0.00292*t*h-4.064;}
+function findNextAlertSchedule(){
+  var now=new Date(),scheds=ALERT_CFG.schedules||DEFAULT_SCHEDULES,startHour=ALERT_CFG.alertStartHour!==undefined?ALERT_CFG.alertStartHour:0;
+  for(var d=0;d<4;d++){
+    var dt=new Date(now);dt.setDate(dt.getDate()+d);
+    for(var i=0;i<scheds.length;i++){
+      var s=scheds[i];if(s.day!==dt.getDay())continue;
+      var at=new Date(dt);at.setHours(startHour,0,0,0);
+      if(now>=at||d>0)return{s:s,dt:dt,offset:d};
+    }
+  }
+  return null;
+}
+function checkAutoAlert(){
+  if(!navigator.geolocation)return;
+  var info=findNextAlertSchedule();if(!info||info.s.indoor)return;
+  navigator.geolocation.getCurrentPosition(function(pos){
+    var url="https://api.open-meteo.com/v1/forecast?latitude="+pos.coords.latitude+"&longitude="+pos.coords.longitude+"&hourly=temperature_2m,relative_humidity_2m,weathercode,precipitation_probability&timezone=Asia/Tokyo&forecast_days=3";
+    fetch(url).then(function(r){return r.json();}).then(function(data){
+      var hours=data.hourly,sd=info.dt,dateStr=sd.getFullYear()+"-"+String(sd.getMonth()+1).padStart(2,"0")+"-"+String(sd.getDate()).padStart(2,"0");
+      var sh=+info.s.start.split(":")[0],eh=+info.s.end.split(":")[0],rainMax=0,wbgtMax=0,hasRain=false,rainTh=ALERT_CFG.rainThreshold||30;
+      hours.time.forEach(function(t,i){
+        if(!t.startsWith(dateStr))return;var h=+t.slice(11,13);if(h<sh||h>eh)return;
+        var pp=hours.precipitation_probability[i]||0,wc=hours.weathercode[i]||0,wb=wbgt(hours.temperature_2m[i],hours.relative_humidity_2m[i]);
+        if(pp>=rainTh||wc>=51)hasRain=true;if(pp>rainMax)rainMax=pp;if(wb>wbgtMax)wbgtMax=wb;
+      });
+      var dow=["日","月","火","水","木","金","土"][sd.getDay()],label=info.offset===0?"本日":"明日("+dow+")",mon=sd.getMonth()+1,isOdd=mon%2===1;
+      if(hasRain){
+        document.getElementById("auto-rain-body").textContent=label+"の屋外練習に雨の予報（降水確率"+rainMax+"%）があります。\n・室内用シューズをご用意ください\n・練習時間・場所が変更になる場合があります\n・雨天時の会場："+(ALERT_CFG.rainVenue||"北小体育館")+"\n・"+(isOdd?(ALERT_CFG.rainOdd||""):(ALERT_CFG.rainEven||""));
+        document.getElementById("auto-rain").classList.add("show");
+      }
+      var heatTh=ALERT_CFG.heatThreshold||25;
+      if(wbgtMax>=heatTh){
+        var lv=wbgtMax>=31?"危険":wbgtMax>=28?"厳重警戒":"警戒";
+        document.getElementById("auto-heat-body").textContent=label+"の練習時間帯にWBGT "+wbgtMax.toFixed(1)+"℃（"+lv+"）の予報があります。\n・帽子を必ず着用してください\n・水筒は2本（水＋スポーツドリンク）持参してください\n・保冷剤・タオルがあると安心です"+(wbgtMax>=31?"\n⛔ WBGT31℃以上は活動中止基準です":"");
+        document.getElementById("auto-heat").classList.add("show");
+      }
+    }).catch(function(){});
+  },function(){},{timeout:8000,maximumAge:1800000});
+}
+function copyAlert(type){
+  var el=document.getElementById("auto-"+type+"-body");
+  if(!el||!el.textContent.trim()){alert("アラートが表示されていません");return;}
+  var prefix=type==="rain"?"🌧️ 雨の予報\n":"🌡️ 熱中症注意\n";
+  navigator.clipboard.writeText(prefix+el.textContent).then(function(){alert("コピーしました！LINEに貼り付けてください。");}).catch(function(){alert("コピーできませんでした。");});
+}
+window.addEventListener("DOMContentLoaded",checkAutoAlert);
 </script>
 </body>
 </html>
