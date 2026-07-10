@@ -214,6 +214,8 @@ function fetchByLatLon(lat, lon, placeName){
     var now=new Date(), ts=now.getHours()+"時"+String(now.getMinutes()).padStart(2,"0")+"分";
     showWBGT(w, "📍 "+placeName+"  気温"+t+"℃ / 湿度"+h+"%  "+ts+"現在");
     st.textContent="";
+    var fb=document.getElementById("fetch-btn");
+    if(fb){ fb.disabled=false; fb.textContent="🔄 再取得"; }
     var hours=data.hourly, grid=document.getElementById("forecast-grid"), cnt=0;
     grid.innerHTML="";
     for(var i=0;i<hours.time.length&&cnt<8;i++){
@@ -229,8 +231,11 @@ function fetchByLatLon(lat, lon, placeName){
       cnt++;
     }
     if(!cnt) grid.innerHTML='<div style="grid-column:1/-1;text-align:center;color:var(--ink-3);font-size:.84rem;padding:16px">予報データがありません。</div>';
-  }).catch(function(){
-    document.getElementById("status-msg").textContent="気象データの取得に失敗しました。";
+  }).catch(function(err){
+    document.getElementById("status-msg").textContent="気象データの取得に失敗しました。通信状況を確認してください。";
+    var fb=document.getElementById("fetch-btn");
+    if(fb){ fb.disabled=false; fb.textContent="📍 現在地の気象を取得"; }
+    console.log("fetch error:", err);
   });
 }
 
@@ -255,7 +260,7 @@ function fetchWeather(){
   navigator.geolocation.getCurrentPosition(
     function(pos){
       // 位置情報取得成功
-      btn.disabled=false; btn.textContent="🔄 再取得";
+      localStorage.setItem("geo_allowed","1");
       document.getElementById("manual-area").style.display="none";
       fetchByLatLon(pos.coords.latitude, pos.coords.longitude, "現在地");
     },
@@ -275,7 +280,13 @@ function fetchWeather(){
     {timeout:10000}
   );
 }
-window.addEventListener("DOMContentLoaded",function(){fetchWeather();});
+window.addEventListener("DOMContentLoaded",function(){
+  // 自動取得はしない（ユーザーがボタンを押した時のみ取得）
+  // ただしlocalStorageに位置情報許可済みフラグがあれば自動取得
+  if(localStorage.getItem("geo_allowed")==="1"){
+    fetchWeather();
+  }
+});
 </script>
 <script src="common.js"></script>
 </body>
