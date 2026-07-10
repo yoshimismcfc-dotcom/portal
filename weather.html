@@ -201,6 +201,47 @@ function showWBGT(w,meta){
   document.getElementById("wbgt-meta").textContent=meta||"";
   d.style.background=l.bg;d.style.color=l.color;
 }
+// 座標を直接指定して取得
+function fetchByLatLon(lat, lon, placeName){
+  var st = document.getElementById("status-msg");
+  st.textContent = "気象データを取得中…";
+  var url = "https://api.open-meteo.com/v1/forecast?latitude="+lat+"&longitude="+lon
+    +"&current=temperature_2m,relative_humidity_2m,weathercode"
+    +"&hourly=temperature_2m,relative_humidity_2m,weathercode"
+    +"&timezone=Asia/Tokyo&forecast_days=1";
+  fetch(url).then(function(r){return r.json();}).then(function(data){
+    var t=data.current.temperature_2m, h=data.current.relative_humidity_2m, w=wbgt(t,h);
+    var now=new Date(), ts=now.getHours()+"時"+String(now.getMinutes()).padStart(2,"0")+"分";
+    showWBGT(w, "📍 "+placeName+"  気温"+t+"℃ / 湿度"+h+"%  "+ts+"現在");
+    st.textContent="";
+    var hours=data.hourly, grid=document.getElementById("forecast-grid"), cnt=0;
+    grid.innerHTML="";
+    for(var i=0;i<hours.time.length&&cnt<8;i++){
+      var hT=new Date(hours.time[i]);
+      if(hT<=now) continue;
+      var ht=hours.temperature_2m[i], hh=hours.relative_humidity_2m[i], hw=wbgt(ht,hh), hl=lv(hw);
+      grid.innerHTML+='<div class="fc-card">'
+        +'<div class="fc-time">'+hT.getHours()+'時</div>'
+        +'<div class="fc-icon">'+(WI[hours.weathercode[i]]||"🌤️")+'</div>'
+        +'<div class="fc-temp">'+ht+'℃ / '+hh+'%</div>'
+        +'<div class="fc-wbgt" style="background:'+hl.bg+';color:'+hl.color+'">'+hw.toFixed(1)+'℃ '+hl.label+'</div>'
+        +'</div>';
+      cnt++;
+    }
+    if(!cnt) grid.innerHTML='<div style="grid-column:1/-1;text-align:center;color:var(--ink-3);font-size:.84rem;padding:16px">予報データがありません。</div>';
+  }).catch(function(){
+    document.getElementById("status-msg").textContent="気象データの取得に失敗しました。";
+  });
+}
+
+// 手動選択で取得
+function fetchManual(){
+  var sel = document.getElementById("manual-place");
+  var val = sel.value.split(",");
+  var name = sel.options[sel.selectedIndex].text;
+  fetchByLatLon(parseFloat(val[0]), parseFloat(val[1]), name);
+}
+
 function fetchWeather(){
   var btn=document.getElementById("fetch-btn"),st=document.getElementById("status-msg");
   btn.disabled=true;btn.textContent="📍 位置情報を取得中…";st.textContent="";
@@ -240,9 +281,19 @@ function fetchWeather(){
       st.textContent="気象データの取得に失敗しました。";btn.disabled=false;btn.textContent="📍 現在地の気象を取得";
     });
   },function(e){
-    var m={1:"位置情報の使用が拒否されました。",2:"位置情報を取得できませんでした。",3:"タイムアウトしました。"};
-    document.getElementById("status-msg").textContent=m[e.code]||"位置情報の取得に失敗しました。";
-    btn.disabled=false;btn.textContent="📍 現在地の気象を取得";
+    btn.disabled=false; btn.textContent="📍 現在地の気象を取得";
+    if(e.code===1){
+      // 拒否された場合：手動エリアを表示して吉見町で自動取得
+      document.getElementById("status-msg").textContent="位置情報が拒否されました。吉見町の気象を表示します。";
+      document.getElementById("manual-area").style.display="block";
+      fetchByLatLon(36.0, 139.5, "吉見町");
+    } else if(e.code===2){
+      document.getElementById("status-msg").textContent="位置情報を取得できませんでした。地域を選択してください。";
+      document.getElementById("manual-area").style.display="block";
+    } else {
+      document.getElementById("status-msg").textContent="タイムアウトしました。地域を選択してください。";
+      document.getElementById("manual-area").style.display="block";
+    }
   },{timeout:10000});
 }
 window.addEventListener("DOMContentLoaded",function(){fetchWeather();});
