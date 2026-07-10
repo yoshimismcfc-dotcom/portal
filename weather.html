@@ -258,7 +258,7 @@ function fetchWeather(){
   }
   function showManual(msg){
     st.textContent=msg;
-    manualArea.style.display="block";
+    if(manualArea){ if(manualArea){ manualArea.style.display="block"; } }
   }
 
   // 位置情報非対応
@@ -273,7 +273,7 @@ function fetchWeather(){
   btn.disabled=true;
   btn.textContent="📍 位置情報を取得中…";
   st.textContent="";
-  manualArea.style.display="none";
+  if(manualArea){ manualArea.style.display="block"; }
 
   // タイムアウト保険（5秒で吉見町にフォールバック）
   var fallbackTimer=setTimeout(function(){
@@ -287,7 +287,7 @@ function fetchWeather(){
       clearTimeout(fallbackTimer);
       resetBtn();
       btn.textContent="🔄 再取得";
-      manualArea.style.display="none";
+      if(manualArea){ manualArea.style.display="block"; }
       fetchByLatLon(pos.coords.latitude, pos.coords.longitude, "現在地");
     },
     function(e){
