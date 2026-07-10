@@ -912,3 +912,20 @@ body[data-theme="light"] [style*="background:rgba(255,255,255,.05)"] {
 .btn-line-copy:hover { background: linear-gradient(135deg,#00d000,#00aa00); transform: translateY(-1px); }
 .btn-line-copy:active { transform: scale(.97); }
 .btn-line-copy.sm { font-size: .74rem; padding: 5px 11px; }
+
+
+/* ===== 雨・WBGT 自動アラート（共通表示） ===== */
+.auto-alert{display:none;flex-direction:column;gap:9px;margin-bottom:12px;padding:12px 14px;border:1px solid;border-radius:var(--r12)}
+.auto-alert.show{display:flex}
+.auto-alert.alert-rain{background:linear-gradient(135deg,rgba(68,136,255,.16),rgba(68,136,255,.07));border-color:rgba(90,167,255,.48)}
+.auto-alert.alert-heat{background:linear-gradient(135deg,rgba(255,91,110,.17),rgba(143,18,48,.08));border-color:rgba(255,91,110,.48)}
+.auto-alert-head{display:flex;align-items:center;justify-content:space-between;gap:8px}
+.auto-alert .alert-title{display:flex;align-items:center;flex-wrap:wrap;gap:7px;min-width:0;font-size:.88rem;font-weight:900}
+.auto-alert.alert-rain .alert-title{color:#93c5fd}
+.auto-alert.alert-heat .alert-title{color:#fca5a5}
+.auto-alert-label{display:inline-flex;align-items:center;min-height:19px;padding:1px 7px;border:1px solid currentColor;border-radius:999px;font-size:.58rem;font-weight:900;letter-spacing:.04em;opacity:.92}
+.auto-alert .alert-body{color:var(--ink-2);font-size:.8rem;line-height:1.72;white-space:pre-line}
+.auto-alert .btn-line-copy{flex:0 0 auto;white-space:nowrap}
+body[data-theme="light"] .auto-alert.alert-rain .alert-title{color:#175ca8}
+body[data-theme="light"] .auto-alert.alert-heat .alert-title{color:#a61f36}
+@media(max-width:480px){.auto-alert-head{align-items:flex-start}.auto-alert .alert-title{font-size:.82rem}.auto-alert .btn-line-copy{padding:5px 8px;font-size:.68rem}}
