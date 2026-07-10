@@ -248,44 +248,60 @@ function fetchManual(){
 }
 
 function fetchWeather(){
-  var btn=document.getElementById("fetch-btn"), st=document.getElementById("status-msg");
-  btn.disabled=true; btn.textContent="📍 位置情報を取得中…"; st.textContent="";
+  var btn=document.getElementById("fetch-btn");
+  var st=document.getElementById("status-msg");
+  var manualArea=document.getElementById("manual-area");
+
+  function resetBtn(){
+    btn.disabled=false;
+    btn.textContent="📍 現在地の気象を取得";
+  }
+  function showManual(msg){
+    st.textContent=msg;
+    manualArea.style.display="block";
+  }
+
+  // 位置情報非対応
   if(!navigator.geolocation){
-    st.textContent="このブラウザは位置情報に対応していません。";
-    document.getElementById("manual-area").style.display="block";
-    btn.disabled=false; btn.textContent="📍 現在地の気象を取得";
+    showManual("このブラウザは位置情報に対応していません。");
+    resetBtn();
     fetchByLatLon(36.0, 139.5, "吉見町");
     return;
   }
+
+  // 取得中表示
+  btn.disabled=true;
+  btn.textContent="📍 位置情報を取得中…";
+  st.textContent="";
+  manualArea.style.display="none";
+
+  // タイムアウト保険（5秒で吉見町にフォールバック）
+  var fallbackTimer=setTimeout(function(){
+    resetBtn();
+    showManual("位置情報の取得に時間がかかっています。吉見町の気象を表示します。");
+    fetchByLatLon(36.0, 139.5, "吉見町");
+  }, 5000);
+
   navigator.geolocation.getCurrentPosition(
     function(pos){
-      // 位置情報取得成功
-      localStorage.setItem("geo_allowed","1");
-      document.getElementById("manual-area").style.display="none";
+      clearTimeout(fallbackTimer);
+      resetBtn();
+      btn.textContent="🔄 再取得";
+      manualArea.style.display="none";
       fetchByLatLon(pos.coords.latitude, pos.coords.longitude, "現在地");
     },
     function(e){
-      // 位置情報取得失敗
-      btn.disabled=false; btn.textContent="📍 現在地の気象を取得";
-      document.getElementById("manual-area").style.display="block";
-      if(e.code===1){
-        st.textContent="位置情報が拒否されました。吉見町の気象を表示します。";
-      } else if(e.code===2){
-        st.textContent="位置情報を取得できませんでした。地域を選択してください。";
-      } else {
-        st.textContent="タイムアウトしました。地域を選択してください。";
-      }
+      clearTimeout(fallbackTimer);
+      resetBtn();
+      var msgs={1:"位置情報が拒否されました。",2:"位置情報を取得できませんでした。",3:"タイムアウトしました。"};
+      showManual((msgs[e.code]||"取得に失敗しました。")+" 吉見町の気象を表示します。");
       fetchByLatLon(36.0, 139.5, "吉見町");
     },
-    {timeout:10000}
+    {timeout:4000, enableHighAccuracy:false, maximumAge:60000}
   );
 }
 window.addEventListener("DOMContentLoaded",function(){
-  // 自動取得はしない（ユーザーがボタンを押した時のみ取得）
-  // ただしlocalStorageに位置情報許可済みフラグがあれば自動取得
-  if(localStorage.getItem("geo_allowed")==="1"){
-    fetchWeather();
-  }
+  // 自動取得はしない。ボタン押下時のみ取得
 });
 </script>
 <script src="common.js"></script>
