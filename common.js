@@ -192,3 +192,147 @@
   });
 
 })();
+
+
+/* ===== 雨・WBGT 自動アラート（ホーム／カレンダー／出欠確認 共通） ===== */
+(function(){
+  var targetPages=["","index.html","calendar.html","attendance.html"];
+  var pageName=location.pathname.split("/").pop();
+  if(targetPages.indexOf(pageName)===-1)return;
+  var ALERT_KEY="smc_alert_settings_v1";
+  var DEFAULT_SCHEDULES=[
+    {day:3,start:"19:00",end:"21:00",indoor:true},
+    {day:4,start:"18:30",end:"20:30",indoor:true},
+    {day:6,start:"08:00",end:"10:30",indoor:false},
+    {day:0,start:"08:00",end:"10:30",indoor:false}
+  ];
+  var DEFAULT_CFG={
+    schedules:DEFAULT_SCHEDULES,alertStartHour:0,rainThreshold:30,heatThreshold:25,
+    rainVenue:"北小体育館",
+    rainOdd:"奇数月：6〜4年 8:00〜10:00 ／ 3年〜年長 10:00〜12:00",
+    rainEven:"偶数月：3年〜年長 8:00〜10:00 ／ 6〜4年 10:00〜12:00"
+  };
+  var cfg=DEFAULT_CFG,checkTimer=null,checkSeq=0;
+  try{var saved=localStorage.getItem(ALERT_KEY);if(saved)cfg=JSON.parse(saved);}
+  catch(e){console.warn("auto alert local settings error:",e);}
+
+  function calcWbgt(temp,humidity){return 0.735*temp+0.0374*humidity+0.00292*temp*humidity-4.064;}
+  function findNextOutdoorPractice(){
+    var now=new Date(),schedules=cfg.schedules||DEFAULT_SCHEDULES;
+    var startHour=cfg.alertStartHour!==undefined?Number(cfg.alertStartHour):0;
+    for(var offset=0;offset<4;offset++){
+      var date=new Date(now);date.setDate(date.getDate()+offset);
+      for(var i=0;i<schedules.length;i++){
+        var schedule=schedules[i];
+        if(Number(schedule.day)!==date.getDay())continue;
+        var alertTime=new Date(date);alertTime.setHours(startHour,0,0,0);
+        if(now>=alertTime||offset>0)return{schedule:schedule,date:date,offset:offset};
+      }
+    }
+    return null;
+  }
+  function scheduleCheck(){
+    if(document.readyState==="loading")return;
+    clearTimeout(checkTimer);
+    checkTimer=setTimeout(checkAlerts,0);
+  }
+  function checkAlerts(){
+    var runId=++checkSeq;
+    var rainEl=document.getElementById("auto-rain"),heatEl=document.getElementById("auto-heat");
+    if(!rainEl||!heatEl)return;
+    rainEl.classList.remove("show");heatEl.classList.remove("show");
+    var practice=findNextOutdoorPractice();
+    if(!practice||practice.schedule.indoor)return;
+
+    function fetchForecast(lat,lon,sourceName){
+      var url="https://api.open-meteo.com/v1/forecast?latitude="+lat+"&longitude="+lon
+        +"&hourly=temperature_2m,relative_humidity_2m,weather_code,precipitation_probability"
+        +"&timezone=Asia/Tokyo&forecast_days=4";
+      fetch(url,{cache:"no-store"}).then(function(response){
+        if(!response.ok)throw new Error("Open-Meteo HTTP "+response.status);
+        return response.json();
+      }).then(function(data){
+        if(runId!==checkSeq)return;
+        var hourly=data&&data.hourly;
+        if(!hourly||!Array.isArray(hourly.time)||!Array.isArray(hourly.weather_code))throw new Error("気象データの形式が不正です");
+        var date=practice.date;
+        var dateText=date.getFullYear()+"-"+String(date.getMonth()+1).padStart(2,"0")+"-"+String(date.getDate()).padStart(2,"0");
+        var startParts=String(practice.schedule.start||"00:00").split(":");
+        var endParts=String(practice.schedule.end||"23:59").split(":");
+        var startMins=Number(startParts[0])*60+Number(startParts[1]||0);
+        var endMins=Number(endParts[0])*60+Number(endParts[1]||0);
+        var rainThreshold=Number(cfg.rainThreshold),heatThreshold=Number(cfg.heatThreshold);
+        if(!isFinite(rainThreshold))rainThreshold=30;
+        if(!isFinite(heatThreshold))heatThreshold=25;
+        var rainMax=0,wbgtMax=-Infinity,hasRain=false,checkedHours=0;
+        hourly.time.forEach(function(time,index){
+          if(!String(time).startsWith(dateText))return;
+          var hour=Number(String(time).slice(11,13)),minute=Number(String(time).slice(14,16))||0;
+          var mins=hour*60+minute;
+          if(mins<startMins||mins>endMins)return;
+          var temp=Number(hourly.temperature_2m[index]),humidity=Number(hourly.relative_humidity_2m[index]);
+          if(!isFinite(temp)||!isFinite(humidity))return;
+          checkedHours++;
+          var probability=Number(hourly.precipitation_probability[index])||0;
+          var weatherCode=Number(hourly.weather_code[index])||0;
+          var predictedWbgt=calcWbgt(temp,humidity);
+          if(probability>=rainThreshold||weatherCode>=51)hasRain=true;
+          if(probability>rainMax)rainMax=probability;
+          if(predictedWbgt>wbgtMax)wbgtMax=predictedWbgt;
+        });
+        if(!checkedHours)throw new Error("練習時間帯の予報がありません");
+        var month=date.getMonth()+1,isOddMonth=month%2===1;
+        var dayName=["日","月","火","水","木","金","土"][date.getDay()];
+        var dayLabel=practice.offset===0?"本日":practice.offset===1?"明日（"+dayName+"）":month+"/"+date.getDate()+"（"+dayName+"）";
+        var timeLabel=(practice.schedule.start||"")+"〜"+(practice.schedule.end||"");
+        var sourceLabel="（"+sourceName+"の予報）";
+        if(hasRain){
+          var venue=cfg.rainVenue||"北小体育館";
+          var rainSchedule=isOddMonth?(cfg.rainOdd||""):(cfg.rainEven||"");
+          document.getElementById("auto-rain-body").textContent=
+            dayLabel+" "+timeLabel+"の屋外練習に雨の予報があります。"+sourceLabel+"\n"
+            +"・最大降水確率："+rainMax+"%（設定基準 "+rainThreshold+"%）\n"
+            +"・室内用シューズをご用意ください\n"
+            +"・雨天時の会場："+venue+(rainSchedule?"\n・"+rainSchedule:"");
+          rainEl.classList.add("show");
+        }
+        if(wbgtMax>=heatThreshold){
+          var level=wbgtMax>=31?"危険":wbgtMax>=28?"厳重警戒":"警戒";
+          document.getElementById("auto-heat-body").textContent=
+            dayLabel+" "+timeLabel+"の屋外練習は、予想WBGT "+wbgtMax.toFixed(1)+"℃（"+level+"）です。"+sourceLabel+"\n"
+            +"・帽子を必ず着用してください\n"
+            +"・水筒は2本（水＋スポーツドリンク）持参してください\n"
+            +"・保冷剤・タオルをご用意ください"+(wbgtMax>=31?"\n⛔ WBGT31℃以上は活動中止基準です":"");
+          heatEl.classList.add("show");
+        }
+      }).catch(function(error){console.error("auto alert fetch error:",error);});
+    }
+    function useYoshimi(){if(runId===checkSeq)fetchForecast(36.0,139.5,"吉見町");}
+    if(!navigator.geolocation){useYoshimi();return;}
+    navigator.geolocation.getCurrentPosition(function(position){
+      if(runId===checkSeq)fetchForecast(position.coords.latitude,position.coords.longitude,"現在地");
+    },function(error){
+      console.warn("auto alert geolocation fallback:",error&&error.message?error.message:error);
+      useYoshimi();
+    },{timeout:5000,enableHighAccuracy:false,maximumAge:1800000});
+  }
+  window.copyAlert=function(type){
+    var body=document.getElementById("auto-"+type+"-body");
+    if(!body||!body.textContent.trim()){alert("現在表示中のアラートはありません");return;}
+    var heading=type==="rain"?"【自動アラート・雨の予報】":"【自動アラート・熱中症注意】";
+    var text=heading+"\n"+body.textContent;
+    if(navigator.clipboard&&navigator.clipboard.writeText){
+      navigator.clipboard.writeText(text).then(function(){alert("コピーしました！LINEに貼り付けてください。");})
+      .catch(function(){alert("コピーできませんでした。");});
+    }else{alert("このブラウザではコピー機能を利用できません。");}
+  };
+  if(typeof dbListen==="function"){
+    dbListen("alert_settings",function(value){
+      if(value&&value.schedules)cfg=value;
+      else{try{var local=localStorage.getItem(ALERT_KEY);if(local)cfg=JSON.parse(local);}
+      catch(e){console.warn("auto alert settings error:",e);}}
+      scheduleCheck();
+    },ALERT_KEY,null);
+  }
+  window.addEventListener("DOMContentLoaded",scheduleCheck);
+})();
