@@ -10,18 +10,19 @@
   <script src="firebase-config.js"></script>
   <link rel="stylesheet" href="common.css">
   <style>
-    .attend-grid{display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-bottom:24px}
+    .attend-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:18px}
     .attend-card{
       background:var(--surface-lt);border-radius:var(--r16);border:2px solid var(--line-2);
-      padding:28px 20px;display:flex;flex-direction:column;gap:16px;
+      padding:18px 10px;display:flex;flex-direction:column;gap:10px;
       box-shadow:var(--shadow);text-align:center;transition:.18s;
     }
     .attend-card:hover{border-color:var(--cyan);box-shadow:var(--glow-c),var(--shadow)}
     .attend-card.coach-card{border-color:rgba(0,212,255,.4)}
     .attend-card.coach-card:hover{border-color:var(--orange);box-shadow:var(--glow-o),var(--shadow)}
-    .attend-card .card-emoji{font-size:2.6rem;filter:drop-shadow(0 0 8px rgba(255,107,43,.4))}
-    .attend-card .card-title{font-size:1.15rem;font-weight:900;color:#ffffff}
-    .attend-card .card-subtitle{font-size:.8rem;color:#a8d4f0;margin-top:2px}
+    .attend-card .card-emoji{font-size:2rem;filter:drop-shadow(0 0 8px rgba(255,107,43,.4))}
+    .attend-card .card-title{font-size:1rem;font-weight:900;color:#ffffff}
+    .attend-card .card-subtitle{font-size:.72rem;color:#a8d4f0;margin-top:2px;line-height:1.45}
+    .attend-card .btn{width:100%;min-height:44px;padding:10px 6px;font-size:.78rem;line-height:1.35;white-space:normal;word-break:keep-all}
     .auto-alert{border-radius:var(--r12);padding:12px 14px;margin-bottom:12px;border:1px solid;display:none;gap:8px;flex-direction:column}
     .auto-alert.show{display:flex}
     .auto-alert.alert-rain{background:rgba(68,136,255,.12);border-color:rgba(68,136,255,.4)}
@@ -32,7 +33,14 @@
     .alert-body{font-size:.8rem;line-height:1.7;white-space:pre-line}
     .alert-rain .alert-body{color:#bfdbfe}
     .alert-heat .alert-body{color:#fecaca}
-    @media(max-width:520px){.attend-grid{grid-template-columns:1fr}}
+    @media(max-width:380px){
+      .attend-grid{gap:8px}
+      .attend-card{padding:15px 8px;border-radius:var(--r12)}
+      .attend-card .card-emoji{font-size:1.75rem}
+      .attend-card .card-title{font-size:.92rem}
+      .attend-card .card-subtitle{font-size:.66rem}
+      .attend-card .btn{font-size:.72rem;padding:9px 4px}
+    }
   </style>
 </head>
 <body>
