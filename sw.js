@@ -2,7 +2,7 @@
 
 
 // バージョン: 20260710223836
-const CACHE_NAME = 'smc-portal-' + CACHE_VERSION;
+
 
 // インストール：新バージョンを即座にアクティベート
 self.addEventListener('install', function(e){
