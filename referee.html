@@ -521,5 +521,30 @@
   </div>
 </main>
 <footer class="site-footer">YOSHIMI SMC FC — SMART PORTAL</footer>
+<script>
+function copyCheckList(){
+  var text=[
+    "【審判チェックリスト】",
+    "",
+    "■試合開始30分前",
+    "・ユニフォーム色の確認（被る場合はビブス対応）",
+    "・試合球の空気圧確認",
+    "・ゴールネット、コーナーフラッグ確認",
+    "・AED、救護バッグの場所確認",
+    "・WBGT確認、飲水タイム計画",
+    "",
+    "■試合直前",
+    "・参加選手数確認（8人制：最少5人）",
+    "・スパイク、アクセサリー確認",
+    "・GKユニフォーム色の確認",
+    "・コイントス実施"
+  ].join("\n");
+  navigator.clipboard.writeText(text).then(function(){
+    alert("審判チェックリストをコピーしました。LINEに貼り付けてください。");
+  }).catch(function(){
+    alert("コピーできませんでした。画面の内容を手動でコピーしてください。");
+  });
+}
+</script>
 <script src="common.js"></script>
 </body></html>
