@@ -67,6 +67,19 @@
     <button class="btn btn-outline btn-sm" onclick="fetchWeather()">🔄 更新</button>
   </div>
   <p id="status-msg" style="font-size:.82rem;color:var(--ink-3);margin-bottom:10px;min-height:1.2em"></p>
+  <div id="manual-area" style="display:none;margin-top:10px;background:rgba(255,107,43,.08);border:1px solid rgba(255,107,43,.3);border-radius:12px;padding:12px 14px">
+    <div style="font-size:.8rem;color:#ffaa66;font-weight:900;margin-bottom:8px">⚙️ 位置情報が使えない場合は地域を選択してください</div>
+    <div style="display:flex;gap:8px;flex-wrap:wrap;align-items:center">
+      <select id="manual-place" class="form-control" style="flex:1;min-width:160px;font-size:.84rem">
+        <option value="36.0,139.5">吉見町（デフォルト）</option>
+        <option value="35.9,139.6">さいたま市</option>
+        <option value="36.1,139.4">熊谷市</option>
+        <option value="35.9,139.5">川越市</option>
+        <option value="35.7,139.7">東京都心</option>
+      </select>
+      <button class="btn btn-primary btn-sm" onclick="fetchManual()">🌤️ この地域で取得</button>
+    </div>
+  </div>
 
   <!-- WBGT現在値 -->
   <div class="wbgt-big" id="wbgt-display" style="background:var(--surface-lt);color:var(--ink)">
@@ -242,6 +255,7 @@ function fetchByLatLon(lat, lon, placeName){
 // 手動選択で取得
 function fetchManual(){
   var sel = document.getElementById("manual-place");
+  if(!sel){ fetchByLatLon(36.0, 139.5, "吉見町"); return; }
   var val = sel.value.split(",");
   var name = sel.options[sel.selectedIndex].text;
   fetchByLatLon(parseFloat(val[0]), parseFloat(val[1]), name);
@@ -273,7 +287,7 @@ function fetchWeather(){
   btn.disabled=true;
   btn.textContent="📍 位置情報を取得中…";
   st.textContent="";
-  if(manualArea){ manualArea.style.display="none"; }
+  if(manualArea){ if(manualArea){ manualArea.style.display="none"; } }
 
   // タイムアウト保険（5秒で吉見町にフォールバック）
   var fallbackTimer=setTimeout(function(){
@@ -287,7 +301,7 @@ function fetchWeather(){
       clearTimeout(fallbackTimer);
       resetBtn();
       btn.textContent="🔄 再取得";
-      if(manualArea){ manualArea.style.display="none"; }
+      if(manualArea){ if(manualArea){ manualArea.style.display="none"; } }
       fetchByLatLon(pos.coords.latitude, pos.coords.longitude, "現在地");
     },
     function(e){
