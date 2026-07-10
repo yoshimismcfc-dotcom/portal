@@ -196,549 +196,6 @@
 <div class="japan-bar"></div>
 <footer class="site-footer">YOSHIMI SMC FC — SMART PORTAL</footer>
 <script>
-// ===== 天気コード =====
-var WI={0:'☀️',1:'🌤️',2:'⛅',3:'☁️',45:'🌫️',48:'🌫️',
-  51:'🌦️',53:'🌦️',55:'🌧️',61:'🌧️',63:'🌧️',65:'🌧️',
-  71:'🌨️',73:'🌨️',75:'❄️',80:'🌦️',81:'🌦️',82:'🌧️',95:'⛈️'};
-
-var WEATHER_CODES={
-  0:'晴れ',1:'概ね晴れ',2:'一部曇り',3:'曇り',
-  45:'霧',48:'霧',51:'小雨',53:'小雨',55:'雨',
-  61:'雨',63:'雨',65:'強い雨',71:'雪',73:'雪',75:'強い雪',
-  80:'にわか雨',81:'にわか雨',82:'強いにわか雨',95:'雷雨'
-};
-
-// ===== WBGT判定レベル =====
-var LEVELS=[
-  {min:31,label:'危険',    bg:'#cc0000',color:'#fff',msg:'運動は原則中止。熱中症の危険性が非常に高い状態です。'},
-  {min:28,label:'厳重警戒',bg:'#ff6600',color:'#fff',msg:'激しい運動は中止。こまめな休憩と水分補給を徹底してください。'},
-  {min:25,label:'警戒',   bg:'#ffaa00',color:'#fff',msg:'積極的に休憩を取り、水分・塩分補給をしてください。'},
-  {min:21,label:'注意',   bg:'#ffee00',color:'#333',msg:'こまめな水分補給を。運動の合間に必ず休憩を取ってください。'},
-  {min:0, label:'ほぼ安全',bg:'#00aa55',color:'#fff',msg:'通常の活動が可能ですが、水分補給を忘れずに。'}
-];
-
-function wbgt(t,h){return 0.735*t+0.0374*h+0.00292*t*h-4.064;}
-function lv(w){return LEVELS.find(function(l){return w>=l.min;})||LEVELS[4];}
-
-function showWBGT(w,meta){
-  var l=lv(w), d=document.getElementById('wbgt-display');
-  if(!d) return;
-  document.getElementById('wbgt-val').textContent=w.toFixed(1)+'℃';
-  document.getElementById('wbgt-lv').textContent=l.label;
-  document.getElementById('wbgt-msg').textContent=l.msg;
-  document.getElementById('wbgt-meta').textContent=meta||'';
-  d.style.background=l.bg; d.style.color=l.color;
-}
-
-// ===== 予報グリッド描画 =====
-function renderForecast(data){
-  var hours=data.hourly, grid=document.getElementById('forecast-grid'), cnt=0;
-  if(!grid) return;
-  var now=new Date();
-  grid.innerHTML='';
-  for(var i=0;i<hours.time.length&&cnt<8;i++){
-    var hT=new Date(hours.time[i]);
-    if(hT<=now) continue;
-    var ht=hours.temperature_2m[i], hh=hours.relative_humidity_2m[i];
-    var hw=wbgt(ht,hh), hl=lv(hw);
-    grid.innerHTML+='<div class="fc-card">'
-      +'<div class="fc-time">'+hT.getHours()+'時</div>'
-      +'<div class="fc-icon">'+(WI[hours.weather_code[i]]||'🌤️')+'</div>'
-      +'<div class="fc-temp">'+ht+'℃ / '+hh+'%</div>'
-      +'<div class="fc-wbgt" style="background:'+hl.bg+';color:'+hl.color+'">'+hw.toFixed(1)+'℃ '+hl.label+'</div>'
-      +'</div>';
-    cnt++;
-  }
-  if(!cnt) grid.innerHTML='<div style="grid-column:1/-1;text-align:center;color:var(--ink-3);font-size:.84rem;padding:16px">予報データがありません。</div>';
-}
-
-// ===== Open-Meteo APIで気象取得 =====
-function fetchAPI(lat, lon, placeName){
-  var st=document.getElementById('status-msg');
-  var btn=document.getElementById('fetch-btn');
-  st.textContent='気象データを取得中…';
-  var url='https://api.open-meteo.com/v1/forecast?latitude='+lat+'&longitude='+lon
-    +'&current=temperature_2m,relative_humidity_2m,weather_code'
-    +'&hourly=temperature_2m,relative_humidity_2m,weather_code'
-    +'&timezone=Asia%2FTokyo&forecast_days=1';
-  fetch(url)
-    .then(function(r){return r.json();})
-    .then(function(data){
-      var cur=data.current;
-      var t=cur.temperature_2m, h=cur.relative_humidity_2m;
-      var now=new Date();
-      var ts=now.getHours()+'時'+String(now.getMinutes()).padStart(2,'0')+'分';
-      var weather=WEATHER_CODES[cur.weather_code]||'不明';
-      showWBGT(wbgt(t,h),'📍 '+placeName+'　'+weather+'　'+t+'℃ / 湿度'+h+'%　'+ts+'現在');
-      st.textContent='';
-      btn.disabled=false; btn.textContent='🔄 再取得';
-      renderForecast(data);
-    })
-    .catch(function(){
-      // Open-Meteo失敗時は気象庁フォールバック
-      st.textContent='気象APIに接続できません。気象庁予報を使用します。';
-      fetch('https://www.jma.go.jp/bosai/forecast/data/forecast/110000.json')
-        .then(function(r){return r.json();})
-        .then(function(jd){
-          var ts=jd[1]&&jd[1].timeSeries&&jd[1].timeSeries.find(function(s){
-            return s.areas&&s.areas[0]&&s.areas[0].tempsMax;
-          });
-          var temp=parseFloat(ts&&ts.areas[0].tempsMax[0])||30;
-          showWBGT(wbgt(temp,60),'📍 埼玉県　気象庁予報最高'+temp+'℃（湿度60%と仮定）');
-          st.textContent='';
-          btn.disabled=false; btn.textContent='🔄 再取得';
-        })
-        .catch(function(){
-          st.textContent='気象データの取得に失敗しました。通信状況を確認してください。';
-          btn.disabled=false; btn.textContent='📍 現在地の気象を取得';
-        });
-    });
-}
-
-// ===== メイン取得（async/await でGPS取得） =====
-async function fetchWeather(){
-  var btn=document.getElementById('fetch-btn');
-  var st=document.getElementById('status-msg');
-  var manualArea=document.getElementById('manual-area');
-
-  btn.disabled=true; btn.textContent='📍 位置情報を取得中…'; st.textContent='';
-  if(manualArea) manualArea.style.display='none';
-
-  if(!navigator.geolocation){
-    st.textContent='このブラウザは位置情報に対応していません。吉見町の気象を表示します。';
-    if(manualArea) manualArea.style.display='block';
-    fetchAPI(36.0, 139.5, '吉見町');
-    return;
-  }
-
-  try {
-    // GPS取得（Promise化）
-    var pos = await new Promise(function(resolve, reject){
-      navigator.geolocation.getCurrentPosition(resolve, reject, {
-        enableHighAccuracy: false,
-        timeout: 8000,
-        maximumAge: 600000
-      });
-    });
-
-    var lat=pos.coords.latitude, lon=pos.coords.longitude;
-    var placeName='現在地';
-
-    // 逆ジオコーディング（地名取得）
-    try {
-      var gr=await fetch(
-        'https://nominatim.openstreetmap.org/reverse?lat='+lat+'&lon='+lon+'&format=json&accept-language=ja',
-        {headers:{'User-Agent':'YoshimiSMCPortal/1.0'}}
-      );
-      var gj=await gr.json();
-      placeName=gj.address&&(gj.address.city||gj.address.town||gj.address.village||gj.address.county)||'現在地';
-    } catch(e){}
-
-    fetchAPI(lat, lon, placeName);
-
-  } catch(e){
-    // GPS失敗 → 吉見町フォールバック
-    var msgs={1:'位置情報が拒否されました。',2:'位置情報を取得できませんでした。',3:'タイムアウトしました。'};
-    st.textContent=(msgs[e.code]||'位置情報を取得できませんでした。')+' 吉見町の気象を表示します。';
-    if(manualArea) manualArea.style.display='block';
-    fetchAPI(36.0, 139.5, '吉見町');
-  }
-}
-
-// ===== 手動地域選択 =====
-function fetchManual(){
-  var sel=document.getElementById('manual-place');
-  if(!sel) return;
-  var val=sel.value.split(',');
-  fetchAPI(parseFloat(val[0]), parseFloat(val[1]), sel.options[sel.selectedIndex].text);
-}
-
-window.addEventListener('DOMContentLoaded',function(){
-  // 自動取得なし。ボタン押下時のみ取得
-});
-</script>
-<script src="common.js"></script>
-</body>
-</html><script>
-// ===== 天気コード =====
-var WI={0:'☀️',1:'🌤️',2:'⛅',3:'☁️',45:'🌫️',48:'🌫️',
-  51:'🌦️',53:'🌦️',55:'🌧️',61:'🌧️',63:'🌧️',65:'🌧️',
-  71:'🌨️',73:'🌨️',75:'❄️',80:'🌦️',81:'🌦️',82:'🌧️',95:'⛈️'};
-
-var WEATHER_CODES={
-  0:'晴れ',1:'概ね晴れ',2:'一部曇り',3:'曇り',
-  45:'霧',48:'霧',51:'小雨',53:'小雨',55:'雨',
-  61:'雨',63:'雨',65:'強い雨',71:'雪',73:'雪',75:'強い雪',
-  80:'にわか雨',81:'にわか雨',82:'強いにわか雨',95:'雷雨'
-};
-
-// ===== WBGT判定レベル =====
-var LEVELS=[
-  {min:31,label:'危険',    bg:'#cc0000',color:'#fff',msg:'運動は原則中止。熱中症の危険性が非常に高い状態です。'},
-  {min:28,label:'厳重警戒',bg:'#ff6600',color:'#fff',msg:'激しい運動は中止。こまめな休憩と水分補給を徹底してください。'},
-  {min:25,label:'警戒',   bg:'#ffaa00',color:'#fff',msg:'積極的に休憩を取り、水分・塩分補給をしてください。'},
-  {min:21,label:'注意',   bg:'#ffee00',color:'#333',msg:'こまめな水分補給を。運動の合間に必ず休憩を取ってください。'},
-  {min:0, label:'ほぼ安全',bg:'#00aa55',color:'#fff',msg:'通常の活動が可能ですが、水分補給を忘れずに。'}
-];
-
-function wbgt(t,h){return 0.735*t+0.0374*h+0.00292*t*h-4.064;}
-function lv(w){return LEVELS.find(function(l){return w>=l.min;})||LEVELS[4];}
-
-function showWBGT(w,meta){
-  var l=lv(w), d=document.getElementById('wbgt-display');
-  if(!d) return;
-  document.getElementById('wbgt-val').textContent=w.toFixed(1)+'℃';
-  document.getElementById('wbgt-lv').textContent=l.label;
-  document.getElementById('wbgt-msg').textContent=l.msg;
-  document.getElementById('wbgt-meta').textContent=meta||'';
-  d.style.background=l.bg; d.style.color=l.color;
-}
-
-// ===== メイン取得処理（async/await） =====
-async function fetchWeather(){
-  var btn = document.getElementById('fetch-btn');
-  var st  = document.getElementById('status-msg');
-  var manualArea = document.getElementById('manual-area');
-
-  btn.disabled=true; btn.textContent='📍 位置情報を取得中…'; st.textContent='';
-  if(manualArea) manualArea.style.display='none';
-
-  var lat, lon, placeName='吉見町';
-
-  // ① GPS取得（Promise化）
-  try {
-    var pos = await new Promise(function(resolve, reject){
-      navigator.geolocation.getCurrentPosition(resolve, reject, {
-        enableHighAccuracy: false,
-        timeout: 8000,
-        maximumAge: 600000
-      });
-    });
-    lat = pos.coords.latitude;
-    lon = pos.coords.longitude;
-
-    // ② 逆ジオコーディング（地名取得）
-    try {
-      var gr = await fetch(
-        'https://nominatim.openstreetmap.org/reverse?lat='+lat+'&lon='+lon+'&format=json&accept-language=ja',
-        {headers:{'User-Agent':'YoshimiSMCPortal/1.0'}}
-      );
-      var gj = await gr.json();
-      placeName = gj.address&&(gj.address.city||gj.address.town||gj.address.village||gj.address.county)||'現在地';
-    } catch(e){ placeName='現在地'; }
-
-  } catch(e) {
-    // GPS失敗 → 吉見町にフォールバック
-    lat=36.0; lon=139.5;
-    var msgs={1:'位置情報が拒否されました。',2:'位置情報を取得できませんでした。',3:'タイムアウトしました。'};
-    st.textContent=(msgs[e.code]||'位置情報を取得できませんでした。')+' 吉見町の気象を表示します。';
-    if(manualArea) manualArea.style.display='block';
-  }
-
-  // ③ Open-Meteo API（気温・湿度・天気・予報）
-  try {
-    st.textContent='気象データを取得中…';
-    var url = 'https://api.open-meteo.com/v1/forecast?latitude='+lat+'&longitude='+lon
-      +'&current=temperature_2m,relative_humidity_2m,weather_code'
-      +'&hourly=temperature_2m,relative_humidity_2m,weather_code'
-      +'&timezone=Asia%2FTokyo&forecast_days=1';
-    var wr = await fetch(url);
-    var data = await wr.json();
-
-    var cur = data.current;
-    var t=cur.temperature_2m, h=cur.relative_humidity_2m, w=wbgt(t,h);
-    var now=new Date();
-    var ts=now.getHours()+'時'+String(now.getMinutes()).padStart(2,'0')+'分';
-    var weather=WEATHER_CODES[cur.weather_code]||'不明';
-
-    // ④ WBGT表示
-    showWBGT(w, '📍 '+placeName+'　'+weather+'　'+t+'℃ / 湿度'+h+'%　'+ts+'現在');
-    st.textContent='';
-
-    // 予報グリッド
-    var hours=data.hourly, grid=document.getElementById('forecast-grid'), cnt=0;
-    if(grid){
-      grid.innerHTML='';
-      for(var i=0;i<hours.time.length&&cnt<8;i++){
-        var hT=new Date(hours.time[i]);
-        if(hT<=now) continue;
-        var ht=hours.temperature_2m[i], hh=hours.relative_humidity_2m[i];
-        var hw=wbgt(ht,hh), hl=lv(hw);
-        grid.innerHTML+='<div class="fc-card">'
-          +'<div class="fc-time">'+hT.getHours()+'時</div>'
-          +'<div class="fc-icon">'+(WI[hours.weather_code[i]]||'🌤️')+'</div>'
-          +'<div class="fc-temp">'+ht+'℃ / '+hh+'%</div>'
-          +'<div class="fc-wbgt" style="background:'+hl.bg+';color:'+hl.color+'">'+hw.toFixed(1)+'℃ '+hl.label+'</div>'
-          +'</div>';
-        cnt++;
-      }
-      if(!cnt) grid.innerHTML='<div style="grid-column:1/-1;text-align:center;color:var(--ink-3);font-size:.84rem;padding:16px">予報データがありません。</div>';
-    }
-
-  } catch(err) {
-    // Open-Meteo失敗 → 気象庁JSONフォールバック
-    st.textContent='気象APIが利用できません。気象庁の予報を使用します。';
-    try {
-      var jr = await fetch('https://www.jma.go.jp/bosai/forecast/data/forecast/110000.json');
-      var jd = await jr.json();
-      var ts2 = jd[1]&&jd[1].timeSeries&&jd[1].timeSeries.find(function(s){return s.areas&&s.areas[0]&&s.areas[0].tempsMax;});
-      var temp = parseFloat(ts2&&ts2.areas&&ts2.areas[0]&&ts2.areas[0].tempsMax[0])||30;
-      showWBGT(wbgt(temp,60), '📍 埼玉県　気象庁予報最高'+temp+'℃（湿度60%と仮定）');
-      st.textContent='';
-    } catch(e2){
-      st.textContent='気象データの取得に失敗しました。通信状況を確認してください。';
-    }
-  }
-
-  btn.disabled=false; btn.textContent='🔄 再取得';
-}
-
-function fetchManual(){
-  var sel = document.getElementById('manual-place');
-  if(!sel) return;
-  var val = sel.value.split(',');
-  var name = sel.options[sel.selectedIndex].text;
-  // 手動取得もfetchWeatherのAPI部分を流用
-  var lat=parseFloat(val[0]), lon=parseFloat(val[1]);
-  var btn=document.getElementById('fetch-btn');
-  var st=document.getElementById('status-msg');
-  btn.disabled=true; btn.textContent='🌤️ 取得中…'; st.textContent='気象データを取得中…';
-  fetch('https://api.open-meteo.com/v1/forecast?latitude='+lat+'&longitude='+lon
-    +'&current=temperature_2m,relative_humidity_2m,weather_code'
-    +'&hourly=temperature_2m,relative_humidity_2m,weather_code'
-    +'&timezone=Asia%2FTokyo&forecast_days=1')
-  .then(function(r){return r.json();})
-  .then(function(data){
-    var cur=data.current, t=cur.temperature_2m, h=cur.relative_humidity_2m;
-    var now=new Date(), ts=now.getHours()+'時'+String(now.getMinutes()).padStart(2,'0')+'分';
-    showWBGT(wbgt(t,h),'📍 '+name+'　'+t+'℃ / '+h+'%　'+ts+'現在');
-    st.textContent='';
-    btn.disabled=false; btn.textContent='🔄 再取得';
-    var hours=data.hourly, grid=document.getElementById('forecast-grid'), cnt=0;
-    if(grid){
-      grid.innerHTML='';
-      for(var i=0;i<hours.time.length&&cnt<8;i++){
-        var hT=new Date(hours.time[i]);
-        if(hT<=now) continue;
-        var ht=hours.temperature_2m[i], hh=hours.relative_humidity_2m[i];
-        var hw=wbgt(ht,hh), hl=lv(hw);
-        grid.innerHTML+='<div class="fc-card">'
-          +'<div class="fc-time">'+hT.getHours()+'時</div>'
-          +'<div class="fc-icon">'+(WI[hours.weather_code[i]]||'🌤️')+'</div>'
-          +'<div class="fc-temp">'+ht+'℃ / '+hh+'%</div>'
-          +'<div class="fc-wbgt" style="background:'+hl.bg+';color:'+hl.color+'">'+hw.toFixed(1)+'℃ '+hl.label+'</div>'
-          +'</div>';
-        cnt++;
-      }
-    }
-  })
-  .catch(function(){
-    st.textContent='気象データの取得に失敗しました。';
-    btn.disabled=false; btn.textContent='📍 現在地の気象を取得';
-  });
-}
-
-window.addEventListener('DOMContentLoaded',function(){
-  // 自動取得なし。ボタン押下のみ
-});
-</script>e html>
-<html lang="ja">
-<head>
-  <meta charset="utf-8">
-  <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
-  <meta http-equiv="Pragma" content="no-cache">
-  <meta http-equiv="Expires" content="0">
-  <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>天気・WBGT｜吉見SMC FC</title>
-  <link rel="stylesheet" href="common.css">
-  <style>
-    .japan-bar{height:4px;background:linear-gradient(90deg,#003087 50%,#bc002d 50%)}
-    .wbgt-big{text-align:center;padding:24px 16px;border-radius:var(--r12);transition:all .4s;margin-bottom:12px;border:1px solid rgba(255,255,255,.1)}
-    .wbgt-num{font-size:3.8rem;font-weight:900;line-height:1}
-    .wbgt-lv{font-size:1.4rem;font-weight:900;margin:6px 0}
-    .wbgt-msg{font-size:.85rem;line-height:1.7;max-width:360px;margin:0 auto;opacity:.92}
-    .wbgt-meta{font-size:.7rem;opacity:.6;margin-top:8px}
-    .forecast-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:8px;margin-bottom:4px}
-    .fc-card{background:var(--surface-lt);border-radius:var(--r8);border:1px solid var(--line);padding:10px 7px;text-align:center}
-    .fc-time{font-size:.67rem;color:var(--ink-3);margin-bottom:3px}
-    .fc-icon{font-size:1.55rem;margin-bottom:3px}
-    .fc-temp{font-size:.82rem;font-weight:900;color:#fff}
-    .fc-wbgt{font-size:.7rem;font-weight:900;margin-top:3px;padding:2px 5px;border-radius:4px;display:inline-block}
-    .lv-dot{width:10px;height:10px;border-radius:50%;display:inline-block;margin-right:5px;vertical-align:middle}
-    @media(max-width:480px){.forecast-grid{grid-template-columns:repeat(2,1fr)}}
-
-    /* 熱中症注意事項カード */
-    .heat-tip-card{
-      background:linear-gradient(135deg,rgba(255,107,43,.12),rgba(255,68,102,.08));
-      border:1px solid rgba(255,107,43,.35);border-radius:var(--r12);
-      padding:16px;margin-bottom:14px;
-    }
-    .heat-tip-title{font-size:.9rem;font-weight:900;color:#ff8855;margin-bottom:10px;display:flex;align-items:center;gap:7px}
-    .heat-tip-grid{display:grid;grid-template-columns:1fr 1fr;gap:8px}
-    .heat-tip-item{background:rgba(0,0,0,.2);border-radius:var(--r8);padding:10px 11px}
-    .heat-tip-item .ht-icon{font-size:1.3rem;margin-bottom:4px}
-    .heat-tip-item .ht-label{font-size:.78rem;font-weight:900;color:#fff;margin-bottom:2px}
-    .heat-tip-item .ht-desc{font-size:.7rem;color:#c8e8ff;line-height:1.5}
-    @media(max-width:420px){.heat-tip-grid{grid-template-columns:1fr}}
-
-    /* 症状早見表 */
-    .symptom-table td,.symptom-table th{padding:7px 9px;font-size:.78rem}
-  </style>
-</head>
-<body>
-<div class="japan-bar"></div>
-<header class="site-header">
-  <div class="header-inner">
-    <a class="header-logo" href="index.html">
-      <div class="logo-mark">⚽</div>
-      <div><span class="logo-name">吉見SMC FC</span><span class="logo-sub">SMART PORTAL</span></div>
-    </a>
-  </div>
-</header>
-<main class="page-wrap">
-  <a class="back-btn" href="index.html">ホームに戻る</a>
-  <div class="hero-band">
-    <div class="hero-emoji">🌤️</div>
-    <div>
-      <div class="hero-title">天気・WBGT 自動判定</div>
-      <div class="hero-sub">現在地の気象を自動取得。8時間予報と熱中症リスクを表示します。</div>
-    </div>
-  </div>
-
-  <div style="display:flex;gap:8px;margin-bottom:12px;flex-wrap:wrap">
-    <button class="btn btn-primary" id="fetch-btn" onclick="fetchWeather()" style="flex:1">📍 現在地の気象を取得</button>
-    <button class="btn btn-outline btn-sm" onclick="fetchWeather()">🔄 更新</button>
-  </div>
-  <p id="status-msg" style="font-size:.82rem;color:var(--ink-3);margin-bottom:10px;min-height:1.2em"></p>
-  <div id="manual-area" style="display:none;margin-top:10px;background:rgba(255,107,43,.08);border:1px solid rgba(255,107,43,.3);border-radius:12px;padding:12px 14px">
-    <div style="font-size:.8rem;color:#ffaa66;font-weight:900;margin-bottom:8px">⚙️ 位置情報が使えない場合は地域を選択してください</div>
-    <div style="display:flex;gap:8px;flex-wrap:wrap;align-items:center">
-      <select id="manual-place" class="form-control" style="flex:1;min-width:160px;font-size:.84rem">
-        <option value="36.0,139.5">吉見町（デフォルト）</option>
-        <option value="35.9,139.6">さいたま市</option>
-        <option value="36.1,139.4">熊谷市</option>
-        <option value="35.9,139.5">川越市</option>
-        <option value="35.7,139.7">東京都心</option>
-      </select>
-      <button class="btn btn-primary btn-sm" onclick="fetchManual()">🌤️ この地域で取得</button>
-    </div>
-  </div>
-
-  <!-- WBGT現在値 -->
-  <div class="wbgt-big" id="wbgt-display" style="background:var(--surface-lt);color:var(--ink)">
-    <div class="wbgt-num" id="wbgt-val">—</div>
-    <div class="wbgt-lv" id="wbgt-lv">取得ボタンを押してください</div>
-    <div class="wbgt-msg" id="wbgt-msg"></div>
-    <div class="wbgt-meta" id="wbgt-meta"></div>
-  </div>
-
-  <!-- 8時間予報 -->
-  <div class="panel">
-    <div class="panel-title">⏱️ 今後8時間の予報</div>
-    <div class="forecast-grid" id="forecast-grid">
-      <div style="grid-column:1/-1;text-align:center;color:var(--ink-3);font-size:.84rem;padding:16px">気象データを取得すると表示されます</div>
-    </div>
-  </div>
-
-  <!-- WBGT判定基準 -->
-  <div class="panel">
-    <div class="panel-title">📊 WBGT判定基準（日本スポーツ協会準拠）</div>
-    <div style="overflow-x:auto">
-      <table class="data-table symptom-table">
-        <thead><tr><th>WBGT</th><th>レベル</th><th>活動の目安</th></tr></thead>
-        <tbody>
-          <tr><td><span class="lv-dot" style="background:#ff4466"></span>31℃以上</td><td><span class="badge badge-red">危険</span></td><td>原則運動中止。日陰で安静・保護者に連絡。</td></tr>
-          <tr><td><span class="lv-dot" style="background:#ff8800"></span>28〜31℃</td><td><span class="badge badge-yellow">厳重警戒</span></td><td>激しい運動禁止。15分ごとに給水・休憩。</td></tr>
-          <tr><td><span class="lv-dot" style="background:#ffcc00"></span>25〜28℃</td><td><span class="badge badge-yellow">警戒</span></td><td>積極的に休憩を増やす。体調不良者を早期確認。</td></tr>
-          <tr><td><span class="lv-dot" style="background:#4488ff"></span>21〜25℃</td><td><span class="badge badge-blue">注意</span></td><td>給水間隔を短く。体調変化に気を配る。</td></tr>
-          <tr><td><span class="lv-dot" style="background:#00ff88"></span>21℃未満</td><td><span class="badge badge-green">ほぼ安全</span></td><td>通常活動可。水分補給は忘れずに。</td></tr>
-        </tbody>
-      </table>
-    </div>
-    <p style="font-size:.7rem;color:var(--ink-3);margin-top:8px">※ WBGT推定式：0.735×気温+0.0374×湿度+0.00292×気温×湿度−4.064（屋外・日射あり想定）。Open-Meteo API使用。実測値との誤差±2〜3℃あり。</p>
-  </div>
-
-  <!-- ⚽ 熱中症予防のポイント（サッカー少年団向け） -->
-  <div class="heat-tip-card">
-    <div class="heat-tip-title">⚽ サッカー少年団での熱中症予防のポイント</div>
-    <div class="heat-tip-grid">
-      <div class="heat-tip-item">
-        <div class="ht-icon">🧴</div>
-        <div class="ht-label">水分補給</div>
-        <div class="ht-desc">練習前・中・後に必ず補給。水筒は2本（水＋スポーツドリンク）持参。のどが渇く前に飲む習慣を。</div>
-      </div>
-      <div class="heat-tip-item">
-        <div class="ht-icon">🧢</div>
-        <div class="ht-label">帽子・日よけ</div>
-        <div class="ht-desc">日除け帽や首に濡れタオルを着用。ウォームアップ前から被ること。直射日光を避ける。</div>
-      </div>
-      <div class="heat-tip-item">
-        <div class="ht-icon">🧊</div>
-        <div class="ht-label">冷却グッズ</div>
-        <div class="ht-desc">保冷剤・冷却スプレーをクーラーボックスで持参。首・脇の下・太ももの付け根を冷やすと効果的。</div>
-      </div>
-      <div class="heat-tip-item">
-        <div class="ht-icon">⏱️</div>
-        <div class="ht-label">休憩の取り方</div>
-        <div class="ht-desc">WBGT25℃以上は30分ごとに5分休憩。28℃以上は15分ごと。必ず日陰で休憩する。</div>
-      </div>
-      <div class="heat-tip-item">
-        <div class="ht-icon">👀</div>
-        <div class="ht-label">体調チェック</div>
-        <div class="ht-desc">練習前に「昨夜よく眠れたか」「朝食を食べたか」「今日の体調は？」を確認。不調なら無理させない。</div>
-      </div>
-      <div class="heat-tip-item">
-        <div class="ht-icon">🚨</div>
-        <div class="ht-label">緊急対応</div>
-        <div class="ht-desc">ふらつき・顔が赤い・意識がおかしいときは即日陰へ。体を冷やしながら119番。一人にしない。</div>
-      </div>
-      <div class="heat-tip-item">
-        <div class="ht-icon">🌙</div>
-        <div class="ht-label">前日の準備</div>
-        <div class="ht-desc">十分な睡眠・朝食をとる。起床後すぐコップ1杯の水を飲む。暑い日が続くほど体に負担が溜まる。</div>
-      </div>
-      <div class="heat-tip-item">
-        <div class="ht-icon">🏃</div>
-        <div class="ht-label">暑熱順化</div>
-        <div class="ht-desc">夏の初めは強度を落として体を慣らす（暑熱順化）。急に炎天下で激しい練習はしない。</div>
-      </div>
-    </div>
-  </div>
-
-  <!-- 症状別対処法 -->
-  <div class="panel">
-    <div class="panel-title">🩺 熱中症の症状と対処法</div>
-    <div style="overflow-x:auto">
-      <table class="data-table symptom-table">
-        <thead><tr><th>重症度</th><th>主な症状</th><th>対処法</th></tr></thead>
-        <tbody>
-          <tr>
-            <td><span class="badge badge-yellow">軽度</span></td>
-            <td>めまい・立ちくらみ・筋肉のけいれん・大量の汗</td>
-            <td>日陰で安静・スポーツドリンクを補給・休憩後様子見</td>
-          </tr>
-          <tr>
-            <td><span class="badge" style="background:rgba(255,136,0,.2);color:#ff8800;border:1px solid rgba(255,136,0,.4)">中度</span></td>
-            <td>頭痛・吐き気・嘔吐・体がだるい・集中できない</td>
-            <td>日陰に移動し体を冷やす・水分補給・保護者に連絡・医療機関受診を検討</td>
-          </tr>
-          <tr>
-            <td><span class="badge badge-red">重度</span></td>
-            <td>意識がない・会話がおかしい・高体温（40℃以上）・けいれん</td>
-            <td><strong style="color:#ff4466">即座に119番！</strong> 体を冷やしながら救急車を待つ。一人にしない。</td>
-          </tr>
-        </tbody>
-      </table>
-    </div>
-  </div>
-
-  <div class="notice-bar">
-    💡 実測WBGTは環境省「<a href="https://www.wbgt.env.go.jp/" target="_blank" rel="noopener" style="color:var(--orange);font-weight:700">熱中症予防情報サイト</a>」でも確認できます。
-  </div>
-</main>
-<div class="japan-bar"></div>
-<footer class="site-footer">YOSHIMI SMC FC — SMART PORTAL</footer>
-<script>
 var LEVELS=[
   {min:31, label:"危険",     color:"#ff4466",bg:"rgba(255,68,102,.18)",  msg:"⛔ 原則運動中止。日陰で安静にし、すぐに保護者へ連絡してください。体を冷やしながら救急車を呼ぶ準備を。"},
   {min:28, label:"厳重警戒", color:"#ff8800",bg:"rgba(255,136,0,.14)",   msg:"⚠️ 激しい運動は禁止。15分ごとに給水・休憩。体調不良者がいたら即座に対応。"},
@@ -770,8 +227,6 @@ function fetchByLatLon(lat, lon, placeName){
     var now=new Date(), ts=now.getHours()+"時"+String(now.getMinutes()).padStart(2,"0")+"分";
     showWBGT(w, "📍 "+placeName+"  気温"+t+"℃ / 湿度"+h+"%  "+ts+"現在");
     st.textContent="";
-    var fb=document.getElementById("fetch-btn");
-    if(fb){ fb.disabled=false; fb.textContent="🔄 再取得"; }
     var hours=data.hourly, grid=document.getElementById("forecast-grid"), cnt=0;
     grid.innerHTML="";
     for(var i=0;i<hours.time.length&&cnt<8;i++){
@@ -787,79 +242,81 @@ function fetchByLatLon(lat, lon, placeName){
       cnt++;
     }
     if(!cnt) grid.innerHTML='<div style="grid-column:1/-1;text-align:center;color:var(--ink-3);font-size:.84rem;padding:16px">予報データがありません。</div>';
-  }).catch(function(err){
-    document.getElementById("status-msg").textContent="気象データの取得に失敗しました。通信状況を確認してください。";
-    var fb=document.getElementById("fetch-btn");
-    if(fb){ fb.disabled=false; fb.textContent="📍 現在地の気象を取得"; }
-    console.log("fetch error:", err);
+  }).catch(function(){
+    document.getElementById("status-msg").textContent="気象データの取得に失敗しました。";
   });
 }
 
 // 手動選択で取得
 function fetchManual(){
   var sel = document.getElementById("manual-place");
-  if(!sel){ fetchByLatLon(36.0, 139.5, "吉見町"); return; }
   var val = sel.value.split(",");
   var name = sel.options[sel.selectedIndex].text;
   fetchByLatLon(parseFloat(val[0]), parseFloat(val[1]), name);
 }
 
 function fetchWeather(){
-  var btn=document.getElementById("fetch-btn");
-  var st=document.getElementById("status-msg");
-  var manualArea=document.getElementById("manual-area");
-
-  function resetBtn(){
-    btn.disabled=false;
-    btn.textContent="📍 現在地の気象を取得";
-  }
-  function showManual(msg){
-    st.textContent=msg;
-    if(manualArea){ manualArea.style.display="block"; }
-  }
-
-  // 位置情報非対応
+  var btn=document.getElementById("fetch-btn"),st=document.getElementById("status-msg");
+  btn.disabled=true;btn.textContent="📍 位置情報を取得中…";st.textContent="";
   if(!navigator.geolocation){
-    showManual("このブラウザは位置情報に対応していません。");
-    resetBtn();
-    fetchByLatLon(36.0, 139.5, "吉見町");
-    return;
+    st.textContent="このブラウザは位置情報に対応していません。";
+    btn.disabled=false;btn.textContent="📍 現在地の気象を取得";return;
   }
-
-  // 取得中表示
-  btn.disabled=true;
-  btn.textContent="📍 位置情報を取得中…";
-  st.textContent="";
-  if(manualArea){ if(manualArea){ manualArea.style.display="none"; } }
-
-  // タイムアウト保険（5秒で吉見町にフォールバック）
-  var fallbackTimer=setTimeout(function(){
-    resetBtn();
-    showManual("位置情報の取得に時間がかかっています。吉見町の気象を表示します。");
-    fetchByLatLon(36.0, 139.5, "吉見町");
-  }, 5000);
-
-  navigator.geolocation.getCurrentPosition(
-    function(pos){
-      clearTimeout(fallbackTimer);
-      resetBtn();
-      btn.textContent="🔄 再取得";
-      if(manualArea){ if(manualArea){ manualArea.style.display="none"; } }
-      fetchByLatLon(pos.coords.latitude, pos.coords.longitude, "現在地");
-    },
-    function(e){
-      clearTimeout(fallbackTimer);
-      resetBtn();
-      var msgs={1:"位置情報が拒否されました。",2:"位置情報を取得できませんでした。",3:"タイムアウトしました。"};
-      showManual((msgs[e.code]||"取得に失敗しました。")+" 吉見町の気象を表示します。");
+  navigator.geolocation.getCurrentPosition(function(pos){
+    var lat=pos.coords.latitude,lon=pos.coords.longitude;
+    st.textContent="気象データを取得中…";
+    var url="https://api.open-meteo.com/v1/forecast?latitude="+lat+"&longitude="+lon
+      +"&current=temperature_2m,relative_humidity_2m,weathercode"
+      +"&hourly=temperature_2m,relative_humidity_2m,weathercode"
+      +"&timezone=Asia/Tokyo&forecast_days=1";
+    fetch(url).then(function(r){return r.json();}).then(function(data){
+      var t=data.current.temperature_2m,h=data.current.relative_humidity_2m,w=wbgt(t,h);
+      var now=new Date(),ts=now.getHours()+"時"+String(now.getMinutes()).padStart(2,"0")+"分";
+      showWBGT(w,"📍 現在地  気温"+t+"℃ / 湿度"+h+"%  "+ts+"現在");
+      st.textContent="";btn.textContent="🔄 再取得";
+      var hours=data.hourly,grid=document.getElementById("forecast-grid"),cnt=0;
+      grid.innerHTML="";
+      for(var i=0;i<hours.time.length&&cnt<8;i++){
+        var hT=new Date(hours.time[i]);
+        if(hT<=now)continue;
+        var ht=hours.temperature_2m[i],hh=hours.relative_humidity_2m[i],hw=wbgt(ht,hh),hl=lv(hw);
+        grid.innerHTML+='<div class="fc-card">'
+          +'<div class="fc-time">'+hT.getHours()+'時</div>'
+          +'<div class="fc-icon">'+(WI[hours.weathercode[i]]||"🌤️")+'</div>'
+          +'<div class="fc-temp">'+ht+'℃ / '+hh+'%</div>'
+          +'<div class="fc-wbgt" style="background:'+hl.bg+';color:'+hl.color+'">'+hw.toFixed(1)+'℃ '+hl.label+'</div>'
+          +'</div>';
+        cnt++;
+      }
+      if(!cnt)grid.innerHTML='<div style="grid-column:1/-1;text-align:center;color:var(--ink-3);font-size:.84rem;padding:16px">予報データがありません。</div>';
+      btn.disabled=false;
+    }).catch(function(){
+      st.textContent="気象データの取得に失敗しました。";btn.disabled=false;btn.textContent="📍 現在地の気象を取得";
+    });
+  },function(e){
+    btn.disabled=false; btn.textContent="📍 現在地の気象を取得";
+    if(e.code===1){
+      // 拒否された場合：手動エリアを表示して吉見町で自動取得
+      document.getElementById("status-msg").textContent="位置情報が拒否されました。吉見町の気象を表示します。";
+      document.getElementById("manual-area").style.display="block";
       fetchByLatLon(36.0, 139.5, "吉見町");
-    },
-    {timeout:4000, enableHighAccuracy:false, maximumAge:60000}
-  );
+    } else if(e.code===2){
+      document.getElementById("status-msg").textContent="位置情報を取得できませんでした。地域を選択してください。";
+      document.getElementById("manual-area").style.display="block";
+    } else {
+      document.getElementById("status-msg").textContent="タイムアウトしました。地域を選択してください。";
+      document.getElementById("manual-area").style.display="block";
+    }
+  },{timeout:10000});
 }
-window.addEventListener("DOMContentLoaded",function(){
-  // 自動取得はしない。ボタン押下時のみ取得
-});
+function fetchManual(){
+  var sel=document.getElementById("manual-place");
+  if(!sel) return;
+  var val=sel.value.split(",");
+  var name=sel.options[sel.selectedIndex].text;
+  fetchByLatLon(parseFloat(val[0]), parseFloat(val[1]), name);
+}
+window.addEventListener("DOMContentLoaded",function(){fetchWeather();});
 </script>
 <script src="common.js"></script>
 </body>
