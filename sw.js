@@ -1,7 +1,7 @@
 // Service Worker - 自動更新対応版
-// バージョン: 20260710201446
+// バージョン: 20260711052840
 
-const CACHE_VERSION = '20260710201446';
+const CACHE_VERSION = '20260711052840';
 const CACHE_NAME = 'smc-portal-' + CACHE_VERSION;
 
 // インストール：新バージョンを即座にアクティベート
@@ -35,17 +35,17 @@ self.addEventListener('activate', function(e){
   );
 });
 
-// フェッチ：常にネットワークから最新を取得
+// フェッチ：同一オリジンのファイルだけを処理
+// Open-Meteo等の外部API通信はService Workerを経由させない
 self.addEventListener('fetch', function(e){
   if(e.request.method !== 'GET') return;
-  // chrome-extension等は無視
   if(!e.request.url.startsWith('http')) return;
 
+  var requestUrl=new URL(e.request.url);
+  if(requestUrl.origin !== self.location.origin) return;
+
   e.respondWith(
-    fetch(e.request, {
-      cache: 'no-store',
-      headers: {'Cache-Control': 'no-cache'}
-    }).catch(function(){
+    fetch(e.request,{cache:'no-store'}).catch(function(){
       return caches.match(e.request);
     })
   );
