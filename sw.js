@@ -1,7 +1,7 @@
 // Service Worker - 自動キャッシュ無効化
-// バージョン: 20260708235728
+// バージョン: 20260710052427
 
-const CACHE_VERSION = '20260708235728';
+const CACHE_VERSION = '20260710052427';
 
 // インストール：即座にアクティベート
 self.addEventListener('install', function(e){
