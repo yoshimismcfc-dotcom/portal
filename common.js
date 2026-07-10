@@ -135,11 +135,60 @@
   });
 })();
 
-/* ===== Service Worker 登録（キャッシュ無効化のみ・リロードなし） ===== */
+/* ===== Service Worker 自動更新登録（iPhone PWA・Android PWA対応） ===== */
 (function(){
   if(!('serviceWorker' in navigator)) return;
-  // 全SWを解除してキャッシュクリア（リロードは行わない）
-  navigator.serviceWorker.getRegistrations().then(function(regs){
-    return Promise.all(regs.map(function(r){ return r.unregister(); }));
-  }).catch(function(){});
+
+  var SW_PATH = location.pathname.replace(/\/[^\/]*$/, '/') + 'sw.js';
+
+  // SWを登録
+  navigator.serviceWorker.register(SW_PATH).then(function(reg){
+
+    // 強制的に更新チェック
+    reg.update();
+
+    // 新しいSWがインストールされたとき
+    reg.addEventListener('updatefound', function(){
+      var newWorker = reg.installing;
+      if(!newWorker) return;
+
+      newWorker.addEventListener('statechange', function(){
+        // 新SWがアクティブ待機状態になったら即座に適用
+        if(newWorker.state === 'installed'){
+          // 新SWにskipWaitingを送信
+          newWorker.postMessage({type:'SKIP_WAITING'});
+        }
+      });
+    });
+
+  }).catch(function(err){
+    console.log('SW登録エラー:', err);
+  });
+
+  // SWから更新通知を受け取ったらページをリロード
+  navigator.serviceWorker.addEventListener('message', function(e){
+    if(e.data && e.data.type === 'SW_UPDATED'){
+      // セッションストレージで二重リロードを防止
+      var key = 'smc_sw_ver';
+      var last = sessionStorage.getItem(key);
+      if(last !== e.data.version){
+        sessionStorage.setItem(key, e.data.version);
+        // 少し待ってからリロード（UX向上）
+        setTimeout(function(){ window.location.reload(); }, 300);
+      }
+    }
+  });
+
+  // controllerchangeイベント：新SWが制御を取得したらリロード
+  navigator.serviceWorker.addEventListener('controllerchange', function(){
+    var key = 'smc_ctrl_reload';
+    if(!sessionStorage.getItem(key)){
+      sessionStorage.setItem(key, '1');
+      setTimeout(function(){
+        sessionStorage.removeItem(key);
+        window.location.reload();
+      }, 300);
+    }
+  });
+
 })();

@@ -2,6 +2,24 @@
 <html lang="ja">
 <head>
   <meta charset="utf-8">
+  <meta name="app-version" content="20260710095640">
+  <script>
+    // PWA起動時：古いSWが残っていれば強制更新
+    if('serviceWorker' in navigator){
+      navigator.serviceWorker.getRegistrations().then(function(regs){
+        regs.forEach(function(r){
+          r.update(); // 更新チェック
+          if(r.waiting){ r.waiting.postMessage({type:'SKIP_WAITING'}); }
+        });
+      });
+      // キャッシュも全削除
+      if('caches' in window){
+        caches.keys().then(function(keys){
+          keys.forEach(function(k){ caches.delete(k); });
+        });
+      }
+    }
+  </script>
   <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
   <meta http-equiv="Pragma" content="no-cache">
   <meta http-equiv="Expires" content="0">
