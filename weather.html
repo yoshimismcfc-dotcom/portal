@@ -223,7 +223,7 @@ function lv(w){return LEVELS.find(function(l){return w>=l.min;})||LEVELS[4];}
 function showWBGT(w,meta){
   var l=lv(w), d=document.getElementById('wbgt-display');
   if(!d) return;
-  document.getElementById('wbgt-num').textContent=w.toFixed(1)+'℃';
+  document.getElementById('wbgt-val').textContent=w.toFixed(1)+'℃';
   document.getElementById('wbgt-lv').textContent=l.label;
   document.getElementById('wbgt-msg').textContent=l.msg;
   document.getElementById('wbgt-meta').textContent=meta||'';
@@ -387,7 +387,7 @@ function lv(w){return LEVELS.find(function(l){return w>=l.min;})||LEVELS[4];}
 function showWBGT(w,meta){
   var l=lv(w), d=document.getElementById('wbgt-display');
   if(!d) return;
-  document.getElementById('wbgt-num').textContent=w.toFixed(1)+'℃';
+  document.getElementById('wbgt-val').textContent=w.toFixed(1)+'℃';
   document.getElementById('wbgt-lv').textContent=l.label;
   document.getElementById('wbgt-msg').textContent=l.msg;
   document.getElementById('wbgt-meta').textContent=meta||'';
