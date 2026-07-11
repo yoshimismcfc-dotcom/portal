@@ -179,6 +179,24 @@
   </div>
 </div>
 
+<!-- 日程編集モーダル -->
+<div class="modal-bg" id="modal-edit-date">
+  <div class="modal">
+    <h3>📅 日程を編集</h3>
+    <div class="form-group"><label class="form-label">日付</label>
+      <input class="form-control" id="edit-date" type="date"></div>
+    <div class="form-group"><label class="form-label">カテゴリー</label>
+      <input class="form-control" id="edit-cat" placeholder="例：U12 4チーム"></div>
+    <div class="form-group"><label class="form-label">目標チーム数</label>
+      <input class="form-control" id="edit-target" type="number" min="0"></div>
+    <div class="modal-btns" style="flex-wrap:wrap">
+      <button class="btn btn-outline" style="color:var(--red);border-color:rgba(255,68,102,.4)" onclick="deleteEditDate()">🗑 削除</button>
+      <button class="btn btn-outline" onclick="closeModal('modal-edit-date')">キャンセル</button>
+      <button class="btn btn-cyan" onclick="saveEditDate()">💾 保存</button>
+    </div>
+  </div>
+</div>
+
 <footer class="site-footer">YOSHIMI SMC FC — SMART PORTAL</footer>
 <script>
 const KEY = "smc_game_adj_v1";
@@ -343,6 +361,49 @@ function renderTable() {
   tbl.innerHTML = h;
 }
 
+var _editDateId = null;
+function openEditDate(dateId){
+  var d = data.dates.find(function(x){ return x.id===dateId; });
+  if(!d) return;
+  _editDateId = dateId;
+  // 日付をYYYY-MM-DD形式に変換
+  var m = (d.label||"").match(/(\d+)\/(\d+)/);
+  if(m){
+    var y = new Date().getFullYear();
+    document.getElementById("edit-date").value = y + "-" + String(m[1]).padStart(2,"0") + "-" + String(m[2]).padStart(2,"0");
+  } else {
+    document.getElementById("edit-date").value = "";
+  }
+  document.getElementById("edit-cat").value = d.cat || "";
+  document.getElementById("edit-target").value = (d.target !== undefined ? d.target : 3);
+  openModal("modal-edit-date");
+}
+function saveEditDate(){
+  if(!_editDateId) return;
+  var d = data.dates.find(function(x){ return x.id===_editDateId; });
+  if(!d) return;
+  var dateVal = document.getElementById("edit-date").value;
+  var cat = document.getElementById("edit-cat").value.trim() || "未設定";
+  var tVal = document.getElementById("edit-target").value;
+  var target = tVal === "" ? 1 : Math.max(0, Number(tVal));
+  if(dateVal){
+    var dt = new Date(dateVal);
+    d.label = (dt.getMonth()+1) + "/" + dt.getDate() + "（" + ["日","月","火","水","木","金","土"][dt.getDay()] + "）";
+  }
+  d.cat = cat;
+  d.target = target;
+  saveData();
+  renderTable();
+  closeModal("modal-edit-date");
+}
+function deleteEditDate(){
+  if(!_editDateId || !confirm("この日程を削除しますか？")) return;
+  data.dates = data.dates.filter(function(x){ return x.id !== _editDateId; });
+  data.teams.forEach(function(t){ if(t.statuses) delete t.statuses[_editDateId]; });
+  saveData();
+  renderTable();
+  closeModal("modal-edit-date");
+}
 function openModal(id) { document.getElementById(id).classList.add("open"); }
 function closeModal(id) { document.getElementById(id).classList.remove("open"); }
 
