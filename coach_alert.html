@@ -47,17 +47,31 @@
 
   <!-- しきい値設定 -->
   <div class="panel" style="margin-top:14px">
-    <div class="panel-title">⏰ アラート表示開始時間</div>
+    <div class="panel-title">⏰ アラート表示開始タイミング</div>
     <div class="form-group">
-      <label class="form-label">当日の何時からアラートを表示するか</label>
-      <select class="form-control" id="alert-start-hour" style="max-width:200px">
-        <option value="0">0時（深夜・当日0時から）</option>
+      <label class="form-label">何日前から表示するか</label>
+      <select class="form-control" id="alert-days-before" style="max-width:220px">
+        <option value="0">当日のみ</option>
+        <option value="1">前日から（推奨）</option>
+        <option value="2">2日前から</option>
+        <option value="3">3日前から</option>
+      </select>
+    </div>
+    <div class="form-group">
+      <label class="form-label">表示開始日の何時から表示するか</label>
+      <select class="form-control" id="alert-start-hour" style="max-width:220px">
+        <option value="0">0時（深夜0時から）</option>
         <option value="5">5時（早朝）</option>
         <option value="6">6時</option>
         <option value="7">7時</option>
         <option value="8">8時</option>
-        <option value="12">12時（前日昼から）</option>
+        <option value="12">12時（昼から・推奨）</option>
+        <option value="15">15時</option>
+        <option value="18">18時（夕方から）</option>
       </select>
+    </div>
+    <div style="background:rgba(0,100,220,.12);border:1px solid rgba(0,150,255,.25);border-radius:8px;padding:8px 12px;font-size:.76rem;color:#88ccff;line-height:1.6;margin-bottom:6px">
+      💡 例：「前日から」＋「12時」＝ 土曜練習なら金曜のお昼12時からアラートが表示されます。
     </div>
 
     <div class="panel-title" style="margin-top:10px">🌧️ 雨アラートのしきい値</div>
@@ -162,7 +176,8 @@ function saveCfg(cfg){
 
 function renderForm(){
   var cfg=loadCfg();
-  document.getElementById("alert-start-hour").value=cfg.alertStartHour!==undefined?cfg.alertStartHour:0;
+  document.getElementById("alert-start-hour").value=cfg.alertStartHour!==undefined?cfg.alertStartHour:12;
+  document.getElementById("alert-days-before").value=cfg.alertDaysBefore!==undefined?cfg.alertDaysBefore:1;
   document.getElementById("rain-threshold").value=cfg.rainThreshold||30;
   document.getElementById("heat-threshold").value=cfg.heatThreshold||25;
   document.getElementById("rain-venue").value=cfg.rainVenue||"";
@@ -191,6 +206,8 @@ function renderScheds(cfg){
 function saveAll(){
   var cfg=loadCfg();
   cfg.alertStartHour=parseInt(document.getElementById("alert-start-hour").value)||0;
+  cfg.alertDaysBefore=parseInt(document.getElementById("alert-days-before").value);
+  if(!isFinite(cfg.alertDaysBefore)||cfg.alertDaysBefore<0)cfg.alertDaysBefore=1;
   cfg.rainThreshold=parseInt(document.getElementById("rain-threshold").value)||30;
   cfg.heatThreshold=parseInt(document.getElementById("heat-threshold").value)||25;
   cfg.rainVenue=document.getElementById("rain-venue").value.trim();

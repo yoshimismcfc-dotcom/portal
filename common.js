@@ -207,7 +207,7 @@
     {day:0,start:"08:00",end:"10:30",indoor:false}
   ];
   var DEFAULT_CFG={
-    schedules:DEFAULT_SCHEDULES,alertStartHour:0,rainThreshold:30,heatThreshold:25,
+    schedules:DEFAULT_SCHEDULES,alertStartHour:12,alertDaysBefore:1,rainThreshold:30,heatThreshold:25,
     rainVenue:"北小体育館",
     rainOdd:"奇数月：6〜4年 8:00〜10:00 ／ 3年〜年長 10:00〜12:00",
     rainEven:"偶数月：3年〜年長 8:00〜10:00 ／ 6〜4年 10:00〜12:00"
@@ -220,13 +220,25 @@
   function findNextOutdoorPractice(){
     var now=new Date(),schedules=cfg.schedules||DEFAULT_SCHEDULES;
     var startHour=cfg.alertStartHour!==undefined?Number(cfg.alertStartHour):0;
+    var daysBefore=cfg.alertDaysBefore!==undefined?Number(cfg.alertDaysBefore):1;
+    if(!isFinite(daysBefore)||daysBefore<0)daysBefore=1;
     for(var offset=0;offset<4;offset++){
       var date=new Date(now);date.setDate(date.getDate()+offset);
       for(var i=0;i<schedules.length;i++){
         var schedule=schedules[i];
+        if(schedule.indoor)continue; // 屋外練習のみ対象（屋内はスキップして先の屋外を探す）
         if(Number(schedule.day)!==date.getDay())continue;
-        var alertTime=new Date(date);alertTime.setHours(startHour,0,0,0);
-        if(now>=alertTime||offset>0)return{schedule:schedule,date:date,offset:offset};
+        // 当日練習が終了済みならスキップ
+        if(offset===0){
+          var endParts=String(schedule.end||"23:59").split(":");
+          var endTime=new Date(date);endTime.setHours(Number(endParts[0]),Number(endParts[1]||0),0,0);
+          if(now>endTime)continue;
+        }
+        // 表示開始 = 練習日の daysBefore 日前の startHour 時から
+        var alertTime=new Date(date);
+        alertTime.setDate(alertTime.getDate()-daysBefore);
+        alertTime.setHours(startHour,0,0,0);
+        if(now>=alertTime)return{schedule:schedule,date:date,offset:offset};
       }
     }
     return null;
