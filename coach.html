@@ -504,7 +504,8 @@ function loadAlertSettings(){
 function renderScheduleList(){
   var cfg = loadAlertSettings();
   // フォームに反映
-  document.getElementById("alert-start-hour").value = cfg.alertStartHour !== undefined ? cfg.alertStartHour : 0;
+  var ashEl = document.getElementById("alert-start-hour");
+  if(ashEl) ashEl.value = cfg.alertStartHour !== undefined ? cfg.alertStartHour : 12;
   document.getElementById("rain-threshold").value = cfg.rainThreshold || 30;
   document.getElementById("heat-threshold").value = cfg.heatThreshold || 25;
   document.getElementById("rain-venue").value = cfg.rainVenue || "";
@@ -597,7 +598,8 @@ document.getElementById("modal-sched").addEventListener("click", function(e){
 
 function saveAlertSettings(){
   var cfg = loadAlertSettings();
-  cfg.alertStartHour = parseInt(document.getElementById("alert-start-hour").value) || 0;
+  var ashEl2 = document.getElementById("alert-start-hour");
+  if(ashEl2) cfg.alertStartHour = parseInt(ashEl2.value) || 0;
   cfg.rainThreshold = parseInt(document.getElementById("rain-threshold").value) || 30;
   cfg.heatThreshold = parseInt(document.getElementById("heat-threshold").value) || 25;
   cfg.rainVenue = document.getElementById("rain-venue").value.trim();
