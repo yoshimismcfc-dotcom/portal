@@ -229,6 +229,7 @@ const INIT = {
   備考:{d2:"中止（若草まつり）",d5:"川越U9 大会不可"}
 };
 
+// Firebaseから初期はINITまたはlocalStorageで表示、その後クラウド同期
 function loadData(){
   try {
     const s = localStorage.getItem(KEY);
@@ -237,6 +238,17 @@ function loadData(){
   return JSON.parse(JSON.stringify(INIT));
 }
 let data = loadData();
+let _fbSyncing = false; // Firebase受信中の再保存を防ぐフラグ
+
+// Firebaseからデータを購読（他端末・クラウドと同期）
+dbListen("game_adjust", function(val){
+  if(val && val.dates && val.teams){
+    _fbSyncing = true;
+    data = val;
+    renderTable();
+    _fbSyncing = false;
+  }
+}, KEY, null);
 
 function collectDOMChanges() {
   document.querySelectorAll(".biko-input").forEach(function(el) {
@@ -253,14 +265,15 @@ function collectDOMChanges() {
 
 function saveData() {
   collectDOMChanges();
-  localStorage.setItem(KEY, JSON.stringify(data));
-  flash("💾 保存しました", "#00ff88");
+  // localStorage + Firebase 両方に保存
+  dbSave("game_adjust", data, KEY, null);
+  if(!_fbSyncing) flash("💾 保存しました（クラウド同期）", "#00ff88");
 }
 
 function resetData() {
   if (!confirm("初期データに戻しますか？現在のデータは消えます。")) return;
-  localStorage.removeItem(KEY);
   data = JSON.parse(JSON.stringify(INIT));
+  dbSave("game_adjust", data, KEY, null);
   renderTable();
   flash("↩ リセットしました", "#ffaa88");
 }
