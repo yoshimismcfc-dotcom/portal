@@ -242,12 +242,34 @@ let _fbSyncing = false; // Firebase受信中の再保存を防ぐフラグ
 
 // Firebaseからデータを購読（他端末・クラウドと同期）
 dbListen("game_adjust", function(val){
-  if(val && val.dates && val.teams){
-    _fbSyncing = true;
-    data = val;
-    renderTable();
-    _fbSyncing = false;
-  }
+  if(!(val && val.dates && val.teams)) return;
+
+  // ===== 自動復元ロジック =====
+  // クラウドのデータが「初期データ(INIT)と同一」で、
+  // この端末により新しい（異なる）データが残っている場合は、
+  // 端末側のデータを正として自動的にクラウドへ復元する。
+  try {
+    var initStr = JSON.stringify(INIT);
+    var valStr  = JSON.stringify(val);
+    if(valStr === initStr){
+      var localRaw = localStorage.getItem(KEY);
+      if(localRaw && localRaw !== initStr){
+        var localData = JSON.parse(localRaw);
+        if(localData && localData.dates && localData.teams){
+          data = localData;
+          renderTable();
+          dbSave("game_adjust", data, KEY, null);
+          flash("♻️ この端末のデータをクラウドに復元しました", "#00ff88");
+          return;
+        }
+      }
+    }
+  } catch(e){ console.warn("restore check error:", e); }
+
+  _fbSyncing = true;
+  data = val;
+  renderTable();
+  _fbSyncing = false;
 }, KEY, null);
 
 function collectDOMChanges() {
