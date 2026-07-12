@@ -1,7 +1,7 @@
 // Service Worker - 自動更新対応版
-// バージョン: 20260711180916
+// バージョン: 20260712071949
 
-const CACHE_VERSION = '20260711180916';
+const CACHE_VERSION = '20260712071949';
 const CACHE_NAME = 'smc-portal-' + CACHE_VERSION;
 
 // インストール：新バージョンを即座にアクティベート
@@ -21,16 +21,6 @@ self.addEventListener('activate', function(e){
     }).then(function(){
       // 全ての開いているページを即座に制御下に置く
       return self.clients.claim();
-    }).then(function(){
-      // 全クライアントに更新を通知（PWAリロード用）
-      return self.clients.matchAll({type:'window'}).then(function(clients){
-        clients.forEach(function(client){
-          client.postMessage({
-            type: 'SW_UPDATED',
-            version: CACHE_VERSION
-          });
-        });
-      });
     })
   );
 });
