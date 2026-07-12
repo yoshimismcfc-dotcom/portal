@@ -233,7 +233,11 @@ const INIT = {
 function loadData(){
   try {
     const s = localStorage.getItem(KEY);
-    if (s) return JSON.parse(s);
+    if (s) {
+      var parsed = JSON.parse(s);
+      // normalizeDataは後方で定義されるため簡易チェック
+      if(parsed && parsed.dates && parsed.teams) return parsed;
+    }
   } catch(e) {}
   return JSON.parse(JSON.stringify(INIT));
 }
@@ -241,22 +245,51 @@ let data = loadData();
 let _fbSyncing = false; // Firebase受信中の再保存を防ぐフラグ
 
 // Firebaseからデータを購読（他端末・クラウドと同期）
-dbListen("game_adjust", function(val){
-  if(!(val && val.dates && val.teams)) return;
+// ===== データ正規化（Firebaseは空配列・空オブジェクトを削除するため補完） =====
+function normalizeData(d){
+  if(!d || typeof d !== "object") return null;
+  // Firebaseが配列をオブジェクト{0:..,1:..}で返す場合に配列へ変換
+  function toArray(x){
+    if(Array.isArray(x)) return x.filter(Boolean);
+    if(x && typeof x === "object") return Object.keys(x).sort().map(function(k){return x[k];}).filter(Boolean);
+    return [];
+  }
+  var dates = toArray(d.dates);
+  var teams = toArray(d.teams).map(function(t){
+    t.statuses = (t.statuses && typeof t.statuses === "object") ? t.statuses : {};
+    return t;
+  });
+  if(!dates.length || !teams.length) return null;
+  return { dates: dates, teams: teams, 備考: (d["備考"] && typeof d["備考"]==="object") ? d["備考"] : {} };
+}
 
-  // ===== 自動復元ロジック =====
-  // クラウドのデータが「初期データ(INIT)と同一」で、
-  // この端末により新しい（異なる）データが残っている場合は、
-  // 端末側のデータを正として自動的にクラウドへ復元する。
-  try {
-    var initStr = JSON.stringify(INIT);
-    var valStr  = JSON.stringify(val);
-    if(valStr === initStr){
+dbListen("game_adjust", function(val){
+  var normalized = normalizeData(val);
+
+  if(!normalized){
+    // クラウドが空・壊れている → ローカル→INITの順で復元
+    var restored = null;
+    try {
       var localRaw = localStorage.getItem(KEY);
-      if(localRaw && localRaw !== initStr){
-        var localData = JSON.parse(localRaw);
-        if(localData && localData.dates && localData.teams){
-          data = localData;
+      if(localRaw) restored = normalizeData(JSON.parse(localRaw));
+    } catch(e){}
+    if(!restored) restored = normalizeData(JSON.parse(JSON.stringify(INIT)));
+    data = restored;
+    renderTable();
+    dbSave("game_adjust", data, KEY, null);
+    flash("♻️ データを復元しました", "#00ff88");
+    return;
+  }
+
+  // クラウドがINITと同一で、この端末により新しいデータが残っていれば端末側を復元
+  try {
+    var initStr = JSON.stringify(normalizeData(JSON.parse(JSON.stringify(INIT))));
+    if(JSON.stringify(normalized) === initStr){
+      var lr = localStorage.getItem(KEY);
+      if(lr){
+        var ld = normalizeData(JSON.parse(lr));
+        if(ld && JSON.stringify(ld) !== initStr){
+          data = ld;
           renderTable();
           dbSave("game_adjust", data, KEY, null);
           flash("♻️ この端末のデータをクラウドに復元しました", "#00ff88");
@@ -267,7 +300,7 @@ dbListen("game_adjust", function(val){
   } catch(e){ console.warn("restore check error:", e); }
 
   _fbSyncing = true;
-  data = val;
+  data = normalized;
   renderTable();
   _fbSyncing = false;
 }, KEY, null);
@@ -359,7 +392,7 @@ function renderTable() {
     h += "<tr><td class='col-fixed'>" + t.name +
          " <button class='del-team-btn' onclick=\"deleteTeam('" + t.id + "')\" title='削除'>🗑</button></td>";
     dates.forEach(function(d) {
-      var st = t.statuses[d.id] || "－";
+      var st = (t.statuses || {})[d.id] || "－";
       var cls = SCLS[st] || "s-none";
       h += "<td style='text-align:center'><button class='status-btn " + cls +
            "' onclick=\"cycleStatus('" + t.id + "','" + d.id + "')\">" + st + "</button></td>";
@@ -371,7 +404,7 @@ function renderTable() {
   // 参加数
   h += "<tr class='tr-count'><td class='col-fixed'>✅ 参加チーム数</td>";
   dates.forEach(function(d) {
-    var cnt = teams.filter(function(t){ return (t.statuses[d.id] || "－") === "OK"; }).length;
+    var cnt = teams.filter(function(t){ return ((t.statuses || {})[d.id] || "－") === "OK"; }).length;
     h += "<td>" + cnt + "<span style='font-size:.65rem;color:#8ac8e8'> /" + d.target + "</span></td>";
   });
   h += "<td></td></tr>";
@@ -379,7 +412,7 @@ function renderTable() {
   // 残り
   h += "<tr class='tr-nokori'><td class='col-fixed'>残り</td>";
   dates.forEach(function(d) {
-    var cnt = teams.filter(function(t){ return (t.statuses[d.id] || "－") === "OK"; }).length;
+    var cnt = teams.filter(function(t){ return ((t.statuses || {})[d.id] || "－") === "OK"; }).length;
     var n = d.target - cnt;
     var col = n <= 0 ? "#00ff88" : n === 1 ? "#ffee44" : "#ff8888";
     h += "<td style='color:" + col + ";font-weight:900'>" + (n <= 0 ? "✅ 充足" : n) + "</td>";

@@ -1,7 +1,7 @@
 // Service Worker - 自動更新対応版
-// バージョン: 20260712073303
+// バージョン: 20260712073723
 
-const CACHE_VERSION = '20260712073303';
+const CACHE_VERSION = '20260712073723';
 const CACHE_NAME = 'smc-portal-' + CACHE_VERSION;
 
 // インストール：新バージョンを即座にアクティベート
