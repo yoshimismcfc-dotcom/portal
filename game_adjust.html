@@ -3,17 +3,22 @@
 <head>
   <meta charset="utf-8">
   <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
-  <meta http-equiv="Pragma" content="no-cache">
-  <meta http-equiv="Expires" content="0">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>試合調整｜吉見SMC FC</title>
   <script src="firebase-config.js"></script>
   <link rel="stylesheet" href="common.css">
   <style>
+    /* ============================================================
+       試合調整 2026年最高品質版
+       - タップ領域44px以上（Apple HIG準拠）
+       - 充足日程の視覚強調・ゼブラストライプ
+       - アニメーション・アクセシビリティ・印刷最適化
+       ============================================================ */
     .adj-wrap{
-      overflow:auto; max-height:62vh;
+      overflow:auto; max-height:66vh;
       border:1px solid var(--line-2); border-radius:var(--r12);
       scrollbar-width:thin; scrollbar-color:rgba(255,107,43,.6) rgba(0,0,0,.4);
+      overscroll-behavior:contain;
     }
     .adj-wrap::-webkit-scrollbar{height:7px;width:7px}
     .adj-wrap::-webkit-scrollbar-track{background:rgba(0,0,0,.4)}
@@ -23,12 +28,13 @@
       border-right:1px solid var(--line); border-bottom:1px solid var(--line);
       padding:8px 10px; white-space:nowrap; vertical-align:middle;
     }
-    /* 固定1行目 */
+    /* ゼブラストライプ（視認性向上） */
+    tbody tr:nth-child(even):not(.tr-count):not(.tr-nokori):not(.tr-biko) td{background:rgba(255,255,255,.02)}
+    /* 固定ヘッダー行 */
     .adj-table thead tr:first-child th{
       position:sticky;top:0;z-index:30;background:#071523;
       border-bottom:2px solid var(--line-2);
     }
-    /* 固定2行目 */
     .adj-table thead tr:nth-child(2) th{
       position:sticky;top:41px;z-index:29;background:#050f1a;
       border-bottom:1px solid var(--line-2);
@@ -36,64 +42,85 @@
     /* 固定左列 */
     .col-fixed{
       position:sticky;left:0;z-index:20;
-      background:#0a1f30; min-width:118px; max-width:160px;
-      font-weight:700; color:#ffffff;
+      background:#0a1f30; min-width:118px; max-width:170px;
+      font-weight:700; color:#fff;
       border-right:2px solid rgba(0,212,255,.35) !important;
+      white-space:normal !important; line-height:1.3;
     }
     thead tr:first-child .col-fixed{z-index:40;background:#071523}
     thead tr:nth-child(2) .col-fixed{z-index:39;background:#050f1a}
-    tbody tr:hover td{background:rgba(0,212,255,.04)}
+    tbody tr:hover td{background:rgba(0,212,255,.05)}
     tbody tr:hover .col-fixed{background:#0e2a3e}
     /* ヘッダーセル */
-    .th-date{text-align:center;color:#ffffff;font-size:.8rem;font-weight:900;min-width:92px;letter-spacing:.03em}
-    .th-cat{text-align:center;color:#a8d4f0;font-size:.68rem;font-weight:400}
+    .th-date{text-align:center;color:#fff;font-size:.8rem;font-weight:900;min-width:96px;letter-spacing:.03em}
+    .th-date.is-full{color:#00ff88}
+    .th-cat{text-align:center;color:#a8d4f0;font-size:.68rem;font-weight:400;cursor:pointer;transition:.15s}
+    .th-cat:hover{background:rgba(0,212,255,.08)}
+    .th-cat:focus-visible{outline:2px solid var(--cyan);outline-offset:-2px}
     .th-label{color:var(--cyan);font-size:.68rem;font-weight:900;letter-spacing:.08em}
     .th-tantou{text-align:center;min-width:74px}
-    /* ステータスボタン */
+    /* 充足バッジ */
+    .full-badge{display:inline-block;background:rgba(0,255,136,.18);color:#00ff88;font-size:.58rem;font-weight:900;padding:1px 6px;border-radius:99px;margin-left:4px;vertical-align:middle;animation:pop .3s ease}
+    /* ステータスボタン：44px以上のタップ領域（HIG準拠） */
     .s-ok   {background:rgba(0,255,136,.2); color:#00ff88;border:1px solid rgba(0,255,136,.6)}
     .s-ng   {background:rgba(255,68,102,.2);color:#ff8888;border:1px solid rgba(255,68,102,.6)}
     .s-kakun{background:rgba(255,204,0,.2); color:#ffee44;border:1px solid rgba(255,204,0,.6)}
     .s-none {background:rgba(255,255,255,.07);color:#8ac8e8;border:1px solid rgba(0,212,255,.25)}
     .status-btn{
-      border-radius:6px;padding:4px 10px;font:inherit;font-size:.8rem;font-weight:900;
-      cursor:pointer;display:inline-block;min-width:58px;text-align:center;
-      transition:all .12s;user-select:none;border:none;
+      border-radius:8px;padding:10px 12px;font:inherit;font-size:.82rem;font-weight:900;
+      cursor:pointer;display:inline-block;min-width:64px;min-height:40px;text-align:center;
+      transition:transform .12s,filter .12s;user-select:none;-webkit-tap-highlight-color:transparent;
     }
     .status-btn:hover{filter:brightness(1.25)}
-    .status-btn:active{transform:scale(.9);filter:brightness(1.5)}
+    .status-btn:active{transform:scale(.92);filter:brightness(1.5)}
+    .status-btn:focus-visible{outline:2px solid var(--cyan);outline-offset:2px}
+    .status-btn.just-changed{animation:pop .28s ease}
+    @keyframes pop{0%{transform:scale(.8)}55%{transform:scale(1.12)}100%{transform:scale(1)}}
     /* 集計行 */
     .tr-count .col-fixed{background:#060e18;color:var(--cyan);font-size:.72rem}
-    .tr-count td{background:rgba(255,107,43,.09);color:#ffaa77;font-weight:900;font-size:.78rem;text-align:center}
+    .tr-count td{background:rgba(255,107,43,.09);color:#ffaa77;font-weight:900;font-size:.8rem;text-align:center;transition:background .3s}
+    .tr-count td.is-full{background:rgba(0,255,136,.12);color:#00ff88}
     .tr-nokori .col-fixed{background:#060e18;color:var(--cyan);font-size:.72rem}
     .tr-nokori td{background:rgba(0,212,255,.07);font-weight:900;font-size:.78rem;text-align:center}
     .tr-biko .col-fixed{background:#060e18;color:#8ac8e8;font-size:.7rem}
     .tr-biko td{background:rgba(255,204,0,.06);font-size:.72rem;padding:4px 6px}
     .biko-input{
       width:100%;background:transparent;border:none;color:#ffee66;
-      font:inherit;font-size:.72rem;resize:none;outline:none;padding:2px 4px;min-width:82px;
+      font:inherit;font-size:.74rem;resize:none;outline:none;padding:6px 4px;min-width:88px;min-height:34px;
     }
     .biko-input:focus{background:rgba(255,204,0,.12);border-radius:4px}
-    /* 削除ボタン */
+    /* 削除ボタン（タップ領域確保） */
     .del-date-btn{
       background:none;border:none;color:rgba(255,100,120,.6);
-      cursor:pointer;font-size:.75rem;padding:1px 5px;border-radius:4px;
-      margin-left:4px;transition:.15s;vertical-align:middle;
+      cursor:pointer;font-size:.8rem;padding:6px 8px;border-radius:6px;
+      margin-left:2px;transition:.15s;vertical-align:middle;min-width:30px;min-height:30px;
     }
     .del-date-btn:hover{color:#ff4466;background:rgba(255,68,102,.2)}
     .del-team-btn{
       background:none;border:none;color:rgba(255,100,120,.5);
-      cursor:pointer;font-size:.82rem;padding:2px 5px;border-radius:4px;transition:.15s;
+      cursor:pointer;font-size:.85rem;padding:6px 8px;border-radius:6px;transition:.15s;min-width:30px;min-height:30px;
     }
     .del-team-btn:hover{color:#ff4466;background:rgba(255,68,102,.2)}
     /* 担当者インライン編集 */
     .tantou-input{
       background:transparent;border:none;color:#a8d4f0;
-      font:inherit;font-size:.78rem;text-align:center;width:100%;outline:none;padding:0;
+      font:inherit;font-size:.78rem;text-align:center;width:100%;outline:none;padding:8px 0;min-height:36px;
     }
-    .tantou-input:focus{color:#ffffff;background:rgba(255,255,255,.07);border-radius:4px}
+    .tantou-input:focus{color:#fff;background:rgba(255,255,255,.07);border-radius:4px}
     /* 操作バー・凡例 */
     .ctrl-bar{display:flex;gap:8px;align-items:center;flex-wrap:wrap;margin-bottom:10px}
     .legend{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:12px;font-size:.76rem;align-items:center;color:#8ac8e8}
+    .legend .status-btn{min-height:auto;min-width:52px;padding:4px 8px;cursor:default}
+    /* Undo/Redoボタン */
+    .undo-btn{
+      background:rgba(255,255,255,.06);border:1px solid var(--line-2);color:#8ac8e8;
+      border-radius:var(--r8);padding:7px 12px;font:inherit;font-size:.78rem;font-weight:900;
+      cursor:pointer;transition:.15s;min-height:36px;
+    }
+    .undo-btn:hover:not(:disabled){background:rgba(0,212,255,.12);color:#fff}
+    .undo-btn:disabled{opacity:.3;cursor:default}
+    /* 自動保存インジケーター */
+    #save-msg{font-size:.76rem;color:#00ff88;transition:opacity .3s;min-height:1.2em}
     /* モーダル */
     .modal-bg{position:fixed;inset:0;background:rgba(0,0,0,.82);display:none;place-items:center;z-index:200;backdrop-filter:blur(6px)}
     .modal-bg.open{display:grid}
@@ -101,9 +128,27 @@
       background:var(--surface-lt);border:1px solid var(--line-2);
       border-radius:var(--r16);padding:24px;width:min(400px,92vw);
       box-shadow:var(--shadow-lg),0 0 40px rgba(0,212,255,.15);
+      animation:modalIn .22s ease;
     }
-    .modal h3{font-size:1rem;font-weight:900;margin-bottom:16px;color:#ffffff;letter-spacing:.05em}
+    @keyframes modalIn{from{opacity:0;transform:translateY(14px) scale(.97)}to{opacity:1;transform:none}}
+    .modal h3{font-size:1rem;font-weight:900;margin-bottom:16px;color:#fff;letter-spacing:.05em}
     .modal-btns{display:flex;gap:8px;justify-content:flex-end;margin-top:16px;flex-wrap:wrap}
+    /* ===== 印刷最適化 ===== */
+    @media print{
+      .site-header,.site-footer,.back-btn,.ctrl-bar,.legend,.hero-band,p{display:none !important}
+      .adj-wrap{max-height:none;overflow:visible;border:none}
+      body{background:#fff !important;color:#000 !important}
+      .adj-table{font-size:8pt}
+      .adj-table th,.adj-table td{border:1px solid #999 !important;background:#fff !important;color:#000 !important;padding:4px 6px}
+      .col-fixed{position:static;background:#eee !important;color:#000 !important}
+      .status-btn{border:1px solid #666;background:#fff;color:#000;padding:2px 6px;min-height:auto;min-width:auto}
+      .del-date-btn,.del-team-btn{display:none}
+      .full-badge{border:1px solid #090;color:#090;background:#fff}
+    }
+    /* モーション低減設定の尊重（アクセシビリティ） */
+    @media (prefers-reduced-motion: reduce){
+      *{animation:none !important;transition:none !important}
+    }
   </style>
 </head>
 <body>
@@ -121,40 +166,45 @@
     <div class="hero-emoji">📊</div>
     <div>
       <div class="hero-title">試合調整</div>
-      <div class="hero-sub">ふれあい芝グラウンド大会の参加チーム調整表。タップでOK/NG/確認中を切り替え。チーム・日程・備考すべて追加・削除可能。</div>
+      <div class="hero-sub">タップでOK/NG/確認中を切り替え。<strong style="color:#00ff88">変更は自動保存</strong>されクラウドで全端末に同期されます。</div>
     </div>
   </div>
 
-  <div class="ctrl-bar">
-    <button class="btn btn-primary btn-sm" onclick="openModal('modal-team')">＋ チーム追加</button>
-    <button class="btn btn-cyan btn-sm" onclick="openModal('modal-date')">＋ 日程追加</button>
-    <button class="btn btn-green btn-sm" onclick="saveData()">💾 保存</button>
-    <button class="btn btn-outline btn-sm" style="color:var(--red);border-color:rgba(255,68,102,.4)" onclick="resetData()">↩ リセット</button>
-    <span id="save-msg" style="font-size:.78rem;color:#00ff88"></span>
+  <div class="ctrl-bar" role="toolbar" aria-label="操作バー">
+    <button class="btn btn-primary btn-sm" onclick="openModal('modal-team')" aria-label="チームを追加">＋ チーム追加</button>
+    <button class="btn btn-cyan btn-sm" onclick="openModal('modal-date')" aria-label="日程を追加">＋ 日程追加</button>
+    <button class="undo-btn" id="undo-btn" onclick="undo()" disabled aria-label="元に戻す" title="元に戻す">↶ 戻す</button>
+    <button class="undo-btn" id="redo-btn" onclick="redo()" disabled aria-label="やり直す" title="やり直す">↷ 進む</button>
+    <button class="btn-line-copy sm" onclick="copyAdjList()" aria-label="調整状況をLINE用にコピー">📋 LINEコピー</button>
+    <button class="btn btn-outline btn-sm no-print" onclick="window.print()" aria-label="印刷">🖨 印刷</button>
+    <span id="save-msg" role="status" aria-live="polite"></span>
   </div>
-  <div class="legend">
+  <div class="legend" aria-hidden="true">
     タップで切替 →
-    <span class="status-btn s-ok" style="cursor:default">OK</span>参加可
-    <span class="status-btn s-ng" style="cursor:default">NG</span>不可
-    <span class="status-btn s-kakun" style="cursor:default">確認中</span>返答待ち
-    <span class="status-btn s-none" style="cursor:default">－</span>未打診
-    <span style="color:#6aaccc;font-size:.7rem">｜ 日付の✕で列削除 ／ チームの🗑で行削除</span>
+    <span class="status-btn s-ok">OK</span>参加可
+    <span class="status-btn s-ng">NG</span>不可
+    <span class="status-btn s-kakun">確認中</span>返答待ち
+    <span class="status-btn s-none">－</span>未打診
   </div>
 
   <div class="adj-wrap">
-    <table class="adj-table" id="adj-table"></table>
+    <table class="adj-table" id="adj-table" aria-label="試合調整表"></table>
   </div>
-  <p style="font-size:.7rem;color:#6aaccc;margin-top:8px">← 横スクロール可。チーム列と日付行は固定。備考欄・担当者欄はタップして直接編集できます。</p>
+  <p style="font-size:.7rem;color:#6aaccc;margin-top:8px">← 横スクロール可。チーム列と日付行は固定。備考・担当者はタップで直接編集（自動保存）。カテゴリー欄タップで日程を編集できます。</p>
+
+  <div style="margin-top:14px">
+    <button class="btn btn-outline btn-sm" style="color:var(--red);border-color:rgba(255,68,102,.35);font-size:.72rem" onclick="resetData()">↩ 初期データにリセット（取扱注意）</button>
+  </div>
 </main>
 
 <!-- チーム追加モーダル -->
-<div class="modal-bg" id="modal-team">
+<div class="modal-bg" id="modal-team" role="dialog" aria-modal="true" aria-labelledby="mt-title">
   <div class="modal">
-    <h3>⚽ チームを追加</h3>
-    <div class="form-group"><label class="form-label">チーム名</label>
-      <input class="form-control" id="new-team-name" placeholder="例：川越FC"></div>
-    <div class="form-group"><label class="form-label">担当者</label>
-      <input class="form-control" id="new-team-tantou" placeholder="例：武部"></div>
+    <h3 id="mt-title">⚽ チームを追加</h3>
+    <div class="form-group"><label class="form-label" for="new-team-name">チーム名</label>
+      <input class="form-control" id="new-team-name" placeholder="例：川越FC" autocomplete="off"></div>
+    <div class="form-group"><label class="form-label" for="new-team-tantou">担当者</label>
+      <input class="form-control" id="new-team-tantou" placeholder="例：武部" autocomplete="off"></div>
     <div class="modal-btns">
       <button class="btn btn-outline" onclick="closeModal('modal-team')">キャンセル</button>
       <button class="btn btn-primary" onclick="addTeam()">追加</button>
@@ -163,15 +213,15 @@
 </div>
 
 <!-- 日程追加モーダル -->
-<div class="modal-bg" id="modal-date">
+<div class="modal-bg" id="modal-date" role="dialog" aria-modal="true" aria-labelledby="md-title">
   <div class="modal">
-    <h3>📅 日程を追加</h3>
-    <div class="form-group"><label class="form-label">日付</label>
+    <h3 id="md-title">📅 日程を追加</h3>
+    <div class="form-group"><label class="form-label" for="new-date">日付</label>
       <input class="form-control" id="new-date" type="date"></div>
-    <div class="form-group"><label class="form-label">カテゴリー</label>
-      <input class="form-control" id="new-cat" placeholder="例：U12 4チーム"></div>
-    <div class="form-group"><label class="form-label">目標チーム数</label>
-      <input class="form-control" id="new-target" type="number" value="3" min="1"></div>
+    <div class="form-group"><label class="form-label" for="new-cat">カテゴリー</label>
+      <input class="form-control" id="new-cat" placeholder="例：U12 4チーム" autocomplete="off"></div>
+    <div class="form-group"><label class="form-label" for="new-target">目標チーム数</label>
+      <input class="form-control" id="new-target" type="number" value="3" min="0" inputmode="numeric"></div>
     <div class="modal-btns">
       <button class="btn btn-outline" onclick="closeModal('modal-date')">キャンセル</button>
       <button class="btn btn-cyan" onclick="addDate()">追加</button>
@@ -180,15 +230,15 @@
 </div>
 
 <!-- 日程編集モーダル -->
-<div class="modal-bg" id="modal-edit-date">
+<div class="modal-bg" id="modal-edit-date" role="dialog" aria-modal="true" aria-labelledby="me-title">
   <div class="modal">
-    <h3>📅 日程を編集</h3>
-    <div class="form-group"><label class="form-label">日付</label>
+    <h3 id="me-title">📅 日程を編集</h3>
+    <div class="form-group"><label class="form-label" for="edit-date">日付</label>
       <input class="form-control" id="edit-date" type="date"></div>
-    <div class="form-group"><label class="form-label">カテゴリー</label>
-      <input class="form-control" id="edit-cat" placeholder="例：U12 4チーム"></div>
-    <div class="form-group"><label class="form-label">目標チーム数</label>
-      <input class="form-control" id="edit-target" type="number" min="0"></div>
+    <div class="form-group"><label class="form-label" for="edit-cat">カテゴリー</label>
+      <input class="form-control" id="edit-cat" placeholder="例：U12 4チーム" autocomplete="off"></div>
+    <div class="form-group"><label class="form-label" for="edit-target">目標チーム数</label>
+      <input class="form-control" id="edit-target" type="number" min="0" inputmode="numeric"></div>
     <div class="modal-btns" style="flex-wrap:wrap">
       <button class="btn btn-outline" style="color:var(--red);border-color:rgba(255,68,102,.4)" onclick="deleteEditDate()">🗑 削除</button>
       <button class="btn btn-outline" onclick="closeModal('modal-edit-date')">キャンセル</button>
@@ -199,6 +249,17 @@
 
 <footer class="site-footer">YOSHIMI SMC FC — SMART PORTAL</footer>
 <script>
+/* ============================================================
+   試合調整 2026年最高品質版 メインスクリプト
+   [設計方針]
+   - XSS完全対策：全ユーザー入力をesc()でエスケープ
+   - イベントデリゲーション：動的要素のonclick文字列連結を排除
+   - 自動保存：全変更が0.8秒デバウンスでクラウド保存
+   - Undo/Redo：最大30手のスナップショット
+   - Firebaseエコー抑制：自分の保存の反射で再描画しない
+     （入力中のフォーカス飛び・点滅を根絶）
+   ============================================================ */
+
 const KEY = "smc_game_adj_v1";
 const INIT = {
   dates:[
@@ -229,26 +290,32 @@ const INIT = {
   備考:{d2:"中止（若草まつり）",d5:"川越U9 大会不可"}
 };
 
-// Firebaseから初期はINITまたはlocalStorageで表示、その後クラウド同期
+/* ---------- XSS対策：HTMLエスケープ ---------- */
+function esc(s){
+  return String(s == null ? "" : s)
+    .replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;")
+    .replace(/"/g,"&quot;").replace(/'/g,"&#39;");
+}
+
+/* ---------- 初期データ読込（localStorage→INIT） ---------- */
 function loadData(){
   try {
     const s = localStorage.getItem(KEY);
     if (s) {
       var parsed = JSON.parse(s);
-      // normalizeDataは後方で定義されるため簡易チェック
       if(parsed && parsed.dates && parsed.teams) return parsed;
     }
   } catch(e) {}
   return JSON.parse(JSON.stringify(INIT));
 }
 let data = loadData();
-let _fbSyncing = false; // Firebase受信中の再保存を防ぐフラグ
 
-// Firebaseからデータを購読（他端末・クラウドと同期）
-// ===== データ正規化（Firebaseは空配列・空オブジェクトを削除するため補完） =====
+/* ---------- Firebase同期（正規化・自動復元・エコー抑制） ---------- */
+let _lastSavedStr = null; // 自分が最後に保存したデータ（エコー抑制用）
+
+// Firebaseは空配列・空オブジェクトを削除し、配列をオブジェクトで返すことがあるため正規化
 function normalizeData(d){
   if(!d || typeof d !== "object") return null;
-  // Firebaseが配列をオブジェクト{0:..,1:..}で返す場合に配列へ変換
   function toArray(x){
     if(Array.isArray(x)) return x.filter(Boolean);
     if(x && typeof x === "object") return Object.keys(x).sort().map(function(k){return x[k];}).filter(Boolean);
@@ -266,8 +333,8 @@ function normalizeData(d){
 dbListen("game_adjust", function(val){
   var normalized = normalizeData(val);
 
+  // クラウドが空・壊れている → ローカル→INITの順で自動復元
   if(!normalized){
-    // クラウドが空・壊れている → ローカル→INITの順で復元
     var restored = null;
     try {
       var localRaw = localStorage.getItem(KEY);
@@ -276,12 +343,12 @@ dbListen("game_adjust", function(val){
     if(!restored) restored = normalizeData(JSON.parse(JSON.stringify(INIT)));
     data = restored;
     renderTable();
-    dbSave("game_adjust", data, KEY, null);
-    flash("♻️ データを復元しました", "#00ff88");
+    persist();
+    flash("♻️ データを復元しました");
     return;
   }
 
-  // クラウドがINITと同一で、この端末により新しいデータが残っていれば端末側を復元
+  // クラウドがINITと同一で、この端末により新しいデータがあれば端末側を復元
   try {
     var initStr = JSON.stringify(normalizeData(JSON.parse(JSON.stringify(INIT))));
     if(JSON.stringify(normalized) === initStr){
@@ -291,20 +358,42 @@ dbListen("game_adjust", function(val){
         if(ld && JSON.stringify(ld) !== initStr){
           data = ld;
           renderTable();
-          dbSave("game_adjust", data, KEY, null);
-          flash("♻️ この端末のデータをクラウドに復元しました", "#00ff88");
+          persist();
+          flash("♻️ この端末のデータをクラウドに復元しました");
           return;
         }
       }
     }
   } catch(e){ console.warn("restore check error:", e); }
 
-  _fbSyncing = true;
+  // 【エコー抑制】自分が保存した内容の反射なら再描画しない
+  // （入力中のフォーカス飛び・画面点滅を防ぐ）
+  var incoming = JSON.stringify(normalized);
+  if(incoming === _lastSavedStr) return;
+
   data = normalized;
   renderTable();
-  _fbSyncing = false;
 }, KEY, null);
 
+/* ---------- 保存（自動保存・デバウンス） ---------- */
+var _saveTimer = null;
+
+// 即時保存（構造変更時：チーム/日程の追加削除・状態変更）
+function persist(showMsg){
+  collectDOMChanges();
+  _lastSavedStr = JSON.stringify(normalizeData(JSON.parse(JSON.stringify(data))));
+  dbSave("game_adjust", data, KEY, null);
+  if(showMsg !== false) flash("💾 自動保存しました");
+}
+
+// デバウンス保存（テキスト入力時：備考・担当者）
+function persistDebounced(){
+  clearTimeout(_saveTimer);
+  flash("✏️ 入力中…", "#8ac8e8");
+  _saveTimer = setTimeout(function(){ persist(); }, 800);
+}
+
+// DOM上の編集中テキストをdataに反映
 function collectDOMChanges() {
   document.querySelectorAll(".biko-input").forEach(function(el) {
     if (!data.備考) data.備考 = {};
@@ -318,123 +407,256 @@ function collectDOMChanges() {
   });
 }
 
-function saveData() {
+/* ---------- Undo / Redo（最大30手） ---------- */
+var _undoStack = [], _redoStack = [];
+function snapshot(){
   collectDOMChanges();
-  // localStorage + Firebase 両方に保存
-  dbSave("game_adjust", data, KEY, null);
-  if(!_fbSyncing) flash("💾 保存しました（クラウド同期）", "#00ff88");
+  _undoStack.push(JSON.stringify(data));
+  if(_undoStack.length > 30) _undoStack.shift();
+  _redoStack = [];
+  updateUndoButtons();
 }
-
-function resetData() {
-  if (!confirm("初期データに戻しますか？現在のデータは消えます。")) return;
-  data = JSON.parse(JSON.stringify(INIT));
-  dbSave("game_adjust", data, KEY, null);
-  renderTable();
-  flash("↩ リセットしました", "#ffaa88");
+function undo(){
+  if(!_undoStack.length) return;
+  collectDOMChanges();
+  _redoStack.push(JSON.stringify(data));
+  data = JSON.parse(_undoStack.pop());
+  renderTable(); persist(false);
+  flash("↶ 元に戻しました", "#8ac8e8");
+  updateUndoButtons();
 }
+function redo(){
+  if(!_redoStack.length) return;
+  collectDOMChanges();
+  _undoStack.push(JSON.stringify(data));
+  data = JSON.parse(_redoStack.pop());
+  renderTable(); persist(false);
+  flash("↷ やり直しました", "#8ac8e8");
+  updateUndoButtons();
+}
+function updateUndoButtons(){
+  document.getElementById("undo-btn").disabled = !_undoStack.length;
+  document.getElementById("redo-btn").disabled = !_redoStack.length;
+}
+// Ctrl+Z / Ctrl+Shift+Z（PC用ショートカット）
+document.addEventListener("keydown", function(e){
+  if((e.ctrlKey||e.metaKey) && e.key.toLowerCase()==="z"){
+    e.preventDefault();
+    if(e.shiftKey) redo(); else undo();
+  }
+});
 
+/* ---------- 通知 ---------- */
+var _flashTimer = null;
 function flash(msg, col) {
   var e = document.getElementById("save-msg");
   e.textContent = msg;
   e.style.color = col || "#00ff88";
-  setTimeout(function(){ e.textContent = ""; }, 2500);
+  clearTimeout(_flashTimer);
+  _flashTimer = setTimeout(function(){ e.textContent = ""; }, 2200);
 }
 
+/* ---------- ステータス切替 ---------- */
 var CYCLE = ["－","OK","NG","確認中"];
 var SCLS = {"OK":"s-ok","NG":"s-ng","確認中":"s-kakun","－":"s-none"};
 
-function cycleStatus(tid, did) {
+function cycleStatus(tid, did, btnEl) {
   var t = data.teams.find(function(t){ return t.id === tid; });
   if (!t) return;
-  var cur = t.statuses[did] || "－";
-  t.statuses[did] = CYCLE[(CYCLE.indexOf(cur) + 1) % CYCLE.length];
-  saveData();
-  renderTable();
+  snapshot();
+  var cur = (t.statuses || {})[did] || "－";
+  var next = CYCLE[(CYCLE.indexOf(cur) + 1) % CYCLE.length];
+  if(!t.statuses) t.statuses = {};
+  t.statuses[did] = next;
+
+  // 【高速化】該当ボタンと集計行だけ部分更新（全再描画しない）
+  if(btnEl){
+    btnEl.textContent = next;
+    btnEl.className = "status-btn just-changed " + (SCLS[next] || "s-none");
+    setTimeout(function(){ btnEl.classList.remove("just-changed"); }, 300);
+    updateCounts();
+  } else {
+    renderTable();
+  }
+  persist(false);
+  flash("💾 保存: " + esc(t.name) + " → " + next);
 }
 
+/* 集計行（参加数・残り・充足バッジ）だけを再計算して更新 */
+function updateCounts(){
+  data.dates.forEach(function(d, i){
+    var cnt = data.teams.filter(function(t){ return ((t.statuses||{})[d.id]||"－")==="OK"; }).length;
+    var n = d.target - cnt;
+    var cEl = document.getElementById("cnt-" + d.id);
+    var rEl = document.getElementById("rem-" + d.id);
+    var hEl = document.getElementById("hdr-" + d.id);
+    if(cEl){
+      cEl.innerHTML = cnt + "<span style='font-size:.65rem;color:#8ac8e8'> /" + d.target + "</span>";
+      cEl.classList.toggle("is-full", n <= 0);
+    }
+    if(rEl){
+      var col = n <= 0 ? "#00ff88" : n === 1 ? "#ffee44" : "#ff8888";
+      rEl.style.color = col;
+      rEl.textContent = n <= 0 ? "✅ 充足" : n;
+    }
+    if(hEl){
+      hEl.classList.toggle("is-full", n <= 0);
+      var badge = hEl.querySelector(".full-badge");
+      if(n <= 0 && !badge){
+        var b = document.createElement("span");
+        b.className = "full-badge"; b.textContent = "✅";
+        hEl.appendChild(b);
+      } else if(n > 0 && badge){ badge.remove(); }
+    }
+  });
+}
+
+/* ---------- 削除系 ---------- */
 function deleteDate(did) {
-  if (!confirm("この日程列を削除しますか？")) return;
+  if (!confirm("この日程列を削除しますか？（↶戻すボタンで復帰できます）")) return;
+  snapshot();
   collectDOMChanges();
   data.dates = data.dates.filter(function(d){ return d.id !== did; });
-  data.teams.forEach(function(t){ delete t.statuses[did]; });
+  data.teams.forEach(function(t){ if(t.statuses) delete t.statuses[did]; });
   if (data.備考) delete data.備考[did];
-  saveData();
-  renderTable();
+  persist(); renderTable();
 }
 
 function deleteTeam(tid) {
-  if (!confirm("このチームを削除しますか？")) return;
+  var t = data.teams.find(function(x){ return x.id === tid; });
+  if (!confirm("「" + (t ? t.name : "") + "」を削除しますか？（↶戻すボタンで復帰できます）")) return;
+  snapshot();
   collectDOMChanges();
   data.teams = data.teams.filter(function(t){ return t.id !== tid; });
-  saveData();
-  renderTable();
+  persist(); renderTable();
 }
 
+/* ---------- リセット（2段階確認・Undo対応で安全化） ---------- */
+function resetData() {
+  if (!confirm("⚠️ 初期データに戻しますか？\n現在のデータは全端末で置き換わります。")) return;
+  if (!confirm("本当によろしいですか？\n（誤操作の場合は↶戻すボタンで復帰できます）")) return;
+  snapshot();
+  data = JSON.parse(JSON.stringify(INIT));
+  persist(); renderTable();
+  flash("↩ リセットしました（↶で戻せます）", "#ffaa88");
+}
+
+/* ---------- LINEコピー（打診状況の共有） ---------- */
+function copyAdjList(){
+  collectDOMChanges();
+  var t = "【試合調整 状況】\n\n";
+  data.dates.forEach(function(d){
+    var ok = data.teams.filter(function(tm){ return ((tm.statuses||{})[d.id]||"－")==="OK"; });
+    var kakun = data.teams.filter(function(tm){ return ((tm.statuses||{})[d.id]||"－")==="確認中"; });
+    var n = d.target - ok.length;
+    t += "■ " + d.label + "（" + d.cat + "）\n";
+    t += "  参加：" + ok.length + "/" + d.target + (n<=0 ? " ✅充足" : "（あと" + n + "チーム）") + "\n";
+    if(ok.length)    t += "  OK：" + ok.map(function(x){return x.name;}).join("・") + "\n";
+    if(kakun.length) t += "  確認中：" + kakun.map(function(x){return x.name;}).join("・") + "\n";
+    var biko = (data.備考||{})[d.id];
+    if(biko) t += "  備考：" + biko + "\n";
+    t += "\n";
+  });
+  navigator.clipboard.writeText(t)
+    .then(function(){ flash("📋 コピーしました！LINEに貼り付けてください"); })
+    .catch(function(){ flash("コピーできませんでした", "#ff8888"); });
+}
+
+/* ---------- 表の描画（XSS対策済み・イベントデリゲーション） ---------- */
 function renderTable() {
   var tbl = document.getElementById("adj-table");
   var dates = data.dates, teams = data.teams;
   if (!data.備考) data.備考 = {};
-  var DOW = ["日","月","火","水","木","金","土"];
 
-  var h = "<thead><tr><th class='col-fixed th-label'>チーム</th>";
+  var h = "<thead><tr><th class='col-fixed th-label' scope='col'>チーム</th>";
   dates.forEach(function(d) {
-    h += "<th class='th-date'>" + d.label +
-         "<button class='del-date-btn' onclick=\"deleteDate('" + d.id + "')\" title='この列を削除'>✕</button></th>";
+    var cnt = teams.filter(function(t){ return ((t.statuses||{})[d.id]||"－")==="OK"; }).length;
+    var full = (d.target - cnt) <= 0;
+    h += "<th class='th-date" + (full ? " is-full" : "") + "' id='hdr-" + esc(d.id) + "' scope='col'>" + esc(d.label) +
+         (full ? "<span class='full-badge'>✅</span>" : "") +
+         "<button class='del-date-btn' data-act='del-date' data-id='" + esc(d.id) + "' title='この列を削除' aria-label='" + esc(d.label) + "を削除'>✕</button></th>";
   });
-  h += "<th class='th-date th-tantou'>担当</th></tr>";
-  h += "<tr><th class='col-fixed th-cat' style='color:#8ac8e8'>カテゴリー / 目標</th>";
+  h += "<th class='th-date th-tantou' scope='col'>担当</th></tr>";
+  h += "<tr><th class='col-fixed th-cat' style='color:#8ac8e8;cursor:default'>カテゴリー / 目標</th>";
   dates.forEach(function(d) {
-    h += "<th class='th-cat' style='cursor:pointer' onclick=\"openEditDate('" + d.id + "')\" title='タップして編集'>" + d.cat + "<br><span style='color:#ffaa66;font-weight:900'>目標 " + d.target + "チーム</span><span style='font-size:.6rem;color:#6aaccc;display:block'>✏️ タップして編集</span></th>";
+    h += "<th class='th-cat' data-act='edit-date' data-id='" + esc(d.id) + "' tabindex='0' role='button' aria-label='" + esc(d.label) + "の日程を編集' title='タップして編集'>" + esc(d.cat) +
+         "<br><span style='color:#ffaa66;font-weight:900'>目標 " + esc(d.target) + "チーム</span>" +
+         "<span style='font-size:.6rem;color:#6aaccc;display:block'>✏️ タップして編集</span></th>";
   });
-  h += "<th class='th-cat'></th></tr></thead><tbody>";
+  h += "<th class='th-cat' style='cursor:default'></th></tr></thead><tbody>";
 
   teams.forEach(function(t) {
-    h += "<tr><td class='col-fixed'>" + t.name +
-         " <button class='del-team-btn' onclick=\"deleteTeam('" + t.id + "')\" title='削除'>🗑</button></td>";
+    h += "<tr><td class='col-fixed'>" + esc(t.name) +
+         " <button class='del-team-btn' data-act='del-team' data-id='" + esc(t.id) + "' title='削除' aria-label='" + esc(t.name) + "を削除'>🗑</button></td>";
     dates.forEach(function(d) {
       var st = (t.statuses || {})[d.id] || "－";
       var cls = SCLS[st] || "s-none";
       h += "<td style='text-align:center'><button class='status-btn " + cls +
-           "' onclick=\"cycleStatus('" + t.id + "','" + d.id + "')\">" + st + "</button></td>";
+           "' data-act='cycle' data-tid='" + esc(t.id) + "' data-did='" + esc(d.id) +
+           "' aria-label='" + esc(t.name) + " " + esc(d.label) + " 現在" + esc(st) + "'>" + esc(st) + "</button></td>";
     });
-    h += "<td style='text-align:center'><input class='tantou-input' data-tid='" + t.id +
-         "' value='" + (t.tantou || "") + "' placeholder='担当'></td></tr>";
+    h += "<td style='text-align:center'><input class='tantou-input' data-tid='" + esc(t.id) +
+         "' value='" + esc(t.tantou || "") + "' placeholder='担当' aria-label='" + esc(t.name) + "の担当者'></td></tr>";
   });
 
-  // 参加数
+  // 集計行（参加数）
   h += "<tr class='tr-count'><td class='col-fixed'>✅ 参加チーム数</td>";
   dates.forEach(function(d) {
     var cnt = teams.filter(function(t){ return ((t.statuses || {})[d.id] || "－") === "OK"; }).length;
-    h += "<td>" + cnt + "<span style='font-size:.65rem;color:#8ac8e8'> /" + d.target + "</span></td>";
+    var full = (d.target - cnt) <= 0;
+    h += "<td id='cnt-" + esc(d.id) + "'" + (full ? " class='is-full'" : "") + ">" + cnt + "<span style='font-size:.65rem;color:#8ac8e8'> /" + esc(d.target) + "</span></td>";
   });
   h += "<td></td></tr>";
 
-  // 残り
+  // 集計行（残り）
   h += "<tr class='tr-nokori'><td class='col-fixed'>残り</td>";
   dates.forEach(function(d) {
     var cnt = teams.filter(function(t){ return ((t.statuses || {})[d.id] || "－") === "OK"; }).length;
     var n = d.target - cnt;
     var col = n <= 0 ? "#00ff88" : n === 1 ? "#ffee44" : "#ff8888";
-    h += "<td style='color:" + col + ";font-weight:900'>" + (n <= 0 ? "✅ 充足" : n) + "</td>";
+    h += "<td id='rem-" + esc(d.id) + "' style='color:" + col + ";font-weight:900'>" + (n <= 0 ? "✅ 充足" : n) + "</td>";
   });
   h += "<td></td></tr>";
 
-  // 備考（直接編集）
+  // 備考行（直接編集・自動保存）
   h += "<tr class='tr-biko'><td class='col-fixed'>📝 備考</td>";
   dates.forEach(function(d) {
     var biko = (data.備考 || {})[d.id] || "";
-    h += "<td><textarea class='biko-input' data-did='" + d.id + "' rows='1' placeholder='備考…'>" + biko + "</textarea></td>";
+    h += "<td><textarea class='biko-input' data-did='" + esc(d.id) + "' rows='1' placeholder='備考…' aria-label='" + esc(d.label) + "の備考'>" + esc(biko) + "</textarea></td>";
   });
   h += "<td></td></tr></tbody>";
   tbl.innerHTML = h;
 }
 
+/* ---------- イベントデリゲーション（動的要素の操作を一括処理） ---------- */
+document.getElementById("adj-table").addEventListener("click", function(e){
+  var el = e.target.closest("[data-act]");
+  if(!el) return;
+  var act = el.dataset.act;
+  if(act === "cycle")     cycleStatus(el.dataset.tid, el.dataset.did, el);
+  else if(act === "del-date") deleteDate(el.dataset.id);
+  else if(act === "del-team") deleteTeam(el.dataset.id);
+  else if(act === "edit-date") openEditDate(el.dataset.id);
+});
+// キーボード操作（アクセシビリティ：Enterで日程編集）
+document.getElementById("adj-table").addEventListener("keydown", function(e){
+  if(e.key !== "Enter") return;
+  var el = e.target.closest("[data-act='edit-date']");
+  if(el) openEditDate(el.dataset.id);
+});
+// 備考・担当者の自動保存（入力のたびデバウンス保存）
+document.getElementById("adj-table").addEventListener("input", function(e){
+  if(e.target.classList.contains("biko-input") || e.target.classList.contains("tantou-input")){
+    persistDebounced();
+  }
+});
+
+/* ---------- 日程編集モーダル ---------- */
 var _editDateId = null;
 function openEditDate(dateId){
   var d = data.dates.find(function(x){ return x.id===dateId; });
   if(!d) return;
   _editDateId = dateId;
-  // 日付をYYYY-MM-DD形式に変換
   var m = (d.label||"").match(/(\d+)\/(\d+)/);
   if(m){
     var y = new Date().getFullYear();
@@ -450,6 +672,7 @@ function saveEditDate(){
   if(!_editDateId) return;
   var d = data.dates.find(function(x){ return x.id===_editDateId; });
   if(!d) return;
+  snapshot();
   var dateVal = document.getElementById("edit-date").value;
   var cat = document.getElementById("edit-cat").value.trim() || "未設定";
   var tVal = document.getElementById("edit-target").value;
@@ -460,35 +683,48 @@ function saveEditDate(){
   }
   d.cat = cat;
   d.target = target;
-  saveData();
-  renderTable();
+  persist(); renderTable();
   closeModal("modal-edit-date");
 }
 function deleteEditDate(){
-  if(!_editDateId || !confirm("この日程を削除しますか？")) return;
+  if(!_editDateId || !confirm("この日程を削除しますか？（↶戻すボタンで復帰できます）")) return;
+  snapshot();
   data.dates = data.dates.filter(function(x){ return x.id !== _editDateId; });
   data.teams.forEach(function(t){ if(t.statuses) delete t.statuses[_editDateId]; });
-  saveData();
-  renderTable();
+  persist(); renderTable();
   closeModal("modal-edit-date");
 }
-function openModal(id) { document.getElementById(id).classList.add("open"); }
-function closeModal(id) { document.getElementById(id).classList.remove("open"); }
 
-["modal-team","modal-date"].forEach(function(id) {
+/* ---------- モーダル共通 ---------- */
+function openModal(id) {
+  document.getElementById(id).classList.add("open");
+  // 最初の入力欄にフォーカス（アクセシビリティ）
+  var first = document.getElementById(id).querySelector("input");
+  if(first) setTimeout(function(){ first.focus(); }, 80);
+}
+function closeModal(id) { document.getElementById(id).classList.remove("open"); }
+// 背景クリック・Escで閉じる
+["modal-team","modal-date","modal-edit-date"].forEach(function(id) {
   document.getElementById(id).addEventListener("click", function(e) {
     if (e.target.id === id) closeModal(id);
   });
 });
+document.addEventListener("keydown", function(e){
+  if(e.key === "Escape"){
+    ["modal-team","modal-date","modal-edit-date"].forEach(closeModal);
+  }
+});
 
+/* ---------- 追加系 ---------- */
 function addTeam() {
   var name = document.getElementById("new-team-name").value.trim();
   var tantou = document.getElementById("new-team-tantou").value.trim();
   if (!name) { alert("チーム名を入力してください"); return; }
+  snapshot();
   var id = "t" + Date.now(), statuses = {};
   data.dates.forEach(function(d){ statuses[d.id] = "－"; });
   data.teams.push({id:id, name:name, tantou:tantou, statuses:statuses});
-  saveData(); renderTable(); closeModal("modal-team");
+  persist(); renderTable(); closeModal("modal-team");
   document.getElementById("new-team-name").value = "";
   document.getElementById("new-team-tantou").value = "";
 }
@@ -497,18 +733,20 @@ function addDate() {
   var dateVal = document.getElementById("new-date").value;
   var cat = document.getElementById("new-cat").value.trim() || "未設定";
   var targetVal = document.getElementById("new-target").value;
-  var target = targetVal === "" ? 1 : Math.max(0, Number(targetVal));
+  var target = targetVal === "" ? 1 : Math.max(0, Number(targetVal)); // 0も有効値として扱う
   if (!dateVal) { alert("日付を入力してください"); return; }
+  snapshot();
   var d = new Date(dateVal);
   var label = (d.getMonth()+1) + "/" + d.getDate() + "（" + ["日","月","火","水","木","金","土"][d.getDay()] + "）";
   var id = "d" + Date.now();
   data.dates.push({id:id, label:label, cat:cat, target:target});
-  data.teams.forEach(function(t){ t.statuses[id] = "－"; });
-  saveData(); renderTable(); closeModal("modal-date");
+  data.teams.forEach(function(t){ if(!t.statuses) t.statuses = {}; t.statuses[id] = "－"; });
+  persist(); renderTable(); closeModal("modal-date");
   document.getElementById("new-date").value = "";
   document.getElementById("new-cat").value = "";
 }
 
+/* ---------- 初期描画 ---------- */
 renderTable();
 </script>
 <script src="common.js"></script>
