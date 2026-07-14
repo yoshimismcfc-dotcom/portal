@@ -80,11 +80,15 @@ for (const file of ["common.js", "firebase-config.js", "sw.js"]) {
 }
 
 const indexSource = fs.readFileSync(path.join(root, "index.html"), "utf8");
+const commonCssSource = fs.readFileSync(path.join(root, "common.css"), "utf8");
 const swSource = fs.readFileSync(path.join(root, "sw.js"), "utf8");
 const indexVersion = indexSource.match(/name=["']app-version["'][^>]*content=["']([^"']+)/i)?.[1];
 const swVersion = swSource.match(/APP_VERSION\s*=\s*["']([^"']+)/)?.[1];
 if (!indexVersion || !swVersion || indexVersion !== swVersion) {
   fail("PWA", `バージョン不一致 index=${indexVersion || "なし"} sw=${swVersion || "なし"}`);
+}
+if (!commonCssSource.includes("--body-tail: #e8eef7")) {
+  fail("common.css", "ライトモードのページ背景が暗色のままです");
 }
 
 const tournamentSource = fs.readFileSync(path.join(root, "tournament.html"), "utf8");
@@ -105,6 +109,16 @@ if (!membersSource.includes('MEMBER_PATH = "members_v2"')) fail("members.html", 
 if (/var INIT\s*=\s*\{[\s\S]*?name\s*:/m.test(membersSource)) fail("members.html", "HTML内に団員名簿が残っています");
 if (/localStorage\.setItem\([^\n]*smc_members/i.test(membersSource)) fail("members.html", "団員名簿を端末へ保存しています");
 if (!membersSource.includes("next[grade]=next[grade].filter")) fail("members.html", "Firebase名簿の空データを除外していません");
+
+const commonSource = fs.readFileSync(path.join(root, "common.js"), "utf8");
+if (!commonSource.includes("setupDisclosureAccessibility")) {
+  fail("common.js", "タップ式の説明項目にキーボード操作を追加していません");
+}
+const guideSource = fs.readFileSync(path.join(root, "guide.html"), "utf8");
+if (guideSource.includes("今後1週間の予定リスト")) fail("guide.html", "廃止したカレンダー予定リストの説明が残っています");
+if (guideSource.includes("パスワードは「表示」")) fail("guide.html", "廃止したパスワード表示機能の説明が残っています");
+const accountsSource = fs.readFileSync(path.join(root, "accounts.html"), "utf8");
+if (/<th>パスワード<\/th>/.test(accountsSource)) fail("accounts.html", "保存しないパスワードの列見出しが残っています");
 
 const rulesPath = path.join(root, "database.rules.json");
 if (fs.existsSync(rulesPath)) {
