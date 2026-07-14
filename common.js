@@ -116,6 +116,26 @@
     });
   }
 
+  function setupDisclosureAccessibility() {
+    document.querySelectorAll(".acc-hdr[onclick]").forEach((header) => {
+      const panel = header.nextElementSibling;
+      if (!panel) return;
+      header.setAttribute("role", "button");
+      header.setAttribute("tabindex", "0");
+      header.setAttribute("aria-expanded", String(panel.classList.contains("open")));
+      header.addEventListener("click", () => {
+        window.setTimeout(() => {
+          header.setAttribute("aria-expanded", String(panel.classList.contains("open")));
+        }, 0);
+      });
+      header.addEventListener("keydown", (event) => {
+        if (event.key !== "Enter" && event.key !== " ") return;
+        event.preventDefault();
+        header.click();
+      });
+    });
+  }
+
   function showStorageWarning() {
     if (canStore) return;
     const banner = document.createElement("div");
@@ -131,6 +151,7 @@
     applyTheme(getSavedTheme());
     refreshFooter();
     setupTabs();
+    setupDisclosureAccessibility();
     showStorageWarning();
   });
 })();
