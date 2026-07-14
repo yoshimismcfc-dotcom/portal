@@ -56,7 +56,7 @@
   <div class="g-tab-bar">
     <button class="g-tab-btn active" onclick="switchTab('basic',this)">🏠<span>基本</span></button>
     <button class="g-tab-btn" onclick="switchTab('func',this)">⚡<span>機能</span></button>
-    <button class="g-tab-btn" onclick="switchTab('coach',this)">⚙️<span>運営</span></button>
+    <button class="g-tab-btn" onclick="switchTab('coach',this)">📁<span>コーチ</span></button>
     <button class="g-tab-btn" onclick="switchTab('pdf',this)">📄<span>PDF</span></button>
     <button class="g-tab-btn" onclick="switchTab('install',this)">📲<span>追加</span></button>
     <button class="g-tab-btn" onclick="switchTab('trouble',this)">🆘<span>困った</span></button>
@@ -85,7 +85,7 @@
         <table class="ft mobile-stack">
           <thead><tr><th>セクション</th><th>カード一覧</th></tr></thead>
           <tbody>
-            <tr><td>⚡ よく使う</td><td>チームカレンダー・出欠確認・⚙️運営メニュー・やることリスト・天気WBGT・説明書</td></tr>
+            <tr><td>⚡ よく使う</td><td>チームカレンダー・出欠確認・📁コーチ専用フォルダ・やることリスト・天気WBGT・説明書</td></tr>
             <tr><td>👨‍👩‍👦 入団・連絡</td><td>団員名簿・体験入団申込・担当フォルダ・会計業務</td></tr>
             <tr><td>🏟️ 試合・大会</td><td>当番・荷物チェック・ユニフォーム貸出・ピッチサイズ・審判ガイド・写真アルバム・YouTube</td></tr>
             <tr><td>🔗 SNS・外部リンク</td><td>LINE登録・Instagram・LINEシェア・ホームページ・注文リンク集</td></tr>
@@ -145,7 +145,7 @@
           <li>カテゴリー別に色分けされています（全体：黒／U12：橙／U11：赤／U10：橙／U9：黄／U8：黄緑／U7：緑）</li>
           <li>ホーム画面と同じ<strong>ガイダンス・雨アラート・熱中症アラート</strong>が上部に表示されます</li>
         </ul>
-        <div class="tip-o">⚠️ このページからは予定を追加できません。運営メニュー→「Googleカレンダー（編集）」から追加してください。</div>
+        <div class="tip-o">⚠️ このページからは予定を追加できません。コーチ専用フォルダ→「Googleカレンダー（編集）」から追加してください。</div>
       </div>
     </div>
 
@@ -232,10 +232,11 @@
           <li>チームと日程を登録して試合スケジュールを調整するページです</li>
           <li>「＋ チームを追加」でチーム名・参加カテゴリを登録</li>
           <li>「＋ 日程を追加」で日付・カテゴリ・<strong>目標チーム数（0以上）</strong>を設定</li>
-          <li><strong>日程カードをタップ</strong>すると日付・カテゴリ・目標チーム数を編集・削除できます</li>
-          <li>◯△×をタップして各チームの参加意向を管理</li>
+          <li>スマホでは「表示する日程」または左右の矢印で、確認する日程を1日ずつ切り替えます</li>
+          <li><strong>カテゴリー・目標欄をタップ</strong>すると日付・カテゴリ・目標チーム数を編集・削除できます</li>
+          <li>OK・NG・確認中・－をタップして各チームの参加意向を管理</li>
         </ul>
-        <div class="tip-g">✅ 目標数を0に設定しても正しく保存されます（以前のバグを修正済み）</div>
+        <div class="tip-g">✅ スマホはチーム名・選択日程・担当者が1画面に収まり、横スライドなしで操作できます。</div>
       </div>
     </div>
 
@@ -311,15 +312,15 @@
 
   </div>
 
-  <!-- ===== 運営メニュー ===== -->
+  <!-- ===== コーチ専用フォルダ ===== -->
   <div class="g-tab-content" id="tab-coach">
-    <div class="tip">🔓 運営メニューを含むすべての画面は、パスコードなしで開いて編集できます。</div>
+    <div class="tip">🔓 コーチ専用フォルダを含むすべての画面は、パスコードなしで開いて編集できます。</div>
 
     <div class="acc-section">
       <div class="acc-hdr" onclick="tog(this)"><div class="acc-icon">📢</div><div class="acc-title">ガイダンス設定（全員のホームにお知らせ）</div><div class="acc-arrow open">▶</div></div>
       <div class="acc-body open">
         <ul class="step-list">
-          <li>運営メニュー →「ガイダンス設定」をタップ</li>
+          <li>コーチ専用フォルダ →「ガイダンス設定」をタップ</li>
           <li><strong>青帯（INFO）：</strong>練習場所・持ち物・時間変更などのお知らせ</li>
           <li><strong>赤帯（ALERT）：</strong>熱中症警戒・緊急連絡など重要な注意事項</li>
           <li>「💾 保存」を押すと<strong>全員のホーム・カレンダー・出欠確認ページ</strong>に即時反映</li>
@@ -333,7 +334,7 @@
       <div class="acc-hdr" onclick="tog(this)"><div class="acc-icon">🔔</div><div class="acc-title">自動アラート設定</div><div class="acc-arrow">▶</div></div>
       <div class="acc-body">
         <ul class="step-list">
-          <li>運営メニュー →「自動アラート設定」をタップ</li>
+          <li>コーチ専用フォルダ →「自動アラート設定」をタップ</li>
           <li><strong>練習スケジュール：</strong>曜日・時間・室内/屋外を設定。「屋外」の日のみアラートが出ます</li>
           <li><strong>雨アラートのしきい値：</strong>降水確率（%）を設定</li>
           <li><strong>熱中症アラートのしきい値：</strong>WBGT（℃）を設定（デフォルト：25℃）</li>
@@ -347,7 +348,7 @@
       <div class="acc-hdr" onclick="tog(this)"><div class="acc-icon">⚖️</div><div class="acc-title">大会任務分担</div><div class="acc-arrow">▶</div></div>
       <div class="acc-body">
         <ul class="step-list">
-          <li>運営メニュー → 試合・大会 →「大会任務分担」をタップ</li>
+          <li>コーチ専用フォルダ → 試合・大会 →「大会任務分担」をタップ</li>
           <li>「＋ 大会を追加」で大会名・日付・会場・集合時間・備考を登録</li>
           <li>登録すると以下の任務が自動セット：<br>📝要項作成・📋対戦表作成・🟡審判の手配・🏆トロフィー/メダル・🏅審判カード・⬜石灰・🔑鍵の受け取り・🔓鍵の返却・📸写真記録・⚖️試合判断</li>
           <li>各任務をタップして<strong>担当者（複数可）・時間・状態・メモ</strong>を入力</li>
@@ -363,7 +364,7 @@
       <div class="acc-body">
         <div class="sec-title">📄 大会要綱</div>
         <ul class="step-list">
-          <li>運営メニュー →「大会要綱・対戦表」→「📄 大会要綱」タブ</li>
+          <li>コーチ専用フォルダ →「大会要綱・対戦表」→「📄 大会要綱」タブ</li>
           <li>大会名・日程・場所・ルールなどを入力（長い内容は自動で縦に伸びます）</li>
           <li>「＋ 基本情報に項目を追加する」で<strong>独自の項目を自由に追加</strong>できます</li>
           <li>「👁 プレビュー」→「🖨 印刷・PDF」でPDF保存</li>
@@ -387,7 +388,7 @@
       <div class="acc-hdr" onclick="tog(this)"><div class="acc-icon">💰</div><div class="acc-title">大会会計・決算書</div><div class="acc-arrow">▶</div></div>
       <div class="acc-body">
         <ul class="step-list">
-          <li>運営メニュー →「大会会計・決算書」をタップ</li>
+          <li>コーチ専用フォルダ →「大会会計・決算書」をタップ</li>
           <li>「＋ 大会を追加」で大会を登録 → 収入・支出の明細を入力</li>
           <li>「年度累計」タブで年間の収支をまとめて確認</li>
           <li>「🖨 印刷・PDF」で決算書を印刷（白背景・黒文字で出力）</li>
@@ -399,7 +400,7 @@
       <div class="acc-hdr" onclick="tog(this)"><div class="acc-icon">📝</div><div class="acc-title">練習日誌</div><div class="acc-arrow">▶</div></div>
       <div class="acc-body">
         <ul class="step-list">
-          <li>運営メニュー →「練習日誌」をタップ</li>
+          <li>コーチ専用フォルダ →「練習日誌」をタップ</li>
           <li>「＋ 日誌を追加」で日付・学年・天気・練習内容・気づき・タグを記録</li>
           <li>キーワード検索・学年フィルターで過去の記録を絞り込めます</li>
         </ul>
@@ -421,7 +422,7 @@
       <div class="acc-hdr" onclick="tog(this)"><div class="acc-icon">📧</div><div class="acc-title">Gmail・Googleカレンダーを開く</div><div class="acc-arrow">▶</div></div>
       <div class="acc-body">
         <ul class="step-list">
-          <li>運営メニュー →「外部ツール」の「Gmail」または「Googleカレンダー（編集）」をタップ</li>
+          <li>コーチ専用フォルダ →「外部ツール」の「Gmail」または「Googleカレンダー（編集）」をタップ</li>
           <li>カレンダーで予定を追加・変更するとチームカレンダーページに自動反映されます</li>
         </ul>
       </div>
@@ -574,7 +575,7 @@
     </div>
 
     <div class="acc-section">
-      <div class="acc-hdr" onclick="tog(this)"><div class="acc-icon">❓</div><div class="acc-title">運営メニューが開けない・スピナーが止まらない</div><div class="acc-arrow">▶</div></div>
+      <div class="acc-hdr" onclick="tog(this)"><div class="acc-icon">❓</div><div class="acc-title">コーチ専用フォルダが開けない・スピナーが止まらない</div><div class="acc-arrow">▶</div></div>
       <div class="acc-body">
         <ul class="step-list">
           <li>Safariを完全に閉じてから再度開いてください</li>
