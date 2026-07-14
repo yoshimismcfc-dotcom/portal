@@ -116,6 +116,114 @@
     }
   }
 
+  function enhanceGameAdjustMobile() {
+    const table = document.getElementById("adj-table");
+    const wrapper = table?.closest(".adj-wrap");
+    if (!table || !wrapper) return;
+
+    document.body.classList.add("game-adjust-enhanced");
+
+    if (!document.getElementById("game-adjust-mobile-style")) {
+      const style = document.createElement("style");
+      style.id = "game-adjust-mobile-style";
+      style.textContent = `
+        body[data-theme="light"].game-adjust-enhanced .adj-table tbody tr:not(.tr-count):not(.tr-nokori):not(.tr-biko) td{background:#fff!important;color:#17243a!important}
+        body[data-theme="light"].game-adjust-enhanced .adj-table tbody tr:nth-child(even):not(.tr-count):not(.tr-nokori):not(.tr-biko) td{background:#e7eef7!important}
+        body[data-theme="light"].game-adjust-enhanced .adj-table tbody tr:not(.tr-count):not(.tr-nokori):not(.tr-biko) > :first-child{background:#d6e4f1!important;color:#10213a!important;border-right-color:#247d9e!important}
+        body[data-theme="light"].game-adjust-enhanced .adj-table tbody tr:nth-child(even):not(.tr-count):not(.tr-nokori):not(.tr-biko) > :first-child{background:#c5d7e8!important}
+        body[data-theme="light"].game-adjust-enhanced .adj-table .tantou-input{background:#fff!important;color:#18314b!important;border-color:#8db2c8!important}
+        body[data-theme="light"].game-adjust-enhanced .adj-table .status-btn.s-ok{background:#d7f5e4!important;color:#08743d!important;border-color:#16975a!important}
+        body[data-theme="light"].game-adjust-enhanced .adj-table .status-btn.s-ng{background:#ffe0e7!important;color:#a01339!important;border-color:#cf315c!important}
+        body[data-theme="light"].game-adjust-enhanced .adj-table .status-btn.s-kakun{background:#fff1bd!important;color:#775800!important;border-color:#b88c00!important}
+        body[data-theme="light"].game-adjust-enhanced .adj-table .status-btn.s-none{background:#e5edf5!important;color:#31536c!important;border-color:#789bb1!important}
+        .game-adjust-date-nav{display:none}
+        @media (max-width:760px){
+          body.game-adjust-enhanced .page-wrap{padding-left:10px!important;padding-right:10px!important}
+          body.game-adjust-enhanced .ctrl-bar{display:grid!important;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px!important}
+          body.game-adjust-enhanced .ctrl-bar > *{width:100%!important;min-width:0!important;margin:0!important;justify-content:center}
+          body.game-adjust-enhanced .legend{display:grid!important;grid-template-columns:repeat(2,minmax(0,1fr));gap:7px!important}
+          body.game-adjust-enhanced .legend > span:first-child{grid-column:1/-1}
+          .game-adjust-date-nav{display:grid;grid-template-columns:44px minmax(0,1fr) 44px;gap:7px;align-items:end;margin:8px 0 10px}
+          .game-adjust-date-nav label{font-size:.72rem;font-weight:900;color:var(--ink-3)}
+          .game-adjust-date-nav select,.game-adjust-date-nav button{min-height:46px;border-radius:12px;font:inherit;font-weight:900}
+          .game-adjust-date-nav select{width:100%;margin-top:4px;padding:7px 9px;background:var(--panel);color:var(--ink);border:1px solid var(--line)}
+          .game-adjust-date-nav button{border:1px solid var(--cyan);background:rgba(25,180,220,.12);color:var(--cyan);font-size:1.35rem}
+          body.game-adjust-enhanced .adj-wrap{width:100%!important;max-height:none!important;overflow-x:hidden!important;overflow-y:visible!important;-webkit-overflow-scrolling:auto!important}
+          body.game-adjust-enhanced .adj-table{width:100%!important;min-width:0!important;table-layout:fixed!important}
+          body.game-adjust-enhanced .adj-table tr > *{min-width:0!important;box-sizing:border-box!important;padding-left:7px!important;padding-right:7px!important}
+          body.game-adjust-enhanced .adj-table tr > :first-child{position:static!important;left:auto!important;width:40%!important;max-width:none!important;white-space:normal!important}
+          body.game-adjust-enhanced .adj-table tr > :last-child{width:25%!important;max-width:none!important}
+          body.game-adjust-enhanced .adj-table .ga-date-column{display:none!important}
+          body.game-adjust-enhanced .adj-table .ga-date-column.ga-date-active{display:table-cell!important;width:35%!important}
+          body.game-adjust-enhanced .adj-table .status-btn{width:100%!important;min-width:0!important;padding:10px 3px!important;font-size:.82rem!important}
+          body.game-adjust-enhanced .adj-table .tantou-input{width:100%!important;min-width:0!important;padding:8px 4px!important;text-align:center}
+          body.game-adjust-enhanced .adj-table tbody td:first-child{font-size:.78rem!important;font-weight:900!important;overflow-wrap:anywhere}
+          body.game-adjust-enhanced .desktop-scroll-help{font-size:.68rem!important}
+        }
+      `;
+      document.head.appendChild(style);
+    }
+
+    let activeDateIndex = 1;
+    let syncing = false;
+    const nav = document.createElement("div");
+    nav.className = "game-adjust-date-nav";
+    nav.setAttribute("aria-label", "表示する日程の切り替え");
+    nav.innerHTML = '<button type="button" data-move="-1" aria-label="前の日程">‹</button><label>表示する日程<select aria-label="表示する日程"></select></label><button type="button" data-move="1" aria-label="次の日程">›</button>';
+    wrapper.before(nav);
+    const select = nav.querySelector("select");
+
+    function cleanHeaderLabel(cell) {
+      const copy = cell.cloneNode(true);
+      copy.querySelectorAll("button").forEach((button) => button.remove());
+      return copy.textContent.replace(/\s+/g, " ").trim() || "日程";
+    }
+
+    function syncDateColumns() {
+      if (syncing) return;
+      syncing = true;
+      const headerCells = Array.from(table.querySelectorAll("thead tr:first-child > th"));
+      const dateCount = Math.max(0, headerCells.length - 2);
+      if (!dateCount) {
+        select.innerHTML = '<option>日程なし</option>';
+        select.disabled = true;
+        syncing = false;
+        return;
+      }
+      activeDateIndex = Math.min(Math.max(activeDateIndex, 1), dateCount);
+      select.disabled = false;
+      select.innerHTML = headerCells.slice(1, -1).map((cell, index) =>
+        `<option value="${index + 1}">${cleanHeaderLabel(cell)}</option>`
+      ).join("");
+      select.value = String(activeDateIndex);
+      table.querySelectorAll("tr").forEach((row) => {
+        const cells = Array.from(row.children);
+        cells.forEach((cell, index) => {
+          const isDate = index > 0 && index < cells.length - 1;
+          cell.classList.toggle("ga-date-column", isDate);
+          cell.classList.toggle("ga-date-active", isDate && index === activeDateIndex);
+        });
+      });
+      syncing = false;
+    }
+
+    select.addEventListener("change", () => {
+      activeDateIndex = Number(select.value) || 1;
+      syncDateColumns();
+    });
+    nav.querySelectorAll("button").forEach((button) => {
+      button.addEventListener("click", () => {
+        const count = select.options.length;
+        if (!count || select.disabled) return;
+        activeDateIndex = ((activeDateIndex - 1 + Number(button.dataset.move) + count) % count) + 1;
+        syncDateColumns();
+      });
+    });
+    new MutationObserver(() => window.requestAnimationFrame(syncDateColumns))
+      .observe(table, { childList: true, subtree: true });
+    syncDateColumns();
+  }
+
   function setupTabs() {
     document.querySelectorAll(".tab-btn").forEach((button) => {
       button.addEventListener("click", () => {
@@ -193,6 +301,7 @@
     applyTheme(getSavedTheme());
     refreshFooter();
     refreshCoachFolderLabels();
+    enhanceGameAdjustMobile();
     setupTabs();
     setupDisclosureAccessibility();
     setupResponsiveTables();
