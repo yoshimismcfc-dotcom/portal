@@ -132,11 +132,11 @@ if (/<th>パスワード<\/th>/.test(accountsSource)) fail("accounts.html", "保
 if (/\.pw-(?:cell|text|toggle)/.test(accountsSource)) fail("accounts.html", "廃止したパスワード表示用CSSが残っています");
 
 const gameAdjustSource = fs.readFileSync(path.join(root, "game_adjust.html"), "utf8");
-if (!gameAdjustSource.includes("mobile-date-nav") || !gameAdjustSource.includes("setFocusedDate")) {
-  fail("game_adjust.html", "スマホ用の日程切り替え表示がありません");
+if (!commonSource.includes("enhanceGameAdjustMobile") || !commonSource.includes("game-adjust-date-nav")) {
+  fail("common.js", "試合調整のスマホ用日程切り替え表示がありません");
 }
-if (!gameAdjustSource.includes('body[data-theme="light"] .adj-table tbody .col-fixed')) {
-  fail("game_adjust.html", "ライトモードの試合調整表に文字色補正がありません");
+if (!commonSource.includes('body[data-theme="light"].game-adjust-enhanced')) {
+  fail("common.js", "ライトモードの試合調整表に文字色補正がありません");
 }
 
 const rulesPath = path.join(root, "database.rules.json");
