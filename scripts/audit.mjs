@@ -156,6 +156,12 @@ if (!commonSource.includes("enhanceTournamentPrinting") || !commonSource.include
 if (!commonSource.includes("adjustedRoundTimes") || !commonSource.includes("finalsStart")) {
   fail("common.js", "昼食後の予選・順位戦時刻を再計算する処理がありません");
 }
+if (!commonSource.includes("const finalsStart = cursor") || !commonSource.includes('finalsTable.querySelectorAll(".tr-break-td")')) {
+  fail("common.js", "順位戦前の固定10分休憩を削除する処理がありません");
+}
+if (!guideSource.includes("固定10分休憩はありません")) {
+  fail("guide.html", "任意休憩の説明がありません");
+}
 if (!commonSource.includes('data-print-target="tournament-schedule"') || !commonSource.includes("tournament-print-enhanced-style")) {
   fail("common.js", "対戦表の印刷専用デザインがありません");
 }
