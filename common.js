@@ -98,6 +98,13 @@
     });
   }
 
+  function refreshCoachFolderLabels() {
+    document.querySelectorAll("body *:not(script):not(style)").forEach((element) => {
+      if (element.children.length || !element.textContent.includes("運営メニュー")) return;
+      element.textContent = element.textContent.replace(/運営メニュー/g, "コーチ専用フォルダ");
+    });
+  }
+
   function setupTabs() {
     document.querySelectorAll(".tab-btn").forEach((button) => {
       button.addEventListener("click", () => {
@@ -174,6 +181,7 @@
     refreshHeader();
     applyTheme(getSavedTheme());
     refreshFooter();
+    refreshCoachFolderLabels();
     setupTabs();
     setupDisclosureAccessibility();
     setupResponsiveTables();
