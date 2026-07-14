@@ -127,6 +127,9 @@ for (const responsiveFile of ["accounts.html", "members.html", "duty.html", "acc
 const guideSource = fs.readFileSync(path.join(root, "guide.html"), "utf8");
 if (guideSource.includes("今後1週間の予定リスト")) fail("guide.html", "廃止したカレンダー予定リストの説明が残っています");
 if (guideSource.includes("パスワードは「表示」")) fail("guide.html", "廃止したパスワード表示機能の説明が残っています");
+if (!guideSource.includes("予選・順位戦・閉会式の時刻も自動再計算")) fail("guide.html", "昼食後の時刻再計算が説明書にありません");
+if (!guideSource.includes("参加チーム数・残りチーム数")) fail("guide.html", "試合調整のスマホ集計表示が説明書にありません");
+if (guideSource.includes("先に「📊 対戦表を生成」を押してから印刷")) fail("guide.html", "古い対戦表印刷手順が残っています");
 const accountsSource = fs.readFileSync(path.join(root, "accounts.html"), "utf8");
 if (/<th>パスワード<\/th>/.test(accountsSource)) fail("accounts.html", "保存しないパスワードの列見出しが残っています");
 if (/\.pw-(?:cell|text|toggle)/.test(accountsSource)) fail("accounts.html", "廃止したパスワード表示用CSSが残っています");
