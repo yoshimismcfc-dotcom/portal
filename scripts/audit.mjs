@@ -144,6 +144,9 @@ if (!commonSource.includes("game-adjust-legend-item") || !commonSource.includes(
 if (!commonSource.includes("ga-mobile-summary") || !commonSource.includes("参加チーム数：")) {
   fail("common.js", "参加数・残り数のスマホ向け集約表示がありません");
 }
+if (!commonSource.includes("表示する日程・カテゴリー") || !commonSource.includes(".full-badge{display:none")) {
+  fail("common.js", "日程選択の強調または不要な達成チェックの非表示がありません");
+}
 
 const rulesPath = path.join(root, "database.rules.json");
 if (fs.existsSync(rulesPath)) {

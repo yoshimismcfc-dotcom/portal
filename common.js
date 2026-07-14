@@ -149,6 +149,7 @@
         body[data-theme="light"].game-adjust-enhanced .adj-table .status-btn.s-none{background:#e5edf5!important;color:#31536c!important;border-color:#789bb1!important}
         .game-adjust-date-nav{display:none}
         .ga-mobile-summary{display:none}
+        body.game-adjust-enhanced .adj-table .full-badge{display:none!important}
         @media (max-width:760px){
           body.game-adjust-enhanced .page-wrap{padding-left:10px!important;padding-right:10px!important}
           body.game-adjust-enhanced .ctrl-bar{display:grid!important;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px!important}
@@ -158,11 +159,14 @@
           body.game-adjust-enhanced .legend .game-adjust-legend-item{display:grid!important;grid-template-columns:minmax(118px,1fr) minmax(90px,.8fr);align-items:center;gap:12px;width:100%}
           body.game-adjust-enhanced .legend .game-adjust-legend-item .status-btn{width:100%!important;min-width:0!important;box-sizing:border-box}
           body.game-adjust-enhanced .legend .game-adjust-legend-label{font-size:.78rem;color:var(--ink-3);font-weight:800;text-align:left}
-          .game-adjust-date-nav{display:grid;grid-template-columns:44px minmax(0,1fr) 44px;gap:7px;align-items:end;margin:8px 0 10px}
-          .game-adjust-date-nav label{font-size:.72rem;font-weight:900;color:var(--ink-3)}
+          .game-adjust-date-nav{display:grid;grid-template-columns:46px minmax(0,1fr) 46px;gap:9px;align-items:end;margin:12px 0;padding:11px;border:2px solid rgba(35,190,235,.72);border-radius:16px;background:linear-gradient(135deg,rgba(14,118,170,.2),rgba(25,180,220,.08));box-shadow:0 6px 20px rgba(0,0,0,.2)}
+          .game-adjust-date-nav label{font-size:.78rem;font-weight:900;color:#73dcff;letter-spacing:.02em}
+          body[data-theme="light"].game-adjust-enhanced .game-adjust-date-nav{background:linear-gradient(135deg,#d7f3ff,#f7fcff);border-color:#1689b4;box-shadow:0 6px 18px rgba(17,91,126,.16)}
+          body[data-theme="light"].game-adjust-enhanced .game-adjust-date-nav label{color:#075d84}
           .game-adjust-date-nav select,.game-adjust-date-nav button{min-height:46px;border-radius:12px;font:inherit;font-weight:900}
-          .game-adjust-date-nav select{width:100%;margin-top:4px;padding:7px 9px;background:var(--panel);color:var(--ink);border:1px solid var(--line)}
-          .game-adjust-date-nav button{border:1px solid var(--cyan);background:rgba(25,180,220,.12);color:var(--cyan);font-size:1.35rem}
+          .game-adjust-date-nav select{width:100%;margin-top:6px;padding:8px 10px;background:var(--panel);color:var(--ink);border:2px solid var(--cyan);font-size:.88rem}
+          .game-adjust-date-nav button{border:2px solid var(--cyan);background:rgba(25,180,220,.16);color:#72dcff;font-size:1.4rem}
+          body[data-theme="light"].game-adjust-enhanced .game-adjust-date-nav button{color:#075d84;background:#fff}
           body.game-adjust-enhanced .adj-wrap{width:100%!important;max-height:none!important;overflow-x:hidden!important;overflow-y:visible!important;-webkit-overflow-scrolling:auto!important}
           body.game-adjust-enhanced .adj-table{width:100%!important;min-width:0!important;table-layout:fixed!important}
           body.game-adjust-enhanced .adj-table tr > *{min-width:0!important;box-sizing:border-box!important;padding-left:7px!important;padding-right:7px!important}
@@ -189,7 +193,7 @@
     const nav = document.createElement("div");
     nav.className = "game-adjust-date-nav";
     nav.setAttribute("aria-label", "表示する日程の切り替え");
-    nav.innerHTML = '<button type="button" data-move="-1" aria-label="前の日程">‹</button><label>表示する日程<select aria-label="表示する日程"></select></label><button type="button" data-move="1" aria-label="次の日程">›</button>';
+    nav.innerHTML = '<button type="button" data-move="-1" aria-label="前の日程">‹</button><label>📅 表示する日程・カテゴリー<select aria-label="表示する日程とカテゴリー"></select></label><button type="button" data-move="1" aria-label="次の日程">›</button>';
     wrapper.before(nav);
     const select = nav.querySelector("select");
 
