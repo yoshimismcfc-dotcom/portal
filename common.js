@@ -277,6 +277,147 @@
     syncDateColumns();
   }
 
+  function enhanceTournamentPrinting() {
+    const preview = document.getElementById("taisen-preview");
+    if (!preview) return;
+
+    document.body.classList.add("tournament-print-enhanced");
+    if (!document.getElementById("tournament-print-enhanced-style")) {
+      const style = document.createElement("style");
+      style.id = "tournament-print-enhanced-style";
+      style.textContent = `
+        body.tournament-print-enhanced #taisen-preview .tai-sheet{border:1px solid #b8c3d1;background:#fff;color:#172033}
+        body.tournament-print-enhanced #taisen-preview .tai-title{color:#173b66;border-bottom:3px solid #ea6b24;padding-bottom:6px;margin-bottom:4px}
+        body.tournament-print-enhanced #taisen-preview .tai-sub{color:#475569;font-weight:700}
+        body.tournament-print-enhanced #taisen-preview .block-hd{background:#173b66;color:#fff}
+        body.tournament-print-enhanced #taisen-preview .st .sched-th{background:#173b66;color:#fff;border-color:#355a82}
+        body.tournament-print-enhanced #taisen-preview .st td,body.tournament-print-enhanced #taisen-preview .rt td,body.tournament-print-enhanced #taisen-preview .rct td{border-color:#8793a3;color:#172033}
+        body.tournament-print-enhanced #taisen-preview .st .tr-break-td{background:#fff0c7;color:#684600;border:2px solid #d79a16;font-weight:900}
+        body.tournament-print-enhanced #taisen-preview .st .tr-closing-td{background:#fde3d4;color:#8a3100;border:2px solid #e67838;font-weight:900}
+        body.tournament-print-enhanced #taisen-preview .st .td-score,body.tournament-print-enhanced #taisen-preview .rct .td-score{background:#fff8d8}
+        body.tournament-print-enhanced #taisen-preview .rt .rank-th{background:#285943;color:#fff;border-color:#3e7560}
+        body.tournament-print-enhanced #taisen-preview .rct .round-th-h{background:#344054;color:#fff}
+        body.tournament-print-enhanced #taisen-preview .rct .round-th-t{background:#526174;color:#fff}
+        @media print{
+          body[data-print-target="tournament-schedule"] #taisen-preview{display:block!important;overflow:visible!important;margin:0!important}
+          body[data-print-target="tournament-schedule"] #taisen-preview > *{min-width:0!important}
+          body[data-print-target="tournament-schedule"] .tai-sheet{width:100%!important;max-width:none!important;padding:0!important;margin:0!important;border:0!important;box-shadow:none!important;overflow:visible!important;font-size:8.5pt!important;line-height:1.28!important}
+          body[data-print-target="tournament-schedule"] .tai-title{font-size:16pt!important;color:#173b66!important;border-bottom:2.5pt solid #ea6b24!important;padding-bottom:4mm!important;margin-bottom:2mm!important}
+          body[data-print-target="tournament-schedule"] .tai-sub{font-size:9.5pt!important;color:#334155!important;margin-bottom:3mm!important}
+          body[data-print-target="tournament-schedule"] .courts-row,body[data-print-target="tournament-schedule"] .blocks-row{gap:5mm!important;grid-template-columns:1fr 1fr!important}
+          body[data-print-target="tournament-schedule"] .block-hd{display:block!important;width:auto!important;margin:3mm 0 1.5mm!important;padding:1.5mm 2.5mm!important;border-radius:1mm!important;background:#173b66!important;color:#fff!important;font-size:9pt!important;break-after:avoid-page;page-break-after:avoid}
+          body[data-print-target="tournament-schedule"] table{width:100%!important;margin-bottom:3mm!important;border-collapse:collapse!important}
+          body[data-print-target="tournament-schedule"] thead{display:table-header-group}
+          body[data-print-target="tournament-schedule"] tr{break-inside:avoid-page;page-break-inside:avoid}
+          body[data-print-target="tournament-schedule"] .st .sched-th{padding:1.3mm 1mm!important;background:#173b66!important;color:#fff!important;border:1px solid #355a82!important;font-size:7.5pt!important}
+          body[data-print-target="tournament-schedule"] .st td{padding:1.5mm 1.2mm!important;border:1px solid #667085!important;background:#fff!important;color:#111827!important;font-size:8pt!important}
+          body[data-print-target="tournament-schedule"] .st .tr-alt-bg td{background:#eef3f8!important}
+          body[data-print-target="tournament-schedule"] .st .td-score{background:#fff3b0!important}
+          body[data-print-target="tournament-schedule"] .st .td-vs{background:#e5e7eb!important;color:#475569!important}
+          body[data-print-target="tournament-schedule"] .st .tr-break-td{background:#fff0c7!important;color:#5d3d00!important;border:2px solid #c88a08!important;font-size:9pt!important;padding:2mm!important}
+          body[data-print-target="tournament-schedule"] .st .tr-closing-td{background:#fde3d4!important;color:#7c2d00!important;border:2px solid #dc6b2f!important;font-size:9pt!important;padding:2mm!important}
+          body[data-print-target="tournament-schedule"] .rt .rank-th{background:#285943!important;color:#fff!important;border:1px solid #3e7560!important;font-size:7.2pt!important;padding:1.2mm .8mm!important}
+          body[data-print-target="tournament-schedule"] .rt td{border:1px solid #667085!important;background:#fff!important;color:#111827!important;font-size:7.6pt!important;padding:1.2mm .8mm!important}
+          body[data-print-target="tournament-schedule"] .rt .rank-alt{background:#edf7f1!important}
+          body[data-print-target="tournament-schedule"] .rct th,body[data-print-target="tournament-schedule"] .rct td{border:1px solid #667085!important;font-size:7.2pt!important;padding:1mm .8mm!important}
+          body[data-print-target="tournament-schedule"] .rct .round-th-h{background:#344054!important;color:#fff!important}
+          body[data-print-target="tournament-schedule"] .rct .round-th-t{background:#526174!important;color:#fff!important}
+          body[data-print-target="tournament-schedule"] .rct .td-self{background:#d8dee7!important;color:#344054!important}
+          body[data-print-target="tournament-schedule"] .rct .td-score{background:#fff3b0!important}
+        }
+      `;
+      document.head.appendChild(style);
+    }
+
+    const lunchFieldIds = ["lunch-enable", "lunch-start", "lunch-min", "lunch-label"];
+    if (Array.isArray(window.TAISEN_FIELDS)) {
+      lunchFieldIds.forEach((id) => {
+        if (!window.TAISEN_FIELDS.includes(id)) window.TAISEN_FIELDS.push(id);
+      });
+    }
+
+    if (typeof window.collectFields === "function" && !window.collectFields.__lunchFixed) {
+      const originalCollectFields = window.collectFields;
+      const enhancedCollectFields = function(fields) {
+        const result = originalCollectFields(fields);
+        (fields || []).forEach((id) => {
+          const element = document.getElementById(id);
+          if (element?.type === "checkbox") result[id] = element.checked;
+        });
+        return result;
+      };
+      enhancedCollectFields.__lunchFixed = true;
+      window.collectFields = enhancedCollectFields;
+    }
+
+    if (typeof window.applyFields === "function" && !window.applyFields.__lunchFixed) {
+      const originalApplyFields = window.applyFields;
+      const enhancedApplyFields = function(data) {
+        originalApplyFields(data || {});
+        Object.keys(data || {}).forEach((id) => {
+          const element = document.getElementById(id);
+          if (element?.type === "checkbox") element.checked = data[id] === true || data[id] === "true" || data[id] === "on";
+        });
+        if (typeof window.toggleLunch === "function") window.toggleLunch();
+      };
+      enhancedApplyFields.__lunchFixed = true;
+      window.applyFields = enhancedApplyFields;
+    }
+
+    function addMinutes(time, minutes) {
+      const parts = String(time || "00:00").split(":");
+      const total = ((Number(parts[0]) * 60 + Number(parts[1]) + Number(minutes)) % 1440 + 1440) % 1440;
+      return String(Math.floor(total / 60)).padStart(2, "0") + ":" + String(total % 60).padStart(2, "0");
+    }
+
+    function ensureLunchBreakRows() {
+      const enabled = document.getElementById("lunch-enable")?.checked;
+      const sheet = preview.querySelector(".tai-sheet");
+      if (!enabled || !sheet) return;
+      const start = document.getElementById("lunch-start")?.value || "12:00";
+      const minutes = Math.max(10, Number(document.getElementById("lunch-min")?.value) || 60);
+      const label = document.getElementById("lunch-label")?.value.trim() || "🍱 昼食休憩";
+      const end = addMinutes(start, minutes);
+      let scheduleTables = Array.from(sheet.querySelectorAll(".courts-row > div > table.st"));
+      if (!scheduleTables.length) {
+        const firstSchedule = sheet.querySelector("table.st");
+        if (firstSchedule) scheduleTables = [firstSchedule];
+      }
+      scheduleTables.forEach((table) => {
+        const existing = Array.from(table.querySelectorAll(".tr-break-td")).find((cell) =>
+          cell.textContent.includes(label) || cell.textContent.includes("昼食休憩")
+        );
+        if (existing) {
+          existing.closest("tr")?.classList.add("lunch-break-row");
+          return;
+        }
+        const row = document.createElement("tr");
+        row.className = "lunch-break-row";
+        const cell = document.createElement("td");
+        cell.className = "tr-break-td";
+        cell.colSpan = Math.max(1, table.querySelectorAll("thead th").length);
+        cell.textContent = `${label}　（${minutes}分）　${start}〜${end}`;
+        row.appendChild(cell);
+        const body = table.tBodies[0] || table.createTBody();
+        const timedRows = Array.from(body.rows).filter((candidate) => /^\d{1,2}:\d{2}$/.test(candidate.cells[1]?.textContent.trim() || ""));
+        const insertBefore = timedRows.find((candidate) => candidate.cells[1].textContent.trim() >= start);
+        if (insertBefore) body.insertBefore(row, insertBefore);
+        else body.appendChild(row);
+      });
+    }
+
+    if (typeof window.buildTaisen === "function" && !window.buildTaisen.__lunchFixed) {
+      const originalBuildTaisen = window.buildTaisen;
+      const enhancedBuildTaisen = function() {
+        const result = originalBuildTaisen.apply(this, arguments);
+        ensureLunchBreakRows();
+        return result;
+      };
+      enhancedBuildTaisen.__lunchFixed = true;
+      window.buildTaisen = enhancedBuildTaisen;
+    }
+  }
+
   function setupTabs() {
     document.querySelectorAll(".tab-btn").forEach((button) => {
       button.addEventListener("click", () => {
@@ -355,6 +496,7 @@
     refreshFooter();
     refreshCoachFolderLabels();
     enhanceGameAdjustMobile();
+    enhanceTournamentPrinting();
     setupTabs();
     setupDisclosureAccessibility();
     setupResponsiveTables();
