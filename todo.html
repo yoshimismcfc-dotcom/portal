@@ -6,9 +6,11 @@
   <meta http-equiv="Pragma" content="no-cache">
   <meta http-equiv="Expires" content="0">
   <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="robots" content="noindex,nofollow">
   <title>やることリスト｜吉見SMC FC</title>
   <script src="firebase-config.js"></script>
   <link rel="stylesheet" href="common.css">
+  <script src="common.js"></script>
   <style>
     /* ===== フィルター・ステータスタブ ===== */
     .filter-bar{display:flex;gap:6px;flex-wrap:wrap;margin-bottom:14px}
@@ -92,14 +94,7 @@
   </style>
 </head>
 <body>
-<header class="site-header">
-  <div class="header-inner">
-    <a class="header-logo" href="index.html">
-      <div class="logo-mark">⚽</div>
-      <div><span class="logo-name">吉見SMC FC</span><span class="logo-sub">SMART PORTAL</span></div>
-    </a>
-  </div>
-</header>
+<header class="site-header"></header>
 <main class="page-wrap">
   <a class="back-btn" href="index.html">ホームに戻る</a>
   <div class="hero-band">
@@ -172,7 +167,7 @@
   </div>
 </div>
 
-<footer class="site-footer">YOSHIMI SMC FC — SMART PORTAL</footer>
+<footer class="site-footer"></footer>
 <script>
 var KEY = "smc_todo_v1";
 var editId = null, currentFilter = "all";
@@ -243,7 +238,7 @@ function renderList(){
   list.innerHTML = data.map(function(t){
     var sm = STATUS_MAP[t.status] || STATUS_MAP.todo;
     var isDone = t.status === "done";
-    var checkHtml = '<div class="tc-check'+(isDone?" checked":"")+'" onclick="toggleDone(\''+t.id+'\')">'+(isDone?"✓":"")+'</div>';
+    var checkHtml = '<div class="tc-check'+(isDone?" checked":"")+'" onclick="toggleDone('+inlineJsArg(t.id)+')">'+(isDone?"✓":"")+'</div>';
     var dueHtml = "";
     if(t.due){
       var overdue = !isDone && t.due < today;
@@ -262,8 +257,8 @@ function renderList(){
       +'</div>'
       +noteHtml
       +'<div class="tc-actions">'
-      +'<button class="act-btn edit" onclick="openEdit(\''+t.id+'\')">✏️ 編集</button>'
-      +'<button class="act-btn del"  onclick="confirmDel(\''+t.id+'\')">🗑 削除</button>'
+      +'<button class="act-btn edit" onclick="openEdit('+inlineJsArg(t.id)+')">✏️ 編集</button>'
+      +'<button class="act-btn del"  onclick="confirmDel('+inlineJsArg(t.id)+')">🗑 削除</button>'
       +'</div>'
       +'</div>';
   }).join("");
@@ -370,6 +365,5 @@ function copyTodoList(){
     .catch(function(){ alert("コピーできませんでした。"); });
 }
 </script>
-<script src="common.js"></script>
 </body>
 </html>

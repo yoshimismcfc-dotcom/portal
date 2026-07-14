@@ -6,8 +6,10 @@
   <meta http-equiv="Pragma" content="no-cache">
   <meta http-equiv="Expires" content="0">
   <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="robots" content="noindex,nofollow">
   <title>熱中症チェック｜吉見SMC FC</title>
   <link rel="stylesheet" href="common.css">
+  <script src="common.js"></script>
   <style>
     .wbgt-display{text-align:center;padding:30px 20px;border-radius:var(--r12);background:var(--navy-dk);color:var(--white);margin-bottom:16px;transition:background .4s,color .4s}
     .wbgt-value{font-size:3.6rem;font-weight:900;line-height:1;margin-bottom:4px}
@@ -25,14 +27,10 @@
   </style>
 </head>
 <body>
-<header class="site-header">
-  <div class="header-inner">
-    <a class="header-logo" href="index.html"><div class="logo-mark">⚽</div>
-      <div><span class="logo-name">吉見SMC FC</span><span class="logo-sub">SMART PORTAL</span></div></a>
-  </div>
-</header>
+<header class="site-header"></header>
 <main class="page-wrap">
   <a class="back-btn" href="index.html">ホームに戻る</a>
+  <div class="notice-bar red">このページは旧画面です。最新の天気・雨・WBGT確認は <a href="weather.html" style="text-decoration:underline;font-weight:900">天気・熱中症ページ</a> を使用してください。</div>
   <div class="hero-band">
     <div class="hero-emoji">🌡️</div>
     <div><div class="hero-title">熱中症リスク判定</div>
@@ -93,7 +91,7 @@
   </div>
   <div class="notice-bar">💡 実測WBGTは環境省「<a href="https://www.wbgt.env.go.jp/" target="_blank" rel="noopener" style="color:var(--orange);font-weight:700">熱中症予防情報サイト</a>」でも確認できます。</div>
 </main>
-<footer class="site-footer">吉見SMCサッカースポーツ少年団｜スマートポータル</footer>
+<footer class="site-footer"></footer>
 <script>
 const LEVELS=[
   {min:31,label:"危険",color:"#C0392B",bg:"#FEF0ED",message:"原則運動中止。日陰で安静にし、保護者へ連絡してください。水分・塩分を補給し、回復しない場合は救急対応を。"},
@@ -162,5 +160,4 @@ async function fetchWeather(){
 // ページ読み込み時に自動で現在地取得を開始
 window.addEventListener("DOMContentLoaded",()=>{ fetchWeather(); });
 </script>
-<script src="common.js"></script>
 </body></html>

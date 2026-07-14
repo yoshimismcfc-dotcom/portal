@@ -2,10 +2,12 @@
 <html lang="ja">
 <head>
   <meta charset="utf-8">
+  <meta name="robots" content="noindex,nofollow">
   <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>説明書・ヘルプ｜吉見SMC FC</title>
   <link rel="stylesheet" href="common.css">
+  <script src="common.js"></script>
   <style>
     .g-tab-bar{display:flex;gap:0;border-radius:var(--r8);overflow:hidden;border:1px solid var(--line-2);margin-bottom:14px;flex-wrap:wrap}
     .g-tab-btn{flex:1;min-width:60px;padding:9px 4px;font:inherit;font-size:.75rem;font-weight:900;background:var(--surface-lt);color:#6aaccc;border:none;cursor:pointer;transition:.15s;border-right:1px solid var(--line-2);display:flex;flex-direction:column;align-items:center;gap:2px}
@@ -40,14 +42,7 @@
   </style>
 </head>
 <body>
-<header class="site-header">
-  <div class="header-inner">
-    <a class="header-logo" href="index.html">
-      <div class="logo-mark">⚽</div>
-      <div><span class="logo-name">吉見SMC FC</span><span class="logo-sub">SMART PORTAL</span></div>
-    </a>
-  </div>
-</header>
+<header class="site-header"></header>
 <main class="page-wrap">
   <a class="back-btn" href="index.html">ホームに戻る</a>
   <div class="hero-band">
@@ -110,7 +105,7 @@
     <div class="acc-section">
       <div class="acc-hdr" onclick="tog(this)"><div class="acc-icon">☁️</div><div class="acc-title">データの保存について</div><div class="acc-arrow">▶</div></div>
       <div class="acc-body">
-        <p class="desc">このポータルのデータは<strong style="color:#fff">Firebase（クラウド）</strong>に保存されています。</p>
+        <p class="desc">このポータルのデータは端末内へ保存した後、<strong style="color:#fff">Firebase（クラウド）</strong>へ同期します。</p>
         <table class="ft">
           <thead><tr><th>ページ</th><th>保存先</th></tr></thead>
           <tbody>
@@ -118,7 +113,7 @@
             <tr><td>大会要綱・対戦表</td><td>☁️ Firebase（💾保存ボタンを押した時）</td></tr>
           </tbody>
         </table>
-        <div class="tip-g">✅ ブラウザの「履歴を消去」をしてもFirebaseのデータは消えません。安心して使えます。</div>
+        <div class="tip-g">✅ 「クラウドに保存しました」と表示されたデータは、ブラウザの履歴を消去してもFirebase側に残ります。事前に保存状態を確認してください。</div>
       </div>
     </div>
 
@@ -518,17 +513,10 @@
         <p class="desc">基本的には自動で更新されますが、古い画面が表示される場合は以下をお試しください。</p>
         <ul class="step-list">
           <li>画面を下に引っ張って<strong>プルリフレッシュ</strong></li>
-          <li>ホーム画面のアイコンを<strong>削除して再追加</strong>（最も確実）</li>
+          <li>SafariまたはChromeを<strong>完全に閉じて再度開く</strong></li>
+          <li>通信状態を確認し、数秒待ってからページを開き直す</li>
         </ul>
-        <div class="sec-title">🍎 iPhone Safari キャッシュ消去</div>
-        <ul class="step-list">
-          <li>設定 → Safari →「履歴とWebサイトデータを消去」→「消去」</li>
-          <li>Safariを完全に閉じてから再度開く</li>
-        </ul>
-        <div class="sec-title-g">🤖 Android Chrome</div>
-        <ul class="step-list">
-          <li>メニュー（⋮）→ 設定 → プライバシー → 閲覧データを削除</li>
-        </ul>
+        <div class="tip-o">⚠️ 閲覧データの一括消去は、端末内だけに保存された未同期データも消す可能性があるため、通常の更新手順には使用しません。</div>
       </div>
     </div>
   </div>
@@ -541,16 +529,8 @@
       <div class="acc-body open">
         <ul class="step-list">
           <li>画面を下に引っ張って更新（プルリフレッシュ）してみてください</li>
-          <li>ホーム画面のアイコンを削除して再追加する（最も確実）</li>
-        </ul>
-        <div class="sec-title">🍎 iPhone Safari キャッシュ消去</div>
-        <ul class="step-list">
-          <li>設定 → Safari →「履歴とWebサイトデータを消去」→「消去」</li>
-          <li>Safariを完全に閉じる → URLを直接入力してアクセス</li>
-        </ul>
-        <div class="sec-title-g">🤖 Android Chrome</div>
-        <ul class="step-list">
-          <li>メニュー（⋮）→ 設定 → プライバシー → 閲覧データを削除</li>
+          <li>SafariまたはChromeを完全に閉じる → URLを直接入力してアクセス</li>
+          <li>通信状態を確認し、少し待ってから再度開く</li>
         </ul>
       </div>
     </div>
@@ -573,7 +553,7 @@
         <ul class="step-list">
           <li>「コピーしました！」と表示されていればコピーされています</li>
           <li>LINEのトーク画面でテキスト入力欄を長押し →「貼り付け」で送れます</li>
-          <li>キャッシュ消去後に再度お試しください</li>
+          <li>HTTPSのポータルURLをSafariまたはChromeで開き、クリップボード権限を許可して再度お試しください</li>
         </ul>
       </div>
     </div>
@@ -597,9 +577,8 @@
       <div class="acc-hdr" onclick="tog(this)"><div class="acc-icon">❓</div><div class="acc-title">コーチ専用ページが開けない・スピナーが止まらない</div><div class="acc-arrow">▶</div></div>
       <div class="acc-body">
         <ul class="step-list">
-          <li>キャッシュ消去（設定 → Safari → 履歴とWebサイトデータを消去）を行ってください</li>
           <li>Safariを完全に閉じてから再度開いてください</li>
-          <li>ホーム画面のアイコンを削除して再追加してください</li>
+          <li>通信状態とFirebaseの接続表示を確認してください</li>
         </ul>
       </div>
     </div>
@@ -612,7 +591,7 @@
           <li>通信環境が悪い場合、保存に失敗することがあります</li>
           <li>大会要綱・対戦表は<strong>「💾 保存」ボタンを押したときのみ</strong>クラウドに保存されます。押し忘れに注意してください</li>
         </ul>
-        <div class="tip-g">✅ ブラウザの「履歴を消去」をしてもFirebaseのデータは消えません。</div>
+        <div class="tip-g">✅ 「クラウドに保存しました」と表示されたデータはFirebase側に残ります。端末保存のみの場合は、通信復旧後にもう一度保存してください。</div>
       </div>
     </div>
 
@@ -630,7 +609,7 @@
   </div>
 
 </main>
-<footer class="site-footer">YOSHIMI SMC FC — SMART PORTAL</footer>
+<footer class="site-footer"></footer>
 <script>
 function switchTab(id,btn){
   document.querySelectorAll(".g-tab-content").forEach(function(t){t.classList.remove("active");});
@@ -646,6 +625,5 @@ function tog(hdr){
   if(icon) icon.classList.toggle("open",!open);
 }
 </script>
-<script src="common.js"></script>
 </body>
 </html>

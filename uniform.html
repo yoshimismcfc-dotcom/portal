@@ -6,9 +6,11 @@
   <meta http-equiv="Pragma" content="no-cache">
   <meta http-equiv="Expires" content="0">
   <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="robots" content="noindex,nofollow">
   <title>ユニフォーム貸出｜吉見SMC FC</title>
   <script src="firebase-config.js"></script>
   <link rel="stylesheet" href="common.css">
+  <script src="common.js"></script>
   <style>
     /* ===== 統計バー ===== */
     .stat-row{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-bottom:16px}
@@ -108,14 +110,7 @@
   </style>
 </head>
 <body>
-<header class="site-header">
-  <div class="header-inner">
-    <a class="header-logo" href="index.html">
-      <div class="logo-mark">⚽</div>
-      <div><span class="logo-name">吉見SMC FC</span><span class="logo-sub">SMART PORTAL</span></div>
-    </a>
-  </div>
-</header>
+<header class="site-header"></header>
 <main class="page-wrap">
   <a class="back-btn" href="index.html">ホームに戻る</a>
   <div class="hero-band">
@@ -228,7 +223,7 @@
   </div>
 </div>
 
-<footer class="site-footer">YOSHIMI SMC FC — SMART PORTAL</footer>
+<footer class="site-footer"></footer>
 <script>
 var KU="smc_uniform_v3",KH="smc_uniform_hist_v1";
 var editId=null,lendId=null;
@@ -276,6 +271,7 @@ function hexLightness(hex){
 function isLightFolder(p){
   return hexLightness(p.c1)>185 || hexLightness(p.c2)>185 || hexLightness(p.code)>185;
 }
+function safeColor(value,fallback){return /^#[0-9a-f]{6}$/i.test(String(value||""))?String(value):fallback;}
 
 function renderStats(){
   var d=loadU(),total=d.length,free=d.filter(function(u){return !u.lentTo;}).length;
@@ -293,7 +289,10 @@ function renderFolders(){
   map["その他"]={p:{code:"#666",c1:"#555",c2:"#777"},items:[]};
   data.forEach(function(u){
     var k=u.cname||"その他";
-    if(!map[k])map[k]={p:{code:u.ccode||"#666",c1:u.ccode||"#555",c2:"#777"},items:[]};
+    if(!map[k]){
+      var customColor=safeColor(u.ccode,"#666666");
+      map[k]={p:{code:customColor,c1:customColor,c2:"#777777"},items:[]};
+    }
     map[k].items.push(u);
   });
   var container=document.getElementById("color-folders"),html="";
@@ -312,21 +311,21 @@ function renderFolders(){
     var rows=items.map(function(u){
       var isLent=!!u.lentTo;
       var statusCell=isLent
-        ?'<span class="badge-lent">貸出中</span> <span style="font-size:.72rem;color:#94c4e4">'+u.lentTo+(u.lentDate?' '+u.lentDate+'〜':'')+'</span>'
+        ?'<span class="badge-lent">貸出中</span> <span style="font-size:.72rem;color:#94c4e4">'+escapeHtml(u.lentTo)+(u.lentDate?' '+escapeHtml(u.lentDate)+'〜':'')+'</span>'
         :'<span class="badge-free">在庫あり</span>';
       var lendReturnBtn=isLent
-        ?'<button class="action-btn return-btn" onclick="event.stopPropagation();openLend(\''+u.id+'\')">返却</button>'
-        :'<button class="action-btn lend-btn" onclick="event.stopPropagation();openLend(\''+u.id+'\')">貸出</button>';
+        ?'<button class="action-btn return-btn" onclick="event.stopPropagation();openLend('+inlineJsArg(u.id)+')">返却</button>'
+        :'<button class="action-btn lend-btn" onclick="event.stopPropagation();openLend('+inlineJsArg(u.id)+')">貸出</button>';
       return '<tr>'
-        +'<td style="white-space:nowrap"><span style="font-size:1rem;font-weight:900;color:#fff">#'+u.num+'</span>'
-        +(u.player?' <span style="font-size:.78rem;color:#94c4e4">'+u.player+'</span>':'')
+        +'<td style="white-space:nowrap"><span style="font-size:1rem;font-weight:900;color:#fff">#'+escapeHtml(u.num)+'</span>'
+        +(u.player?' <span style="font-size:.78rem;color:#94c4e4">'+escapeHtml(u.player)+'</span>':'')
         +'</td>'
-        +'<td style="text-align:center;color:#fff;white-space:nowrap">'+u.size+'</td>'
+        +'<td style="text-align:center;color:#fff;white-space:nowrap">'+escapeHtml(u.size)+'</td>'
         +'<td>'+statusCell+'</td>'
         +'<td><div class="uni-actions">'
         +lendReturnBtn
-        +'<button class="action-btn edit-btn" onclick="event.stopPropagation();openEdit(\''+u.id+'\')">編集</button>'
-        +'<button class="action-btn del-btn" onclick="event.stopPropagation();confirmDel(\''+u.id+'\')">削除</button>'
+        +'<button class="action-btn edit-btn" onclick="event.stopPropagation();openEdit('+inlineJsArg(u.id)+')">編集</button>'
+        +'<button class="action-btn del-btn" onclick="event.stopPropagation();confirmDel('+inlineJsArg(u.id)+')">削除</button>'
         +'</div></td>'
         +'</tr>';
     }).join("");
@@ -334,7 +333,7 @@ function renderFolders(){
     html+='<div class="color-folder">'
       +'<div class="cf-header'+lightClass+'" style="background:'+hdrGrad+'" onclick="toggleFolder(\''+bodyId+'\')">'
       +'<div class="cf-swatch" style="background:'+cg.p.code+'"></div>'
-      +'<div class="cf-name">'+cname+'</div>'
+      +'<div class="cf-name">'+escapeHtml(cname)+'</div>'
       +'<div class="cf-stats">'
       +'<span class="cf-total">全'+items.length+'着</span>'
       +'<span class="cf-free">在庫'+free+'</span>'
@@ -435,7 +434,7 @@ function openLend(id){
   var isLent=!!u.lentTo;
   document.getElementById("lend-title").textContent="【"+u.cname+"】#"+u.num+(u.player?" "+u.player:"")+" ("+u.size+")";
   document.getElementById("lend-info").innerHTML=isLent
-    ?"<span style='color:#ff8888'>🔴 貸出中</span><br>借りている人：<strong style='color:#fff'>"+u.lentTo+"</strong><br>貸出日："+u.lentDate+(u.retDate?"　返却予定："+u.retDate:"")
+    ?"<span style='color:#ff8888'>🔴 貸出中</span><br>借りている人：<strong style='color:#fff'>"+escapeHtml(u.lentTo)+"</strong><br>貸出日："+escapeHtml(u.lentDate)+(u.retDate?"　返却予定："+escapeHtml(u.retDate):"")
     :"<span style='color:#00ff88'>🟢 在庫あり</span>";
   document.getElementById("lend-form").style.display=isLent?"none":"block";
   var btn=document.getElementById("lend-btn");
@@ -469,11 +468,11 @@ function showHistory(){
     ?'<div style="color:var(--ink-3);text-align:center;padding:20px">履歴がありません。</div>'
     :h.map(function(x){
       return '<div class="hist-item">'
-        +'<span style="color:'+(x.type==="貸出"?"#ffaa66":"#66ffaa")+';font-weight:900;white-space:nowrap">'+x.type+'</span>'
-        +'<span style="color:var(--ink-3);white-space:nowrap">'+x.date+'</span>'
-        +'<span style="color:#fff;white-space:nowrap">'+x.cname+' #'+x.num+(x.player?" ("+x.player+")":"")+'</span>'
-        +'<span style="color:var(--cyan)">→ '+x.name+'</span>'
-        +(x.retDate?'<span style="color:var(--ink-3);font-size:.7rem">予定:'+x.retDate+'</span>':"")
+        +'<span style="color:'+(x.type==="貸出"?"#ffaa66":"#66ffaa")+';font-weight:900;white-space:nowrap">'+escapeHtml(x.type)+'</span>'
+        +'<span style="color:var(--ink-3);white-space:nowrap">'+escapeHtml(x.date)+'</span>'
+        +'<span style="color:#fff;white-space:nowrap">'+escapeHtml(x.cname)+' #'+escapeHtml(x.num)+(x.player?" ("+escapeHtml(x.player)+")":"")+'</span>'
+        +'<span style="color:var(--cyan)">→ '+escapeHtml(x.name)+'</span>'
+        +(x.retDate?'<span style="color:var(--ink-3);font-size:.7rem">予定:'+escapeHtml(x.retDate)+'</span>':"")
         +'</div>';
     }).join("");
   document.getElementById("modal-hist").classList.add("open");
@@ -486,19 +485,18 @@ function render(){renderStats();renderFolders();}
 // render()はdbListenで呼ばれる
 
 function copyUniformList(){
-  var items = _uData.filter(function(u){ return u.borrower; });
+  var items = _unifData.filter(function(u){ return u.lentTo; });
   if(!items.length){ alert("現在の貸出はありません"); return; }
   var t = "【ユニフォーム貸出中一覧】\n\n";
   items.forEach(function(u){
-    t += "No."+u.num+" "+u.name+"\n";
-    t += "   借りた人："+u.borrower+"\n";
-    t += "   貸出日："+u.borrowDate+"\n\n";
+    t += "No."+u.num+(u.player?" "+u.player:"")+"\n";
+    t += "   借りた人："+u.lentTo+"\n";
+    t += "   貸出日："+(u.lentDate||"未設定")+"\n\n";
   });
   navigator.clipboard.writeText(t)
     .then(function(){ alert("コピーしました！LINEに貼り付けてください。"); })
     .catch(function(){ alert("コピーできませんでした。"); });
 }
 </script>
-<script src="common.js"></script>
 </body>
 </html>

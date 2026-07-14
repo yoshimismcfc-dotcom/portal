@@ -2,12 +2,14 @@
 <html lang="ja">
 <head>
   <meta charset="utf-8">
+  <meta name="robots" content="noindex,nofollow">
   <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
   <meta http-equiv="Pragma" content="no-cache">
   <meta http-equiv="Expires" content="0">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>入会申込書｜吉見SMC FC</title>
   <link rel="stylesheet" href="common.css">
+  <script src="common.js"></script>
   <style>
     .tab-bar{display:flex;gap:0;margin-bottom:20px;border-radius:var(--r8);overflow:hidden;border:1px solid var(--line-2)}
     .tab-btn{flex:1;padding:12px 8px;font:inherit;font-size:.85rem;font-weight:900;background:var(--surface-lt);color:#6aaccc;border:none;cursor:pointer;transition:.15s;display:flex;align-items:center;justify-content:center;gap:5px}
@@ -82,14 +84,7 @@
   </style>
 </head>
 <body>
-<header class="site-header">
-  <div class="header-inner">
-    <a class="header-logo" href="index.html">
-      <div class="logo-mark">⚽</div>
-      <div><span class="logo-name">吉見SMC FC</span><span class="logo-sub">SMART PORTAL</span></div>
-    </a>
-  </div>
-</header>
+<header class="site-header"></header>
 <main class="page-wrap">
   <a class="back-btn" href="index.html">ホームに戻る</a>
   <div class="hero-band"><div class="hero-emoji">📄</div>
@@ -162,7 +157,7 @@
     <div class="psheet" id="psheet"></div>
   </div>
 </main>
-<footer class="site-footer no-print">YOSHIMI SMC FC — SMART PORTAL</footer>
+<footer class="site-footer no-print"></footer>
 
 <script>
 function showTab(t){
@@ -177,16 +172,12 @@ function doPrint(){
   document.getElementById("form-area").style.display="none";
   document.getElementById("preview-area").style.display="block";
   document.getElementById("btn-print").classList.add("active");
-  // レンダリング完了を待ってから印刷ダイアログを開く
-  requestAnimationFrame(function(){
-    requestAnimationFrame(function(){
-      window.print();
-    });
-  });
+  smcPrint({orientation:"portrait",margin:"0",target:"join-form"});
 }
 function gv(id){var e=document.getElementById(id);return e?e.value.trim():"";}
-function ui(v,w){return '<span class="ui" style="min-width:'+(w||"50px")+'">'+(v||"&nbsp;")+'</span>';}
-function ub(v,cls){return '<div class="ub'+(cls?" "+cls:"")+'">'+(v||"&nbsp;")+'</div>';}
+function eh(v){return String(v||"").replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;").replace(/"/g,"&quot;").replace(/'/g,"&#39;");}
+function ui(v,w){return '<span class="ui" style="min-width:'+(w||"50px")+'">'+(v?eh(v):"&nbsp;")+'</span>';}
+function ub(v,cls){return '<div class="ub'+(cls?" "+cls:"")+'">'+(v?eh(v):"&nbsp;")+'</div>';}
 
 function build(){
   var fy=gv("fy"),fm=gv("fm"),fd=gv("fd");
@@ -224,13 +215,13 @@ function build(){
   h+='<div class="p-date-row s8">'+ui(by,"58px")+'&nbsp;年&nbsp;'+ui(bm,"34px")+'&nbsp;月&nbsp;'+ui(bd,"34px")+'&nbsp;日</div>';
 
   /* 住所 */
-  h+='<div class="p-flex s2"><span style="font-size:10pt;font-weight:bold;white-space:nowrap">住所&nbsp;〒</span><div class="uf">'+(addr||"&nbsp;")+'</div></div>';
+  h+='<div class="p-flex s2"><span style="font-size:10pt;font-weight:bold;white-space:nowrap">住所&nbsp;〒</span><div class="uf">'+(addr?eh(addr):"&nbsp;")+'</div></div>';
   h+=ub("")+"<div class='s5'></div>";
 
   /* 学校 */
   h+='<span class="p-label s2">学校名・学年</span>';
-  h+='<div class="p-flex s6"><div class="uf">'+(school||"&nbsp;")+'</div>';
-  h+='<div style="border-bottom:1px solid #333;min-width:48px;min-height:16px;padding:0 3px;font-size:10.5pt">'+(grade||"&nbsp;")+'</div>';
+  h+='<div class="p-flex s6"><div class="uf">'+(school?eh(school):"&nbsp;")+'</div>';
+  h+='<div style="border-bottom:1px solid #333;min-width:48px;min-height:16px;padding:0 3px;font-size:10.5pt">'+(grade?eh(grade):"&nbsp;")+'</div>';
   h+='<span style="font-size:10pt;white-space:nowrap;padding-bottom:1px">年生</span></div>';
 
   /* 電話 */
@@ -238,7 +229,7 @@ function build(){
 
   /* 緊急 */
   h+='<span class="p-label s2">緊急連絡先</span>';
-  h+='<div class="p-flex s4"><div class="uf">'+(mobile||"&nbsp;")+'</div><span style="font-size:9pt;color:#444;white-space:nowrap;padding-bottom:1px">（携帯）</span></div>';
+  h+='<div class="p-flex s4"><div class="uf">'+(mobile?eh(mobile):"&nbsp;")+'</div><span style="font-size:9pt;color:#444;white-space:nowrap;padding-bottom:1px">（携帯）</span></div>';
   h+=ub("")+"<div class='s4'></div>";
 
   /* ===== 誓約書 ===== */
@@ -256,7 +247,7 @@ function build(){
   h+='<li>２、貴少年団活動中及び、会場と自宅との経路往復中の事故等、障害について貴少年団が指定するスポーツ安全保険の適用範囲外の補償は、貴少年団に対して一切補償請求しない。</li>';
   h+='</ul>';
   h+='<div class="p-ijou">以上</div>';
-  h+='<div class="p-flex"><span style="font-size:10pt;font-weight:bold;white-space:nowrap">保護者名</span><div class="uf">'+(pname||"&nbsp;")+'</div></div>';
+  h+='<div class="p-flex"><span style="font-size:10pt;font-weight:bold;white-space:nowrap">保護者名</span><div class="uf">'+(pname?eh(pname):"&nbsp;")+'</div></div>';
 
   document.getElementById("psheet").innerHTML=h;
 }
@@ -267,6 +258,5 @@ function clearForm(){
 }
 (function(){var n=new Date();document.getElementById("fy").value=n.getFullYear();document.getElementById("fm").value=n.getMonth()+1;document.getElementById("fd").value=n.getDate();})();
 </script>
-<script src="common.js"></script>
 </body>
 </html>

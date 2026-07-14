@@ -1,25 +1,84 @@
-# 吉見SMCサッカースポーツ少年団 スマートポータル
+# 吉見SMC FC スマートポータル
 
-埼玉土建上尾伊奈支部ポータルと同じデザインシステムを使用。
+吉見SMCサッカースポーツ少年団の連絡・出欠・試合・当番・名簿・会計をまとめる、静的HTML中心のWebアプリです。GitHub Pagesでの配信を想定し、Firebase Realtime Databaseと端末内ストレージを併用します。
 
-## ファイル構成
-- `common.css` 共通スタイル（土建ポータルと同一デザインシステム）
-- `common.js`  共通JS（タブ切り替えなど）
-- `index.html` ホーム画面
-- `heat.html`  熱中症チェック（WBGT推定・環境省準拠）
-- `attendance.html` 出欠確認（調整さんリンク）
-- `calendar.html`   チームカレンダー（Googleカレンダー埋め込み）
-- `coach.html`      コーチ専用エリア（パスコードロック）
-- `.nojekyll`  GitHub Pages用（削除しないこと）
+## 主な構成
 
-## 差し替え必須箇所
-1. `attendance.html` 内の調整さんURL（団員用・コーチ用 各1箇所）
-2. `calendar.html` 内のGoogleカレンダーiframe URL
-3. `index.html` 内の今日の連絡テキスト
-4. `coach.html` 内のパスコード（PASSCODE定数）
+- `index.html` — ホーム
+- `common.css` / `common.js` — 共通デザイン、テーマ、PWA登録、印刷、保存通知、端末内エラーログ
+- `firebase-config.js` — Firebase初期化、リアルタイム読込、保存結果の共通処理
+- `sw.js` / `manifest.json` / `offline.html` — PWAと一部オフライン表示
+- `members.html` / `staff.html` — 団員名簿・担当者
+- `game_adjust.html` / `tournament.html` / `duty_match.html` — 試合調整・大会資料・当番
+- `finance.html` / `accounting.html` — 現行の会計画面
+- `diagnostics.html` — この端末の通信・PWA・直近20件のJavaScriptエラー確認
 
-## GitHub Pages公開手順
-1. GitHubで新リポジトリを作成（例: `yoshimi-smc-portal`）
-2. このフォルダの全ファイルをアップロード
-3. Settings → Pages → Source: main ブランチ / root に設定
+全ページの一覧は `index.html` と `coach.html` の導線を基準にしてください。
 
+ヘッダーとフッターは各HTMLに空のマウント先だけを置き、`common.js`から一元生成します。アイコンは、チームロゴをブランド表示に、絵文字を共通サイズの機能アイコンに限定して使い分けます。
+
+## データ保存
+
+通常の入力内容は端末内にも保存し、その後Firebaseへ同期します。団員名簿は個人情報を端末に残さないため、`members_v2/{団員ID}`へ直接クラウド保存します。名簿の追加・修正・削除は団員単位で行われます。
+
+画面の保存通知は次の状態を区別します。
+
+- クラウド保存完了
+- 端末内のみ保存
+- クラウド再接続待ち
+- 保存失敗
+
+Firebase接続前の空データを自動でクラウドへ書き戻さない設計です。運用前と大きな変更の前には、Firebase Consoleからバックアップを取得してください。
+
+## セキュリティ上の前提
+
+GitHub Pages上のHTML・JavaScriptは誰でも閲覧できます。次の情報をソースへ直接書かないでください。
+
+- パスワード、固定パスコード、秘密鍵
+- 団員名簿や保護者名などの個人情報
+- 限定共有URL
+
+現在はLINEのリッチメニュー等からすぐ利用できることを優先し、Firebase Authenticationを使用しない公開モードです。Firebase本番環境のルールはリポジトリへ含めず、Firebase Console側で管理します。管理系ページには`noindex,nofollow`を設定していますが、これは検索結果への掲載を抑える指定であり、アクセス制限ではありません。
+
+ログインなしのクラウド編集を利用するには、Firebase本番環境でアプリが使用する保存先への読み取り・書き込みを許可する必要があります。データベース全体を無条件に公開せず、使用する保存先と入力形式を確認したうえで設定してください。
+
+URLを知っている人は名簿・会計などを閲覧・変更・削除できます。運用時はURLの共有範囲を限定し、Firebaseのバックアップを定期的に取得してください。将来必要になった場合は、閲覧はそのまま、編集だけ認証する方式へ変更できます。
+
+アカウント管理画面にはパスワードを保存しません。認証情報は管理者のパスワード管理ツールで管理してください。
+
+## PWA・更新
+
+Service Workerは公開ページと共通アセットを事前キャッシュし、閲覧済みページをオフライン時の候補として保存します。管理系ページは事前キャッシュしません。
+
+リリース時は、次のバージョンを同じ値に更新してください。
+
+- `index.html` の `meta[name="app-version"]`
+- `tournament.html` の `meta[name="app-version"]`
+- `sw.js` の `APP_VERSION`
+
+## 旧ページ
+
+互換性と既存ブックマークのため残していますが、検索対象外にしています。
+
+- `album.html` — 旧アルバム案内
+- `kaikei.html` — 旧会計・立替画面（印刷対応のみ保守）
+- `heat.html` — 旧熱中症画面。現行は `weather.html`
+- `init-data.html` — 廃止済み。データ上書き機能はありません
+
+## ローカル確認
+
+Service Workerを含めて確認するため、ファイルを直接開かずHTTPサーバーを使用します。
+
+```bash
+python3 -m http.server 8000
+```
+
+別のターミナルで自動検査を実行します。
+
+```bash
+npm test
+```
+
+検査内容はローカルリンク、重複ID、JavaScript構文、PWAバージョン、事前キャッシュ対象、危険なキャッシュ削除、既知の秘密情報形式です。GitHub Actionsでも同じ検査を実行します。
+
+画面上の問題調査は、コーチ画面の「動作診断」から端末内エラーログを確認できます。ログは外部へ自動送信されないため、複数端末を横断する監視が必要な場合は、認証と個人情報の除外方針を決めたうえで専用監視サービスを導入してください。

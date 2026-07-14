@@ -6,9 +6,11 @@
   <meta http-equiv="Pragma" content="no-cache">
   <meta http-equiv="Expires" content="0">
   <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="robots" content="noindex,nofollow">
   <title>会計業務｜吉見SMC FC</title>
   <script src="firebase-config.js"></script>
   <link rel="stylesheet" href="common.css">
+  <script src="common.js"></script>
   <style>
     .fin-tabs{position:relative;z-index:2;display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:0;border:1px solid var(--line-2);border-radius:var(--r8);overflow:hidden;margin-bottom:14px}
     .fin-tab{position:relative;z-index:1;border:0;background:var(--surface-lt);color:var(--ink-3);font:inherit;font-size:.76rem;font-weight:900;padding:10px 3px;cursor:pointer;min-width:0;pointer-events:auto;touch-action:manipulation;white-space:nowrap}
@@ -146,14 +148,7 @@
   </style>
 </head>
 <body>
-<header class="site-header">
-  <div class="header-inner">
-    <a class="header-logo" href="index.html">
-      <div class="logo-mark">⚽</div>
-      <div><span class="logo-name">吉見SMC FC</span><span class="logo-sub">SMART PORTAL</span></div>
-    </a>
-  </div>
-</header>
+<header class="site-header"></header>
 <main class="page-wrap">
   <a class="back-btn no-print" href="index.html">ホームに戻る</a>
   <div class="hero-band no-print">
@@ -304,7 +299,7 @@
     <div class="panel no-print">
       <div class="section-head" style="margin-top:0">
         <h2>月別会計報告</h2>
-        <button class="btn btn-primary btn-sm" onclick="window.print()">印刷・PDF保存</button>
+        <button class="btn btn-primary btn-sm" onclick="smcPrint({orientation:'portrait',target:'finance-month'})">印刷・PDF保存</button>
       </div>
       <div class="month-select-row">
         <div class="form-group" style="margin:0">
@@ -331,13 +326,13 @@
       </div>
       <div style="display:flex;gap:8px;justify-content:flex-end;flex-wrap:wrap">
         <button class="btn btn-outline btn-sm" onclick="downloadCsv()">CSV保存</button>
-        <button class="btn btn-primary btn-sm" onclick="window.print()">印刷・PDF保存</button>
+        <button class="btn btn-primary btn-sm" onclick="smcPrint({orientation:'portrait',target:'finance-year'})">印刷・PDF保存</button>
       </div>
     </div>
     <div class="report-sheet" id="year-report"></div>
   </section>
 </main>
-<footer class="site-footer no-print">YOSHIMI SMC FC — SMART PORTAL</footer>
+<footer class="site-footer no-print"></footer>
 <script>
 var KEY="smc_family_finance_v1";
 var CATS=["団費","入団金","大会参加費","登録費","保険料","備品","消耗品","救急用品","グラウンド・施設","審判・謝礼","印刷・事務","行事","その他"];
@@ -367,11 +362,13 @@ function memberKey(m){return [m.grade||"",m.name||"",m.kana||""].join("|");}
 function gradeNumber(g){var m=String(g||"").match(/\d/);return m?Number(m[0]):0;}
 function memberList(){
   var list=[];
-  GRADES.forEach(function(g){
-    (membersData[g]||[]).forEach(function(m){
-      if(m&&m.name)list.push({key:memberKey({grade:g,name:m.name,kana:m.kana}),grade:g,name:m.name,kana:m.kana||"",num:m.num||""});
-    });
+  Object.keys(membersData||{}).forEach(function(id){
+    var m=membersData[id];
+    if(m&&m.name&&GRADES.indexOf(m.grade)>=0){
+      list.push({key:id,grade:m.grade,name:m.name,kana:m.kana||"",num:m.num||""});
+    }
   });
+  list.sort(function(a,b){return GRADES.indexOf(a.grade)-GRADES.indexOf(b.grade)||(a.kana||a.name).localeCompare(b.kana||b.name,"ja");});
   return list;
 }
 function validMonth(m){return /^\d{4}-\d{2}$/.test(String(m||""));}
@@ -625,20 +622,22 @@ function renderRequest(){
     '<div class="fin-card good"><div class="k">支払い済</div><div class="v">'+yen(paid)+'</div></div>'+
     '<div class="fin-card"><div class="k">申請合計</div><div class="v">'+yd.requests.length+'件</div></div>';
   document.getElementById("request-rows").innerHTML=yd.requests.map(function(r){
+    var requestId=Number(r.id)||0;
     return '<tr>'+
       '<td><span class="badge '+statusClass(r.status)+'">'+esc(r.status)+'</span></td>'+
       '<td>'+esc(r.date)+'</td><td>'+esc(r.name)+'</td><td>'+esc(r.type)+'</td><td>'+esc(r.category)+'</td><td>'+esc(r.item)+'</td>'+
       '<td class="money">'+yen(r.amount)+'</td><td>'+esc(r.note)+'</td>'+
-      '<td class="no-print"><select class="form-control" onchange="updateRequest('+r.id+',\'status\',this.value)">'+["申請中","了解","支払い済","差戻し"].map(function(s){return '<option '+(r.status===s?'selected':'')+'>'+s+'</option>';}).join("")+'</select><button class="btn btn-outline btn-sm" style="margin-top:6px;color:var(--red);border-color:rgba(255,68,102,.4)" onclick="deleteRequest('+r.id+')">削除</button></td>'+
+      '<td class="no-print"><select class="form-control" onchange="updateRequest('+requestId+',\'status\',this.value)">'+["申請中","了解","支払い済","差戻し"].map(function(s){return '<option '+(r.status===s?'selected':'')+'>'+s+'</option>';}).join("")+'</select><button class="btn btn-outline btn-sm" style="margin-top:6px;color:var(--red);border-color:rgba(255,68,102,.4)" onclick="deleteRequest('+requestId+')">削除</button></td>'+
     '</tr>';
   }).join("")||'<tr><td colspan="9" style="text-align:center;color:var(--ink-3);padding:22px">申請はまだありません。</td></tr>';
   document.getElementById("request-cards").innerHTML=yd.requests.map(function(r){
+    var requestId=Number(r.id)||0;
     return '<div class="mini-card">'+
       '<div class="mini-card-head"><span class="badge '+statusClass(r.status)+'">'+esc(r.status)+'</span><span class="mini-money">'+yen(r.amount)+'</span></div>'+
       '<div class="mini-title">'+esc(r.item)+'</div>'+
       '<div class="mini-meta">'+esc(r.date)+' / '+esc(r.name)+' / '+esc(r.type)+' / '+esc(r.category)+'</div>'+
       '<div class="mini-meta">'+esc(r.note)+'</div>'+
-      '<div class="mini-actions"><select class="form-control" onchange="updateRequest('+r.id+',\'status\',this.value)">'+["申請中","了解","支払い済","差戻し"].map(function(s){return '<option '+(r.status===s?'selected':'')+'>'+s+'</option>';}).join("")+'</select><button class="btn btn-outline btn-sm" style="color:var(--red);border-color:rgba(255,68,102,.4)" onclick="deleteRequest('+r.id+')">削除</button></div>'+
+      '<div class="mini-actions"><select class="form-control" onchange="updateRequest('+requestId+',\'status\',this.value)">'+["申請中","了解","支払い済","差戻し"].map(function(s){return '<option '+(r.status===s?'selected':'')+'>'+s+'</option>';}).join("")+'</select><button class="btn btn-outline btn-sm" style="color:var(--red);border-color:rgba(255,68,102,.4)" onclick="deleteRequest('+requestId+')">削除</button></div>'+
     '</div>';
   }).join("")||'<div class="mini-card"><div class="mini-meta" style="text-align:center">申請はまだありません。</div></div>';
 }
@@ -668,19 +667,20 @@ function renderLedgerRows(kind,targetId){
   document.getElementById(targetId).innerHTML=rows.map(function(x){
     var direct=x.source==="direct"&&!x.sourceId;
     if(!direct){
-      var action=isCollectionEntry(x)?'<button class="detail-btn" type="button" onclick="showCollectionBreakdown(\''+esc(x.sourceId||"")+'\')">内訳</button>':'<span class="badge '+sourceClass(x)+'">'+esc(sourceText(x))+'</span>';
+      var action=isCollectionEntry(x)?'<button class="detail-btn" type="button" onclick="showCollectionBreakdown('+inlineJsArg(x.sourceId||"")+')">内訳</button>':'<span class="badge '+sourceClass(x)+'">'+esc(sourceText(x))+'</span>';
       return '<tr>'+
         '<td class="readonly-cell">'+esc(x.date||"")+'</td><td class="readonly-cell">'+esc(x.category||"その他")+'</td>'+
         '<td class="readonly-cell">'+esc(x.item||"")+'</td><td class="amount-readonly">'+yen(x.amount)+'</td>'+
         '<td class="readonly-cell">'+esc(x.note||"")+'</td><td>'+action+'</td></tr>';
     }
+    var ledgerId=Number(x.id)||0;
     return '<tr>'+
-      '<td><input class="form-control" type="date" value="'+esc(x.date||"")+'" onchange="editLedgerLine('+x.id+',\'date\',this.value,true)"></td>'+
-      '<td><select class="form-control" onchange="editLedgerLine('+x.id+',\'category\',this.value,true)">'+ledgerCategoryOptions(x.category)+'</select></td>'+
-      '<td><input class="form-control" value="'+esc(x.item||"")+'" placeholder="内容" oninput="editLedgerLine('+x.id+',\'item\',this.value,false)" onchange="editLedgerLine('+x.id+',\'item\',this.value,true)"></td>'+
-      '<td><input class="form-control" type="number" inputmode="numeric" value="'+esc(x.amount||"")+'" placeholder="0" oninput="editLedgerLine('+x.id+',\'amount\',this.value,false)" onchange="editLedgerLine('+x.id+',\'amount\',this.value,true)"></td>'+
-      '<td><input class="form-control" value="'+esc(x.note||"")+'" placeholder="備考" oninput="editLedgerLine('+x.id+',\'note\',this.value,false)" onchange="editLedgerLine('+x.id+',\'note\',this.value,true)"></td>'+
-      '<td style="text-align:center"><button class="btn btn-outline btn-sm" type="button" style="color:var(--red);border-color:rgba(255,91,110,.4)" onclick="deleteLedger('+x.id+')">削除</button></td></tr>';
+      '<td><input class="form-control" type="date" value="'+esc(x.date||"")+'" onchange="editLedgerLine('+ledgerId+',\'date\',this.value,true)"></td>'+
+      '<td><select class="form-control" onchange="editLedgerLine('+ledgerId+',\'category\',this.value,true)">'+ledgerCategoryOptions(x.category)+'</select></td>'+
+      '<td><input class="form-control" value="'+esc(x.item||"")+'" placeholder="内容" oninput="editLedgerLine('+ledgerId+',\'item\',this.value,false)" onchange="editLedgerLine('+ledgerId+',\'item\',this.value,true)"></td>'+
+      '<td><input class="form-control" type="number" inputmode="numeric" value="'+esc(x.amount||"")+'" placeholder="0" oninput="editLedgerLine('+ledgerId+',\'amount\',this.value,false)" onchange="editLedgerLine('+ledgerId+',\'amount\',this.value,true)"></td>'+
+      '<td><input class="form-control" value="'+esc(x.note||"")+'" placeholder="備考" oninput="editLedgerLine('+ledgerId+',\'note\',this.value,false)" onchange="editLedgerLine('+ledgerId+',\'note\',this.value,true)"></td>'+
+      '<td style="text-align:center"><button class="btn btn-outline btn-sm" type="button" style="color:var(--red);border-color:rgba(255,91,110,.4)" onclick="deleteLedger('+ledgerId+')">削除</button></td></tr>';
   }).join("")||'<tr><td colspan="6" style="text-align:center;color:var(--ink-3);padding:20px">「＋ '+(kind==="income"?'収入':'支出')+'行」から入力してください。</td></tr>';
 }
 function renderMonthly(){
@@ -896,7 +896,7 @@ function renderCollection(){
   document.getElementById("collection-list").innerHTML=yd.collections.map(function(x){
     var ps=x.payments||{},p=0,e=0,sum=0;
     members.forEach(function(m){var pay=ps[m.key]||{},s=pay.status||"unpaid";if(s==="paid"){p++;sum+=paymentAmount(x,m,pay,members);}if(s==="exempt")e++;});
-    return '<button class="collection-btn '+(String(x.id)===String(c.id)?"active":"")+'" onclick="selectedCollectionId='+x.id+';renderAll()">'+
+    return '<button class="collection-btn '+(String(x.id)===String(c.id)?"active":"")+'" onclick="selectedCollectionId='+(Number(x.id)||0)+';renderAll()">'+
       '<div class="collection-title">'+esc(x.title)+'</div>'+
       '<div class="collection-meta">'+collectionAmountLabel(x)+' / 済 '+p+'名 '+yen(sum)+' / 未 '+Math.max(0,total-p-e)+'名</div>'+
     '</button>';
@@ -1048,12 +1048,11 @@ dbListen("family_finance",function(val){
   data=val&&typeof val==="object"?val:data;
   normalize();fillCats();renderAll();
 },KEY,clone(data));
-dbListen("members",function(val){
+dbListen("members_v2",function(val){
   membersData=val&&typeof val==="object"?val:{};
   renderAll();
-},"smc_members_v4",{});
+},null,{});
 window.addEventListener("DOMContentLoaded",function(){fillCats();normalize();renderAll();});
 </script>
-<script src="common.js"></script>
 </body>
 </html>

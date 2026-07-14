@@ -4,9 +4,11 @@
   <meta charset="utf-8">
   <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
   <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="robots" content="noindex,nofollow">
   <title>試合調整｜吉見SMC FC</title>
   <script src="firebase-config.js"></script>
   <link rel="stylesheet" href="common.css">
+  <script src="common.js"></script>
   <style>
     /* ============================================================
        試合調整 2026年最高品質版
@@ -152,14 +154,7 @@
   </style>
 </head>
 <body>
-<header class="site-header">
-  <div class="header-inner">
-    <a class="header-logo" href="index.html">
-      <div class="logo-mark">⚽</div>
-      <div><span class="logo-name">吉見SMC FC</span><span class="logo-sub">SMART PORTAL</span></div>
-    </a>
-  </div>
-</header>
+<header class="site-header"></header>
 <main class="page-wrap">
   <a class="back-btn" href="coach.html">コーチ専用に戻る</a>
   <div class="hero-band">
@@ -176,7 +171,7 @@
     <button class="undo-btn" id="undo-btn" onclick="undo()" disabled aria-label="元に戻す" title="元に戻す">↶ 戻す</button>
     <button class="undo-btn" id="redo-btn" onclick="redo()" disabled aria-label="やり直す" title="やり直す">↷ 進む</button>
     <button class="btn-line-copy sm" onclick="copyAdjList()" aria-label="調整状況をLINE用にコピー">📋 LINEコピー</button>
-    <button class="btn btn-outline btn-sm no-print" onclick="window.print()" aria-label="印刷">🖨 印刷</button>
+    <button class="btn btn-outline btn-sm no-print" onclick="smcPrint({orientation:'landscape',target:'game-adjust'})" aria-label="印刷">🖨 印刷</button>
     <span id="save-msg" role="status" aria-live="polite"></span>
   </div>
   <div class="legend" aria-hidden="true">
@@ -247,7 +242,7 @@
   </div>
 </div>
 
-<footer class="site-footer">YOSHIMI SMC FC — SMART PORTAL</footer>
+<footer class="site-footer"></footer>
 <script>
 /* ============================================================
    試合調整 2026年最高品質版 メインスクリプト
@@ -272,20 +267,20 @@ const INIT = {
     {id:"d7",label:"8/30（日）U9",cat:"U9 4チーム",                target:3},
   ],
   teams:[
-    {id:"t01",name:"田間宮",           tantou:"野口",     statuses:{d1:"NG",d2:"－",d3:"－",d4:"OK",d5:"NG",d6:"－",d7:"－"}},
-    {id:"t02",name:"ネクサス",         tantou:"武部/片山",statuses:{d1:"OK",d2:"OK",d3:"－",d4:"－",d5:"NG",d6:"－",d7:"－"}},
-    {id:"t03",name:"鴻巣ドルフィンズ", tantou:"武部",     statuses:{d1:"－",d2:"NG",d3:"OK",d4:"NG",d5:"OK",d6:"－",d7:"－"}},
-    {id:"t04",name:"熊谷東",           tantou:"武部",     statuses:{d1:"NG",d2:"確認中",d3:"NG",d4:"NG",d5:"NG",d6:"－",d7:"－"}},
-    {id:"t05",name:"川里",             tantou:"野口",     statuses:{d1:"－",d2:"－",d3:"－",d4:"NG",d5:"OK",d6:"－",d7:"－"}},
-    {id:"t06",name:"滑川",             tantou:"綿貫",     statuses:{d1:"OK",d2:"－",d3:"－",d4:"－",d5:"OK",d6:"NG",d7:"－"}},
-    {id:"t07",name:"川越 笠幡",        tantou:"中山",     statuses:{d1:"－",d2:"－",d3:"－",d4:"－",d5:"NG",d6:"－",d7:"－"}},
-    {id:"t08",name:"川越 岡田",        tantou:"中山",     statuses:{d1:"－",d2:"－",d3:"NG",d4:"OK",d5:"NG",d6:"－",d7:"－"}},
-    {id:"t09",name:"川越イーグルF",    tantou:"武部",     statuses:{d1:"－",d2:"－",d3:"OK",d4:"－",d5:"NG",d6:"－",d7:"－"}},
-    {id:"t10",name:"熊谷リリーズ",     tantou:"綿貫",     statuses:{d1:"－",d2:"－",d3:"－",d4:"OK",d5:"－",d6:"－",d7:"－"}},
-    {id:"t11",name:"唐子",             tantou:"武部",     statuses:{d1:"－",d2:"－",d3:"NG",d4:"－",d5:"NG",d6:"－",d7:"－"}},
-    {id:"t12",name:"川越 芳野",        tantou:"石川",     statuses:{d1:"－",d2:"－",d3:"NG",d4:"－",d5:"－",d6:"－",d7:"－"}},
-    {id:"t13",name:"本庄ホッパーズ",   tantou:"武部",     statuses:{d1:"－",d2:"－",d3:"OK",d4:"－",d5:"OK",d6:"－",d7:"－"}},
-    {id:"t14",name:"川島",             tantou:"中山",     statuses:{d1:"－",d2:"－",d3:"－",d4:"－",d5:"OK",d6:"－",d7:"－"}},
+    {id:"t01",name:"田間宮",           tantou:"",statuses:{d1:"NG",d2:"－",d3:"－",d4:"OK",d5:"NG",d6:"－",d7:"－"}},
+    {id:"t02",name:"ネクサス",         tantou:"",statuses:{d1:"OK",d2:"OK",d3:"－",d4:"－",d5:"NG",d6:"－",d7:"－"}},
+    {id:"t03",name:"鴻巣ドルフィンズ", tantou:"",statuses:{d1:"－",d2:"NG",d3:"OK",d4:"NG",d5:"OK",d6:"－",d7:"－"}},
+    {id:"t04",name:"熊谷東",           tantou:"",statuses:{d1:"NG",d2:"確認中",d3:"NG",d4:"NG",d5:"NG",d6:"－",d7:"－"}},
+    {id:"t05",name:"川里",             tantou:"",statuses:{d1:"－",d2:"－",d3:"－",d4:"NG",d5:"OK",d6:"－",d7:"－"}},
+    {id:"t06",name:"滑川",             tantou:"",statuses:{d1:"OK",d2:"－",d3:"－",d4:"－",d5:"OK",d6:"NG",d7:"－"}},
+    {id:"t07",name:"川越 笠幡",        tantou:"",statuses:{d1:"－",d2:"－",d3:"－",d4:"－",d5:"NG",d6:"－",d7:"－"}},
+    {id:"t08",name:"川越 岡田",        tantou:"",statuses:{d1:"－",d2:"－",d3:"NG",d4:"OK",d5:"NG",d6:"－",d7:"－"}},
+    {id:"t09",name:"川越イーグルF",    tantou:"",statuses:{d1:"－",d2:"－",d3:"OK",d4:"－",d5:"NG",d6:"－",d7:"－"}},
+    {id:"t10",name:"熊谷リリーズ",     tantou:"",statuses:{d1:"－",d2:"－",d3:"－",d4:"OK",d5:"－",d6:"－",d7:"－"}},
+    {id:"t11",name:"唐子",             tantou:"",statuses:{d1:"－",d2:"－",d3:"NG",d4:"－",d5:"NG",d6:"－",d7:"－"}},
+    {id:"t12",name:"川越 芳野",        tantou:"",statuses:{d1:"－",d2:"－",d3:"NG",d4:"－",d5:"－",d6:"－",d7:"－"}},
+    {id:"t13",name:"本庄ホッパーズ",   tantou:"",statuses:{d1:"－",d2:"－",d3:"OK",d4:"－",d5:"OK",d6:"－",d7:"－"}},
+    {id:"t14",name:"川島",             tantou:"",statuses:{d1:"－",d2:"－",d3:"－",d4:"－",d5:"OK",d6:"－",d7:"－"}},
   ],
   備考:{d2:"中止（若草まつり）",d5:"川越U9 大会不可"}
 };
@@ -382,8 +377,9 @@ var _saveTimer = null;
 function persist(showMsg){
   collectDOMChanges();
   _lastSavedStr = JSON.stringify(normalizeData(JSON.parse(JSON.stringify(data))));
-  dbSave("game_adjust", data, KEY, null);
-  if(showMsg !== false) flash("💾 自動保存しました");
+  dbSave("game_adjust", data, KEY, function(){
+    if(showMsg !== false) flash("💾 自動保存しました");
+  });
 }
 
 // デバウンス保存（テキスト入力時：備考・担当者）
@@ -749,5 +745,4 @@ function addDate() {
 /* ---------- 初期描画 ---------- */
 renderTable();
 </script>
-<script src="common.js"></script>
 </body></html>

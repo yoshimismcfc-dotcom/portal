@@ -141,9 +141,8 @@
 
   var SW_PATH = location.pathname.replace(/\/[^\/]*$/, '/') + 'sw.js';
 
-  // SWを登録して更新チェックのみ行う。
-  // コンテンツはSWが常にネットワークから取得(no-store)するため、
-  // リロードしなくても次回表示時に最新版になる。
+  // SWを登録して更新チェックのみ行う。ページ遷移はネットワーク優先、
+  // 共通アセットはキャッシュを先に表示してバックグラウンド更新する。
   navigator.serviceWorker.register(SW_PATH).then(function(reg){
     reg.update();
     reg.addEventListener('updatefound', function(){
@@ -159,6 +158,112 @@
     console.log('SW登録エラー:', err);
   });
   // 注意：window.location.reload() は絶対に呼ばない（点滅・無限リロードの原因）
+})();
+
+/* ===== 保存状態の共通表示 ===== */
+(function(){
+  var hideTimer = null;
+  function getToast(){
+    var toast = document.getElementById("smc-save-toast");
+    if(toast) return toast;
+    toast = document.createElement("div");
+    toast.id = "smc-save-toast";
+    toast.className = "save-toast";
+    toast.setAttribute("role", "status");
+    toast.setAttribute("aria-live", "polite");
+    document.body.appendChild(toast);
+    return toast;
+  }
+  window.addEventListener("smc:save-status", function(event){
+    var d = event.detail || {};
+    var toast = getToast();
+    var message = "";
+    var state = "ok";
+    if(d.cloudSaved){
+      message = d.syncedAfterTimeout ? "☁️ クラウドへ再同期しました" : "✅ クラウドに保存しました";
+    }else if(d.localOnly && d.localSaved){
+      message = "📱 この端末に保存しました";
+      state = "local";
+    }else if(d.queued && d.localSaved){
+      message = "⚠️ 端末に保存しました。クラウド保存は完了していません";
+      state = "warn";
+    }else{
+      message = "❌ 保存できませんでした。通信状態をご確認ください";
+      state = "error";
+    }
+    toast.textContent = message;
+    toast.dataset.state = state;
+    toast.classList.add("show");
+    window.clearTimeout(hideTimer);
+    hideTimer = window.setTimeout(function(){ toast.classList.remove("show"); }, 3600);
+  });
+})();
+
+/* ===== 共通印刷（描画完了待ち・用紙方向・後片付け） ===== */
+(function(){
+  var printing = false;
+  function setPageStyle(orientation, requestedMargin){
+    var style = document.getElementById("smc-print-page-style");
+    if(!style){
+      style = document.createElement("style");
+      style.id = "smc-print-page-style";
+      document.head.appendChild(style);
+    }
+    var size = orientation === "landscape" ? "A4 landscape" : "A4 portrait";
+    var margin = requestedMargin || (orientation === "landscape" ? "8mm 10mm" : "10mm 12mm");
+    style.textContent = "@page{size:" + size + ";margin:" + margin + "}";
+  }
+  function cleanupPrint(){
+    printing = false;
+    document.body.classList.remove("is-printing");
+    document.body.removeAttribute("data-print-target");
+  }
+  window.smcPrint = function(options){
+    options = options || {};
+    if(printing) return;
+    printing = true;
+    if(typeof options.before === "function") options.before();
+    setPageStyle(options.orientation || "portrait", options.margin);
+    if(options.target) document.body.dataset.printTarget = options.target;
+    document.body.classList.add("is-printing");
+    window.addEventListener("afterprint", cleanupPrint, {once:true});
+    window.requestAnimationFrame(function(){
+      window.requestAnimationFrame(function(){
+        window.setTimeout(function(){
+          window.print();
+          window.setTimeout(cleanupPrint, 1200);
+        }, 80);
+      });
+    });
+  };
+})();
+
+/* ===== 端末内エラーログ（個人情報を外部送信しない） ===== */
+(function(){
+  var ERROR_KEY = "smc_client_errors_v1";
+  function recordError(type, message, source, line){
+    try{
+      var errors = JSON.parse(localStorage.getItem(ERROR_KEY) || "[]");
+      errors.push({
+        at: new Date().toISOString(),
+        page: location.pathname.split("/").pop() || "index.html",
+        type: type,
+        message: String(message || "不明なエラー").slice(0, 500),
+        source: String(source || "").split("/").pop(),
+        line: Number(line) || 0
+      });
+      localStorage.setItem(ERROR_KEY, JSON.stringify(errors.slice(-20)));
+    }catch(e){
+      console.warn("client error log failed", e);
+    }
+  }
+  window.addEventListener("error", function(event){
+    recordError("error", event.message, event.filename, event.lineno);
+  });
+  window.addEventListener("unhandledrejection", function(event){
+    var reason = event.reason;
+    recordError("promise", reason && reason.message ? reason.message : reason, "", 0);
+  });
 })();
 
 

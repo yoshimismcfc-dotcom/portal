@@ -6,9 +6,11 @@
   <meta http-equiv="Pragma" content="no-cache">
   <meta http-equiv="Expires" content="0">
   <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="robots" content="noindex,nofollow">
   <title>練習日誌｜吉見SMC FC</title>
   <script src="firebase-config.js"></script>
   <link rel="stylesheet" href="common.css">
+  <script src="common.js"></script>
   <style>
     .diary-list{display:grid;gap:10px}
     .diary-card{
@@ -42,14 +44,7 @@
   </style>
 </head>
 <body>
-<header class="site-header">
-  <div class="header-inner">
-    <a class="header-logo" href="index.html">
-      <div class="logo-mark">⚽</div>
-      <div><span class="logo-name">吉見SMC FC</span><span class="logo-sub">SMART PORTAL</span></div>
-    </a>
-  </div>
-</header>
+<header class="site-header"></header>
 <main class="page-wrap">
   <a class="back-btn" href="coach.html">コーチ専用に戻る</a>
   <div class="hero-band">
@@ -129,7 +124,7 @@
   </div>
 </div>
 
-<footer class="site-footer">YOSHIMI SMC FC — SMART PORTAL</footer>
+<footer class="site-footer"></footer>
 <script>
 var KEY="smc_diary_v1";
 var editId=null;
@@ -152,24 +147,25 @@ function renderList(){
   var gr=document.getElementById("filter-grade").value;
   var data=load().sort(function(a,b){return b.date.localeCompare(a.date);});
   if(gr)data=data.filter(function(d){return d.grade===gr;});
-  if(q)data=data.filter(function(d){return (d.title+d.content+d.note+d.tags.join("")).toLowerCase().includes(q);});
+  if(q)data=data.filter(function(d){return ((d.title||"")+(d.content||"")+(d.note||"")+((d.tags||[]).join(""))).toLowerCase().includes(q);});
   var list=document.getElementById("diary-list");
   if(!data.length){list.innerHTML='<div class="empty-msg">記録がありません。</div>';return;}
   list.innerHTML=data.map(function(d){
-    var tagsHtml=d.tags.map(function(t){return '<span class="dc-tag">'+t+'</span>';}).join("");
-    var bodyPreview=d.content.length>80?d.content.slice(0,80)+"…":d.content;
-    return '<div class="diary-card" onclick="openEdit(\''+d.id+'\')">'
+    var tagsHtml=(d.tags||[]).map(function(t){return '<span class="dc-tag">'+escapeHtml(t)+'</span>';}).join("");
+    var content=d.content||"";
+    var bodyPreview=content.length>80?content.slice(0,80)+"…":content;
+    return '<div class="diary-card" data-diary-id="'+escapeHtml(d.id)+'">'
       +'<div class="dc-header">'
-      +'<span class="dc-date">'+d.date+'</span>'
-      +'<span class="dc-grade">'+d.grade+'</span>'
-      +'<span class="dc-weather">'+d.weather+'</span>'
-      +(d.count?'<span style="font-size:.72rem;color:var(--ink-3)">'+d.count+'名</span>':"")
+      +'<span class="dc-date">'+escapeHtml(d.date)+'</span>'
+      +'<span class="dc-grade">'+escapeHtml(d.grade)+'</span>'
+      +'<span class="dc-weather">'+escapeHtml(d.weather)+'</span>'
+      +(d.count?'<span style="font-size:.72rem;color:var(--ink-3)">'+escapeHtml(d.count)+'名</span>':"")
       +'</div>'
-      +'<div class="dc-title">'+d.title+'</div>'
-      +'<div class="dc-body">'+bodyPreview+'</div>'
-      +(d.note?'<div style="font-size:.78rem;color:#ffaa66;margin-top:4px">💡 '+d.note.slice(0,60)+(d.note.length>60?"…":"")+'</div>':"")
+      +'<div class="dc-title">'+escapeHtml(d.title)+'</div>'
+      +'<div class="dc-body">'+escapeHtml(bodyPreview)+'</div>'
+      +(d.note?'<div style="font-size:.78rem;color:#ffaa66;margin-top:4px">💡 '+escapeHtml(d.note.slice(0,60))+(d.note.length>60?"…":"")+'</div>':"")
       +'<div class="dc-footer">'+tagsHtml
-      +'<button class="diary-del" onclick="event.stopPropagation();confirmDelete(\''+d.id+'\')">🗑</button>'
+      +'<button class="diary-del" data-diary-delete="'+escapeHtml(d.id)+'" aria-label="削除">🗑</button>'
       +'</div>'
       +'</div>';
   }).join("");
@@ -208,6 +204,12 @@ function openEdit(id){
   document.getElementById("modal").classList.add("open");
 }
 function closeModal(){document.getElementById("modal").classList.remove("open");}
+document.getElementById("diary-list").addEventListener("click",function(event){
+  var deleteButton=event.target.closest("[data-diary-delete]");
+  if(deleteButton){confirmDelete(deleteButton.dataset.diaryDelete);return;}
+  var card=event.target.closest("[data-diary-id]");
+  if(card)openEdit(card.dataset.diaryId);
+});
 function toggleTag(btn){btn.classList.toggle("on");}
 function saveDiary(){
   var title=document.getElementById("d-title").value.trim();
@@ -251,5 +253,4 @@ function exportDiary(){
 document.getElementById("modal").addEventListener("click",function(e){if(e.target.id==="modal")closeModal();});
 // renderList()はdbListenで呼ばれる
 </script>
-<script src="common.js"></script>
 </body></html>

@@ -6,9 +6,11 @@
   <meta http-equiv="Pragma" content="no-cache">
   <meta http-equiv="Expires" content="0">
   <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="robots" content="noindex,nofollow">
   <title>会計・決算書｜吉見SMC FC</title>
   <script src="firebase-config.js"></script>
   <link rel="stylesheet" href="common.css">
+  <script src="common.js"></script>
   <style>
     .acct-tabs{display:flex;gap:0;border:1px solid var(--line-2);border-radius:var(--r8);overflow:hidden;margin-bottom:14px}
     .acct-tab{flex:1;border:0;background:var(--surface-lt);color:var(--ink-3);font:inherit;font-size:.86rem;font-weight:900;padding:12px 8px;cursor:pointer}
@@ -66,14 +68,7 @@
   </style>
 </head>
 <body>
-<header class="site-header">
-  <div class="header-inner">
-    <a class="header-logo" href="index.html">
-      <div class="logo-mark">⚽</div>
-      <div><span class="logo-name">吉見SMC FC</span><span class="logo-sub">SMART PORTAL</span></div>
-    </a>
-  </div>
-</header>
+<header class="site-header"></header>
 <main class="page-wrap">
   <a class="back-btn no-print" href="coach.html">← コーチ専用に戻る</a>
   <div class="hero-band no-print">
@@ -165,7 +160,7 @@
     <div class="panel no-print">
       <div class="section-head" style="margin-top:0">
         <h2>決算書</h2>
-        <button class="btn btn-primary btn-sm" onclick="window.print()">印刷・PDF保存</button>
+        <button class="btn btn-primary btn-sm" onclick="smcPrint({orientation:'portrait',target:'accounting-report'})">印刷・PDF保存</button>
       </div>
       <select class="form-control" id="report-select" onchange="selectTournament(this.value)"></select>
     </div>
@@ -180,7 +175,7 @@
             <option value="2026">2026年度</option>
           </select>
           <button class="btn btn-outline btn-sm" onclick="addAnnualYear()">＋ 年度追加</button>
-          <button class="btn btn-primary btn-sm" onclick="window.print()">🖨 印刷</button>
+          <button class="btn btn-primary btn-sm" onclick="smcPrint({orientation:'portrait',target:'accounting-annual'})">🖨 印刷</button>
           <button class="btn btn-outline btn-sm" onclick="downloadAnnualCsv()">📥 CSV</button>
         </div>
       </div>
@@ -196,7 +191,7 @@
   </section>
 
 </main>
-<footer class="site-footer no-print">YOSHIMI SMC FC — SMART PORTAL</footer>
+<footer class="site-footer no-print"></footer>
 <script>
 var KEY="smc_accounting_v1";
 var current=0;
@@ -400,9 +395,9 @@ function loadAnnual(){
   try{ var s=localStorage.getItem(ANNUAL_KEY); if(s) return JSON.parse(s); }catch(e){}
   return {};
 }
-function storeAnnual(d){
+function storeAnnual(d,onSuccess,onError){
   localStorage.setItem(ANNUAL_KEY, JSON.stringify(d));
-  dbSave("accounting_annual", d, ANNUAL_KEY, null);
+  return dbSave("accounting_annual", d, ANNUAL_KEY, onSuccess, onError);
 }
 
 function addAnnualYear(){
@@ -438,10 +433,15 @@ function saveAsAnnual(){
   };
   var all = loadAnnual();
   all[y] = snap;
-  storeAnnual(all);
   var msg = document.getElementById("annual-msg");
-  msg.textContent = "✅ "+y+"年度として保存しました（"+new Date().toLocaleDateString("ja-JP")+"）";
-  setTimeout(function(){ msg.textContent=""; }, 3000);
+  msg.textContent = "💾 保存中…";
+  storeAnnual(all,function(){
+    msg.textContent = "✅ "+y+"年度として保存しました（"+new Date().toLocaleDateString("ja-JP")+"）";
+    setTimeout(function(){ msg.textContent=""; }, 3000);
+  },function(){
+    msg.textContent = "⚠️ 端末保存のみ完了しました";
+    setTimeout(function(){ msg.textContent=""; }, 3500);
+  });
   renderAnnual();
 }
 
@@ -534,6 +534,5 @@ dbListen("accounting_annual", function(val){
 }, ANNUAL_KEY, {});
 
 </script>
-<script src="common.js"></script>
 </body>
 </html>

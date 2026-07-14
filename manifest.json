@@ -4,8 +4,8 @@
   "description": "吉見SMCサッカースポーツ少年団のチームポータル",
   "start_url": "/portal/",
   "display": "standalone",
-  "background_color": "#ffffff",
-  "theme_color": "#f68b1f",
+  "background_color": "#071126",
+  "theme_color": "#003087",
   "orientation": "portrait-primary",
   "icons": [
     {"src": "favicon.png",         "sizes": "32x32",   "type": "image/png"},

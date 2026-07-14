@@ -16,6 +16,7 @@ var FIREBASE_READY = false;
 var FIREBASE_DB = null;
 var FIREBASE_CALLBACKS = [];
 var FIREBASE_FAILED = false;
+var FIREBASE_SAVE_TIMEOUT = 8000;
 
 function onFirebaseReady(cb){
   if(FIREBASE_READY) cb(FIREBASE_DB);
@@ -113,32 +114,127 @@ function dbListen(path, callback, localKey, fallback){
   });
 }
 
-function dbSave(path, data, localKey, onSuccess){
+function emitSaveStatus(detail){
+  try{
+    window.dispatchEvent(new CustomEvent("smc:save-status", {detail:detail}));
+  }catch(e){
+    console.log("[SMC Portal] save status:", detail);
+  }
+}
+
+function dbSave(path, data, localKey, onSuccess, onError){
+  var localSaved = true;
   try{
     if(localKey) localStorage.setItem(localKey, JSON.stringify(data));
   }catch(e){
+    localSaved = false;
     console.error("[SMC Portal] localStorage save error:", e);
   }
 
-  var done = false;
-  function successOnce(){
-    if(done) return;
-    done = true;
-    if(onSuccess) onSuccess();
-  }
-
-  successOnce();
-
   if(typeof FIREBASE_CONFIG === "undefined" || FIREBASE_CONFIG.apiKey === "YOUR_API_KEY"){
-    return;
+    var localResult = {
+      ok: localSaved,
+      path: path,
+      localSaved: localSaved,
+      cloudSaved: false,
+      localOnly: true,
+      queued: false,
+      error: localSaved ? null : "端末への保存に失敗しました"
+    };
+    emitSaveStatus(localResult);
+    if(localSaved && onSuccess) onSuccess(localResult);
+    if(!localSaved && onError) onError(localResult);
+    return Promise.resolve(localResult);
   }
 
-  onFirebaseReady(function(db){
-    db.ref(path).set(data).then(function(){
-      successOnce();
-    }).catch(function(err){
-      console.error("[SMC Portal] dbSave error:", path, err);
-      successOnce();
+  return new Promise(function(resolve){
+    var settled = false;
+    var waitingNoticeSent = false;
+
+    function settle(result){
+      if(settled) return;
+      settled = true;
+      emitSaveStatus(result);
+      if(result.ok){
+        if(onSuccess) onSuccess(result);
+      }else if(onError){
+        onError(result);
+      }
+      resolve(result);
+    }
+
+    var timer = window.setTimeout(function(){
+      waitingNoticeSent = true;
+      settle({
+        ok: false,
+        path: path,
+        localSaved: localSaved,
+        cloudSaved: false,
+        localOnly: false,
+        queued: localSaved,
+        error: "クラウド接続がタイムアウトしました"
+      });
+    }, FIREBASE_SAVE_TIMEOUT);
+
+    onFirebaseReady(function(db){
+      db.ref(path).set(data).then(function(){
+        window.clearTimeout(timer);
+        var result = {
+          ok: true,
+          path: path,
+          localSaved: localSaved,
+          cloudSaved: true,
+          localOnly: false,
+          queued: false,
+          error: null,
+          syncedAfterTimeout: waitingNoticeSent
+        };
+        if(settled){
+          emitSaveStatus(result);
+          return;
+        }
+        settle(result);
+      }).catch(function(err){
+        window.clearTimeout(timer);
+        console.error("[SMC Portal] dbSave error:", path, err);
+        settle({
+          ok: false,
+          path: path,
+          localSaved: localSaved,
+          cloudSaved: false,
+          localOnly: false,
+          queued: localSaved,
+          error: err && err.message ? err.message : "クラウド保存に失敗しました"
+        });
+      });
     });
   });
+}
+
+/* ===== 共通の文字列・URL安全化 ===== */
+function escapeHtml(value){
+  return String(value == null ? "" : value)
+    .replace(/&/g,"&amp;")
+    .replace(/</g,"&lt;")
+    .replace(/>/g,"&gt;")
+    .replace(/"/g,"&quot;")
+    .replace(/'/g,"&#39;");
+}
+
+function normalizeExternalUrl(value){
+  var raw = String(value || "").trim();
+  if(!raw) return "";
+  try{
+    var parsed = new URL(raw, window.location.href);
+    if(parsed.protocol !== "https:") return "";
+    return parsed.href;
+  }catch(e){
+    return "";
+  }
+}
+
+// 既存のインラインイベントへ値を渡す場合の安全な1引数表現。
+// JSON文字列化した後にHTML属性用エスケープを行う。
+function inlineJsArg(value){
+  return escapeHtml(JSON.stringify(String(value == null ? "" : value)));
 }

@@ -4,19 +4,14 @@
   <meta charset="utf-8">
   <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
   <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="robots" content="noindex,nofollow">
   <title>ガイダンス設定｜吉見SMC FC</title>
   <script src="firebase-config.js"></script>
   <link rel="stylesheet" href="common.css">
+  <script src="common.js"></script>
 </head>
 <body>
-<header class="site-header">
-  <div class="header-inner">
-    <a class="header-logo" href="index.html">
-      <div class="logo-mark">⚽</div>
-      <div><span class="logo-name">吉見SMC FC</span><span class="logo-sub">SMART PORTAL</span></div>
-    </a>
-  </div>
-</header>
+<header class="site-header"></header>
 <main class="page-wrap">
   <a class="back-btn" href="coach.html">← コーチ専用に戻る</a>
   <div class="hero-band">
@@ -62,7 +57,7 @@
   <div id="save-msg" style="text-align:center;color:var(--green);font-size:.85rem;min-height:1.4em;margin-top:8px"></div>
   <a class="btn btn-outline" href="coach.html" style="display:flex;justify-content:center;margin-top:12px">← コーチ専用に戻る</a>
 </main>
-<footer class="site-footer">YOSHIMI SMC FC — SMART PORTAL</footer>
+<footer class="site-footer"></footer>
 <script>
 function loadInputs(){
   var g=localStorage.getItem("smc_guidance")||"";
@@ -82,11 +77,15 @@ function loadInputs(){
 function saveNotice(t){
   var lKey=t==="guidance"?"smc_guidance":"smc_warning";
   var val=document.getElementById(t+"-input").value.trim();
-  dbSave("notices/"+t,val||null,lKey,null);
+  var msg=document.getElementById("save-msg");
+  msg.textContent="💾 保存中…";
+  dbSave("notices/"+t,val||null,lKey,function(){
+    msg.textContent="✅ 保存しました";setTimeout(function(){msg.textContent="";},2500);
+  },function(){
+    msg.textContent="⚠️ 端末保存のみ完了しました";setTimeout(function(){msg.textContent="";},3500);
+  });
   if(val)localStorage.setItem(lKey,val);else localStorage.removeItem(lKey);
   document.getElementById(t+"-preview").textContent=val||"（未設定）";
-  var msg=document.getElementById("save-msg");
-  msg.textContent="✅ 保存しました";setTimeout(function(){msg.textContent="";},2500);
 }
 function clearNotice(t){
   var lKey=t==="guidance"?"smc_guidance":"smc_warning";
@@ -97,6 +96,5 @@ function clearNotice(t){
 }
 window.addEventListener("DOMContentLoaded",loadInputs);
 </script>
-<script src="common.js"></script>
 </body>
 </html>

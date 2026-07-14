@@ -6,9 +6,11 @@
   <meta http-equiv="Pragma" content="no-cache">
   <meta http-equiv="Expires" content="0">
   <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="robots" content="noindex,nofollow">
   <title>団員名簿｜吉見SMC FC</title>
   <script src="firebase-config.js"></script>
   <link rel="stylesheet" href="common.css">
+  <script src="common.js"></script>
   <style>
     .roster-wrap{overflow-x:auto;-webkit-overflow-scrolling:touch;border-radius:var(--r8);border:1px solid var(--line-2);margin-bottom:10px}
     .roster-table{border-collapse:collapse;width:max-content;min-width:100%;font-size:.82rem}
@@ -46,14 +48,7 @@
   </style>
 </head>
 <body>
-<header class="site-header">
-  <div class="header-inner">
-    <a class="header-logo" href="index.html">
-      <div class="logo-mark">⚽</div>
-      <div><span class="logo-name">吉見SMC FC</span><span class="logo-sub">SMART PORTAL</span></div>
-    </a>
-  </div>
-</header>
+<header class="site-header"></header>
 <main class="page-wrap">
   <a class="back-btn" href="index.html">ホームに戻る</a>
   <div class="hero-band">
@@ -63,7 +58,7 @@
       <div class="hero-sub">2026年度 SMC学年別名簿。氏名をタップして編集できます。</div>
     </div>
   </div>
-  <div class="notice-bar">☁️ データはクラウド（Firebase）で保存・共有されます。</div>
+  <div class="notice-bar">☁️ 団員ごとにFirebaseへ自動保存します。団員情報はこの端末には保存しません。</div>
 
   <!-- 学年フィルター -->
   <div class="sort-bar">
@@ -107,9 +102,8 @@
 
   <!-- 保存バー -->
   <div class="save-bar">
-    <span style="font-size:.82rem;color:var(--green);flex:1" id="save-msg"></span>
+    <span style="font-size:.82rem;color:var(--green);flex:1" id="save-msg">変更は団員ごとに自動保存されます</span>
     <button class="btn btn-outline btn-sm" onclick="exportCSV()">📥 CSV出力</button>
-    <button class="btn btn-primary" onclick="saveData()">💾 保存</button>
   </div>
 </main>
 
@@ -144,68 +138,24 @@
   </div>
 </div>
 
-<footer class="site-footer">YOSHIMI SMC FC — SMART PORTAL</footer>
+<footer class="site-footer"></footer>
 <script>
 var GRADES = ["6年","5年","4年","3年","2年","1年","年長"];
-var KEY = "smc_members_v4";
+var MEMBER_PATH = "members_v2";
+var LEGACY_MEMBER_PATH = "members";
 var ROWS = 14;
 var currentSort = "none";
 var currentGrade = "all";
-var editGrade = null, editRow = null;
+var editGrade = null, editRow = null, editId = null;
+var memberRecords = {};
+var memberListenerStarted = false;
+var migrationAttempted = false;
 
-var INIT = {
-  "6年":[
-    {name:"有瀧　晴一",   kana:"ありたき　はるいち",    num:"",gender:"m"},
-    {name:"石川　日向葵", kana:"いしかわ　ひなたあおい", num:"",gender:"f"},
-    {name:"一場　純",     kana:"いちば　じゅん",         num:"",gender:"m"},
-    {name:"岡野　楓斗",   kana:"おかの　はやと",         num:"",gender:"m"},
-    {name:"金井　暖記",   kana:"かない　はるき",         num:"",gender:"m"},
-    {name:"笹野　陽青",   kana:"ささの　はるせ",         num:"",gender:"m"},
-    {name:"武部　陽樹",   kana:"たけべ　はるき",         num:"",gender:"m"},
-    {name:"長嶋　蓮弥",   kana:"ながしま　れんや",       num:"",gender:"m"},
-    null,null,null,null,null,null
-  ],
-  "5年":[
-    {name:"上村　夏萌", kana:"かみむら　なつめ", num:"",gender:"f"},
-    {name:"木村　玲菜", kana:"きむら　れいな",   num:"",gender:"f"},
-    {name:"澤井　怜央", kana:"さわい　れお",     num:"",gender:"m"},
-    null,null,null,null,null,null,null,null,null,null,null
-  ],
-  "4年":[
-    {name:"金井　勇記",     kana:"かない　ゆうき",     num:"",gender:"m"},
-    {name:"功刀　莉愛",     kana:"くぬぎ　りお",       num:"",gender:"f"},
-    {name:"小柳　柊真",     kana:"こやなぎ　とうま",   num:"",gender:"m"},
-    {name:"谷口　じゅんな", kana:"たにぐち　じゅんな", num:"",gender:"f"},
-    null,null,null,null,null,null,null,null,null,null
-  ],
-  "3年":[
-    {name:"石川　幸乃羽", kana:"いしかわ　このは",   num:"",gender:"f"},
-    {name:"加藤　陸",     kana:"かとう　りく",       num:"",gender:"m"},
-    {name:"上村　葵",     kana:"かみむら　あおい",   num:"",gender:"f"},
-    {name:"北村　悠真",   kana:"きたむら　はるま",   num:"",gender:"m"},
-    {name:"木村　翔馬",   kana:"きむら　しょうま",   num:"",gender:"m"},
-    {name:"小林　蒼",     kana:"こばやし　あおい",   num:"",gender:"m"},
-    {name:"坂上　大珠",   kana:"さかうえ　たいじゅ", num:"",gender:"m"},
-    {name:"篠田　和希",   kana:"しのだ　ともき",     num:"",gender:"m"},
-    {name:"芝嵜　理矩",   kana:"しばさき　りく",     num:"",gender:"m"},
-    {name:"柴田　凌玖",   kana:"しばた　りく",       num:"",gender:"m"},
-    {name:"瀬戸　大志",   kana:"せと　たいし",       num:"",gender:"m"},
-    {name:"武部　優樹",   kana:"たけべ　ゆうき",     num:"",gender:"m"},
-    {name:"長嶋　茉莉",   kana:"ながしま　まり",     num:"",gender:"f"},
-    null
-  ],
-  "2年":[
-    {name:"飯塚　洋介", kana:"いいづか　ようすけ", num:"",gender:"m"},
-    {name:"関口　夏絆", kana:"せきぐち　なつき",   num:"",gender:"f"},
-    {name:"野口　陽生", kana:"のぐち　はるき",     num:"",gender:"m"},
-    null,null,null,null,null,null,null,null,null,null,null
-  ],
-  "1年":[null,null,null,null,null,null,null,null,null,null,null,null,null,null],
-  "年長":[
-    {name:"功刀　あいと", kana:"くぬぎ　あいと", num:"",gender:"m"},
-    null,null,null,null,null,null,null,null,null,null,null,null,null
-  ]
-};
+// 個人情報を公開HTMLへ埋め込まない。現行名簿はFirebaseまたは端末保存から読み込む。
+var INIT = GRADES.reduce(function(result, grade){
+  result[grade] = Array(ROWS).fill(null);
+  return result;
+}, {});
 
 var data = JSON.parse(JSON.stringify(INIT));
 
@@ -242,7 +192,8 @@ function renderGrid(){
       +"<span class='grade-sort-ind' id='gsi-"+g+"'></span></th>";
   });
   h += "</tr></thead><tbody>";
-  for(var r=0; r<ROWS; r++){
+  var rowCount = grades.reduce(function(max,g){return Math.max(max,(data[g]||[]).length);},ROWS);
+  for(var r=0; r<rowCount; r++){
     h += "<tr><td class='col-no'>"+(r+1)+"</td>";
     grades.forEach(function(g){
       var m = (data[g]||[])[r];
@@ -250,9 +201,9 @@ function renderGrid(){
         var girl = m.gender==="f";
         var dot  = girl ? "#ff8888" : "#6aaccc";
         h += "<td><div class='name-cell' onclick=\"openEdit('"+g+"',"+r+")\">"
-          +"<div class='kana'>"+(m.kana||"")+"</div>"
-          +"<div class='kanji"+(girl?" girl":"")+"'><span class='gender-dot' style='background:"+dot+"'></span>"+m.name+"</div>"
-          +(m.num?"<div class='num-badge'>#"+m.num+"</div>":"")
+          +"<div class='kana'>"+escapeHtml(m.kana||"")+"</div>"
+          +"<div class='kanji"+(girl?" girl":"")+"'><span class='gender-dot' style='background:"+dot+"'></span>"+escapeHtml(m.name)+"</div>"
+          +(m.num?"<div class='num-badge'>#"+escapeHtml(m.num)+"</div>":"")
           +"</div></td>";
       } else {
         h += "<td><div class='name-cell empty' onclick=\"openNew('"+g+"',"+r+")\"></div></td>";
@@ -289,9 +240,9 @@ function renderList(){
       var girl = m.gender==="f";
       h += "<tr onclick=\"openEdit('"+m.grade+"',"+m.row+")\">";
       if(showGrade) h += "<td style='text-align:center;color:var(--cyan);font-weight:700;font-size:.76rem'>"+m.grade+"</td>";
-      h += "<td style='font-weight:900;"+(girl?"color:#ff8888":"color:#fff")+"'>"+m.name+"</td>"
-        +"<td style='font-size:.76rem;color:var(--ink-3)'>"+m.kana+"</td>"
-        +"<td style='text-align:center;font-weight:700;color:var(--orange)'>"+(m.num?"#"+m.num:"—")+"</td>"
+      h += "<td style='font-weight:900;"+(girl?"color:#ff8888":"color:#fff")+"'>"+escapeHtml(m.name)+"</td>"
+        +"<td style='font-size:.76rem;color:var(--ink-3)'>"+escapeHtml(m.kana)+"</td>"
+        +"<td style='text-align:center;font-weight:700;color:var(--orange)'>"+(m.num?"#"+escapeHtml(m.num):"—")+"</td>"
         +"<td style='text-align:center'>"+(girl?"<span style='color:#ff8888'>女</span>":"<span style='color:#88aaff'>男</span>")+"</td>"
         +"</tr>";
     });
@@ -322,8 +273,7 @@ function cycleSort(g){
   var el = document.getElementById("gsi-"+g);
   if(el) el.textContent = label[next]||"";
 
-  // 自動保存
-  dbSave("members", data, KEY, null);
+  // 表示順だけを変更する。団員データ自体は書き換えない。
 }
 
 /* ===== ソートボタン ===== */
@@ -351,7 +301,7 @@ function setGrade(g){
 function openEdit(g,r){
   var m = (data[g]||[])[r];
   if(!m||!m.name){ openNew(g,r); return; }
-  editGrade=g; editRow=r;
+  editGrade=g; editRow=r; editId=m.id||null;
   document.getElementById("edit-title").textContent = g+" "+(r+1)+"番目を編集";
   document.getElementById("edit-name").value = m.name||"";
   document.getElementById("edit-kana").value = m.kana||"";
@@ -361,7 +311,7 @@ function openEdit(g,r){
   document.getElementById("edit-modal").classList.add("open");
 }
 function openNew(g,r){
-  editGrade=g; editRow=r;
+  editGrade=g; editRow=r; editId=null;
   document.getElementById("edit-title").textContent = g+" "+(r+1)+"番に追加";
   document.getElementById("edit-name").value = "";
   document.getElementById("edit-kana").value = "";
@@ -371,82 +321,181 @@ function openNew(g,r){
   document.getElementById("edit-modal").classList.add("open");
 }
 function closeModal(){ document.getElementById("edit-modal").classList.remove("open"); }
+function setSaveMessage(message,isError){
+  var el=document.getElementById("save-msg");
+  if(!el) return;
+  el.textContent=message;
+  el.style.color=isError?"var(--red)":"var(--green)";
+}
 function saveEdit(){
   var name = document.getElementById("edit-name").value.trim();
   var gEl  = document.querySelector("input[name='edit-gender']:checked");
-  if(!data[editGrade]) data[editGrade]=[];
-  data[editGrade][editRow] = name ? {
+  if(!name){ alert("氏名を入力してください。"); return; }
+  var current = editId && memberRecords[editId] ? memberRecords[editId] : {};
+  var record = {
     name:name,
     kana:document.getElementById("edit-kana").value.trim(),
     num: document.getElementById("edit-num").value.trim(),
-    gender: gEl?gEl.value:"m"
-  } : null;
-  closeModal(); render();
-  dbSave("members",data,KEY,function(){
-    var m=document.getElementById("save-msg");
-    if(m){m.textContent="✅ 保存しました";setTimeout(function(){m.textContent="";},2000);}
+    gender:gEl?gEl.value:"m",
+    grade:editGrade,
+    order:Number.isFinite(Number(current.order))?Number(current.order):editRow,
+    updatedAt:Date.now()
+  };
+  onFirebaseReady(function(db){
+    var id=editId||db.ref(MEMBER_PATH).push().key;
+    setSaveMessage("☁️ 保存中…",false);
+    dbSave(MEMBER_PATH+"/"+id,record,null,function(){
+      closeModal();
+      setSaveMessage("✅ クラウドに保存しました",false);
+    },function(){
+      setSaveMessage("❌ クラウドに保存できませんでした",true);
+    });
   });
 }
 function deleteEntry(){
-  if(!confirm("削除しますか？")) return;
-  if(data[editGrade]) data[editGrade][editRow]=null;
-  closeModal(); render();
-  dbSave("members",data,KEY,null);
-}
-function saveData(){
-  var m=document.getElementById("save-msg");
-  if(m) m.textContent="💾 保存中…";
-  dbSave("members",data,KEY,function(){
-    if(m){m.textContent="✅ 保存しました";setTimeout(function(){m.textContent="";},2500);}
+  if(!editId || !confirm("この団員を名簿から削除しますか？")) return;
+  setSaveMessage("☁️ 削除中…",false);
+  dbSave(MEMBER_PATH+"/"+editId,null,null,function(){
+    closeModal();
+    setSaveMessage("✅ クラウドから削除しました",false);
+  },function(){
+    setSaveMessage("❌ 削除できませんでした",true);
   });
 }
 function exportCSV(){
-  var csv="\uFEFF学年,氏名,フリガナ,背番号,性別\n";
+  function csvCell(value){
+    var text=String(value==null?"":value);
+    if(/^[=+\-@]/.test(text)) text="'"+text;
+    return '"'+text.replace(/"/g,'""')+'"';
+  }
+  var rows=[["学年","氏名","フリガナ","背番号","性別"]];
   GRADES.forEach(function(g){
     (data[g]||[]).forEach(function(m){
-      if(m&&m.name) csv+='"'+g+'","'+m.name+'","'+(m.kana||"")+'","'+(m.num||"")+'","'+(m.gender==="f"?"女":"男")+'"\n';
+      if(m&&m.name) rows.push([g,m.name,m.kana||"",m.num||"",m.gender==="f"?"女":"男"]);
     });
   });
+  var csv="\uFEFF"+rows.map(function(row){return row.map(csvCell).join(",");}).join("\n");
   var a=document.createElement("a");
-  a.href=URL.createObjectURL(new Blob([csv],{type:"text/csv"}));
-  a.download="smc_members.csv"; a.click();
+  var url=URL.createObjectURL(new Blob([csv],{type:"text/csv"}));
+  a.href=url;a.download="smc_members.csv";a.click();
+  setTimeout(function(){URL.revokeObjectURL(url);},0);
 }
 document.getElementById("edit-modal").addEventListener("click",function(e){
   if(e.target.id==="edit-modal") closeModal();
 });
 
+function recordsToGrid(records){
+  var next=JSON.parse(JSON.stringify(INIT));
+  Object.keys(records||{}).forEach(function(id){
+    var source=records[id];
+    if(!source||!source.name||GRADES.indexOf(source.grade)<0) return;
+    next[source.grade].push(Object.assign({id:id},source));
+  });
+  GRADES.forEach(function(grade){
+    next[grade].sort(function(a,b){
+      var ao=Number.isFinite(Number(a.order))?Number(a.order):999;
+      var bo=Number.isFinite(Number(b.order))?Number(b.order):999;
+      return ao-bo||(a.kana||a.name).localeCompare(b.kana||b.name,"ja");
+    });
+    while(next[grade].length&&next[grade][0]===null) next[grade].shift();
+  });
+  return next;
+}
+
+function convertLegacyMembers(legacy){
+  var converted={};
+  GRADES.forEach(function(grade,gradeIndex){
+    var group=legacy&&legacy[grade];
+    if(!group||typeof group!=="object") return;
+    Object.keys(group).forEach(function(position){
+      var member=group[position];
+      if(!member||!member.name) return;
+      var id="legacy_"+gradeIndex+"_"+String(position).replace(/[^0-9A-Za-z_-]/g,"");
+      converted[id]={
+        name:String(member.name||""),
+        kana:String(member.kana||""),
+        num:String(member.num||""),
+        gender:member.gender==="f"?"f":"m",
+        grade:grade,
+        order:Number(position)||0,
+        updatedAt:Date.now()
+      };
+    });
+  });
+  return converted;
+}
+
+function migrateLegacyMembers(db){
+  if(migrationAttempted) return;
+  migrationAttempted=true;
+  setSaveMessage("既存名簿を確認しています…",false);
+  db.ref(LEGACY_MEMBER_PATH).once("value").then(function(snapshot){
+    var converted=convertLegacyMembers(snapshot.val());
+    if(!Object.keys(converted).length){
+      memberRecords={};data=JSON.parse(JSON.stringify(INIT));render();
+      setSaveMessage("名簿は空です。空欄をタップして登録できます",false);
+      return;
+    }
+    setSaveMessage("既存名簿を新しい保存形式へ移行中…",false);
+    dbSave(MEMBER_PATH,converted,null,function(){
+      setSaveMessage("✅ 既存名簿をFirebaseへ移行しました",false);
+    },function(){
+      memberRecords=converted;data=recordsToGrid(converted);render();
+      setSaveMessage("❌ 既存名簿を表示しましたが、移行保存に失敗しました",true);
+    });
+  }).catch(function(){
+    setSaveMessage("❌ 既存名簿を確認できませんでした",true);
+  });
+}
+
+function startMemberSync(){
+  if(memberListenerStarted) return;
+  memberListenerStarted=true;
+  try{localStorage.removeItem("smc_members_v4");}catch(e){}
+  onFirebaseReady(function(db){
+    db.ref(MEMBER_PATH).on("value",function(snapshot){
+      var value=snapshot.val();
+      if(value&&typeof value==="object"&&Object.keys(value).length){
+        memberRecords=value;
+        data=recordsToGrid(value);
+        render();
+        setSaveMessage("☁️ Firebaseと同期済み",false);
+      }else{
+        migrateLegacyMembers(db);
+      }
+    },function(){
+      setSaveMessage("❌ 名簿を読み込めません。通信状態とFirebase設定をご確認ください",true);
+    });
+  });
+}
+
 /* ===== 起動 ===== */
 window.addEventListener("DOMContentLoaded", function(){
-  render(); // INITで即描画
-  dbListen("members", function(val){
-    if(val && typeof val==="object" && !Array.isArray(val) && Object.keys(val).length>0){
-      data = val;
-    } else {
-      data = JSON.parse(JSON.stringify(INIT));
-      dbSave("members",data,KEY,null);
-    }
-    render();
-  }, KEY, null);
+  render();
+  startMemberSync();
 });
 
 function copyMemberList(){
-  var grades = ["1年","2年","3年","4年","5年","6年"];
+  var grades = ["6年","5年","4年","3年","2年","1年","年長"];
   var t = "【団員名簿】\n\n";
   grades.forEach(function(g){
-    var members = (_roster||[]).filter(function(m){ return m.grade===g && m.name; });
+    var members = (data[g]||[]).filter(function(m){ return m && m.name; });
     if(members.length){
       t += "■ "+g+"（"+members.length+"名）\n";
       members.forEach(function(m){
-        t += "  "+m.num+" "+m.name+(m.kana?" ("+m.kana+")":"")+"\n";
+        t += "  "+(m.num ? "#"+m.num+" " : "")+m.name+(m.kana?"（"+m.kana+"）":"")+"\n";
       });
       t += "\n";
     }
   });
-  navigator.clipboard.writeText(t)
+  if(!navigator.clipboard || !navigator.clipboard.writeText){
+    alert("このブラウザではコピー機能を利用できません。");
+    return;
+  }
+  navigator.clipboard.writeText(t.trim())
     .then(function(){ alert("名簿をコピーしました！LINEに貼り付けてください。"); })
-    .catch(function(){ alert("コピーできませんでした。"); });
+    .catch(function(){ alert("コピーできませんでした。ブラウザの権限をご確認ください。"); });
 }
 </script>
-<script src="common.js"></script>
 </body>
 </html>

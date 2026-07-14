@@ -6,9 +6,11 @@
   <meta http-equiv="Pragma" content="no-cache">
   <meta http-equiv="Expires" content="0">
   <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="robots" content="noindex,nofollow">
   <title>担当フォルダ｜吉見SMC FC</title>
   <script src="firebase-config.js"></script>
   <link rel="stylesheet" href="common.css">
+  <script src="common.js"></script>
   <style>
     /* タブ */
     .staff-tab-bar{display:flex;gap:0;margin-bottom:20px;border-radius:var(--r8);overflow:hidden;border:1px solid var(--line-2)}
@@ -40,14 +42,7 @@
   </style>
 </head>
 <body>
-<header class="site-header">
-  <div class="header-inner">
-    <a class="header-logo" href="index.html">
-      <div class="logo-mark">⚽</div>
-      <div><span class="logo-name">吉見SMC FC</span><span class="logo-sub">SMART PORTAL</span></div>
-    </a>
-  </div>
-</header>
+<header class="site-header"></header>
 <main class="page-wrap">
   <a class="back-btn" href="index.html">ホームに戻る</a>
   <div class="hero-band">
@@ -98,34 +93,15 @@
   </div>
 </div>
 
-<footer class="site-footer">YOSHIMI SMC FC — SMART PORTAL</footer>
+<footer class="site-footer"></footer>
 <script>
 var KEY_C="smc_staff_coach_v1", KEY_P="smc_staff_parent_v1";
 var editId=null, editType=null;
 var _coachData=[], _parentData=[];
 
-// 初期データ
-var INIT_COACH=[
-  {id:"c1", role:"代表",        name:"片山",   note:""},
-  {id:"c2", role:"監督",        name:"綿貫",   note:""},
-  {id:"c3", role:"テクニカルHC",name:"調整中", note:""},
-  {id:"c4", role:"審判部",      name:"奥本、土居", note:""},
-  {id:"c5", role:"顧問",        name:"中村、松本", note:""},
-  {id:"c6", role:"6年担当",     name:"石川",   note:""},
-  {id:"c7", role:"5年担当",     name:"上村",   note:""},
-  {id:"c8", role:"4年担当",     name:"原口",   note:""},
-  {id:"c9", role:"3年担当",     name:"柴田",   note:""},
-  {id:"ca", role:"2年担当",     name:"野口",   note:""},
-  {id:"cb", role:"1年担当",     name:"鶴崎",   note:""},
-  {id:"cc", role:"年長担当",    name:"功刀",   note:""},
-  {id:"cd", role:"事務局",      name:"武部",   note:""},
-];
-var INIT_PARENT=[
-  {id:"p1", role:"会長",       name:"長嶋",         note:""},
-  {id:"p2", role:"会計",       name:"岡野、一場",   note:""},
-  {id:"p3", role:"連絡係（高学年）", name:"石川",  note:""},
-  {id:"p4", role:"連絡係（低学年）", name:"北村、瀬戸", note:""},
-];
+// 個人名は公開HTMLへ埋め込まず、Firebaseまたは端末保存から読み込む。
+var INIT_COACH=[];
+var INIT_PARENT=[];
 
 // 敬称付与
 function withTitle(type, name){
@@ -145,7 +121,6 @@ dbListen("staff/coach", function(val){
     _coachData = val;
   } else {
     _coachData = JSON.parse(JSON.stringify(INIT_COACH));
-    dbSave("staff/coach", _coachData, KEY_C, null);
   }
   renderCoach();
 }, KEY_C, null);
@@ -155,7 +130,6 @@ dbListen("staff/parent", function(val){
     _parentData = val;
   } else {
     _parentData = JSON.parse(JSON.stringify(INIT_PARENT));
-    dbSave("staff/parent", _parentData, KEY_P, null);
   }
   renderParent();
 }, KEY_P, null);
@@ -168,8 +142,8 @@ function renderCoach(){
       +'<div class="role-name">'+escH(withTitle("coach",s.name))+'</div>'
       +(s.note?'<div class="role-sub">'+escH(s.note)+'</div>':"")
       +'<div class="role-actions">'
-      +'<button class="act-btn act-edit" onclick="openEdit(\'coach\',\''+s.id+'\')">✏️ 編集</button>'
-      +'<button class="act-btn act-del"  onclick="confirmDel(\'coach\',\''+s.id+'\')">🗑</button>'
+      +'<button class="act-btn act-edit" onclick="openEdit(\'coach\','+inlineJsArg(s.id)+')">✏️ 編集</button>'
+      +'<button class="act-btn act-del"  onclick="confirmDel(\'coach\','+inlineJsArg(s.id)+')">🗑</button>'
       +'</div></div>';
   }).join("")||'<div style="color:var(--ink-3);font-size:.85rem;padding:16px">担当者がいません。追加してください。</div>';
 }
@@ -182,8 +156,8 @@ function renderParent(){
       +'<div class="role-name">'+escH(withTitle("parent",s.name))+'</div>'
       +(s.note?'<div class="role-sub">'+escH(s.note)+'</div>':"")
       +'<div class="role-actions">'
-      +'<button class="act-btn act-edit" onclick="openEdit(\'parent\',\''+s.id+'\')">✏️ 編集</button>'
-      +'<button class="act-btn act-del"  onclick="confirmDel(\'parent\',\''+s.id+'\')">🗑</button>'
+      +'<button class="act-btn act-edit" onclick="openEdit(\'parent\','+inlineJsArg(s.id)+')">✏️ 編集</button>'
+      +'<button class="act-btn act-del"  onclick="confirmDel(\'parent\','+inlineJsArg(s.id)+')">🗑</button>'
       +'</div></div>';
   }).join("")||'<div style="color:var(--ink-3);font-size:.85rem;padding:16px">担当者がいません。追加してください。</div>';
 }
@@ -268,8 +242,7 @@ function confirmDel(type,id){
 }
 function closeModal(){document.getElementById("modal").classList.remove("open");}
 document.getElementById("modal").addEventListener("click",function(e){if(e.target.id==="modal")closeModal();});
-function escH(s){return String(s||"").replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;");}
+function escH(s){return escapeHtml(s);}
 </script>
-<script src="common.js"></script>
 </body>
 </html>
