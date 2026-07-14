@@ -98,6 +98,24 @@
     });
   }
 
+  function refreshCoachFolderLabels() {
+    const walker = document.createTreeWalker(document.body, NodeFilter.SHOW_TEXT);
+    let node;
+    while ((node = walker.nextNode())) {
+      const parent = node.parentElement;
+      if (!parent || parent.closest("script,style") || !node.nodeValue.includes("運営メニュー")) continue;
+      node.nodeValue = node.nodeValue.replace(/運営メニュー/g, "コーチ専用フォルダ");
+    }
+    document.title = document.title.replace(/運営メニュー/g, "コーチ専用フォルダ");
+    const coachCard = document.querySelector('a.menu-card[href="coach.html"]');
+    if (coachCard) {
+      const icon = coachCard.querySelector(".card-icon");
+      const description = coachCard.querySelector(".card-desc");
+      if (icon) icon.textContent = "📁";
+      if (description) description.textContent = "Coach Folder";
+    }
+  }
+
   function setupTabs() {
     document.querySelectorAll(".tab-btn").forEach((button) => {
       button.addEventListener("click", () => {
@@ -174,6 +192,7 @@
     refreshHeader();
     applyTheme(getSavedTheme());
     refreshFooter();
+    refreshCoachFolderLabels();
     setupTabs();
     setupDisclosureAccessibility();
     setupResponsiveTables();
