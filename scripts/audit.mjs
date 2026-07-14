@@ -138,6 +138,12 @@ if (!commonSource.includes("enhanceGameAdjustMobile") || !commonSource.includes(
 if (!commonSource.includes('body[data-theme="light"].game-adjust-enhanced')) {
   fail("common.js", "ライトモードの試合調整表に文字色補正がありません");
 }
+if (!commonSource.includes("game-adjust-legend-item") || !commonSource.includes("cleanCategoryLabel")) {
+  fail("common.js", "試合調整の凡例または日程カテゴリー表示がありません");
+}
+if (!commonSource.includes("ga-mobile-summary") || !commonSource.includes("参加チーム数：")) {
+  fail("common.js", "参加数・残り数のスマホ向け集約表示がありません");
+}
 
 const rulesPath = path.join(root, "database.rules.json");
 if (fs.existsSync(rulesPath)) {
