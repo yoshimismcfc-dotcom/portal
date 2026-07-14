@@ -123,6 +123,17 @@
 
     document.body.classList.add("game-adjust-enhanced");
 
+    const legend = document.querySelector(".legend");
+    if (legend) {
+      legend.innerHTML = `
+        <span class="game-adjust-legend-intro">タップで切り替え →</span>
+        <span class="game-adjust-legend-item"><span class="status-btn s-ok">OK</span><span class="game-adjust-legend-label">参加可</span></span>
+        <span class="game-adjust-legend-item"><span class="status-btn s-ng">NG</span><span class="game-adjust-legend-label">不可</span></span>
+        <span class="game-adjust-legend-item"><span class="status-btn s-kakun">確認中</span><span class="game-adjust-legend-label">返答待ち</span></span>
+        <span class="game-adjust-legend-item"><span class="status-btn s-none">－</span><span class="game-adjust-legend-label">未打診</span></span>
+      `;
+    }
+
     if (!document.getElementById("game-adjust-mobile-style")) {
       const style = document.createElement("style");
       style.id = "game-adjust-mobile-style";
@@ -137,12 +148,16 @@
         body[data-theme="light"].game-adjust-enhanced .adj-table .status-btn.s-kakun{background:#fff1bd!important;color:#775800!important;border-color:#b88c00!important}
         body[data-theme="light"].game-adjust-enhanced .adj-table .status-btn.s-none{background:#e5edf5!important;color:#31536c!important;border-color:#789bb1!important}
         .game-adjust-date-nav{display:none}
+        .ga-mobile-summary{display:none}
         @media (max-width:760px){
           body.game-adjust-enhanced .page-wrap{padding-left:10px!important;padding-right:10px!important}
           body.game-adjust-enhanced .ctrl-bar{display:grid!important;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px!important}
           body.game-adjust-enhanced .ctrl-bar > *{width:100%!important;min-width:0!important;margin:0!important;justify-content:center}
-          body.game-adjust-enhanced .legend{display:grid!important;grid-template-columns:repeat(2,minmax(0,1fr));gap:7px!important}
-          body.game-adjust-enhanced .legend > span:first-child{grid-column:1/-1}
+          body.game-adjust-enhanced .legend{display:grid!important;grid-template-columns:1fr;gap:7px!important;align-items:stretch!important}
+          body.game-adjust-enhanced .legend .game-adjust-legend-intro{margin-bottom:2px;color:var(--ink-3)}
+          body.game-adjust-enhanced .legend .game-adjust-legend-item{display:grid!important;grid-template-columns:minmax(118px,1fr) minmax(90px,.8fr);align-items:center;gap:12px;width:100%}
+          body.game-adjust-enhanced .legend .game-adjust-legend-item .status-btn{width:100%!important;min-width:0!important;box-sizing:border-box}
+          body.game-adjust-enhanced .legend .game-adjust-legend-label{font-size:.78rem;color:var(--ink-3);font-weight:800;text-align:left}
           .game-adjust-date-nav{display:grid;grid-template-columns:44px minmax(0,1fr) 44px;gap:7px;align-items:end;margin:8px 0 10px}
           .game-adjust-date-nav label{font-size:.72rem;font-weight:900;color:var(--ink-3)}
           .game-adjust-date-nav select,.game-adjust-date-nav button{min-height:46px;border-radius:12px;font:inherit;font-weight:900}
@@ -158,6 +173,11 @@
           body.game-adjust-enhanced .adj-table .status-btn{width:100%!important;min-width:0!important;padding:10px 3px!important;font-size:.82rem!important}
           body.game-adjust-enhanced .adj-table .tantou-input{width:100%!important;min-width:0!important;padding:8px 4px!important;text-align:center}
           body.game-adjust-enhanced .adj-table tbody td:first-child{font-size:.78rem!important;font-weight:900!important;overflow-wrap:anywhere}
+          body.game-adjust-enhanced .adj-table .tr-count,body.game-adjust-enhanced .adj-table .tr-nokori{display:none!important}
+          body.game-adjust-enhanced .adj-table .ga-mobile-summary{display:grid;gap:4px;margin-top:8px;padding-top:7px;border-top:1px solid rgba(106,172,204,.35);font-size:.68rem;font-weight:900;color:#d8efff}
+          body[data-theme="light"].game-adjust-enhanced .adj-table .ga-mobile-summary{color:#173d5a;border-top-color:#8ba9bd}
+          body.game-adjust-enhanced .adj-table .ga-mobile-summary strong{color:#00e889}
+          body[data-theme="light"].game-adjust-enhanced .adj-table .ga-mobile-summary strong{color:#08743d}
           body.game-adjust-enhanced .desktop-scroll-help{font-size:.68rem!important}
         }
       `;
@@ -179,10 +199,18 @@
       return copy.textContent.replace(/\s+/g, " ").trim() || "日程";
     }
 
+    function cleanCategoryLabel(cell) {
+      if (!cell) return "未設定";
+      const copy = cell.cloneNode(true);
+      copy.querySelectorAll("span,br,button,.ga-mobile-summary").forEach((element) => element.remove());
+      return copy.textContent.replace(/\s+/g, " ").trim() || "未設定";
+    }
+
     function syncDateColumns() {
       if (syncing) return;
       syncing = true;
       const headerCells = Array.from(table.querySelectorAll("thead tr:first-child > th"));
+      const categoryCells = Array.from(table.querySelectorAll("thead tr:nth-child(2) > th"));
       const dateCount = Math.max(0, headerCells.length - 2);
       if (!dateCount) {
         select.innerHTML = '<option>日程なし</option>';
@@ -192,9 +220,12 @@
       }
       activeDateIndex = Math.min(Math.max(activeDateIndex, 1), dateCount);
       select.disabled = false;
-      select.innerHTML = headerCells.slice(1, -1).map((cell, index) =>
-        `<option value="${index + 1}">${cleanHeaderLabel(cell)}</option>`
-      ).join("");
+      select.replaceChildren(...headerCells.slice(1, -1).map((cell, index) => {
+        const option = document.createElement("option");
+        option.value = String(index + 1);
+        option.textContent = `${cleanHeaderLabel(cell)}｜${cleanCategoryLabel(categoryCells[index + 1])}`;
+        return option;
+      }));
       select.value = String(activeDateIndex);
       table.querySelectorAll("tr").forEach((row) => {
         const cells = Array.from(row.children);
@@ -204,6 +235,24 @@
           cell.classList.toggle("ga-date-active", isDate && index === activeDateIndex);
         });
       });
+      const categoryCell = categoryCells[activeDateIndex];
+      if (categoryCell) {
+        let summary = categoryCell.querySelector(".ga-mobile-summary");
+        if (!summary) {
+          summary = document.createElement("span");
+          summary.className = "ga-mobile-summary";
+          summary.innerHTML = '<span>参加チーム数：<strong data-summary="count"></strong></span><span>残りチーム数：<strong data-summary="remaining"></strong></span>';
+          categoryCell.appendChild(summary);
+        }
+        const countCell = table.querySelector(".tr-count")?.children[activeDateIndex];
+        const remainingCell = table.querySelector(".tr-nokori")?.children[activeDateIndex];
+        const countValue = countCell?.textContent.trim() || "0";
+        const remainingValue = remainingCell?.textContent.trim() || "0";
+        const countOutput = summary.querySelector('[data-summary="count"]');
+        const remainingOutput = summary.querySelector('[data-summary="remaining"]');
+        if (countOutput.textContent !== countValue) countOutput.textContent = countValue;
+        if (remainingOutput.textContent !== remainingValue) remainingOutput.textContent = remainingValue;
+      }
       syncing = false;
     }
 
