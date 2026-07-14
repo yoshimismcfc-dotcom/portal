@@ -150,6 +150,9 @@ if (!commonSource.includes("表示する日程・カテゴリー") || !commonSou
 if (!commonSource.includes("enhanceTournamentPrinting") || !commonSource.includes("ensureLunchBreakRows")) {
   fail("common.js", "対戦表の昼食休憩を印刷へ確実に反映する処理がありません");
 }
+if (!commonSource.includes("adjustedRoundTimes") || !commonSource.includes("finalsStart")) {
+  fail("common.js", "昼食後の予選・順位戦時刻を再計算する処理がありません");
+}
 if (!commonSource.includes('data-print-target="tournament-schedule"') || !commonSource.includes("tournament-print-enhanced-style")) {
   fail("common.js", "対戦表の印刷専用デザインがありません");
 }
