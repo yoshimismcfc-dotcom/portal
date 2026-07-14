@@ -147,6 +147,12 @@ if (!commonSource.includes("ga-mobile-summary") || !commonSource.includes("参�
 if (!commonSource.includes("表示する日程・カテゴリー") || !commonSource.includes(".full-badge{display:none")) {
   fail("common.js", "日程選択の強調または不要な達成チェックの非表示がありません");
 }
+if (!commonSource.includes("enhanceTournamentPrinting") || !commonSource.includes("ensureLunchBreakRows")) {
+  fail("common.js", "対戦表の昼食休憩を印刷へ確実に反映する処理がありません");
+}
+if (!commonSource.includes('data-print-target="tournament-schedule"') || !commonSource.includes("tournament-print-enhanced-style")) {
+  fail("common.js", "対戦表の印刷専用デザインがありません");
+}
 
 const rulesPath = path.join(root, "database.rules.json");
 if (fs.existsSync(rulesPath)) {
