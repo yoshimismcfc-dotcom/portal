@@ -392,12 +392,12 @@ function recordsToGrid(records){
     next[source.grade].push(Object.assign({id:id},source));
   });
   GRADES.forEach(function(grade){
+    next[grade]=next[grade].filter(function(member){return member&&member.name;});
     next[grade].sort(function(a,b){
       var ao=Number.isFinite(Number(a.order))?Number(a.order):999;
       var bo=Number.isFinite(Number(b.order))?Number(b.order):999;
       return ao-bo||(a.kana||a.name).localeCompare(b.kana||b.name,"ja");
     });
-    while(next[grade].length&&next[grade][0]===null) next[grade].shift();
   });
   return next;
 }

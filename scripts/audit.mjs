@@ -104,6 +104,7 @@ const membersSource = fs.readFileSync(path.join(root, "members.html"), "utf8");
 if (!membersSource.includes('MEMBER_PATH = "members_v2"')) fail("members.html", "団員単位の保存パスがありません");
 if (/var INIT\s*=\s*\{[\s\S]*?name\s*:/m.test(membersSource)) fail("members.html", "HTML内に団員名簿が残っています");
 if (/localStorage\.setItem\([^\n]*smc_members/i.test(membersSource)) fail("members.html", "団員名簿を端末へ保存しています");
+if (!membersSource.includes("next[grade]=next[grade].filter")) fail("members.html", "Firebase名簿の空データを除外していません");
 
 const rulesPath = path.join(root, "database.rules.json");
 if (fs.existsSync(rulesPath)) {
