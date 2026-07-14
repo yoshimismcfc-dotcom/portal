@@ -8,6 +8,7 @@
   --navy-900: #0b1734;
   --navy-820: #10204a;
   --navy-760: #162a60;
+  --body-tail: #130817;
   --orange: #f68b1f;
   --orange-2: #ffb347;
   --wine: #8f1230;
@@ -39,6 +40,7 @@ body[data-theme="light"] {
   --navy-900: #eef3f9;
   --navy-820: #ffffff;
   --navy-760: #dce6f4;
+  --body-tail: #e8eef7;
   --ink: #10172a;
   --ink-2: #263954;
   --ink-3: #5d6f86;
@@ -61,7 +63,7 @@ body {
   background:
     linear-gradient(135deg, rgba(246, 139, 31, .12), transparent 32rem),
     radial-gradient(circle at 85% 8%, rgba(143, 18, 48, .34), transparent 28rem),
-    linear-gradient(155deg, var(--navy-950) 0%, var(--navy-900) 52%, #130817 100%);
+    linear-gradient(155deg, var(--navy-950) 0%, var(--navy-900) 52%, var(--body-tail) 100%);
   background-attachment: fixed;
 }
 body::before {
@@ -78,6 +80,11 @@ body::before {
 a { color: inherit; text-decoration: none; }
 img { display: block; max-width: 100%; height: auto; }
 button, input, select, textarea { font: inherit; }
+:where(a, button, input, select, textarea, [role="button"]):focus-visible {
+  outline: 3px solid var(--orange-2);
+  outline-offset: 3px;
+}
+.acc-hdr[role="button"] { cursor: pointer; }
 
 body.is-loading { overflow: hidden; }
 .portal-loader {
@@ -666,6 +673,34 @@ body[data-theme="light"] .sum-lbl,
 body[data-theme="light"] .sum-val,
 body[data-theme="light"] .event-name,
 body[data-theme="light"] .event-date,
+body[data-theme="light"] .acct-card .value,
+body[data-theme="light"] .summary-table .name,
+body[data-theme="light"] .amount-cell,
+body[data-theme="light"] .fin-card .v,
+body[data-theme="light"] .money,
+body[data-theme="light"] .mini-title,
+body[data-theme="light"] .mini-money,
+body[data-theme="light"] .collection-title,
+body[data-theme="light"] .member-name,
+body[data-theme="light"] .help-card strong,
+body[data-theme="light"] .diary-card .dc-title,
+body[data-theme="light"] .step-list strong,
+body[data-theme="light"] .tool-name,
+body[data-theme="light"] .point-box strong,
+body[data-theme="light"] .gesture-card strong,
+body[data-theme="light"] .guide-section h3,
+body[data-theme="light"] .rule-title,
+body[data-theme="light"] .sched-day,
+body[data-theme="light"] .mc-name,
+body[data-theme="light"] .d-label,
+body[data-theme="light"] .tn-date,
+body[data-theme="light"] .ag-day,
+body[data-theme="light"] .ag-title,
+body[data-theme="light"] .fc-temp,
+body[data-theme="light"] .heat-tip-item .ht-label,
+body[data-theme="light"] .cf-name,
+body[data-theme="light"] .uniform-note-box h3,
+body[data-theme="light"] .saved-item-name,
 body[data-theme="light"] .sort-lbl,
 body[data-theme="light"] .legend-bar,
 body[data-theme="light"] .grade-head,
