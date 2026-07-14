@@ -56,7 +56,7 @@
   <div class="g-tab-bar">
     <button class="g-tab-btn active" onclick="switchTab('basic',this)">🏠<span>基本</span></button>
     <button class="g-tab-btn" onclick="switchTab('func',this)">⚡<span>機能</span></button>
-    <button class="g-tab-btn" onclick="switchTab('coach',this)">🔒<span>コーチ</span></button>
+    <button class="g-tab-btn" onclick="switchTab('coach',this)">⚙️<span>運営</span></button>
     <button class="g-tab-btn" onclick="switchTab('pdf',this)">📄<span>PDF</span></button>
     <button class="g-tab-btn" onclick="switchTab('install',this)">📲<span>追加</span></button>
     <button class="g-tab-btn" onclick="switchTab('trouble',this)">🆘<span>困った</span></button>
@@ -85,7 +85,7 @@
         <table class="ft">
           <thead><tr><th>セクション</th><th>カード一覧</th></tr></thead>
           <tbody>
-            <tr><td>⚡ よく使う</td><td>チームカレンダー・出欠確認・🔒コーチ専用・やることリスト・天気WBGT・説明書</td></tr>
+            <tr><td>⚡ よく使う</td><td>チームカレンダー・出欠確認・⚙️運営メニュー・やることリスト・天気WBGT・説明書</td></tr>
             <tr><td>👨‍👩‍👦 入団・連絡</td><td>団員名簿・体験入団申込・担当フォルダ・会計業務</td></tr>
             <tr><td>🏟️ 試合・大会</td><td>当番・荷物チェック・ユニフォーム貸出・ピッチサイズ・審判ガイド・写真アルバム・YouTube</td></tr>
             <tr><td>🔗 SNS・外部リンク</td><td>LINE登録・Instagram・LINEシェア・ホームページ・注文リンク集</td></tr>
@@ -105,11 +105,12 @@
     <div class="acc-section">
       <div class="acc-hdr" onclick="tog(this)"><div class="acc-icon">☁️</div><div class="acc-title">データの保存について</div><div class="acc-arrow">▶</div></div>
       <div class="acc-body">
-        <p class="desc">このポータルのデータは端末内へ保存した後、<strong style="color:#fff">Firebase（クラウド）</strong>へ同期します。</p>
+        <p class="desc">このポータルの共有データは<strong style="color:#fff">Firebase（クラウド）</strong>へ保存します。通信できない場合だけ、対応画面では端末内に一時保存します。</p>
         <table class="ft">
           <thead><tr><th>ページ</th><th>保存先</th></tr></thead>
           <tbody>
-            <tr><td>名簿・ユニフォーム・やることリスト・当番表・練習日誌・会計・大会任務分担など</td><td>☁️ Firebase（自動）</td></tr>
+            <tr><td>団員名簿</td><td>☁️ Firebase（団員ごとに追加・修正・削除）</td></tr>
+            <tr><td>ユニフォーム・やることリスト・当番表・練習日誌・会計・大会任務分担など</td><td>☁️ Firebase（自動）／通信失敗時は端末に一時保存</td></tr>
             <tr><td>大会要綱・対戦表</td><td>☁️ Firebase（💾保存ボタンを押した時）</td></tr>
           </tbody>
         </table>
@@ -122,7 +123,7 @@
       <div class="acc-body">
         <p class="desc">ホーム画面に追加したアプリは<strong style="color:#fff">自動で最新版に更新</strong>されます。</p>
         <ul class="step-list">
-          <li>アップデートがあると、次回起動時に自動でリロードされます</li>
+          <li>アップデートがあると、次にページを開いたときから新しいファイルが使われます</li>
           <li>「ページが古い」と感じたら画面を下に引っ張って更新（プルリフレッシュ）してください</li>
           <li>それでも古い場合はPWAを削除して再追加すると確実です（「📲 追加」タブ参照）</li>
         </ul>
@@ -142,10 +143,9 @@
           <li>「チームカレンダー」をタップ → Googleカレンダーが表示されます</li>
           <li>上部ボタンで<strong>月・週・リスト</strong>表示を切り替えできます</li>
           <li>カテゴリー別に色分けされています（全体：黒／U12：橙／U11：赤／U10：橙／U9：黄／U8：黄緑／U7：緑）</li>
-          <li>ページ下部に<strong>今後1週間の予定リスト</strong>が表示されます</li>
           <li>ホーム画面と同じ<strong>ガイダンス・雨アラート・熱中症アラート</strong>が上部に表示されます</li>
         </ul>
-        <div class="tip-o">⚠️ このページからは予定を追加できません。コーチ専用→「Googleカレンダー（編集）」から追加してください。</div>
+        <div class="tip-o">⚠️ このページからは予定を追加できません。運営メニュー→「Googleカレンダー（編集）」から追加してください。</div>
       </div>
     </div>
 
@@ -311,15 +311,15 @@
 
   </div>
 
-  <!-- ===== コーチ専用 ===== -->
+  <!-- ===== 運営メニュー ===== -->
   <div class="g-tab-content" id="tab-coach">
-    <div class="tip">🔓 コーチ専用ページはパスコード不要で開けるようになりました。</div>
+    <div class="tip">🔓 運営メニューを含むすべての画面は、パスコードなしで開いて編集できます。</div>
 
     <div class="acc-section">
       <div class="acc-hdr" onclick="tog(this)"><div class="acc-icon">📢</div><div class="acc-title">ガイダンス設定（全員のホームにお知らせ）</div><div class="acc-arrow open">▶</div></div>
       <div class="acc-body open">
         <ul class="step-list">
-          <li>コーチ専用 →「ガイダンス設定」をタップ</li>
+          <li>運営メニュー →「ガイダンス設定」をタップ</li>
           <li><strong>青帯（INFO）：</strong>練習場所・持ち物・時間変更などのお知らせ</li>
           <li><strong>赤帯（ALERT）：</strong>熱中症警戒・緊急連絡など重要な注意事項</li>
           <li>「💾 保存」を押すと<strong>全員のホーム・カレンダー・出欠確認ページ</strong>に即時反映</li>
@@ -333,7 +333,7 @@
       <div class="acc-hdr" onclick="tog(this)"><div class="acc-icon">🔔</div><div class="acc-title">自動アラート設定</div><div class="acc-arrow">▶</div></div>
       <div class="acc-body">
         <ul class="step-list">
-          <li>コーチ専用 →「自動アラート設定」をタップ</li>
+          <li>運営メニュー →「自動アラート設定」をタップ</li>
           <li><strong>練習スケジュール：</strong>曜日・時間・室内/屋外を設定。「屋外」の日のみアラートが出ます</li>
           <li><strong>雨アラートのしきい値：</strong>降水確率（%）を設定</li>
           <li><strong>熱中症アラートのしきい値：</strong>WBGT（℃）を設定（デフォルト：25℃）</li>
@@ -347,7 +347,7 @@
       <div class="acc-hdr" onclick="tog(this)"><div class="acc-icon">⚖️</div><div class="acc-title">大会任務分担</div><div class="acc-arrow">▶</div></div>
       <div class="acc-body">
         <ul class="step-list">
-          <li>コーチ専用 → 試合・大会 →「大会任務分担」をタップ</li>
+          <li>運営メニュー → 試合・大会 →「大会任務分担」をタップ</li>
           <li>「＋ 大会を追加」で大会名・日付・会場・集合時間・備考を登録</li>
           <li>登録すると以下の任務が自動セット：<br>📝要項作成・📋対戦表作成・🟡審判の手配・🏆トロフィー/メダル・🏅審判カード・⬜石灰・🔑鍵の受け取り・🔓鍵の返却・📸写真記録・⚖️試合判断</li>
           <li>各任務をタップして<strong>担当者（複数可）・時間・状態・メモ</strong>を入力</li>
@@ -363,7 +363,7 @@
       <div class="acc-body">
         <div class="sec-title">📄 大会要綱</div>
         <ul class="step-list">
-          <li>コーチ専用 →「大会要綱・対戦表」→「📄 大会要綱」タブ</li>
+          <li>運営メニュー →「大会要綱・対戦表」→「📄 大会要綱」タブ</li>
           <li>大会名・日程・場所・ルールなどを入力（長い内容は自動で縦に伸びます）</li>
           <li>「＋ 基本情報に項目を追加する」で<strong>独自の項目を自由に追加</strong>できます</li>
           <li>「👁 プレビュー」→「🖨 印刷・PDF」でPDF保存</li>
@@ -387,7 +387,7 @@
       <div class="acc-hdr" onclick="tog(this)"><div class="acc-icon">💰</div><div class="acc-title">大会会計・決算書</div><div class="acc-arrow">▶</div></div>
       <div class="acc-body">
         <ul class="step-list">
-          <li>コーチ専用 →「大会会計・決算書」をタップ</li>
+          <li>運営メニュー →「大会会計・決算書」をタップ</li>
           <li>「＋ 大会を追加」で大会を登録 → 収入・支出の明細を入力</li>
           <li>「年度累計」タブで年間の収支をまとめて確認</li>
           <li>「🖨 印刷・PDF」で決算書を印刷（白背景・黒文字で出力）</li>
@@ -399,7 +399,7 @@
       <div class="acc-hdr" onclick="tog(this)"><div class="acc-icon">📝</div><div class="acc-title">練習日誌</div><div class="acc-arrow">▶</div></div>
       <div class="acc-body">
         <ul class="step-list">
-          <li>コーチ専用 →「練習日誌」をタップ</li>
+          <li>運営メニュー →「練習日誌」をタップ</li>
           <li>「＋ 日誌を追加」で日付・学年・天気・練習内容・気づき・タグを記録</li>
           <li>キーワード検索・学年フィルターで過去の記録を絞り込めます</li>
         </ul>
@@ -410,8 +410,8 @@
       <div class="acc-hdr" onclick="tog(this)"><div class="acc-icon">🔑</div><div class="acc-title">アカウント管理</div><div class="acc-arrow">▶</div></div>
       <div class="acc-body">
         <ul class="step-list">
-          <li>Google・LINE・InstagramなどのID・パスワードを確認できます</li>
-          <li>パスワードは「表示」ボタンで個別に表示できます</li>
+          <li>Google・LINE・InstagramなどのIDと公式リンクを確認できます</li>
+          <li>パスワードはこのアプリに保存せず、管理者のパスワード管理ツールで保管します</li>
         </ul>
         <div class="tip-r">⚠️ アカウント情報はコーチ以外に見せないよう注意してください。</div>
       </div>
@@ -421,7 +421,7 @@
       <div class="acc-hdr" onclick="tog(this)"><div class="acc-icon">📧</div><div class="acc-title">Gmail・Googleカレンダーを開く</div><div class="acc-arrow">▶</div></div>
       <div class="acc-body">
         <ul class="step-list">
-          <li>コーチ専用 →「外部ツール」の「Gmail」または「Googleカレンダー（編集）」をタップ</li>
+          <li>運営メニュー →「外部ツール」の「Gmail」または「Googleカレンダー（編集）」をタップ</li>
           <li>カレンダーで予定を追加・変更するとチームカレンダーページに自動反映されます</li>
         </ul>
       </div>
@@ -574,7 +574,7 @@
     </div>
 
     <div class="acc-section">
-      <div class="acc-hdr" onclick="tog(this)"><div class="acc-icon">❓</div><div class="acc-title">コーチ専用ページが開けない・スピナーが止まらない</div><div class="acc-arrow">▶</div></div>
+      <div class="acc-hdr" onclick="tog(this)"><div class="acc-icon">❓</div><div class="acc-title">運営メニューが開けない・スピナーが止まらない</div><div class="acc-arrow">▶</div></div>
       <div class="acc-body">
         <ul class="step-list">
           <li>Safariを完全に閉じてから再度開いてください</li>
@@ -601,7 +601,7 @@
         <ul class="step-list">
           <li><strong>大会要綱：</strong>「👁 プレビュー」ボタンを先に押してください</li>
           <li><strong>対戦表：</strong>「📊 対戦表を生成」ボタンを先に押してください</li>
-          <li>ポップアップがブロックされている場合は、ブラウザの設定でこのサイトのポップアップを許可してください</li>
+          <li>印刷画面が開いたら、プリンターまたは「PDFとして保存」を選択してください</li>
         </ul>
       </div>
     </div>
