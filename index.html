@@ -2,24 +2,8 @@
 <html lang="ja">
 <head>
   <meta charset="utf-8">
-  <meta name="app-version" content="20260711055441">
-  <script>
-    // PWA起動時：古いSWが残っていれば強制更新
-    if('serviceWorker' in navigator){
-      navigator.serviceWorker.getRegistrations().then(function(regs){
-        regs.forEach(function(r){
-          r.update(); // 更新チェック
-          if(r.waiting){ r.waiting.postMessage({type:'SKIP_WAITING'}); }
-        });
-      });
-      // キャッシュも全削除
-      if('caches' in window){
-        caches.keys().then(function(keys){
-          keys.forEach(function(k){ caches.delete(k); });
-        });
-      }
-    }
-  </script>
+  <meta name="robots" content="noindex,nofollow">
+  <meta name="app-version" content="20260714-3">
   <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
   <meta http-equiv="Pragma" content="no-cache">
   <meta http-equiv="Expires" content="0">
@@ -34,6 +18,7 @@
   <link rel="apple-touch-icon" href="icon.svg">
   <script src="firebase-config.js"></script>
   <link rel="stylesheet" href="common.css">
+  <script src="common.js"></script>
   <style>
     .portal-hero{position:relative;overflow:hidden;background:linear-gradient(160deg,#003087 0%,#0050cc 45%,#001a4f 100%);border-radius:var(--r16);margin-bottom:20px;padding:26px 20px 22px;text-align:center;box-shadow:0 8px 32px rgba(0,48,135,.5),0 0 0 1px rgba(255,255,255,.08)}
     .portal-hero::before{content:"";position:absolute;inset:0;pointer-events:none;background:repeating-linear-gradient(0deg,rgba(255,255,255,.04) 0,rgba(255,255,255,.04) 1px,transparent 1px,transparent 32px),repeating-linear-gradient(90deg,rgba(255,255,255,.04) 0,rgba(255,255,255,.04) 1px,transparent 1px,transparent 32px)}
@@ -62,14 +47,7 @@
   </style>
 </head>
 <body>
-<header class="site-header">
-  <div class="header-inner">
-    <a class="header-logo" href="index.html">
-      <div class="logo-mark">⚽</div>
-      <div><span class="logo-name">吉見SMC FC</span><span class="logo-sub">SMART PORTAL</span></div>
-    </a>
-  </div>
-</header>
+<header class="site-header"></header>
 <main class="page-wrap">
 
   <div id="home-guidance" class="dynamic-notice guidance" style="display:none"><span class="notice-label">📢 INFO</span><span id="guidance-text"></span></div>
@@ -184,11 +162,8 @@
           </div>
           <div style="background:rgba(255,255,255,.04);border-radius:8px;padding:10px 12px;font-size:.8rem;color:#c8e4ff;display:flex;gap:10px;align-items:flex-start">
             <span style="background:var(--orange);color:#fff;border-radius:50%;width:20px;height:20px;min-width:20px;display:flex;align-items:center;justify-content:center;font-size:.7rem;font-weight:900;margin-top:1px">2</span>
-            <div><strong style="color:#fff">キャッシュ（一時データ）を消去する</strong><br>
-            <span style="color:#7dd3fc">🍎 iPhone の場合：</span><br>
-            「設定」アプリ → 「Safari」 → 「履歴とWebサイトデータを消去」をタップ → 「消去」<br><br>
-            <span style="color:#a0e8a0">🤖 Android の場合：</span><br>
-            Chromeアプリの右上「︙（3点メニュー）」→「設定」→「プライバシーとセキュリティ」→「閲覧データを削除」→「データを削除」</div>
+            <div><strong style="color:#fff">ブラウザを閉じて、もう一度開く</strong><br>
+            アプリは起動時に更新を確認します。ホーム画面へ戻り、ブラウザまたは追加済みアプリを開き直してください。</div>
           </div>
           <div style="background:rgba(255,255,255,.04);border-radius:8px;padding:10px 12px;font-size:.8rem;color:#c8e4ff;display:flex;gap:10px;align-items:flex-start">
             <span style="background:var(--orange);color:#fff;border-radius:50%;width:20px;height:20px;min-width:20px;display:flex;align-items:center;justify-content:center;font-size:.7rem;font-weight:900;margin-top:1px">3</span>
@@ -271,7 +246,7 @@
           <div style="padding:6px 10px;display:flex;gap:8px"><span>・</span><span>ブラウザアプリをアンインストールした場合</span></div>
         </div>
         <div style="background:rgba(0,212,255,.08);border:1px solid rgba(0,212,255,.2);border-radius:8px;padding:10px 12px;font-size:.78rem;color:#7dd3fc;line-height:1.7">
-          ✅ <strong style="color:#fff">Firebase対応のデータ（名簿・ユニフォーム・アカウントなど）</strong>はクラウドに保存されているため、端末が変わっても同じデータが見られます。<br><br>
+          ✅ 保存時に「クラウドに保存しました」と表示されたデータは、別端末でも確認できます。「端末に保存」と表示された場合は、通信復旧後にもう一度保存してください。<br><br>
           📥 ローカル保存のデータは「CSV出力」ボタンで定期的にバックアップを取ることをおすすめします。
         </div>
       </div>
@@ -284,7 +259,7 @@
   </div>
 
 </main>
-<footer class="site-footer">YOSHIMI SMC FC — SMART PORTAL</footer>
+<footer class="site-footer"></footer>
 <script>
 // ガイダンスをFirebaseからリアルタイム取得
 dbListen("notices/guidance", function(val){
@@ -307,6 +282,5 @@ function toggleTrouble(id){
   if(arrow) arrow.style.transform=open?"":"rotate(180deg)";
 }
 </script>
-<script src="common.js"></script>
 </body>
 </html>

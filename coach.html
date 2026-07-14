@@ -6,9 +6,11 @@
   <meta http-equiv="Pragma" content="no-cache">
   <meta http-equiv="Expires" content="0">
   <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="robots" content="noindex,nofollow">
   <title>コーチ専用 v2｜吉見SMC FC</title>
   <script src="firebase-config.js"></script>
   <link rel="stylesheet" href="common.css">
+  <script src="common.js"></script>
   <style>
     .lock-wrap{max-width:380px;margin:0 auto}
     .locked-area{background:var(--surface-lt);border:1px solid var(--line-2);border-radius:var(--r16);padding:32px 24px;text-align:center}
@@ -84,14 +86,7 @@
   </style>
 </head>
 <body>
-<header class="site-header">
-  <div class="header-inner">
-    <a class="header-logo" href="index.html">
-      <div class="logo-mark">⚽</div>
-      <div><span class="logo-name">吉見SMC FC</span><span class="logo-sub">SMART PORTAL</span></div>
-    </a>
-  </div>
-</header>
+<header class="site-header"></header>
 <main class="page-wrap">
   <a class="back-btn" href="index.html">ホームに戻る</a>
   <div class="hero-band">
@@ -100,27 +95,9 @@
       <div class="hero-sub">ガイダンス設定・試合調整・練習メニュー・日誌・資料管理</div></div>
   </div>
 
-  <!-- ロック画面 -->
-  <div id="lock-screen" class="lock-wrap" style="display:none">
-    <div class="locked-area">
-      <div style="font-size:2.2rem;margin-bottom:10px">🔐</div>
-      <h2>パスコードを入力</h2>
-      <p>コーチ専用エリアにアクセスするには<br>管理者から配布されたパスコードが必要です。</p>
-      <form id="lock-form">
-        <div class="form-group">
-          <input class="form-control" id="passcode" type="password" inputmode="numeric"
-            placeholder="パスコード" autocomplete="off"
-            style="text-align:center;font-size:1.2rem;letter-spacing:.2em">
-        </div>
-        <button class="btn btn-primary btn-lg" type="submit" style="width:100%">解除する</button>
-        <p id="lock-msg" style="color:var(--ink-3);font-size:.8rem;margin-top:10px;min-height:1.4em">パスコード: 2026</p>
-      </form>
-    </div>
-  </div>
-
   <!-- コーチコンテンツ -->
   <div id="coach-content">
-    <div class="notice-bar green">✅ コーチ専用エリアへようこそ。</div>
+    <div class="notice-bar">🔗 LINEのリッチメニューなどから、そのまま各管理機能を利用できます。</div>
     <div id="cloud-status-bar" class="notice-bar" style="background:rgba(255,204,0,.12);border-color:rgba(255,204,0,.35);color:#ffcc00;display:flex;justify-content:space-between;align-items:center">
       <span id="cloud-status-text">☁️ クラウド接続状況を確認中...</span>
       <a href="firebase-setup.html" class="btn btn-outline btn-sm" style="font-size:.7rem;height:26px;padding:0 8px;flex-shrink:0">⚙️ 設定</a>
@@ -201,7 +178,7 @@
       <a class="c-card c-purple" href="accounts.html">
         <div class="c-icon">🔑</div>
         <div class="c-label">アカウント管理</div>
-        <div class="c-desc">ID・パスワード一覧</div>
+        <div class="c-desc">アカウントID・管理リンク</div>
       </a>
       <a class="c-card" href="https://drive.google.com/drive/folders/1BOinS5PmZgnk7RYlYtLwhEGemDrQIlSJ?usp=sharing" target="_blank" rel="noopener">
         <div class="c-icon">📁</div>
@@ -229,6 +206,11 @@
         <div class="c-icon">🔗</div>
         <div class="c-label">練習メニュー</div>
         <div class="c-desc">URLを登録してタップで開く</div>
+      </a>
+      <a class="c-card c-cyan" href="diagnostics.html">
+        <div class="c-icon">🩺</div>
+        <div class="c-label">動作診断</div>
+        <div class="c-desc">通信・PWA・端末内エラーログ</div>
       </a>
     </div>
 
@@ -380,23 +362,10 @@
 
   </div><!-- /coach-content -->
 </main>
-<footer class="site-footer">YOSHIMI SMC FC — SMART PORTAL</footer>
+<footer class="site-footer"></footer>
 
 <script>
-var PASSCODE="2026", URL_KEY="smc_menu_urls_v1";
-
-document.getElementById("lock-form").addEventListener("submit",function(e){
-  e.preventDefault();
-  var val=document.getElementById("passcode").value.trim();
-  if(val===PASSCODE){
-    document.getElementById("lock-screen").style.display="none";
-    document.getElementById("coach-content").style.display="block";
-    loadNoticeInputs(); renderUrls(); renderScheduleList(); return;
-  }
-  var msg=document.getElementById("lock-msg");
-  msg.textContent="パスコードが違います。";msg.style.color="var(--red)";
-  document.getElementById("passcode").value="";
-});
+var URL_KEY="smc_menu_urls_v1";
 
 function loadNoticeInputs(){
   var g=localStorage.getItem("smc_guidance")||"";
@@ -410,10 +379,11 @@ function saveNotice(t){
   var lKey=t==="guidance"?"smc_guidance":"smc_warning";
   var dbKey=t==="guidance"?"guidance":"warning";
   var val=document.getElementById(t+"-input").value.trim();
-  dbSave("notices/"+dbKey, val||null, lKey, null);
+  dbSave("notices/"+dbKey, val||null, lKey, function(){
+    flash(t==="guidance"?"ガイダンスを保存しました":"注意事項を保存しました");
+  });
   if(val)localStorage.setItem(lKey,val);else localStorage.removeItem(lKey);
   document.getElementById(t+"-preview").textContent=val||"（未設定）";
-  flash(t==="guidance"?"ガイダンスを保存しました":"注意事項を保存しました");
 }
 function clearNotice(t){
   var lKey=t==="guidance"?"smc_guidance":"smc_warning";
@@ -438,12 +408,12 @@ function flash(msg){
 }
 
 function loadUrls(){try{return JSON.parse(localStorage.getItem(URL_KEY))||[];}catch(e){return[];}}
-function saveUrls(d){localStorage.setItem(URL_KEY,JSON.stringify(d));}
+function saveUrls(d){localStorage.setItem(URL_KEY,JSON.stringify(d));dbSave("practice_menu",d,URL_KEY,null);}
 function addUrl(){
   var label=document.getElementById("url-label").value.trim();
-  var href=document.getElementById("url-href").value.trim();
+  var href=normalizeExternalUrl(document.getElementById("url-href").value);
   if(!label){alert("ラベルを入力してください");return;}
-  if(!href||!href.startsWith("http")){alert("URLを正しく入力してください");return;}
+  if(!href){alert("URLは https:// から始まる安全な形式で入力してください");return;}
   var data=loadUrls();
   data.push({id:Date.now(),label:label,href:href});
   saveUrls(data);
@@ -462,12 +432,13 @@ function renderUrls(){
     list.innerHTML='<p style="color:var(--ink-3);font-size:.82rem;text-align:center;padding:12px">URLを追加するとここに表示されます。</p>';return;
   }
   list.innerHTML=data.map(function(u){
+    var safeHref=normalizeExternalUrl(u.href);
     return '<div class="url-item">'
-      +'<div style="flex:1;min-width:0"><div class="url-item-label">'+u.label+'</div>'
-      +'<a class="url-item-link" href="'+u.href+'" target="_blank" rel="noopener">'+u.href+'</a></div>'
+      +'<div style="flex:1;min-width:0"><div class="url-item-label">'+escapeHtml(u.label)+'</div>'
+      +(safeHref?'<a class="url-item-link" href="'+escapeHtml(safeHref)+'" target="_blank" rel="noopener noreferrer">'+escapeHtml(safeHref)+'</a>':'<span class="url-item-link">無効なURL</span>')+'</div>'
       +'<div class="url-actions">'
-      +'<a class="icon-btn" href="'+u.href+'" target="_blank" rel="noopener" title="開く">🔗</a>'
-      +'<button class="icon-btn" onclick="deleteUrl('+u.id+')" title="削除">🗑</button>'
+      +(safeHref?'<a class="icon-btn" href="'+escapeHtml(safeHref)+'" target="_blank" rel="noopener noreferrer" title="開く">🔗</a>':'')
+      +'<button class="icon-btn" onclick="deleteUrl('+(Number(u.id)||0)+')" title="削除">🗑</button>'
       +'</div></div>';
   }).join("");
 }
@@ -526,10 +497,10 @@ function renderScheduleList(){
       ? '<span style="font-size:.68rem;background:rgba(0,212,255,.15);color:var(--cyan);border:1px solid rgba(0,212,255,.3);border-radius:4px;padding:1px 6px">室内</span>'
       : '<span style="font-size:.68rem;background:rgba(0,200,80,.15);color:#00cc66;border:1px solid rgba(0,200,80,.3);border-radius:4px;padding:1px 6px">屋外⚡</span>';
     return '<div style="display:flex;align-items:center;gap:10px;padding:9px 12px;background:rgba(255,255,255,.04);border-radius:var(--r8);margin-bottom:6px;border:1px solid var(--line)">'
-      +'<span style="font-weight:900;color:#fff;min-width:22px">'+DAYS[s.day]+'</span>'
-      +'<span style="color:#c8e4ff;font-size:.84rem">'+s.start+'〜'+s.end+'</span>'
+      +'<span style="font-weight:900;color:#fff;min-width:22px">'+escapeHtml(DAYS[s.day]||"")+'</span>'
+      +'<span style="color:#c8e4ff;font-size:.84rem">'+escapeHtml(s.start)+'〜'+escapeHtml(s.end)+'</span>'
       +indoorBadge
-      +(s.memo ? '<span style="font-size:.75rem;color:var(--ink-3)">'+s.memo+'</span>' : '')
+      +(s.memo ? '<span style="font-size:.75rem;color:var(--ink-3)">'+escapeHtml(s.memo)+'</span>' : '')
       +'<button class="btn btn-outline btn-sm" onclick="editSchedule('+cfg.schedules.indexOf(s)+')" '
       +'style="margin-left:auto;font-size:.7rem;height:26px;padding:0 8px">✏️ 編集</button>'
       +'</div>';
@@ -609,16 +580,27 @@ function saveAlertSettings(){
 }
 function saveAlertCfg(cfg){
   localStorage.setItem(ALERT_KEY, JSON.stringify(cfg));
-  dbSave("alert_settings", cfg, ALERT_KEY, null);
   var msg = document.getElementById("alert-save-msg");
-  if(msg){ msg.textContent = "✅ アラート設定を保存しました"; setTimeout(function(){ msg.textContent=""; }, 2500); }
+  if(msg) msg.textContent = "💾 保存中…";
+  dbSave("alert_settings", cfg, ALERT_KEY, function(){
+    if(msg){ msg.textContent = "✅ アラート設定を保存しました"; setTimeout(function(){ msg.textContent=""; }, 2500); }
+  },function(){
+    if(msg){ msg.textContent = "⚠️ 端末保存のみ完了しました"; setTimeout(function(){ msg.textContent=""; }, 3500); }
+  });
   renderScheduleList();
 }
 
-// 起動時に表示
+dbListen("practice_menu",function(value){
+  if(Array.isArray(value)){
+    try{localStorage.setItem(URL_KEY,JSON.stringify(value));}catch(e){}
+    renderUrls();
+  }
+},URL_KEY,[]);
+
 document.addEventListener("DOMContentLoaded", function(){
-  // コーチコンテンツ表示時に実行（ログイン後）
-  var orig = document.getElementById("lock-form").onsubmit;
+  loadNoticeInputs();
+  renderUrls();
+  renderScheduleList();
 });
 
 // クラウド接続状況確認
@@ -644,6 +626,5 @@ document.addEventListener("DOMContentLoaded", function(){
   });
 })();
 </script>
-<script src="common.js"></script>
 </body>
 </html>

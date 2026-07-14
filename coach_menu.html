@@ -4,9 +4,11 @@
   <meta charset="utf-8">
   <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
   <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="robots" content="noindex,nofollow">
   <title>練習メニュー｜吉見SMC FC</title>
   <script src="firebase-config.js"></script>
   <link rel="stylesheet" href="common.css">
+  <script src="common.js"></script>
   <style>
     .url-item{background:rgba(255,255,255,.04);border:1px solid var(--line);border-radius:var(--r8);padding:11px 13px;display:flex;align-items:center;gap:10px;margin-bottom:8px}
     .url-label{font-size:.88rem;font-weight:700;color:#fff;flex:1;min-width:0}
@@ -17,14 +19,7 @@
   </style>
 </head>
 <body>
-<header class="site-header">
-  <div class="header-inner">
-    <a class="header-logo" href="index.html">
-      <div class="logo-mark">⚽</div>
-      <div><span class="logo-name">吉見SMC FC</span><span class="logo-sub">SMART PORTAL</span></div>
-    </a>
-  </div>
-</header>
+<header class="site-header"></header>
 <main class="page-wrap">
   <a class="back-btn" href="coach.html">← コーチ専用に戻る</a>
   <div class="hero-band">
@@ -56,7 +51,7 @@
 
   <a class="btn btn-outline" href="coach.html" style="display:flex;justify-content:center;margin-top:16px">← コーチ専用に戻る</a>
 </main>
-<footer class="site-footer">YOSHIMI SMC FC — SMART PORTAL</footer>
+<footer class="site-footer"></footer>
 <script>
 var KEY="smc_menu_urls_v1";
 var _data=[];
@@ -71,14 +66,15 @@ function render(){
     return;
   }
   list.innerHTML=_data.map(function(u){
+    var safeHref=normalizeExternalUrl(u.href);
     return '<div class="url-item">'
       +'<div style="flex:1;min-width:0">'
       +'<div class="url-label">'+escH(u.label)+'</div>'
-      +'<div class="url-link">'+escH(u.href)+'</div>'
+      +'<div class="url-link">'+escH(safeHref||"無効なURL")+'</div>'
       +'</div>'
       +'<div class="url-actions">'
-      +'<a class="btn btn-primary btn-sm" href="'+escH(u.href)+'" target="_blank" rel="noopener">🔗 開く</a>'
-      +'<button class="btn btn-outline btn-sm" onclick="del('+u.id+')" style="color:var(--red);border-color:rgba(255,68,102,.4)">🗑</button>'
+      +(safeHref?'<a class="btn btn-primary btn-sm" href="'+escH(safeHref)+'" target="_blank" rel="noopener noreferrer">🔗 開く</a>':'')
+      +'<button class="btn btn-outline btn-sm" onclick="del('+(Number(u.id)||0)+')" style="color:var(--red);border-color:rgba(255,68,102,.4)">🗑</button>'
       +'</div>'
       +'</div>';
   }).join("");
@@ -86,9 +82,9 @@ function render(){
 
 function addUrl(){
   var label=document.getElementById("url-label").value.trim();
-  var href=document.getElementById("url-href").value.trim();
+  var href=normalizeExternalUrl(document.getElementById("url-href").value);
   if(!label){alert("ラベルを入力してください");return;}
-  if(!href||!href.startsWith("http")){alert("URLを正しく入力してください（https://...）");return;}
+  if(!href){alert("URLは https:// から始まる安全な形式で入力してください");return;}
   var d=load();
   d.push({id:Date.now(),label:label,href:href});
   save(d);_data=d;render();
@@ -110,6 +106,5 @@ dbListen("practice_menu",function(val){
 },KEY,[]);
 window.addEventListener("DOMContentLoaded",function(){_data=load();render();});
 </script>
-<script src="common.js"></script>
 </body>
 </html>

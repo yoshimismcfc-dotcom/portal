@@ -4,9 +4,11 @@
   <meta charset="utf-8">
   <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
   <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="robots" content="noindex,nofollow">
   <title>自動アラート設定｜吉見SMC FC</title>
   <script src="firebase-config.js"></script>
   <link rel="stylesheet" href="common.css">
+  <script src="common.js"></script>
   <style>
     .sched-item{background:rgba(255,255,255,.04);border:1px solid var(--line);border-radius:var(--r8);padding:10px 12px;display:flex;align-items:center;gap:10px;margin-bottom:6px}
     .sched-day{font-weight:900;color:#fff;min-width:24px}
@@ -22,14 +24,7 @@
   </style>
 </head>
 <body>
-<header class="site-header">
-  <div class="header-inner">
-    <a class="header-logo" href="index.html">
-      <div class="logo-mark">⚽</div>
-      <div><span class="logo-name">吉見SMC FC</span><span class="logo-sub">SMART PORTAL</span></div>
-    </a>
-  </div>
-</header>
+<header class="site-header"></header>
 <main class="page-wrap">
   <a class="back-btn" href="coach.html">← コーチ専用に戻る</a>
   <div class="hero-band">
@@ -146,7 +141,7 @@
   </div>
 </div>
 
-<footer class="site-footer">YOSHIMI SMC FC — SMART PORTAL</footer>
+<footer class="site-footer"></footer>
 <script>
 var KEY="smc_alert_settings_v1";
 var DAYS=["日","月","火","水","木","金","土"];
@@ -169,9 +164,9 @@ function loadCfg(){
   try{var s=localStorage.getItem(KEY);if(s)return JSON.parse(s);}catch(e){}
   return JSON.parse(JSON.stringify(DEFAULT));
 }
-function saveCfg(cfg){
+function saveCfg(cfg,onSuccess,onError){
   localStorage.setItem(KEY,JSON.stringify(cfg));
-  dbSave("alert_settings",cfg,KEY,null);
+  return dbSave("alert_settings",cfg,KEY,onSuccess,onError);
 }
 
 function renderForm(){
@@ -195,8 +190,8 @@ function renderScheds(cfg){
       ?'<span class="badge-in">室内</span>'
       :'<span class="badge-out">屋外⚡</span>';
     return '<div class="sched-item">'
-      +'<span class="sched-day">'+DAYS[s.day]+'</span>'
-      +'<span class="sched-time">'+s.start+'〜'+s.end+(s.memo?' ('+s.memo+')':'')+'</span>'
+      +'<span class="sched-day">'+escapeHtml(DAYS[s.day]||"")+'</span>'
+      +'<span class="sched-time">'+escapeHtml(s.start)+'〜'+escapeHtml(s.end)+(s.memo?' ('+escapeHtml(s.memo)+')':'')+'</span>'
       +badge
       +'<button class="btn btn-outline btn-sm" onclick="openEditSched('+i+')" style="font-size:.7rem;height:26px;padding:0 8px;margin-left:auto">✏️</button>'
       +'</div>';
@@ -213,9 +208,13 @@ function saveAll(){
   cfg.rainVenue=document.getElementById("rain-venue").value.trim();
   cfg.rainOdd=document.getElementById("rain-odd").value.trim();
   cfg.rainEven=document.getElementById("rain-even").value.trim();
-  saveCfg(cfg);
   var msg=document.getElementById("save-msg");
-  msg.textContent="✅ 保存しました";setTimeout(function(){msg.textContent="";},2500);
+  msg.textContent="💾 保存中…";
+  saveCfg(cfg,function(){
+    msg.textContent="✅ 保存しました";setTimeout(function(){msg.textContent="";},2500);
+  },function(){
+    msg.textContent="⚠️ 端末保存のみ完了しました";setTimeout(function(){msg.textContent="";},3500);
+  });
 }
 
 function openAddSched(){
@@ -270,6 +269,5 @@ dbListen("alert_settings",function(val){
 },KEY,null);
 window.addEventListener("DOMContentLoaded",renderForm);
 </script>
-<script src="common.js"></script>
 </body>
 </html>

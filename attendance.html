@@ -2,6 +2,7 @@
 <html lang="ja">
 <head>
   <meta charset="utf-8">
+  <meta name="robots" content="noindex,nofollow">
   <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
   <meta http-equiv="Pragma" content="no-cache">
   <meta http-equiv="Expires" content="0">
@@ -9,6 +10,7 @@
   <title>出欠確認｜吉見SMC FC</title>
   <script src="firebase-config.js"></script>
   <link rel="stylesheet" href="common.css">
+  <script src="common.js"></script>
   <style>
     .attend-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:18px}
     .attend-card{
@@ -35,14 +37,7 @@
   </style>
 </head>
 <body>
-<header class="site-header">
-  <div class="header-inner">
-    <a class="header-logo" href="index.html">
-      <div class="logo-mark">⚽</div>
-      <div><span class="logo-name">吉見SMC FC</span><span class="logo-sub">SMART PORTAL</span></div>
-    </a>
-  </div>
-</header>
+<header class="site-header"></header>
 <main class="page-wrap">
   <a class="back-btn" href="index.html">ホームに戻る</a>
   <div class="hero-band">
@@ -93,8 +88,7 @@
     </div>
   </div>
 </main>
-<footer class="site-footer">YOSHIMI SMC FC — SMART PORTAL</footer>
-<script src="common.js"></script>
+<footer class="site-footer"></footer>
 <script>
 function setNotice(id,textId,val,display){
   var el=document.getElementById(id),tx=document.getElementById(textId);

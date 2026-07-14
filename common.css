@@ -142,11 +142,7 @@ body[data-theme="light"] .tc-title,
 body[data-theme="light"] .check-name,
 body[data-theme="light"] .kanji,
 body[data-theme="light"] .list-table td,
-body[data-theme="light"] .data-table td,
-body[data-theme="light"] [style*="color:#fff"],
-body[data-theme="light"] [style*="color: #fff"],
-body[data-theme="light"] [style*="color:#ffffff"],
-body[data-theme="light"] [style*="color: #ffffff"] {
+body[data-theme="light"] .data-table td {
   color: var(--ink) !important;
   text-shadow: none !important;
 }
@@ -764,6 +760,16 @@ body[data-theme="light"] .menu-card {
 body[data-theme="light"] .menu-card .card-label { color: var(--ink) !important; }
 body[data-theme="light"] .menu-card .card-desc  { color: var(--ink-3) !important; }
 
+/* 個別ページのインライン白文字を明るい背景で読める色へ補正 */
+body[data-theme="light"] .ac-desc [style*="color:#fff"],
+body[data-theme="light"] .desc [style*="color:#fff"],
+body[data-theme="light"] .acc-body [style*="color:#fff"],
+body[data-theme="light"] .step-body [style*="color:#fff"],
+body[data-theme="light"] .sched-item [style*="color:#fff"],
+body[data-theme="light"] button > span[style*="color:#fff"][style*="flex:1"] {
+  color: var(--ink) !important;
+}
+
 /* ノーティスバー */
 body[data-theme="light"] .notice-bar {
   background: rgba(0,48,135,.07) !important;
@@ -912,6 +918,86 @@ body[data-theme="light"] [style*="background:rgba(255,255,255,.05)"] {
 .btn-line-copy:hover { background: linear-gradient(135deg,#00d000,#00aa00); transform: translateY(-1px); }
 .btn-line-copy:active { transform: scale(.97); }
 .btn-line-copy.sm { font-size: .74rem; padding: 5px 11px; }
+
+/* ===== 保存状態トースト ===== */
+.save-toast {
+  position: fixed;
+  left: 50%;
+  bottom: max(18px, env(safe-area-inset-bottom));
+  z-index: 10000;
+  width: min(92vw, 520px);
+  padding: 11px 16px;
+  border: 1px solid rgba(40,199,111,.45);
+  border-radius: 999px;
+  background: rgba(7,17,38,.96);
+  color: #dfffea;
+  box-shadow: 0 16px 42px rgba(0,0,0,.4);
+  text-align: center;
+  font-size: .82rem;
+  font-weight: 900;
+  opacity: 0;
+  pointer-events: none;
+  transform: translate(-50%, 18px);
+  transition: opacity .2s ease, transform .2s ease;
+}
+.save-toast.show { opacity: 1; transform: translate(-50%, 0); }
+.save-toast[data-state="warn"] { border-color: rgba(255,209,102,.55); color: #ffe6a6; }
+.save-toast[data-state="error"] { border-color: rgba(255,91,110,.55); color: #ffc0c8; }
+.save-toast[data-state="local"] { border-color: rgba(90,167,255,.55); color: #c9e2ff; }
+body[data-theme="light"] .save-toast { background: rgba(255,255,255,.98); color: #173323; }
+body[data-theme="light"] .save-toast[data-state="warn"] { color: #714b00; }
+body[data-theme="light"] .save-toast[data-state="error"] { color: #8b1728; }
+body[data-theme="light"] .save-toast[data-state="local"] { color: #174f8b; }
+
+/* ===== 横長表のスマホ操作共通化 ===== */
+.table-wrap,
+.acc-table-wrap,
+.acct-table-wrap,
+.ledger-sheet-wrap,
+.roster-wrap,
+.list-wrap,
+.adj-wrap {
+  max-width: 100%;
+  overflow-x: auto;
+  overscroll-behavior-inline: contain;
+  -webkit-overflow-scrolling: touch;
+  scrollbar-gutter: stable;
+}
+.acc-table th:last-child,
+.acc-table td:last-child,
+.uni-table th:last-child,
+.uni-table td:last-child,
+.fin-table th:last-child,
+.fin-table td:last-child,
+.ledger-edit-table th:last-child,
+.ledger-edit-table td:last-child {
+  position: sticky;
+  right: 0;
+  z-index: 2;
+  background: var(--navy-900);
+  box-shadow: -6px 0 12px rgba(0,0,0,.16);
+}
+body[data-theme="light"] .acc-table td:last-child,
+body[data-theme="light"] .uni-table td:last-child,
+body[data-theme="light"] .fin-table td:last-child,
+body[data-theme="light"] .ledger-edit-table td:last-child {
+  background: #f8fbff;
+}
+
+@media print {
+  .save-toast { display: none !important; }
+  .acc-table th:last-child,
+  .acc-table td:last-child,
+  .uni-table th:last-child,
+  .uni-table td:last-child,
+  .fin-table th:last-child,
+  .fin-table td:last-child,
+  .ledger-edit-table th:last-child,
+  .ledger-edit-table td:last-child {
+    position: static !important;
+    box-shadow: none !important;
+  }
+}
 
 
 /* ===== 雨・WBGT 自動アラート（共通表示） ===== */

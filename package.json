@@ -1,0 +1,11 @@
+{
+  "name": "yoshimi-smc-portal",
+  "private": true,
+  "version": "20260714.3.0",
+  "scripts": {
+    "test": "node scripts/audit.mjs && node scripts/firebase-save.test.mjs"
+  },
+  "engines": {
+    "node": ">=20"
+  }
+}

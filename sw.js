@@ -1,49 +1,95 @@
-// Service Worker - 自動更新対応版
-// バージョン: 20260713031219
+// Yoshimi SMC FC Portal Service Worker
+const APP_VERSION = "20260714-3";
+const CACHE_PREFIX = "smc-portal-";
+const CACHE_NAME = CACHE_PREFIX + APP_VERSION;
 
-const CACHE_VERSION = '20260713031219';
-const CACHE_NAME = 'smc-portal-' + CACHE_VERSION;
+// 公開ページと共通アセットだけを事前保存する。
+const PRECACHE_URLS = [
+  "./",
+  "./index.html",
+  "./offline.html",
+  "./common.css",
+  "./common.js",
+  "./firebase-config.js",
+  "./manifest.json",
+  "./favicon.png",
+  "./apple-touch-icon.png",
+  "./icon-192.png",
+  "./icon-512.png",
+  "./icon.svg",
+  "./assets/yoshimi-smc-logo.jpeg",
+  "./attendance.html",
+  "./calendar.html",
+  "./guide.html",
+  "./join.html",
+  "./orders.html",
+  "./pitch.html",
+  "./referee.html",
+  "./weather.html"
+];
 
-// インストール：新バージョンを即座にアクティベート
-self.addEventListener('install', function(e){
-  // skipWaitingで既存SWを即座に置き換え
-  e.waitUntil(self.skipWaiting());
+self.addEventListener("install", function(event){
+  event.waitUntil(
+    caches.open(CACHE_NAME)
+      .then(function(cache){ return cache.addAll(PRECACHE_URLS); })
+      .then(function(){ return self.skipWaiting(); })
+  );
 });
 
-// アクティベート：古いキャッシュを全削除して全クライアントを制御
-self.addEventListener('activate', function(e){
-  e.waitUntil(
+self.addEventListener("activate", function(event){
+  event.waitUntil(
     caches.keys().then(function(keys){
-      return Promise.all(
-        keys.filter(function(k){ return k !== CACHE_NAME; })
-            .map(function(k){ return caches.delete(k); })
-      );
-    }).then(function(){
-      // 全ての開いているページを即座に制御下に置く
-      return self.clients.claim();
-    })
+      return Promise.all(keys
+        .filter(function(key){ return key.indexOf(CACHE_PREFIX) === 0 && key !== CACHE_NAME; })
+        .map(function(key){ return caches.delete(key); }));
+    }).then(function(){ return self.clients.claim(); })
   );
 });
 
-// フェッチ：同一オリジンのファイルだけを処理
-// Open-Meteo等の外部API通信はService Workerを経由させない
-self.addEventListener('fetch', function(e){
-  if(e.request.method !== 'GET') return;
-  if(!e.request.url.startsWith('http')) return;
+function networkFirst(request){
+  return fetch(request).then(function(response){
+    if(response && response.ok){
+      var copy = response.clone();
+      caches.open(CACHE_NAME).then(function(cache){ cache.put(request, copy); });
+    }
+    return response;
+  }).catch(function(){
+    return caches.match(request).then(function(cached){
+      return cached || caches.match("./offline.html");
+    });
+  });
+}
 
-  var requestUrl=new URL(e.request.url);
-  if(requestUrl.origin !== self.location.origin) return;
+function staleWhileRevalidate(request){
+  return caches.match(request).then(function(cached){
+    var update = fetch(request).then(function(response){
+      if(response && response.ok){
+        var copy = response.clone();
+        caches.open(CACHE_NAME).then(function(cache){ cache.put(request, copy); });
+      }
+      return response;
+    }).catch(function(){ return cached; });
+    return cached || update;
+  });
+}
 
-  e.respondWith(
-    fetch(e.request,{cache:'no-store'}).catch(function(){
-      return caches.match(e.request);
-    })
-  );
-});
+self.addEventListener("fetch", function(event){
+  var request = event.request;
+  if(request.method !== "GET") return;
 
-// メッセージ受信（外部からのキャッシュクリア要求）
-self.addEventListener('message', function(e){
-  if(e.data && e.data.type === 'SKIP_WAITING'){
-    self.skipWaiting();
+  var url = new URL(request.url);
+  if(url.origin !== self.location.origin) return;
+
+  if(request.mode === "navigate"){
+    event.respondWith(networkFirst(request));
+    return;
   }
+
+  if(["style","script","image","font"].indexOf(request.destination) !== -1){
+    event.respondWith(staleWhileRevalidate(request));
+  }
+});
+
+self.addEventListener("message", function(event){
+  if(event.data && event.data.type === "SKIP_WAITING") self.skipWaiting();
 });

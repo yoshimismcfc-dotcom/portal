@@ -2,27 +2,16 @@
 <html lang="ja">
 <head>
   <meta charset="utf-8">
-  <script>
-    // Service Worker・キャッシュを強制削除
-    if('serviceWorker' in navigator){
-      navigator.serviceWorker.getRegistrations().then(function(regs){
-        regs.forEach(function(r){ r.unregister(); });
-      });
-    }
-    if('caches' in window){
-      caches.keys().then(function(keys){
-        keys.forEach(function(k){ caches.delete(k); });
-      });
-    }
-  </script>
   <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate, max-age=0">
   <meta http-equiv="Pragma" content="no-cache">
   <meta http-equiv="Expires" content="-1">
-  <meta name="version" content="v4-20260704">
+  <meta name="app-version" content="20260714-3">
   <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="robots" content="noindex,nofollow">
   <title>大会要綱・対戦表 v5｜吉見SMC FC</title>
   <script src="firebase-config.js"></script>
   <link rel="stylesheet" href="common.css">
+  <script src="common.js"></script>
   <style>
     /* ====== タブ ====== */
     .doc-tab-bar{display:flex;gap:0;margin-bottom:20px;border-radius:var(--r8);overflow:hidden;border:1px solid var(--line-2)}
@@ -168,14 +157,7 @@
   </style>
 </head>
 <body>
-<header class="site-header">
-  <div class="header-inner">
-    <a class="header-logo" href="index.html">
-      <div class="logo-mark">⚽</div>
-      <div><span class="logo-name">吉見SMC FC</span><span class="logo-sub">SMART PORTAL</span></div>
-    </a>
-  </div>
-</header>
+<header class="site-header"></header>
 <main class="page-wrap">
   <a class="back-btn" href="coach.html">コーチ専用に戻る</a>
   <div class="hero-band">
@@ -334,7 +316,7 @@
   </div>
 </div>
 
-<footer class="site-footer no-print">YOSHIMI SMC FC — SMART PORTAL</footer>
+<footer class="site-footer no-print"></footer>
 <script>
 /* ===== タブ ===== */
 function switchDoc(id,el){
@@ -361,15 +343,15 @@ function fmtDate(val){
 function buildYoukou(){
   var title=gv("y-title"),dateStr=fmtDate(gv("y-date"));
   var h='<div class="req-sheet">';
-  h+='<div class="req-title">'+title+'　大会要項</div>';
+  h+='<div class="req-title">'+escapeHtml(title)+'　大会要項</div>';
   h+='<table class="req-info"><tbody>';
-  h+='<tr><th>期日</th><td>'+(dateStr||"　　年　月　日")+'</td><th>場所</th><td>'+gv("y-place")+'</td></tr>';
-  h+='<tr><th>受付</th><td>'+gv("y-uketsuke")+'</td><th>主催</th><td>'+gv("y-host")+'</td></tr>';
+  h+='<tr><th>期日</th><td>'+escapeHtml(dateStr||"　　年　月　日")+'</td><th>場所</th><td>'+escapeHtml(gv("y-place"))+'</td></tr>';
+  h+='<tr><th>受付</th><td>'+escapeHtml(gv("y-uketsuke"))+'</td><th>主催</th><td>'+escapeHtml(gv("y-host"))+'</td></tr>';
   h+='</tbody></table>';
   h+='<div style="font-weight:bold;font-size:11pt;margin-bottom:5px;color:#003087;border-bottom:1px solid #c0cce8;padding-bottom:3px">開催要項</div>';
   function sec(n,t,items){
-    var r='<div class="req-num">'+n+'）'+t+'</div><ul class="req-li">';
-    items.forEach(function(i){r+='<li>'+i+'</li>';});return r+'</ul>';
+    var r='<div class="req-num">'+escapeHtml(n)+'）'+escapeHtml(t)+'</div><ul class="req-li">';
+    items.forEach(function(i){r+='<li>'+escapeHtml(i)+'</li>';});return r+'</ul>';
   }
   h+=sec(1,"目的",["試合を通して少年少女サッカーの普及を目指します。","チーム間の友好と親善を図り、サッカーの楽しさを知ってもらいます。","試合経験を通して、選手相互の技術向上を図ります。"]);
   h+=sec(2,"対象学年",[gv("y-cat")]);
@@ -382,7 +364,7 @@ function buildYoukou(){
   h+=sec(9,"表彰",[gv("y-award")]);
   h+=sec(10,"注意事項",["代表者会議を8:00より行いますので本部に集合してください。","熱中症・感染症には十分に気をつけてください。","飲水は各チームで十分に準備し、選手の体調管理をお願いします。",gv("y-parking"),"ゴミは各チームで持ち帰りをお願いします。"]);
   h+=sec(11,"雨天時",[gv("y-rain")]);
-  h+='<div class="req-contact"><b>📞 お問い合わせ</b>　'+gv("y-rep")+'　／　'+gv("y-contact")+'</div>';
+  h+='<div class="req-contact"><b>📞 お問い合わせ</b>　'+escapeHtml(gv("y-rep"))+'　／　'+escapeHtml(gv("y-contact"))+'</div>';
   h+='</div>';
   var pv=document.getElementById("youkou-preview");
   pv.innerHTML=h;pv.style.display="block";
@@ -489,8 +471,8 @@ function buildTaisen(){
 
   /* ---- HTML生成 ---- */
   var h='<div class="tai-sheet">';
-  h+='<div class="tai-title">'+title+'　対戦表</div>';
-  h+='<div class="tai-sub">'+(dateStr?dateStr+"　":"")+place+'</div>';
+  h+='<div class="tai-title">'+escapeHtml(title)+'　対戦表</div>';
+  h+='<div class="tai-sub">'+escapeHtml((dateStr?dateStr+"　":"")+place)+'</div>';
 
   if(courts===2){
     /* 2コート：A面・B面を横に並べてスケジュール表示 */
@@ -511,16 +493,16 @@ function buildTaisen(){
       schedsByTime.forEach(function(slot,si){
 if(slot.isBreak){
           var bEnd=addMins(slot.time,slot.breakMin);
-          h+="<tr><td colspan=\"7\" class=\"tr-break-td\">"+slot.breakLabel+"\u3000（"+slot.breakMin+"分）\u3000"+slot.time+"〜"+bEnd+"</td></tr>";
+          h+="<tr><td colspan=\"7\" class=\"tr-break-td\">"+escapeHtml(slot.breakLabel)+"\u3000（"+slot.breakMin+"分）\u3000"+slot.time+"〜"+bEnd+"</td></tr>";
           return;
         }
         slot.games.forEach(function(g){
           if(g.blkIdx===blk.idx){
             h+='<tr'+(si%2===1?' class="tr-alt-bg"':"")+'>';
             h+='<td>'+no+'</td><td>'+slot.time+'</td>';
-            h+='<td class="td-home">'+g.home+'</td>';
+            h+='<td class="td-home">'+escapeHtml(g.home)+'</td>';
             h+='<td class="td-score"></td><td class="td-vs">－</td><td class="td-score"></td>';
-            h+='<td class="td-away">'+g.away+'</td>';
+            h+='<td class="td-away">'+escapeHtml(g.away)+'</td>';
             h+='</tr>';
             no++;
           }
@@ -537,7 +519,7 @@ if(slot.isBreak){
       h+='</tr></thead><tbody>';
       blk.teams.forEach(function(t,i){
         h+='<tr'+(i%2===1?' class="rank-alt"':"")+'>';
-        h+='<td>'+(i+1)+'</td><td class="td-name">'+t+'</td>';
+        h+='<td>'+(i+1)+'</td><td class="td-name">'+escapeHtml(t)+'</td>';
         h+='<td>0</td><td>0</td><td>0</td><td>0</td><td>0</td><td>0</td><td>0</td><td>0</td></tr>';
       });
       h+='</tbody></table>';
@@ -545,10 +527,10 @@ if(slot.isBreak){
       /* 総当り票 */
       h+='<div style="font-size:8pt;font-weight:bold;margin:5px 0 3px;color:#333">'+blk.blkLabel+' 総当り票</div>';
       h+='<table class="rct"><thead><tr><th class="round-th-h"></th>';
-      blk.teams.forEach(function(t){h+='<th class="round-th-t">'+t+'</th>';});
+      blk.teams.forEach(function(t){h+='<th class="round-th-t">'+escapeHtml(t)+'</th>';});
       h+='</tr></thead><tbody>';
       blk.teams.forEach(function(t1,i){
-        h+='<tr><th class="round-th-h">'+t1+'</th>';
+        h+='<tr><th class="round-th-h">'+escapeHtml(t1)+'</th>';
         blk.teams.forEach(function(t2,j){
           h+=i===j?'<td class="td-self">－</td>':'<td class="td-score"></td>';
         });
@@ -595,15 +577,15 @@ if(slot.isBreak){
     schedsByTime.forEach(function(slot,si){
 if(slot.isBreak){
         var bEnd=addMins(slot.time,slot.breakMin);
-        h+="<tr><td colspan=\"7\" class=\"tr-break-td\">"+slot.breakLabel+"\u3000（"+slot.breakMin+"分）\u3000"+slot.time+"〜"+bEnd+"</td></tr>";
+        h+="<tr><td colspan=\"7\" class=\"tr-break-td\">"+escapeHtml(slot.breakLabel)+"\u3000（"+slot.breakMin+"分）\u3000"+slot.time+"〜"+bEnd+"</td></tr>";
         return;
       }
       slot.games.forEach(function(g,gi){
         h+='<tr'+(si%2===1?' class="tr-alt-bg"':"")+'>';
         h+='<td>'+(si+1)+'</td><td>'+slot.time+'</td>';
-        h+='<td class="td-home">'+g.home+'</td>';
+        h+='<td class="td-home">'+escapeHtml(g.home)+'</td>';
         h+='<td class="td-score"></td><td class="td-vs">－</td><td class="td-score"></td>';
-        h+='<td class="td-away">'+g.away+'</td><td></td></tr>';
+        h+='<td class="td-away">'+escapeHtml(g.away)+'</td><td></td></tr>';
       });
     });
     h+='<tr><td colspan="8" class="tr-closing-td">🏆 閉会式　'+closingTime+'～</td></tr>';
@@ -616,17 +598,17 @@ if(slot.isBreak){
     h+='<th class="rank-th">得</th><th class="rank-th">失</th><th class="rank-th">差</th><th class="rank-th">点</th>';
     h+='</tr></thead><tbody>';
     blk.teams.forEach(function(t,i){
-      h+='<tr'+(i%2===1?' class="rank-alt"':"")+'><td>'+(i+1)+'</td><td class="td-name">'+t+'</td>';
+      h+='<tr'+(i%2===1?' class="rank-alt"':"")+'><td>'+(i+1)+'</td><td class="td-name">'+escapeHtml(t)+'</td>';
       h+='<td>0</td><td>0</td><td>0</td><td>0</td><td>0</td><td>0</td><td>0</td><td>0</td></tr>';
     });
     h+='</tbody></table>';
 
     h+='<div style="font-size:8.5pt;font-weight:bold;margin:8px 0 4px;color:#333">総当り票</div>';
     h+='<table class="rct"><thead><tr><th class="round-th-h" style="min-width:80px"></th>';
-    blk.teams.forEach(function(t){h+='<th class="round-th-t">'+t+'</th>';});
+    blk.teams.forEach(function(t){h+='<th class="round-th-t">'+escapeHtml(t)+'</th>';});
     h+='</tr></thead><tbody>';
     blk.teams.forEach(function(t1,i){
-      h+='<tr><th class="round-th-h">'+t1+'</th>';
+      h+='<tr><th class="round-th-h">'+escapeHtml(t1)+'</th>';
       blk.teams.forEach(function(t2,j){h+=i===j?'<td class="td-self">－</td>':'<td class="td-score"></td>';});
       h+='</tr>';
     });
@@ -690,34 +672,11 @@ function copyTaisen(){
 /* ===== 印刷 ===== */
 function buildAndPrintPortrait(){
   buildYoukou();
-  // プレビュー表示後にやや余裕を持って印刷ダイアログを開く
-  setTimeout(function(){
-    var s=document.getElementById('pOS');
-    if(!s){s=document.createElement('style');s.id='pOS';document.head.appendChild(s);}
-    s.textContent='@page{size:A4 portrait;margin:10mm 12mm}';
-    window.print();
-  },800);
+  smcPrint({orientation:"portrait",target:"tournament-guidelines"});
 }
 function buildAndPrintLandscape(){
   buildTaisen();
-  setTimeout(function(){
-    var s=document.getElementById('pOS');
-    if(!s){s=document.createElement('style');s.id='pOS';document.head.appendChild(s);}
-    s.textContent='@page{size:A4 landscape;margin:8mm 10mm}';
-    window.print();
-  },800);
-}
-function printPortrait(){
-  var s=document.getElementById('pOS');
-  if(!s){s=document.createElement('style');s.id='pOS';document.head.appendChild(s);}
-  s.textContent='@page{size:A4 portrait;margin:10mm 12mm}';
-  window.print();
-}
-function printLandscape(){
-  var s=document.getElementById('pOS');
-  if(!s){s=document.createElement('style');s.id='pOS';document.head.appendChild(s);}
-  s.textContent='@page{size:A4 landscape;margin:8mm 10mm}';
-  window.print();
+  smcPrint({orientation:"landscape",target:"tournament-schedule"});
 }
 
 /* ===== 初期化 ===== */
@@ -868,17 +827,31 @@ function renderSavedList(type){
     var id=e[0], item=e[1];
     var dateStr = item.savedAt ? new Date(item.savedAt).toLocaleString("ja-JP") : "";
     html2 += "<div class=\"saved-item\">";
-    html2 += "<div class=\"saved-item-info\" onclick=\"loadSave('" + id + "')\">";
+    html2 += "<div class=\"saved-item-info\" role=\"button\" tabindex=\"0\" data-save-action=\"load\" data-id=\"" + esc3(id) + "\">";
     html2 += "<div class=\"saved-item-name\">" + esc2(item.name) + "</div>";
-    html2 += "<div class=\"saved-item-meta\">" + dateStr + "</div>";
+    html2 += "<div class=\"saved-item-meta\">" + esc2(dateStr) + "</div>";
     html2 += "</div>";
-    html2 += "<button class=\"saved-item-del\" onclick=\"deleteSave('" + id + "')\">🗑</button>";
+    html2 += "<button class=\"saved-item-del\" data-save-action=\"delete\" data-id=\"" + esc3(id) + "\">🗑</button>";
     html2 += "</div>";
   });
   wrap.innerHTML = html2;
 }
 
-function esc2(s){ return String(s||"").replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;"); }
+function esc2(s){ return escapeHtml(s); }
+
+document.getElementById("saved-list").addEventListener("click",function(event){
+  var target=event.target.closest("[data-save-action]");
+  if(!target)return;
+  if(target.dataset.saveAction==="load")loadSave(target.dataset.id);
+  if(target.dataset.saveAction==="delete")deleteSave(target.dataset.id);
+});
+document.getElementById("saved-list").addEventListener("keydown",function(event){
+  if(event.key!=="Enter"&&event.key!==" ")return;
+  var target=event.target.closest('[data-save-action="load"]');
+  if(!target)return;
+  event.preventDefault();
+  loadSave(target.dataset.id);
+});
 
 // データ読込
 function loadSave(id){
@@ -918,6 +891,5 @@ function deleteSave(id){
   renderSavedList(_saveType);
 }
 </script>
-<script src="common.js"></script>
 </body>
 </html>

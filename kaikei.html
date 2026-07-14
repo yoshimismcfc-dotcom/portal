@@ -4,9 +4,11 @@
   <meta charset="utf-8">
   <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
   <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="robots" content="noindex,nofollow">
   <title>会計・立替申請｜吉見SMC FC</title>
   <script src="firebase-config.js"></script>
   <link rel="stylesheet" href="common.css">
+  <script src="common.js"></script>
   <style>
     .tab-bar{display:flex;gap:0;border-radius:var(--r8);overflow:hidden;border:1px solid var(--line-2);margin-bottom:18px}
     .tab-btn{flex:1;padding:11px 6px;font:inherit;font-size:.8rem;font-weight:900;background:var(--surface-lt);color:#6aaccc;border:none;cursor:pointer;transition:.15s;display:flex;align-items:center;justify-content:center;gap:4px}
@@ -60,19 +62,28 @@
     .modal-btns{display:flex;gap:8px;justify-content:flex-end;margin-top:14px;flex-wrap:wrap}
     .g2{display:grid;grid-template-columns:1fr 1fr;gap:10px}
     @media(max-width:460px){.g2{grid-template-columns:1fr}}
+    @media print{
+      @page{size:A4 portrait;margin:12mm}
+      *{-webkit-print-color-adjust:exact;print-color-adjust:exact}
+      html,body{background:#fff!important;color:#000!important}
+      .site-header,.site-footer,.back-btn,.hero-band,.notice-bar,.tab-bar,.modal-bg,.report-controls{display:none!important}
+      .page-wrap{max-width:none!important;margin:0!important;padding:0!important}
+      .tab-sec{display:none!important}
+      .tab-sec.active{display:block!important}
+      .rpt-table{font-size:10pt!important}
+      .rpt-table th{background:#003087!important;color:#fff!important}
+      .rpt-table td,.rpt-table tfoot td{color:#000!important;background:#fff!important;border-color:#999!important}
+      .rpt-table tfoot td{font-weight:900!important}
+      .sum-box{background:#fff!important;border-color:#999!important;box-shadow:none!important}
+      .sum-lbl,.sum-val{color:#000!important}
+    }
   </style>
 </head>
 <body>
-<header class="site-header">
-  <div class="header-inner">
-    <a class="header-logo" href="index.html">
-      <div class="logo-mark">⚽</div>
-      <div><span class="logo-name">吉見SMC FC</span><span class="logo-sub">SMART PORTAL</span></div>
-    </a>
-  </div>
-</header>
+<header class="site-header"></header>
 <main class="page-wrap">
   <a class="back-btn" href="index.html">ホームに戻る</a>
+  <div class="notice-bar red">このページは旧会計画面です。通常の会計管理には <a href="finance.html" style="text-decoration:underline;font-weight:900">新しい会計ページ</a> を使用してください。</div>
   <div class="hero-band">
     <div class="hero-emoji">💴</div>
     <div>
@@ -116,21 +127,21 @@
 
   <!-- ===== 月次報告タブ ===== -->
   <div class="tab-sec" id="tab-monthly">
-    <div style="display:flex;gap:8px;align-items:center;margin-bottom:14px;flex-wrap:wrap">
+    <div class="report-controls" style="display:flex;gap:8px;align-items:center;margin-bottom:14px;flex-wrap:wrap">
       <select class="form-control" id="monthly-year" style="max-width:100px;height:36px;padding:4px 8px;font-size:.82rem" onchange="renderMonthly()"></select>
       <select class="form-control" id="monthly-month" style="max-width:80px;height:36px;padding:4px 8px;font-size:.82rem" onchange="renderMonthly()"></select>
       <button class="btn btn-outline btn-sm" onclick="exportMonthlyCsv()">📥 CSV</button>
-      <button class="btn btn-primary btn-sm" onclick="window.print()">🖨 印刷</button>
+      <button class="btn btn-primary btn-sm" onclick="printKaikeiReport('monthly')">🖨 印刷</button>
     </div>
     <div id="monthly-content"></div>
   </div>
 
   <!-- ===== 年度報告タブ ===== -->
   <div class="tab-sec" id="tab-annual">
-    <div style="display:flex;gap:8px;align-items:center;margin-bottom:14px;flex-wrap:wrap">
+    <div class="report-controls" style="display:flex;gap:8px;align-items:center;margin-bottom:14px;flex-wrap:wrap">
       <select class="form-control" id="annual-year2" style="max-width:100px;height:36px;padding:4px 8px;font-size:.82rem" onchange="renderAnnual()"></select>
       <button class="btn btn-outline btn-sm" onclick="exportAnnualCsv()">📥 CSV</button>
-      <button class="btn btn-primary btn-sm" onclick="window.print()">🖨 印刷</button>
+      <button class="btn btn-primary btn-sm" onclick="printKaikeiReport('annual')">🖨 印刷</button>
     </div>
     <div id="annual-content"></div>
   </div>
@@ -197,7 +208,7 @@
   </div>
 </div>
 
-<footer class="site-footer">YOSHIMI SMC FC — SMART PORTAL</footer>
+<footer class="site-footer"></footer>
 <script>
 var KEY = "smc_kaikei_v1";
 var _data = []; // [{id,person,date,amount,item,category,memo,status,comment,paidAt}]
@@ -246,16 +257,16 @@ function renderList(){
     var statusBadge = '<span class="status-badge '+r.status+'">'+STATUS_LABEL[r.status]+'</span>';
     var actions = '';
     if(r.status === 'pending'){
-      actions += '<button class="act-btn act-approve" onclick="changeStatus(\''+r.id+'\',\'approved\')">✅ 承認する</button>';
-      actions += '<button class="act-btn act-reject" onclick="changeStatus(\''+r.id+'\',\'rejected\')">❌ 却下</button>';
-      actions += '<button class="act-btn act-edit" onclick="openEdit(\''+r.id+'\')">✏️ 編集</button>';
+      actions += '<button class="act-btn act-approve" onclick="changeStatus('+inlineJsArg(r.id)+',\'approved\')">✅ 承認する</button>';
+      actions += '<button class="act-btn act-reject" onclick="changeStatus('+inlineJsArg(r.id)+',\'rejected\')">❌ 却下</button>';
+      actions += '<button class="act-btn act-edit" onclick="openEdit('+inlineJsArg(r.id)+')">✏️ 編集</button>';
     } else if(r.status === 'approved'){
-      actions += '<button class="act-btn act-paid" onclick="changeStatus(\''+r.id+'\',\'paid\')">💰 支払済にする</button>';
-      actions += '<button class="act-btn act-edit" onclick="openEdit(\''+r.id+'\')">✏️ 編集</button>';
+      actions += '<button class="act-btn act-paid" onclick="changeStatus('+inlineJsArg(r.id)+',\'paid\')">💰 支払済にする</button>';
+      actions += '<button class="act-btn act-edit" onclick="openEdit('+inlineJsArg(r.id)+')">✏️ 編集</button>';
     } else {
-      actions += '<button class="act-btn act-edit" onclick="openEdit(\''+r.id+'\')">✏️ 編集</button>';
+      actions += '<button class="act-btn act-edit" onclick="openEdit('+inlineJsArg(r.id)+')">✏️ 編集</button>';
     }
-    actions += '<button class="act-btn act-del" onclick="confirmDel(\''+r.id+'\')">🗑</button>';
+    actions += '<button class="act-btn act-del" onclick="confirmDel('+inlineJsArg(r.id)+')">🗑</button>';
 
     return '<div class="req-card '+r.status+'">'
       +'<div class="req-header">'
@@ -425,7 +436,7 @@ function renderMonthly(){
   var totalPending = pending.reduce(function(s,r){ return s+Number(r.amount||0); }, 0);
 
   var wrap = document.getElementById("monthly-content");
-  var html = '<div style="font-size:.92rem;font-weight:900;color:#fff;margin-bottom:12px">'+y+"年"+m+"月 月次会計報告</div>";
+  var html = '<div style="font-size:.92rem;font-weight:900;color:var(--ink);margin-bottom:12px">'+y+"年"+m+"月 月次会計報告</div>";
   html += '<div class="sum-grid" style="margin-bottom:14px">'
     +'<div class="sum-box"><div class="sum-lbl">支払済</div><div class="sum-val" style="color:#0088ff">¥'+totalPaid.toLocaleString()+'</div></div>'
     +'<div class="sum-box"><div class="sum-lbl">承認済（未払）</div><div class="sum-val" style="color:#00cc66">¥'+totalApproved.toLocaleString()+'</div></div>'
@@ -476,7 +487,7 @@ function renderAnnual(){
   paid.forEach(function(r){ var cat=r.category||"その他"; catMap[cat]=(catMap[cat]||0)+Number(r.amount||0); });
 
   var wrap = document.getElementById("annual-content");
-  var html = '<div style="font-size:.92rem;font-weight:900;color:#fff;margin-bottom:4px">'+y+"年度 年間会計報告</div>";
+  var html = '<div style="font-size:.92rem;font-weight:900;color:var(--ink);margin-bottom:4px">'+y+"年度 年間会計報告</div>";
   html += '<div style="font-size:.76rem;color:var(--ink-3);margin-bottom:12px">'+y+"年4月〜"+(y+1)+"年3月</div>";
 
   // 支出の部
@@ -543,6 +554,12 @@ function csvDownload(items, filename){
   a.download=filename+".csv"; a.click();
 }
 
+function printKaikeiReport(tab){
+  var section=document.getElementById("tab-"+tab);
+  if(!section)return;
+  smcPrint({orientation:"portrait",target:"kaikei-"+tab});
+}
+
 /* ===== タブ切り替え ===== */
 function switchTab(id, btn){
   document.querySelectorAll(".tab-sec").forEach(function(s){ s.classList.remove("active"); });
@@ -555,7 +572,7 @@ function switchTab(id, btn){
 
 /* ===== 共通 ===== */
 function closeModal(id){ document.getElementById(id).classList.remove("open"); }
-function esc(s){ return String(s||"").replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;"); }
+function esc(s){ return escapeHtml(s); }
 document.getElementById("modal-req").addEventListener("click",function(e){if(e.target.id==="modal-req")closeModal("modal-req");});
 document.getElementById("modal-comment").addEventListener("click",function(e){if(e.target.id==="modal-comment")closeModal("modal-comment");});
 window.addEventListener("DOMContentLoaded", function(){ initSelects(); });

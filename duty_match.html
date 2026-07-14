@@ -4,9 +4,11 @@
   <meta charset="utf-8">
   <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
   <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="robots" content="noindex,nofollow">
   <title>大会任務分担 v3｜吉見SMC FC</title>
   <script src="firebase-config.js"></script>
   <link rel="stylesheet" href="common.css">
+  <script src="common.js"></script>
   <style>
     /* カード */
     .mc{background:var(--surface-lt);border:1px solid var(--line-2);border-radius:var(--r12);margin-bottom:12px;overflow:hidden}
@@ -79,14 +81,7 @@
   </style>
 </head>
 <body>
-<header class="site-header">
-  <div class="header-inner">
-    <a class="header-logo" href="index.html">
-      <div class="logo-mark">⚽</div>
-      <div><span class="logo-name">吉見SMC FC</span><span class="logo-sub">SMART PORTAL</span></div>
-    </a>
-  </div>
-</header>
+<header class="site-header"></header>
 <main class="page-wrap">
   <a class="back-btn" href="coach.html">← コーチ専用に戻る</a>
   <div class="hero-band">
@@ -185,7 +180,7 @@
   </div>
 </div>
 
-<footer class="site-footer">YOSHIMI SMC FC — SMART PORTAL</footer>
+<footer class="site-footer"></footer>
 <script>
 var KEY = "smc_duty_match_v3";
 var DUTY_TEMPLATE = [
@@ -216,7 +211,7 @@ dbListen("duty_match", function(val){
 function save(){ localStorage.setItem(KEY, JSON.stringify(_data)); dbSave("duty_match", _data, KEY, null); }
 
 /* ===== 描画 ===== */
-function esc(s){ return String(s||"").replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;"); }
+function esc(s){ return escapeHtml(s); }
 
 function stBadge(st){
   if(st==="done") return '<span class="st st-done">✅ 確</span>';
@@ -256,8 +251,8 @@ function render(){
         : '<span class="person-empty">未定</span>';
       var timeStr = d.time ? '<span style="font-size:.7rem;color:var(--cyan);white-space:nowrap">'+esc(d.time)+'</span>' : '';
       return '<tr><td>'
-        +'<div class="duty-row-inner" onclick="openEditDuty(\''+m.id+'\',\''+d.key+'\')">'
-        +'<span class="d-icon">'+d.icon+'</span>'
+        +'<div class="duty-row-inner" onclick="openEditDuty('+inlineJsArg(m.id)+','+inlineJsArg(d.key)+')">'
+        +'<span class="d-icon">'+esc(d.icon)+'</span>'
         +'<div style="flex:1;min-width:80px"><span class="d-label">'+esc(d.label)+'</span>'
         +(d.memo?'<span class="d-memo">'+esc(d.memo)+'</span>':'')
         +'</div>'
@@ -268,25 +263,26 @@ function render(){
         +'</td></tr>';
     }).join("");
 
-    return '<div class="mc" id="mc-'+m.id+'">'
-      +'<div class="mc-head" onclick="toggleCard(\''+m.id+'\')">'
+    var domId=String(m.id||"").replace(/[^a-z0-9_-]/gi,"_");
+    return '<div class="mc" id="mc-'+domId+'">'
+      +'<div class="mc-head" onclick="toggleCard('+inlineJsArg(m.id)+')">'
       +'<div style="flex:1;min-width:0">'
       +'<div class="mc-name">'+esc(m.name)+'</div>'
-      +'<div class="mc-sub">'+(m.date||"")+(m.venue?' 📍'+esc(m.venue):'')+(m.time?' 集合'+esc(m.time):'')+'</div>'
+      +'<div class="mc-sub">'+esc(m.date||"")+(m.venue?' 📍'+esc(m.venue):'')+(m.time?' 集合'+esc(m.time):'')+'</div>'
       +(m.note?'<div class="mc-sub" style="color:#ffe58a">📝 '+esc(m.note)+'</div>':'')
       +'</div>'
       +'<div class="mc-prog" style="color:'+progColor+'">'+done+'/'+total+'</div>'
-      +'<button class="mc-edit-btn" onclick="event.stopPropagation();openEditMatch(\''+m.id+'\')">✏️</button>'
-      +'<span class="mc-arrow" id="arr-'+m.id+'">▼</span>'
+      +'<button class="mc-edit-btn" onclick="event.stopPropagation();openEditMatch('+inlineJsArg(m.id)+')">✏️</button>'
+      +'<span class="mc-arrow" id="arr-'+domId+'">▼</span>'
       +'</div>'
-      +'<div class="mc-body" id="body-'+m.id+'">'
+      +'<div class="mc-body" id="body-'+domId+'">'
       +'<div class="dt-wrap"><table class="dt">'
       +'<thead><tr><th>任務 / 担当者 / 状態</th></tr></thead>'
       +'<tbody>'+rows+'</tbody>'
       +'</table></div>'
-      +'<div class="add-duty-row" onclick="openAddDuty(\''+m.id+'\')">＋ 任務を追加</div>'
+      +'<div class="add-duty-row" onclick="openAddDuty('+inlineJsArg(m.id)+')">＋ 任務を追加</div>'
       +'<div style="display:flex;gap:8px;padding:6px 0 0;justify-content:flex-end">'
-      +'<button class="btn-line-copy sm" onclick="copyText(\''+m.id+'\')">📋 LINEコピー</button>'
+      +'<button class="btn-line-copy sm" onclick="copyText('+inlineJsArg(m.id)+')">📋 LINEコピー</button>'
       +'</div>'
       +'</div></div>';
   }).join("");
@@ -294,14 +290,16 @@ function render(){
 
 /* ===== アコーディオン ===== */
 function toggleCard(id){
-  var b = document.getElementById("body-"+id);
-  var a = document.getElementById("arr-"+id);
+  var domId=String(id||"").replace(/[^a-z0-9_-]/gi,"_");
+  var b = document.getElementById("body-"+domId);
+  var a = document.getElementById("arr-"+domId);
   var open = b.classList.toggle("open");
   if(a) a.style.transform = open?"rotate(180deg)":"";
 }
 function openCard(id){
-  var b = document.getElementById("body-"+id);
-  var a = document.getElementById("arr-"+id);
+  var domId=String(id||"").replace(/[^a-z0-9_-]/gi,"_");
+  var b = document.getElementById("body-"+domId);
+  var a = document.getElementById("arr-"+domId);
   if(b && !b.classList.contains("open")){ b.classList.add("open"); if(a) a.style.transform="rotate(180deg)"; }
 }
 
