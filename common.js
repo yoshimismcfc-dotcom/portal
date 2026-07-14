@@ -370,39 +370,96 @@
       return String(Math.floor(total / 60)).padStart(2, "0") + ":" + String(total % 60).padStart(2, "0");
     }
 
+    function timeToMinutes(time) {
+      const parts = String(time || "00:00").split(":");
+      return Number(parts[0]) * 60 + Number(parts[1]);
+    }
+
+    function minutesToTime(total) {
+      const normalized = ((Number(total) % 1440) + 1440) % 1440;
+      return String(Math.floor(normalized / 60)).padStart(2, "0") + ":" + String(normalized % 60).padStart(2, "0");
+    }
+
     function ensureLunchBreakRows() {
       const enabled = document.getElementById("lunch-enable")?.checked;
       const sheet = preview.querySelector(".tai-sheet");
       if (!enabled || !sheet) return;
-      const start = document.getElementById("lunch-start")?.value || "12:00";
+      const requestedStart = document.getElementById("lunch-start")?.value || "12:00";
       const minutes = Math.max(10, Number(document.getElementById("lunch-min")?.value) || 60);
       const label = document.getElementById("lunch-label")?.value.trim() || "🍱 昼食休憩";
-      const end = addMinutes(start, minutes);
+      const gameMinutes = Math.max(1, Number(document.getElementById("t-min")?.value) || 40);
+      const tournamentStart = document.getElementById("t-start")?.value || "08:30";
       let scheduleTables = Array.from(sheet.querySelectorAll(".courts-row > div > table.st"));
       if (!scheduleTables.length) {
         const firstSchedule = sheet.querySelector("table.st");
         if (firstSchedule) scheduleTables = [firstSchedule];
       }
+
       scheduleTables.forEach((table) => {
-        const existing = Array.from(table.querySelectorAll(".tr-break-td")).find((cell) =>
-          cell.textContent.includes(label) || cell.textContent.includes("昼食休憩")
-        );
-        if (existing) {
-          existing.closest("tr")?.classList.add("lunch-break-row");
-          return;
+        Array.from(table.querySelectorAll("tr")).forEach((row) => {
+          const breakCell = row.querySelector(".tr-break-td");
+          if (row.classList.contains("lunch-break-row") || breakCell?.textContent.includes(label) || breakCell?.textContent.includes("昼食休憩")) row.remove();
+        });
+      });
+
+      const timedRowsByTable = scheduleTables.map((table) =>
+        Array.from(table.tBodies[0]?.rows || []).filter((candidate) => /^\d{1,2}:\d{2}$/.test(candidate.cells[1]?.textContent.trim() || ""))
+      );
+      const roundCount = Math.max(0, ...timedRowsByTable.map((rows) => rows.length));
+      const requestedStartMinutes = timeToMinutes(requestedStart);
+      let cursor = timeToMinutes(tournamentStart);
+      let lunchBeforeRound = -1;
+      let actualLunchStart = requestedStartMinutes;
+      const adjustedRoundTimes = [];
+
+      for (let round = 0; round < roundCount; round++) {
+        if (lunchBeforeRound < 0 && (cursor >= requestedStartMinutes || cursor + gameMinutes > requestedStartMinutes)) {
+          lunchBeforeRound = round;
+          actualLunchStart = Math.max(cursor, requestedStartMinutes);
+          cursor = actualLunchStart + minutes;
         }
+        adjustedRoundTimes.push(minutesToTime(cursor));
+        cursor += gameMinutes;
+      }
+      if (lunchBeforeRound < 0) {
+        lunchBeforeRound = roundCount;
+        actualLunchStart = Math.max(cursor, requestedStartMinutes);
+        cursor = actualLunchStart + minutes;
+      }
+      const actualLunchEnd = actualLunchStart + minutes;
+
+      scheduleTables.forEach((table) => {
+        const timedRows = Array.from(table.tBodies[0]?.rows || []).filter((candidate) => /^\d{1,2}:\d{2}$/.test(candidate.cells[1]?.textContent.trim() || ""));
+        timedRows.forEach((row, index) => {
+          if (adjustedRoundTimes[index]) row.cells[1].textContent = adjustedRoundTimes[index];
+        });
         const row = document.createElement("tr");
         row.className = "lunch-break-row";
         const cell = document.createElement("td");
         cell.className = "tr-break-td";
         cell.colSpan = Math.max(1, table.querySelectorAll("thead th").length);
-        cell.textContent = `${label}　（${minutes}分）　${start}〜${end}`;
+        cell.textContent = `${label}　（${minutes}分）　${minutesToTime(actualLunchStart)}〜${minutesToTime(actualLunchEnd)}`;
         row.appendChild(cell);
         const body = table.tBodies[0] || table.createTBody();
-        const timedRows = Array.from(body.rows).filter((candidate) => /^\d{1,2}:\d{2}$/.test(candidate.cells[1]?.textContent.trim() || ""));
-        const insertBefore = timedRows.find((candidate) => candidate.cells[1].textContent.trim() >= start);
+        const insertBefore = timedRows[lunchBeforeRound];
         if (insertBefore) body.insertBefore(row, insertBefore);
         else body.appendChild(row);
+      });
+
+      const allScheduleTables = Array.from(sheet.querySelectorAll("table.st"));
+      const finalsTable = allScheduleTables.find((table) =>
+        !scheduleTables.includes(table) && Array.from(table.querySelectorAll("tbody tr")).some((row) => row.cells[2]?.textContent.trim() === "順位戦")
+      );
+      const finalsStart = cursor + 10;
+      if (finalsTable) {
+        const finalsRows = Array.from(finalsTable.tBodies[0]?.rows || []).filter((row) => row.cells[2]?.textContent.trim() === "順位戦");
+        finalsRows.forEach((row, index) => {
+          row.cells[1].textContent = minutesToTime(finalsStart + (index >= 2 ? gameMinutes : 0));
+        });
+      }
+      const closingTime = minutesToTime(finalsStart + gameMinutes * 2);
+      sheet.querySelectorAll(".tr-closing-td").forEach((cell) => {
+        cell.textContent = cell.textContent.replace(/\d{1,2}:\d{2}(?=～)/, closingTime);
       });
     }
 
