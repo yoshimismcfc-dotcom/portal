@@ -286,6 +286,9 @@
       const style = document.createElement("style");
       style.id = "tournament-print-enhanced-style";
       style.textContent = `
+        body.tournament-print-enhanced #doc-taisen .fg1,body.tournament-print-enhanced #doc-taisen .fg1 > .form-group{width:100%;min-width:0;max-width:100%;box-sizing:border-box}
+        body.tournament-print-enhanced #doc-taisen #t-date{display:block;width:100%!important;min-width:0!important;max-width:100%!important;inline-size:100%!important;min-inline-size:0!important;box-sizing:border-box!important}
+        body.tournament-print-enhanced #doc-taisen #t-date::-webkit-date-and-time-value{min-width:0;text-align:left}
         body.tournament-print-enhanced #taisen-preview .tai-sheet{border:1px solid #b8c3d1;background:#fff;color:#172033}
         body.tournament-print-enhanced #taisen-preview .tai-title{color:#173b66;border-bottom:3px solid #ea6b24;padding-bottom:6px;margin-bottom:4px}
         body.tournament-print-enhanced #taisen-preview .tai-sub{color:#475569;font-weight:700}
