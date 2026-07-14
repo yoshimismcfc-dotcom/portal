@@ -998,6 +998,17 @@ body[data-theme="light"] .save-toast[data-state="local"] { color: #174f8b; }
   -webkit-overflow-scrolling: touch;
   scrollbar-gutter: stable;
 }
+.table-wrap:focus-visible,
+.acc-table-wrap:focus-visible,
+.acct-table-wrap:focus-visible,
+.ledger-sheet-wrap:focus-visible,
+.roster-wrap:focus-visible,
+.list-wrap:focus-visible,
+.adj-wrap:focus-visible,
+.duty-table-wrap:focus-visible {
+  outline: 3px solid var(--orange-2);
+  outline-offset: 3px;
+}
 .acc-table th:last-child,
 .acc-table td:last-child,
 .uni-table th:last-child,
@@ -1017,6 +1028,66 @@ body[data-theme="light"] .uni-table td:last-child,
 body[data-theme="light"] .fin-table td:last-child,
 body[data-theme="light"] .ledger-edit-table td:last-child {
   background: #f8fbff;
+}
+
+@media (max-width: 640px) {
+  table.mobile-stack {
+    display: block;
+    width: 100%;
+    min-width: 0 !important;
+    white-space: normal !important;
+  }
+  table.mobile-stack thead {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    overflow: hidden;
+    clip: rect(0 0 0 0);
+    clip-path: inset(50%);
+  }
+  table.mobile-stack tbody,
+  table.mobile-stack tr,
+  table.mobile-stack td {
+    display: block;
+    width: 100%;
+  }
+  table.mobile-stack tbody {
+    display: grid;
+    gap: 10px;
+    padding: 8px;
+  }
+  table.mobile-stack tbody tr {
+    overflow: hidden;
+    border: 1px solid var(--line-2);
+    border-radius: var(--r8);
+    background: var(--surface-lt);
+  }
+  table.mobile-stack tbody td {
+    position: static !important;
+    min-height: 42px;
+    padding: 9px 10px !important;
+    display: grid;
+    grid-template-columns: minmax(6.5rem, 38%) minmax(0, 1fr);
+    align-items: center;
+    gap: 10px;
+    border: 0 !important;
+    border-bottom: 1px solid var(--line) !important;
+    background: transparent !important;
+    box-shadow: none !important;
+    text-align: left !important;
+    white-space: normal !important;
+    overflow-wrap: anywhere;
+  }
+  table.mobile-stack tbody td:last-child { border-bottom: 0 !important; }
+  table.mobile-stack tbody td::before {
+    content: attr(data-label);
+    color: var(--ink-3);
+    font-size: .68rem;
+    font-weight: 900;
+    line-height: 1.35;
+  }
+  table.mobile-stack tbody td[data-label=""]::before { content: "操作"; }
+  table.mobile-stack .acc-actions { justify-content: flex-start; }
 }
 
 @media print {

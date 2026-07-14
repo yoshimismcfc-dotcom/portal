@@ -136,6 +136,30 @@
     });
   }
 
+  function labelResponsiveTable(table) {
+    const headers = Array.from(table.querySelectorAll("thead th")).map((header) => header.textContent.trim());
+    if (!headers.length) return;
+    table.querySelectorAll("tbody tr").forEach((row) => {
+      Array.from(row.children).forEach((cell, index) => {
+        if (cell.tagName !== "TD" || cell.hasAttribute("data-label")) return;
+        cell.setAttribute("data-label", headers[index] || "");
+      });
+    });
+  }
+
+  function setupResponsiveTables() {
+    document.querySelectorAll("table.mobile-stack").forEach((table) => {
+      labelResponsiveTable(table);
+      const observer = new MutationObserver(() => labelResponsiveTable(table));
+      observer.observe(table, { childList: true, subtree: true });
+    });
+    document.querySelectorAll(".table-wrap,.acc-table-wrap,.acct-table-wrap,.ledger-sheet-wrap,.roster-wrap,.list-wrap,.adj-wrap,.duty-table-wrap").forEach((wrapper) => {
+      if (!wrapper.hasAttribute("tabindex")) wrapper.setAttribute("tabindex", "0");
+      wrapper.setAttribute("role", "region");
+      if (!wrapper.hasAttribute("aria-label")) wrapper.setAttribute("aria-label", "横にスクロールできる表");
+    });
+  }
+
   function showStorageWarning() {
     if (canStore) return;
     const banner = document.createElement("div");
@@ -152,6 +176,7 @@
     refreshFooter();
     setupTabs();
     setupDisclosureAccessibility();
+    setupResponsiveTables();
     showStorageWarning();
   });
 })();

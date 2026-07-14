@@ -114,11 +114,19 @@ const commonSource = fs.readFileSync(path.join(root, "common.js"), "utf8");
 if (!commonSource.includes("setupDisclosureAccessibility")) {
   fail("common.js", "タップ式の説明項目にキーボード操作を追加していません");
 }
+if (!commonSource.includes("setupResponsiveTables") || !commonCssSource.includes("table.mobile-stack")) {
+  fail("共通UI", "スマホ向け表レイアウトの共通処理がありません");
+}
+for (const responsiveFile of ["accounts.html", "members.html", "duty.html", "accounting.html", "weather.html", "heat.html", "guide.html"]) {
+  const responsiveSource = fs.readFileSync(path.join(root, responsiveFile), "utf8");
+  if (!responsiveSource.includes("mobile-stack")) fail(responsiveFile, "スマホ向け表レイアウトが適用されていません");
+}
 const guideSource = fs.readFileSync(path.join(root, "guide.html"), "utf8");
 if (guideSource.includes("今後1週間の予定リスト")) fail("guide.html", "廃止したカレンダー予定リストの説明が残っています");
 if (guideSource.includes("パスワードは「表示」")) fail("guide.html", "廃止したパスワード表示機能の説明が残っています");
 const accountsSource = fs.readFileSync(path.join(root, "accounts.html"), "utf8");
 if (/<th>パスワード<\/th>/.test(accountsSource)) fail("accounts.html", "保存しないパスワードの列見出しが残っています");
+if (/\.pw-(?:cell|text|toggle)/.test(accountsSource)) fail("accounts.html", "廃止したパスワード表示用CSSが残っています");
 
 const rulesPath = path.join(root, "database.rules.json");
 if (fs.existsSync(rulesPath)) {
