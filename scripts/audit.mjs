@@ -111,6 +111,9 @@ if (/localStorage\.setItem\([^\n]*smc_members/i.test(membersSource)) fail("membe
 if (!membersSource.includes("next[grade]=next[grade].filter")) fail("members.html", "Firebase名簿の空データを除外していません");
 
 const commonSource = fs.readFileSync(path.join(root, "common.js"), "utf8");
+if (!commonSource.includes("refreshCoachFolderLabels")) {
+  fail("common.js", "旧名称を安全にコーチ専用フォルダへ置き換える処理がありません");
+}
 if (!commonSource.includes("setupDisclosureAccessibility")) {
   fail("common.js", "タップ式の説明項目にキーボード操作を追加していません");
 }
@@ -127,6 +130,14 @@ if (guideSource.includes("パスワードは「表示」")) fail("guide.html", "
 const accountsSource = fs.readFileSync(path.join(root, "accounts.html"), "utf8");
 if (/<th>パスワード<\/th>/.test(accountsSource)) fail("accounts.html", "保存しないパスワードの列見出しが残っています");
 if (/\.pw-(?:cell|text|toggle)/.test(accountsSource)) fail("accounts.html", "廃止したパスワード表示用CSSが残っています");
+
+const gameAdjustSource = fs.readFileSync(path.join(root, "game_adjust.html"), "utf8");
+if (!gameAdjustSource.includes("mobile-date-nav") || !gameAdjustSource.includes("setFocusedDate")) {
+  fail("game_adjust.html", "スマホ用の日程切り替え表示がありません");
+}
+if (!gameAdjustSource.includes('body[data-theme="light"] .adj-table tbody .col-fixed')) {
+  fail("game_adjust.html", "ライトモードの試合調整表に文字色補正がありません");
+}
 
 const rulesPath = path.join(root, "database.rules.json");
 if (fs.existsSync(rulesPath)) {
