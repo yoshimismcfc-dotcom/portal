@@ -22,6 +22,7 @@
       scrollbar-width:thin; scrollbar-color:rgba(255,107,43,.6) rgba(0,0,0,.4);
       overscroll-behavior:contain;
     }
+    .mobile-date-nav{display:none}
     .adj-wrap::-webkit-scrollbar{height:7px;width:7px}
     .adj-wrap::-webkit-scrollbar-track{background:rgba(0,0,0,.4)}
     .adj-wrap::-webkit-scrollbar-thumb{background:rgba(255,107,43,.6);border-radius:4px}
@@ -135,6 +136,57 @@
     @keyframes modalIn{from{opacity:0;transform:translateY(14px) scale(.97)}to{opacity:1;transform:none}}
     .modal h3{font-size:1rem;font-weight:900;margin-bottom:16px;color:#fff;letter-spacing:.05em}
     .modal-btns{display:flex;gap:8px;justify-content:flex-end;margin-top:16px;flex-wrap:wrap}
+    body[data-theme="light"] .adj-wrap{background:#fff;border-color:#d38a35}
+    body[data-theme="light"] .adj-table tbody tr:not(.tr-count):not(.tr-nokori):not(.tr-biko) td{background:#fff;color:#17243a}
+    body[data-theme="light"] .adj-table tbody tr:nth-child(even):not(.tr-count):not(.tr-nokori):not(.tr-biko) td{background:#edf3fa}
+    body[data-theme="light"] .adj-table tbody .col-fixed{background:#dce8f4!important;color:#10213a!important;border-right-color:#2786a8!important}
+    body[data-theme="light"] .adj-table tbody tr:nth-child(even) .col-fixed{background:#cddceb!important}
+    body[data-theme="light"] .s-none{background:#fff;color:#17607e;border-color:#4aa3bd}
+    body[data-theme="light"] .s-ok{background:#dff7e9;color:#006b3c;border-color:#39a873}
+    body[data-theme="light"] .s-ng{background:#ffe4e9;color:#a7193c;border-color:#d35d78}
+    body[data-theme="light"] .s-kakun{background:#fff4c7;color:#765600;border-color:#c59b00}
+    body[data-theme="light"] .tantou-input{color:#17445c}
+    body[data-theme="light"] .tr-count td{background:#fff0df!important;color:#8a3d00!important}
+    body[data-theme="light"] .tr-count td.is-full{background:#dff7e9!important;color:#006b3c!important}
+    body[data-theme="light"] .tr-nokori td{background:#e4f4fb!important;color:#17445c!important}
+    body[data-theme="light"] .tr-biko td{background:#fff9df!important;color:#664c00!important}
+    body[data-theme="light"] .biko-input{color:#664c00}
+    body[data-theme="light"] .legend{color:#324a62}
+    @media(max-width:760px){
+      .page-wrap{padding-left:10px;padding-right:10px}
+      .hero-band{padding:14px 12px;gap:10px}
+      .hero-emoji{width:46px;height:46px;font-size:1.4rem}
+      .ctrl-bar{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:7px}
+      .ctrl-bar .btn,.ctrl-bar .undo-btn,.ctrl-bar .btn-line-copy{width:100%;min-height:44px;justify-content:center}
+      #save-msg{grid-column:1/-1;text-align:center}
+      .legend{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:6px;font-size:.68rem}
+      .legend-intro{grid-column:1/-1}
+      .legend-item{display:flex;align-items:center;gap:5px;min-width:0}
+      .legend .status-btn{min-width:48px;flex:0 0 auto}
+      .mobile-date-nav{display:grid;grid-template-columns:44px minmax(0,1fr) 44px;align-items:end;gap:7px;margin:4px 0 9px}
+      .mobile-date-nav label{font-size:.68rem;font-weight:900;color:var(--ink-3)}
+      .mobile-date-nav .form-control{min-height:44px;margin-top:3px;padding:7px 9px;font-size:.8rem}
+      .date-nav-btn{min-width:44px;min-height:44px;border:1px solid var(--line-2);border-radius:var(--r8);background:var(--surface-lt);color:var(--ink);font-size:1.25rem;font-weight:900}
+      .adj-wrap{max-height:none;overflow-x:hidden;overflow-y:visible;border-radius:10px}
+      .adj-table{width:100%;min-width:0;table-layout:fixed;font-size:.76rem}
+      .adj-table [data-date-id]:not(.is-active-date){display:none}
+      .adj-table th,.adj-table td{padding:7px 5px;white-space:normal}
+      .adj-table thead tr:first-child th,.adj-table thead tr:nth-child(2) th{position:static}
+      .col-fixed{position:static;left:auto;min-width:0;max-width:none;width:40%;padding-left:9px!important}
+      .th-date.date-col,.date-cell{width:34%}
+      .th-tantou,.tantou-cell{width:26%}
+      .th-date{min-width:0;font-size:.76rem}
+      .th-cat{font-size:.62rem;line-height:1.45}
+      .status-btn{width:100%;min-width:0;min-height:44px;padding:8px 4px;font-size:.76rem}
+      .del-date-btn{min-width:26px;padding:4px;font-size:.7rem}
+      .team-cell-inner{display:flex;align-items:center;justify-content:space-between;gap:3px}
+      .team-name{min-width:0;overflow-wrap:anywhere;font-size:.76rem}
+      .del-team-btn{flex:0 0 auto;padding:4px;min-width:26px}
+      .tantou-input{font-size:.72rem;padding:6px 2px}
+      .biko-input{min-width:0;font-size:.7rem}
+      .tr-count .col-fixed,.tr-nokori .col-fixed,.tr-biko .col-fixed{font-size:.66rem}
+      .desktop-scroll-help{display:none}
+    }
     /* ===== 印刷最適化 ===== */
     @media print{
       .site-header,.site-footer,.back-btn,.ctrl-bar,.legend,.hero-band,p{display:none !important}
@@ -156,7 +208,7 @@
 <body>
 <header class="site-header"></header>
 <main class="page-wrap">
-  <a class="back-btn" href="coach.html">運営メニューに戻る</a>
+  <a class="back-btn" href="coach.html">コーチ専用フォルダに戻る</a>
   <div class="hero-band">
     <div class="hero-emoji">📊</div>
     <div>
@@ -175,17 +227,25 @@
     <span id="save-msg" role="status" aria-live="polite"></span>
   </div>
   <div class="legend" aria-hidden="true">
-    タップで切替 →
-    <span class="status-btn s-ok">OK</span>参加可
-    <span class="status-btn s-ng">NG</span>不可
-    <span class="status-btn s-kakun">確認中</span>返答待ち
-    <span class="status-btn s-none">－</span>未打診
+    <span class="legend-intro">タップで切替</span>
+    <span class="legend-item"><span class="status-btn s-ok">OK</span>参加可</span>
+    <span class="legend-item"><span class="status-btn s-ng">NG</span>不可</span>
+    <span class="legend-item"><span class="status-btn s-kakun">確認中</span>返答待ち</span>
+    <span class="legend-item"><span class="status-btn s-none">－</span>未打診</span>
+  </div>
+
+  <div class="mobile-date-nav" aria-label="スマホ用日程切り替え">
+    <button class="date-nav-btn" type="button" onclick="moveFocusedDate(-1)" aria-label="前の日程">‹</button>
+    <label for="date-focus-select">表示する日程
+      <select class="form-control" id="date-focus-select" onchange="setFocusedDate(this.value)"></select>
+    </label>
+    <button class="date-nav-btn" type="button" onclick="moveFocusedDate(1)" aria-label="次の日程">›</button>
   </div>
 
   <div class="adj-wrap">
     <table class="adj-table" id="adj-table" aria-label="試合調整表"></table>
   </div>
-  <p style="font-size:.7rem;color:#6aaccc;margin-top:8px">← 横スクロール可。チーム列と日付行は固定。備考・担当者はタップで直接編集（自動保存）。カテゴリー欄タップで日程を編集できます。</p>
+  <p class="desktop-scroll-help" style="font-size:.7rem;color:#6aaccc;margin-top:8px">← パソコンでは横スクロールできます。スマホでは上の「表示する日程」で1日ずつ切り替えます。備考・担当者は直接編集（自動保存）。カテゴリー欄タップで日程を編集できます。</p>
 
   <div style="margin-top:14px">
     <button class="btn btn-outline btn-sm" style="color:var(--red);border-color:rgba(255,68,102,.35);font-size:.72rem" onclick="resetData()">↩ 初期データにリセット（取扱注意）</button>
@@ -559,6 +619,34 @@ function copyAdjList(){
 }
 
 /* ---------- 表の描画（XSS対策済み・イベントデリゲーション） ---------- */
+var _focusedDateId = "";
+function refreshDateFocus(){
+  var dates = data.dates || [];
+  if(!dates.some(function(d){return d.id===_focusedDateId;})) _focusedDateId = dates.length ? dates[0].id : "";
+  var select = document.getElementById("date-focus-select");
+  if(select){
+    select.innerHTML = dates.map(function(d){
+      return "<option value='"+esc(d.id)+"'>"+esc(d.label)+"｜"+esc(d.cat||"未設定")+"</option>";
+    }).join("");
+    select.value = _focusedDateId;
+    select.disabled = !dates.length;
+  }
+  document.querySelectorAll("#adj-table [data-date-id]").forEach(function(cell){
+    cell.classList.toggle("is-active-date", cell.dataset.dateId===_focusedDateId);
+  });
+}
+function setFocusedDate(dateId){
+  _focusedDateId = dateId;
+  refreshDateFocus();
+}
+function moveFocusedDate(delta){
+  var dates = data.dates || [];
+  if(!dates.length) return;
+  var index = dates.findIndex(function(d){return d.id===_focusedDateId;});
+  if(index<0) index=0;
+  index = (index + delta + dates.length) % dates.length;
+  setFocusedDate(dates[index].id);
+}
 function renderTable() {
   var tbl = document.getElementById("adj-table");
   var dates = data.dates, teams = data.teams;
@@ -568,30 +656,30 @@ function renderTable() {
   dates.forEach(function(d) {
     var cnt = teams.filter(function(t){ return ((t.statuses||{})[d.id]||"－")==="OK"; }).length;
     var full = (d.target - cnt) <= 0;
-    h += "<th class='th-date" + (full ? " is-full" : "") + "' id='hdr-" + esc(d.id) + "' scope='col'>" + esc(d.label) +
+    h += "<th class='th-date date-col" + (full ? " is-full" : "") + "' data-date-id='" + esc(d.id) + "' id='hdr-" + esc(d.id) + "' scope='col'>" + esc(d.label) +
          (full ? "<span class='full-badge'>✅</span>" : "") +
          "<button class='del-date-btn' data-act='del-date' data-id='" + esc(d.id) + "' title='この列を削除' aria-label='" + esc(d.label) + "を削除'>✕</button></th>";
   });
   h += "<th class='th-date th-tantou' scope='col'>担当</th></tr>";
   h += "<tr><th class='col-fixed th-cat' style='color:#8ac8e8;cursor:default'>カテゴリー / 目標</th>";
   dates.forEach(function(d) {
-    h += "<th class='th-cat' data-act='edit-date' data-id='" + esc(d.id) + "' tabindex='0' role='button' aria-label='" + esc(d.label) + "の日程を編集' title='タップして編集'>" + esc(d.cat) +
+    h += "<th class='th-cat date-col' data-date-id='" + esc(d.id) + "' data-act='edit-date' data-id='" + esc(d.id) + "' tabindex='0' role='button' aria-label='" + esc(d.label) + "の日程を編集' title='タップして編集'>" + esc(d.cat) +
          "<br><span style='color:#ffaa66;font-weight:900'>目標 " + esc(d.target) + "チーム</span>" +
          "<span style='font-size:.6rem;color:#6aaccc;display:block'>✏️ タップして編集</span></th>";
   });
   h += "<th class='th-cat' style='cursor:default'></th></tr></thead><tbody>";
 
   teams.forEach(function(t) {
-    h += "<tr><td class='col-fixed'>" + esc(t.name) +
-         " <button class='del-team-btn' data-act='del-team' data-id='" + esc(t.id) + "' title='削除' aria-label='" + esc(t.name) + "を削除'>🗑</button></td>";
+    h += "<tr><td class='col-fixed'><div class='team-cell-inner'><span class='team-name'>" + esc(t.name) +
+         "</span><button class='del-team-btn' data-act='del-team' data-id='" + esc(t.id) + "' title='削除' aria-label='" + esc(t.name) + "を削除'>🗑</button></div></td>";
     dates.forEach(function(d) {
       var st = (t.statuses || {})[d.id] || "－";
       var cls = SCLS[st] || "s-none";
-      h += "<td style='text-align:center'><button class='status-btn " + cls +
+      h += "<td class='date-cell' data-date-id='" + esc(d.id) + "' style='text-align:center'><button class='status-btn " + cls +
            "' data-act='cycle' data-tid='" + esc(t.id) + "' data-did='" + esc(d.id) +
            "' aria-label='" + esc(t.name) + " " + esc(d.label) + " 現在" + esc(st) + "'>" + esc(st) + "</button></td>";
     });
-    h += "<td style='text-align:center'><input class='tantou-input' data-tid='" + esc(t.id) +
+    h += "<td class='tantou-cell' style='text-align:center'><input class='tantou-input' data-tid='" + esc(t.id) +
          "' value='" + esc(t.tantou || "") + "' placeholder='担当' aria-label='" + esc(t.name) + "の担当者'></td></tr>";
   });
 
@@ -600,7 +688,7 @@ function renderTable() {
   dates.forEach(function(d) {
     var cnt = teams.filter(function(t){ return ((t.statuses || {})[d.id] || "－") === "OK"; }).length;
     var full = (d.target - cnt) <= 0;
-    h += "<td id='cnt-" + esc(d.id) + "'" + (full ? " class='is-full'" : "") + ">" + cnt + "<span style='font-size:.65rem;color:#8ac8e8'> /" + esc(d.target) + "</span></td>";
+    h += "<td data-date-id='" + esc(d.id) + "' id='cnt-" + esc(d.id) + "'" + (full ? " class='is-full'" : "") + ">" + cnt + "<span style='font-size:.65rem;color:#8ac8e8'> /" + esc(d.target) + "</span></td>";
   });
   h += "<td></td></tr>";
 
@@ -610,7 +698,7 @@ function renderTable() {
     var cnt = teams.filter(function(t){ return ((t.statuses || {})[d.id] || "－") === "OK"; }).length;
     var n = d.target - cnt;
     var col = n <= 0 ? "#00ff88" : n === 1 ? "#ffee44" : "#ff8888";
-    h += "<td id='rem-" + esc(d.id) + "' style='color:" + col + ";font-weight:900'>" + (n <= 0 ? "✅ 充足" : n) + "</td>";
+    h += "<td data-date-id='" + esc(d.id) + "' id='rem-" + esc(d.id) + "' style='color:" + col + ";font-weight:900'>" + (n <= 0 ? "✅ 充足" : n) + "</td>";
   });
   h += "<td></td></tr>";
 
@@ -618,10 +706,11 @@ function renderTable() {
   h += "<tr class='tr-biko'><td class='col-fixed'>📝 備考</td>";
   dates.forEach(function(d) {
     var biko = (data.備考 || {})[d.id] || "";
-    h += "<td><textarea class='biko-input' data-did='" + esc(d.id) + "' rows='1' placeholder='備考…' aria-label='" + esc(d.label) + "の備考'>" + esc(biko) + "</textarea></td>";
+    h += "<td data-date-id='" + esc(d.id) + "'><textarea class='biko-input' data-did='" + esc(d.id) + "' rows='1' placeholder='備考…' aria-label='" + esc(d.label) + "の備考'>" + esc(biko) + "</textarea></td>";
   });
   h += "<td></td></tr></tbody>";
   tbl.innerHTML = h;
+  refreshDateFocus();
 }
 
 /* ---------- イベントデリゲーション（動的要素の操作を一括処理） ---------- */
@@ -735,6 +824,7 @@ function addDate() {
   var d = new Date(dateVal);
   var label = (d.getMonth()+1) + "/" + d.getDate() + "（" + ["日","月","火","水","木","金","土"][d.getDay()] + "）";
   var id = "d" + Date.now();
+  _focusedDateId = id;
   data.dates.push({id:id, label:label, cat:cat, target:target});
   data.teams.forEach(function(t){ if(!t.statuses) t.statuses = {}; t.statuses[id] = "－"; });
   persist(); renderTable(); closeModal("modal-date");
