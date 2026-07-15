@@ -174,6 +174,19 @@ if (!commonSource.includes("enhanceCalendarUpcomingAgenda") || !commonSource.inc
 if (!commonSource.includes("extractDescriptionTime") || !commonSource.includes("descriptionTime")) {
   fail("common.js", "説明欄の時間範囲を予定カードへ反映する処理がありません");
 }
+const calendarColorMappings = [
+  ['color: "#8e24aa", label: "U12"', '<span class="leg-dot" style="background:#8e24aa"></span>U12'],
+  ['color: "#d50000", label: "U11"', '<span class="leg-dot" style="background:#d50000"></span>U11'],
+  ['color: "#f09300", label: "U10"', '<span class="leg-dot" style="background:#f09300"></span>U10'],
+  ['color: "#e4c441", label: "U9"', '<span class="leg-dot" style="background:#e4c441"></span>U9'],
+  ['color: "#7cb342", label: "U8"', '<span class="leg-dot" style="background:#7cb342"></span>U8'],
+  ['color: "#0b8043", label: "U7"', '<span class="leg-dot" style="background:#0b8043"></span>U7']
+];
+for (const [cardMapping, legendMapping] of calendarColorMappings) {
+  if (!commonSource.includes(cardMapping) || !calendarSource.includes(legendMapping)) {
+    fail("calendar.html", "Googleカレンダーと予定カードのカテゴリー色が一致していません");
+  }
+}
 if (!guideSource.includes("Google Calendar API") || !guideSource.includes("利用制限")) {
   fail("guide.html", "今後の予定のAPI連携と利用制限が説明書にありません");
 }
