@@ -168,6 +168,12 @@ if (!commonSource.includes('data-print-target="tournament-schedule"') || !common
 if (!commonSource.includes("#doc-taisen #t-date") || !commonSource.includes("min-inline-size:0")) {
   fail("common.js", "対戦表の期日入力欄にスマホ向け横幅補正がありません");
 }
+if (!commonSource.includes("enhanceCalendarUpcomingAgenda") || !commonSource.includes("calendar-upcoming-agenda")) {
+  fail("common.js", "カレンダー下の今後の予定表示がありません");
+}
+if (!guideSource.includes("Googleカレンダー公式のリスト表示")) {
+  fail("guide.html", "今後の予定の安全な表示方法が説明書にありません");
+}
 
 const rulesPath = path.join(root, "database.rules.json");
 if (fs.existsSync(rulesPath)) {

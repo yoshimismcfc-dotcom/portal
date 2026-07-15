@@ -481,6 +481,66 @@
     }
   }
 
+  function enhanceCalendarUpcomingAgenda() {
+    const calendarFrame = document.getElementById("gcal-iframe");
+    const calendarWrap = calendarFrame?.closest(".gcal-wrap");
+    if (!calendarFrame || !calendarWrap || document.getElementById("calendar-upcoming-agenda")) return;
+
+    let agendaUrl;
+    try {
+      agendaUrl = new URL(calendarFrame.src);
+      agendaUrl.searchParams.set("mode", "AGENDA");
+      agendaUrl.searchParams.set("showNav", "0");
+      agendaUrl.searchParams.set("showDate", "0");
+      agendaUrl.searchParams.set("showTabs", "0");
+      agendaUrl.searchParams.set("showCalendars", "0");
+      agendaUrl.searchParams.set("showPrint", "0");
+    } catch (error) {
+      return;
+    }
+
+    if (!document.getElementById("calendar-upcoming-style")) {
+      const style = document.createElement("style");
+      style.id = "calendar-upcoming-style";
+      style.textContent = `
+        .calendar-upcoming{margin-top:20px}
+        .calendar-upcoming-heading{display:flex;align-items:center;justify-content:space-between;gap:10px;margin-bottom:10px}
+        .calendar-upcoming-title{display:flex;align-items:center;gap:8px;color:#78ddff;font-size:1rem;font-weight:900}
+        .calendar-upcoming-badge{padding:3px 8px;border:1px solid rgba(45,190,230,.45);border-radius:999px;color:var(--ink-3);font-size:.62rem;font-weight:800}
+        .calendar-upcoming-frame-wrap{position:relative;overflow:hidden;border:1px solid rgba(45,190,230,.35);border-radius:16px;background:#fff;box-shadow:var(--shadow)}
+        .calendar-upcoming-frame{display:block;width:100%;height:520px;border:0;background:#fff}
+        .calendar-upcoming-loading{position:absolute;inset:0;display:grid;place-items:center;background:var(--surface);color:var(--ink-3);font-size:.78rem;font-weight:800;transition:opacity .2s}
+        .calendar-upcoming-loading.is-loaded{opacity:0;pointer-events:none}
+        .calendar-upcoming-note{margin-top:8px;color:var(--ink-3);font-size:.7rem;line-height:1.6}
+        body[data-theme="light"] .calendar-upcoming-title{color:#075d84}
+        body[data-theme="light"] .calendar-upcoming-frame-wrap{border-color:#7aaabd;box-shadow:0 8px 22px rgba(31,64,92,.14)}
+        @media(max-width:600px){.calendar-upcoming{margin-top:16px}.calendar-upcoming-frame{height:500px}.calendar-upcoming-title{font-size:.92rem}.calendar-upcoming-badge{font-size:.58rem}}
+      `;
+      document.head.appendChild(style);
+    }
+
+    const section = document.createElement("section");
+    section.className = "calendar-upcoming";
+    section.id = "calendar-upcoming-agenda";
+    section.setAttribute("aria-labelledby", "calendar-upcoming-title");
+    section.innerHTML = `
+      <div class="calendar-upcoming-heading">
+        <h2 class="calendar-upcoming-title" id="calendar-upcoming-title">📋 今後の予定</h2>
+        <span class="calendar-upcoming-badge">自動更新</span>
+      </div>
+      <div class="calendar-upcoming-frame-wrap">
+        <div class="calendar-upcoming-loading">予定を読み込んでいます...</div>
+        <iframe class="calendar-upcoming-frame" title="吉見SMC 今後の予定" loading="lazy"></iframe>
+      </div>
+      <p class="calendar-upcoming-note">Googleカレンダーに登録された予定を、日付順のリストで表示しています。予定をタップすると詳細を確認できます。</p>
+    `;
+    calendarWrap.after(section);
+    const agendaFrame = section.querySelector("iframe");
+    const loading = section.querySelector(".calendar-upcoming-loading");
+    agendaFrame.addEventListener("load", () => loading.classList.add("is-loaded"), { once: true });
+    agendaFrame.src = agendaUrl.toString();
+  }
+
   function setupTabs() {
     document.querySelectorAll(".tab-btn").forEach((button) => {
       button.addEventListener("click", () => {
@@ -560,6 +620,7 @@
     refreshCoachFolderLabels();
     enhanceGameAdjustMobile();
     enhanceTournamentPrinting();
+    enhanceCalendarUpcomingAgenda();
     setupTabs();
     setupDisclosureAccessibility();
     setupResponsiveTables();
