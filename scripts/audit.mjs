@@ -111,6 +111,7 @@ if (/localStorage\.setItem\([^\n]*smc_members/i.test(membersSource)) fail("membe
 if (!membersSource.includes("next[grade]=next[grade].filter")) fail("members.html", "Firebase名簿の空データを除外していません");
 
 const commonSource = fs.readFileSync(path.join(root, "common.js"), "utf8");
+const calendarSource = fs.readFileSync(path.join(root, "calendar.html"), "utf8");
 if (!commonSource.includes("refreshCoachFolderLabels")) {
   fail("common.js", "旧名称を安全にコーチ専用フォルダへ置き換える処理がありません");
 }
