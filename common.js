@@ -487,7 +487,7 @@ function enhanceCalendarUpcomingAgenda() {
     if (!calendarFrame || !calendarWrap || document.getElementById("calendar-upcoming-agenda")) return;
 
     const PUBLIC_CALENDAR_KEY = ["AIzaSyDRH2RymQBOFCcXIDDjJc", "EbBdyuVmfXLnQ"].join("");
-    const CACHE_KEY = "smc-calendar-upcoming-v5";
+    const CACHE_KEY = "smc-calendar-upcoming-v6";
     const CALENDARS = [
       { id: "yoshimi.smc.fc@gmail.com", color: "#616161", label: "全体" },
       { id: "fceff821382e14ab8c504a20e126273e4fc5883bf387a7ae30262ca6e8c9ec05@group.calendar.google.com", color: "#f09300", label: "U10" },
@@ -584,12 +584,13 @@ function enhanceCalendarUpcomingAgenda() {
 
     function extractDescriptionTime(description) {
           const plain = String(description || "")
+            .normalize("NFKC")
             .replace(/<br\s*\/?>/gi, "\n")
             .replace(/<[^>]*>/g, " ")
             .replace(/&nbsp;/gi, " ");
           const ranges = [];
-          const colonRange = /(?:^|\s)([01]?\d|2[0-3])\s*[:：]\s*([0-5]\d)\s*(?:[〜～~－—-]|から)\s*([01]?\d|2[0-3])\s*[:：]\s*([0-5]\d)(?=\s|$)/gm;
-          const japaneseRange = /(?:^|\s)([01]?\d|2[0-3])\s*時\s*(?:([0-5]?\d)\s*分)?\s*(?:[〜～~－—-]|から)\s*([01]?\d|2[0-3])\s*時\s*(?:([0-5]?\d)\s*分)?(?=\s|$)/gm;
+          const colonRange = /(?:^|[^\d])([01]?\d|2[0-3])\s*[:：]\s*([0-5]\d)\s*(?:[〜～~－—-]|から)\s*([01]?\d|2[0-3])\s*[:：]\s*([0-5]\d)(?!\d)/gm;
+          const japaneseRange = /(?:^|[^\d])([01]?\d|2[0-3])\s*時\s*(?:([0-5]?\d)\s*分)?\s*(?:[〜～~－—-]|から)\s*([01]?\d|2[0-3])\s*時\s*(?:([0-5]?\d)\s*分)?(?!\d)/gm;
           let match;
           while ((match = colonRange.exec(plain))) {
             ranges.push([match[1], match[2], match[3], match[4]]);

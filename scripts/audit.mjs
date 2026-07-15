@@ -171,7 +171,7 @@ if (!commonSource.includes("#doc-taisen #t-date") || !commonSource.includes("min
 if (!commonSource.includes("enhanceCalendarUpcomingAgenda") || !commonSource.includes("calendar-upcoming-agenda") || !commonSource.includes("calendar-event-card")) {
   fail("common.js", "カレンダー下の今後の予定表示がありません");
 }
-if (!commonSource.includes("extractDescriptionTime") || !commonSource.includes("descriptionTime")) {
+if (!commonSource.includes("extractDescriptionTime") || !commonSource.includes("descriptionTime") || !commonSource.includes('normalize("NFKC")')) {
   fail("common.js", "説明欄の時間範囲を予定カードへ反映する処理がありません");
 }
 if (!commonSource.includes("calendar-upcoming-refresh") || !commonSource.includes('refreshButton.addEventListener("click"') || commonSource.includes("CACHE_TTL")) {
