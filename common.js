@@ -487,7 +487,7 @@ function enhanceCalendarUpcomingAgenda() {
     if (!calendarFrame || !calendarWrap || document.getElementById("calendar-upcoming-agenda")) return;
 
     const PUBLIC_CALENDAR_KEY = ["AIzaSyDRH2RymQBOFCcXIDDjJc", "EbBdyuVmfXLnQ"].join("");
-    const CACHE_KEY = "smc-calendar-upcoming-v2";
+    const CACHE_KEY = "smc-calendar-upcoming-v3";
     const CACHE_TTL = 15 * 60 * 1000;
     const CALENDARS = [
       { id: "yoshimi.smc.fc@gmail.com", color: "#616161", label: "全体" },
