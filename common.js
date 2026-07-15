@@ -580,7 +580,29 @@ function enhanceCalendarUpcomingAgenda() {
       return new Date(event.start);
     }
 
+    function extractDescriptionTime(description) {
+          const plain = String(description || "")
+            .replace(/<br\s*\/?>/gi, "\n")
+            .replace(/<[^>]*>/g, " ")
+            .replace(/&nbsp;/gi, " ");
+          const ranges = [];
+          const colonRange = /(?:^|\s)([01]?\d|2[0-3])\s*[:：]\s*([0-5]\d)\s*(?:[〜～~－—-]|から)\s*([01]?\d|2[0-3])\s*[:：]\s*([0-5]\d)(?=\s|$)/gm;
+          const japaneseRange = /(?:^|\s)([01]?\d|2[0-3])\s*時\s*(?:([0-5]?\d)\s*分)?\s*(?:[〜～~－—-]|から)\s*([01]?\d|2[0-3])\s*時\s*(?:([0-5]?\d)\s*分)?(?=\s|$)/gm;
+          let match;
+          while ((match = colonRange.exec(plain))) {
+            ranges.push([match[1], match[2], match[3], match[4]]);
+          }
+          while ((match = japaneseRange.exec(plain))) {
+            ranges.push([match[1], match[2] || "0", match[3], match[4] || "0"]);
+          }
+          if (ranges.length !== 1) return "";
+          const [startHour, startMinute, endHour, endMinute] = ranges[0];
+          const pad = (value) => String(value).padStart(2, "0");
+          return `${pad(startHour)}:${pad(startMinute)}〜${pad(endHour)}:${pad(endMinute)}`;
+        }
+
     function formatTime(event) {
+      if (event.descriptionTime) return event.descriptionTime;
       if (event.allDay) return "終日";
       const formatter = new Intl.DateTimeFormat("ja-JP", { hour: "2-digit", minute: "2-digit", hour12: false });
       return `${formatter.format(new Date(event.start))}〜${formatter.format(new Date(event.end))}`;
@@ -740,6 +762,7 @@ function enhanceCalendarUpcomingAgenda() {
         start: event.start?.dateTime || event.start?.date || "",
         end: event.end?.dateTime || event.end?.date || "",
         allDay: !event.start?.dateTime,
+        descriptionTime: !event.start?.dateTime ? extractDescriptionTime(event.description) : "",
         location: event.location || "",
         url: event.htmlLink || "",
         color: calendar.color,
