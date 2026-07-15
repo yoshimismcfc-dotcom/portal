@@ -174,6 +174,9 @@ if (!commonSource.includes("enhanceCalendarUpcomingAgenda") || !commonSource.inc
 if (!commonSource.includes("extractDescriptionTime") || !commonSource.includes("descriptionTime")) {
   fail("common.js", "説明欄の時間範囲を予定カードへ反映する処理がありません");
 }
+if (!commonSource.includes("calendar-upcoming-refresh") || !commonSource.includes('refreshButton.addEventListener("click"') || commonSource.includes("CACHE_TTL")) {
+  fail("common.js", "今後の予定がページ表示時に最新情報へ更新される構造ではありません");
+}
 const calendarColorMappings = [
   ['color: "#8e24aa", label: "U12"', '<span class="leg-dot" style="background:#8e24aa"></span>U12'],
   ['color: "#d50000", label: "U11"', '<span class="leg-dot" style="background:#d50000"></span>U11'],
