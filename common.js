@@ -487,16 +487,16 @@ function enhanceCalendarUpcomingAgenda() {
     if (!calendarFrame || !calendarWrap || document.getElementById("calendar-upcoming-agenda")) return;
 
     const PUBLIC_CALENDAR_KEY = ["AIzaSyDRH2RymQBOFCcXIDDjJc", "EbBdyuVmfXLnQ"].join("");
-    const CACHE_KEY = "smc-calendar-upcoming-v3";
+    const CACHE_KEY = "smc-calendar-upcoming-v4";
     const CACHE_TTL = 15 * 60 * 1000;
     const CALENDARS = [
       { id: "yoshimi.smc.fc@gmail.com", color: "#616161", label: "全体" },
-      { id: "fceff821382e14ab8c504a20e126273e4fc5883bf387a7ae30262ca6e8c9ec05@group.calendar.google.com", color: "#f09300", label: "U12" },
+      { id: "fceff821382e14ab8c504a20e126273e4fc5883bf387a7ae30262ca6e8c9ec05@group.calendar.google.com", color: "#f09300", label: "U10" },
       { id: "b90bd81001cd0963551c8cd44eb53531d1587f3ab8759318e8023da65b7b08ee@group.calendar.google.com", color: "#d50000", label: "U11" },
-      { id: "1e5a7d7fd91ca84987b1980a6576d7034f431e79067fe2c8e1a38feb06fe2292@group.calendar.google.com", color: "#8e24aa", label: "U10" },
-      { id: "f858f43317baa1ffb0ce1110b03c6ecac3bf10a5d5367424a0b9fc538b50efcf@group.calendar.google.com", color: "#0b8043", label: "U9" },
+      { id: "1e5a7d7fd91ca84987b1980a6576d7034f431e79067fe2c8e1a38feb06fe2292@group.calendar.google.com", color: "#8e24aa", label: "U12" },
+      { id: "f858f43317baa1ffb0ce1110b03c6ecac3bf10a5d5367424a0b9fc538b50efcf@group.calendar.google.com", color: "#0b8043", label: "U7" },
       { id: "73b735bde5b9d22f273c480e5721885d51e19fedade71df07c521e99f6d53f3a@group.calendar.google.com", color: "#7cb342", label: "U8" },
-      { id: "01d22b708d632098f45dd7bc1be0cae88eff00e4d2e4b9f077c8d70bcca46de0@group.calendar.google.com", color: "#e4c441", label: "U7" },
+      { id: "01d22b708d632098f45dd7bc1be0cae88eff00e4d2e4b9f077c8d70bcca46de0@group.calendar.google.com", color: "#e4c441", label: "U9" },
       { id: "ccd8330bb3b6efb8f90a36e1655ac0459ddbe047155325367bb0feddd1eae83d@group.calendar.google.com", color: "#4285f4", label: "その他" }
     ];
 
