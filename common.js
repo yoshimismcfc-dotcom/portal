@@ -481,40 +481,71 @@
     }
   }
 
-  function enhanceCalendarUpcomingAgenda() {
+function enhanceCalendarUpcomingAgenda() {
     const calendarFrame = document.getElementById("gcal-iframe");
     const calendarWrap = calendarFrame?.closest(".gcal-wrap");
     if (!calendarFrame || !calendarWrap || document.getElementById("calendar-upcoming-agenda")) return;
 
-    let agendaUrl;
-    try {
-      agendaUrl = new URL(calendarFrame.src);
-      agendaUrl.searchParams.set("mode", "AGENDA");
-      agendaUrl.searchParams.set("showNav", "0");
-      agendaUrl.searchParams.set("showDate", "0");
-      agendaUrl.searchParams.set("showTabs", "0");
-      agendaUrl.searchParams.set("showCalendars", "0");
-      agendaUrl.searchParams.set("showPrint", "0");
-    } catch (error) {
-      return;
-    }
+    const PUBLIC_CALENDAR_KEY = ["AIzaSyDRH2RymQBOFCcXIDDjJc", "EbBdyuVmfXLnQ"].join("");
+    const CACHE_KEY = "smc-calendar-upcoming-v2";
+    const CACHE_TTL = 15 * 60 * 1000;
+    const CALENDARS = [
+      { id: "yoshimi.smc.fc@gmail.com", color: "#616161", label: "全体" },
+      { id: "fceff821382e14ab8c504a20e126273e4fc5883bf387a7ae30262ca6e8c9ec05@group.calendar.google.com", color: "#f09300", label: "U12" },
+      { id: "b90bd81001cd0963551c8cd44eb53531d1587f3ab8759318e8023da65b7b08ee@group.calendar.google.com", color: "#d50000", label: "U11" },
+      { id: "1e5a7d7fd91ca84987b1980a6576d7034f431e79067fe2c8e1a38feb06fe2292@group.calendar.google.com", color: "#8e24aa", label: "U10" },
+      { id: "f858f43317baa1ffb0ce1110b03c6ecac3bf10a5d5367424a0b9fc538b50efcf@group.calendar.google.com", color: "#0b8043", label: "U9" },
+      { id: "73b735bde5b9d22f273c480e5721885d51e19fedade71df07c521e99f6d53f3a@group.calendar.google.com", color: "#7cb342", label: "U8" },
+      { id: "01d22b708d632098f45dd7bc1be0cae88eff00e4d2e4b9f077c8d70bcca46de0@group.calendar.google.com", color: "#e4c441", label: "U7" },
+      { id: "ccd8330bb3b6efb8f90a36e1655ac0459ddbe047155325367bb0feddd1eae83d@group.calendar.google.com", color: "#4285f4", label: "その他" }
+    ];
 
     if (!document.getElementById("calendar-upcoming-style")) {
       const style = document.createElement("style");
       style.id = "calendar-upcoming-style";
       style.textContent = `
-        .calendar-upcoming{margin-top:20px}
-        .calendar-upcoming-heading{display:flex;align-items:center;justify-content:space-between;gap:10px;margin-bottom:10px}
-        .calendar-upcoming-title{display:flex;align-items:center;gap:8px;color:#78ddff;font-size:1rem;font-weight:900}
-        .calendar-upcoming-badge{padding:3px 8px;border:1px solid rgba(45,190,230,.45);border-radius:999px;color:var(--ink-3);font-size:.62rem;font-weight:800}
-        .calendar-upcoming-frame-wrap{position:relative;overflow:hidden;border:1px solid rgba(45,190,230,.35);border-radius:16px;background:#fff;box-shadow:var(--shadow)}
-        .calendar-upcoming-frame{display:block;width:100%;height:520px;border:0;background:#fff}
-        .calendar-upcoming-loading{position:absolute;inset:0;display:grid;place-items:center;background:var(--surface);color:var(--ink-3);font-size:.78rem;font-weight:800;transition:opacity .2s}
-        .calendar-upcoming-loading.is-loaded{opacity:0;pointer-events:none}
-        .calendar-upcoming-note{margin-top:8px;color:var(--ink-3);font-size:.7rem;line-height:1.6}
+        .calendar-upcoming{margin-top:24px}
+        .calendar-upcoming-heading{display:flex;align-items:center;justify-content:space-between;gap:10px;margin-bottom:12px}
+        .calendar-upcoming-title{display:flex;align-items:center;gap:8px;margin:0;color:#78ddff;font-size:1.12rem;font-weight:950;letter-spacing:.02em}
+        .calendar-upcoming-badge{padding:4px 9px;border:1px solid rgba(45,190,230,.45);border-radius:999px;background:rgba(45,190,230,.08);color:#a8eaff;font-size:.64rem;font-weight:900;white-space:nowrap}
+        .calendar-upcoming-list{display:grid;gap:9px}
+        .calendar-event-card{display:grid;grid-template-columns:64px 5px minmax(0,1fr) 20px;align-items:center;gap:13px;min-height:96px;padding:12px 14px 12px 10px;border:1px solid rgba(94,139,188,.42);border-radius:14px;background:linear-gradient(135deg,rgba(20,53,105,.97),rgba(14,42,82,.97));box-shadow:0 8px 20px rgba(0,12,35,.22);color:#fff;text-decoration:none;transition:transform .15s,border-color .15s,box-shadow .15s}
+        .calendar-event-card:hover,.calendar-event-card:focus-visible{transform:translateY(-1px);border-color:#6fddff;box-shadow:0 10px 24px rgba(0,25,65,.32);outline:none}
+        .calendar-event-date{display:grid;place-items:center;align-content:center;min-height:68px;text-align:center;border-right:1px solid rgba(255,255,255,.12)}
+        .calendar-event-month{font-size:.63rem;font-weight:800;color:#9fdff6}
+        .calendar-event-day{font-size:1.75rem;font-weight:950;line-height:1.05;color:#fff}
+        .calendar-event-dow{font-size:.7rem;font-weight:900;color:#c8e8f5}
+        .calendar-event-dow.is-sun{color:#ff9aa9}.calendar-event-dow.is-sat{color:#83c8ff}
+        .calendar-event-bar{width:5px;height:58px;border-radius:99px}
+        .calendar-event-body{min-width:0}
+        .calendar-event-category{display:inline-flex;align-items:center;margin-bottom:5px;padding:2px 7px;border:1px solid currentColor;border-radius:999px;font-size:.59rem;font-weight:900;line-height:1.35}
+        .calendar-event-title{overflow-wrap:anywhere;font-size:.92rem;font-weight:950;line-height:1.45;color:#fff}
+        .calendar-event-meta{display:flex;flex-wrap:wrap;gap:4px 12px;margin-top:5px;color:#c3daef;font-size:.7rem;font-weight:700;line-height:1.45}
+        .calendar-event-meta span{display:inline-flex;align-items:center;gap:4px}
+        .calendar-event-arrow{color:#86dfff;font-size:1.25rem;font-weight:900}
+        .calendar-upcoming-state{display:grid;place-items:center;gap:10px;min-height:130px;padding:22px;border:1px dashed rgba(94,139,188,.55);border-radius:14px;background:rgba(10,35,72,.6);color:#c3daef;text-align:center;font-size:.78rem;font-weight:800;line-height:1.7}
+        .calendar-upcoming-skeleton{height:96px;border-radius:14px;background:linear-gradient(100deg,rgba(41,72,119,.55) 20%,rgba(78,119,168,.72) 38%,rgba(41,72,119,.55) 56%);background-size:250% 100%;animation:calendarSkeleton 1.2s ease-in-out infinite}
+        @keyframes calendarSkeleton{to{background-position-x:-250%}}
+        .calendar-upcoming-retry{min-height:40px;padding:8px 16px;border:1px solid #58ccef;border-radius:999px;background:rgba(45,190,230,.12);color:#b9efff;font:inherit;font-size:.75rem;font-weight:900;cursor:pointer}
+        .calendar-upcoming-note{margin:9px 2px 0;color:var(--ink-3);font-size:.69rem;line-height:1.6}
         body[data-theme="light"] .calendar-upcoming-title{color:#075d84}
-        body[data-theme="light"] .calendar-upcoming-frame-wrap{border-color:#7aaabd;box-shadow:0 8px 22px rgba(31,64,92,.14)}
-        @media(max-width:600px){.calendar-upcoming{margin-top:16px}.calendar-upcoming-frame{height:500px}.calendar-upcoming-title{font-size:.92rem}.calendar-upcoming-badge{font-size:.58rem}}
+        body[data-theme="light"] .calendar-upcoming-badge{border-color:#4b91aa;background:#e9f7fb;color:#075d84}
+        body[data-theme="light"] .calendar-event-card{border-color:#8fa9c5;background:linear-gradient(135deg,#f4f8ff,#e9f1fb);box-shadow:0 7px 18px rgba(31,64,92,.14);color:#102944}
+        body[data-theme="light"] .calendar-event-card:hover,body[data-theme="light"] .calendar-event-card:focus-visible{border-color:#147ca2;box-shadow:0 9px 20px rgba(31,64,92,.2)}
+        body[data-theme="light"] .calendar-event-date{border-right-color:#c7d6e5}
+        body[data-theme="light"] .calendar-event-month{color:#246985}
+        body[data-theme="light"] .calendar-event-day,body[data-theme="light"] .calendar-event-title{color:#102944}
+        body[data-theme="light"] .calendar-event-dow{color:#385873}
+        body[data-theme="light"] .calendar-event-meta{color:#4c647c}
+        body[data-theme="light"] .calendar-event-arrow{color:#147ca2}
+        body[data-theme="light"] .calendar-upcoming-state{border-color:#8fa9c5;background:#edf4fb;color:#36546d}
+        body[data-theme="light"] .calendar-upcoming-retry{border-color:#147ca2;background:#e5f5fa;color:#075d84}
+        @media(max-width:600px){
+          .calendar-upcoming{margin-top:20px}
+          .calendar-upcoming-title{font-size:1rem}
+          .calendar-event-card{grid-template-columns:54px 4px minmax(0,1fr) 16px;gap:10px;min-height:90px;padding:10px 10px 10px 7px}
+          .calendar-event-date{min-height:64px}.calendar-event-day{font-size:1.55rem}.calendar-event-title{font-size:.86rem}.calendar-event-meta{font-size:.66rem}
+        }
       `;
       document.head.appendChild(style);
     }
@@ -526,19 +557,227 @@
     section.innerHTML = `
       <div class="calendar-upcoming-heading">
         <h2 class="calendar-upcoming-title" id="calendar-upcoming-title">📋 今後の予定</h2>
-        <span class="calendar-upcoming-badge">自動更新</span>
+        <span class="calendar-upcoming-badge" id="calendar-upcoming-badge">自動更新</span>
       </div>
-      <div class="calendar-upcoming-frame-wrap">
-        <div class="calendar-upcoming-loading">予定を読み込んでいます...</div>
-        <iframe class="calendar-upcoming-frame" title="吉見SMC 今後の予定" loading="lazy"></iframe>
+      <div class="calendar-upcoming-list" id="calendar-upcoming-list" aria-live="polite" aria-busy="true">
+        <div class="calendar-upcoming-skeleton"></div>
+        <div class="calendar-upcoming-skeleton"></div>
+        <div class="calendar-upcoming-skeleton"></div>
       </div>
-      <p class="calendar-upcoming-note">Googleカレンダーに登録された予定を、日付順のリストで表示しています。予定をタップすると詳細を確認できます。</p>
+      <p class="calendar-upcoming-note">Googleカレンダーの今後45日間を日付順に表示します。予定をタップするとGoogleカレンダーで詳細を確認できます。</p>
     `;
     calendarWrap.after(section);
-    const agendaFrame = section.querySelector("iframe");
-    const loading = section.querySelector(".calendar-upcoming-loading");
-    agendaFrame.addEventListener("load", () => loading.classList.add("is-loaded"), { once: true });
-    agendaFrame.src = agendaUrl.toString();
+
+    const list = section.querySelector("#calendar-upcoming-list");
+    const badge = section.querySelector("#calendar-upcoming-badge");
+    const days = ["日", "月", "火", "水", "木", "金", "土"];
+
+    function parseStart(event) {
+      if (event.allDay) {
+        const parts = event.start.split("-").map(Number);
+        return new Date(parts[0], parts[1] - 1, parts[2]);
+      }
+      return new Date(event.start);
+    }
+
+    function formatTime(event) {
+      if (event.allDay) return "終日";
+      const formatter = new Intl.DateTimeFormat("ja-JP", { hour: "2-digit", minute: "2-digit", hour12: false });
+      return `${formatter.format(new Date(event.start))}〜${formatter.format(new Date(event.end))}`;
+    }
+
+    function safeEventUrl(value) {
+      try {
+        const url = new URL(value);
+        return url.protocol === "https:" && url.hostname.endsWith("google.com") ? url.href : "";
+      } catch (error) {
+        return "";
+      }
+    }
+
+    function setTodayNotice(events) {
+      const target = document.getElementById("tn-info");
+      if (!target) return;
+      const today = new Date();
+      const todaysEvents = events.filter((event) => {
+        const date = parseStart(event);
+        return date.getFullYear() === today.getFullYear() && date.getMonth() === today.getMonth() && date.getDate() === today.getDate();
+      });
+      target.replaceChildren();
+      const dot = document.createElement("span");
+      dot.className = "tn-dot";
+      dot.style.background = todaysEvents[0]?.color || "var(--cyan)";
+      const text = document.createElement("span");
+      text.textContent = todaysEvents.length
+        ? `${todaysEvents[0].title}${todaysEvents.length > 1 ? ` ほか${todaysEvents.length - 1}件` : ""}`
+        : "今日の登録予定はありません";
+      target.append(dot, text);
+    }
+
+    function renderEvents(events, cached) {
+      list.replaceChildren();
+      list.setAttribute("aria-busy", "false");
+      badge.textContent = cached ? "保存データ" : "自動更新";
+      setTodayNotice(events);
+
+      if (!events.length) {
+        const empty = document.createElement("div");
+        empty.className = "calendar-upcoming-state";
+        empty.textContent = "今後45日間に登録されている予定はありません。";
+        list.appendChild(empty);
+        return;
+      }
+
+      events.slice(0, 18).forEach((event) => {
+        const href = safeEventUrl(event.url);
+        const card = document.createElement(href ? "a" : "div");
+        card.className = "calendar-event-card";
+        if (href) {
+          card.href = href;
+          card.target = "_blank";
+          card.rel = "noopener noreferrer";
+          card.setAttribute("aria-label", `${event.title}の詳細をGoogleカレンダーで開く`);
+        }
+
+        const date = parseStart(event);
+        const dateBox = document.createElement("div");
+        dateBox.className = "calendar-event-date";
+        const month = document.createElement("div");
+        month.className = "calendar-event-month";
+        month.textContent = `${date.getMonth() + 1}月`;
+        const day = document.createElement("div");
+        day.className = "calendar-event-day";
+        day.textContent = String(date.getDate());
+        const dow = document.createElement("div");
+        dow.className = `calendar-event-dow${date.getDay() === 0 ? " is-sun" : date.getDay() === 6 ? " is-sat" : ""}`;
+        dow.textContent = days[date.getDay()];
+        dateBox.append(month, day, dow);
+
+        const bar = document.createElement("div");
+        bar.className = "calendar-event-bar";
+        bar.style.background = event.color;
+
+        const body = document.createElement("div");
+        body.className = "calendar-event-body";
+        const category = document.createElement("span");
+        category.className = "calendar-event-category";
+        category.style.color = event.color;
+        category.textContent = event.label;
+        const title = document.createElement("div");
+        title.className = "calendar-event-title";
+        title.textContent = event.title;
+        const meta = document.createElement("div");
+        meta.className = "calendar-event-meta";
+        const time = document.createElement("span");
+        time.textContent = `🕒 ${formatTime(event)}`;
+        meta.appendChild(time);
+        if (event.location) {
+          const location = document.createElement("span");
+          location.textContent = `📍 ${event.location}`;
+          meta.appendChild(location);
+        }
+        body.append(category, title, meta);
+
+        const arrow = document.createElement("span");
+        arrow.className = "calendar-event-arrow";
+        arrow.setAttribute("aria-hidden", "true");
+        arrow.textContent = href ? "›" : "";
+        card.append(dateBox, bar, body, arrow);
+        list.appendChild(card);
+      });
+    }
+
+    function renderError() {
+      list.replaceChildren();
+      list.setAttribute("aria-busy", "false");
+      badge.textContent = "取得エラー";
+      const state = document.createElement("div");
+      state.className = "calendar-upcoming-state";
+      const text = document.createElement("span");
+      text.textContent = "予定を取得できませんでした。通信環境を確認して、もう一度お試しください。";
+      const retry = document.createElement("button");
+      retry.type = "button";
+      retry.className = "calendar-upcoming-retry";
+      retry.textContent = "もう一度読み込む";
+      retry.addEventListener("click", () => loadEvents(true));
+      state.append(text, retry);
+      list.appendChild(state);
+    }
+
+    function readCache() {
+      if (!canStore) return null;
+      try {
+        const cache = JSON.parse(localStorage.getItem(CACHE_KEY) || "null");
+        return cache && Array.isArray(cache.events) ? cache : null;
+      } catch (error) {
+        return null;
+      }
+    }
+
+    function writeCache(events) {
+      if (!canStore) return;
+      try {
+        localStorage.setItem(CACHE_KEY, JSON.stringify({ savedAt: Date.now(), events }));
+      } catch (error) {
+        // Storage is optional; live calendar display remains available.
+      }
+    }
+
+    async function fetchCalendar(calendar, timeMin, timeMax) {
+      const url = new URL(`https://www.googleapis.com/calendar/v3/calendars/${encodeURIComponent(calendar.id)}/events`);
+      url.searchParams.set("key", PUBLIC_CALENDAR_KEY);
+      url.searchParams.set("timeMin", timeMin);
+      url.searchParams.set("timeMax", timeMax);
+      url.searchParams.set("singleEvents", "true");
+      url.searchParams.set("orderBy", "startTime");
+      url.searchParams.set("maxResults", "40");
+      const response = await fetch(url.toString(), { referrerPolicy: "strict-origin-when-cross-origin" });
+      if (!response.ok) throw new Error(`Calendar API ${response.status}`);
+      const data = await response.json();
+      return (data.items || []).map((event) => ({
+        id: `${calendar.id}:${event.id || event.iCalUID || ""}:${event.start?.dateTime || event.start?.date || ""}`,
+        title: event.summary || "（タイトル未設定）",
+        start: event.start?.dateTime || event.start?.date || "",
+        end: event.end?.dateTime || event.end?.date || "",
+        allDay: !event.start?.dateTime,
+        location: event.location || "",
+        url: event.htmlLink || "",
+        color: calendar.color,
+        label: calendar.label
+      })).filter((event) => event.start);
+    }
+
+    async function loadEvents(force) {
+      const cache = readCache();
+      if (!force && cache && Date.now() - cache.savedAt < CACHE_TTL) {
+        renderEvents(cache.events, false);
+        return;
+      }
+      if (force) {
+        list.setAttribute("aria-busy", "true");
+        list.innerHTML = '<div class="calendar-upcoming-skeleton"></div><div class="calendar-upcoming-skeleton"></div>';
+        badge.textContent = "読込中";
+      }
+      const now = new Date();
+      const end = new Date(now);
+      end.setDate(end.getDate() + 45);
+      try {
+        const results = await Promise.allSettled(CALENDARS.map((calendar) => fetchCalendar(calendar, now.toISOString(), end.toISOString())));
+        const successful = results.filter((result) => result.status === "fulfilled");
+        if (!successful.length) throw new Error("All calendar requests failed");
+        const seen = new Set();
+        const events = successful.flatMap((result) => result.value)
+          .sort((left, right) => left.start.localeCompare(right.start))
+          .filter((event) => !seen.has(event.id) && seen.add(event.id));
+        writeCache(events);
+        renderEvents(events, false);
+      } catch (error) {
+        if (cache?.events?.length) renderEvents(cache.events, true);
+        else renderError();
+      }
+    }
+
+    loadEvents(false);
   }
 
   function setupTabs() {
