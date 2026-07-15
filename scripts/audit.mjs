@@ -171,6 +171,9 @@ if (!commonSource.includes("#doc-taisen #t-date") || !commonSource.includes("min
 if (!commonSource.includes("enhanceCalendarUpcomingAgenda") || !commonSource.includes("calendar-upcoming-agenda") || !commonSource.includes("calendar-event-card")) {
   fail("common.js", "カレンダー下の今後の予定表示がありません");
 }
+if (!commonSource.includes("extractDescriptionTime") || !commonSource.includes("descriptionTime")) {
+  fail("common.js", "説明欄の時間範囲を予定カードへ反映する処理がありません");
+}
 if (!guideSource.includes("Google Calendar API") || !guideSource.includes("利用制限")) {
   fail("guide.html", "今後の予定のAPI連携と利用制限が説明書にありません");
 }
