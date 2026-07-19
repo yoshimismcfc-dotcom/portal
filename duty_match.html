@@ -42,6 +42,12 @@
     .person-chip .del-p{background:none;border:none;color:rgba(255,255,255,.4);cursor:pointer;font-size:.75rem;padding:0 0 0 3px;line-height:1}
     .person-chip .del-p:hover{color:#ff6680}
     .person-empty{color:var(--ink-3);font-size:.74rem;font-style:italic}
+    .person-quick-edit{max-width:150px;border:1px solid rgba(0,212,255,.35);border-radius:8px;background:rgba(0,90,170,.18);color:#9adfff;font:inherit;font-size:.74rem;font-weight:900;line-height:1.2;padding:5px 8px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;cursor:pointer}
+    .person-quick-edit.is-empty{color:#ffd56a;border-color:rgba(255,204,0,.42);background:rgba(255,204,0,.09)}
+    .person-quick-edit:focus-visible{outline:2px solid var(--cyan);outline-offset:2px}
+    body[data-theme="light"] .d-label{color:#17243a}
+    body[data-theme="light"] .person-quick-edit{background:#e5f6fc;color:#075d84;border-color:#1689b4}
+    body[data-theme="light"] .person-quick-edit.is-empty{background:#fff4cd;color:#6d5200;border-color:#b88c00}
 
     /* 状態バッジ（小さく） */
     .st{display:inline-block;font-size:.7rem;font-weight:900;padding:2px 8px;border-radius:99px;white-space:nowrap;flex-shrink:0}
@@ -69,6 +75,32 @@
     .modal-btns{display:flex;gap:8px;justify-content:flex-end;margin-top:14px;flex-wrap:wrap}
     .g2{display:grid;grid-template-columns:1fr 1fr;gap:10px}
     @media(max-width:440px){.g2{grid-template-columns:1fr}}
+    @media(max-width:760px){
+      .page-wrap{padding:10px 7px}
+      .hero-band{margin-bottom:7px;padding:8px 10px}
+      .hero-sub{font-size:.67rem}
+      .notice-bar,.linked-context-panel{margin-bottom:7px;padding:7px 9px}
+      .sum-bar{gap:4px;margin-bottom:7px}
+      .sum-chip{padding:4px 6px}
+      .sum-n{font-size:.92rem}.sum-l{font-size:.58rem}
+      .mc{margin-bottom:7px;border-radius:10px}
+      .mc-head{padding:7px 9px;gap:6px}
+      .mc-name{font-size:.78rem}.mc-sub{font-size:.6rem}
+      .mc-body{padding:5px 6px 7px}
+      .dt-wrap{overflow:visible;margin-bottom:4px}
+      .dt{min-width:0;table-layout:fixed;font-size:.72rem}
+      .dt thead{display:none}
+      .duty-row-inner{min-height:34px;padding:3px 5px;gap:4px}
+      .d-icon{width:18px;font-size:.8rem}
+      .d-label{font-size:.7rem;line-height:1.12}
+      .d-memo,.d-time{display:none}
+      .persons-wrap{flex:0 0 78px;justify-content:flex-end}
+      .person-quick-edit{width:78px;max-width:78px;padding:4px 5px;font-size:.66rem}
+      .st{font-size:.56rem;padding:1px 4px}
+      .add-duty-row{padding:4px 6px;font-size:.68rem}
+      .mc-body-actions{gap:5px!important;padding-top:3px!important}
+      .mc-body-actions .btn,.mc-body-actions .btn-line-copy{padding:6px 8px!important;font-size:.65rem!important;min-height:34px!important}
+    }
 
     /* 担当者追加エリア（モーダル内） */
     .person-add-row{display:flex;gap:6px;margin-bottom:8px}
@@ -326,10 +358,12 @@ function render(){
     var progColor = pct===100?"#00cc66":pct>60?"var(--cyan)":"#ffcc00";
 
     var rows = duties.map(function(d){
-      var chips = (d.persons||[]).length
-        ? (d.persons||[]).map(function(p){ return '<span class="person-chip">'+esc(p)+'</span>'; }).join("")
-        : '<span class="person-empty">未定</span>';
-      var timeStr = d.time ? '<span style="font-size:.7rem;color:var(--cyan);white-space:nowrap">'+esc(d.time)+'</span>' : '';
+      var persons = d.persons || [];
+      var personText = persons.length ? persons.join("・") : "未定";
+      var chips = '<button type="button" class="person-quick-edit'+(persons.length?'':' is-empty')+'"'
+        +' onclick="event.stopPropagation();openEditDutyPersons('+inlineJsArg(m.id)+','+inlineJsArg(d.key)+')"'
+        +' aria-label="'+esc(d.label)+'の担当者を編集">'+esc(personText)+'</button>';
+      var timeStr = d.time ? '<span class="d-time" style="font-size:.7rem;color:var(--cyan);white-space:nowrap">'+esc(d.time)+'</span>' : '';
       return '<tr><td>'
         +'<div class="duty-row-inner" onclick="openEditDuty('+inlineJsArg(m.id)+','+inlineJsArg(d.key)+')">'
         +'<span class="d-icon">'+esc(d.icon)+'</span>'
@@ -363,7 +397,7 @@ function render(){
       +'<tbody>'+rows+'</tbody>'
       +'</table></div>'
       +'<div class="add-duty-row" onclick="openAddDuty('+inlineJsArg(m.id)+')">＋ 任務を追加</div>'
-      +'<div style="display:flex;gap:8px;padding:6px 0 0;justify-content:flex-end;flex-wrap:wrap">'
+      +'<div class="mc-body-actions" style="display:flex;gap:8px;padding:6px 0 0;justify-content:flex-end;flex-wrap:wrap">'
       +'<button class="btn btn-outline btn-sm" onclick="copyDutyTemplate('+inlineJsArg(m.id)+')">📑 任務テンプレートをコピー</button>'
       +'<button class="btn-line-copy sm" onclick="copyText('+inlineJsArg(m.id)+')">📋 LINEコピー</button>'
       +'</div>'
@@ -469,6 +503,13 @@ function openEditDuty(matchId, dutyKey){
   document.getElementById("md-person-input").value = "";
   renderPersonChips();
   document.getElementById("modal-duty").classList.add("open");
+}
+function openEditDutyPersons(matchId, dutyKey){
+  openEditDuty(matchId, dutyKey);
+  window.setTimeout(function(){
+    var input = document.getElementById("md-person-input");
+    if(input){ input.focus(); input.scrollIntoView({block:"center"}); }
+  }, 80);
 }
 function openAddDuty(matchId){
   var m = _data.find(function(x){ return x.id===matchId; }); if(!m) return;
