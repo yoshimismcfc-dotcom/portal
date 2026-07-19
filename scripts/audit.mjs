@@ -159,6 +159,7 @@ if (/\.pw-(?:cell|text|toggle)/.test(accountsSource)) fail("accounts.html", "廃
 
 const gameAdjustSource = fs.readFileSync(path.join(root, "game_adjust.html"), "utf8");
 const dutyMatchSource = fs.readFileSync(path.join(root, "duty_match.html"), "utf8");
+const accountingSource = fs.readFileSync(path.join(root, "accounting.html"), "utf8");
 if (!gameAdjustSource.includes("renderGameAdjustImmediately") || !gameAdjustSource.includes("connectGameAdjustCloud") || !gameAdjustSource.includes("firebase-config.js?retry=")) {
   fail("game_adjust.html", "試合調整に即時表示またはFirebase自動再接続がありません");
 }
@@ -168,7 +169,7 @@ if (!gameAdjustSource.includes('window.addEventListener("online"') || !gameAdjus
 if (!guideSource.includes("端末データを先に即時表示") || !guideSource.includes("裏側で自動再接続")) {
   fail("guide.html", "試合調整の自動復旧が説明されていません");
 }
-if (!gameAdjustSource.includes("duty_match.html") || !gameAdjustSource.includes("tournament.html") || !gameAdjustSource.includes("date-related-links")) {
+if (!gameAdjustSource.includes("duty_match.html") || !gameAdjustSource.includes("tournament.html") || !gameAdjustSource.includes("accounting.html") || !gameAdjustSource.includes("date-related-links")) {
   fail("game_adjust.html", "カテゴリー／目標下に大会関連ページへの入口がありません");
 }
 if (!dutyMatchSource.includes('dbListen("duty_match"') || !dutyMatchSource.includes('dbSave("duty_match"')) {
@@ -195,7 +196,16 @@ if (!tournamentSource.includes("copyTournamentTemplate") || !tournamentSource.in
 if (!tournamentSource.includes("linkedExisting") || !tournamentSource.includes("gameAdjustDateId: _activeGameAdjustDateId")) {
   fail("tournament.html", "要綱・対戦表が日程単位で更新保存されません");
 }
-if (!guideSource.includes("試合調整の日程ID") || !guideSource.includes("テンプレートをコピー") || !guideSource.includes("既存の未連携データは削除されません")) {
+if (!accountingSource.includes("ensureLinkedAccounting") || !accountingSource.includes("gameAdjustDateId") || !accountingSource.includes("LINK_CONTEXT")) {
+  fail("accounting.html", "会計・決算書が試合調整の日程別データとして開きません");
+}
+if (!accountingSource.includes('dbListen("accounting"') || !accountingSource.includes('dbSave("accounting"')) {
+  fail("accounting.html", "会計・決算書が共通Firebaseデータを使用していません");
+}
+if (!accountingSource.includes("copyAccountingTemplate") || !accountingSource.includes("linkedAccountingTemplate")) {
+  fail("accounting.html", "会計・決算書にコピー可能な標準テンプレートがありません");
+}
+if (!guideSource.includes("試合調整の日程ID") || !guideSource.includes("会計テンプレートをコピー") || !guideSource.includes("既存の未連携データは削除されません")) {
   fail("guide.html", "日程連動・テンプレート・既存データ互換の説明がありません");
 }
 if (!gameAdjustSource.includes('id="new-note"') || !gameAdjustSource.includes('id="edit-note"')) {
