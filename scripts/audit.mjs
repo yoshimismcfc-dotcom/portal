@@ -136,6 +136,15 @@ if (/<th>パスワード<\/th>/.test(accountsSource)) fail("accounts.html", "保
 if (/\.pw-(?:cell|text|toggle)/.test(accountsSource)) fail("accounts.html", "廃止したパスワード表示用CSSが残っています");
 
 const gameAdjustSource = fs.readFileSync(path.join(root, "game_adjust.html"), "utf8");
+if (!gameAdjustSource.includes('id="new-note"') || !gameAdjustSource.includes('id="edit-note"')) {
+  fail("game_adjust.html", "日程の追加・編集画面に備考入力欄がありません");
+}
+if (!gameAdjustSource.includes("class='date-note'") || !gameAdjustSource.includes("data.備考[d.id] = note")) {
+  fail("game_adjust.html", "日程備考の保存またはカテゴリー／目標下の表示がありません");
+}
+if (!guideSource.includes("備考はカテゴリー／目標の直下に表示")) {
+  fail("guide.html", "日程備考の入力・表示方法が説明書にありません");
+}
 if (!commonSource.includes("enhanceGameAdjustMobile") || !commonSource.includes("game-adjust-date-nav")) {
   fail("common.js", "試合調整のスマホ用日程切り替え表示がありません");
 }
