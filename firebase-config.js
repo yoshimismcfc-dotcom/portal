@@ -79,7 +79,7 @@ function dbListen(path, callback, localKey, fallback){
     var local = readLocalResult(localKey, fallback);
     if(!local.has) return;
     deliveredLocal = true;
-    callback(local.value);
+    callback(local.value, {source:"local", authoritative:false});
   }
 
   // Show saved device data immediately when it exists, but do not invent empty fallback data
@@ -87,13 +87,13 @@ function dbListen(path, callback, localKey, fallback){
   deliverLocal();
 
   if(typeof FIREBASE_CONFIG === "undefined" || FIREBASE_CONFIG.apiKey === "YOUR_API_KEY"){
-    if(!deliveredLocal) callback(fallback);
+    if(!deliveredLocal) callback(fallback, {source:"fallback", authoritative:false});
     return;
   }
 
   window.setTimeout(function(){
     if(!deliveredLocal && !FIREBASE_READY){
-      callback(fallback);
+      callback(fallback, {source:"fallback", authoritative:false});
     }
   }, 3500);
 
@@ -108,14 +108,14 @@ function dbListen(path, callback, localKey, fallback){
       }catch(cacheError){
         console.warn("[SMC Portal] latest cache update error:", localKey, cacheError);
       }
-      callback(latest);
+      callback(latest, {source:"cloud", authoritative:true, empty:val === null || val === undefined});
       try{
         window.dispatchEvent(new CustomEvent("smc:data-refreshed", {detail:{path:path}}));
       }catch(eventError){}
     }, function(err){
       console.error("[SMC Portal] dbListen error:", path, err);
       var local = readLocalResult(localKey, fallback);
-      callback(local.has ? local.value : fallback);
+      callback(local.has ? local.value : fallback, {source:local.has ? "local-error" : "error", authoritative:false});
     });
   });
 }

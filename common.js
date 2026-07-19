@@ -149,6 +149,7 @@
         body[data-theme="light"].game-adjust-enhanced .adj-table .status-btn.s-none{background:#e5edf5!important;color:#31536c!important;border-color:#789bb1!important}
         .game-adjust-date-nav{display:none}
         .ga-mobile-summary{display:none}
+        .ga-mobile-summary-note[hidden]{display:none!important}
         body.game-adjust-enhanced .adj-table .full-badge{display:none!important}
         @media (max-width:760px){
           body.game-adjust-enhanced .page-wrap{padding-left:10px!important;padding-right:10px!important}
@@ -181,6 +182,7 @@
           body.game-adjust-enhanced .adj-table .tantou-input{width:100%!important;min-width:0!important;padding:8px 4px!important;text-align:center}
           body.game-adjust-enhanced .adj-table tbody td:first-child{font-size:.78rem!important;font-weight:900!important;overflow-wrap:anywhere}
           body.game-adjust-enhanced .adj-table .tr-count,body.game-adjust-enhanced .adj-table .tr-nokori{display:none!important}
+          body.game-adjust-enhanced .adj-table .date-note{display:none!important}
           body.game-adjust-enhanced .adj-table .ga-mobile-summary{display:grid;gap:4px;margin-top:8px;padding-top:7px;border-top:1px solid rgba(106,172,204,.35);font-size:.68rem;font-weight:900;color:#d8efff}
           body[data-theme="light"].game-adjust-enhanced .adj-table .ga-mobile-summary{color:#173d5a;border-top-color:#8ba9bd}
           body.game-adjust-enhanced .adj-table .ga-mobile-summary strong{color:#00e889}
@@ -256,8 +258,9 @@
       });
   
       if (!dateEntries.length) {
-        select.innerHTML = '<option>日程なし</option>';
-        categoryFilter.innerHTML = '<option>カテゴリーなし</option>';
+        const ready = table.dataset.dataReady === "true";
+        select.innerHTML = ready ? '<option>日程なし</option>' : '<option>データ更新中…</option>';
+        categoryFilter.innerHTML = ready ? '<option>カテゴリーなし</option>' : '<option>更新待ち</option>';
         select.disabled = true;
         categoryFilter.disabled = true;
         syncing = false;
@@ -317,17 +320,23 @@
         if (!summary) {
           summary = document.createElement("span");
           summary.className = "ga-mobile-summary";
-          summary.innerHTML = '<span>参加チーム数：<strong data-summary="count"></strong></span><span>残りチーム数：<strong data-summary="remaining"></strong></span>';
+          summary.innerHTML = '<span>参加チーム数：<strong data-summary="count"></strong></span><span>残りチーム数：<strong data-summary="remaining"></strong></span><span class="ga-mobile-summary-note" data-summary-row="note" hidden>📝 備考：<strong data-summary="note"></strong></span>';
           categoryCell.appendChild(summary);
         }
         const countCell = table.querySelector(".tr-count")?.children[activeDateIndex];
         const remainingCell = table.querySelector(".tr-nokori")?.children[activeDateIndex];
+        const noteCell = table.querySelector(".tr-biko")?.children[activeDateIndex];
         const countValue = countCell?.textContent.trim() || "0";
         const remainingValue = remainingCell?.textContent.trim() || "0";
+        const noteValue = noteCell?.querySelector(".biko-input")?.value.trim() || "";
         const countOutput = summary.querySelector('[data-summary="count"]');
         const remainingOutput = summary.querySelector('[data-summary="remaining"]');
+        const noteOutput = summary.querySelector('[data-summary="note"]');
+        const noteRow = summary.querySelector('[data-summary-row="note"]');
         if (countOutput.textContent !== countValue) countOutput.textContent = countValue;
         if (remainingOutput.textContent !== remainingValue) remainingOutput.textContent = remainingValue;
+        if (noteOutput.textContent !== noteValue) noteOutput.textContent = noteValue;
+        noteRow.hidden = !noteValue;
       }
       syncing = false;
     }
@@ -363,6 +372,9 @@
     });
     new MutationObserver(() => window.requestAnimationFrame(syncDateColumns))
       .observe(table, { childList: true, subtree: true });
+    table.addEventListener("input", (event) => {
+      if (event.target.classList.contains("biko-input")) window.requestAnimationFrame(syncDateColumns);
+    });
     syncDateColumns();
   }
   function enhanceTournamentPrinting() {
@@ -997,20 +1009,15 @@ function enhanceCalendarUpcomingAgenda() {
   });
 })();
 
-/* ===== Service Worker 登録（リロードなし・点滅防止） ===== */
+/* ===== Service Worker 登録（操作中の強制再読込なし） ===== */
 (function(){
   if(!('serviceWorker' in navigator)) return;
 
   var SW_PATH = location.pathname.replace(/\/[^\/]*$/, '/') + 'sw.js';
-  var bootStartedAt = Date.now();
-  var refreshingForUpdate = false;
 
-  // 起動直後に新しいService Workerへ切り替わった場合だけ1回再読込し、
-  // 古いJavaScript/CSSのまま操作が始まることを防ぐ。
+  // 新しいWorkerへの切替は通知だけにし、入力中の画面を強制再読込しない。
   navigator.serviceWorker.addEventListener('controllerchange', function(){
-    if(refreshingForUpdate || Date.now() - bootStartedAt > 30000) return;
-    refreshingForUpdate = true;
-    window.location.reload();
+    try{ window.dispatchEvent(new CustomEvent('smc:app-updated')); }catch(e){}
   });
 
   navigator.serviceWorker.register(SW_PATH).then(function(reg){
@@ -1028,9 +1035,12 @@ function enhanceCalendarUpcomingAgenda() {
     console.log('SW登録エラー:', err);
   });
 
-  // iPhone等でバックフォワードキャッシュから復帰した場合も最新データを取得する。
+  // iPhoneの戻る操作では画面を維持したまま、次回取得用の更新確認だけ行う。
   window.addEventListener('pageshow', function(event){
-    if(event.persisted) window.location.reload();
+    if(!event.persisted) return;
+    navigator.serviceWorker.getRegistration(SW_PATH).then(function(reg){
+      if(reg) reg.update();
+    }).catch(function(){});
   });
 })();
 

@@ -125,6 +125,9 @@ if (!commonSource.includes("refreshCoachFolderLabels")) {
 if (!commonSource.includes("controllerchange") || !commonSource.includes("event.persisted")) {
   fail("common.js", "アプリ更新時または復元表示時に最新版を取得する処理がありません");
 }
+if (/window\.location\.reload\s*\(/.test(commonSource)) {
+  fail("common.js", "入力中の画面を消す強制再読込が残っています");
+}
 if (!commonSource.includes("setupDisclosureAccessibility")) {
   fail("common.js", "タップ式の説明項目にキーボード操作を追加していません");
 }
@@ -201,7 +204,7 @@ if (!gameAdjustSource.includes("date-tournament-name") || !gameAdjustSource.incl
 if (!guideSource.includes("大会名は日付の下")) {
   fail("guide.html", "大会名の入力・表示方法が説明書にありません");
 }
-if (!guideSource.includes("備考はカテゴリー／目標の直下")) {
+if (!guideSource.includes("備考は残りチーム数のすぐ下")) {
   fail("guide.html", "日程備考の入力・表示方法が説明書にありません");
 }
 if (!guideSource.includes("Firebaseを正") || !guideSource.includes("コンパクトな大会関連ボタン")) {
@@ -218,6 +221,12 @@ if (!commonSource.includes("game-adjust-legend-item") || !commonSource.includes(
 }
 if (!commonSource.includes("ga-mobile-summary") || !commonSource.includes("参加チーム数：")) {
   fail("common.js", "参加数・残り数のスマホ向け集約表示がありません");
+}
+if (!commonSource.includes('data-summary="note"') || !commonSource.includes('data-summary-row="note"')) {
+  fail("common.js", "備考が残りチーム数の下へ集約表示されません");
+}
+if (!dutyMatchSource.includes("person-quick-edit") || !dutyMatchSource.includes("openEditDutyPersons")) {
+  fail("duty_match.html", "未定または担当者名から直接編集するスマホ操作がありません");
 }
 if (!commonSource.includes("表示する日程") || !commonSource.includes(".full-badge{display:none")) {
   fail("common.js", "日程選択の強調または不要な達成チェックの非表示がありません");
