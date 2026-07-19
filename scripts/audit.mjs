@@ -204,7 +204,7 @@ if (!gameAdjustSource.includes("date-tournament-name") || !gameAdjustSource.incl
 if (!guideSource.includes("大会名は日付の下")) {
   fail("guide.html", "大会名の入力・表示方法が説明書にありません");
 }
-if (!guideSource.includes("備考はカテゴリー／目標の直下")) {
+if (!guideSource.includes("備考は残りチーム数のすぐ下")) {
   fail("guide.html", "日程備考の入力・表示方法が説明書にありません");
 }
 if (!guideSource.includes("Firebaseを正") || !guideSource.includes("コンパクトな大会関連ボタン")) {
