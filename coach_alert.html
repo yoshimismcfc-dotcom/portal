@@ -50,6 +50,8 @@
         <option value="1">前日から（推奨）</option>
         <option value="2">2日前から</option>
         <option value="3">3日前から</option>
+        <option value="5">5日前から</option>
+        <option value="7">7日前から</option>
       </select>
     </div>
     <div class="form-group">
@@ -154,7 +156,7 @@ var DEFAULT={
     {day:6,start:"08:00",end:"10:30",indoor:false,memo:"北小グラウンド"},
     {day:0,start:"08:00",end:"10:30",indoor:false,memo:"北小グラウンド"}
   ],
-  alertStartHour:0, rainThreshold:30, heatThreshold:25,
+  alertStartHour:12, alertDaysBefore:1, rainThreshold:30, heatThreshold:25,
   rainVenue:"北小体育館",
   rainOdd:"奇数月：6〜4年 8:00〜10:00 ／ 3年〜年長 10:00〜12:00",
   rainEven:"偶数月：3年〜年長 8:00〜10:00 ／ 6〜4年 10:00〜12:00"
