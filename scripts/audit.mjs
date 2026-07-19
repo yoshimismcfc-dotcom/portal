@@ -321,6 +321,21 @@ if (!commonSource.includes("game-adjust-category-filter") || !commonSource.inclu
 if (!commonSource.includes("dateSortValue") || !commonSource.includes("visibleEntries") || !commonSource.includes("fiscalMonthIndex")) {
   fail("common.js", "試合調整の日程選択が4月始まりの年度順になっていません");
 }
+if (!commonSource.includes("ACTIVE_DATE_KEY") || !commonSource.includes("rememberActiveDate") || !commonSource.includes("option.value = entry.dateId")) {
+  fail("common.js", "選択中の試合日程を列番号ではなく日程IDで保持していません");
+}
+if (!commonSource.includes("dateSortValue(dateIso, label)") || !commonSource.includes("fiscalYear * 10000")) {
+  fail("common.js", "複数年度の日程を西暦込みの年度順で並べていません");
+}
+if (!gameAdjustSource.includes("data-date-id") || !gameAdjustSource.includes("data-date-iso") || !gameAdjustSource.includes("var savedDateIso")) {
+  fail("game_adjust.html", "日程ID・ISO日付または保存済み年を編集画面へ引き継いでいません");
+}
+if (/function openEditDate[\s\S]*?new Date\(\)\.getFullYear\(\)/.test(gameAdjustSource)) {
+  fail("game_adjust.html", "日程編集時に保存済みの年ではなく端末の今年を使用しています");
+}
+if (!guideSource.includes("選択中の日程は日程IDで保持")) {
+  fail("guide.html", "年をまたぐ日程選択の保持が説明されていません");
+}
 if (!guideSource.includes("カテゴリーで絞り込み") || !guideSource.includes("年度順（4月→翌年3月）")) {
   fail("guide.html", "試合調整の年度順表示とカテゴリー絞り込みが説明書にありません");
 }
