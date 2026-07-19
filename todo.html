@@ -196,7 +196,8 @@ window.addEventListener("DOMContentLoaded", function(){
   }
   renderStats(); renderList();
   dbListen("todo", function(val){
-    if(Array.isArray(val) && val.length > 0){
+    // 空配列も「全件削除された最新データ」として受け入れる
+    if(Array.isArray(val)){
       _todoData = val;
     }
     renderStats(); renderList();
