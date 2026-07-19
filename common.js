@@ -1174,28 +1174,61 @@ function enhanceCalendarUpcomingAgenda() {
   catch(e){console.warn("auto alert local settings error:",e);}
 
   function calcWbgt(temp,humidity){return 0.735*temp+0.0374*humidity+0.00292*temp*humidity-4.064;}
+  function ensureAlertStatus(heatEl){
+    var status=document.getElementById("auto-alert-status");
+    if(status)return status;
+    status=document.createElement("div");
+    status.id="auto-alert-status";
+    status.className="auto-alert alert-status show";
+    status.setAttribute("role","status");
+    status.setAttribute("aria-live","polite");
+    status.innerHTML='<div class="auto-alert-head"><div class="alert-title"><span class="auto-alert-label">自動アラート</span><span>🔎 予報確認状況</span></div></div><div class="alert-body" id="auto-alert-status-body">確認しています…</div>';
+    heatEl.insertAdjacentElement("afterend",status);
+    if(!document.getElementById("auto-alert-status-style")){
+      var style=document.createElement("style");
+      style.id="auto-alert-status-style";
+      style.textContent='.auto-alert.alert-status{display:block!important;border-color:rgba(0,180,230,.42);background:rgba(0,100,150,.12)}.auto-alert.alert-status[data-state="safe"]{border-color:rgba(0,190,105,.45);background:rgba(0,150,85,.1)}.auto-alert.alert-status[data-state="waiting"]{border-color:rgba(255,190,40,.42);background:rgba(180,120,0,.1)}.auto-alert.alert-status[data-state="error"]{border-color:rgba(255,80,100,.45);background:rgba(180,30,50,.1)}.auto-alert.alert-status .alert-body{white-space:pre-line}';
+      document.head.appendChild(style);
+    }
+    return status;
+  }
+  function setAlertStatus(heatEl,message,state){
+    var status=ensureAlertStatus(heatEl);
+    status.dataset.state=state||"checking";
+    var body=document.getElementById("auto-alert-status-body");
+    if(body)body.textContent=message;
+  }
+  function dateTimeLabel(date,includeTime){
+    var days=["日","月","火","水","木","金","土"];
+    var label=(date.getMonth()+1)+"/"+date.getDate()+"（"+days[date.getDay()]+"）";
+    if(includeTime)label+=" "+String(date.getHours()).padStart(2,"0")+":"+String(date.getMinutes()).padStart(2,"0");
+    return label;
+  }
+  function practiceLabel(practice){
+    return dateTimeLabel(practice.date,false)+" "+(practice.schedule.start||"")+"〜"+(practice.schedule.end||"");
+  }
   function findNextOutdoorPractice(){
     var now=new Date(),schedules=cfg.schedules||DEFAULT_SCHEDULES;
-    var startHour=cfg.alertStartHour!==undefined?Number(cfg.alertStartHour):0;
+    var startHour=cfg.alertStartHour!==undefined?Number(cfg.alertStartHour):12;
     var daysBefore=cfg.alertDaysBefore!==undefined?Number(cfg.alertDaysBefore):1;
     if(!isFinite(daysBefore)||daysBefore<0)daysBefore=1;
-    for(var offset=0;offset<4;offset++){
+    if(!isFinite(startHour)||startHour<0||startHour>23)startHour=12;
+    // 週1回の屋外練習でも必ず次回を見つけられるよう、今日を含む8日間を検索。
+    for(var offset=0;offset<8;offset++){
       var date=new Date(now);date.setDate(date.getDate()+offset);
       for(var i=0;i<schedules.length;i++){
         var schedule=schedules[i];
-        if(schedule.indoor)continue; // 屋外練習のみ対象（屋内はスキップして先の屋外を探す）
+        if(schedule.indoor)continue;
         if(Number(schedule.day)!==date.getDay())continue;
-        // 当日練習が終了済みならスキップ
         if(offset===0){
           var endParts=String(schedule.end||"23:59").split(":");
           var endTime=new Date(date);endTime.setHours(Number(endParts[0]),Number(endParts[1]||0),0,0);
           if(now>endTime)continue;
         }
-        // 表示開始 = 練習日の daysBefore 日前の startHour 時から
         var alertTime=new Date(date);
         alertTime.setDate(alertTime.getDate()-daysBefore);
         alertTime.setHours(startHour,0,0,0);
-        if(now>=alertTime)return{schedule:schedule,date:date,offset:offset};
+        return{schedule:schedule,date:date,offset:offset,alertTime:alertTime,eligible:now>=alertTime};
       }
     }
     return null;
@@ -1211,12 +1244,20 @@ function enhanceCalendarUpcomingAgenda() {
     if(!rainEl||!heatEl)return;
     rainEl.classList.remove("show");heatEl.classList.remove("show");
     var practice=findNextOutdoorPractice();
-    if(!practice||practice.schedule.indoor)return;
+    if(!practice){
+      setAlertStatus(heatEl,"屋外練習が登録されていません。コーチ専用フォルダの「自動アラート設定」を確認してください。","waiting");
+      return;
+    }
+    if(!practice.eligible){
+      setAlertStatus(heatEl,"次回の屋外練習："+practiceLabel(practice)+"\n予報確認開始："+dateTimeLabel(practice.alertTime,true)+"から","waiting");
+      return;
+    }
+    setAlertStatus(heatEl,"次回の屋外練習："+practiceLabel(practice)+"\n最新の雨・WBGT予報を確認しています…","checking");
 
-    function fetchForecast(lat,lon,sourceName){
+    function fetchForecast(lat,lon,sourceName,isFallback){
       var url="https://api.open-meteo.com/v1/forecast?latitude="+lat+"&longitude="+lon
         +"&hourly=temperature_2m,relative_humidity_2m,weather_code,precipitation_probability"
-        +"&timezone=Asia/Tokyo&forecast_days=4";
+        +"&timezone=Asia/Tokyo&forecast_days=8";
       fetch(url,{cache:"no-store"}).then(function(response){
         if(!response.ok)throw new Error("Open-Meteo HTTP "+response.status);
         return response.json();
@@ -1274,12 +1315,29 @@ function enhanceCalendarUpcomingAgenda() {
             +"・保冷剤・タオルをご用意ください"+(wbgtMax>=31?"\n⛔ WBGT31℃以上は活動中止基準です":"");
           heatEl.classList.add("show");
         }
-      }).catch(function(error){console.error("auto alert fetch error:",error);});
+        var warnings=[];
+        if(hasRain)warnings.push("雨アラート");
+        if(wbgtMax>=heatThreshold)warnings.push("熱中症アラート");
+        if(warnings.length){
+          setAlertStatus(heatEl,"次回の屋外練習："+practiceLabel(practice)+"\n予報確認済み："+warnings.join("・")+"を表示しています。","waiting");
+        }else{
+          setAlertStatus(heatEl,"次回の屋外練習："+practiceLabel(practice)+"\n現在アラートはありません（最大降水確率 "+rainMax+"%／予想WBGT "+wbgtMax.toFixed(1)+"℃）","safe");
+        }
+      }).catch(function(error){
+        console.error("auto alert fetch error:",error);
+        if(runId!==checkSeq)return;
+        if(!isFallback){
+          setAlertStatus(heatEl,"現在地の予報を取得できなかったため、吉見町の予報で再確認しています…","checking");
+          fetchForecast(36.0,139.5,"吉見町",true);
+          return;
+        }
+        setAlertStatus(heatEl,"予報を取得できませんでした。通信状態を確認し、画面を開き直してください。","error");
+      });
     }
-    function useYoshimi(){if(runId===checkSeq)fetchForecast(36.0,139.5,"吉見町");}
+    function useYoshimi(){if(runId===checkSeq)fetchForecast(36.0,139.5,"吉見町",true);}
     if(!navigator.geolocation){useYoshimi();return;}
     navigator.geolocation.getCurrentPosition(function(position){
-      if(runId===checkSeq)fetchForecast(position.coords.latitude,position.coords.longitude,"現在地");
+      if(runId===checkSeq)fetchForecast(position.coords.latitude,position.coords.longitude,"現在地",false);
     },function(error){
       console.warn("auto alert geolocation fallback:",error&&error.message?error.message:error);
       useYoshimi();
@@ -1304,4 +1362,7 @@ function enhanceCalendarUpcomingAgenda() {
     },ALERT_KEY,null);
   }
   window.addEventListener("DOMContentLoaded",scheduleCheck);
+  document.addEventListener("visibilitychange",function(){
+    if(document.visibilityState==="visible")scheduleCheck();
+  });
 })();
