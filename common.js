@@ -120,9 +120,9 @@
     const table = document.getElementById("adj-table");
     const wrapper = table?.closest(".adj-wrap");
     if (!table || !wrapper) return;
-
+  
     document.body.classList.add("game-adjust-enhanced");
-
+  
     const legend = document.querySelector(".legend");
     if (legend) {
       legend.innerHTML = `
@@ -133,7 +133,7 @@
         <span class="game-adjust-legend-item"><span class="status-btn s-none">－</span><span class="game-adjust-legend-label">未打診</span></span>
       `;
     }
-
+  
     if (!document.getElementById("game-adjust-mobile-style")) {
       const style = document.createElement("style");
       style.id = "game-adjust-mobile-style";
@@ -159,10 +159,13 @@
           body.game-adjust-enhanced .legend .game-adjust-legend-item{display:grid!important;grid-template-columns:minmax(118px,1fr) minmax(90px,.8fr);align-items:center;gap:12px;width:100%}
           body.game-adjust-enhanced .legend .game-adjust-legend-item .status-btn{width:100%!important;min-width:0!important;box-sizing:border-box}
           body.game-adjust-enhanced .legend .game-adjust-legend-label{font-size:.78rem;color:var(--ink-3);font-weight:800;text-align:left}
-          .game-adjust-date-nav{display:grid;grid-template-columns:46px minmax(0,1fr) 46px;gap:9px;align-items:end;margin:12px 0;padding:11px;border:2px solid rgba(35,190,235,.72);border-radius:16px;background:linear-gradient(135deg,rgba(14,118,170,.2),rgba(25,180,220,.08));box-shadow:0 6px 20px rgba(0,0,0,.2)}
-          .game-adjust-date-nav label{font-size:.78rem;font-weight:900;color:#73dcff;letter-spacing:.02em}
+          .game-adjust-date-nav{display:grid;grid-template-columns:46px minmax(0,1fr) 46px;gap:9px;align-items:center;margin:12px 0;padding:11px;border:2px solid rgba(35,190,235,.72);border-radius:16px;background:linear-gradient(135deg,rgba(14,118,170,.2),rgba(25,180,220,.08));box-shadow:0 6px 20px rgba(0,0,0,.2)}
+          .game-adjust-date-controls{display:grid;gap:9px;min-width:0}
+          .game-adjust-date-nav label{display:block;font-size:.78rem;font-weight:900;color:#73dcff;letter-spacing:.02em}
+          .game-adjust-category-label{padding-top:8px;border-top:1px solid rgba(115,220,255,.32)}
           body[data-theme="light"].game-adjust-enhanced .game-adjust-date-nav{background:linear-gradient(135deg,#d7f3ff,#f7fcff);border-color:#1689b4;box-shadow:0 6px 18px rgba(17,91,126,.16)}
           body[data-theme="light"].game-adjust-enhanced .game-adjust-date-nav label{color:#075d84}
+          body[data-theme="light"].game-adjust-enhanced .game-adjust-category-label{border-top-color:rgba(7,93,132,.28)}
           .game-adjust-date-nav select,.game-adjust-date-nav button{min-height:46px;border-radius:12px;font:inherit;font-weight:900}
           .game-adjust-date-nav select{width:100%;margin-top:6px;padding:8px 10px;background:var(--panel);color:var(--ink);border:2px solid var(--cyan);font-size:.88rem}
           .game-adjust-date-nav button{border:2px solid var(--cyan);background:rgba(25,180,220,.16);color:#72dcff;font-size:1.4rem}
@@ -187,50 +190,116 @@
       `;
       document.head.appendChild(style);
     }
-
+  
     let activeDateIndex = 1;
     let syncing = false;
     const nav = document.createElement("div");
     nav.className = "game-adjust-date-nav";
-    nav.setAttribute("aria-label", "表示する日程の切り替え");
-    nav.innerHTML = '<button type="button" data-move="-1" aria-label="前の日程">‹</button><label>📅 表示する日程・カテゴリー<select aria-label="表示する日程とカテゴリー"></select></label><button type="button" data-move="1" aria-label="次の日程">›</button>';
+    nav.setAttribute("aria-label", "表示する日程の切り替えとカテゴリー絞り込み");
+    nav.innerHTML = '<button type="button" data-move="-1" aria-label="前の日程">‹</button><div class="game-adjust-date-controls"><label>📅 表示する日程<select class="game-adjust-date-select" aria-label="表示する日程"></select></label><label class="game-adjust-category-label">🔎 カテゴリーで絞り込み<select class="game-adjust-category-filter" aria-label="カテゴリーで絞り込み"></select></label></div><button type="button" data-move="1" aria-label="次の日程">›</button>';
     wrapper.before(nav);
-    const select = nav.querySelector("select");
-
+    const select = nav.querySelector(".game-adjust-date-select");
+    const categoryFilter = nav.querySelector(".game-adjust-category-filter");
+  
     function cleanHeaderLabel(cell) {
       const copy = cell.cloneNode(true);
       copy.querySelectorAll("button").forEach((button) => button.remove());
       return copy.textContent.replace(/\s+/g, " ").trim() || "日程";
     }
-
+  
     function cleanCategoryLabel(cell) {
       if (!cell) return "未設定";
       const copy = cell.cloneNode(true);
       copy.querySelectorAll("span,br,button,.ga-mobile-summary").forEach((element) => element.remove());
       return copy.textContent.replace(/\s+/g, " ").trim() || "未設定";
     }
-
+  
+    function categoryKey(label) {
+      const normalized = String(label || "").normalize("NFKC").trim();
+      const underMatch = normalized.match(/U\s*[-ー]?\s*(\d{1,2})/i);
+      if (underMatch) return `U${Number(underMatch[1])}`;
+      return normalized.split(/[／/・,、\s]/)[0] || "未設定";
+    }
+  
+    function dateSortValue(label) {
+      const normalized = String(label || "").normalize("NFKC");
+      const slashMatch = normalized.match(/(?:\d{4}\s*[\/.\-]\s*)?(\d{1,2})\s*[\/.\-]\s*(\d{1,2})/);
+      const japaneseMatch = normalized.match(/(\d{1,2})\s*月\s*(\d{1,2})\s*日/);
+      const match = slashMatch || japaneseMatch;
+      if (!match) return Number.MAX_SAFE_INTEGER;
+      const month = Number(match[1]);
+      const day = Number(match[2]);
+      if (month < 1 || month > 12 || day < 1 || day > 31) return Number.MAX_SAFE_INTEGER;
+      return month * 100 + day;
+    }
+  
+    function categorySortValue(value) {
+      const match = String(value).match(/^U(\d+)$/);
+      return match ? Number(match[1]) : 1000;
+    }
+  
     function syncDateColumns() {
       if (syncing) return;
       syncing = true;
       const headerCells = Array.from(table.querySelectorAll("thead tr:first-child > th"));
       const categoryCells = Array.from(table.querySelectorAll("thead tr:nth-child(2) > th"));
-      const dateCount = Math.max(0, headerCells.length - 2);
-      if (!dateCount) {
+      const dateEntries = headerCells.slice(1, -1).map((cell, index) => {
+        const categoryLabel = cleanCategoryLabel(categoryCells[index + 1]);
+        return {
+          columnIndex: index + 1,
+          dateLabel: cleanHeaderLabel(cell),
+          categoryLabel,
+          category: categoryKey(categoryLabel)
+        };
+      });
+  
+      if (!dateEntries.length) {
         select.innerHTML = '<option>日程なし</option>';
+        categoryFilter.innerHTML = '<option>カテゴリーなし</option>';
         select.disabled = true;
+        categoryFilter.disabled = true;
         syncing = false;
         return;
       }
-      activeDateIndex = Math.min(Math.max(activeDateIndex, 1), dateCount);
-      select.disabled = false;
-      select.replaceChildren(...headerCells.slice(1, -1).map((cell, index) => {
+  
+      const previousCategory = categoryFilter.value || "all";
+      const categories = [...new Set(dateEntries.map((entry) => entry.category))]
+        .sort((a, b) => categorySortValue(a) - categorySortValue(b) || a.localeCompare(b, "ja", { numeric: true }));
+      const allOption = document.createElement("option");
+      allOption.value = "all";
+      allOption.textContent = "すべてのカテゴリー";
+      const categoryOptions = categories.map((category) => {
         const option = document.createElement("option");
-        option.value = String(index + 1);
-        option.textContent = `${cleanHeaderLabel(cell)}｜${cleanCategoryLabel(categoryCells[index + 1])}`;
+        option.value = category;
+        option.textContent = category;
+        return option;
+      });
+      categoryFilter.replaceChildren(allOption, ...categoryOptions);
+      categoryFilter.value = categories.includes(previousCategory) ? previousCategory : "all";
+  
+      const visibleEntries = dateEntries
+        .filter((entry) => categoryFilter.value === "all" || entry.category === categoryFilter.value)
+        .sort((a, b) =>
+          dateSortValue(a.dateLabel) - dateSortValue(b.dateLabel)
+          || categorySortValue(a.category) - categorySortValue(b.category)
+          || a.category.localeCompare(b.category, "ja", { numeric: true })
+          || a.columnIndex - b.columnIndex
+        );
+  
+      if (!visibleEntries.some((entry) => entry.columnIndex === activeDateIndex)) {
+        activeDateIndex = visibleEntries[0].columnIndex;
+      }
+  
+      select.disabled = false;
+      categoryFilter.disabled = false;
+      select.replaceChildren(...visibleEntries.map((entry) => {
+        const option = document.createElement("option");
+        option.value = String(entry.columnIndex);
+        option.textContent = `${entry.dateLabel}｜${entry.categoryLabel}`;
         return option;
       }));
       select.value = String(activeDateIndex);
+  
       table.querySelectorAll("tr").forEach((row) => {
         const cells = Array.from(row.children);
         cells.forEach((cell, index) => {
@@ -239,6 +308,7 @@
           cell.classList.toggle("ga-date-active", isDate && index === activeDateIndex);
         });
       });
+  
       const categoryCell = categoryCells[activeDateIndex];
       if (categoryCell) {
         let summary = categoryCell.querySelector(".ga-mobile-summary");
@@ -259,16 +329,33 @@
       }
       syncing = false;
     }
-
+  
     select.addEventListener("change", () => {
       activeDateIndex = Number(select.value) || 1;
       syncDateColumns();
     });
+    categoryFilter.addEventListener("change", () => {
+      const selectedCategory = categoryFilter.value;
+      const headerCells = Array.from(table.querySelectorAll("thead tr:first-child > th"));
+      const categoryCells = Array.from(table.querySelectorAll("thead tr:nth-child(2) > th"));
+      const firstMatching = headerCells.slice(1, -1)
+        .map((cell, index) => ({
+          columnIndex: index + 1,
+          dateLabel: cleanHeaderLabel(cell),
+          category: categoryKey(cleanCategoryLabel(categoryCells[index + 1]))
+        }))
+        .filter((entry) => selectedCategory === "all" || entry.category === selectedCategory)
+        .sort((a, b) => dateSortValue(a.dateLabel) - dateSortValue(b.dateLabel) || a.columnIndex - b.columnIndex)[0];
+      if (firstMatching) activeDateIndex = firstMatching.columnIndex;
+      syncDateColumns();
+    });
     nav.querySelectorAll("button").forEach((button) => {
       button.addEventListener("click", () => {
-        const count = select.options.length;
-        if (!count || select.disabled) return;
-        activeDateIndex = ((activeDateIndex - 1 + Number(button.dataset.move) + count) % count) + 1;
+        const dateIndexes = Array.from(select.options).map((option) => Number(option.value)).filter(Number.isFinite);
+        if (!dateIndexes.length || select.disabled) return;
+        const currentPosition = Math.max(0, dateIndexes.indexOf(activeDateIndex));
+        const nextPosition = (currentPosition + Number(button.dataset.move) + dateIndexes.length) % dateIndexes.length;
+        activeDateIndex = dateIndexes[nextPosition];
         syncDateColumns();
       });
     });
@@ -276,7 +363,6 @@
       .observe(table, { childList: true, subtree: true });
     syncDateColumns();
   }
-
   function enhanceTournamentPrinting() {
     const preview = document.getElementById("taisen-preview");
     if (!preview) return;
