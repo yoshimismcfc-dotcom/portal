@@ -195,6 +195,24 @@ if (!guideSource.includes("立替・購入相談") || !guideSource.includes("共
   fail("guide.html", "コーチ共有の会計・やることリスト連動が説明されていません");
 }
 
+const refereeSource = fs.readFileSync(path.join(root, "referee.html"), "utf8");
+const assistantRuleNumbers = Array.from({ length: 8 }, (_, index) => refereeSource.includes(`<div class="rule-num">${index + 1}</div>`) ? index + 1 : 0);
+if (assistantRuleNumbers.join(",") !== "1,2,3,4,5,6,7,8") {
+  fail("referee.html", "副審の心得が1〜8の順で揃っていません");
+}
+for (const requiredText of ["10〜15m素早く移動", "主審とのアイコンタクト", "少なくとも片足の一部", "時計2個", "判定と次の再開の監視を優先", "copyAssistantPrinciples", "IFAB競技規則2026/27"]) {
+  if (!refereeSource.includes(requiredText)) fail("referee.html", `副審の心得に必要な内容がありません: ${requiredText}`);
+}
+if (refereeSource.includes("キック前にGKが動きゴールインしなかった場合はフラッグアップ")) {
+  fail("referee.html", "PK時の古い一律フラッグアップ説明が残っています");
+}
+if (!refereeSource.includes('body[data-theme="light"] .rule-title') || !refereeSource.includes("principles-source")) {
+  fail("referee.html", "副審の心得のライトモードまたは出典表示がありません");
+}
+if (!guideSource.includes("副審の心得をLINEコピー") || !guideSource.includes("IFAB競技規則2026/27")) {
+  fail("guide.html", "副審の心得・LINEコピー・現行規則の説明がありません");
+}
+
 const gameAdjustSource = fs.readFileSync(path.join(root, "game_adjust.html"), "utf8");
 const dutyMatchSource = fs.readFileSync(path.join(root, "duty_match.html"), "utf8");
 const accountingSource = fs.readFileSync(path.join(root, "accounting.html"), "utf8");
