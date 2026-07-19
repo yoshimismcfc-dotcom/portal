@@ -148,8 +148,17 @@ if (!commonSource.includes("game-adjust-legend-item") || !commonSource.includes(
 if (!commonSource.includes("ga-mobile-summary") || !commonSource.includes("参加チーム数：")) {
   fail("common.js", "参加数・残り数のスマホ向け集約表示がありません");
 }
-if (!commonSource.includes("表示する日程・カテゴリー") || !commonSource.includes(".full-badge{display:none")) {
+if (!commonSource.includes("表示する日程") || !commonSource.includes(".full-badge{display:none")) {
   fail("common.js", "日程選択の強調または不要な達成チェックの非表示がありません");
+}
+if (!commonSource.includes("game-adjust-category-filter") || !commonSource.includes("categoryKey")) {
+  fail("common.js", "試合調整にカテゴリー絞り込みがありません");
+}
+if (!commonSource.includes("dateSortValue") || !commonSource.includes("visibleEntries")) {
+  fail("common.js", "試合調整の日程選択が日付順になっていません");
+}
+if (!guideSource.includes("カテゴリーで絞り込み") || !guideSource.includes("日付順")) {
+  fail("guide.html", "試合調整の日付順表示とカテゴリー絞り込みが説明書にありません");
 }
 if (!commonSource.includes("enhanceTournamentPrinting") || !commonSource.includes("ensureLunchBreakRows")) {
   fail("common.js", "対戦表の昼食休憩を印刷へ確実に反映する処理がありません");
