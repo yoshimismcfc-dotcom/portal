@@ -1,5 +1,5 @@
 // Yoshimi SMC FC Portal Service Worker
-const APP_VERSION = "20260714-5";
+const APP_VERSION = "20260719-6";
 const CACHE_PREFIX = "smc-portal-";
 const CACHE_NAME = CACHE_PREFIX + APP_VERSION;
 
@@ -47,7 +47,7 @@ self.addEventListener("activate", function(event){
 });
 
 function networkFirst(request){
-  return fetch(request).then(function(response){
+  return fetch(request, {cache:"no-store"}).then(function(response){
     if(response && response.ok){
       var copy = response.clone();
       caches.open(CACHE_NAME).then(function(cache){ cache.put(request, copy); });
@@ -85,7 +85,14 @@ self.addEventListener("fetch", function(event){
     return;
   }
 
-  if(["style","script","image","font"].indexOf(request.destination) !== -1){
+  // JavaScriptとCSSは起動時にネットワークを優先し、常に最新版を確認する。
+  if(["style","script"].indexOf(request.destination) !== -1){
+    event.respondWith(networkFirst(request));
+    return;
+  }
+
+  // 画像とフォントだけは表示速度を優先し、裏側で更新する。
+  if(["image","font"].indexOf(request.destination) !== -1){
     event.respondWith(staleWhileRevalidate(request));
   }
 });
