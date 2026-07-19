@@ -230,7 +230,9 @@
       const month = Number(match[1]);
       const day = Number(match[2]);
       if (month < 1 || month > 12 || day < 1 || day > 31) return Number.MAX_SAFE_INTEGER;
-      return month * 100 + day;
+      // チーム年度は4月始まり。4月〜12月の後に翌年1月〜3月を並べる。
+      const fiscalMonthIndex = month >= 4 ? month - 4 : month + 8;
+      return fiscalMonthIndex * 100 + day;
     }
   
     function categorySortValue(value) {

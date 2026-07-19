@@ -154,11 +154,11 @@ if (!commonSource.includes("表示する日程") || !commonSource.includes(".ful
 if (!commonSource.includes("game-adjust-category-filter") || !commonSource.includes("categoryKey")) {
   fail("common.js", "試合調整にカテゴリー絞り込みがありません");
 }
-if (!commonSource.includes("dateSortValue") || !commonSource.includes("visibleEntries")) {
-  fail("common.js", "試合調整の日程選択が日付順になっていません");
+if (!commonSource.includes("dateSortValue") || !commonSource.includes("visibleEntries") || !commonSource.includes("fiscalMonthIndex")) {
+  fail("common.js", "試合調整の日程選択が4月始まりの年度順になっていません");
 }
-if (!guideSource.includes("カテゴリーで絞り込み") || !guideSource.includes("日付順")) {
-  fail("guide.html", "試合調整の日付順表示とカテゴリー絞り込みが説明書にありません");
+if (!guideSource.includes("カテゴリーで絞り込み") || !guideSource.includes("年度順（4月→翌年3月）")) {
+  fail("guide.html", "試合調整の年度順表示とカテゴリー絞り込みが説明書にありません");
 }
 if (!commonSource.includes("enhanceTournamentPrinting") || !commonSource.includes("ensureLunchBreakRows")) {
   fail("common.js", "対戦表の昼食休憩を印刷へ確実に反映する処理がありません");
