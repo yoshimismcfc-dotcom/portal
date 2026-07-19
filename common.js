@@ -193,8 +193,19 @@
       document.head.appendChild(style);
     }
   
+    const ACTIVE_DATE_KEY = "smc_game_adjust_active_date_v1";
     let activeDateIndex = 1;
+    let activeDateId = "";
+    try { activeDateId = sessionStorage.getItem(ACTIVE_DATE_KEY) || ""; } catch (error) {}
     let syncing = false;
+
+    function rememberActiveDate(dateId) {
+      activeDateId = String(dateId || "");
+      try {
+        if (activeDateId) sessionStorage.setItem(ACTIVE_DATE_KEY, activeDateId);
+        else sessionStorage.removeItem(ACTIVE_DATE_KEY);
+      } catch (error) {}
+    }
     const nav = document.createElement("div");
     nav.className = "game-adjust-date-nav";
     nav.setAttribute("aria-label", "表示する日程の切り替えとカテゴリー絞り込み");
@@ -223,20 +234,31 @@
       return normalized.split(/[／/・,、\s]/)[0] || "未設定";
     }
   
-    function dateSortValue(label) {
+    function dateSortValue(dateIso, label) {
+      const isoMatch = String(dateIso || "").match(/^(\d{4})-(\d{2})-(\d{2})$/);
       const normalized = String(label || "").normalize("NFKC");
-      const slashMatch = normalized.match(/(?:\d{4}\s*[\/.\-]\s*)?(\d{1,2})\s*[\/.\-]\s*(\d{1,2})/);
-      const japaneseMatch = normalized.match(/(\d{1,2})\s*月\s*(\d{1,2})\s*日/);
-      const match = slashMatch || japaneseMatch;
+      const slashMatch = normalized.match(/(?:(\d{4})\s*[\/.\-]\s*)?(\d{1,2})\s*[\/.\-]\s*(\d{1,2})/);
+      const japaneseMatch = normalized.match(/(?:(\d{4})\s*年\s*)?(\d{1,2})\s*月\s*(\d{1,2})\s*日/);
+      const match = isoMatch || slashMatch || japaneseMatch;
       if (!match) return Number.MAX_SAFE_INTEGER;
-      const month = Number(match[1]);
-      const day = Number(match[2]);
+      const hasYear = Boolean(match[1]);
+      const year = hasYear ? Number(match[1]) : 0;
+      const month = Number(match[2]);
+      const day = Number(match[3]);
       if (month < 1 || month > 12 || day < 1 || day > 31) return Number.MAX_SAFE_INTEGER;
-      // チーム年度は4月始まり。4月〜12月の後に翌年1月〜3月を並べる。
+      // 年をまたいでも、各年度を4月→翌年3月の順で並べる。
+      const fiscalYear = hasYear ? (month >= 4 ? year : year - 1) : 0;
       const fiscalMonthIndex = month >= 4 ? month - 4 : month + 8;
-      return fiscalMonthIndex * 100 + day;
+      return fiscalYear * 10000 + fiscalMonthIndex * 100 + day;
     }
-  
+
+    function optionDateLabel(entry) {
+      if (!/^\d{4}-\d{2}-\d{2}$/.test(entry.dateIso || "")) return entry.dateLabel;
+      const parts = entry.dateIso.split("-");
+      const suffix = entry.dateLabel.replace(/^\d{1,2}\s*\/\s*\d{1,2}/, "").trim();
+      return parts[0] + "/" + Number(parts[1]) + "/" + Number(parts[2]) + (suffix ? " " + suffix : "");
+    }
+
     function categorySortValue(value) {
       const match = String(value).match(/^U(\d+)$/);
       return match ? Number(match[1]) : 1000;
@@ -251,6 +273,8 @@
         const categoryLabel = cleanCategoryLabel(categoryCells[index + 1]);
         return {
           columnIndex: index + 1,
+          dateId: cell.dataset.dateId || cell.id.replace(/^hdr-/, "") || String(index + 1),
+          dateIso: cell.dataset.dateIso || "",
           dateLabel: cleanHeaderLabel(cell),
           categoryLabel,
           category: categoryKey(categoryLabel)
@@ -285,25 +309,29 @@
       const visibleEntries = dateEntries
         .filter((entry) => categoryFilter.value === "all" || entry.category === categoryFilter.value)
         .sort((a, b) =>
-          dateSortValue(a.dateLabel) - dateSortValue(b.dateLabel)
+          dateSortValue(a.dateIso, a.dateLabel) - dateSortValue(b.dateIso, b.dateLabel)
           || categorySortValue(a.category) - categorySortValue(b.category)
           || a.category.localeCompare(b.category, "ja", { numeric: true })
           || a.columnIndex - b.columnIndex
         );
   
-      if (!visibleEntries.some((entry) => entry.columnIndex === activeDateIndex)) {
+      const selectedEntry = visibleEntries.find((entry) => entry.dateId === activeDateId);
+      if (selectedEntry) {
+        activeDateIndex = selectedEntry.columnIndex;
+      } else {
         activeDateIndex = visibleEntries[0].columnIndex;
+        rememberActiveDate(visibleEntries[0].dateId);
       }
   
       select.disabled = false;
       categoryFilter.disabled = false;
       select.replaceChildren(...visibleEntries.map((entry) => {
         const option = document.createElement("option");
-        option.value = String(entry.columnIndex);
-        option.textContent = `${entry.dateLabel}｜${entry.categoryLabel}`;
+        option.value = entry.dateId;
+        option.textContent = `${optionDateLabel(entry)}｜${entry.categoryLabel}`;
         return option;
       }));
-      select.value = String(activeDateIndex);
+      select.value = activeDateId;
   
       table.querySelectorAll("tr").forEach((row) => {
         const cells = Array.from(row.children);
@@ -342,7 +370,7 @@
     }
   
     select.addEventListener("change", () => {
-      activeDateIndex = Number(select.value) || 1;
+      rememberActiveDate(select.value);
       syncDateColumns();
     });
     categoryFilter.addEventListener("change", () => {
@@ -352,21 +380,26 @@
       const firstMatching = headerCells.slice(1, -1)
         .map((cell, index) => ({
           columnIndex: index + 1,
+          dateId: cell.dataset.dateId || cell.id.replace(/^hdr-/, "") || String(index + 1),
+          dateIso: cell.dataset.dateIso || "",
           dateLabel: cleanHeaderLabel(cell),
           category: categoryKey(cleanCategoryLabel(categoryCells[index + 1]))
         }))
         .filter((entry) => selectedCategory === "all" || entry.category === selectedCategory)
-        .sort((a, b) => dateSortValue(a.dateLabel) - dateSortValue(b.dateLabel) || a.columnIndex - b.columnIndex)[0];
-      if (firstMatching) activeDateIndex = firstMatching.columnIndex;
+        .sort((a, b) => dateSortValue(a.dateIso, a.dateLabel) - dateSortValue(b.dateIso, b.dateLabel) || a.columnIndex - b.columnIndex)[0];
+      if (firstMatching) {
+        activeDateIndex = firstMatching.columnIndex;
+        rememberActiveDate(firstMatching.dateId);
+      }
       syncDateColumns();
     });
     nav.querySelectorAll("button").forEach((button) => {
       button.addEventListener("click", () => {
-        const dateIndexes = Array.from(select.options).map((option) => Number(option.value)).filter(Number.isFinite);
-        if (!dateIndexes.length || select.disabled) return;
-        const currentPosition = Math.max(0, dateIndexes.indexOf(activeDateIndex));
-        const nextPosition = (currentPosition + Number(button.dataset.move) + dateIndexes.length) % dateIndexes.length;
-        activeDateIndex = dateIndexes[nextPosition];
+        const dateIds = Array.from(select.options).map((option) => option.value).filter(Boolean);
+        if (!dateIds.length || select.disabled) return;
+        const currentPosition = Math.max(0, dateIds.indexOf(activeDateId));
+        const nextPosition = (currentPosition + Number(button.dataset.move) + dateIds.length) % dateIds.length;
+        rememberActiveDate(dateIds[nextPosition]);
         syncDateColumns();
       });
     });
