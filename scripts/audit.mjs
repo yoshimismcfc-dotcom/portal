@@ -128,6 +128,15 @@ if (!commonSource.includes("controllerchange") || !commonSource.includes("event.
 if (/window\.location\.reload\s*\(/.test(commonSource)) {
   fail("common.js", "入力中の画面を消す強制再読込が残っています");
 }
+if (!commonSource.includes("forecast_days=8") || !commonSource.includes("offset<8") || !commonSource.includes("auto-alert-status")) {
+  fail("common.js", "自動アラートが8日先検索または予報確認状況表示に対応していません");
+}
+if (!commonSource.includes("現在アラートはありません") || !commonSource.includes("予報を取得できませんでした")) {
+  fail("common.js", "自動アラートの正常・エラー状態表示がありません");
+}
+if (!guideSource.includes("次の屋外練習を8日先まで") || !guideSource.includes("予報確認状況")) {
+  fail("guide.html", "自動アラートの8日先検索と状態表示が説明されていません");
+}
 if (!commonSource.includes("setupDisclosureAccessibility")) {
   fail("common.js", "タップ式の説明項目にキーボード操作を追加していません");
 }
