@@ -63,6 +63,10 @@
     .th-cat:focus-visible{outline:2px solid var(--cyan);outline-offset:-2px}
     .date-note{display:block;margin-top:7px;padding:6px 7px;border-radius:8px;background:rgba(106,172,204,.12);color:#d9efff;font-size:.64rem;font-weight:700;line-height:1.45;text-align:left;white-space:pre-wrap;overflow-wrap:anywhere}
     body[data-theme="light"] .date-note{background:#dceaf4;color:#173d5a}
+    .date-related-links{display:grid;gap:5px;margin-top:8px;padding-top:8px;border-top:1px solid rgba(106,172,204,.35)}
+    .date-related-link{display:flex;align-items:center;justify-content:center;min-height:32px;padding:5px 6px;border:1px solid rgba(0,212,255,.42);border-radius:8px;background:rgba(0,122,180,.16);color:#bfeeff!important;font-size:.62rem;font-weight:900;line-height:1.25;text-decoration:none;white-space:normal}
+    .date-related-link:hover,.date-related-link:focus-visible{background:rgba(0,212,255,.24);border-color:#00d4ff;outline:none}
+    body[data-theme="light"] .date-related-link{background:#e5f6fc;color:#075d84!important;border-color:#1689b4}
     .th-label{color:var(--cyan);font-size:.68rem;font-weight:900;letter-spacing:.08em}
     .th-tantou{text-align:center;min-width:74px}
     /* 充足バッジ */
@@ -589,8 +593,16 @@ function renderTable() {
   h += "<th class='th-date th-tantou' scope='col'>担当</th></tr>";
   h += "<tr><th class='col-fixed th-cat' style='color:#8ac8e8;cursor:default'>カテゴリー / 目標</th>";
   dates.forEach(function(d) {
+    var relatedQuery = "?from=game_adjust&dateId=" + encodeURIComponent(d.id) +
+      "&date=" + encodeURIComponent(d.label || "") +
+      "&name=" + encodeURIComponent(d.tournamentName || "") +
+      "&category=" + encodeURIComponent(d.cat || "");
     h += "<th class='th-cat' data-act='edit-date' data-id='" + esc(d.id) + "' tabindex='0' role='button' aria-label='" + esc(d.label) + "の日程を編集' title='タップして編集'>" + esc(d.cat) +
          "<br><span style='color:#ffaa66;font-weight:900'>目標 " + esc(d.target) + "チーム</span>" +
+         "<span class='date-related-links' aria-label='大会関連メニュー'>" +
+           "<a class='date-related-link' data-act='open-related' href='duty_match.html" + esc(relatedQuery) + "'>👥 大会任務分担</a>" +
+           "<a class='date-related-link' data-act='open-related' href='tournament.html" + esc(relatedQuery) + "'>📋 大会要項・対戦表</a>" +
+         "</span>" +
          ((data.備考 || {})[d.id] ? "<span class='date-note'>📝 " + esc((data.備考 || {})[d.id]) + "</span>" : "") +
          "<span style='font-size:.6rem;color:#6aaccc;display:block'>✏️ タップして編集</span></th>";
   });
@@ -647,11 +659,16 @@ document.getElementById("adj-table").addEventListener("click", function(e){
   if(act === "cycle")     cycleStatus(el.dataset.tid, el.dataset.did, el);
   else if(act === "del-date") deleteDate(el.dataset.id);
   else if(act === "del-team") deleteTeam(el.dataset.id);
+  else if(act === "open-related") {
+    e.stopPropagation();
+    collectDOMChanges();
+    persist();
+  }
   else if(act === "edit-date") openEditDate(el.dataset.id);
 });
 // キーボード操作（アクセシビリティ：Enterで日程編集）
 document.getElementById("adj-table").addEventListener("keydown", function(e){
-  if(e.key !== "Enter") return;
+  if(e.key !== "Enter" || e.target.closest(".date-related-link")) return;
   var el = e.target.closest("[data-act='edit-date']");
   if(el) openEditDate(el.dataset.id);
 });
