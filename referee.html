@@ -43,6 +43,31 @@
     body[data-theme="light"] .gesture-card p,
     body[data-theme="light"] .guide-list li{color:var(--ink-2)}
     body[data-theme="light"] .rule-card{background:rgba(0,48,135,.035);border-color:rgba(21,72,105,.22)}
+    .quick-priority{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:9px;margin:12px 0 18px}
+    .quick-priority div{padding:12px;border-radius:12px;background:rgba(0,212,255,.08);border:1px solid rgba(0,212,255,.25);color:var(--ink-2);font-size:.82rem;line-height:1.55}
+    .quick-priority b{display:block;color:var(--cyan);font-size:.9rem;margin-bottom:3px}
+    .offside-lead{background:linear-gradient(135deg,rgba(255,107,43,.14),rgba(0,212,255,.09));border:1px solid rgba(255,170,102,.42);border-radius:14px;padding:14px;margin-bottom:12px;color:var(--ink-2);line-height:1.7;font-size:.84rem}
+    .offside-lead strong{color:var(--orange)}
+    .diagram-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px;margin:12px 0}
+    .diagram-card{background:#071728;border:1px solid rgba(0,212,255,.3);border-radius:14px;padding:12px;overflow:hidden}
+    .diagram-card h4{color:#fff;font-size:.86rem;margin:0 0 8px}
+    .diagram-card p{color:#b7d7e9;font-size:.74rem;line-height:1.55;margin:8px 0 0}
+    .diagram-card svg{display:block;width:100%;height:auto;background:#eaf7ee;border-radius:10px}
+    .signal-steps{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:8px}
+    .signal-step{text-align:center;padding:10px 6px;border-radius:12px;background:rgba(255,255,255,.045);border:1px solid var(--line-2);font-size:.73rem;color:var(--ink-3);line-height:1.45}
+    .signal-step b{display:block;color:var(--cyan);font-size:.82rem;margin-bottom:4px}
+    .change-card{border:1px solid var(--line-2);border-radius:14px;overflow:hidden;margin-bottom:12px;background:rgba(255,255,255,.035)}
+    .change-head{display:flex;align-items:center;gap:8px;padding:10px 12px;background:rgba(0,212,255,.1);font-weight:900;color:var(--ink)}
+    .change-year{padding:3px 8px;border-radius:99px;background:var(--orange);color:#fff;font-size:.7rem;white-space:nowrap}
+    .change-body{display:grid;grid-template-columns:1fr 1fr;gap:8px;padding:12px}
+    .change-body div{padding:10px;border-radius:10px;background:rgba(0,0,0,.12);color:var(--ink-2);font-size:.79rem;line-height:1.55}
+    .change-body b{display:block;color:var(--cyan);margin-bottom:3px}
+    .source-links{font-size:.72rem;line-height:1.75;color:var(--ink-3);padding:12px;border-left:3px solid var(--cyan);background:rgba(0,212,255,.07);border-radius:0 10px 10px 0}
+    .source-links a{color:var(--cyan);font-weight:800}
+    body[data-theme="light"] .diagram-card{background:#f7fbff}
+    body[data-theme="light"] .diagram-card h4{color:var(--ink)}
+    body[data-theme="light"] .diagram-card p{color:var(--ink-2)}
+    @media(max-width:560px){.diagram-grid,.quick-priority{grid-template-columns:1fr}.change-body{grid-template-columns:1fr}.signal-steps{grid-template-columns:1fr 1fr 1fr}}
   </style>
 </head>
 <body>
@@ -62,12 +87,20 @@
     <button class="tab-btn" data-tab="fourth-ref">⏱️ 第4審判</button>
     <button class="tab-btn" data-tab="check">📋 試合前</button>
     <button class="tab-btn" data-tab="local">📜 ルール</button>
+    <button class="tab-btn" data-tab="changes">🆕 改正</button>
   </div>
 
   <!-- 主審タブ -->
   <div class="tab-content active" id="tab-main-ref">
     <div class="panel">
       <div style="text-align:center;margin-bottom:16px"><span class="role-badge role-main">主審（レフェリー）</span></div>
+      <div class="offside-lead"><strong>小学生の試合で最優先：</strong>うまく流すことより、選手の安全・公平・分かりやすさ。笛を吹いたら止まって、再開方向を大きく示し、必要なら短い言葉で伝えます。</div>
+      <div class="quick-priority">
+        <div><b>① 安全</b>頭部への接触、強い衝突、負傷の疑いは早めに止める。</div>
+        <div><b>② 見える合図</b>笛→静止→方向の順で、選手全員に伝わる大きさに。</div>
+        <div><b>③ 距離と角度</b>ボールに近づき過ぎず、争点を横から見られる位置へ。</div>
+        <div><b>④ ローカル確認</b>試合時間、交代、飲水、退場後の人数は大会要項を優先。</div>
+      </div>
       <div class="guide-section">
         <h3>役割・立ち位置</h3>
         <ul class="guide-list">
@@ -194,10 +227,10 @@
             <svg width="70" height="88" viewBox="0 0 70 88" style="display:block;margin:0 auto 8px">
               <circle cx="35" cy="13" r="9" fill="#fff" stroke="#00d4ff" stroke-width="1.5"/>
               <rect x="30" y="22" width="10" height="26" rx="4" fill="#fff"/>
-              <line x1="30" y1="31" x2="8" y2="31" stroke="#fff" stroke-width="4" stroke-linecap="round"/>
+              <line x1="30" y1="31" x2="11" y2="13" stroke="#fff" stroke-width="4" stroke-linecap="round"/>
               <!-- 旗 -->
-              <rect x="0" y="24" width="2" height="18" fill="#00d4ff"/>
-              <polygon points="2,24 14,28 2,32" fill="#00d4ff"/>
+              <line x1="11" y1="13" x2="3" y2="5" stroke="#00d4ff" stroke-width="2"/>
+              <polygon points="3,5 16,7 8,15" fill="#00d4ff"/>
               <line x1="40" y1="31" x2="46" y2="44" stroke="#fff" stroke-width="4" stroke-linecap="round"/>
               <line x1="32" y1="48" x2="27" y2="72" stroke="#fff" stroke-width="4" stroke-linecap="round"/>
               <line x1="38" y1="48" x2="43" y2="72" stroke="#fff" stroke-width="4" stroke-linecap="round"/>
@@ -210,10 +243,10 @@
             <svg width="70" height="88" viewBox="0 0 70 88" style="display:block;margin:0 auto 8px">
               <circle cx="35" cy="13" r="9" fill="#fff" stroke="#00d4ff" stroke-width="1.5"/>
               <rect x="30" y="22" width="10" height="26" rx="4" fill="#fff"/>
-              <line x1="30" y1="28" x2="10" y2="10" stroke="#fff" stroke-width="4" stroke-linecap="round"/>
-              <!-- 旗（斜め上） -->
-              <rect x="6" y="3" width="2" height="16" fill="#00d4ff" transform="rotate(45,7,3)"/>
-              <polygon points="7,3 19,8 7,13" fill="#00d4ff" transform="rotate(45,7,3)"/>
+              <line x1="30" y1="28" x2="30" y2="4" stroke="#fff" stroke-width="4" stroke-linecap="round"/>
+              <!-- 旗（最初は垂直） -->
+              <line x1="30" y1="4" x2="30" y2="0" stroke="#00d4ff" stroke-width="2"/>
+              <polygon points="30,0 45,5 30,10" fill="#00d4ff"/>
               <line x1="40" y1="31" x2="46" y2="44" stroke="#fff" stroke-width="4" stroke-linecap="round"/>
               <line x1="32" y1="48" x2="27" y2="72" stroke="#fff" stroke-width="4" stroke-linecap="round"/>
               <line x1="38" y1="48" x2="43" y2="72" stroke="#fff" stroke-width="4" stroke-linecap="round"/>
@@ -258,13 +291,13 @@
             <svg width="70" height="88" viewBox="0 0 70 88" style="display:block;margin:0 auto 8px">
               <circle cx="35" cy="13" r="9" fill="#fff" stroke="#00d4ff" stroke-width="1.5"/>
               <rect x="30" y="22" width="10" height="26" rx="4" fill="#fff"/>
-              <line x1="35" y1="30" x2="35" y2="8" stroke="#fff" stroke-width="4" stroke-linecap="round"/>
-              <line x1="40" y1="31" x2="46" y2="44" stroke="#fff" stroke-width="4" stroke-linecap="round"/>
+              <line x1="30" y1="28" x2="21" y2="8" stroke="#fff" stroke-width="4" stroke-linecap="round"/>
+              <line x1="40" y1="28" x2="49" y2="8" stroke="#fff" stroke-width="4" stroke-linecap="round"/>
               <line x1="32" y1="48" x2="27" y2="72" stroke="#fff" stroke-width="4" stroke-linecap="round"/>
               <line x1="38" y1="48" x2="43" y2="72" stroke="#fff" stroke-width="4" stroke-linecap="round"/>
-              <!-- 掲示板 -->
-              <rect x="28" y="2" width="14" height="10" rx="1" fill="#00d4ff"/>
-              <text x="35" y="9.5" fill="#fff" font-size="6" font-weight="bold" text-anchor="middle">交代</text>
+              <!-- 旗を頭上で水平に保持 -->
+              <line x1="20" y1="7" x2="50" y2="7" stroke="#00d4ff" stroke-width="3"/>
+              <polygon points="50,2 65,7 50,12" fill="#00d4ff"/>
             </svg>
             <strong>交代サイン</strong><p>旗を両手で持ち、頭上に水平に掲げる</p>
           </div>
@@ -402,6 +435,61 @@
           </div>
 
         </div>
+
+        <div class="guide-section" id="offside-master" style="margin-top:20px">
+          <h3>オフサイドを図で理解する</h3>
+          <div class="offside-lead"><strong>判定の順番は3つだけ：</strong>①味方がボールをプレー・タッチした瞬間の位置 → ②オフサイドポジションか → ③その後プレーへ関与したか。<strong>位置にいるだけでは反則ではありません。</strong></div>
+          <div class="diagram-grid">
+            <article class="diagram-card" id="offside-body-parts">
+              <h4>① どの身体部分で見る？</h4>
+              <svg viewBox="0 0 320 205" role="img" aria-label="頭、胴体、足はオフサイド判定対象で、手と腕は対象外">
+                <rect width="320" height="205" fill="#eaf7ee"/><line x1="205" y1="12" x2="205" y2="193" stroke="#ef4444" stroke-width="5"/><text x="211" y="26" fill="#b91c1c" font-size="12" font-weight="700">オフサイドライン</text>
+                <circle cx="170" cy="48" r="20" fill="#ef4444"/><rect x="151" y="68" width="38" height="62" rx="14" fill="#ef4444"/>
+                <line x1="154" y1="78" x2="115" y2="111" stroke="#64748b" stroke-width="13" stroke-linecap="round"/><line x1="187" y1="79" x2="224" y2="110" stroke="#64748b" stroke-width="13" stroke-linecap="round"/>
+                <line x1="162" y1="126" x2="145" y2="180" stroke="#ef4444" stroke-width="16" stroke-linecap="round"/><line x1="180" y1="126" x2="198" y2="180" stroke="#ef4444" stroke-width="16" stroke-linecap="round"/>
+                <text x="18" y="28" fill="#b91c1c" font-size="14" font-weight="800">対象：頭・胴体・足</text><text x="18" y="48" fill="#475569" font-size="13" font-weight="700">対象外：手・腕</text><text x="18" y="67" fill="#475569" font-size="11">腕の上端＝脇の下</text>
+              </svg>
+              <p>得点できる身体部分が少しでもラインより前なら対象。手や腕だけが前に出てもオフサイドポジションにはなりません。</p>
+            </article>
+            <article class="diagram-card" id="returning-offside-diagram">
+              <h4>② 戻りオフサイド</h4>
+              <svg viewBox="0 0 320 205" role="img" aria-label="パスの瞬間にオフサイド位置にいた選手が戻ってボールを受ける図">
+                <rect width="320" height="205" fill="#eaf7ee"/><line x1="205" y1="10" x2="205" y2="195" stroke="#ef4444" stroke-width="4" stroke-dasharray="8 6"/><text x="211" y="24" fill="#b91c1c" font-size="11">判定ライン</text>
+                <circle cx="80" cy="145" r="12" fill="#2563eb"/><circle cx="105" cy="151" r="7" fill="#fff" stroke="#111"/><text x="51" y="176" fill="#1e3a8a" font-size="12" font-weight="800">味方がパス</text>
+                <circle cx="232" cy="66" r="13" fill="#ef4444"/><text x="218" y="48" fill="#b91c1c" font-size="11" font-weight="800">パス時</text>
+                <circle cx="169" cy="116" r="13" fill="#f59e0b"/><path d="M225 79 Q205 100 181 110" fill="none" stroke="#f59e0b" stroke-width="4" marker-end="url(#arr)"/><defs><marker id="arr" markerWidth="7" markerHeight="7" refX="5" refY="3.5" orient="auto"><polygon points="0 0,7 3.5,0 7" fill="#f59e0b"/></marker></defs>
+                <text x="128" y="140" fill="#92400e" font-size="11" font-weight="800">戻って受けても</text><text x="117" y="158" fill="#b91c1c" font-size="13" font-weight="900">オフサイド</text>
+              </svg>
+              <p>基準は受けた場所ではなく、味方がプレーした瞬間。そこから自陣側へ戻ってボールに触れても、最初の位置は消えません。</p>
+            </article>
+            <article class="diagram-card" id="deliberate-play-diagram">
+              <h4>③ 守備者が触れたら全部リセット？</h4>
+              <svg viewBox="0 0 320 205" role="img" aria-label="守備者の意図的なプレーとディフレクションの違い">
+                <rect width="320" height="205" fill="#eaf7ee"/><rect x="12" y="18" width="142" height="168" rx="12" fill="#dcfce7"/><rect x="166" y="18" width="142" height="168" rx="12" fill="#fee2e2"/>
+                <text x="83" y="45" text-anchor="middle" fill="#166534" font-size="14" font-weight="900">意図的なプレー</text><text x="237" y="45" text-anchor="middle" fill="#991b1b" font-size="14" font-weight="900">はね返り・セーブ</text>
+                <text x="83" y="74" text-anchor="middle" fill="#166534" font-size="12">時間と可能性があり</text><text x="83" y="94" text-anchor="middle" fill="#166534" font-size="12">コントロールしてプレー</text><text x="83" y="132" text-anchor="middle" fill="#166534" font-size="28">○</text><text x="83" y="160" text-anchor="middle" fill="#166534" font-size="12" font-weight="800">原則リセット</text>
+                <text x="237" y="74" text-anchor="middle" fill="#991b1b" font-size="12">至近距離で当たる</text><text x="237" y="94" text-anchor="middle" fill="#991b1b" font-size="12">または得点を防ぐセーブ</text><text x="237" y="132" text-anchor="middle" fill="#991b1b" font-size="28">×</text><text x="237" y="160" text-anchor="middle" fill="#991b1b" font-size="12" font-weight="800">リセットしない</text>
+              </svg>
+              <p>守備者が触れただけでは判断しません。ボールをコントロールして意図的にプレーできたかを主審と共有します。</p>
+            </article>
+            <article class="diagram-card">
+              <h4>④ 直接受けても反則にならない再開</h4>
+              <svg viewBox="0 0 320 205" role="img" aria-label="ゴールキック、スローイン、コーナーキックは直接受けてもオフサイドではない">
+                <rect width="320" height="205" fill="#eaf7ee"/><text x="160" y="42" text-anchor="middle" fill="#166534" font-size="16" font-weight="900">オフサイドなし</text>
+                <circle cx="63" cy="101" r="38" fill="#dcfce7"/><circle cx="160" cy="101" r="38" fill="#dcfce7"/><circle cx="257" cy="101" r="38" fill="#dcfce7"/>
+                <text x="63" y="96" text-anchor="middle" font-size="25">🥅</text><text x="63" y="119" text-anchor="middle" fill="#166534" font-size="11" font-weight="800">ゴールキック</text><text x="160" y="96" text-anchor="middle" font-size="25">🙌</text><text x="160" y="119" text-anchor="middle" fill="#166534" font-size="11" font-weight="800">スローイン</text><text x="257" y="96" text-anchor="middle" font-size="25">🚩</text><text x="257" y="119" text-anchor="middle" fill="#166534" font-size="11" font-weight="800">コーナー</text>
+                <text x="160" y="170" text-anchor="middle" fill="#475569" font-size="12">味方から直接受けた最初のプレーのみ</text>
+              </svg>
+              <p>フリーキックや通常のパスは例外ではありません。例外の再開後、別の味方が触れた次のプレーから通常判定です。</p>
+            </article>
+          </div>
+          <h3 style="margin-top:18px">旗の順番：上げる → 笛を待つ → 位置</h3>
+          <div class="signal-steps">
+            <div class="signal-step"><b>1 まず垂直</b>右手で旗を真上。急いで角度を付けない。</div>
+            <div class="signal-step"><b>2 主審を見る</b>アイコンタクト。主審の笛まで旗を維持。</div>
+            <div class="signal-step"><b>3 場所を示す</b>近い側＝斜め下、中央＝水平、遠い側＝斜め上。</div>
+          </div>
+        </div>
         <button class="btn btn-line-copy" type="button" onclick="copyAssistantPrinciples()" style="width:100%;margin-top:12px">📋 副審の心得をLINEコピー</button>
         <p class="principles-source">資料「2025年 副審の心得」をもとに、IFAB競技規則2026/27（第6条・第14条）と照合して整理しています。大会ローカルルールと試合前の主審打ち合わせを優先してください。</p>
       </div>
@@ -517,12 +605,24 @@
       <div class="guide-section">
         <h3>🌡️ 暑熱対応ルール</h3>
         <ul class="guide-list">
-          <li>WBGT25℃以上：ハーフタイムに5分以上の飲水タイムを設ける。</li>
-          <li>WBGT28℃以上：前後半各1回の飲水タイムを追加する。</li>
-          <li>WBGT31℃以上：試合を中止または延期する。</li>
+          <li>試合前とハーフタイムにWBGTを確認し、大会本部の暑熱対策・飲水手順に従う。</li>
+          <li>WBGTだけでなく、日射・湿度・選手の様子も確認。無理に再開しない。</li>
+          <li>WBGT31℃以上では原則として試合を行わない。実施可否はJFA暑熱対策と大会本部の判断を優先する。</li>
           <li>体調不良者が出た場合は即座にプレーを停止し、日陰で安静にさせる。</li>
         </ul>
       </div>
+    </div>
+  </div>
+
+  <!-- 競技規則の主な改正 -->
+  <div class="tab-content" id="tab-changes">
+    <div class="panel">
+      <div class="notice-bar orange">大会が採用する競技規則の年度とローカルルールを試合前に確認してください。下記はIFAB現行規則の要点です。</div>
+      <div class="change-card"><div class="change-head"><span class="change-year">2025/26〜</span>GKのボール保持は8秒</div><div class="change-body"><div><b>以前</b>6秒を超えると間接フリーキック。</div><div><b>現在の対応</b>8秒を超えると相手のコーナーキック。主審は最後の5秒を手でカウントする。</div></div></div>
+      <div class="change-card"><div class="change-head"><span class="change-year">2025/26〜</span>ドロップボールの相手</div><div class="change-body"><div><b>以前</b>PA外では最後に触れたチームが基準。</div><div><b>現在の対応</b>明らかな場合は、止めなければ保持・獲得したはずのチームへ。判断不能なら最後に触れたチームへ。</div></div></div>
+      <div class="change-card"><div class="change-head"><span class="change-year">明文化</span>PKの偶発的な二度触り</div><div class="change-body"><div><b>例</b>軸足に偶然当たって、そのままゴールへ入った。</div><div><b>現在の対応</b>入れば蹴り直し。入らなければ守備側の間接フリーキック。故意の二度触りは従来どおり間接FK。</div></div></div>
+      <div class="change-card"><div class="change-head"><span class="change-year">2026/27</span>再開の遅延への5秒カウント</div><div class="change-body"><div><b>対象</b>スローインやゴールキックを意図的に遅らせる場面。</div><div><b>現在の対応</b>採用大会では主審が合図後に5秒を目視カウント。超過時はスローインを相手へ、ゴールキックは相手のCKへ。</div></div></div>
+      <div class="source-links">公式確認先：<a href="https://www.theifab.com/laws/latest/offside/" target="_blank" rel="noopener noreferrer">IFAB 第11条 オフサイド</a> ／ <a href="https://www.theifab.com/law-changes/latest/" target="_blank" rel="noopener noreferrer">IFAB 最新改正</a> ／ <a href="https://www.jfa.jp/laws/" target="_blank" rel="noopener noreferrer">JFA 競技規則</a><br>最終確認：2026年7月。大会要項に別の定めがある場合は大会規定を優先してください。</div>
     </div>
   </div>
 </main>
