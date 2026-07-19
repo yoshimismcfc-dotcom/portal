@@ -317,7 +317,8 @@ function loadData(){
     const s = localStorage.getItem(KEY);
     if (s) {
       var parsed = JSON.parse(s);
-      if(parsed && parsed.dates && parsed.teams) return parsed;
+      var normalized = normalizeData(parsed);
+      if(normalized) return normalized;
     }
   } catch(e) {}
   return JSON.parse(JSON.stringify(INIT));
@@ -344,7 +345,7 @@ function normalizeData(d){
   return { dates: dates, teams: teams, 備考: (d["備考"] && typeof d["備考"]==="object") ? d["備考"] : {} };
 }
 
-dbListen("game_adjust", function(val, meta){
+function handleGameAdjustRemote(val, meta){
   var normalized = normalizeData(val);
 
   // 接続待ちの一時的な空応答では、すでに表示中の正常データを消さない。
@@ -392,7 +393,7 @@ dbListen("game_adjust", function(val, meta){
 
   data = normalized;
   renderTable();
-}, KEY, null);
+}
 
 /* ---------- 保存（自動保存・デバウンス） ---------- */
 var _saveTimer = null;
@@ -812,7 +813,54 @@ function addDate() {
   document.getElementById("new-note").value = "";
 }
 
-/* ---------- 初期描画 ---------- */
-renderTable();
+/* ---------- 初期描画・クラウド自動再接続 ---------- */
+var _gameAdjustCloudListening = false;
+var _firebaseRetryScriptAdded = false;
+
+function renderGameAdjustImmediately(){
+  try{
+    data = normalizeData(data) || normalizeData(JSON.parse(JSON.stringify(INIT)));
+    renderTable();
+  }catch(error){
+    console.error("game adjust initial render error:", error);
+    data = normalizeData(JSON.parse(JSON.stringify(INIT)));
+    try{ renderTable(); }
+    catch(fallbackError){ console.error("game adjust fallback render error:", fallbackError); }
+  }
+}
+
+function connectGameAdjustCloud(attempt){
+  if(_gameAdjustCloudListening) return;
+  attempt = Number(attempt) || 0;
+  if(typeof dbListen === "function"){
+    _gameAdjustCloudListening = true;
+    dbListen("game_adjust", handleGameAdjustRemote, KEY, null);
+    return;
+  }
+
+  // firebase-config.js自体の読込に失敗した場合だけ、キャッシュを避けて1回再取得する。
+  if(attempt >= 2 && !_firebaseRetryScriptAdded){
+    _firebaseRetryScriptAdded = true;
+    var retryScript = document.createElement("script");
+    retryScript.src = "firebase-config.js?retry=" + Date.now();
+    retryScript.dataset.gameAdjustFirebaseRetry = "true";
+    retryScript.onload = function(){ connectGameAdjustCloud(0); };
+    retryScript.onerror = function(){ flash("📱 端末データを表示中（通信回復時に自動再接続）", "#ffee66"); };
+    document.head.appendChild(retryScript);
+  }
+
+  if(attempt < 10){
+    window.setTimeout(function(){ connectGameAdjustCloud(attempt + 1); }, 700);
+  }else{
+    flash("📱 端末データを表示中（通信回復時に自動再接続）", "#ffee66");
+  }
+}
+
+renderGameAdjustImmediately();
+connectGameAdjustCloud(0);
+window.addEventListener("online", function(){ connectGameAdjustCloud(0); });
+document.addEventListener("visibilitychange", function(){
+  if(document.visibilityState === "visible") connectGameAdjustCloud(0);
+});
 </script>
 </body></html>
