@@ -159,6 +159,15 @@ if (/\.pw-(?:cell|text|toggle)/.test(accountsSource)) fail("accounts.html", "廃
 
 const gameAdjustSource = fs.readFileSync(path.join(root, "game_adjust.html"), "utf8");
 const dutyMatchSource = fs.readFileSync(path.join(root, "duty_match.html"), "utf8");
+if (!gameAdjustSource.includes("renderGameAdjustImmediately") || !gameAdjustSource.includes("connectGameAdjustCloud") || !gameAdjustSource.includes("firebase-config.js?retry=")) {
+  fail("game_adjust.html", "試合調整に即時表示またはFirebase自動再接続がありません");
+}
+if (!gameAdjustSource.includes('window.addEventListener("online"') || !gameAdjustSource.includes('document.addEventListener("visibilitychange"')) {
+  fail("game_adjust.html", "通信回復・画面復帰時の自動再接続がありません");
+}
+if (!guideSource.includes("端末データを先に即時表示") || !guideSource.includes("裏側で自動再接続")) {
+  fail("guide.html", "試合調整の自動復旧が説明されていません");
+}
 if (!gameAdjustSource.includes("duty_match.html") || !gameAdjustSource.includes("tournament.html") || !gameAdjustSource.includes("date-related-links")) {
   fail("game_adjust.html", "カテゴリー／目標下に大会関連ページへの入口がありません");
 }
