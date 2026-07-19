@@ -146,8 +146,26 @@ if (!dutyMatchSource.includes('dbListen("duty_match"') || !dutyMatchSource.inclu
 if (!tournamentSource.includes('dbListen("tournament_saves"') || !tournamentSource.includes('dbSave("tournament_saves"')) {
   fail("tournament.html", "大会要項・対戦表が共通Firebaseデータを使用していません");
 }
-if (!guideSource.includes("既存ページそのもの") || !guideSource.includes("同じFirebaseデータ")) {
-  fail("guide.html", "大会関連ページの共通データ構造が説明書にありません");
+if (!gameAdjustSource.includes("linkedDateIso") || !gameAdjustSource.includes("&dateIso=")) {
+  fail("game_adjust.html", "大会関連ページへ日程IDと年月日を引き継いでいません");
+}
+if (!dutyMatchSource.includes("ensureLinkedMatch") || !dutyMatchSource.includes("gameAdjustDateId") || !dutyMatchSource.includes("_showAllMatches")) {
+  fail("duty_match.html", "大会任務分担が試合調整の日程別データとして表示されません");
+}
+if (!dutyMatchSource.includes("copyDutyTemplate") || !dutyMatchSource.includes("cloneDutyTemplate")) {
+  fail("duty_match.html", "大会任務分担にコピー可能な標準テンプレートがありません");
+}
+if (!tournamentSource.includes("hydrateLinkedDate") || !tournamentSource.includes("linked-tournament-dates") || !tournamentSource.includes("linkedEntries")) {
+  fail("tournament.html", "大会要項・対戦表に日程別一覧または選択日程の読込処理がありません");
+}
+if (!tournamentSource.includes("copyTournamentTemplate") || !tournamentSource.includes("TOURNAMENT_TEMPLATES")) {
+  fail("tournament.html", "大会要項・対戦表にコピー可能なテンプレートがありません");
+}
+if (!tournamentSource.includes("linkedExisting") || !tournamentSource.includes("gameAdjustDateId: _activeGameAdjustDateId")) {
+  fail("tournament.html", "要綱・対戦表が日程単位で更新保存されません");
+}
+if (!guideSource.includes("試合調整の日程ID") || !guideSource.includes("テンプレートをコピー") || !guideSource.includes("既存の未連携データは削除されません")) {
+  fail("guide.html", "日程連動・テンプレート・既存データ互換の説明がありません");
 }
 if (!gameAdjustSource.includes('id="new-note"') || !gameAdjustSource.includes('id="edit-note"')) {
   fail("game_adjust.html", "日程の追加・編集画面に備考入力欄がありません");

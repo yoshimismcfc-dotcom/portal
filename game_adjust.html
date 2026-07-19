@@ -575,6 +575,18 @@ function copyAdjList(){
     .catch(function(){ flash("コピーできませんでした", "#ff8888"); });
 }
 
+/* ---------- 連携用の日付（既存データは4月始まりの年度から補完） ---------- */
+function linkedDateIso(d) {
+  if (d && /^\d{4}-\d{2}-\d{2}$/.test(d.dateIso || "")) return d.dateIso;
+  var match = String((d && d.label) || "").normalize("NFKC").match(/(\d{1,2})\s*\/\s*(\d{1,2})/);
+  if (!match) return "";
+  var month = Number(match[1]), day = Number(match[2]);
+  var now = new Date(), currentMonth = now.getMonth() + 1;
+  var fiscalStartYear = currentMonth >= 4 ? now.getFullYear() : now.getFullYear() - 1;
+  var year = month >= 4 ? fiscalStartYear : fiscalStartYear + 1;
+  return year + "-" + String(month).padStart(2, "0") + "-" + String(day).padStart(2, "0");
+}
+
 /* ---------- 表の描画（XSS対策済み・イベントデリゲーション） ---------- */
 function renderTable() {
   var tbl = document.getElementById("adj-table");
@@ -594,6 +606,7 @@ function renderTable() {
   h += "<tr><th class='col-fixed th-cat' style='color:#8ac8e8;cursor:default'>カテゴリー / 目標</th>";
   dates.forEach(function(d) {
     var relatedQuery = "?from=game_adjust&dateId=" + encodeURIComponent(d.id) +
+      "&dateIso=" + encodeURIComponent(linkedDateIso(d)) +
       "&date=" + encodeURIComponent(d.label || "") +
       "&name=" + encodeURIComponent(d.tournamentName || "") +
       "&category=" + encodeURIComponent(d.cat || "");
@@ -711,6 +724,7 @@ function saveEditDate(){
   var note = document.getElementById("edit-note").value.trim();
   if(dateVal){
     var dt = new Date(dateVal);
+    d.dateIso = dateVal;
     d.label = (dt.getMonth()+1) + "/" + dt.getDate() + "（" + ["日","月","火","水","木","金","土"][dt.getDay()] + "）";
   }
   if (tournamentName) d.tournamentName = tournamentName;
@@ -779,7 +793,7 @@ function addDate() {
   var d = new Date(dateVal);
   var label = (d.getMonth()+1) + "/" + d.getDate() + "（" + ["日","月","火","水","木","金","土"][d.getDay()] + "）";
   var id = "d" + Date.now();
-  data.dates.push({id:id, label:label, tournamentName:tournamentName, cat:cat, target:target});
+  data.dates.push({id:id, dateIso:dateVal, label:label, tournamentName:tournamentName, cat:cat, target:target});
   if (!data.備考) data.備考 = {};
   if (note) data.備考[id] = note;
   data.teams.forEach(function(t){ if(!t.statuses) t.statuses = {}; t.statuses[id] = "－"; });

@@ -154,6 +154,19 @@
     .add-row-btn{display:flex;align-items:center;gap:6px;padding:7px 12px;background:rgba(0,212,255,.07);border:1px dashed rgba(0,212,255,.3);border-radius:var(--r8);color:var(--cyan);font-size:.8rem;font-weight:700;cursor:pointer;width:100%;margin-top:4px;box-sizing:border-box}
     .add-row-btn:hover{background:rgba(0,212,255,.13)}
     .btn-group{display:flex;flex-wrap:wrap;gap:6px;margin-top:10px;width:100%;box-sizing:border-box}
+    .linked-workflow{margin:0 0 14px;padding:13px;border:2px solid rgba(0,212,255,.45);border-radius:14px;background:linear-gradient(135deg,rgba(0,92,150,.18),rgba(0,212,255,.06))}
+    .linked-workflow h3{font-size:.9rem;font-weight:900;color:#8fe7ff;margin-bottom:4px}
+    .linked-workflow-help{font-size:.72rem;color:var(--ink-3);line-height:1.55;margin-bottom:9px}
+    .linked-date-list{display:grid;gap:7px}
+    .linked-date-item{width:100%;display:grid;grid-template-columns:minmax(0,1fr) auto;gap:10px;align-items:center;padding:9px 10px;border:1px solid var(--line-2);border-radius:10px;background:var(--surface-lt);color:var(--ink);text-align:left;font:inherit;cursor:pointer}
+    .linked-date-item.active{border:2px solid #00d4ff;background:rgba(0,160,220,.13)}
+    .linked-date-name{font-size:.82rem;font-weight:900;overflow-wrap:anywhere}
+    .linked-date-meta{font-size:.68rem;color:var(--ink-3);margin-top:2px}
+    .linked-date-status{font-size:.66rem;font-weight:900;line-height:1.5;text-align:right;color:#7ee7b2}
+    .linked-empty{padding:10px;text-align:center;color:var(--ink-3);font-size:.75rem}
+    .linked-active-actions{display:flex;flex-wrap:wrap;gap:7px;margin-top:9px}
+    body[data-theme="light"] .linked-workflow{background:#e8f7fc;border-color:#1689b4}
+    body[data-theme="light"] .linked-workflow h3{color:#075d84}
   </style>
 </head>
 <body>
@@ -164,6 +177,13 @@
     <div class="hero-emoji">📋</div>
     <div><div class="hero-title">大会要綱・対戦表</div>
       <div class="hero-sub">入力するとプレビューが表示され、A4でPDF保存・印刷できます。</div></div>
+  </div>
+
+  <div class="linked-workflow no-print">
+    <h3>📅 日程別データ一覧</h3>
+    <div class="linked-workflow-help">試合調整の日程ごとに、大会要綱と対戦表の保存状況をまとめて表示します。</div>
+    <div class="linked-date-list" id="linked-tournament-dates"></div>
+    <div class="linked-active-actions" id="linked-active-actions"></div>
   </div>
 
   <div class="doc-tab-bar no-print">
@@ -215,6 +235,7 @@
         ＋ 基本情報に項目を追加する
       </div>
       <div class="btn-group">
+        <button class="btn btn-outline btn-sm" onclick="copyTournamentTemplate('youkou')">📑 テンプレートをコピー</button>
         <button class="btn btn-primary" onclick="buildYoukou()" style="flex:1 1 140px">👁 プレビュー</button>
         <button class="btn btn-outline btn-sm" onclick="openSaveModal('youkou')">💾 保存</button>
         <button class="btn btn-outline btn-sm" onclick="openLoadModal('youkou')">📂 読込</button>
@@ -271,6 +292,7 @@
       <div class="sec">⚽ チーム設定</div>
       <div id="team-inputs"></div>
       <div class="btn-group">
+        <button class="btn btn-outline btn-sm" onclick="copyTournamentTemplate('taisen')">📑 テンプレートをコピー</button>
         <button class="btn btn-primary" onclick="buildTaisen()" style="flex:1 1 140px">📊 対戦表を生成</button>
         <button class="btn btn-outline btn-sm" onclick="openSaveModal('taisen')">💾 保存</button>
         <button class="btn btn-outline btn-sm" onclick="openLoadModal('taisen')">📂 読込</button>
@@ -731,10 +753,36 @@ function esc3(s){ return String(s||"").replace(/&/g,"&amp;").replace(/</g,"&lt;"
 var SAVE_KEY = "tournament_saves";
 var _saveType = "youkou"; // "youkou" or "taisen"
 var _allSaves = {};
+var TOURNAMENT_CONTEXT = (function(){
+  var params = new URLSearchParams(location.search);
+  return {
+    dateId: params.get("dateId") || "",
+    dateIso: params.get("dateIso") || "",
+    dateLabel: params.get("date") || "",
+    name: params.get("name") || "",
+    category: params.get("category") || ""
+  };
+})();
+var _activeGameAdjustDateId = TOURNAMENT_CONTEXT.dateId;
+var _activeDateMeta = {
+  dateIso:TOURNAMENT_CONTEXT.dateIso,
+  dateLabel:TOURNAMENT_CONTEXT.dateLabel,
+  name:TOURNAMENT_CONTEXT.name,
+  category:TOURNAMENT_CONTEXT.category
+};
+var _contextHydrated = false;
 
 // Firebase読込
 dbListen("tournament_saves", function(val){
   _allSaves = (val && typeof val==="object") ? val : {};
+  // 端末キャッシュが同期読込されても、テンプレート初期化後に連動処理を行う。
+  window.setTimeout(function(){
+    renderLinkedTournamentDates();
+    if(_activeGameAdjustDateId && !_contextHydrated){
+      _contextHydrated = true;
+      hydrateLinkedDate(_activeGameAdjustDateId, _activeDateMeta);
+    }
+  }, 0);
 }, SAVE_KEY, {});
 
 // 要綱フィールドを収集
@@ -760,6 +808,132 @@ function applyFields(data){
   });
 }
 
+function captureTeamValues(){
+  var teams = [];
+  for(var i=0;i<16;i++){
+    var el = document.getElementById("t-team-"+i);
+    if(el) teams.push(el.value);
+  }
+  return teams;
+}
+function applyTeamValues(teams){
+  (teams||[]).forEach(function(value,index){
+    var el = document.getElementById("t-team-"+index);
+    if(el) el.value = value;
+  });
+}
+var TOURNAMENT_TEMPLATES = {
+  youkou:{data:collectFields(YOUKOU_FIELDS),customRows:JSON.parse(JSON.stringify(_customRows))},
+  taisen:{data:collectFields(TAISEN_FIELDS),teams:captureTeamValues()}
+};
+
+function copyTournamentTemplate(type, silent){
+  var template = TOURNAMENT_TEMPLATES[type];
+  if(!template) return;
+  if(!silent && !confirm((type==="youkou"?"大会要綱":"対戦表")+"の標準テンプレートをコピーしますか？\n現在の入力内容はテンプレートで置き換わります。")) return;
+  applyFields(JSON.parse(JSON.stringify(template.data)));
+  if(type==="youkou"){
+    _customRows = JSON.parse(JSON.stringify(template.customRows||[]));
+    renderCustomRows();
+    if(_activeDateMeta.name) document.getElementById("y-title").value = _activeDateMeta.name;
+    if(_activeDateMeta.category) document.getElementById("y-cat").value = _activeDateMeta.category;
+    if(_activeDateMeta.dateIso) document.getElementById("y-date").value = _activeDateMeta.dateIso;
+    buildYoukou();
+  } else {
+    applyTeamValues(template.teams||[]);
+    if(_activeDateMeta.name) document.getElementById("t-title").value = _activeDateMeta.name;
+    if(_activeDateMeta.dateIso) document.getElementById("t-date").value = _activeDateMeta.dateIso;
+    buildTaisen();
+  }
+  if(!silent) alert("テンプレートをコピーしました。内容を編集して保存してください。");
+}
+
+function linkedEntries(dateId, type){
+  return Object.entries(_allSaves)
+    .filter(function(entry){
+      return entry[1] && entry[1].gameAdjustDateId===dateId && (!type || entry[1].type===type);
+    })
+    .sort(function(a,b){ return (b[1].savedAt||"").localeCompare(a[1].savedAt||""); });
+}
+function linkedMetaFromEntry(entry){
+  var data = (entry && entry.data) || {};
+  return {
+    name:(entry&&entry.name)||data["y-title"]||data["t-title"]||"",
+    dateIso:(entry&&entry.dateIso)||data["y-date"]||data["t-date"]||"",
+    dateLabel:(entry&&entry.dateLabel)||"",
+    category:(entry&&entry.category)||data["y-cat"]||""
+  };
+}
+function renderLinkedTournamentDates(){
+  var wrap = document.getElementById("linked-tournament-dates");
+  var actions = document.getElementById("linked-active-actions");
+  if(!wrap || !actions) return;
+  var groups = {};
+  Object.entries(_allSaves).forEach(function(pair){
+    var item = pair[1];
+    if(!item || !item.gameAdjustDateId) return;
+    var id = item.gameAdjustDateId;
+    if(!groups[id]) groups[id]={id:id,meta:linkedMetaFromEntry(item),youkou:false,taisen:false};
+    groups[id][item.type] = true;
+    var newer = linkedMetaFromEntry(item);
+    Object.keys(newer).forEach(function(key){ if(newer[key]) groups[id].meta[key]=newer[key]; });
+  });
+  if(_activeGameAdjustDateId && !groups[_activeGameAdjustDateId]){
+    groups[_activeGameAdjustDateId]={id:_activeGameAdjustDateId,meta:_activeDateMeta,youkou:false,taisen:false};
+  }
+  var list = Object.keys(groups).map(function(id){ return groups[id]; })
+    .sort(function(a,b){ return (a.meta.dateIso||"9999").localeCompare(b.meta.dateIso||"9999"); });
+  if(!list.length){
+    wrap.innerHTML='<div class="linked-empty">試合調整と連動した保存データはまだありません。</div>';
+  } else {
+    wrap.innerHTML=list.map(function(group){
+      var title=group.meta.name||group.meta.dateLabel||group.meta.dateIso||"名称未設定";
+      return '<button type="button" class="linked-date-item'+(group.id===_activeGameAdjustDateId?' active':'')+'" data-linked-date="'+esc3(group.id)+'">'
+        +'<span><span class="linked-date-name">'+esc3(title)+'</span><span class="linked-date-meta">'+esc3(group.meta.dateIso||group.meta.dateLabel||"日付未設定")+(group.meta.category?'｜'+esc3(group.meta.category):'')+'</span></span>'
+        +'<span class="linked-date-status">要綱 '+(group.youkou?'✅':'未保存')+'<br>対戦表 '+(group.taisen?'✅':'未保存')+'</span></button>';
+    }).join("");
+  }
+  actions.innerHTML = _activeGameAdjustDateId
+    ? '<a class="btn btn-outline btn-sm" href="game_adjust.html">← 試合調整へ戻る</a><button class="btn btn-outline btn-sm" type="button" onclick="clearLinkedDate()">全日程の一覧に戻る</button>'
+    : '';
+}
+function selectLinkedDate(dateId){
+  var entries = linkedEntries(dateId);
+  var meta = entries.length ? linkedMetaFromEntry(entries[0][1]) : {};
+  hydrateLinkedDate(dateId, meta);
+}
+function clearLinkedDate(){
+  _activeGameAdjustDateId="";
+  _activeDateMeta={dateIso:"",dateLabel:"",name:"",category:""};
+  renderLinkedTournamentDates();
+}
+function hydrateLinkedDate(dateId, meta){
+  _activeGameAdjustDateId=dateId||"";
+  var requestedMeta=Object.assign({dateIso:"",dateLabel:"",name:"",category:""},meta||{});
+  _activeDateMeta=Object.assign({},requestedMeta);
+  ["youkou","taisen"].forEach(function(type){
+    var entries=linkedEntries(_activeGameAdjustDateId,type);
+    if(entries.length) applySaveEntry(entries[0][1]);
+    else copyTournamentTemplate(type,true);
+  });
+  // 試合調整から開いた場合は、親日程の最新名称・日付・カテゴリーを優先する。
+  Object.keys(requestedMeta).forEach(function(key){
+    if(requestedMeta[key]) _activeDateMeta[key]=requestedMeta[key];
+  });
+  if(requestedMeta.name){
+    document.getElementById("y-title").value=requestedMeta.name;
+    document.getElementById("t-title").value=requestedMeta.name;
+  }
+  if(requestedMeta.dateIso){
+    document.getElementById("y-date").value=requestedMeta.dateIso;
+    document.getElementById("t-date").value=requestedMeta.dateIso;
+  }
+  if(requestedMeta.category) document.getElementById("y-cat").value=requestedMeta.category;
+  buildYoukou();
+  buildTaisen();
+  renderLinkedTournamentDates();
+}
+
 // 保存モーダルを開く
 function openSaveModal(type){
   _saveType = type;
@@ -780,6 +954,10 @@ function execSave(){
     name: name,
     type: _saveType,
     savedAt: new Date().toISOString(),
+    gameAdjustDateId: _activeGameAdjustDateId || "",
+    dateIso: _activeDateMeta.dateIso || "",
+    dateLabel: _activeDateMeta.dateLabel || "",
+    category: _activeDateMeta.category || "",
     data: collectFields(fields),
     customRows: _saveType==="youkou" ? JSON.parse(JSON.stringify(_customRows)) : []
   };
@@ -795,11 +973,15 @@ function execSave(){
     var cntEl = document.getElementById("t-teamcount");
     if(cntEl) entry.data["t-teamcount"] = cntEl.value;
   }
-  var id = "sv_" + Date.now();
+  var linkedExisting = _activeGameAdjustDateId
+    ? linkedEntries(_activeGameAdjustDateId,_saveType)[0]
+    : null;
+  var id = linkedExisting ? linkedExisting[0] : "sv_" + Date.now();
   _allSaves[id] = entry;
   localStorage.setItem(SAVE_KEY, JSON.stringify(_allSaves));
   dbSave("tournament_saves", _allSaves, SAVE_KEY, function(){
     closeSaveModal();
+    renderLinkedTournamentDates();
     alert("「"+name+"」を保存しました！");
   });
 }
@@ -815,7 +997,9 @@ function closeLoadModal(){ document.getElementById("modal-load").classList.remov
 
 function renderSavedList(type){
   var items = Object.entries(_allSaves)
-    .filter(function(e){ return e[1].type===type; })
+    .filter(function(e){
+      return e[1].type===type && (!_activeGameAdjustDateId || e[1].gameAdjustDateId===_activeGameAdjustDateId);
+    })
     .sort(function(a,b){ return (b[1].savedAt||"").localeCompare(a[1].savedAt||""); });
   var wrap = document.getElementById("saved-list");
   if(!items.length){
@@ -845,6 +1029,10 @@ document.getElementById("saved-list").addEventListener("click",function(event){
   if(target.dataset.saveAction==="load")loadSave(target.dataset.id);
   if(target.dataset.saveAction==="delete")deleteSave(target.dataset.id);
 });
+document.getElementById("linked-tournament-dates").addEventListener("click",function(event){
+  var target=event.target.closest("[data-linked-date]");
+  if(target) selectLinkedDate(target.dataset.linkedDate);
+});
 document.getElementById("saved-list").addEventListener("keydown",function(event){
   if(event.key!=="Enter"&&event.key!==" ")return;
   var target=event.target.closest('[data-save-action="load"]');
@@ -854,30 +1042,30 @@ document.getElementById("saved-list").addEventListener("keydown",function(event)
 });
 
 // データ読込
+function applySaveEntry(item){
+  if(!item) return;
+  applyFields(item.data||{});
+  if(item.type==="taisen" && item.data && item.data.teams){
+    try{ applyTeamValues(JSON.parse(item.data.teams)); }catch(e){}
+  }
+  if(item.type==="youkou" && Array.isArray(item.customRows)){
+    _customRows = JSON.parse(JSON.stringify(item.customRows));
+    renderCustomRows();
+  }
+  if(item.gameAdjustDateId){
+    _activeGameAdjustDateId=item.gameAdjustDateId;
+    _activeDateMeta=linkedMetaFromEntry(item);
+  }
+  if(item.type==="youkou") buildYoukou();
+  else buildTaisen();
+}
 function loadSave(id){
   var item = _allSaves[id];
   if(!item){ alert("データが見つかりません"); return; }
   if(!confirm("「"+item.name+"」を読み込みますか？現在の入力内容は上書きされます。")) return;
-  applyFields(item.data||{});
-  // チーム情報復元（対戦表）
-  if(item.type==="taisen" && item.data.teams){
-    try{
-      var teams = JSON.parse(item.data.teams);
-      teams.forEach(function(v,i){
-        var el = document.getElementById("t-team-"+i);
-        if(el) el.value = v;
-      });
-    }catch(e){}
-  }
-  // カスタム行を復元
-  if(item.type==="youkou" && Array.isArray(item.customRows)){
-    _customRows = item.customRows;
-    renderCustomRows();
-  }
+  applySaveEntry(item);
   closeLoadModal();
-  // プレビューを自動更新
-  if(item.type==="youkou") buildYoukou();
-  else buildTaisen();
+  renderLinkedTournamentDates();
   alert("「"+item.name+"」を読み込みました！");
 }
 

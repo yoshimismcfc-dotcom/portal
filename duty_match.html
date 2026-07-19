@@ -78,6 +78,15 @@
 
     /* 状態セレクト（小さく） */
     .st-select{border-radius:6px;border:1px solid var(--line-2);background:var(--surface-lt);color:var(--ink);font:inherit;font-size:.78rem;padding:4px 8px;cursor:pointer}
+    .linked-context-panel{display:none;margin:0 0 12px;padding:12px 14px;border:2px solid rgba(0,212,255,.5);border-radius:12px;background:linear-gradient(135deg,rgba(0,90,150,.2),rgba(0,212,255,.07))}
+    .linked-context-panel.show{display:block}
+    .linked-context-title{font-size:.9rem;font-weight:900;color:#8fe7ff}
+    .linked-context-meta{margin-top:4px;font-size:.75rem;color:var(--ink-3);line-height:1.6}
+    .linked-context-actions{display:flex;flex-wrap:wrap;gap:7px;margin-top:9px}
+    .linked-badge{display:inline-flex;margin-top:5px;padding:2px 7px;border-radius:99px;background:rgba(0,255,136,.14);border:1px solid rgba(0,255,136,.35);color:#58f0a5;font-size:.62rem;font-weight:900}
+    .template-help{margin:0 0 12px;padding:10px 12px;border:1px dashed rgba(255,170,70,.45);border-radius:10px;background:rgba(255,140,30,.06);font-size:.74rem;color:var(--ink-3);line-height:1.55}
+    body[data-theme="light"] .linked-context-title{color:#075d84}
+    body[data-theme="light"] .linked-context-panel{background:#e8f7fc;border-color:#1689b4}
   </style>
 </head>
 <body>
@@ -92,6 +101,7 @@
     </div>
   </div>
   <div class="notice-bar">☁️ Firebaseでクラウド保存・全員と共有されます。</div>
+  <div class="linked-context-panel" id="linked-context-panel"></div>
 
   <div class="sum-bar">
     <div class="sum-chip"><div class="sum-n" id="s-total" style="color:var(--cyan)">0</div><div class="sum-l">登録大会数</div></div>
@@ -100,9 +110,10 @@
   </div>
 
   <div class="add-match-btn" onclick="openAddMatch()">
-    <div style="font-size:1.3rem">＋</div>
-    <div style="font-size:.84rem;font-weight:900;color:var(--orange)">大会を追加</div>
+    <div style="font-size:1.3rem">📑</div>
+    <div style="font-size:.84rem;font-weight:900;color:var(--orange)">標準テンプレートをコピーして大会を追加</div>
   </div>
+  <div class="template-help">標準テンプレートには「要項作成・対戦表作成・審判手配・表彰準備・鍵・記録係」など10項目が入っています。作成後に担当者や不要項目を変更できます。</div>
 
   <div id="match-list"></div>
 </main>
@@ -201,11 +212,61 @@ var _editMatchId = null;
 var _editDutyMatchId = null;
 var _editDutyKey = null;
 var _editPersons = [];
+var LINK_CONTEXT = (function(){
+  var params = new URLSearchParams(location.search);
+  return {
+    dateId: params.get("dateId") || "",
+    dateIso: params.get("dateIso") || "",
+    dateLabel: params.get("date") || "",
+    name: params.get("name") || "",
+    category: params.get("category") || ""
+  };
+})();
+var _showAllMatches = !LINK_CONTEXT.dateId;
+function cloneDutyTemplate(){
+  return DUTY_TEMPLATE.map(function(d){ return JSON.parse(JSON.stringify(d)); });
+}
+function linkedMatchName(){
+  return LINK_CONTEXT.name || [LINK_CONTEXT.dateLabel, LINK_CONTEXT.category].filter(Boolean).join(" ") || "試合調整の日程";
+}
+function ensureLinkedMatch(){
+  if(!LINK_CONTEXT.dateId){ render(); return; }
+  var linked = _data.find(function(m){
+    return m.gameAdjustDateId===LINK_CONTEXT.dateId || m.id==="ga_"+LINK_CONTEXT.dateId;
+  });
+  var changed = false;
+  if(!linked){
+    linked = {
+      id:"ga_"+LINK_CONTEXT.dateId,
+      gameAdjustDateId:LINK_CONTEXT.dateId,
+      name:linkedMatchName(),
+      date:LINK_CONTEXT.dateIso,
+      dateLabel:LINK_CONTEXT.dateLabel,
+      category:LINK_CONTEXT.category,
+      venue:"",
+      time:"07:30",
+      note:"",
+      duties:cloneDutyTemplate()
+    };
+    _data.push(linked);
+    changed = true;
+  } else {
+    if(linked.gameAdjustDateId!==LINK_CONTEXT.dateId){ linked.gameAdjustDateId=LINK_CONTEXT.dateId; changed=true; }
+    if(LINK_CONTEXT.name && linked.name!==LINK_CONTEXT.name){ linked.name=LINK_CONTEXT.name; changed=true; }
+    if(LINK_CONTEXT.dateIso && linked.date!==LINK_CONTEXT.dateIso){ linked.date=LINK_CONTEXT.dateIso; changed=true; }
+    if(LINK_CONTEXT.dateLabel && linked.dateLabel!==LINK_CONTEXT.dateLabel){ linked.dateLabel=LINK_CONTEXT.dateLabel; changed=true; }
+    if(LINK_CONTEXT.category && linked.category!==LINK_CONTEXT.category){ linked.category=LINK_CONTEXT.category; changed=true; }
+    if(!Array.isArray(linked.duties)){ linked.duties=cloneDutyTemplate(); changed=true; }
+  }
+  if(changed) save();
+  render();
+  setTimeout(function(){ openCard(linked.id); },100);
+}
 
 /* ===== Firebase ===== */
 dbListen("duty_match", function(val){
   _data = Array.isArray(val) ? val : [];
-  render();
+  ensureLinkedMatch();
 }, KEY, []);
 
 function save(){ localStorage.setItem(KEY, JSON.stringify(_data)); dbSave("duty_match", _data, KEY, null); }
@@ -219,8 +280,27 @@ function stBadge(st){
   return '<span class="st st-yet">⏳ 未</span>';
 }
 
+function renderLinkedContextPanel(allMatches){
+  var panel = document.getElementById("linked-context-panel");
+  if(!LINK_CONTEXT.dateId){ panel.classList.remove("show"); return; }
+  var linked = allMatches.find(function(m){ return m.gameAdjustDateId===LINK_CONTEXT.dateId || m.id==="ga_"+LINK_CONTEXT.dateId; });
+  panel.classList.add("show");
+  panel.innerHTML = '<div class="linked-context-title">📅 選択中の日程：'+esc(LINK_CONTEXT.dateLabel || (linked&&linked.date) || "")+'</div>'
+    +'<div class="linked-context-meta">🏆 '+esc((linked&&linked.name) || linkedMatchName())
+    +(LINK_CONTEXT.category ? '　カテゴリー：'+esc(LINK_CONTEXT.category) : '')+'</div>'
+    +'<div class="linked-context-actions">'
+    +'<a class="btn btn-outline btn-sm" href="game_adjust.html">← 試合調整へ戻る</a>'
+    +'<button class="btn btn-outline btn-sm" onclick="toggleAllMatches()">'+(_showAllMatches?'この日程だけ表示':'全日程の一覧を表示')+'</button>'
+    +'</div>';
+}
+function toggleAllMatches(){ _showAllMatches=!_showAllMatches; render(); }
+
 function render(){
-  var sorted = _data.slice().sort(function(a,b){ return (a.date||"").localeCompare(b.date||""); });
+  var allSorted = _data.slice().sort(function(a,b){ return (a.date||"").localeCompare(b.date||""); });
+  var sorted = (!_showAllMatches && LINK_CONTEXT.dateId)
+    ? allSorted.filter(function(m){ return m.gameAdjustDateId===LINK_CONTEXT.dateId || m.id==="ga_"+LINK_CONTEXT.dateId; })
+    : allSorted;
+  renderLinkedContextPanel(allSorted);
   var td=0, ty=0;
   sorted.forEach(function(m){
     (m.duties||[]).forEach(function(d){
@@ -270,6 +350,8 @@ function render(){
       +'<div class="mc-name">'+esc(m.name)+'</div>'
       +'<div class="mc-sub">'+esc(m.date||"")+(m.venue?' 📍'+esc(m.venue):'')+(m.time?' 集合'+esc(m.time):'')+'</div>'
       +(m.note?'<div class="mc-sub" style="color:#ffe58a">📝 '+esc(m.note)+'</div>':'')
+      +(m.category?'<div class="mc-sub">カテゴリー：'+esc(m.category)+'</div>':'')
+      +(m.gameAdjustDateId?'<span class="linked-badge">🔗 試合調整の日程と連動</span>':'')
       +'</div>'
       +'<div class="mc-prog" style="color:'+progColor+'">'+done+'/'+total+'</div>'
       +'<button class="mc-edit-btn" onclick="event.stopPropagation();openEditMatch('+inlineJsArg(m.id)+')">✏️</button>'
@@ -281,7 +363,8 @@ function render(){
       +'<tbody>'+rows+'</tbody>'
       +'</table></div>'
       +'<div class="add-duty-row" onclick="openAddDuty('+inlineJsArg(m.id)+')">＋ 任務を追加</div>'
-      +'<div style="display:flex;gap:8px;padding:6px 0 0;justify-content:flex-end">'
+      +'<div style="display:flex;gap:8px;padding:6px 0 0;justify-content:flex-end;flex-wrap:wrap">'
+      +'<button class="btn btn-outline btn-sm" onclick="copyDutyTemplate('+inlineJsArg(m.id)+')">📑 任務テンプレートをコピー</button>'
       +'<button class="btn-line-copy sm" onclick="copyText('+inlineJsArg(m.id)+')">📋 LINEコピー</button>'
       +'</div>'
       +'</div></div>';
@@ -304,6 +387,14 @@ function openCard(id){
 }
 
 /* ===== 大会 ===== */
+function copyDutyTemplate(matchId){
+  var match = _data.find(function(m){ return m.id===matchId; });
+  if(!match || !confirm("標準任務テンプレート10項目をコピーしますか？\n現在の任務一覧はテンプレートで置き換わります。")) return;
+  match.duties = cloneDutyTemplate();
+  save(); render();
+  setTimeout(function(){ openCard(matchId); },80);
+}
+
 function openAddMatch(){
   _editMatchId = null;
   document.getElementById("mm-title").textContent = "大会を追加";
@@ -332,7 +423,7 @@ function saveMatch(){
     var m = _data.find(function(x){ return x.id===_editMatchId; });
     if(m){ m.name=name; m.date=document.getElementById("mm-date").value; m.venue=document.getElementById("mm-venue").value.trim(); m.time=document.getElementById("mm-time").value; m.note=document.getElementById("mm-note").value.trim(); }
   } else {
-    _data.push({ id:"m"+Date.now(), name:name, date:document.getElementById("mm-date").value, venue:document.getElementById("mm-venue").value.trim(), time:document.getElementById("mm-time").value, note:document.getElementById("mm-note").value.trim(), duties:DUTY_TEMPLATE.map(function(d){ return JSON.parse(JSON.stringify(d)); }) });
+    _data.push({ id:"m"+Date.now(), name:name, date:document.getElementById("mm-date").value, venue:document.getElementById("mm-venue").value.trim(), time:document.getElementById("mm-time").value, note:document.getElementById("mm-note").value.trim(), duties:cloneDutyTemplate() });
   }
   save(); closeM("modal-match"); render();
 }
