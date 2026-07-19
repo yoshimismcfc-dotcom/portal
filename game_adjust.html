@@ -59,6 +59,8 @@
     .th-cat{text-align:center;color:#a8d4f0;font-size:.68rem;font-weight:400;cursor:pointer;transition:.15s}
     .th-cat:hover{background:rgba(0,212,255,.08)}
     .th-cat:focus-visible{outline:2px solid var(--cyan);outline-offset:-2px}
+    .date-note{display:block;margin-top:7px;padding:6px 7px;border-radius:8px;background:rgba(106,172,204,.12);color:#d9efff;font-size:.64rem;font-weight:700;line-height:1.45;text-align:left;white-space:pre-wrap;overflow-wrap:anywhere}
+    body[data-theme="light"] .date-note{background:#dceaf4;color:#173d5a}
     .th-label{color:var(--cyan);font-size:.68rem;font-weight:900;letter-spacing:.08em}
     .th-tantou{text-align:center;min-width:74px}
     /* 充足バッジ */
@@ -217,6 +219,8 @@
       <input class="form-control" id="new-cat" placeholder="例：U12 4チーム" autocomplete="off"></div>
     <div class="form-group"><label class="form-label" for="new-target">目標チーム数</label>
       <input class="form-control" id="new-target" type="number" value="3" min="0" inputmode="numeric"></div>
+    <div class="form-group"><label class="form-label" for="new-note">備考</label>
+      <textarea class="form-control" id="new-note" rows="3" maxlength="500" placeholder="例：会場、集合時間、連絡事項など"></textarea></div>
     <div class="modal-btns">
       <button class="btn btn-outline" onclick="closeModal('modal-date')">キャンセル</button>
       <button class="btn btn-cyan" onclick="addDate()">追加</button>
@@ -234,6 +238,8 @@
       <input class="form-control" id="edit-cat" placeholder="例：U12 4チーム" autocomplete="off"></div>
     <div class="form-group"><label class="form-label" for="edit-target">目標チーム数</label>
       <input class="form-control" id="edit-target" type="number" min="0" inputmode="numeric"></div>
+    <div class="form-group"><label class="form-label" for="edit-note">備考</label>
+      <textarea class="form-control" id="edit-note" rows="3" maxlength="500" placeholder="例：会場、集合時間、連絡事項など"></textarea></div>
     <div class="modal-btns" style="flex-wrap:wrap">
       <button class="btn btn-outline" style="color:var(--red);border-color:rgba(255,68,102,.4)" onclick="deleteEditDate()">🗑 削除</button>
       <button class="btn btn-outline" onclick="closeModal('modal-edit-date')">キャンセル</button>
@@ -577,6 +583,7 @@ function renderTable() {
   dates.forEach(function(d) {
     h += "<th class='th-cat' data-act='edit-date' data-id='" + esc(d.id) + "' tabindex='0' role='button' aria-label='" + esc(d.label) + "の日程を編集' title='タップして編集'>" + esc(d.cat) +
          "<br><span style='color:#ffaa66;font-weight:900'>目標 " + esc(d.target) + "チーム</span>" +
+         ((data.備考 || {})[d.id] ? "<span class='date-note'>📝 " + esc((data.備考 || {})[d.id]) + "</span>" : "") +
          "<span style='font-size:.6rem;color:#6aaccc;display:block'>✏️ タップして編集</span></th>";
   });
   h += "<th class='th-cat' style='cursor:default'></th></tr></thead><tbody>";
@@ -662,6 +669,7 @@ function openEditDate(dateId){
   }
   document.getElementById("edit-cat").value = d.cat || "";
   document.getElementById("edit-target").value = (d.target !== undefined ? d.target : 3);
+  document.getElementById("edit-note").value = (data.備考 || {})[dateId] || "";
   openModal("modal-edit-date");
 }
 function saveEditDate(){
@@ -673,12 +681,16 @@ function saveEditDate(){
   var cat = document.getElementById("edit-cat").value.trim() || "未設定";
   var tVal = document.getElementById("edit-target").value;
   var target = tVal === "" ? 1 : Math.max(0, Number(tVal));
+  var note = document.getElementById("edit-note").value.trim();
   if(dateVal){
     var dt = new Date(dateVal);
     d.label = (dt.getMonth()+1) + "/" + dt.getDate() + "（" + ["日","月","火","水","木","金","土"][dt.getDay()] + "）";
   }
   d.cat = cat;
   d.target = target;
+  if (!data.備考) data.備考 = {};
+  if (note) data.備考[d.id] = note;
+  else delete data.備考[d.id];
   persist(); renderTable();
   closeModal("modal-edit-date");
 }
@@ -687,6 +699,7 @@ function deleteEditDate(){
   snapshot();
   data.dates = data.dates.filter(function(x){ return x.id !== _editDateId; });
   data.teams.forEach(function(t){ if(t.statuses) delete t.statuses[_editDateId]; });
+  if (data.備考) delete data.備考[_editDateId];
   persist(); renderTable();
   closeModal("modal-edit-date");
 }
@@ -730,16 +743,20 @@ function addDate() {
   var cat = document.getElementById("new-cat").value.trim() || "未設定";
   var targetVal = document.getElementById("new-target").value;
   var target = targetVal === "" ? 1 : Math.max(0, Number(targetVal)); // 0も有効値として扱う
+  var note = document.getElementById("new-note").value.trim();
   if (!dateVal) { alert("日付を入力してください"); return; }
   snapshot();
   var d = new Date(dateVal);
   var label = (d.getMonth()+1) + "/" + d.getDate() + "（" + ["日","月","火","水","木","金","土"][d.getDay()] + "）";
   var id = "d" + Date.now();
   data.dates.push({id:id, label:label, cat:cat, target:target});
+  if (!data.備考) data.備考 = {};
+  if (note) data.備考[id] = note;
   data.teams.forEach(function(t){ if(!t.statuses) t.statuses = {}; t.statuses[id] = "－"; });
   persist(); renderTable(); closeModal("modal-date");
   document.getElementById("new-date").value = "";
   document.getElementById("new-cat").value = "";
+  document.getElementById("new-note").value = "";
 }
 
 /* ---------- 初期描画 ---------- */
