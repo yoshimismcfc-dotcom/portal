@@ -42,6 +42,15 @@
     .summary-table tr:hover td{background:rgba(255,139,31,.06)}
     .summary-table .name{font-weight:900;color:#fff}
     .input-note{background:rgba(255,204,0,.1);border:1px solid rgba(255,204,0,.28);color:#ffe58a;border-radius:var(--r8);padding:10px 12px;font-size:.8rem;line-height:1.7;margin-bottom:12px}
+    .linked-accounting-panel{display:none;border:2px solid rgba(0,212,255,.5);background:rgba(0,48,135,.26);border-radius:var(--r8);padding:12px 14px;margin-bottom:12px}
+    .linked-accounting-panel.show{display:block}
+    .linked-accounting-title{color:var(--cyan);font-weight:900;font-size:.9rem;margin-bottom:5px}
+    .linked-accounting-meta{color:var(--ink-2);font-size:.8rem;line-height:1.6}
+    .linked-accounting-actions{display:flex;gap:8px;flex-wrap:wrap;margin-top:9px}
+    .linked-badge{display:inline-block;margin-left:6px;padding:2px 7px;border-radius:999px;background:rgba(0,255,136,.14);border:1px solid rgba(0,255,136,.45);color:#00ff88;font-size:.68rem;font-weight:900}
+    body[data-theme="light"] .linked-accounting-panel{background:#eef8ff;border-color:#168cc4}
+    body[data-theme="light"] .linked-accounting-title{color:#006b9f}
+    body[data-theme="light"] .linked-badge{color:#006b3c;background:#e8fff4;border-color:#26a66c}
     .print-sheet{background:#fff;color:#111;border-radius:12px;padding:22px;box-shadow:var(--shadow);margin-top:14px}
     .print-title{text-align:center;font-size:1.25rem;font-weight:900;color:#003087;border-bottom:2px solid #003087;padding-bottom:8px;margin-bottom:14px}
     .print-sheet table{width:100%;border-collapse:collapse;font-size:.86rem}
@@ -81,6 +90,8 @@
 
   <div class="input-note no-print">黄色セルの代わりに、この画面では青い入力欄を編集します。金額は「単価 × 数量」で自動計算します。1件の金額だけ入れる場合は、単価に金額、数量に 1 を入力してください。</div>
 
+  <div class="linked-accounting-panel no-print" id="linked-accounting-panel"></div>
+
   <div class="acct-tabs no-print">
     <button class="acct-tab active" onclick="switchView('edit',this)">入力</button>
     <button class="acct-tab" onclick="switchView('summary',this)">大会一覧</button>
@@ -111,6 +122,7 @@
         <div class="form-group"><label class="form-label">初回繰越金</label><input class="form-control" id="f-carry" type="number" inputmode="numeric" oninput="editInfo('carry',this.value)"></div>
       </div>
       <div style="display:flex;gap:8px;justify-content:flex-end;flex-wrap:wrap">
+        <button class="btn btn-outline btn-sm" onclick="copyAccountingTemplate()">📑 会計テンプレートをコピー</button>
         <button class="btn btn-outline btn-sm" onclick="duplicateTournament()">複製</button>
         <button class="btn btn-outline btn-sm" style="color:var(--red);border-color:rgba(255,68,102,.4)" onclick="deleteTournament()">削除</button>
       </div>
@@ -196,6 +208,16 @@
 var KEY="smc_accounting_v1";
 var current=0;
 var data={tournaments:[]};
+var LINK_CONTEXT=(function(){
+  var p=new URLSearchParams(location.search);
+  return {
+    dateId:p.get("dateId")||"",
+    dateIso:p.get("dateIso")||"",
+    dateLabel:p.get("date")||"",
+    name:p.get("name")||"",
+    category:p.get("category")||""
+  };
+})();
 
 var EXPENSE_TEMPLATE=["トロフィー","メダル","賞品","参加賞","石灰","ラインテープ","飲み物","氷","弁当","印刷代","グラウンド使用料","審判謝礼","救急用品","雑費","その他"];
 var DEFAULT_TOURNAMENTS=[
@@ -210,7 +232,8 @@ for(var i=4;i<=10;i++){
 function clone(o){return JSON.parse(JSON.stringify(o));}
 function normalize(){
   if(!data||!Array.isArray(data.tournaments)||!data.tournaments.length)data={tournaments:clone(DEFAULT_TOURNAMENTS)};
-  data.tournaments.forEach(function(t){
+  data.tournaments.forEach(function(t,i){
+    if(!t.id)t.id="accounting_legacy_"+i;
     if(!Array.isArray(t.income))t.income=[];
     if(!Array.isArray(t.expense))t.expense=[];
   });
@@ -228,9 +251,9 @@ function balanceAt(idx){var t=data.tournaments[idx];return total(t,"income")-tot
 function closingAt(idx){return carryAt(idx)+balanceAt(idx);}
 function esc(s){return String(s==null?"":s).replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;").replace(/"/g,"&quot;");}
 
-function saveData(){
+function saveData(silent){
   normalize();
-  dbSave("accounting",data,KEY,function(){flash("会計データを保存しました");});
+  dbSave("accounting",data,KEY,function(){if(!silent)flash("会計データを保存しました");});
 }
 function flash(msg){
   var el=document.createElement("div");
@@ -247,7 +270,10 @@ function switchView(name,btn){
   renderAll();
 }
 function renderOptions(){
-  var opts=data.tournaments.map(function(t,i){return '<option value="'+i+'">'+esc(t.name||("第"+(i+1)+"大会"))+'</option>';}).join("");
+  var opts=data.tournaments.map(function(t,i){
+    var linked=t.gameAdjustDateId?"【試合調整連動】 ":"";
+    return '<option value="'+i+'">'+linked+esc(t.name||("第"+(i+1)+"大会"))+'</option>';
+  }).join("");
   ["tournament-select","report-select"].forEach(function(id){
     var el=document.getElementById(id);
     el.innerHTML=opts;
@@ -298,8 +324,9 @@ function renderLineTotal(kind){
 function renderSummary(){
   document.getElementById("summary-rows").innerHTML=data.tournaments.map(function(t,i){
     var inc=total(t,"income"),exp=total(t,"expense"),bal=inc-exp,car=carryAt(i),closing=car+bal;
+    var linked=t.gameAdjustDateId?'<span class="linked-badge">試合調整連動</span>':"";
     return '<tr onclick="current='+i+';switchView(\'edit\',document.querySelector(\'.acct-tab\'))" style="cursor:pointer">'+
-      '<td class="name">'+esc(t.name)+'</td><td>'+esc(t.date||"")+'</td>'+
+      '<td class="name">'+esc(t.name)+linked+'</td><td>'+esc(t.date||"")+'</td>'+
       '<td>'+yen(car)+'</td><td>'+yen(inc)+'</td><td>'+yen(exp)+'</td>'+
       '<td style="color:'+(bal>=0?'#00aa55':'#cc2244')+';font-weight:900">'+yen(bal)+'</td><td>'+yen(closing)+'</td></tr>';
   }).join("");
@@ -320,8 +347,25 @@ function renderReport(){
     '<h3 style="color:#003087;margin:12px 0 6px">収入明細</h3><table><tr><th>項目</th><th>単価</th><th>数量</th><th>金額</th><th>備考</th></tr>'+detailRows("income")+'</table>'+
     '<h3 style="color:#003087;margin:14px 0 6px">支出明細</h3><table><tr><th>項目</th><th>単価</th><th>数量</th><th>金額</th><th>備考</th></tr>'+detailRows("expense")+'</table>';
 }
+function renderLinkedAccountingPanel(){
+  var el=document.getElementById("linked-accounting-panel");
+  if(!el||!LINK_CONTEXT.dateId){if(el)el.classList.remove("show");return;}
+  var t=data.tournaments[current]||{};
+  el.classList.add("show");
+  el.innerHTML='<div class="linked-accounting-title">🔗 試合調整の日程と連動中</div>'+
+    '<div class="linked-accounting-meta">'+esc(t.date||LINK_CONTEXT.dateLabel||"日付未設定")+'　'+esc(t.name||LINK_CONTEXT.name||"大会名未設定")+
+    (LINK_CONTEXT.category?'　カテゴリー：'+esc(LINK_CONTEXT.category):'')+'</div>'+
+    '<div class="linked-accounting-actions">'+
+      '<a class="btn btn-outline btn-sm" href="game_adjust.html">← 試合調整に戻る</a>'+
+      '<button class="btn btn-outline btn-sm" onclick="openAccountingList()">📚 全大会一覧</button>'+
+    '</div>';
+}
+function openAccountingList(){
+  var tab=document.querySelectorAll(".acct-tab")[1];
+  switchView("summary",tab);
+}
 function renderAll(){
-  normalize();renderOptions();renderInfo();renderTotals();renderRows("income");renderRows("expense");renderSummary();renderReport();
+  normalize();renderOptions();renderInfo();renderTotals();renderRows("income");renderRows("expense");renderSummary();renderReport();renderLinkedAccountingPanel();
 }
 function editInfo(field,value){
   data.tournaments[current][field]=field==="carry"?num(value):value;
@@ -344,7 +388,41 @@ function deleteLine(kind,idx){
   renderAll();
 }
 function newTournamentTemplate(n){
-  return {name:"第"+n+"大会",date:"",venue:"",carry:"",income:[{name:"参加費",unit:"",qty:"",memo:""}],expense:EXPENSE_TEMPLATE.map(function(x){return{name:x,unit:"",qty:"",memo:""};})};
+  return {id:"accounting_"+Date.now()+"_"+Math.random().toString(36).slice(2,7),name:"第"+n+"大会",date:"",venue:"",carry:"",income:[{name:"参加費",unit:"",qty:"",memo:""}],expense:EXPENSE_TEMPLATE.map(function(x){return{name:x,unit:"",qty:"",memo:""};})};
+}
+function linkedAccountingTemplate(){
+  var t=newTournamentTemplate(data.tournaments.length+1);
+  t.id="accounting_game_"+LINK_CONTEXT.dateId;
+  t.gameAdjustDateId=LINK_CONTEXT.dateId;
+  t.name=LINK_CONTEXT.name||LINK_CONTEXT.dateLabel||"試合調整の大会";
+  t.date=LINK_CONTEXT.dateIso||"";
+  t.category=LINK_CONTEXT.category||"";
+  return t;
+}
+function ensureLinkedAccounting(){
+  if(!LINK_CONTEXT.dateId)return false;
+  var idx=data.tournaments.findIndex(function(t){return t.gameAdjustDateId===LINK_CONTEXT.dateId||t.id==="accounting_game_"+LINK_CONTEXT.dateId;});
+  var changed=false;
+  if(idx<0){
+    data.tournaments.push(linkedAccountingTemplate());
+    idx=data.tournaments.length-1;
+    changed=true;
+  }
+  var t=data.tournaments[idx];
+  if(t.gameAdjustDateId!==LINK_CONTEXT.dateId){t.gameAdjustDateId=LINK_CONTEXT.dateId;changed=true;}
+  if(LINK_CONTEXT.dateIso&&t.date!==LINK_CONTEXT.dateIso){t.date=LINK_CONTEXT.dateIso;changed=true;}
+  if(LINK_CONTEXT.category&&t.category!==LINK_CONTEXT.category){t.category=LINK_CONTEXT.category;changed=true;}
+  if(LINK_CONTEXT.name&&(!t.name||/^第\d+大会$/.test(t.name))){t.name=LINK_CONTEXT.name;changed=true;}
+  current=idx;
+  if(changed)saveData(true);
+  return changed;
+}
+function copyAccountingTemplate(){
+  var t=data.tournaments[current];
+  if(!t||!confirm("現在の大会の収入・支出を標準テンプレートに戻しますか？\n大会名・開催日・会場・日程連動は残ります。"))return;
+  t.income=[{name:"参加費",unit:"",qty:"",memo:""}];
+  t.expense=EXPENSE_TEMPLATE.map(function(x){return{name:x,unit:"",qty:"",memo:""};});
+  renderAll();saveData(); 
 }
 function addTournament(){
   data.tournaments.push(newTournamentTemplate(data.tournaments.length+1));
@@ -353,6 +431,9 @@ function addTournament(){
 }
 function duplicateTournament(){
   var t=clone(data.tournaments[current]);
+  t.id="accounting_"+Date.now()+"_"+Math.random().toString(36).slice(2,7);
+  delete t.gameAdjustDateId;
+  delete t.category;
   t.name=(t.name||"大会")+" コピー";
   t.date="";
   t.carry="";
@@ -381,7 +462,9 @@ function downloadCsv(){
 
 dbListen("accounting",function(val){
   data=val&&Array.isArray(val.tournaments)?val:{tournaments:clone(DEFAULT_TOURNAMENTS)};
-  normalize();renderAll();
+  normalize();
+  ensureLinkedAccounting();
+  renderAll();
 },KEY,{tournaments:clone(DEFAULT_TOURNAMENTS)});
 window.addEventListener("DOMContentLoaded",function(){normalize();renderAll();});
 
