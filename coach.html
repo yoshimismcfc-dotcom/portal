@@ -97,12 +97,6 @@
 
   <!-- コーチコンテンツ -->
   <div id="coach-content">
-    <div class="notice-bar">🔗 LINEのリッチメニューなどから、そのまま各管理機能を利用できます。</div>
-    <div id="cloud-status-bar" class="notice-bar" style="background:rgba(255,204,0,.12);border-color:rgba(255,204,0,.35);color:#ffcc00;display:flex;justify-content:space-between;align-items:center">
-      <span id="cloud-status-text">☁️ クラウド接続状況を確認中...</span>
-      <a href="firebase-setup.html" class="btn btn-outline btn-sm" style="font-size:.7rem;height:26px;padding:0 8px;flex-shrink:0">⚙️ 設定</a>
-    </div>
-
     <!-- ===== セクション：お知らせ管理 ===== -->
     <div class="c-section-div"><div class="csd-icon">📢</div><div class="csd-text">お知らせ管理</div><div class="csd-sub">NOTICE</div></div>
     <div class="c-card-grid">
@@ -619,29 +613,6 @@ document.addEventListener("DOMContentLoaded", function(){
   renderUrls();
   renderScheduleList();
 });
-
-// クラウド接続状況確認
-(function(){
-  var bar=document.getElementById("cloud-status-bar");
-  var txt=document.getElementById("cloud-status-text");
-  if(!bar||!txt)return;
-  if(typeof FIREBASE_CONFIG==="undefined"||FIREBASE_CONFIG.apiKey==="YOUR_API_KEY"){
-    bar.style.background="rgba(255,68,102,.1)";bar.style.borderColor="rgba(255,68,102,.3)";
-    txt.style.color="#ff8888";
-    txt.textContent="⚠️ Firebaseが未設定です — データは端末内にのみ保存されます。「設定」から設定してください。";
-    return;
-  }
-  onFirebaseReady(function(db){
-    db.ref(".info/connected").on("value",function(snap){
-      if(snap.val()){
-        bar.style.background="rgba(0,255,136,.1)";bar.style.borderColor="rgba(0,255,136,.3)";
-        txt.style.color="#00ff88";txt.textContent="✅ クラウド接続中 — データはリアルタイムで全員と共有されます";
-      }else{
-        txt.textContent="🔄 クラウドへの再接続を試みています...";
-      }
-    });
-  });
-})();
 </script>
 </body>
 </html>
