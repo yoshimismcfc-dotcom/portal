@@ -136,6 +136,19 @@ if (/<th>パスワード<\/th>/.test(accountsSource)) fail("accounts.html", "保
 if (/\.pw-(?:cell|text|toggle)/.test(accountsSource)) fail("accounts.html", "廃止したパスワード表示用CSSが残っています");
 
 const gameAdjustSource = fs.readFileSync(path.join(root, "game_adjust.html"), "utf8");
+const dutyMatchSource = fs.readFileSync(path.join(root, "duty_match.html"), "utf8");
+if (!gameAdjustSource.includes("duty_match.html") || !gameAdjustSource.includes("tournament.html") || !gameAdjustSource.includes("date-related-links")) {
+  fail("game_adjust.html", "カテゴリー／目標下に大会関連ページへの入口がありません");
+}
+if (!dutyMatchSource.includes('dbListen("duty_match"') || !dutyMatchSource.includes('dbSave("duty_match"')) {
+  fail("duty_match.html", "大会任務分担が共通Firebaseデータを使用していません");
+}
+if (!tournamentSource.includes('dbListen("tournament_saves"') || !tournamentSource.includes('dbSave("tournament_saves"')) {
+  fail("tournament.html", "大会要項・対戦表が共通Firebaseデータを使用していません");
+}
+if (!guideSource.includes("既存ページそのもの") || !guideSource.includes("同じFirebaseデータ")) {
+  fail("guide.html", "大会関連ページの共通データ構造が説明書にありません");
+}
 if (!gameAdjustSource.includes('id="new-note"') || !gameAdjustSource.includes('id="edit-note"')) {
   fail("game_adjust.html", "日程の追加・編集画面に備考入力欄がありません");
 }
