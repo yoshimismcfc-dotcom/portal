@@ -344,11 +344,18 @@ function normalizeData(d){
   return { dates: dates, teams: teams, 備考: (d["備考"] && typeof d["備考"]==="object") ? d["備考"] : {} };
 }
 
-dbListen("game_adjust", function(val){
+dbListen("game_adjust", function(val, meta){
   var normalized = normalizeData(val);
 
-  // クラウドが空・壊れている → ローカル→INITの順で自動復元
+  // 接続待ちの一時的な空応答では、すでに表示中の正常データを消さない。
   if(!normalized){
+    if(normalizeData(data)){
+      renderTable();
+      if(meta && meta.source === "cloud"){
+        flash("☁️ クラウドが空のため端末データを表示しています", "#ffee66");
+      }
+      return;
+    }
     var restored = null;
     try {
       var localRaw = localStorage.getItem(KEY);
@@ -357,15 +364,14 @@ dbListen("game_adjust", function(val){
     if(!restored) restored = normalizeData(JSON.parse(JSON.stringify(INIT)));
     data = restored;
     renderTable();
-    persist();
-    flash("♻️ データを復元しました");
+    flash("📱 端末データを表示しています", "#8ac8e8");
     return;
   }
 
   // クラウドがINITと同一で、この端末により新しいデータがあれば端末側を復元
   try {
     var initStr = JSON.stringify(normalizeData(JSON.parse(JSON.stringify(INIT))));
-    if(JSON.stringify(normalized) === initStr){
+    if(meta && meta.source === "cloud" && JSON.stringify(normalized) === initStr){
       var lr = localStorage.getItem(KEY);
       if(lr){
         var ld = normalizeData(JSON.parse(lr));
@@ -381,7 +387,6 @@ dbListen("game_adjust", function(val){
   } catch(e){ console.warn("restore check error:", e); }
 
   // 【エコー抑制】自分が保存した内容の反射なら再描画しない
-  // （入力中のフォーカス飛び・画面点滅を防ぐ）
   var incoming = JSON.stringify(normalized);
   if(incoming === _lastSavedStr) return;
 
@@ -664,6 +669,7 @@ function renderTable() {
   });
   h += "<td></td></tr></tbody>";
   tbl.innerHTML = h;
+  tbl.dataset.dataReady = "true";
 }
 
 /* ---------- イベントデリゲーション（動的要素の操作を一括処理） ---------- */
