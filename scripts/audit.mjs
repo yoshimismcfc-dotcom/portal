@@ -55,6 +55,11 @@ for (const file of htmlFiles) {
   if (/\b(?:pw|password|passcode)\s*[:=]\s*["'][^"']+["']/i.test(source)) {
     fail(file, "平文の認証情報らしき値が埋め込まれています");
   }
+  for (const link of source.matchAll(/<a\b[^>]*\btarget=["']_blank["'][^>]*>/gi)) {
+    if (!/\brel=["'][^"']*\bnoopener\b/i.test(link[0])) {
+      fail(file, "新しいタブで開くリンクに rel=noopener がありません");
+    }
+  }
   const headSource = source.match(/<head>[\s\S]*?<\/head>/i)?.[0] || "";
   if (file !== "offline.html" && !/<script\s+src=["']common\.js["']><\/script>/i.test(headSource)) {
     fail(file, "共通JavaScript common.js がheadで読み込まれていません");
@@ -102,6 +107,11 @@ const tournamentSource = fs.readFileSync(path.join(root, "tournament.html"), "ut
 const tournamentVersion = tournamentSource.match(/name=["']app-version["'][^>]*content=["']([^"']+)/i)?.[1];
 if (tournamentVersion !== swVersion) {
   fail("PWA", `tournament.html のバージョンが一致しません: ${tournamentVersion || "なし"}`);
+}
+const packageJson = JSON.parse(fs.readFileSync(path.join(root, "package.json"), "utf8"));
+const expectedPackageVersion = swVersion ? `${swVersion.replace("-", ".")}.0` : "";
+if (packageJson.version !== expectedPackageVersion) {
+  fail("PWA", `package.json のバージョンが一致しません: ${packageJson.version || "なし"}（期待値 ${expectedPackageVersion || "なし"}）`);
 }
 
 for (const legacyFile of ["album.html", "heat.html", "init-data.html", "kaikei.html"]) {
@@ -170,6 +180,16 @@ if (!financeSource.includes('dbListen("family_finance"') || !financeSource.inclu
 }
 if (!todoSource.includes('dbListen("todo"') || !todoSource.includes('dbSave("todo"') || !todoSource.includes('id="todo-back"')) {
   fail("todo.html", "やることリストが共通Firebaseデータまたはコーチ入口に連動していません");
+}
+if (/dbListen\("todo"[\s\S]*?Array\.isArray\(val\)\s*&&\s*val\.length\s*>\s*0/.test(todoSource)) {
+  fail("todo.html", "Firebaseの空配列を受け入れず、全件削除後に古いタスクが残る可能性があります");
+}
+const readmeSource = fs.readFileSync(path.join(root, "README.md"), "utf8");
+if (!readmeSource.includes("AI・Codexへ修正を依頼する共通プロンプト") || !readmeSource.includes("空配列や空データ")) {
+  fail("README.md", "再利用可能な修正プロンプトまたは空データ同期の注意事項がありません");
+}
+if (!guideSource.includes("会計業務（相談・集金・会計報告）") || !guideSource.includes("申請中・了解・支払い済・差戻し")) {
+  fail("guide.html", "現行の会計画面と状態変更手順が説明されていません");
 }
 if (!guideSource.includes("立替・購入相談") || !guideSource.includes("共有タスク") || !guideSource.includes("同じFirebaseデータ")) {
   fail("guide.html", "コーチ共有の会計・やることリスト連動が説明されていません");
