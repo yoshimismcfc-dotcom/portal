@@ -96,7 +96,7 @@
 <body>
 <header class="site-header"></header>
 <main class="page-wrap">
-  <a class="back-btn" href="index.html">ホームに戻る</a>
+  <a class="back-btn" id="todo-back" href="index.html">ホームに戻る</a>
   <div class="hero-band">
     <div class="hero-emoji">📌</div>
     <div>
@@ -188,6 +188,12 @@ try {
 } catch(e) {}
 
 window.addEventListener("DOMContentLoaded", function(){
+  var p=new URLSearchParams(location.search);
+  var back=document.getElementById("todo-back");
+  if(p.get("from")==="coach"&&back){
+    back.href="coach.html";
+    back.textContent="コーチ専用フォルダに戻る";
+  }
   renderStats(); renderList();
   dbListen("todo", function(val){
     if(Array.isArray(val) && val.length > 0){

@@ -150,7 +150,7 @@
 <body>
 <header class="site-header"></header>
 <main class="page-wrap">
-  <a class="back-btn no-print" href="index.html">ホームに戻る</a>
+  <a class="back-btn no-print" id="finance-back" href="index.html">ホームに戻る</a>
   <div class="hero-band no-print">
     <div class="hero-emoji">💴</div>
     <div>
@@ -521,6 +521,17 @@ function switchView(name,btn){
   document.querySelectorAll(".fin-tab").forEach(function(b){b.classList.remove("active");});
   if(btn)btn.classList.add("active");
   renderAll();
+}
+function applyFinanceEntryContext(){
+  var p=new URLSearchParams(location.search);
+  var back=document.getElementById("finance-back");
+  if(p.get("from")==="coach"&&back){
+    back.href="coach.html";
+    back.textContent="コーチ専用フォルダに戻る";
+  }
+  var view=p.get("view")||"";
+  var btn=document.querySelector('[data-fin-view="'+view+'"]');
+  if(btn&&document.getElementById("view-"+view))switchView(view,btn);
 }
 function addRequest(){
   var yd=yearData();
@@ -1052,7 +1063,7 @@ dbListen("members_v2",function(val){
   membersData=val&&typeof val==="object"?val:{};
   renderAll();
 },null,{});
-window.addEventListener("DOMContentLoaded",function(){fillCats();normalize();renderAll();});
+window.addEventListener("DOMContentLoaded",function(){fillCats();normalize();renderAll();applyFinanceEntryContext();});
 </script>
 </body>
 </html>

@@ -154,8 +154,26 @@ if (!guideSource.includes("予選・順位戦・閉会式の時刻も自動再�
 if (!guideSource.includes("参加チーム数・残りチーム数")) fail("guide.html", "試合調整のスマホ集計表示が説明書にありません");
 if (guideSource.includes("先に「📊 対戦表を生成」を押してから印刷")) fail("guide.html", "古い対戦表印刷手順が残っています");
 const accountsSource = fs.readFileSync(path.join(root, "accounts.html"), "utf8");
+const coachSource = fs.readFileSync(path.join(root, "coach.html"), "utf8");
+const financeSource = fs.readFileSync(path.join(root, "finance.html"), "utf8");
+const todoSource = fs.readFileSync(path.join(root, "todo.html"), "utf8");
 if (/<th>パスワード<\/th>/.test(accountsSource)) fail("accounts.html", "保存しないパスワードの列見出しが残っています");
 if (/\.pw-(?:cell|text|toggle)/.test(accountsSource)) fail("accounts.html", "廃止したパスワード表示用CSSが残っています");
+if (!coachSource.includes("コーチの立替・購入相談") || !coachSource.includes("finance.html?from=coach&view=request")) {
+  fail("coach.html", "コーチ専用フォルダに会計さんへの立替・購入相談入口がありません");
+}
+if (!coachSource.includes("コーチ共有やることリスト") || !coachSource.includes("todo.html?from=coach")) {
+  fail("coach.html", "コーチ専用フォルダにホーム連動のやることリスト入口がありません");
+}
+if (!financeSource.includes('dbListen("family_finance"') || !financeSource.includes('dbSave("family_finance"') || !financeSource.includes("applyFinanceEntryContext")) {
+  fail("finance.html", "会計さんへの入力が共通Firebaseデータまたはコーチ入口に連動していません");
+}
+if (!todoSource.includes('dbListen("todo"') || !todoSource.includes('dbSave("todo"') || !todoSource.includes('id="todo-back"')) {
+  fail("todo.html", "やることリストが共通Firebaseデータまたはコーチ入口に連動していません");
+}
+if (!guideSource.includes("コーチの立替・購入相談") || !guideSource.includes("コーチ共有やることリスト") || !guideSource.includes("同じFirebaseデータ")) {
+  fail("guide.html", "コーチ共有の会計・やることリスト連動が説明されていません");
+}
 
 const gameAdjustSource = fs.readFileSync(path.join(root, "game_adjust.html"), "utf8");
 const dutyMatchSource = fs.readFileSync(path.join(root, "duty_match.html"), "utf8");
