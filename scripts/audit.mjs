@@ -134,9 +134,6 @@ if (!commonSource.includes("forecast_days=8") || !commonSource.includes("offset<
 if (!commonSource.includes("現在アラートはありません") || !commonSource.includes("予報を取得できませんでした")) {
   fail("common.js", "自動アラートの正常・エラー状態表示がありません");
 }
-if (!guideSource.includes("次の屋外練習を8日先まで") || !guideSource.includes("予報確認状況")) {
-  fail("guide.html", "自動アラートの8日先検索と状態表示が説明されていません");
-}
 if (!commonSource.includes("setupDisclosureAccessibility")) {
   fail("common.js", "タップ式の説明項目にキーボード操作を追加していません");
 }
@@ -148,6 +145,9 @@ for (const responsiveFile of ["accounts.html", "members.html", "duty.html", "acc
   if (!responsiveSource.includes("mobile-stack")) fail(responsiveFile, "スマホ向け表レイアウトが適用されていません");
 }
 const guideSource = fs.readFileSync(path.join(root, "guide.html"), "utf8");
+if (!guideSource.includes("次の屋外練習を8日先まで") || !guideSource.includes("予報確認状況")) {
+  fail("guide.html", "自動アラートの8日先検索と状態表示が説明されていません");
+}
 if (guideSource.includes("今後1週間の予定リスト")) fail("guide.html", "廃止したカレンダー予定リストの説明が残っています");
 if (guideSource.includes("パスワードは「表示」")) fail("guide.html", "廃止したパスワード表示機能の説明が残っています");
 if (!guideSource.includes("予選・順位戦・閉会式の時刻も自動再計算")) fail("guide.html", "昼食後の時刻再計算が説明書にありません");
