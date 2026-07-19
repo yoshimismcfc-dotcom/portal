@@ -100,12 +100,18 @@ function dbListen(path, callback, localKey, fallback){
   onFirebaseReady(function(db){
     db.ref(path).on("value", function(snap){
       var val = snap.val();
-      if(val !== null && val !== undefined){
-        callback(val);
-        return;
+      // Firebaseへ接続できた場合はクラウドを正として、端末キャッシュも最新化する。
+      // クラウド側が空なら古い端末データを再表示せず、指定された初期値を使う。
+      var latest = (val !== null && val !== undefined) ? val : fallback;
+      try{
+        if(localKey) localStorage.setItem(localKey, JSON.stringify(latest));
+      }catch(cacheError){
+        console.warn("[SMC Portal] latest cache update error:", localKey, cacheError);
       }
-      var local = readLocalResult(localKey, fallback);
-      callback(local.has ? local.value : fallback);
+      callback(latest);
+      try{
+        window.dispatchEvent(new CustomEvent("smc:data-refreshed", {detail:{path:path}}));
+      }catch(eventError){}
     }, function(err){
       console.error("[SMC Portal] dbListen error:", path, err);
       var local = readLocalResult(localKey, fallback);

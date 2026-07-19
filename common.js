@@ -1002,9 +1002,17 @@ function enhanceCalendarUpcomingAgenda() {
   if(!('serviceWorker' in navigator)) return;
 
   var SW_PATH = location.pathname.replace(/\/[^\/]*$/, '/') + 'sw.js';
+  var bootStartedAt = Date.now();
+  var refreshingForUpdate = false;
 
-  // SWを登録して更新チェックのみ行う。ページ遷移はネットワーク優先、
-  // 共通アセットはキャッシュを先に表示してバックグラウンド更新する。
+  // 起動直後に新しいService Workerへ切り替わった場合だけ1回再読込し、
+  // 古いJavaScript/CSSのまま操作が始まることを防ぐ。
+  navigator.serviceWorker.addEventListener('controllerchange', function(){
+    if(refreshingForUpdate || Date.now() - bootStartedAt > 30000) return;
+    refreshingForUpdate = true;
+    window.location.reload();
+  });
+
   navigator.serviceWorker.register(SW_PATH).then(function(reg){
     reg.update();
     reg.addEventListener('updatefound', function(){
@@ -1019,7 +1027,11 @@ function enhanceCalendarUpcomingAgenda() {
   }).catch(function(err){
     console.log('SW登録エラー:', err);
   });
-  // 注意：window.location.reload() は絶対に呼ばない（点滅・無限リロードの原因）
+
+  // iPhone等でバックフォワードキャッシュから復帰した場合も最新データを取得する。
+  window.addEventListener('pageshow', function(event){
+    if(event.persisted) window.location.reload();
+  });
 })();
 
 /* ===== 保存状態の共通表示 ===== */
