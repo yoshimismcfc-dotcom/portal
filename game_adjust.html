@@ -708,7 +708,7 @@ function openEditDate(dateId){
   var d = data.dates.find(function(x){ return x.id===dateId; });
   if(!d) return;
   _editDateId = dateId;
-  var savedDateIso = /^\\d{4}-\\d{2}-\\d{2}$/.test(d.dateIso || "") ? d.dateIso : linkedDateIso(d);
+  var savedDateIso = (d.dateIso && d.dateIso.length === 10) ? d.dateIso : linkedDateIso(d);
   document.getElementById("edit-date").value = savedDateIso || "";
   document.getElementById("edit-tournament-name").value = d.tournamentName || "";
   document.getElementById("edit-cat").value = d.cat || "";
