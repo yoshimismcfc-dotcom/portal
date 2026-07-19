@@ -82,6 +82,13 @@ for (const file of ["common.js", "firebase-config.js", "sw.js"]) {
 const indexSource = fs.readFileSync(path.join(root, "index.html"), "utf8");
 const commonCssSource = fs.readFileSync(path.join(root, "common.css"), "utf8");
 const swSource = fs.readFileSync(path.join(root, "sw.js"), "utf8");
+const firebaseSource = fs.readFileSync(path.join(root, "firebase-config.js"), "utf8");
+if (!swSource.includes('fetch(request, {cache:"no-store"})') || !swSource.includes('["style","script"]')) {
+  fail("sw.js", "起動時にJavaScript・CSSをネットワーク優先で更新していません");
+}
+if (!firebaseSource.includes("var latest =") || !firebaseSource.includes('localStorage.setItem(localKey, JSON.stringify(latest))')) {
+  fail("firebase-config.js", "Firebase取得後にクラウド値を正として端末キャッシュを最新化していません");
+}
 const indexVersion = indexSource.match(/name=["']app-version["'][^>]*content=["']([^"']+)/i)?.[1];
 const swVersion = swSource.match(/APP_VERSION\s*=\s*["']([^"']+)/)?.[1];
 if (!indexVersion || !swVersion || indexVersion !== swVersion) {
@@ -114,6 +121,9 @@ const commonSource = fs.readFileSync(path.join(root, "common.js"), "utf8");
 const calendarSource = fs.readFileSync(path.join(root, "calendar.html"), "utf8");
 if (!commonSource.includes("refreshCoachFolderLabels")) {
   fail("common.js", "旧名称を安全にコーチ専用フォルダへ置き換える処理がありません");
+}
+if (!commonSource.includes("controllerchange") || !commonSource.includes("event.persisted")) {
+  fail("common.js", "アプリ更新時または復元表示時に最新版を取得する処理がありません");
 }
 if (!commonSource.includes("setupDisclosureAccessibility")) {
   fail("common.js", "タップ式の説明項目にキーボード操作を追加していません");
@@ -173,6 +183,15 @@ if (!gameAdjustSource.includes('id="new-note"') || !gameAdjustSource.includes('i
 if (!gameAdjustSource.includes("class='date-note'") || !gameAdjustSource.includes("data.備考[d.id] = note")) {
   fail("game_adjust.html", "日程備考の保存またはカテゴリー／目標下の表示がありません");
 }
+const gameAdjustRenderStart = gameAdjustSource.indexOf('"<br><span style=\'color:#ffaa66');
+const gameAdjustNoteIndex = gameAdjustSource.indexOf("((data.備考 || {})[d.id]", gameAdjustRenderStart);
+const gameAdjustLinksIndex = gameAdjustSource.indexOf('"<span class=\'date-related-links', gameAdjustRenderStart);
+if (gameAdjustRenderStart < 0 || gameAdjustNoteIndex < 0 || gameAdjustLinksIndex < 0 || gameAdjustNoteIndex > gameAdjustLinksIndex) {
+  fail("game_adjust.html", "備考がカテゴリー／目標の直下に配置されていません");
+}
+if (!gameAdjustSource.includes("min-height:25px") || !gameAdjustSource.includes("date-edit-hint") || !gameAdjustSource.includes("font-size:.72rem")) {
+  fail("game_adjust.html", "大会関連ボタンの縦幅またはタップ編集表示の大きさが調整されていません");
+}
 if (!gameAdjustSource.includes('id="new-tournament-name"') || !gameAdjustSource.includes('id="edit-tournament-name"')) {
   fail("game_adjust.html", "日程の追加・編集画面に大会名入力欄がありません");
 }
@@ -182,8 +201,11 @@ if (!gameAdjustSource.includes("date-tournament-name") || !gameAdjustSource.incl
 if (!guideSource.includes("大会名は日付の下")) {
   fail("guide.html", "大会名の入力・表示方法が説明書にありません");
 }
-if (!guideSource.includes("備考はカテゴリー／目標の直下に表示")) {
+if (!guideSource.includes("備考はカテゴリー／目標の直下")) {
   fail("guide.html", "日程備考の入力・表示方法が説明書にありません");
+}
+if (!guideSource.includes("Firebaseを正") || !guideSource.includes("コンパクトな大会関連ボタン")) {
+  fail("guide.html", "起動時の最新データ取得または試合調整の配置変更が説明書にありません");
 }
 if (!commonSource.includes("enhanceGameAdjustMobile") || !commonSource.includes("game-adjust-date-nav")) {
   fail("common.js", "試合調整のスマホ用日程切り替え表示がありません");
