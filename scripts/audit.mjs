@@ -196,7 +196,7 @@ if (!guideSource.includes("立替・購入相談") || !guideSource.includes("共
 }
 
 const refereeSource = fs.readFileSync(path.join(root, "referee.html"), "utf8");
-const assistantRuleNumbers = [...refereeSource.matchAll(/class=["\']rule-num["\']>([1-8])<\\/div>/g)].map((match) => Number(match[1]));
+const assistantRuleNumbers = [...refereeSource.matchAll(/<div class="rule-num">([1-8])<\\/div>/g)].map((match) => Number(match[1]));
 if (assistantRuleNumbers.join(",") !== "1,2,3,4,5,6,7,8") {
   fail("referee.html", "副審の心得が1〜8の順で揃っていません");
 }
