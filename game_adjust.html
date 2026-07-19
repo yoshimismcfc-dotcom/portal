@@ -605,7 +605,7 @@ function renderTable() {
   dates.forEach(function(d) {
     var cnt = teams.filter(function(t){ return ((t.statuses||{})[d.id]||"－")==="OK"; }).length;
     var full = (d.target - cnt) <= 0;
-    h += "<th class='th-date" + (full ? " is-full" : "") + "' id='hdr-" + esc(d.id) + "' scope='col'>" + esc(d.label) +
+    h += "<th class='th-date" + (full ? " is-full" : "") + "' id='hdr-" + esc(d.id) + "' data-date-id='" + esc(d.id) + "' data-date-iso='" + esc(d.dateIso || "") + "' scope='col'>" + esc(d.label) +
          (full ? "<span class='full-badge'>✅</span>" : "") +
          (d.tournamentName ? "<span class='date-tournament-name'>🏆 " + esc(d.tournamentName) + "</span>" : "") +
          "<button class='del-date-btn' data-act='del-date' data-id='" + esc(d.id) + "' title='この列を削除' aria-label='" + esc(d.label) + "を削除'>✕</button></th>";
@@ -708,13 +708,8 @@ function openEditDate(dateId){
   var d = data.dates.find(function(x){ return x.id===dateId; });
   if(!d) return;
   _editDateId = dateId;
-  var m = (d.label||"").match(/(\d+)\/(\d+)/);
-  if(m){
-    var y = new Date().getFullYear();
-    document.getElementById("edit-date").value = y + "-" + String(m[1]).padStart(2,"0") + "-" + String(m[2]).padStart(2,"0");
-  } else {
-    document.getElementById("edit-date").value = "";
-  }
+  var savedDateIso = /^\\d{4}-\\d{2}-\\d{2}$/.test(d.dateIso || "") ? d.dateIso : linkedDateIso(d);
+  document.getElementById("edit-date").value = savedDateIso || "";
   document.getElementById("edit-tournament-name").value = d.tournamentName || "";
   document.getElementById("edit-cat").value = d.cat || "";
   document.getElementById("edit-target").value = (d.target !== undefined ? d.target : 3);
