@@ -909,12 +909,28 @@ function clearLinkedDate(){
 }
 function hydrateLinkedDate(dateId, meta){
   _activeGameAdjustDateId=dateId||"";
-  _activeDateMeta=Object.assign({dateIso:"",dateLabel:"",name:"",category:""},meta||{});
+  var requestedMeta=Object.assign({dateIso:"",dateLabel:"",name:"",category:""},meta||{});
+  _activeDateMeta=Object.assign({},requestedMeta);
   ["youkou","taisen"].forEach(function(type){
     var entries=linkedEntries(_activeGameAdjustDateId,type);
     if(entries.length) applySaveEntry(entries[0][1]);
     else copyTournamentTemplate(type,true);
   });
+  // 試合調整から開いた場合は、親日程の最新名称・日付・カテゴリーを優先する。
+  Object.keys(requestedMeta).forEach(function(key){
+    if(requestedMeta[key]) _activeDateMeta[key]=requestedMeta[key];
+  });
+  if(requestedMeta.name){
+    document.getElementById("y-title").value=requestedMeta.name;
+    document.getElementById("t-title").value=requestedMeta.name;
+  }
+  if(requestedMeta.dateIso){
+    document.getElementById("y-date").value=requestedMeta.dateIso;
+    document.getElementById("t-date").value=requestedMeta.dateIso;
+  }
+  if(requestedMeta.category) document.getElementById("y-cat").value=requestedMeta.category;
+  buildYoukou();
+  buildTaisen();
   renderLinkedTournamentDates();
 }
 
