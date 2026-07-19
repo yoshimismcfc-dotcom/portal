@@ -159,10 +159,10 @@ const financeSource = fs.readFileSync(path.join(root, "finance.html"), "utf8");
 const todoSource = fs.readFileSync(path.join(root, "todo.html"), "utf8");
 if (/<th>パスワード<\/th>/.test(accountsSource)) fail("accounts.html", "保存しないパスワードの列見出しが残っています");
 if (/\.pw-(?:cell|text|toggle)/.test(accountsSource)) fail("accounts.html", "廃止したパスワード表示用CSSが残っています");
-if (!coachSource.includes("コーチの立替・購入相談") || !coachSource.includes("finance.html?from=coach&view=request")) {
+if (!coachSource.includes("立替・購入相談") || !coachSource.includes("finance.html?from=coach&view=request")) {
   fail("coach.html", "コーチ専用フォルダに会計さんへの立替・購入相談入口がありません");
 }
-if (!coachSource.includes("コーチ共有やることリスト") || !coachSource.includes("todo.html?from=coach")) {
+if (!coachSource.includes("共有タスク") || !coachSource.includes("todo.html?from=coach")) {
   fail("coach.html", "コーチ専用フォルダにホーム連動のやることリスト入口がありません");
 }
 if (!financeSource.includes('dbListen("family_finance"') || !financeSource.includes('dbSave("family_finance"') || !financeSource.includes("applyFinanceEntryContext")) {
@@ -171,7 +171,7 @@ if (!financeSource.includes('dbListen("family_finance"') || !financeSource.inclu
 if (!todoSource.includes('dbListen("todo"') || !todoSource.includes('dbSave("todo"') || !todoSource.includes('id="todo-back"')) {
   fail("todo.html", "やることリストが共通Firebaseデータまたはコーチ入口に連動していません");
 }
-if (!guideSource.includes("コーチの立替・購入相談") || !guideSource.includes("コーチ共有やることリスト") || !guideSource.includes("同じFirebaseデータ")) {
+if (!guideSource.includes("立替・購入相談") || !guideSource.includes("共有タスク") || !guideSource.includes("同じFirebaseデータ")) {
   fail("guide.html", "コーチ共有の会計・やることリスト連動が説明されていません");
 }
 
