@@ -36,6 +36,13 @@
     .rule-num{background:var(--orange);color:#fff;border-radius:50%;width:26px;height:26px;min-width:26px;display:flex;align-items:center;justify-content:center;font-size:.78rem;font-weight:900;flex-shrink:0;margin-top:1px}
     .rule-body{flex:1;min-width:0}
     .rule-title{font-size:.86rem;font-weight:900;color:#fff;margin-bottom:6px}
+    .principles-source{margin:12px 0 0;padding:10px 12px;border-left:3px solid var(--cyan);background:rgba(0,212,255,.07);color:var(--ink-3);font-size:.72rem;line-height:1.65;border-radius:0 var(--r8) var(--r8) 0}
+    body[data-theme="light"] .gesture-card strong,
+    body[data-theme="light"] .guide-section h3,
+    body[data-theme="light"] .rule-title{color:var(--ink)}
+    body[data-theme="light"] .gesture-card p,
+    body[data-theme="light"] .guide-list li{color:var(--ink-2)}
+    body[data-theme="light"] .rule-card{background:rgba(0,48,135,.035);border-color:rgba(21,72,105,.22)}
   </style>
 </head>
 <body>
@@ -195,7 +202,7 @@
               <line x1="32" y1="48" x2="27" y2="72" stroke="#fff" stroke-width="4" stroke-linecap="round"/>
               <line x1="38" y1="48" x2="43" y2="72" stroke="#fff" stroke-width="4" stroke-linecap="round"/>
             </svg>
-            <strong>スローイン</strong><p>ボールが割れたチーム側に旗を水平に伸ばす</p>
+            <strong>スローイン</strong><p>再開するチームの攻撃方向へ、旗を約45度で示す</p>
           </div>
 
           <!-- オフサイド -->
@@ -211,7 +218,7 @@
               <line x1="32" y1="48" x2="27" y2="72" stroke="#fff" stroke-width="4" stroke-linecap="round"/>
               <line x1="38" y1="48" x2="43" y2="72" stroke="#fff" stroke-width="4" stroke-linecap="round"/>
             </svg>
-            <strong>オフサイド</strong><p>旗を斜め上に挙げ位置を示す</p>
+            <strong>オフサイド</strong><p>まず旗を垂直に上げ、主審の合図後に位置を示す</p>
           </div>
 
           <!-- コーナーキック -->
@@ -259,7 +266,7 @@
               <rect x="28" y="2" width="14" height="10" rx="1" fill="#00d4ff"/>
               <text x="35" y="9.5" fill="#fff" font-size="6" font-weight="bold" text-anchor="middle">交代</text>
             </svg>
-            <strong>交代サイン</strong><p>掲示板を頭上に掲げる</p>
+            <strong>交代サイン</strong><p>旗を両手で持ち、頭上に水平に掲げる</p>
           </div>
 
           <!-- ファウル報告 -->
@@ -292,8 +299,8 @@
             <div class="rule-body">
               <div class="rule-title">キックオフ前のゴール・ネット確認</div>
               <ul class="guide-list">
-                <li>ゴールネットとゴールの位置確認は必ず行う。</li>
-                <li>フラッグを使わず<strong>手で直接確認</strong>する。</li>
+                <li>キックオフ前のネット確認を審判のルーティンとして行う。異変を感じた場合は後半開始時も確認する。</li>
+                <li>フラッグを使わず<strong>手で直接確認</strong>する。補修が大きい場合は一人で抱えず応援を呼ぶ。</li>
               </ul>
             </div>
           </div>
@@ -301,13 +308,12 @@
           <div class="rule-card">
             <div class="rule-num">2</div>
             <div class="rule-body">
-              <div class="rule-title">判定はゴールライン・コーナーアークまで走る</div>
+              <div class="rule-title">ゴールラインまで走り、正確にシグナルする</div>
               <ul class="guide-list">
-                <li>ゴールラインのアウト確認はラインまで走り込み、ゴールキック・コーナーキックの合図を主審に送る。明らかにアウトの場合はライン手前でフラッグアップも可。</li>
-                <li>サイドラインが明らかにアウトの時は即、方向の合図をしてよい。</li>
-                <li>きわどいアウトの時は<strong>真上にフラッグアップ</strong>して主審に知らせる。指す方向の手でアップすると分かりやすい。</li>
-                <li>ゴールキック時：ボールがゴールエリア内にあるか・相手選手がペナルティエリアに侵入していないか確認。</li>
-                <li>GKのパントキック時：ペナルティエリア内で蹴られているか確認後、即オフサイドラインへ移動。</li>
+                <li>基本はゴールラインまで走って合図する。コーナーキックでは一歩戻り、身体をタッチラインと平行にして示す。明らかに大きく外れた場合は無理にラインまで走らなくてよい。</li>
+                <li>自分側のコーナーキックは、キッカーを妨げない位置でボールがコーナーエリア内にあるか確認する。反対側ではコーナーフラッグの後方からゴールラインを監視する。</li>
+                <li>ゴールキックは、ボールがゴールエリア内で静止していることをラインの延長上から確認し、その後すぐオフサイドラインへ移動する。</li>
+                <li>ゴールインは主審とアイコンタクト後、ハーフウェーライン方向へ<strong>10〜15m素早く移動</strong>する。きわどい場合の合図は試合前に主審と決めておく。</li>
               </ul>
             </div>
           </div>
@@ -328,7 +334,8 @@
                     <li>ハーフウェイラインへ移動する時</li>
                   </ul>
                 </li>
-                <li>方向を指す時は<strong>静止してピッチに正対</strong>する。争点には素早く入ることが重要。</li>
+                <li>スローインの方向は旗を約45度に上げ、身体をピッチに正対させて明確に示す。</li>
+                <li>速く走る時もフラッグを腰に軽く密着させ、バタつかせない。</li>
               </ul>
             </div>
           </div>
@@ -336,12 +343,11 @@
           <div class="rule-card">
             <div class="rule-num">4</div>
             <div class="rule-body">
-              <div class="rule-title">キックオフ前に主審と打ち合わせする</div>
+              <div class="rule-title">主審とのアイコンタクトと試合前の打ち合わせ</div>
               <ul class="guide-list">
-                <li><strong>オフサイドの判定</strong>：フラッグアップのタイミング（カテゴリーが上がるほどギリギリになる）。</li>
-                <li>主審からのオフサイドキャンセル合図の確認。</li>
-                <li>ファールへの介入・ブラインドサイドへの介入合図。</li>
-                <li>微妙なゴールインの合図の確認。</li>
+                <li>フラッグアップ、ゴールインなどを判定したら、主審とアイコンタクトして確認し合う。</li>
+                <li>主審からのオフサイド取消し、主審から見えない反則への介入、重大な見逃し、きわどいゴールインの合図を試合前に決めておく。</li>
+                <li>副審は主審を補助し、<strong>最終決定は主審</strong>が行う。</li>
               </ul>
             </div>
           </div>
@@ -352,7 +358,7 @@
               <div class="rule-title">サイドステップの活用</div>
               <ul class="guide-list">
                 <li>争点に早く入り、<strong>サイドステップ体勢</strong>をとる（ピッチに正対するために重要）。</li>
-                <li>早く走る時もフラッグをバタつかせない。</li>
+                <li>速く走る時もフラッグを腰に軽く密着させ、バタつかせない。</li>
               </ul>
             </div>
           </div>
@@ -364,7 +370,8 @@
               <ul class="guide-list">
                 <li>試合中のPK：<strong>ゴールラインとペナルティエリアの交点</strong>に立ち、ゴールインの確認とGKの足の動きを確認。</li>
                 <li>PK戦：<strong>ゴールラインとゴールエリアの交点</strong>に立つ。</li>
-                <li>キック前にGKが動きゴールインしなかった場合はフラッグアップして主審に知らせる。</li>
+                <li>キック時、GKは少なくとも片足の一部をゴールラインに触れる・ライン上・ライン後方のいずれかに置く。両足がラインより前に出て結果へ影響した場合の合図方法は、試合前に主審と確認する。</li>
+                <li>違反時の再開や懲戒は状況で変わるため、副審だけで決めず主審へ情報を伝える。</li>
               </ul>
             </div>
           </div>
@@ -372,10 +379,10 @@
           <div class="rule-card">
             <div class="rule-num">7</div>
             <div class="rule-body">
-              <div class="rule-title">試合結果をブッキングする</div>
+              <div class="rule-title">試合記録（ブッキング）</div>
               <ul class="guide-list">
                 <li>記録カードの記入タイミングは試合前の打ち合わせで決める（希望されない時は省略可）。</li>
-                <li>記録項目：得点者No・時間、懲戒（チーム・No・時間）など。</li>
+                <li>記録項目：得点者と時間、懲戒（チーム・背番号・時間）など。</li>
               </ul>
             </div>
           </div>
@@ -388,11 +395,15 @@
                 <li>無理に並ばせず、<strong>準備の出来た選手からチェック</strong>する。</li>
                 <li>2名でメンバー表と用具を分担すると正確に早くできる。</li>
                 <li>スマートな対応が信頼につながる。</li>
+                <li>主審と同等の備品（ワッペン、時計2個、ノート、ペン2本、笛、カード）を準備する。</li>
+                <li>ボールアウト後も、ボールを取りに行くより<strong>判定と次の再開の監視を優先</strong>する。</li>
               </ul>
             </div>
           </div>
 
         </div>
+        <button class="btn btn-line-copy" type="button" onclick="copyAssistantPrinciples()" style="width:100%;margin-top:12px">📋 副審の心得をLINEコピー</button>
+        <p class="principles-source">資料「2025年 副審の心得」をもとに、IFAB競技規則2026/27（第6条・第14条）と照合して整理しています。大会ローカルルールと試合前の主審打ち合わせを優先してください。</p>
       </div>
 
       </div>
@@ -536,6 +547,26 @@ function copyCheckList(){
   ].join("\n");
   navigator.clipboard.writeText(text).then(function(){
     alert("審判チェックリストをコピーしました。LINEに貼り付けてください。");
+  }).catch(function(){
+    alert("コピーできませんでした。画面の内容を手動でコピーしてください。");
+  });
+}
+function copyAssistantPrinciples(){
+  var text=[
+    "【副審の心得】",
+    "1. 試合前にゴールとネットを手で確認する",
+    "2. 基本はゴールラインまで走り、正確に合図する",
+    "3. 旗は主審に見えるよう明確に扱い、持ち替えは腰より下で行う",
+    "4. 主審とアイコンタクトし、合図を試合前に確認する",
+    "5. 争点へ早く入り、サイドステップを活用する",
+    "6. PK時の位置とGKの足を確認し、主審へ情報を伝える",
+    "7. 得点・時間・懲戒を、打ち合わせた方法で記録する",
+    "8. 選手確認を分担し、必要備品を準備する",
+    "",
+    "※大会ローカルルールと主審の指示を優先"
+  ].join("\n");
+  navigator.clipboard.writeText(text).then(function(){
+    alert("副審の心得をコピーしました。LINEに貼り付けてください。");
   }).catch(function(){
     alert("コピーできませんでした。画面の内容を手動でコピーしてください。");
   });
