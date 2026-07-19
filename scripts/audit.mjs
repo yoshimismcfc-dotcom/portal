@@ -212,6 +212,14 @@ if (!refereeSource.includes('body[data-theme="light"] .rule-title') || !refereeS
 if (!guideSource.includes("副審の心得をLINEコピー") || !guideSource.includes("IFAB競技規則2026/27")) {
   fail("guide.html", "副審の心得・LINEコピー・現行規則の説明がありません");
 }
+for (const marker of ["offside-body-parts", "returning-offside-diagram", "deliberate-play-diagram", "tab-changes"]) {
+  if (!refereeSource.includes(marker)) fail("referee.html", `審判ガイドの必須図解がありません: ${marker}`);
+}
+if (!refereeSource.includes("頭・胴体・足") || !refereeSource.includes("手や腕だけ")) fail("referee.html", "オフサイド判定対象の身体部分が説明されていません");
+if (!refereeSource.includes("8秒を超えると相手のコーナーキック") || !refereeSource.includes("最後の5秒")) fail("referee.html", "GKの8秒ルールが最新内容ではありません");
+if (!refereeSource.includes("入れば蹴り直し") || !refereeSource.includes("偶発的な二度触り")) fail("referee.html", "PKの偶発的な二度触りが説明されていません");
+if (refereeSource.includes("WBGT25℃以上：ハーフタイムに5分以上")) fail("referee.html", "根拠のない固定飲水時間が残っています");
+if (!guideSource.includes("戻りオフサイド") || !guideSource.includes("GKの8秒ルール")) fail("guide.html", "審判ガイドの図解・改正説明がありません");
 
 const gameAdjustSource = fs.readFileSync(path.join(root, "game_adjust.html"), "utf8");
 const dutyMatchSource = fs.readFileSync(path.join(root, "duty_match.html"), "utf8");
