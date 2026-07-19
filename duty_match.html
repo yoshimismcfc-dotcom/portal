@@ -223,8 +223,6 @@ var LINK_CONTEXT = (function(){
   };
 })();
 var _showAllMatches = !LINK_CONTEXT.dateId;
-var _linkedEnsured = false;
-
 function cloneDutyTemplate(){
   return DUTY_TEMPLATE.map(function(d){ return JSON.parse(JSON.stringify(d)); });
 }
@@ -232,8 +230,7 @@ function linkedMatchName(){
   return LINK_CONTEXT.name || [LINK_CONTEXT.dateLabel, LINK_CONTEXT.category].filter(Boolean).join(" ") || "試合調整の日程";
 }
 function ensureLinkedMatch(){
-  if(!LINK_CONTEXT.dateId || _linkedEnsured){ render(); return; }
-  _linkedEnsured = true;
+  if(!LINK_CONTEXT.dateId){ render(); return; }
   var linked = _data.find(function(m){
     return m.gameAdjustDateId===LINK_CONTEXT.dateId || m.id==="ga_"+LINK_CONTEXT.dateId;
   });
