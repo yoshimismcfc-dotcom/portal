@@ -128,6 +128,28 @@
     body[data-theme="light"] .coach-finder input{background:#fff;color:#10283d;border-color:#1689b4}
     body[data-theme="light"] .c-card .c-desc{color:#45677c}
     body[data-theme="light"] .c-section-div{background:linear-gradient(90deg,#dff5e4,transparent)}
+
+    .coach-event-browser{margin-top:14px;padding:14px;border:1px solid rgba(0,212,255,.32);border-radius:14px;background:rgba(4,18,35,.45)}
+    .coach-event-browser-head{display:flex;align-items:flex-end;justify-content:space-between;gap:10px;margin-bottom:9px}
+    .coach-event-browser-title{color:#fff;font-size:.84rem;font-weight:900}
+    .coach-event-browser-help{color:#80b8d6;font-size:.62rem}
+    .coach-event-tabs{display:flex;gap:7px;overflow-x:auto;padding:2px 1px 8px;scroll-snap-type:x proximity;scrollbar-width:thin}
+    .coach-event-tab{flex:0 0 auto;max-width:190px;min-height:46px;padding:7px 10px;border:1px solid rgba(0,212,255,.28);border-radius:11px;background:rgba(0,25,46,.72);color:#b9d8ec;text-align:left;cursor:pointer;scroll-snap-align:start}
+    .coach-event-tab-date{display:block;font-size:.66rem;font-weight:900;color:#65dfff}
+    .coach-event-tab-name{display:block;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;font-size:.7rem;font-weight:800;margin-top:2px}
+    .coach-event-tab[aria-selected="true"]{border-color:#ffaa42;background:linear-gradient(145deg,rgba(255,170,66,.2),rgba(0,102,170,.2));color:#fff;box-shadow:0 0 0 1px rgba(255,170,66,.2)}
+    .coach-event-tab:focus-visible{outline:3px solid var(--cyan);outline-offset:2px}
+    .coach-event-selected{margin-top:5px;padding:12px;border:1px solid rgba(0,212,255,.22);border-radius:12px;background:rgba(0,20,38,.54)}
+    .coach-event-selected-title{color:#fff;font-size:.92rem;font-weight:900;line-height:1.4}
+    .coach-event-selected-meta{margin-top:3px;color:#9fc8e2;font-size:.7rem;line-height:1.45}
+    .coach-event-empty{padding:12px;color:#9fc8e2;font-size:.74rem;text-align:center}
+    body[data-theme="light"] .coach-event-browser{background:#f6fbff;border-color:#1689b4}
+    body[data-theme="light"] .coach-event-browser-title,body[data-theme="light"] .coach-event-selected-title{color:#10283d}
+    body[data-theme="light"] .coach-event-browser-help,body[data-theme="light"] .coach-event-selected-meta{color:#315d78}
+    body[data-theme="light"] .coach-event-tab{background:#fff;color:#315d78;border-color:#9fc5d9}
+    body[data-theme="light"] .coach-event-tab[aria-selected="true"]{background:#fff4e4;color:#10283d;border-color:#dc8b2e}
+    body[data-theme="light"] .coach-event-selected{background:#fff;border-color:#9fc5d9}
+
     @media(max-width:640px){
       .coach-welcome{padding:14px}
       .coach-welcome-head{display:block}
@@ -167,6 +189,13 @@
         <a data-coach-link="tournament">📋 要綱・対戦表</a>
         <a data-coach-link="accounting">💴 会計・決算</a>
       </div>
+    </div>
+    <div class="coach-event-browser" id="coach-event-browser" aria-live="polite">
+      <div class="coach-event-browser-head">
+        <div class="coach-event-browser-title">🏆 大会一覧</div>
+        <div class="coach-event-browser-help">大会をタップして選択</div>
+      </div>
+      <div class="coach-event-empty">大会日程を読み込み中…</div>
     </div>
   </section>
 
@@ -701,11 +730,62 @@ document.addEventListener("DOMContentLoaded", function(){
 (function(){
   "use strict";
   function escText(value){return String(value==null?"":value);}
+  var COACH_EVENT_KEY="smc_coach_selected_event_v1";
+  var selectedCoachEventId=(function(){try{return sessionStorage.getItem(COACH_EVENT_KEY)||"";}catch(e){return "";}})();
+  function rememberCoachEvent(id){
+    selectedCoachEventId=String(id||"");
+    try{sessionStorage.setItem(COACH_EVENT_KEY,selectedCoachEventId);}catch(e){}
+  }
+  function renderTournamentBrowser(dates,next){
+    var root=document.getElementById("coach-event-browser");
+    if(!root||!window.SMCEventLinks)return;
+    var sorted=SMCEventLinks.sortDates(dates);
+    if(!sorted.length){
+      root.innerHTML='<div class="coach-event-browser-head"><div class="coach-event-browser-title">🏆 大会一覧</div></div>'
+        +'<div class="coach-event-empty">登録済みの大会はありません</div>';
+      return;
+    }
+    var selected=sorted.find(function(item){return String(item.id)===selectedCoachEventId;});
+    if(!selected){
+      selected=next||sorted[0];
+      rememberCoachEvent(selected.id);
+    }
+    var tabs=sorted.map(function(item){
+      var active=String(item.id)===String(selected.id);
+      var tabDate=SMCEventLinks.label(item)+(item.cat?" · "+item.cat:"");
+      var tabName=item.tournamentName||"大会名未設定";
+      return '<button type="button" class="coach-event-tab" role="tab" aria-selected="'+(active?"true":"false")+'" tabindex="'+(active?"0":"-1")+'" data-coach-event-id="'+escapeHtml(String(item.id||""))+'">'
+        +'<span class="coach-event-tab-date">'+escapeHtml(tabDate)+'</span>'
+        +'<span class="coach-event-tab-name">'+escapeHtml(tabName)+'</span></button>';
+    }).join("");
+    var title=selected.tournamentName||"大会名未設定";
+    var meta=[SMCEventLinks.label(selected),selected.cat,selected.target!=null?"目標 "+selected.target+"チーム":""].filter(Boolean).join(" ／ ");
+    root.innerHTML='<div class="coach-event-browser-head"><div class="coach-event-browser-title">🏆 大会一覧</div><div class="coach-event-browser-help">'+sorted.length+'件・横にスライドできます</div></div>'
+      +'<div class="coach-event-tabs" role="tablist" aria-label="大会を選択">'+tabs+'</div>'
+      +'<div class="coach-event-selected" role="tabpanel">'
+      +'<div class="coach-event-selected-title">'+escapeHtml(title)+'</div>'
+      +'<div class="coach-event-selected-meta">'+escapeHtml(meta)+'</div>'
+      +'<div class="coach-next-actions">'
+      +'<a href="'+escapeHtml(SMCEventLinks.href("game_adjust.html",selected))+'">📊 試合調整</a>'
+      +'<a href="'+escapeHtml(SMCEventLinks.href("duty_match.html",selected))+'">👥 任務分担</a>'
+      +'<a href="'+escapeHtml(SMCEventLinks.href("tournament.html",selected))+'">📋 要綱・対戦表</a>'
+      +'<a href="'+escapeHtml(SMCEventLinks.href("accounting.html",selected))+'">💴 会計・決算</a>'
+      +'</div></div>';
+    root.querySelectorAll("[data-coach-event-id]").forEach(function(button){
+      button.addEventListener("click",function(){
+        rememberCoachEvent(button.getAttribute("data-coach-event-id"));
+        renderTournamentBrowser(sorted,next);
+        var active=root.querySelector('[aria-selected="true"]');
+        if(active)active.focus({preventScroll:true});
+      });
+    });
+  }
   function renderNextEvent(value){
     var root=document.getElementById("coach-next-event");
     if(!root||!window.SMCEventLinks)return;
     var dates=SMCEventLinks.fromGameAdjust(value);
     var next=SMCEventLinks.nearest(dates);
+    renderTournamentBrowser(dates,next);
     if(!next){
       root.innerHTML='<div class="coach-next-kicker">次に予定している試合</div>'
         +'<div class="coach-next-title">日程はまだ登録されていません</div>'
