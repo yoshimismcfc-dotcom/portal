@@ -9,6 +9,7 @@
   <script src="firebase-config.js"></script>
   <link rel="stylesheet" href="common.css">
   <script src="common.js"></script>
+  <script src="event-links.js"></script>
   <style>
     /* カード */
     .mc{background:var(--surface-lt);border:1px solid var(--line-2);border-radius:var(--r12);margin-bottom:12px;overflow:hidden}
@@ -119,12 +120,37 @@
     .template-help{margin:0 0 12px;padding:10px 12px;border:1px dashed rgba(255,170,70,.45);border-radius:10px;background:rgba(255,140,30,.06);font-size:.74rem;color:var(--ink-3);line-height:1.55}
     body[data-theme="light"] .linked-context-title{color:#075d84}
     body[data-theme="light"] .linked-context-panel{background:#e8f7fc;border-color:#1689b4}
+
+
+    .linked-date-index{margin:0 0 14px;padding:14px;border:1px solid rgba(0,212,255,.38);border-radius:15px;background:linear-gradient(145deg,rgba(0,84,145,.2),rgba(0,255,136,.05))}
+    .linked-date-index-head{display:flex;justify-content:space-between;gap:10px;align-items:flex-start;margin-bottom:10px}
+    .linked-date-index h2{margin:0;color:#fff;font-size:.94rem}
+    .linked-date-index p{margin:4px 0 0;color:#8ebbd5;font-size:.7rem;line-height:1.45}
+    .linked-date-filter{width:min(210px,100%);min-height:38px;padding:7px 9px;border:1px solid rgba(0,212,255,.35);border-radius:9px;background:#0b2034;color:#fff;font:inherit;font-size:.72rem}
+    .linked-date-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:7px}
+    .linked-date-card{display:flex;justify-content:space-between;gap:9px;align-items:center;min-width:0;padding:10px 11px;border:1px solid rgba(106,172,204,.25);border-radius:10px;background:rgba(4,18,35,.62);color:inherit;text-decoration:none}
+    .linked-date-card:hover,.linked-date-card:focus-visible{border-color:var(--cyan);background:rgba(0,212,255,.1);outline:none}
+    .linked-date-card.active{border-color:#00ff88;box-shadow:0 0 0 1px rgba(0,255,136,.25)}
+    .linked-date-card-title{display:block;color:#fff;font-size:.78rem;font-weight:900;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+    .linked-date-card-meta{display:block;margin-top:3px;color:#8ebbd5;font-size:.64rem;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+    .linked-date-card-status{flex:none;color:#70ffb0;font-size:.62rem;font-weight:900;text-align:right}
+    .linked-date-empty{grid-column:1/-1;padding:13px;text-align:center;color:#8ebbd5;font-size:.72rem}
+    body[data-theme="light"] .linked-date-index{background:linear-gradient(145deg,#eef9ff,#edfff6);border-color:#1689b4}
+    body[data-theme="light"] .linked-date-index h2,body[data-theme="light"] .linked-date-card-title{color:#10283d}
+    body[data-theme="light"] .linked-date-index p,body[data-theme="light"] .linked-date-card-meta{color:#315d78}
+    body[data-theme="light"] .linked-date-filter,body[data-theme="light"] .linked-date-card{background:#fff;color:#10283d;border-color:#9fc5d9}
+    @media(max-width:620px){
+      .linked-date-index-head{display:block}
+      .linked-date-filter{width:100%;margin-top:9px}
+      .linked-date-grid{grid-template-columns:1fr}
+      .linked-date-card{min-height:52px}
+    }
   </style>
 </head>
 <body>
 <header class="site-header"></header>
 <main class="page-wrap">
-  <a class="back-btn" href="coach.html">← 運営メニューに戻る</a>
+  <a class="back-btn" href="coach.html">← コーチ専用に戻る</a>
   <div class="hero-band">
     <div class="hero-emoji">📋</div>
     <div>
@@ -133,6 +159,13 @@
     </div>
   </div>
   <div class="notice-bar">☁️ Firebaseでクラウド保存・全員と共有されます。</div>
+  <section class="linked-date-index" aria-labelledby="duty-date-index-title">
+    <div class="linked-date-index-head">
+      <div><h2 id="duty-date-index-title">📅 試合調整と連動する日程一覧</h2><p>日程を選ぶと、その試合専用の任務分担を開きます。未作成の日程は標準テンプレートから始まります。</p></div>
+      <select class="linked-date-filter" id="duty-category-filter" aria-label="カテゴリーで日程を絞り込み"><option value="all">すべてのカテゴリー</option></select>
+    </div>
+    <div class="linked-date-grid" id="duty-linked-dates"><div class="linked-date-empty">日程を読み込み中…</div></div>
+  </section>
   <div class="linked-context-panel" id="linked-context-panel"></div>
 
   <div class="sum-bar">
@@ -255,6 +288,7 @@ var LINK_CONTEXT = (function(){
   };
 })();
 var _showAllMatches = !LINK_CONTEXT.dateId;
+var _coachGameAdjustDates = [];
 function cloneDutyTemplate(){
   return DUTY_TEMPLATE.map(function(d){ return JSON.parse(JSON.stringify(d)); });
 }
@@ -299,6 +333,7 @@ function ensureLinkedMatch(){
 dbListen("duty_match", function(val){
   _data = Array.isArray(val) ? val : [];
   ensureLinkedMatch();
+  if(typeof renderDutyDateIndex==="function") renderDutyDateIndex();
 }, KEY, []);
 
 function save(){ localStorage.setItem(KEY, JSON.stringify(_data)); dbSave("duty_match", _data, KEY, null); }
@@ -328,7 +363,7 @@ function renderLinkedContextPanel(allMatches){
 function toggleAllMatches(){ _showAllMatches=!_showAllMatches; render(); }
 
 function render(){
-  var allSorted = _data.slice().sort(function(a,b){ return (a.date||"").localeCompare(b.date||""); });
+  var allSorted = window.SMCEventLinks ? SMCEventLinks.sortDates(_data) : _data.slice().sort(function(a,b){ return (a.date||"").localeCompare(b.date||""); });
   var sorted = (!_showAllMatches && LINK_CONTEXT.dateId)
     ? allSorted.filter(function(m){ return m.gameAdjustDateId===LINK_CONTEXT.dateId || m.id==="ga_"+LINK_CONTEXT.dateId; })
     : allSorted;
@@ -568,6 +603,49 @@ function copyText(id){
 function closeM(id){ document.getElementById(id).classList.remove("open"); }
 document.getElementById("modal-match").addEventListener("click",function(e){if(e.target.id==="modal-match")closeM("modal-match");});
 document.getElementById("modal-duty").addEventListener("click",function(e){if(e.target.id==="modal-duty")closeM("modal-duty");});
+</script>
+<script id="duty-date-linkage">
+(function(){
+  "use strict";
+  function currentCategory(){
+    var filter=document.getElementById("duty-category-filter");
+    return filter?filter.value:"all";
+  }
+  function updateDutyCategories(){
+    var filter=document.getElementById("duty-category-filter");
+    if(!filter)return;
+    var selected=filter.value||"all";
+    var categories=Array.from(new Set(_coachGameAdjustDates.map(function(d){return String(d.cat||"").trim();}).filter(Boolean))).sort(function(a,b){return a.localeCompare(b,"ja");});
+    filter.innerHTML='<option value="all">すべてのカテゴリー</option>'+categories.map(function(cat){return '<option value="'+escapeHtml(cat)+'">'+escapeHtml(cat)+'</option>';}).join("");
+    filter.value=categories.includes(selected)?selected:"all";
+  }
+  window.renderDutyDateIndex=function(){
+    var wrap=document.getElementById("duty-linked-dates");
+    if(!wrap||!window.SMCEventLinks)return;
+    var category=currentCategory();
+    var dates=SMCEventLinks.sortDates(_coachGameAdjustDates).filter(function(d){return category==="all"||String(d.cat||"")===category;});
+    if(!dates.length){wrap.innerHTML='<div class="linked-date-empty">該当する日程はありません。試合調整で日程を追加すると表示されます。</div>';return;}
+    wrap.innerHTML=dates.map(function(d){
+      var record=_data.find(function(m){return m.gameAdjustDateId===d.id||m.id==="ga_"+d.id;});
+      var duties=record&&Array.isArray(record.duties)?record.duties:[];
+      var done=duties.filter(function(item){return item.status==="done";}).length;
+      var total=duties.filter(function(item){return item.status!=="na";}).length;
+      var status=record?(done+"/"+total+" 確定"):"未作成";
+      return '<a class="linked-date-card'+(LINK_CONTEXT.dateId===d.id?' active':'')+'" href="'+escapeHtml(SMCEventLinks.href("duty_match.html",d))+'">'
+        +'<span style="min-width:0"><span class="linked-date-card-title">'+escapeHtml(SMCEventLinks.label(d))+(d.tournamentName?'｜'+escapeHtml(d.tournamentName):'')+'</span>'
+        +'<span class="linked-date-card-meta">'+escapeHtml(d.cat||"カテゴリー未設定")+'</span></span>'
+        +'<span class="linked-date-card-status">'+escapeHtml(status)+'</span></a>';
+    }).join("");
+  };
+  var filter=document.getElementById("duty-category-filter");
+  if(filter)filter.addEventListener("change",renderDutyDateIndex);
+  dbListen("game_adjust",function(value){
+    _coachGameAdjustDates=SMCEventLinks.fromGameAdjust(value);
+    updateDutyCategories();
+    renderDutyDateIndex();
+  },"smc_game_adj_v1",null);
+  renderDutyDateIndex();
+})();
 </script>
 </body>
 </html>

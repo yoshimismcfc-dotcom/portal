@@ -11,6 +11,7 @@
   <script src="firebase-config.js"></script>
   <link rel="stylesheet" href="common.css">
   <script src="common.js"></script>
+  <script src="event-links.js"></script>
   <style>
     .acct-tabs{display:flex;gap:0;border:1px solid var(--line-2);border-radius:var(--r8);overflow:hidden;margin-bottom:14px}
     .acct-tab{flex:1;border:0;background:var(--surface-lt);color:var(--ink-3);font:inherit;font-size:.86rem;font-weight:900;padding:12px 8px;cursor:pointer}
@@ -74,12 +75,32 @@
       #view-annual.active{display:block!important}
       .print-sheet{box-shadow:none!important;border-radius:0!important;margin:0!important;padding:0!important}
     }
+
+
+    .accounting-date-index{margin:0 0 14px;padding:14px;border:1px solid rgba(0,212,255,.38);border-radius:15px;background:linear-gradient(145deg,rgba(0,84,145,.2),rgba(0,255,136,.05))}
+    .accounting-date-head{display:flex;justify-content:space-between;gap:12px;align-items:flex-start;margin-bottom:10px}
+    .accounting-date-index h2{margin:0;color:#fff;font-size:.94rem}
+    .accounting-date-index p{margin:4px 0 0;color:#8ebbd5;font-size:.7rem;line-height:1.45}
+    .accounting-date-filter{width:min(220px,100%);min-height:38px;padding:7px 9px;border:1px solid rgba(0,212,255,.35);border-radius:9px;background:#0b2034;color:#fff;font:inherit;font-size:.72rem}
+    .accounting-date-list{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:7px}
+    .accounting-date-item{display:flex;justify-content:space-between;gap:9px;align-items:center;min-width:0;padding:10px 11px;border:1px solid rgba(106,172,204,.25);border-radius:10px;background:rgba(4,18,35,.62);color:inherit;text-decoration:none}
+    .accounting-date-item:hover,.accounting-date-item:focus-visible{border-color:var(--cyan);background:rgba(0,212,255,.1);outline:none}
+    .accounting-date-item.active{border-color:#00ff88;box-shadow:0 0 0 1px rgba(0,255,136,.25)}
+    .accounting-date-name{display:block;color:#fff;font-size:.78rem;font-weight:900;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+    .accounting-date-meta{display:block;margin-top:3px;color:#8ebbd5;font-size:.64rem;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+    .accounting-date-status{flex:none;color:#70ffb0;font-size:.62rem;font-weight:900}
+    .accounting-date-empty{grid-column:1/-1;padding:13px;text-align:center;color:#8ebbd5;font-size:.72rem}
+    body[data-theme="light"] .accounting-date-index{background:linear-gradient(145deg,#eef9ff,#edfff6);border-color:#1689b4}
+    body[data-theme="light"] .accounting-date-index h2,body[data-theme="light"] .accounting-date-name{color:#10283d}
+    body[data-theme="light"] .accounting-date-index p,body[data-theme="light"] .accounting-date-meta{color:#315d78}
+    body[data-theme="light"] .accounting-date-filter,body[data-theme="light"] .accounting-date-item{background:#fff;color:#10283d;border-color:#9fc5d9}
+    @media(max-width:620px){.accounting-date-head{display:block}.accounting-date-filter{width:100%;margin-top:9px}.accounting-date-list{grid-template-columns:1fr}.accounting-date-item{min-height:52px}}
   </style>
 </head>
 <body>
 <header class="site-header"></header>
 <main class="page-wrap">
-  <a class="back-btn no-print" href="coach.html">← 運営メニューに戻る</a>
+  <a class="back-btn no-print" href="coach.html">← コーチ専用に戻る</a>
   <div class="hero-band no-print">
     <div class="hero-emoji">💴</div>
     <div>
@@ -89,6 +110,14 @@
   </div>
 
   <div class="input-note no-print">黄色セルの代わりに、この画面では青い入力欄を編集します。金額は「単価 × 数量」で自動計算します。1件の金額だけ入れる場合は、単価に金額、数量に 1 を入力してください。</div>
+
+  <section class="accounting-date-index no-print" aria-labelledby="accounting-date-title">
+    <div class="accounting-date-head">
+      <div><h2 id="accounting-date-title">📅 試合調整と連動する日程一覧</h2><p>日程を選ぶと、その試合専用の会計・決算書を開きます。入力内容は試合調整から開いた場合と同じデータです。</p></div>
+      <select class="accounting-date-filter" id="accounting-category-filter" aria-label="カテゴリーで日程を絞り込み"><option value="all">すべてのカテゴリー</option></select>
+    </div>
+    <div class="accounting-date-list" id="accounting-linked-dates"><div class="accounting-date-empty">日程を読み込み中…</div></div>
+  </section>
 
   <div class="linked-accounting-panel no-print" id="linked-accounting-panel"></div>
 
@@ -208,6 +237,7 @@
 var KEY="smc_accounting_v1";
 var current=0;
 var data={tournaments:[]};
+var _gameAdjustDates=[];
 var LINK_CONTEXT=(function(){
   var p=new URLSearchParams(location.search);
   return {
@@ -270,9 +300,13 @@ function switchView(name,btn){
   renderAll();
 }
 function renderOptions(){
-  var opts=data.tournaments.map(function(t,i){
+  var ordered=data.tournaments.map(function(t,i){return{t:t,i:i,dateIso:t.date||""};});
+  if(window.SMCEventLinks) ordered=SMCEventLinks.sortDates(ordered);
+  var opts=ordered.map(function(item){
+    var t=item.t,i=item.i;
     var linked=t.gameAdjustDateId?"【試合調整連動】 ":"";
-    return '<option value="'+i+'">'+linked+esc(t.name||("第"+(i+1)+"大会"))+'</option>';
+    var date=t.date?" "+t.date:"";
+    return '<option value="'+i+'">'+linked+esc(t.name||("第"+(i+1)+"大会"))+esc(date)+'</option>';
   }).join("");
   ["tournament-select","report-select"].forEach(function(id){
     var el=document.getElementById(id);
@@ -366,6 +400,7 @@ function openAccountingList(){
 }
 function renderAll(){
   normalize();renderOptions();renderInfo();renderTotals();renderRows("income");renderRows("expense");renderSummary();renderReport();renderLinkedAccountingPanel();
+  if(typeof renderAccountingDateIndex==="function") renderAccountingDateIndex();
 }
 function editInfo(field,value){
   data.tournaments[current][field]=field==="carry"?num(value):value;
@@ -616,6 +651,43 @@ dbListen("accounting_annual", function(val){
   renderAnnual();
 }, ANNUAL_KEY, {});
 
+</script>
+<script id="accounting-game-adjust-index">
+(function(){
+  "use strict";
+  function updateAccountingCategories(){
+    var filter=document.getElementById("accounting-category-filter");
+    if(!filter)return;
+    var selected=filter.value||"all";
+    var categories=Array.from(new Set(_gameAdjustDates.map(function(d){return String(d.cat||"").trim();}).filter(Boolean))).sort(function(a,b){return a.localeCompare(b,"ja");});
+    filter.innerHTML='<option value="all">すべてのカテゴリー</option>'+categories.map(function(cat){return '<option value="'+escapeHtml(cat)+'">'+escapeHtml(cat)+'</option>';}).join("");
+    filter.value=categories.includes(selected)?selected:"all";
+  }
+  window.renderAccountingDateIndex=function(){
+    var wrap=document.getElementById("accounting-linked-dates");
+    var filter=document.getElementById("accounting-category-filter");
+    if(!wrap||!window.SMCEventLinks)return;
+    var selected=filter?filter.value:"all";
+    var dates=SMCEventLinks.sortDates(_gameAdjustDates).filter(function(d){return selected==="all"||String(d.cat||"")===selected;});
+    if(!dates.length){wrap.innerHTML='<div class="accounting-date-empty">該当する日程はありません。試合調整で日程を追加すると表示されます。</div>';return;}
+    wrap.innerHTML=dates.map(function(d){
+      var record=data.tournaments.find(function(t){return t.gameAdjustDateId===d.id||t.id==="accounting_game_"+d.id;});
+      var hasInput=record&&([].concat(record.income||[],record.expense||[]).some(function(row){return Number(row.unit)||Number(row.qty);}));
+      return '<a class="accounting-date-item'+(LINK_CONTEXT.dateId===d.id?' active':'')+'" href="'+escapeHtml(SMCEventLinks.href("accounting.html",d))+'">'
+        +'<span style="min-width:0"><span class="accounting-date-name">'+escapeHtml(SMCEventLinks.label(d))+(d.tournamentName?'｜'+escapeHtml(d.tournamentName):'')+'</span>'
+        +'<span class="accounting-date-meta">'+escapeHtml(d.cat||"カテゴリー未設定")+'</span></span>'
+        +'<span class="accounting-date-status">'+(record?(hasInput?"入力あり":"作成済み"):"未作成")+'</span></a>';
+    }).join("");
+  };
+  var filter=document.getElementById("accounting-category-filter");
+  if(filter)filter.addEventListener("change",renderAccountingDateIndex);
+  dbListen("game_adjust",function(value){
+    _gameAdjustDates=SMCEventLinks.fromGameAdjust(value);
+    updateAccountingCategories();
+    renderAccountingDateIndex();
+  },"smc_game_adj_v1",null);
+  renderAccountingDateIndex();
+})();
 </script>
 </body>
 </html>

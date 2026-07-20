@@ -5,13 +5,14 @@
   <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate, max-age=0">
   <meta http-equiv="Pragma" content="no-cache">
   <meta http-equiv="Expires" content="-1">
-  <meta name="app-version" content="20260720-3">
+  <meta name="app-version" content="20260720-4">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <meta name="robots" content="noindex,nofollow">
   <title>大会要綱・対戦表 v5｜吉見SMC FC</title>
   <script src="firebase-config.js"></script>
   <link rel="stylesheet" href="common.css">
   <script src="common.js"></script>
+  <script src="event-links.js"></script>
   <style>
     /* ====== タブ ====== */
     .doc-tab-bar{display:flex;gap:0;margin-bottom:20px;border-radius:var(--r8);overflow:hidden;border:1px solid var(--line-2)}
@@ -167,12 +168,20 @@
     .linked-active-actions{display:flex;flex-wrap:wrap;gap:7px;margin-top:9px}
     body[data-theme="light"] .linked-workflow{background:#e8f7fc;border-color:#1689b4}
     body[data-theme="light"] .linked-workflow h3{color:#075d84}
+
+
+    .linked-workflow-head{display:flex;justify-content:space-between;gap:12px;align-items:flex-start}
+    .linked-tournament-filter{width:min(220px,100%);min-height:38px;padding:7px 9px;border:1px solid rgba(0,212,255,.35);border-radius:9px;background:#0b2034;color:#fff;font:inherit;font-size:.72rem}
+    .linked-date-item{min-height:56px}
+    .linked-date-name{white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+    body[data-theme="light"] .linked-tournament-filter{background:#fff;color:#10283d;border-color:#1689b4}
+    @media(max-width:620px){.linked-workflow-head{display:block}.linked-tournament-filter{width:100%;margin:9px 0}.linked-date-item{padding:10px}}
   </style>
 </head>
 <body>
 <header class="site-header"></header>
 <main class="page-wrap">
-  <a class="back-btn" href="coach.html">運営メニューに戻る</a>
+  <a class="back-btn" href="coach.html">コーチ専用に戻る</a>
   <div class="hero-band">
     <div class="hero-emoji">📋</div>
     <div><div class="hero-title">大会要綱・対戦表</div>
@@ -180,8 +189,10 @@
   </div>
 
   <div class="linked-workflow no-print">
-    <h3>📅 日程別データ一覧</h3>
-    <div class="linked-workflow-help">試合調整の日程ごとに、大会要綱と対戦表の保存状況をまとめて表示します。</div>
+    <div class="linked-workflow-head">
+      <div><h3>📅 試合調整と連動する日程一覧</h3><div class="linked-workflow-help">未保存の日程も自動表示します。日程を選ぶと、その試合専用の大会要綱・対戦表を開きます。</div></div>
+      <select class="linked-tournament-filter" id="tournament-category-filter" aria-label="カテゴリーで日程を絞り込み"><option value="all">すべてのカテゴリー</option></select>
+    </div>
     <div class="linked-date-list" id="linked-tournament-dates"></div>
     <div class="linked-active-actions" id="linked-active-actions"></div>
   </div>
@@ -764,6 +775,7 @@ var TOURNAMENT_CONTEXT = (function(){
   };
 })();
 var _activeGameAdjustDateId = TOURNAMENT_CONTEXT.dateId;
+var _gameAdjustDates = [];
 var _activeDateMeta = {
   dateIso:TOURNAMENT_CONTEXT.dateIso,
   dateLabel:TOURNAMENT_CONTEXT.dateLabel,
@@ -878,11 +890,28 @@ function renderLinkedTournamentDates(){
     var newer = linkedMetaFromEntry(item);
     Object.keys(newer).forEach(function(key){ if(newer[key]) groups[id].meta[key]=newer[key]; });
   });
+  _gameAdjustDates.forEach(function(date){
+    if(!date||!date.id) return;
+    if(!groups[date.id]) groups[date.id]={id:date.id,meta:{},youkou:false,taisen:false};
+    groups[date.id].meta=Object.assign({},groups[date.id].meta,{
+      name:date.tournamentName||groups[date.id].meta.name||"",
+      dateIso:date.dateIso||groups[date.id].meta.dateIso||"",
+      dateLabel:date.label||groups[date.id].meta.dateLabel||"",
+      category:date.cat||groups[date.id].meta.category||""
+    });
+  });
   if(_activeGameAdjustDateId && !groups[_activeGameAdjustDateId]){
     groups[_activeGameAdjustDateId]={id:_activeGameAdjustDateId,meta:_activeDateMeta,youkou:false,taisen:false};
   }
+  var filter=document.getElementById("tournament-category-filter");
+  var selectedCategory=filter?filter.value:"all";
   var list = Object.keys(groups).map(function(id){ return groups[id]; })
-    .sort(function(a,b){ return (a.meta.dateIso||"9999").localeCompare(b.meta.dateIso||"9999"); });
+    .filter(function(group){return selectedCategory==="all"||group.meta.category===selectedCategory;})
+    .sort(function(a,b){
+      return window.SMCEventLinks
+        ? SMCEventLinks.fiscalKey({dateIso:a.meta.dateIso})-SMCEventLinks.fiscalKey({dateIso:b.meta.dateIso})
+        : (a.meta.dateIso||"9999").localeCompare(b.meta.dateIso||"9999");
+    });
   if(!list.length){
     wrap.innerHTML='<div class="linked-empty">試合調整と連動した保存データはまだありません。</div>';
   } else {
@@ -899,7 +928,16 @@ function renderLinkedTournamentDates(){
 }
 function selectLinkedDate(dateId){
   var entries = linkedEntries(dateId);
+  var date = _gameAdjustDates.find(function(item){return item.id===dateId;});
   var meta = entries.length ? linkedMetaFromEntry(entries[0][1]) : {};
+  if(date){
+    meta=Object.assign({},meta,{
+      name:date.tournamentName||meta.name||"",
+      dateIso:date.dateIso||meta.dateIso||"",
+      dateLabel:date.label||meta.dateLabel||"",
+      category:date.cat||meta.category||""
+    });
+  }
   hydrateLinkedDate(dateId, meta);
 }
 function clearLinkedDate(){
@@ -1078,6 +1116,26 @@ function deleteSave(id){
   dbSave("tournament_saves", _allSaves, SAVE_KEY, null);
   renderSavedList(_saveType);
 }
+</script>
+<script id="tournament-game-adjust-index">
+(function(){
+  "use strict";
+  function updateTournamentCategories(){
+    var filter=document.getElementById("tournament-category-filter");
+    if(!filter)return;
+    var selected=filter.value||"all";
+    var categories=Array.from(new Set(_gameAdjustDates.map(function(d){return String(d.cat||"").trim();}).filter(Boolean))).sort(function(a,b){return a.localeCompare(b,"ja");});
+    filter.innerHTML='<option value="all">すべてのカテゴリー</option>'+categories.map(function(cat){return '<option value="'+esc3(cat)+'">'+esc3(cat)+'</option>';}).join("");
+    filter.value=categories.includes(selected)?selected:"all";
+  }
+  var filter=document.getElementById("tournament-category-filter");
+  if(filter)filter.addEventListener("change",renderLinkedTournamentDates);
+  dbListen("game_adjust",function(value){
+    _gameAdjustDates=SMCEventLinks.fromGameAdjust(value);
+    updateTournamentCategories();
+    renderLinkedTournamentDates();
+  },"smc_game_adj_v1",null);
+})();
 </script>
 </body>
 </html>

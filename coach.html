@@ -7,10 +7,11 @@
   <meta http-equiv="Expires" content="0">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <meta name="robots" content="noindex,nofollow">
-  <title>運営メニュー｜吉見SMC FC</title>
+  <title>コーチ専用メニュー｜吉見SMC FC</title>
   <script src="firebase-config.js"></script>
   <link rel="stylesheet" href="common.css">
   <script src="common.js"></script>
+  <script src="event-links.js"></script>
   <style>
     .lock-wrap{max-width:380px;margin:0 auto}
     .locked-area{background:var(--surface-lt);border:1px solid var(--line-2);border-radius:var(--r16);padding:32px 24px;text-align:center}
@@ -83,6 +84,56 @@
     .drive-card .di{font-size:2rem;flex-shrink:0}
     .drive-card strong{display:block;color:#fff;font-size:.95rem;margin-bottom:3px}
     .drive-card p{font-size:.78rem;color:var(--ink-3);margin:0 0 10px}
+
+
+    /* コーチ専用ハブ：初心者向け導線 */
+    .coach-welcome{margin:0 0 18px;padding:18px;border:1px solid rgba(0,212,255,.38);border-radius:18px;background:linear-gradient(145deg,rgba(0,84,145,.28),rgba(0,255,136,.07));box-shadow:0 12px 34px rgba(0,0,0,.16)}
+    .coach-welcome-head{display:flex;justify-content:space-between;gap:14px;align-items:flex-start}
+    .coach-welcome h2{margin:0;color:#fff;font-size:1.05rem}
+    .coach-welcome p{margin:6px 0 0;color:#b9d8ec;font-size:.76rem;line-height:1.55}
+    .coach-cloud-badge{flex:none;padding:5px 9px;border-radius:999px;border:1px solid rgba(0,255,136,.38);background:rgba(0,255,136,.1);color:#66ffad;font-size:.62rem;font-weight:900}
+    .coach-next{margin-top:14px;padding:14px;border:1px solid rgba(255,170,66,.38);border-radius:14px;background:rgba(4,18,35,.58)}
+    .coach-next-kicker{color:#ffaa42;font-size:.65rem;font-weight:900;letter-spacing:.08em}
+    .coach-next-title{margin-top:4px;color:#fff;font-size:1rem;font-weight:900}
+    .coach-next-meta{margin-top:4px;color:#9fc8e2;font-size:.72rem;line-height:1.5}
+    .coach-next-actions{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:7px;margin-top:12px}
+    .coach-next-actions a{min-height:43px;padding:8px 6px;border:1px solid rgba(0,212,255,.3);border-radius:10px;background:rgba(0,212,255,.08);color:#dff7ff;text-decoration:none;text-align:center;font-size:.68rem;font-weight:900;display:grid;place-items:center;line-height:1.3}
+    .coach-next-actions a:hover,.coach-next-actions a:focus-visible{border-color:var(--cyan);background:rgba(0,212,255,.16);outline:none}
+    .coach-quick-nav{display:flex;gap:7px;margin:0 0 15px;overflow-x:auto;padding-bottom:3px;scrollbar-width:none}
+    .coach-quick-nav::-webkit-scrollbar{display:none}
+    .coach-quick-nav a{flex:none;padding:8px 11px;border:1px solid var(--line-2);border-radius:999px;background:var(--surface-lt);color:var(--ink-2);font-size:.7rem;font-weight:800;text-decoration:none}
+    .coach-finder{position:relative;margin-bottom:8px}
+    .coach-finder input{width:100%;min-height:46px;padding:10px 44px 10px 42px;border:1px solid rgba(0,212,255,.35);border-radius:13px;background:rgba(5,20,36,.75);color:#fff;font:inherit;font-size:.82rem}
+    .coach-finder input:focus{outline:2px solid var(--cyan);outline-offset:1px}
+    .coach-finder::before{content:"🔎";position:absolute;left:14px;top:12px}
+    .coach-search-count{position:absolute;right:12px;top:13px;color:#7db8d8;font-size:.68rem;font-weight:800}
+    .coach-btn-grid,.c-card-grid{align-items:stretch}
+    .c-card{min-height:118px;justify-content:flex-start}
+    .c-card:focus-visible{outline:3px solid var(--cyan);outline-offset:2px}
+    .c-card .c-label{font-size:.92rem}
+    .c-card .c-desc{font-size:.72rem}
+    .c-section-div{scroll-margin-top:76px}
+    .coach-card-hidden{display:none!important}
+    body[data-theme="light"] .coach-welcome{background:linear-gradient(145deg,#eef9ff,#edfff6);border-color:#1689b4}
+    body[data-theme="light"] .coach-welcome h2,body[data-theme="light"] .coach-next-title,body[data-theme="light"] .c-card .c-label,body[data-theme="light"] .c-section-div .csd-text{color:#10283d}
+    body[data-theme="light"] .coach-welcome p,body[data-theme="light"] .coach-next-meta{color:#315d78}
+    body[data-theme="light"] .coach-cloud-badge{color:#076b44;background:#ddfaeb;border-color:#57c996}
+    body[data-theme="light"] .coach-next{background:#fff;border-color:#dc8b2e}
+    body[data-theme="light"] .coach-finder input{background:#fff;color:#10283d;border-color:#1689b4}
+    body[data-theme="light"] .c-card .c-desc{color:#45677c}
+    body[data-theme="light"] .c-section-div{background:linear-gradient(90deg,#dff5e4,transparent)}
+    @media(max-width:640px){
+      .coach-welcome{padding:14px}
+      .coach-welcome-head{display:block}
+      .coach-cloud-badge{display:inline-flex;margin-top:9px}
+      .coach-next-actions{grid-template-columns:repeat(2,minmax(0,1fr))}
+      .coach-next-actions a{font-size:.7rem}
+      .c-card-grid{grid-template-columns:1fr 1fr;gap:9px}
+      .c-card{min-height:112px;padding:14px 12px}
+      .c-card .c-desc{font-size:.68rem}
+      .c-section-div{margin-top:18px}
+    }
+    @media(max-width:370px){.c-card-grid{grid-template-columns:1fr}}
   </style>
 </head>
 <body>
@@ -90,15 +141,41 @@
 <main class="page-wrap">
   <a class="back-btn" href="index.html">ホームに戻る</a>
   <div class="hero-band">
-    <div class="hero-emoji">⚙️</div>
-    <div><div class="hero-title">運営メニュー</div>
-      <div class="hero-sub">ガイダンス設定・試合調整・練習メニュー・日誌・資料管理</div></div>
+    <div class="hero-emoji">🧑‍🏫</div>
+    <div><div class="hero-title">コーチ専用メニュー</div>
+      <div class="hero-sub">試合・大会・連絡・会計を、ここからまとめて管理できます</div></div>
+  </div>
+
+  <section class="coach-welcome" aria-labelledby="coach-welcome-title">
+    <div class="coach-welcome-head">
+      <div><h2 id="coach-welcome-title">🔰 まずは「次の試合」を確認</h2><p>試合調整で登録した日程と、大会任務・要綱／対戦表・会計は同じ日程IDでつながります。どの画面から編集しても同じクラウドデータへ保存されます。</p></div>
+      <span class="coach-cloud-badge">☁️ 自動共有</span>
+    </div>
+    <div class="coach-next" id="coach-next-event">
+      <div class="coach-next-kicker">次に予定している試合</div>
+      <div class="coach-next-title">日程を読み込み中…</div>
+      <div class="coach-next-meta">クラウドから最新情報を取得しています</div>
+      <div class="coach-next-actions" hidden>
+        <a data-coach-link="game">📊 試合調整</a>
+        <a data-coach-link="duty">👥 任務分担</a>
+        <a data-coach-link="tournament">📋 要綱・対戦表</a>
+        <a data-coach-link="accounting">💴 会計・決算</a>
+      </div>
+    </div>
+  </section>
+
+  <nav class="coach-quick-nav" aria-label="メニュー内移動">
+    <a href="#coach-notice">📢 お知らせ</a><a href="#coach-shared">🤝 共有</a><a href="#coach-match">🏟️ 試合・大会</a><a href="#coach-tools">🔧 外部ツール</a><a href="#coach-data">📁 データ</a>
+  </nav>
+  <div class="coach-finder">
+    <input id="coach-menu-search" type="search" placeholder="メニューを検索（例：対戦表、会計、日誌）" aria-label="コーチメニューを検索">
+    <span class="coach-search-count" id="coach-search-count"></span>
   </div>
 
   <!-- コーチコンテンツ -->
   <div id="coach-content">
     <!-- ===== セクション：お知らせ管理 ===== -->
-    <div class="c-section-div"><div class="csd-icon">📢</div><div class="csd-text">お知らせ管理</div><div class="csd-sub">NOTICE</div></div>
+    <div class="c-section-div" id="coach-notice"><div class="csd-icon">📢</div><div class="csd-text">お知らせ管理</div><div class="csd-sub">NOTICE</div></div>
     <div class="c-card-grid">
       <a class="c-card c-cyan" href="coach_guidance.html">
         <div class="c-icon">📢</div>
@@ -113,7 +190,7 @@
     </div>
 
     <!-- ===== セクション：コーチ共有 ===== -->
-    <div class="c-section-div"><div class="csd-icon">🤝</div><div class="csd-text">コーチ共有</div><div class="csd-sub">COACH SHARED</div></div>
+    <div class="c-section-div" id="coach-shared"><div class="csd-icon">🤝</div><div class="csd-text">コーチ共有</div><div class="csd-sub">COACH SHARED</div></div>
     <div class="c-card-grid">
       <a class="c-card c-green" href="finance.html?from=coach&view=request">
         <div class="c-icon">🧾</div>
@@ -130,7 +207,7 @@
     </div>
 
     <!-- ===== セクション：試合・大会 ===== -->
-    <div class="c-section-div"><div class="csd-icon">🏟️</div><div class="csd-text">試合・大会</div><div class="csd-sub">MATCH & TOURNAMENT</div></div>
+    <div class="c-section-div" id="coach-match"><div class="csd-icon">🏟️</div><div class="csd-text">試合・大会</div><div class="csd-sub">MATCH & TOURNAMENT</div></div>
     <div class="c-card-grid">
       <a class="c-card" href="game_adjust.html">
         <div class="c-icon">📊</div>
@@ -155,7 +232,7 @@
     </div>
 
     <!-- ===== セクション：外部ツール ===== -->
-    <div class="c-section-div"><div class="csd-icon">🔧</div><div class="csd-text">外部ツール</div><div class="csd-sub">EXTERNAL TOOLS</div></div>
+    <div class="c-section-div" id="coach-tools"><div class="csd-icon">🔧</div><div class="csd-text">外部ツール</div><div class="csd-sub">EXTERNAL TOOLS</div></div>
     <div class="c-card-grid">
       <a class="c-card c-cyan" href="https://accounts.google.com/AccountChooser?Email=yoshimi.smc.fc%40gmail.com&continue=https%3A%2F%2Fmail.google.com%2Fmail%2F" target="_blank" rel="noopener">
         <div class="c-icon">📧</div>
@@ -184,7 +261,7 @@
     </div>
 
     <!-- ===== セクション：データ管理 ===== -->
-    <div class="c-section-div"><div class="csd-icon">📁</div><div class="csd-text">データ管理</div><div class="csd-sub">DATA & FILES</div></div>
+    <div class="c-section-div" id="coach-data"><div class="csd-icon">📁</div><div class="csd-text">データ管理</div><div class="csd-sub">DATA & FILES</div></div>
     <div class="c-card-grid">
       <a class="c-card c-purple" href="accounts.html">
         <div class="c-icon">🔑</div>
@@ -613,6 +690,57 @@ document.addEventListener("DOMContentLoaded", function(){
   renderUrls();
   renderScheduleList();
 });
+</script>
+<script id="coach-hub-enhancement">
+(function(){
+  "use strict";
+  function escText(value){return String(value==null?"":value);}
+  function renderNextEvent(value){
+    var root=document.getElementById("coach-next-event");
+    if(!root||!window.SMCEventLinks)return;
+    var dates=SMCEventLinks.fromGameAdjust(value);
+    var next=SMCEventLinks.nearest(dates);
+    var title=root.querySelector(".coach-next-title");
+    var meta=root.querySelector(".coach-next-meta");
+    var actions=root.querySelector(".coach-next-actions");
+    if(!next){
+      title.textContent="日程はまだ登録されていません";
+      meta.textContent="「試合調整」から最初の日程を追加してください";
+      actions.hidden=false;
+      actions.querySelector('[data-coach-link="game"]').href="game_adjust.html";
+      actions.querySelectorAll('a:not([data-coach-link="game"])').forEach(function(a){a.hidden=true;});
+      return;
+    }
+    title.textContent=SMCEventLinks.label(next)+(next.tournamentName?"｜"+escText(next.tournamentName):"");
+    meta.textContent=[next.cat,next.target!=null?"目標 "+next.target+"チーム":""].filter(Boolean).join(" ／ ");
+    actions.hidden=false;
+    actions.querySelectorAll("a").forEach(function(a){a.hidden=false;});
+    actions.querySelector('[data-coach-link="game"]').href="game_adjust.html";
+    actions.querySelector('[data-coach-link="duty"]').href=SMCEventLinks.href("duty_match.html",next);
+    actions.querySelector('[data-coach-link="tournament"]').href=SMCEventLinks.href("tournament.html",next);
+    actions.querySelector('[data-coach-link="accounting"]').href=SMCEventLinks.href("accounting.html",next);
+  }
+  function setupSearch(){
+    var input=document.getElementById("coach-menu-search");
+    var count=document.getElementById("coach-search-count");
+    var cards=Array.from(document.querySelectorAll("#coach-content .c-card"));
+    if(!input)return;
+    function update(){
+      var query=input.value.trim().toLocaleLowerCase("ja");
+      var shown=0;
+      cards.forEach(function(card){
+        var hit=!query||card.textContent.toLocaleLowerCase("ja").includes(query);
+        card.classList.toggle("coach-card-hidden",!hit);
+        if(hit)shown++;
+      });
+      count.textContent=shown+"件";
+    }
+    input.addEventListener("input",update);
+    update();
+  }
+  document.addEventListener("DOMContentLoaded",setupSearch);
+  dbListen("game_adjust",renderNextEvent,"smc_game_adj_v1",null);
+})();
 </script>
 </body>
 </html>
