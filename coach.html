@@ -210,19 +210,6 @@
       <div class="hero-sub">試合・大会・連絡・会計を、ここからまとめて管理できます</div></div>
   </div>
 
-  <section class="coach-welcome" aria-labelledby="coach-welcome-title">
-    <div class="coach-welcome-head">
-      <div><h2 id="coach-welcome-title">🏆 大会を選んで管理</h2><p>大会を選ぶと、試合調整・任務・要綱／対戦表・会計の準備状況と入力画面をまとめて確認できます。</p></div>
-    </div>
-    <div class="coach-event-browser" id="coach-event-browser" aria-live="polite">
-      <div class="coach-event-browser-head">
-        <div class="coach-event-browser-title">🏆 大会一覧</div>
-        <div class="coach-event-browser-help">大会をタップして選択</div>
-      </div>
-      <div class="coach-event-empty">大会日程を読み込み中…</div>
-    </div>
-  </section>
-
   <nav class="coach-quick-nav" aria-label="メニュー内移動">
     <a href="#coach-match">🏟️ 試合・大会</a><a href="#coach-shared">🤝 共有</a><a href="#coach-notice">📢 お知らせ</a><a href="#coach-data">📁 データ</a><a href="#coach-tools">🔧 外部ツール</a>
   </nav>
@@ -235,6 +222,13 @@
   <div id="coach-content">
     <!-- ===== セクション：試合・大会 ===== -->
     <div class="c-section-div" id="coach-match"><div class="csd-icon">🏟️</div><div class="csd-text">試合・大会</div><div class="csd-sub">MATCH & TOURNAMENT</div></div>
+    <div class="coach-event-browser" id="coach-event-browser" aria-live="polite">
+      <div class="coach-event-browser-head">
+        <div class="coach-event-browser-title">🏆 大会一覧</div>
+        <div class="coach-event-browser-help">大会をタップして選択</div>
+      </div>
+      <div class="coach-event-empty">大会日程を読み込み中…</div>
+    </div>
     <div class="c-card-grid">
       <a class="c-card" href="game_adjust.html">
         <div class="c-icon">📊</div>
@@ -817,22 +811,6 @@ document.addEventListener("DOMContentLoaded", function(){
       +'<div class="coach-preparation-item'+(prep.accountingReady?' is-ready':'')+'"><span>💴 会計</span><strong>'+(prep.accountingReady?'入力あり':prep.accountingExists?'入力待ち':'未作成')+'</strong></div>'
       +'</div>';
   }
-  function renderAttention(sorted){
-    var now=new Date(),today=new Date(now.getFullYear(),now.getMonth(),now.getDate());
-    var upcoming=sorted.slice().filter(function(item){
-      var date=SMCEventLinks.parseIso(item.dateIso);
-      return date&&date>=today;
-    }).sort(function(a,b){return SMCEventLinks.parseIso(a.dateIso)-SMCEventLinks.parseIso(b.dateIso);});
-    var needing=upcoming.filter(function(item){return preparationFor(item).completeCount<4;}).slice(0,6);
-    if(!needing.length){
-      return '<div class="coach-attention is-ready"><div class="coach-attention-head"><span>✅ 今後の大会準備</span><span>未完了項目なし</span></div></div>';
-    }
-    return '<div class="coach-attention"><div class="coach-attention-head"><span>⚠️ 要対応</span><span>'+needing.length+'大会</span></div>'
-      +'<div class="coach-attention-list">'+needing.map(function(item){
-        var prep=preparationFor(item);
-        return '<button type="button" class="coach-attention-item" data-coach-attention-id="'+escapeHtml(String(item.id||""))+'"><strong>'+escapeHtml(SMCEventLinks.label(item)+' '+(item.cat||""))+'</strong><span>'+escapeHtml(prep.issues.join("・"))+'</span></button>';
-      }).join("")+'</div></div>';
-  }
   function copyText(textValue){
     if(navigator.clipboard&&window.isSecureContext)return navigator.clipboard.writeText(textValue);
     return new Promise(function(resolve,reject){
@@ -876,7 +854,6 @@ document.addEventListener("DOMContentLoaded", function(){
     var prep=preparationFor(selected);
     var meta=[SMCEventLinks.label(selected),selected.cat,selected.target!=null?"目標 "+selected.target+"チーム":""].filter(Boolean).join(" ／ ");
     root.innerHTML='<div class="coach-event-browser-head"><div class="coach-event-browser-title">🏆 大会一覧</div><div class="coach-event-browser-help">'+sorted.length+'件・横にスライドできます</div></div>'
-      +renderAttention(sorted)
       +'<div class="coach-event-tabs" role="tablist" aria-label="大会を選択">'+tabs+'</div>'
       +'<div class="coach-event-selected" role="tabpanel"><div class="coach-event-selected-title">'+escapeHtml(selected.tournamentName||"大会名未設定")+'</div>'
       +'<div class="coach-event-selected-meta">'+escapeHtml(meta)+'</div><span class="coach-event-countdown">'+escapeHtml(countdownFor(selected))+'</span>'
@@ -885,9 +862,9 @@ document.addEventListener("DOMContentLoaded", function(){
       +'<a href="'+escapeHtml(SMCEventLinks.href("game_adjust.html",selected))+'">📊 試合調整</a><a href="'+escapeHtml(SMCEventLinks.href("duty_match.html",selected))+'">👥 任務分担</a>'
       +'<a href="'+escapeHtml(SMCEventLinks.href("tournament.html",selected))+'">📋 要綱・対戦表</a><a href="'+escapeHtml(SMCEventLinks.href("accounting.html",selected))+'">💴 会計・決算</a></div>'
       +'<button type="button" class="coach-share-button" data-coach-copy-id="'+escapeHtml(String(selected.id||""))+'">📋 準備状況をLINEコピー</button></div>';
-    root.querySelectorAll("[data-coach-event-id],[data-coach-attention-id]").forEach(function(button){
+    root.querySelectorAll("[data-coach-event-id]").forEach(function(button){
       button.addEventListener("click",function(){
-        rememberCoachEvent(button.getAttribute("data-coach-event-id")||button.getAttribute("data-coach-attention-id"));
+        rememberCoachEvent(button.getAttribute("data-coach-event-id"));
         renderTournamentBrowser(sorted,next);
         var active=root.querySelector('[aria-selected="true"]');
         if(active)active.scrollIntoView({behavior:"smooth",block:"nearest",inline:"center"});
