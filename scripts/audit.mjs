@@ -426,6 +426,12 @@ if (!dutyMatchSource.includes('dbListen("duty_match"') || !tournamentSource.incl
 if (!coachSource.includes("coach-next-event") || !coachSource.includes("coach-menu-search") || !coachSource.includes('dbListen("game_adjust"')) {
   fail("coach.html", "初心者向けの次回試合導線またはメニュー検索がありません");
 }
+if (!coachSource.includes("sameDay=dates.filter") || !coachSource.includes("同日 '+(index+1)") || !coachSource.includes('SMCEventLinks.href("game_adjust.html",item)')) {
+  fail("coach.html", "同じ日付の複数試合を別段で表示する処理がありません");
+}
+if (!gameAdjustSource.includes('new URLSearchParams(location.search).get("dateId")') || !gameAdjustSource.includes("var requested=entries.find")) {
+  fail("game_adjust.html", "コーチ専用メニューで選択した日程を直接表示できません");
+}
 if (!guideSource.includes("未保存を含む全日程") || !guideSource.includes("次に予定している試合")) {
   fail("guide.html", "コーチ専用メニューの日程連携と新しい導線が説明されていません");
 }
