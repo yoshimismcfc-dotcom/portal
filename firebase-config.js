@@ -178,6 +178,7 @@ function refreshFirebaseListeners(reason){
 }
 
 (function setupFirebaseResumeRefresh(){
+  if(typeof window.addEventListener !== "function" || typeof document.addEventListener !== "function") return;
   function refresh(reason){ refreshFirebaseListeners(reason); }
   window.addEventListener("pageshow", function(event){
     refresh(event && event.persisted ? "back-forward-cache" : "page-show");
