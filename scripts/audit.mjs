@@ -357,10 +357,10 @@ if (!commonSource.includes("ACTIVE_DATE_KEY") || !commonSource.includes("remembe
 if (!commonSource.includes("dateSortValue(dateIso, label)") || !commonSource.includes("fiscalYear * 10000")) {
   fail("common.js", "複数年度の日程を西暦込みの年度順で並べていません");
 }
-if (!commonSource.includes("sortTeamRowsForActiveDate") || !commonSource.includes('statusB === "OK"') || !commonSource.includes('localeCompare(teamNameForSort(rowB), "ja"')) {
-  fail("common.js", "試合調整のチームが参加OK優先・チーム名順で表示されません");
+if (!commonSource.includes("sortTeamRowsForActiveDate") || !commonSource.includes('"確認中": 1') || !commonSource.includes('"－": 2') || !commonSource.includes('"NG": 3') || !commonSource.includes('nameCollator.compare(nameA, nameB)')) {
+  fail("common.js", "試合調整のチームが参加・確認中・未打診・不可・チーム名順で表示されません");
 }
-if (!guideSource.includes("参加OKを上") || !guideSource.includes("チーム名の五十音順")) {
+if (!guideSource.includes("参加（OK）→確認中→未打診（－）→不可（NG）") || !guideSource.includes("同じ状態の中ではチーム名順")) {
   fail("guide.html", "試合調整のチーム並び順が説明されていません");
 }
 if (!gameAdjustSource.includes("data-date-id") || !gameAdjustSource.includes("data-date-iso") || !gameAdjustSource.includes("var savedDateIso")) {
