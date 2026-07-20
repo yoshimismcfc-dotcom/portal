@@ -238,6 +238,8 @@ var KEY="smc_accounting_v1";
 var current=0;
 var data={tournaments:[]};
 var _gameAdjustDates=[];
+var _accountingCloudReady=false;
+var _gameAdjustCloudReady=false;
 var LINK_CONTEXT=(function(){
   var p=new URLSearchParams(location.search);
   return {
@@ -402,6 +404,17 @@ function renderAll(){
   normalize();renderOptions();renderInfo();renderTotals();renderRows("income");renderRows("expense");renderSummary();renderReport();renderLinkedAccountingPanel();
   if(typeof renderAccountingDateIndex==="function") renderAccountingDateIndex();
 }
+function focusLinkedAccountingEditor(){
+  if(!LINK_CONTEXT.dateId)return;
+  document.querySelectorAll(".acct-view").forEach(function(view){view.classList.remove("active");});
+  var editView=document.getElementById("view-edit");
+  if(editView)editView.classList.add("active");
+  document.querySelectorAll(".acct-tab").forEach(function(tab,index){tab.classList.toggle("active",index===0);});
+  window.setTimeout(function(){
+    var editor=document.querySelector("#view-edit .panel");
+    if(editor)editor.scrollIntoView({behavior:"smooth",block:"start"});
+  },180);
+}
 function editInfo(field,value){
   data.tournaments[current][field]=field==="carry"?num(value):value;
   renderOptions();renderTotals();renderSummary();renderReport();
@@ -434,7 +447,7 @@ function linkedAccountingTemplate(){
   t.category=LINK_CONTEXT.category||"";
   return t;
 }
-function ensureLinkedAccounting(){
+function ensureLinkedAccounting(allowCloudSave){
   if(!LINK_CONTEXT.dateId)return false;
   var idx=data.tournaments.findIndex(function(t){return t.gameAdjustDateId===LINK_CONTEXT.dateId||t.id==="accounting_game_"+LINK_CONTEXT.dateId;});
   var changed=false;
@@ -449,7 +462,7 @@ function ensureLinkedAccounting(){
   if(LINK_CONTEXT.category&&t.category!==LINK_CONTEXT.category){t.category=LINK_CONTEXT.category;changed=true;}
   if(LINK_CONTEXT.name&&(!t.name||/^第\d+大会$/.test(t.name))){t.name=LINK_CONTEXT.name;changed=true;}
   current=idx;
-  if(changed)saveData(true);
+  if(changed&&allowCloudSave)saveData(true);
   return changed;
 }
 function copyAccountingTemplate(){
@@ -495,11 +508,17 @@ function downloadCsv(){
   a.href=URL.createObjectURL(blob);a.download="yoshimi-smc-accounting.csv";a.click();URL.revokeObjectURL(a.href);
 }
 
-dbListen("accounting",function(val){
+dbListen("accounting",function(val,meta){
   data=val&&Array.isArray(val.tournaments)?val:{tournaments:clone(DEFAULT_TOURNAMENTS)};
+  _accountingCloudReady=!!(meta&&meta.authoritative);
   normalize();
-  ensureLinkedAccounting();
-  renderAll();
+  ensureLinkedAccounting(_accountingCloudReady);
+  if(_accountingCloudReady&&_gameAdjustCloudReady&&typeof syncAccountingWithGameAdjust==="function"){
+    syncAccountingWithGameAdjust();
+  }else{
+    renderAll();
+    focusLinkedAccountingEditor();
+  }
 },KEY,{tournaments:clone(DEFAULT_TOURNAMENTS)});
 window.addEventListener("DOMContentLoaded",function(){normalize();renderAll();});
 
@@ -679,12 +698,58 @@ dbListen("accounting_annual", function(val){
         +'<span class="accounting-date-status">'+(record?(hasInput?"入力あり":"作成済み"):"未作成")+'</span></a>';
     }).join("");
   };
+  function isUntouchedAccountingPlaceholder(t){
+    if(!t||t.gameAdjustDateId||!/^第\d+大会$/.test(String(t.name||""))||t.date||t.venue||Number(t.carry))return false;
+    var income=t.income||[],expense=t.expense||[];
+    if(income.length!==1||String(income[0].name||"")!=="参加費"||Number(income[0].unit)||Number(income[0].qty))return false;
+    var defaultMemo="大会名・開催日・会場・参加費を入力してください";
+    if(income[0].memo&&income[0].memo!==defaultMemo)return false;
+    if(expense.length!==EXPENSE_TEMPLATE.length)return false;
+    return expense.every(function(row,index){
+      return String(row.name||"")===EXPENSE_TEMPLATE[index]&&!Number(row.unit)&&!Number(row.qty)&&!String(row.memo||"").trim();
+    });
+  }
+  function linkedNameFromGameDate(date){
+    return String(date.tournamentName||"").trim()||[date.dateIso,date.cat].filter(Boolean).join(" ")||date.label||"試合調整の大会";
+  }
+  window.syncAccountingWithGameAdjust=function(){
+    if(!_accountingCloudReady||!_gameAdjustCloudReady||!_gameAdjustDates.length)return false;
+    var selectedDateId=LINK_CONTEXT.dateId||(data.tournaments[current]&&data.tournaments[current].gameAdjustDateId)||"";
+    var changed=false;
+    var filtered=data.tournaments.filter(function(t){return !isUntouchedAccountingPlaceholder(t);});
+    if(filtered.length!==data.tournaments.length){data.tournaments=filtered;changed=true;}
+    _gameAdjustDates.forEach(function(date){
+      var record=data.tournaments.find(function(t){return t.gameAdjustDateId===date.id||t.id==="accounting_game_"+date.id;});
+      if(!record){
+        record=newTournamentTemplate(data.tournaments.length+1);
+        record.id="accounting_game_"+date.id;
+        record.gameAdjustDateId=date.id;
+        data.tournaments.push(record);
+        changed=true;
+      }
+      var desiredName=linkedNameFromGameDate(date);
+      if(record.gameAdjustDateId!==date.id){record.gameAdjustDateId=date.id;changed=true;}
+      if(desiredName&&record.name!==desiredName){record.name=desiredName;changed=true;}
+      if(date.dateIso&&record.date!==date.dateIso){record.date=date.dateIso;changed=true;}
+      if(String(date.cat||"")!==String(record.category||"")){record.category=date.cat||"";changed=true;}
+    });
+    if(selectedDateId){
+      var selectedIndex=data.tournaments.findIndex(function(t){return t.gameAdjustDateId===selectedDateId;});
+      if(selectedIndex>=0)current=selectedIndex;
+    }
+    if(changed)saveData(true);
+    renderAll();
+    focusLinkedAccountingEditor();
+    return changed;
+  };
   var filter=document.getElementById("accounting-category-filter");
   if(filter)filter.addEventListener("change",renderAccountingDateIndex);
-  dbListen("game_adjust",function(value){
+  dbListen("game_adjust",function(value,meta){
     _gameAdjustDates=SMCEventLinks.fromGameAdjust(value);
+    _gameAdjustCloudReady=!!(meta&&meta.authoritative);
     updateAccountingCategories();
-    renderAccountingDateIndex();
+    if(_accountingCloudReady&&_gameAdjustCloudReady)syncAccountingWithGameAdjust();
+    else renderAccountingDateIndex();
   },"smc_game_adj_v1",null);
   renderAccountingDateIndex();
 })();
