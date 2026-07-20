@@ -215,6 +215,10 @@ if (!guideSource.includes("副審の心得をLINEコピー") || !guideSource.inc
 for (const marker of ["offside-body-parts", "returning-offside-diagram", "deliberate-play-diagram", "tab-changes"]) {
   if (!refereeSource.includes(marker)) fail("referee.html", `審判ガイドの必須図解がありません: ${marker}`);
 }
+for (const marker of ["referee-tab-list", "quick-jump", "main-gestures", "assistant-gestures", "signal-steps", "openRefereeSection"]) {
+  if (!refereeSource.includes(marker)) fail("referee.html", `審判ガイドの視認性改善がありません: ${marker}`);
+}
+if ((refereeSource.match(/class="signal-step"/g) || []).length !== 4) fail("referee.html", "オフサイド旗の垂直・近・中央・遠の4図が揃っていません");
 if (!refereeSource.includes("頭・胴体・足") || !refereeSource.includes("手や腕だけ")) fail("referee.html", "オフサイド判定対象の身体部分が説明されていません");
 if (!refereeSource.includes("8秒を超えると相手のコーナーキック") || !refereeSource.includes("最後の5秒")) fail("referee.html", "GKの8秒ルールが最新内容ではありません");
 if (!refereeSource.includes("入れば蹴り直し") || !refereeSource.includes("偶発的な二度触り")) fail("referee.html", "PKの偶発的な二度触りが説明されていません");
