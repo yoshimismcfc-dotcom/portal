@@ -128,6 +128,7 @@ if (/localStorage\.setItem\([^\n]*smc_members/i.test(membersSource)) fail("membe
 if (!membersSource.includes("next[grade]=next[grade].filter")) fail("members.html", "Firebase名簿の空データを除外していません");
 
 const commonSource = fs.readFileSync(path.join(root, "common.js"), "utf8");
+const eventLinksSource = fs.readFileSync(path.join(root, "event-links.js"), "utf8");
 const calendarSource = fs.readFileSync(path.join(root, "calendar.html"), "utf8");
 if (!commonSource.includes("refreshCoachFolderLabels")) {
   fail("common.js", "旧名称を安全にコーチ専用フォルダへ置き換える処理がありません");
@@ -408,6 +409,28 @@ for (const [cardMapping, legendMapping] of calendarColorMappings) {
 }
 if (!guideSource.includes("Google Calendar API") || !guideSource.includes("利用制限")) {
   fail("guide.html", "今後の予定のAPI連携と利用制限が説明書にありません");
+}
+
+
+if (!eventLinksSource.includes("fiscalKey") || !eventLinksSource.includes("sortDates") || !eventLinksSource.includes("queryFor")) {
+  fail("event-links.js", "試合調整の日程連携または年度順ソートがありません");
+}
+for (const [name, source] of [["duty_match.html", dutyMatchSource], ["tournament.html", tournamentSource], ["accounting.html", accountingSource]]) {
+  if (!source.includes("event-links.js") || !source.includes('dbListen("game_adjust"')) {
+    fail(name, "試合調整の全日程を共通データから読み込んでいません");
+  }
+}
+if (!dutyMatchSource.includes('dbListen("duty_match"') || !tournamentSource.includes('dbListen("tournament_saves"') || !accountingSource.includes('dbListen("accounting"')) {
+  fail("大会連携", "既存の共通Firebase保存先が変更されています");
+}
+if (!coachSource.includes("coach-next-event") || !coachSource.includes("coach-menu-search") || !coachSource.includes('dbListen("game_adjust"')) {
+  fail("coach.html", "初心者向けの次回試合導線またはメニュー検索がありません");
+}
+if (!guideSource.includes("未保存を含む全日程") || !guideSource.includes("次に予定している試合")) {
+  fail("guide.html", "コーチ専用メニューの日程連携と新しい導線が説明されていません");
+}
+if (!swSource.includes("./event-links.js")) {
+  fail("sw.js", "日程連携用JavaScriptが事前キャッシュ対象にありません");
 }
 
 const rulesPath = path.join(root, "database.rules.json");
