@@ -452,7 +452,7 @@ if (!guideSource.includes("準備完了数") || !guideSource.includes("一番上
 if (!gameAdjustSource.includes('new URLSearchParams(location.search).get("dateId")') || !gameAdjustSource.includes("var requested=entries.find")) {
   fail("game_adjust.html", "コーチ専用メニューで選択した日程を直接表示できません");
 }
-if (!guideSource.includes("未保存を含む全日程") || !guideSource.includes("最初に<strong>大会一覧</strong>")) {
+if (!guideSource.includes("未保存を含む全日程") || !guideSource.includes("一番上に大会一覧")) {
   fail("guide.html", "コーチ専用メニューの日程連携と大会一覧導線が説明されていません");
 }
 if (!dutyMatchSource.includes('scrollIntoView({behavior:"smooth",block:"start"})') || !tournamentSource.includes('document.querySelector("#doc-youkou .panel")') || !accountingSource.includes("focusLinkedAccountingEditor")) {
