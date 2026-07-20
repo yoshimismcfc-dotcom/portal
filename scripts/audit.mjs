@@ -237,6 +237,21 @@ if (!gameAdjustSource.includes('window.addEventListener("online"') || !gameAdjus
 if (!guideSource.includes("端末データを先に即時表示") || !guideSource.includes("裏側で自動再接続")) {
   fail("guide.html", "試合調整の自動復旧が説明されていません");
 }
+if (!gameAdjustSource.includes("game-adjust-beginner-guide") || !gameAdjustSource.includes("beginner-steps")) {
+  fail("game_adjust.html", "初心者向けの操作ガイドがありません");
+}
+if (!gameAdjustSource.includes("game-adjust-overview") || !gameAdjustSource.includes("setupGameAdjustBeginnerUI")) {
+  fail("game_adjust.html", "選択日程の概要カードがありません");
+}
+if (!gameAdjustSource.includes("applyNearestDefault") || !gameAdjustSource.includes("data-date-iso")) {
+  fail("game_adjust.html", "直近の予定日程を初期表示する処理がありません");
+}
+if (!gameAdjustSource.includes("データ管理（通常は使用しません）")) {
+  fail("game_adjust.html", "初期データリセットが誤操作防止欄に格納されていません");
+}
+if (!guideSource.includes("今日以降で最も近い日程") || !guideSource.includes("概要カード")) {
+  fail("guide.html", "試合調整の新しい初期表示と概要カードの説明がありません");
+}
 if (!gameAdjustSource.includes("duty_match.html") || !gameAdjustSource.includes("tournament.html") || !gameAdjustSource.includes("accounting.html") || !gameAdjustSource.includes("date-related-links")) {
   fail("game_adjust.html", "カテゴリー／目標下に大会関連ページへの入口がありません");
 }
