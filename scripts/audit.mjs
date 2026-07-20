@@ -435,6 +435,15 @@ if (!gameAdjustSource.includes('new URLSearchParams(location.search).get("dateId
 if (!guideSource.includes("未保存を含む全日程") || !guideSource.includes("次に予定している試合")) {
   fail("guide.html", "コーチ専用メニューの日程連携と新しい導線が説明されていません");
 }
+if (!dutyMatchSource.includes('scrollIntoView({behavior:"smooth",block:"start"})') || !tournamentSource.includes('document.querySelector("#doc-youkou .panel")') || !accountingSource.includes("focusLinkedAccountingEditor")) {
+  fail("大会連携", "試合調整から入力画面へ直接移動する処理がありません");
+}
+if (!accountingSource.includes("syncAccountingWithGameAdjust") || !accountingSource.includes("isUntouchedAccountingPlaceholder") || !accountingSource.includes("_accountingCloudReady&&_gameAdjustCloudReady")) {
+  fail("accounting.html", "試合調整の日程と会計大会名を安全に自動同期する処理がありません");
+}
+if (!guideSource.includes("入力欄まで自動で移動") || !guideSource.includes("毎回自動同期")) {
+  fail("guide.html", "大会入力画面への直接移動と会計同期が説明されていません");
+}
 if (!swSource.includes("./event-links.js")) {
   fail("sw.js", "日程連携用JavaScriptが事前キャッシュ対象にありません");
 }

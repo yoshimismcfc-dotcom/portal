@@ -326,7 +326,11 @@ function ensureLinkedMatch(){
   }
   if(changed) save();
   render();
-  setTimeout(function(){ openCard(linked.id); },100);
+  setTimeout(function(){
+    openCard(linked.id);
+    var card=document.getElementById("mc-"+String(linked.id||"").replace(/[^a-z0-9_-]/gi,"_"));
+    if(card) card.scrollIntoView({behavior:"smooth",block:"start"});
+  },180);
 }
 
 /* ===== Firebase ===== */
