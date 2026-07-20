@@ -17,6 +17,9 @@ var FIREBASE_DB = null;
 var FIREBASE_CALLBACKS = [];
 var FIREBASE_FAILED = false;
 var FIREBASE_SAVE_TIMEOUT = 8000;
+var FIREBASE_LISTENERS = [];
+var FIREBASE_REFRESH_TIMER = null;
+var FIREBASE_LAST_REFRESH_AT = 0;
 
 function onFirebaseReady(cb){
   if(FIREBASE_READY) cb(FIREBASE_DB);
@@ -72,8 +75,49 @@ function readLocalResult(localKey, fallback){
   }
 }
 
+function firebaseValueSignature(value){
+  try{ return JSON.stringify(value); }
+  catch(e){ return String(value); }
+}
+
+function deliverFirebaseCloudValue(record, val, reason){
+  var latest = (val !== null && val !== undefined) ? val : record.fallback;
+  var signature = firebaseValueSignature(latest);
+  if(record.lastCloudSignature === signature) return false;
+  record.lastCloudSignature = signature;
+
+  try{
+    if(record.localKey) localStorage.setItem(record.localKey, JSON.stringify(latest));
+  }catch(cacheError){
+    console.warn("[SMC Portal] latest cache update error:", record.localKey, cacheError);
+  }
+
+  record.callback(latest, {
+    source:"cloud",
+    authoritative:true,
+    empty:val === null || val === undefined,
+    refreshReason:reason || "listener"
+  });
+  try{
+    window.dispatchEvent(new CustomEvent("smc:data-refreshed", {
+      detail:{path:record.path, reason:reason || "listener"}
+    }));
+  }catch(eventError){}
+  return true;
+}
+
 function dbListen(path, callback, localKey, fallback){
   var deliveredLocal = false;
+  var record = {
+    path:path,
+    callback:callback,
+    localKey:localKey,
+    fallback:fallback,
+    lastCloudSignature:null,
+    applyCloud:null
+  };
+  FIREBASE_LISTENERS.push(record);
+
   function deliverLocal(){
     if(deliveredLocal) return;
     var local = readLocalResult(localKey, fallback);
@@ -82,8 +126,7 @@ function dbListen(path, callback, localKey, fallback){
     callback(local.value, {source:"local", authoritative:false});
   }
 
-  // Show saved device data immediately when it exists, but do not invent empty fallback data
-  // before Firebase has had a chance to answer.
+  // 保存済みデータを先に表示し、クラウドの最新値が届いた時だけ差し替える。
   deliverLocal();
 
   if(typeof FIREBASE_CONFIG === "undefined" || FIREBASE_CONFIG.apiKey === "YOUR_API_KEY"){
@@ -98,20 +141,11 @@ function dbListen(path, callback, localKey, fallback){
   }, 3500);
 
   onFirebaseReady(function(db){
+    record.applyCloud = function(val, reason){
+      return deliverFirebaseCloudValue(record, val, reason);
+    };
     db.ref(path).on("value", function(snap){
-      var val = snap.val();
-      // Firebaseへ接続できた場合はクラウドを正として、端末キャッシュも最新化する。
-      // クラウド側が空なら古い端末データを再表示せず、指定された初期値を使う。
-      var latest = (val !== null && val !== undefined) ? val : fallback;
-      try{
-        if(localKey) localStorage.setItem(localKey, JSON.stringify(latest));
-      }catch(cacheError){
-        console.warn("[SMC Portal] latest cache update error:", localKey, cacheError);
-      }
-      callback(latest, {source:"cloud", authoritative:true, empty:val === null || val === undefined});
-      try{
-        window.dispatchEvent(new CustomEvent("smc:data-refreshed", {detail:{path:path}}));
-      }catch(eventError){}
+      record.applyCloud(snap.val(), "listener");
     }, function(err){
       console.error("[SMC Portal] dbListen error:", path, err);
       var local = readLocalResult(localKey, fallback);
@@ -119,6 +153,41 @@ function dbListen(path, callback, localKey, fallback){
     });
   });
 }
+
+// ホーム画面アプリの画面復帰・戻る操作では、ページを強制再読込せず、
+// 登録済みのFirebaseデータだけを再確認する。
+function refreshFirebaseListeners(reason){
+  if(FIREBASE_REFRESH_TIMER) window.clearTimeout(FIREBASE_REFRESH_TIMER);
+  FIREBASE_REFRESH_TIMER = window.setTimeout(function(){
+    FIREBASE_REFRESH_TIMER = null;
+    var now = Date.now();
+    if(now - FIREBASE_LAST_REFRESH_AT < 600) return;
+    FIREBASE_LAST_REFRESH_AT = now;
+
+    onFirebaseReady(function(db){
+      try{ if(typeof db.goOnline === "function") db.goOnline(); }catch(onlineError){}
+      FIREBASE_LISTENERS.forEach(function(record){
+        db.ref(record.path).once("value").then(function(snap){
+          if(record.applyCloud) record.applyCloud(snap.val(), reason || "resume");
+        }).catch(function(error){
+          console.warn("[SMC Portal] resume refresh error:", record.path, error);
+        });
+      });
+    });
+  }, 900);
+}
+
+(function setupFirebaseResumeRefresh(){
+  function refresh(reason){ refreshFirebaseListeners(reason); }
+  window.addEventListener("pageshow", function(event){
+    refresh(event && event.persisted ? "back-forward-cache" : "page-show");
+  });
+  window.addEventListener("focus", function(){ refresh("window-focus"); });
+  window.addEventListener("online", function(){ refresh("online"); });
+  document.addEventListener("visibilitychange", function(){
+    if(document.visibilityState === "visible") refresh("app-visible");
+  });
+})();
 
 function emitSaveStatus(detail){
   try{
