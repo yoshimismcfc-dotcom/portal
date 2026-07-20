@@ -96,6 +96,12 @@
     .coach-next-kicker{color:#ffaa42;font-size:.65rem;font-weight:900;letter-spacing:.08em}
     .coach-next-title{margin-top:4px;color:#fff;font-size:1rem;font-weight:900}
     .coach-next-meta{margin-top:4px;color:#9fc8e2;font-size:.72rem;line-height:1.5}
+    .coach-next-event-list{display:grid;gap:9px;margin-top:10px}
+    .coach-next-row{padding:12px;border:1px solid rgba(0,212,255,.24);border-radius:12px;background:rgba(0,20,38,.48)}
+    .coach-next-row-badge{display:inline-flex;margin-bottom:5px;padding:2px 7px;border-radius:999px;background:rgba(255,170,66,.12);border:1px solid rgba(255,170,66,.3);color:#ffc478;font-size:.58rem;font-weight:900}
+    .coach-next-row .coach-next-title{font-size:.92rem}
+    .coach-next-row .coach-next-actions{margin-top:9px}
+    body[data-theme="light"] .coach-next-row{background:#f8fcff;border-color:#9fc5d9}
     .coach-next-actions{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:7px;margin-top:12px}
     .coach-next-actions a{min-height:43px;padding:8px 6px;border:1px solid rgba(0,212,255,.3);border-radius:10px;background:rgba(0,212,255,.08);color:#dff7ff;text-decoration:none;text-align:center;font-size:.68rem;font-weight:900;display:grid;place-items:center;line-height:1.3}
     .coach-next-actions a:hover,.coach-next-actions a:focus-visible{border-color:var(--cyan);background:rgba(0,212,255,.16);outline:none}
@@ -700,25 +706,34 @@ document.addEventListener("DOMContentLoaded", function(){
     if(!root||!window.SMCEventLinks)return;
     var dates=SMCEventLinks.fromGameAdjust(value);
     var next=SMCEventLinks.nearest(dates);
-    var title=root.querySelector(".coach-next-title");
-    var meta=root.querySelector(".coach-next-meta");
-    var actions=root.querySelector(".coach-next-actions");
     if(!next){
-      title.textContent="日程はまだ登録されていません";
-      meta.textContent="「試合調整」から最初の日程を追加してください";
-      actions.hidden=false;
-      actions.querySelector('[data-coach-link="game"]').href="game_adjust.html";
-      actions.querySelectorAll('a:not([data-coach-link="game"])').forEach(function(a){a.hidden=true;});
+      root.innerHTML='<div class="coach-next-kicker">次に予定している試合</div>'
+        +'<div class="coach-next-title">日程はまだ登録されていません</div>'
+        +'<div class="coach-next-meta">「試合調整」から最初の日程を追加してください</div>'
+        +'<div class="coach-next-actions"><a href="game_adjust.html">📊 試合調整を開く</a></div>';
       return;
     }
-    title.textContent=SMCEventLinks.label(next)+(next.tournamentName?"｜"+escText(next.tournamentName):"");
-    meta.textContent=[next.cat,next.target!=null?"目標 "+next.target+"チーム":""].filter(Boolean).join(" ／ ");
-    actions.hidden=false;
-    actions.querySelectorAll("a").forEach(function(a){a.hidden=false;});
-    actions.querySelector('[data-coach-link="game"]').href="game_adjust.html";
-    actions.querySelector('[data-coach-link="duty"]').href=SMCEventLinks.href("duty_match.html",next);
-    actions.querySelector('[data-coach-link="tournament"]').href=SMCEventLinks.href("tournament.html",next);
-    actions.querySelector('[data-coach-link="accounting"]').href=SMCEventLinks.href("accounting.html",next);
+    var sameDay=dates.filter(function(item){return item.dateIso&&item.dateIso===next.dateIso;})
+      .sort(function(a,b){
+        return String(a.tournamentName||a.cat||"").localeCompare(String(b.tournamentName||b.cat||""),"ja");
+      });
+    var count=sameDay.length;
+    var rows=sameDay.map(function(item,index){
+      var title=(item.tournamentName||"大会名未設定");
+      var meta=[SMCEventLinks.label(item),item.cat,item.target!=null?"目標 "+item.target+"チーム":""].filter(Boolean).join(" ／ ");
+      var badge=count>1?'<span class="coach-next-row-badge">同日 '+(index+1)+' / '+count+'</span>':"";
+      return '<article class="coach-next-row">'+badge
+        +'<div class="coach-next-title">'+escapeHtml(title)+'</div>'
+        +'<div class="coach-next-meta">'+escapeHtml(meta)+'</div>'
+        +'<div class="coach-next-actions">'
+        +'<a href="'+escapeHtml(SMCEventLinks.href("game_adjust.html",item))+'">📊 試合調整</a>'
+        +'<a href="'+escapeHtml(SMCEventLinks.href("duty_match.html",item))+'">👥 任務分担</a>'
+        +'<a href="'+escapeHtml(SMCEventLinks.href("tournament.html",item))+'">📋 要綱・対戦表</a>'
+        +'<a href="'+escapeHtml(SMCEventLinks.href("accounting.html",item))+'">💴 会計・決算</a>'
+        +'</div></article>';
+    }).join("");
+    root.innerHTML='<div class="coach-next-kicker">次に予定している試合'+(count>1?"（同日 "+count+"件）":"")+'</div>'
+      +'<div class="coach-next-event-list">'+rows+'</div>';
   }
   function setupSearch(){
     var input=document.getElementById("coach-menu-search");

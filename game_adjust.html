@@ -964,7 +964,9 @@ document.addEventListener("visibilitychange", function(){
     if(!entries.length) return false;
     entries.sort(function(a,b){return a.date-b.date;});
     var today=localToday();
-    var chosen=entries.find(function(item){return item.date>=today;})||entries[entries.length-1];
+    var requestedId=new URLSearchParams(location.search).get("dateId")||"";
+    var requested=entries.find(function(item){return item.id===requestedId;});
+    var chosen=requested||entries.find(function(item){return item.date>=today;})||entries[entries.length-1];
     if(!Array.from(dateSelect.options).some(function(option){return option.value===chosen.id;})) return false;
     defaultDateApplied=true;
     var category=document.querySelector(".game-adjust-category-filter");
