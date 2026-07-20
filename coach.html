@@ -793,6 +793,13 @@ document.addEventListener("DOMContentLoaded", function(){
     if(!accountingReady)issues.push(accounting?"会計入力":"会計作成");
     return {dutyDone:dutyDone,dutyTotal:dutyTotal,youkou:youkou,taisen:taisen,accountingExists:!!accounting,accountingReady:accountingReady,completeCount:completeCount,issues:issues};
   }
+  function confirmedTeamCount(item){
+    var dateId=String(item&&item.id||"");
+    var teams=coachState.gameAdjust&&Array.isArray(coachState.gameAdjust.teams)?coachState.gameAdjust.teams:[];
+    return teams.filter(function(team){
+      return team&&String((team.statuses||{})[dateId]||"－")==="OK";
+    }).length;
+  }
   function countdownFor(item){
     var date=window.SMCEventLinks&&SMCEventLinks.parseIso(item&&item.dateIso);
     if(!date)return "日付未設定";
@@ -852,7 +859,8 @@ document.addEventListener("DOMContentLoaded", function(){
         +'<span class="coach-event-tab-progress">準備 '+prep.completeCount+'/4</span></button>';
     }).join("");
     var prep=preparationFor(selected);
-    var meta=[SMCEventLinks.label(selected),selected.cat,selected.target!=null?"目標 "+selected.target+"チーム":""].filter(Boolean).join(" ／ ");
+    var confirmed=confirmedTeamCount(selected);
+    var meta=[SMCEventLinks.label(selected),selected.cat,selected.target!=null?"目標 "+selected.target+"チーム":"", "決定 "+confirmed+"チーム"].filter(Boolean).join(" ／ ");
     root.innerHTML='<div class="coach-event-browser-head"><div class="coach-event-browser-title">🏆 大会一覧</div><div class="coach-event-browser-help">'+sorted.length+'件・横にスライドできます</div></div>'
       +'<div class="coach-event-tabs" role="tablist" aria-label="大会を選択">'+tabs+'</div>'
       +'<div class="coach-event-selected" role="tabpanel"><div class="coach-event-selected-title">'+escapeHtml(selected.tournamentName||"大会名未設定")+'</div>'
