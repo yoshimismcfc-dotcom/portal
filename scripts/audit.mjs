@@ -357,6 +357,12 @@ if (!commonSource.includes("ACTIVE_DATE_KEY") || !commonSource.includes("remembe
 if (!commonSource.includes("dateSortValue(dateIso, label)") || !commonSource.includes("fiscalYear * 10000")) {
   fail("common.js", "複数年度の日程を西暦込みの年度順で並べていません");
 }
+if (!commonSource.includes("sortTeamRowsForActiveDate") || !commonSource.includes('statusB === "OK"') || !commonSource.includes('localeCompare(teamNameForSort(rowB), "ja"')) {
+  fail("common.js", "試合調整のチームが参加OK優先・チーム名順で表示されません");
+}
+if (!guideSource.includes("参加OKを上") || !guideSource.includes("チーム名の五十音順")) {
+  fail("guide.html", "試合調整のチーム並び順が説明されていません");
+}
 if (!gameAdjustSource.includes("data-date-id") || !gameAdjustSource.includes("data-date-iso") || !gameAdjustSource.includes("var savedDateIso")) {
   fail("game_adjust.html", "日程ID・ISO日付または保存済み年を編集画面へ引き継いでいません");
 }
