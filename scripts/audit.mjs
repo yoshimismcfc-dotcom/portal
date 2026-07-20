@@ -425,11 +425,11 @@ for (const [name, source] of [["duty_match.html", dutyMatchSource], ["tournament
 if (!dutyMatchSource.includes('dbListen("duty_match"') || !tournamentSource.includes('dbListen("tournament_saves"') || !accountingSource.includes('dbListen("accounting"')) {
   fail("大会連携", "既存の共通Firebase保存先が変更されています");
 }
-if (!coachSource.includes("coach-next-event") || !coachSource.includes("coach-menu-search") || !coachSource.includes('dbListen("game_adjust"')) {
-  fail("coach.html", "初心者向けの次回試合導線またはメニュー検索がありません");
+if (!coachSource.includes("coach-event-browser") || !coachSource.includes("coach-menu-search") || !coachSource.includes('dbListen("game_adjust"')) {
+  fail("coach.html", "大会一覧またはメニュー検索がありません");
 }
-if (!coachSource.includes("sameDay=dates.filter") || !coachSource.includes("同日 '+(index+1)") || !coachSource.includes('SMCEventLinks.href("game_adjust.html",item)')) {
-  fail("coach.html", "同じ日付の複数試合を別段で表示する処理がありません");
+if (coachSource.includes('id="coach-next-event"') || coachSource.includes("function renderNextEvent")) {
+  fail("coach.html", "削除した「次に予定している試合」の表示処理が残っています");
 }
 if (!coachSource.includes("coach-event-browser") || !coachSource.includes("renderTournamentBrowser") || !coachSource.includes("data-coach-event-id") || !coachSource.includes('role="tablist"')) {
   fail("coach.html", "次の大会直下に日程連動の大会選択タブがありません");
@@ -437,17 +437,20 @@ if (!coachSource.includes("coach-event-browser") || !coachSource.includes("rende
 if (!coachSource.includes("preparationFor") || !coachSource.includes("coach-attention") || !coachSource.includes("copyCoachPreparationSummary") || !coachSource.includes('dbListen("duty_match"') || !coachSource.includes('dbListen("tournament_saves"') || !coachSource.includes('dbListen("accounting"')) {
   fail("coach.html", "大会準備状況・要対応・LINEコピーが共通データに連動していません");
 }
-if (!guideSource.includes("その直下の<strong>大会一覧</strong>") || !guideSource.includes("日付・カテゴリーごとの大会タブ")) {
+if (!(coachSource.indexOf("セクション：試合・大会") < coachSource.indexOf("セクション：コーチ共有") && coachSource.indexOf("セクション：コーチ共有") < coachSource.indexOf("セクション：お知らせ管理"))) {
+  fail("coach.html", "コーチメニューが試合・共有・お知らせの推奨順ではありません");
+}
+if (!guideSource.includes("最初に<strong>大会一覧</strong>") || !guideSource.includes("同日開催の複数大会も別々に選べます")) {
   fail("guide.html", "コーチ専用フォルダの大会一覧タブが説明されていません");
 }
-if (!guideSource.includes("準備完了数（4項目）") || !guideSource.includes("「要対応」") || !guideSource.includes("準備状況をLINEコピー")) {
+if (!guideSource.includes("準備完了数") || !guideSource.includes("要対応項目") || !guideSource.includes("準備状況をLINEコピー")) {
   fail("guide.html", "大会準備状況・要対応・LINE共有が説明されていません");
 }
 if (!gameAdjustSource.includes('new URLSearchParams(location.search).get("dateId")') || !gameAdjustSource.includes("var requested=entries.find")) {
   fail("game_adjust.html", "コーチ専用メニューで選択した日程を直接表示できません");
 }
-if (!guideSource.includes("未保存を含む全日程") || !guideSource.includes("次に予定している試合")) {
-  fail("guide.html", "コーチ専用メニューの日程連携と新しい導線が説明されていません");
+if (!guideSource.includes("未保存を含む全日程") || !guideSource.includes("最初に<strong>大会一覧</strong>")) {
+  fail("guide.html", "コーチ専用メニューの日程連携と大会一覧導線が説明されていません");
 }
 if (!dutyMatchSource.includes('scrollIntoView({behavior:"smooth",block:"start"})') || !tournamentSource.includes('document.querySelector("#doc-youkou .panel")') || !accountingSource.includes("focusLinkedAccountingEditor")) {
   fail("大会連携", "試合調整から入力画面へ直接移動する処理がありません");

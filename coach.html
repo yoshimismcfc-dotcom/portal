@@ -179,6 +179,13 @@
     body[data-theme="light"] .coach-event-countdown{color:#075f86;background:#e9f8ff;border-color:#5aa9c9}
     body[data-theme="light"] .coach-share-button{background:#e9fff3;color:#087443;border-color:#36a86f}
 
+
+    /* シンプル表示：大会管理を主役にして縦幅を抑える */
+    .coach-welcome{padding:14px;margin-bottom:14px}.coach-welcome-head{display:block}.coach-welcome p{max-width:640px}
+    .coach-event-browser{margin-top:10px;padding:11px}.coach-attention{padding:8px;margin-bottom:8px}.coach-event-tabs{padding-bottom:6px}.coach-event-selected{padding:10px}
+    .coach-preparation-grid{display:flex;gap:6px;overflow-x:auto;margin-top:8px;padding-bottom:2px;scrollbar-width:none}.coach-preparation-grid::-webkit-scrollbar{display:none}
+    .coach-preparation-item{flex:0 0 auto;min-height:32px;padding:5px 8px}.coach-share-button{min-height:38px;margin-top:7px}.coach-quick-nav{margin-bottom:10px}.c-section-div:first-child{margin-top:12px}
+
     @media(max-width:640px){
       .coach-welcome{padding:14px}
       .coach-welcome-head{display:block}
@@ -205,19 +212,7 @@
 
   <section class="coach-welcome" aria-labelledby="coach-welcome-title">
     <div class="coach-welcome-head">
-      <div><h2 id="coach-welcome-title">🔰 まずは「次の試合」を確認</h2><p>試合調整で登録した日程と、大会任務・要綱／対戦表・会計は同じ日程IDでつながります。どの画面から編集しても同じクラウドデータへ保存されます。</p></div>
-      <span class="coach-cloud-badge">☁️ 自動共有</span>
-    </div>
-    <div class="coach-next" id="coach-next-event">
-      <div class="coach-next-kicker">次に予定している試合</div>
-      <div class="coach-next-title">日程を読み込み中…</div>
-      <div class="coach-next-meta">クラウドから最新情報を取得しています</div>
-      <div class="coach-next-actions" hidden>
-        <a data-coach-link="game">📊 試合調整</a>
-        <a data-coach-link="duty">👥 任務分担</a>
-        <a data-coach-link="tournament">📋 要綱・対戦表</a>
-        <a data-coach-link="accounting">💴 会計・決算</a>
-      </div>
+      <div><h2 id="coach-welcome-title">🏆 大会を選んで管理</h2><p>大会を選ぶと、試合調整・任務・要綱／対戦表・会計の準備状況と入力画面をまとめて確認できます。</p></div>
     </div>
     <div class="coach-event-browser" id="coach-event-browser" aria-live="polite">
       <div class="coach-event-browser-head">
@@ -229,7 +224,7 @@
   </section>
 
   <nav class="coach-quick-nav" aria-label="メニュー内移動">
-    <a href="#coach-notice">📢 お知らせ</a><a href="#coach-shared">🤝 共有</a><a href="#coach-match">🏟️ 試合・大会</a><a href="#coach-tools">🔧 外部ツール</a><a href="#coach-data">📁 データ</a>
+    <a href="#coach-match">🏟️ 試合・大会</a><a href="#coach-shared">🤝 共有</a><a href="#coach-notice">📢 お知らせ</a><a href="#coach-data">📁 データ</a><a href="#coach-tools">🔧 外部ツール</a>
   </nav>
   <div class="coach-finder">
     <input id="coach-menu-search" type="search" placeholder="メニューを検索（例：対戦表、会計、日誌）" aria-label="コーチメニューを検索">
@@ -238,38 +233,6 @@
 
   <!-- コーチコンテンツ -->
   <div id="coach-content">
-    <!-- ===== セクション：お知らせ管理 ===== -->
-    <div class="c-section-div" id="coach-notice"><div class="csd-icon">📢</div><div class="csd-text">お知らせ管理</div><div class="csd-sub">NOTICE</div></div>
-    <div class="c-card-grid">
-      <a class="c-card c-cyan" href="coach_guidance.html">
-        <div class="c-icon">📢</div>
-        <div class="c-label">ガイダンス設定</div>
-        <div class="c-desc">ホーム画面の青帯・赤帯お知らせ</div>
-      </a>
-      <a class="c-card c-red" href="coach_alert.html">
-        <div class="c-icon">🔔</div>
-        <div class="c-label">自動アラート設定</div>
-        <div class="c-desc">雨・熱中症のしきい値・スケジュール</div>
-      </a>
-    </div>
-
-    <!-- ===== セクション：コーチ共有 ===== -->
-    <div class="c-section-div" id="coach-shared"><div class="csd-icon">🤝</div><div class="csd-text">コーチ共有</div><div class="csd-sub">COACH SHARED</div></div>
-    <div class="c-card-grid">
-      <a class="c-card c-green" href="finance.html?from=coach&view=request">
-        <div class="c-icon">🧾</div>
-        <div class="c-label">立替・購入相談</div>
-        <div class="c-desc">会計さんへ購入相談・立替精算を送る</div>
-        <span class="c-badge">会計業務と連動</span>
-      </a>
-      <a class="c-card c-cyan" href="todo.html?from=coach">
-        <div class="c-icon">📌</div>
-        <div class="c-label">共有タスク</div>
-        <div class="c-desc">担当者・期限・進み具合を全員で共有</div>
-        <span class="c-badge">ホームと連動</span>
-      </a>
-    </div>
-
     <!-- ===== セクション：試合・大会 ===== -->
     <div class="c-section-div" id="coach-match"><div class="csd-icon">🏟️</div><div class="csd-text">試合・大会</div><div class="csd-sub">MATCH & TOURNAMENT</div></div>
     <div class="c-card-grid">
@@ -295,32 +258,35 @@
       </a>
     </div>
 
-    <!-- ===== セクション：外部ツール ===== -->
-    <div class="c-section-div" id="coach-tools"><div class="csd-icon">🔧</div><div class="csd-text">外部ツール</div><div class="csd-sub">EXTERNAL TOOLS</div></div>
+    <!-- ===== セクション：コーチ共有 ===== -->
+    <div class="c-section-div" id="coach-shared"><div class="csd-icon">🤝</div><div class="csd-text">コーチ共有</div><div class="csd-sub">COACH SHARED</div></div>
     <div class="c-card-grid">
-      <a class="c-card c-cyan" href="https://accounts.google.com/AccountChooser?Email=yoshimi.smc.fc%40gmail.com&continue=https%3A%2F%2Fmail.google.com%2Fmail%2F" target="_blank" rel="noopener">
-        <div class="c-icon">📧</div>
-        <div class="c-label">Gmail</div>
-        <div class="c-desc">yoshimi.smc.fc@gmail.com</div>
-        <span class="c-badge">外部</span>
+      <a class="c-card c-green" href="finance.html?from=coach&view=request">
+        <div class="c-icon">🧾</div>
+        <div class="c-label">立替・購入相談</div>
+        <div class="c-desc">会計さんへ購入相談・立替精算を送る</div>
+        <span class="c-badge">会計業務と連動</span>
       </a>
-      <a class="c-card c-green" href="https://accounts.google.com/AccountChooser?Email=yoshimi.smc.fc%40gmail.com&continue=https%3A%2F%2Fcalendar.google.com%2Fcalendar%2Fr" target="_blank" rel="noopener">
-        <div class="c-icon">📅</div>
-        <div class="c-label">Googleカレンダー</div>
-        <div class="c-desc">予定の追加・変更・削除</div>
-        <span class="c-badge">外部</span>
+      <a class="c-card c-cyan" href="todo.html?from=coach">
+        <div class="c-icon">📌</div>
+        <div class="c-label">共有タスク</div>
+        <div class="c-desc">担当者・期限・進み具合を全員で共有</div>
+        <span class="c-badge">ホームと連動</span>
       </a>
-      <a class="c-card" href="https://account.line.biz/login?redirectUri=https%3A%2F%2Fmanager.line.biz%2Faccount%2F%40979eflea" target="_blank" rel="noopener">
-        <div class="c-icon">💬</div>
-        <div class="c-label">LINE公式</div>
-        <div class="c-desc">投稿・メッセージ配信</div>
-        <span class="c-badge">外部</span>
+    </div>
+
+    <!-- ===== セクション：お知らせ管理 ===== -->
+    <div class="c-section-div" id="coach-notice"><div class="csd-icon">📢</div><div class="csd-text">お知らせ管理</div><div class="csd-sub">NOTICE</div></div>
+    <div class="c-card-grid">
+      <a class="c-card c-cyan" href="coach_guidance.html">
+        <div class="c-icon">📢</div>
+        <div class="c-label">ガイダンス設定</div>
+        <div class="c-desc">ホーム画面の青帯・赤帯お知らせ</div>
       </a>
-      <a class="c-card" href="https://www.koga-seven.jp/hokusai/user/login.php" target="_blank" rel="noopener">
-        <div class="c-icon">⚽</div>
-        <div class="c-label">北彩リーグ</div>
-        <div class="c-desc">リーグ管理システム</div>
-        <span class="c-badge">外部</span>
+      <a class="c-card c-red" href="coach_alert.html">
+        <div class="c-icon">🔔</div>
+        <div class="c-label">自動アラート設定</div>
+        <div class="c-desc">雨・熱中症のしきい値・スケジュール</div>
       </a>
     </div>
 
@@ -363,6 +329,35 @@
         <div class="c-icon">🩺</div>
         <div class="c-label">動作診断</div>
         <div class="c-desc">通信・PWA・端末内エラーログ</div>
+      </a>
+    </div>
+
+    <!-- ===== セクション：外部ツール ===== -->
+    <div class="c-section-div" id="coach-tools"><div class="csd-icon">🔧</div><div class="csd-text">外部ツール</div><div class="csd-sub">EXTERNAL TOOLS</div></div>
+    <div class="c-card-grid">
+      <a class="c-card c-cyan" href="https://accounts.google.com/AccountChooser?Email=yoshimi.smc.fc%40gmail.com&continue=https%3A%2F%2Fmail.google.com%2Fmail%2F" target="_blank" rel="noopener">
+        <div class="c-icon">📧</div>
+        <div class="c-label">Gmail</div>
+        <div class="c-desc">yoshimi.smc.fc@gmail.com</div>
+        <span class="c-badge">外部</span>
+      </a>
+      <a class="c-card c-green" href="https://accounts.google.com/AccountChooser?Email=yoshimi.smc.fc%40gmail.com&continue=https%3A%2F%2Fcalendar.google.com%2Fcalendar%2Fr" target="_blank" rel="noopener">
+        <div class="c-icon">📅</div>
+        <div class="c-label">Googleカレンダー</div>
+        <div class="c-desc">予定の追加・変更・削除</div>
+        <span class="c-badge">外部</span>
+      </a>
+      <a class="c-card" href="https://account.line.biz/login?redirectUri=https%3A%2F%2Fmanager.line.biz%2Faccount%2F%40979eflea" target="_blank" rel="noopener">
+        <div class="c-icon">💬</div>
+        <div class="c-label">LINE公式</div>
+        <div class="c-desc">投稿・メッセージ配信</div>
+        <span class="c-badge">外部</span>
+      </a>
+      <a class="c-card" href="https://www.koga-seven.jp/hokusai/user/login.php" target="_blank" rel="noopener">
+        <div class="c-icon">⚽</div>
+        <div class="c-label">北彩リーグ</div>
+        <div class="c-desc">リーグ管理システム</div>
+        <span class="c-badge">外部</span>
       </a>
     </div>
 
@@ -901,32 +896,11 @@ document.addEventListener("DOMContentLoaded", function(){
     var copyButton=root.querySelector("[data-coach-copy-id]");
     if(copyButton)copyButton.addEventListener("click",function(){copyCoachPreparationSummary(selected);});
   }
-  function renderNextEvent(value){
-    var root=document.getElementById("coach-next-event");
-    if(!root||!window.SMCEventLinks)return;
-    var dates=SMCEventLinks.fromGameAdjust(value);
-    var next=SMCEventLinks.nearest(dates);
-    renderTournamentBrowser(dates,next);
-    if(!next){
-      root.innerHTML='<div class="coach-next-kicker">次に予定している試合</div><div class="coach-next-title">日程はまだ登録されていません</div><div class="coach-next-meta">「試合調整」から最初の日程を追加してください</div><div class="coach-next-actions"><a href="game_adjust.html">📊 試合調整を開く</a></div>';
-      return;
-    }
-    var sameDay=dates.filter(function(item){return item.dateIso&&item.dateIso===next.dateIso;}).sort(function(a,b){
-      return String(a.tournamentName||a.cat||"").localeCompare(String(b.tournamentName||b.cat||""),"ja");
-    });
-    var count=sameDay.length;
-    var rows=sameDay.map(function(item,index){
-      var title=item.tournamentName||"大会名未設定";
-      var meta=[SMCEventLinks.label(item),item.cat,item.target!=null?"目標 "+item.target+"チーム":""].filter(Boolean).join(" ／ ");
-      var badge=count>1?'<span class="coach-next-row-badge">同日 '+(index+1)+' / '+count+'</span>':"";
-      return '<article class="coach-next-row">'+badge+'<div class="coach-next-title">'+escapeHtml(title)+'</div><div class="coach-next-meta">'+escapeHtml(meta)+'</div>'
-        +'<div class="coach-next-actions"><a href="'+escapeHtml(SMCEventLinks.href("game_adjust.html",item))+'">📊 試合調整</a>'
-        +'<a href="'+escapeHtml(SMCEventLinks.href("duty_match.html",item))+'">👥 任務分担</a><a href="'+escapeHtml(SMCEventLinks.href("tournament.html",item))+'">📋 要綱・対戦表</a>'
-        +'<a href="'+escapeHtml(SMCEventLinks.href("accounting.html",item))+'">💴 会計・決算</a></div></article>';
-    }).join("");
-    root.innerHTML='<div class="coach-next-kicker">次に予定している試合'+(count>1?"（同日 "+count+"件）":"")+'</div><div class="coach-next-event-list">'+rows+'</div>';
+  function refreshCoachHub(){
+    if(!window.SMCEventLinks)return;
+    var dates=SMCEventLinks.fromGameAdjust(coachState.gameAdjust);
+    renderTournamentBrowser(dates,SMCEventLinks.nearest(dates));
   }
-  function refreshCoachHub(){renderNextEvent(coachState.gameAdjust);}
   function setupSearch(){
     var input=document.getElementById("coach-menu-search"),count=document.getElementById("coach-search-count");
     var cards=Array.from(document.querySelectorAll("#coach-content .c-card"));
