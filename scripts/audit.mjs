@@ -93,8 +93,14 @@ const firebaseSource = fs.readFileSync(path.join(root, "firebase-config.js"), "u
 if (!swSource.includes('fetch(request, {cache:"no-store"})') || !swSource.includes('["style","script"]')) {
   fail("sw.js", "起動時にJavaScript・CSSをネットワーク優先で更新していません");
 }
-if (!firebaseSource.includes("var latest =") || !firebaseSource.includes('localStorage.setItem(localKey, JSON.stringify(latest))')) {
+if (!firebaseSource.includes("deliverFirebaseCloudValue") || !firebaseSource.includes('localStorage.setItem(record.localKey, JSON.stringify(latest))')) {
   fail("firebase-config.js", "Firebase取得後にクラウド値を正として端末キャッシュを最新化していません");
+}
+if (!firebaseSource.includes("refreshFirebaseListeners") || !firebaseSource.includes('window.addEventListener("pageshow"') || !firebaseSource.includes('document.addEventListener("visibilitychange"') || !firebaseSource.includes('window.addEventListener("focus"')) {
+  fail("firebase-config.js", "配信済みPWAの画面復帰・画面切替時に最新データを再確認していません");
+}
+if (!firebaseSource.includes("lastCloudSignature") || !firebaseSource.includes("record.lastCloudSignature === signature")) {
+  fail("firebase-config.js", "画面復帰時に同一データで不要な再描画が発生する可能性があります");
 }
 const indexVersion = indexSource.match(/name=["']app-version["'][^>]*content=["']([^"']+)/i)?.[1];
 const swVersion = swSource.match(/APP_VERSION\s*=\s*["']([^"']+)/)?.[1];
