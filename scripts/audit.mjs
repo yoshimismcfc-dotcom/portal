@@ -357,11 +357,14 @@ if (!commonSource.includes("ACTIVE_DATE_KEY") || !commonSource.includes("remembe
 if (!commonSource.includes("dateSortValue(dateIso, label)") || !commonSource.includes("fiscalYear * 10000")) {
   fail("common.js", "複数年度の日程を西暦込みの年度順で並べていません");
 }
-if (!commonSource.includes("sortTeamRowsForActiveDate") || !commonSource.includes('"確認中": 1') || !commonSource.includes('"－": 2') || !commonSource.includes('"NG": 3') || !commonSource.includes('nameCollator.compare(nameA, nameB)')) {
-  fail("common.js", "試合調整のチームが参加・確認中・未打診・不可・チーム名順で表示されません");
+if (!commonSource.includes("sortTeamRowsForActiveDate") || !commonSource.includes('"確認中": 1') || !commonSource.includes('"－": 2') || !commonSource.includes('"NG": 3') || !commonSource.includes("teamReadingForSort") || !commonSource.includes("TEAM_NAME_READINGS")) {
+  fail("common.js", "試合調整のチームが参加・確認中・未打診・不可・読み順で表示されません");
 }
-if (!guideSource.includes("参加（OK）→確認中→未打診（－）→不可（NG）") || !guideSource.includes("同じ状態の中ではチーム名順")) {
-  fail("guide.html", "試合調整のチーム並び順が説明されていません");
+if (!commonSource.includes("pendingTeamSort = true") || !commonSource.includes("pendingTeamSort && sortTeamRowsForActiveDate()")) {
+  fail("common.js", "回答タップ中の行移動を防ぐ遅延並び替えがありません");
+}
+if (!guideSource.includes("次の日程へ切り替えた時に並び替えます") || !guideSource.includes("チーム名の読み順")) {
+  fail("guide.html", "試合調整の遅延並び替えが説明されていません");
 }
 if (!gameAdjustSource.includes("data-date-id") || !gameAdjustSource.includes("data-date-iso") || !gameAdjustSource.includes("var savedDateIso")) {
   fail("game_adjust.html", "日程ID・ISO日付または保存済み年を編集画面へ引き継いでいません");

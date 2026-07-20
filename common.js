@@ -198,6 +198,7 @@
     let activeDateId = "";
     try { activeDateId = sessionStorage.getItem(ACTIVE_DATE_KEY) || ""; } catch (error) {}
     let syncing = false;
+    let pendingTeamSort = true;
 
     function rememberActiveDate(dateId) {
       activeDateId = String(dateId || "");
@@ -264,6 +265,27 @@
       return match ? Number(match[1]) : 1000;
     }
   
+    const TEAM_NAME_READINGS = new Map([
+      ["田間宮", "たまみや"],
+      ["ネクサス", "ねくさす"],
+      ["鴻巣ドルフィンズ", "こうのすどるふぃんず"],
+      ["熊谷東", "くまがやひがし"],
+      ["川里", "かわさと"],
+      ["滑川", "なめがわ"],
+      ["川越笠幡", "かわごえかさはた"],
+      ["川越岡田", "かわごえおかだ"],
+      ["川越イーグルF", "かわごえいーぐるえふ"],
+      ["熊谷リリーズ", "くまがやりりーず"],
+      ["熊谷リーズ", "くまがやりーず"],
+      ["唐子", "からこ"],
+      ["川越芳野", "かわごえよしの"],
+      ["本庄ホッパーズ", "ほんじょうほっぱーず"],
+      ["川島", "かわじま"],
+      ["東松山南", "ひがしまつやまみなみ"],
+      ["宮原", "みやはら"],
+      ["羽生SSS", "はにゅうえすえすえす"]
+    ]);
+
     function teamNameForSort(row) {
       const cell = row?.children?.[0];
       if (!cell) return "";
@@ -272,11 +294,17 @@
       return copy.textContent.replace(/\s+/g, " ").trim();
     }
 
+    function teamReadingForSort(row) {
+      const name = teamNameForSort(row).normalize("NFKC");
+      const compactName = name.replace(/[\s　]+/g, "");
+      return TEAM_NAME_READINGS.get(compactName) || compactName;
+    }
+
     function sortTeamRowsForActiveDate() {
       const tbody = table.tBodies[0];
-      if (!tbody) return;
+      if (!tbody) return false;
       const rows = Array.from(tbody.rows).filter((row) => row.querySelector("button.status-btn"));
-      if (rows.length < 2) return;
+      if (rows.length < 2) return rows.length === 1;
       const statusOrder = { "OK": 0, "確認中": 1, "－": 2, "NG": 3 };
       const nameCollator = new Intl.Collator("ja", { numeric: true, sensitivity: "base", ignorePunctuation: true });
       const sorted = rows.slice().sort((rowA, rowB) => {
@@ -284,13 +312,12 @@
         const statusB = rowB.children[activeDateIndex]?.querySelector("button.status-btn")?.textContent.trim() || "－";
         const statusDifference = (statusOrder[statusA] ?? 2) - (statusOrder[statusB] ?? 2);
         if (statusDifference) return statusDifference;
-        const nameA = teamNameForSort(rowA).normalize("NFKC");
-        const nameB = teamNameForSort(rowB).normalize("NFKC");
-        return nameCollator.compare(nameA, nameB);
+        return nameCollator.compare(teamReadingForSort(rowA), teamReadingForSort(rowB));
       });
-      if (rows.every((row, index) => row === sorted[index])) return;
+      if (rows.every((row, index) => row === sorted[index])) return true;
       const anchorRow = rows[rows.length - 1].nextSibling;
       sorted.forEach((row) => tbody.insertBefore(row, anchorRow));
+      return true;
     }
 
     function syncDateColumns() {
@@ -361,7 +388,7 @@
         return option;
       }));
       select.value = activeDateId;
-      sortTeamRowsForActiveDate();
+      if (pendingTeamSort && sortTeamRowsForActiveDate()) pendingTeamSort = false;
   
       table.querySelectorAll("tr").forEach((row) => {
         const cells = Array.from(row.children);
@@ -400,10 +427,12 @@
     }
   
     select.addEventListener("change", () => {
+      pendingTeamSort = true;
       rememberActiveDate(select.value);
       syncDateColumns();
     });
     categoryFilter.addEventListener("change", () => {
+      pendingTeamSort = true;
       const selectedCategory = categoryFilter.value;
       const headerCells = Array.from(table.querySelectorAll("thead tr:first-child > th"));
       const categoryCells = Array.from(table.querySelectorAll("thead tr:nth-child(2) > th"));
@@ -425,6 +454,7 @@
     });
     nav.querySelectorAll("button").forEach((button) => {
       button.addEventListener("click", () => {
+        pendingTeamSort = true;
         const dateIds = Array.from(select.options).map((option) => option.value).filter(Boolean);
         if (!dateIds.length || select.disabled) return;
         const currentPosition = Math.max(0, dateIds.indexOf(activeDateId));
