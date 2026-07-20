@@ -5,7 +5,7 @@
   <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate, max-age=0">
   <meta http-equiv="Pragma" content="no-cache">
   <meta http-equiv="Expires" content="-1">
-  <meta name="app-version" content="20260720-10">
+  <meta name="app-version" content="20260720-11">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <meta name="robots" content="noindex,nofollow">
   <title>大会要綱・対戦表 v5｜吉見SMC FC</title>
@@ -188,14 +188,17 @@
       <div class="hero-sub">入力するとプレビューが表示され、A4でPDF保存・印刷できます。</div></div>
   </div>
 
-  <div class="linked-workflow no-print">
-    <div class="linked-workflow-head">
-      <div><h3>📅 試合調整と連動する日程一覧</h3><div class="linked-workflow-help">未保存の日程も自動表示します。日程を選ぶと、その試合専用の大会要綱・対戦表を開きます。</div></div>
-      <select class="linked-tournament-filter" id="tournament-category-filter" aria-label="カテゴリーで日程を絞り込み"><option value="all">すべてのカテゴリー</option></select>
+  <details class="linked-workflow linked-date-disclosure no-print">
+    <summary class="linked-date-summary"><span>📅 試合調整と連動する日程一覧</span><span class="linked-date-summary-hint">タップして開く</span></summary>
+    <div class="linked-date-disclosure-body">
+      <div class="linked-workflow-head">
+        <div><div class="linked-workflow-help">未保存の日程も自動表示します。日程を選ぶと、その試合専用の大会要綱・対戦表を開きます。</div></div>
+        <select class="linked-tournament-filter" id="tournament-category-filter" aria-label="カテゴリーで日程を絞り込み"><option value="all">すべてのカテゴリー</option></select>
+      </div>
+      <div class="linked-date-list" id="linked-tournament-dates"></div>
+      <div class="linked-active-actions" id="linked-active-actions"></div>
     </div>
-    <div class="linked-date-list" id="linked-tournament-dates"></div>
-    <div class="linked-active-actions" id="linked-active-actions"></div>
-  </div>
+  </details>
 
   <div class="doc-tab-bar no-print">
     <button class="doc-tab-btn active" id="tbtn-y" onclick="switchDoc('youkou',this)">📄 大会要綱</button>

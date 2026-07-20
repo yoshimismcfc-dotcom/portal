@@ -159,13 +159,16 @@
     </div>
   </div>
   <div class="notice-bar">☁️ Firebaseでクラウド保存・全員と共有されます。</div>
-  <section class="linked-date-index" aria-labelledby="duty-date-index-title">
-    <div class="linked-date-index-head">
-      <div><h2 id="duty-date-index-title">📅 試合調整と連動する日程一覧</h2><p>日程を選ぶと、その試合専用の任務分担を開きます。未作成の日程は標準テンプレートから始まります。</p></div>
-      <select class="linked-date-filter" id="duty-category-filter" aria-label="カテゴリーで日程を絞り込み"><option value="all">すべてのカテゴリー</option></select>
+  <details class="linked-date-index linked-date-disclosure">
+    <summary class="linked-date-summary"><span>📅 試合調整と連動する日程一覧</span><span class="linked-date-summary-hint">タップして開く</span></summary>
+    <div class="linked-date-disclosure-body">
+      <div class="linked-date-index-head">
+        <div><p>日程を選ぶと、その試合専用の任務分担を開きます。未作成の日程は標準テンプレートから始まります。</p></div>
+        <select class="linked-date-filter" id="duty-category-filter" aria-label="カテゴリーで日程を絞り込み"><option value="all">すべてのカテゴリー</option></select>
+      </div>
+      <div class="linked-date-grid" id="duty-linked-dates"><div class="linked-date-empty">日程を読み込み中…</div></div>
     </div>
-    <div class="linked-date-grid" id="duty-linked-dates"><div class="linked-date-empty">日程を読み込み中…</div></div>
-  </section>
+  </details>
   <div class="linked-context-panel" id="linked-context-panel"></div>
 
   <div class="sum-bar">

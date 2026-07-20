@@ -111,13 +111,16 @@
 
   <div class="input-note no-print">黄色セルの代わりに、この画面では青い入力欄を編集します。金額は「単価 × 数量」で自動計算します。1件の金額だけ入れる場合は、単価に金額、数量に 1 を入力してください。</div>
 
-  <section class="accounting-date-index no-print" aria-labelledby="accounting-date-title">
-    <div class="accounting-date-head">
-      <div><h2 id="accounting-date-title">📅 試合調整と連動する日程一覧</h2><p>日程を選ぶと、その試合専用の会計・決算書を開きます。入力内容は試合調整から開いた場合と同じデータです。</p></div>
-      <select class="accounting-date-filter" id="accounting-category-filter" aria-label="カテゴリーで日程を絞り込み"><option value="all">すべてのカテゴリー</option></select>
+  <details class="accounting-date-index linked-date-disclosure no-print">
+    <summary class="linked-date-summary"><span>📅 試合調整と連動する日程一覧</span><span class="linked-date-summary-hint">タップして開く</span></summary>
+    <div class="linked-date-disclosure-body">
+      <div class="accounting-date-head">
+        <div><p>日程を選ぶと、その試合専用の会計・決算書を開きます。入力内容は試合調整から開いた場合と同じデータです。</p></div>
+        <select class="accounting-date-filter" id="accounting-category-filter" aria-label="カテゴリーで日程を絞り込み"><option value="all">すべてのカテゴリー</option></select>
+      </div>
+      <div class="accounting-date-list" id="accounting-linked-dates"><div class="accounting-date-empty">日程を読み込み中…</div></div>
     </div>
-    <div class="accounting-date-list" id="accounting-linked-dates"><div class="accounting-date-empty">日程を読み込み中…</div></div>
-  </section>
+  </details>
 
   <div class="linked-accounting-panel no-print" id="linked-accounting-panel"></div>
 
