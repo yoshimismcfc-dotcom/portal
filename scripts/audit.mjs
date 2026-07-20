@@ -431,6 +431,12 @@ if (!coachSource.includes("coach-next-event") || !coachSource.includes("coach-me
 if (!coachSource.includes("sameDay=dates.filter") || !coachSource.includes("同日 '+(index+1)") || !coachSource.includes('SMCEventLinks.href("game_adjust.html",item)')) {
   fail("coach.html", "同じ日付の複数試合を別段で表示する処理がありません");
 }
+if (!coachSource.includes("coach-event-browser") || !coachSource.includes("renderTournamentBrowser") || !coachSource.includes("data-coach-event-id") || !coachSource.includes('role="tablist"')) {
+  fail("coach.html", "次の大会直下に日程連動の大会選択タブがありません");
+}
+if (!guideSource.includes("その直下の<strong>大会一覧</strong>") || !guideSource.includes("日付・カテゴリーごとの大会タブ")) {
+  fail("guide.html", "コーチ専用フォルダの大会一覧タブが説明されていません");
+}
 if (!gameAdjustSource.includes('new URLSearchParams(location.search).get("dateId")') || !gameAdjustSource.includes("var requested=entries.find")) {
   fail("game_adjust.html", "コーチ専用メニューで選択した日程を直接表示できません");
 }
