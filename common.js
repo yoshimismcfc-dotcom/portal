@@ -277,12 +277,16 @@
       if (!tbody) return;
       const rows = Array.from(tbody.rows).filter((row) => row.querySelector("button.status-btn"));
       if (rows.length < 2) return;
+      const statusOrder = { "OK": 0, "確認中": 1, "－": 2, "NG": 3 };
+      const nameCollator = new Intl.Collator("ja", { numeric: true, sensitivity: "base", ignorePunctuation: true });
       const sorted = rows.slice().sort((rowA, rowB) => {
         const statusA = rowA.children[activeDateIndex]?.querySelector("button.status-btn")?.textContent.trim() || "－";
         const statusB = rowB.children[activeDateIndex]?.querySelector("button.status-btn")?.textContent.trim() || "－";
-        const okDifference = Number(statusB === "OK") - Number(statusA === "OK");
-        if (okDifference) return okDifference;
-        return teamNameForSort(rowA).localeCompare(teamNameForSort(rowB), "ja", { numeric: true, sensitivity: "base" });
+        const statusDifference = (statusOrder[statusA] ?? 2) - (statusOrder[statusB] ?? 2);
+        if (statusDifference) return statusDifference;
+        const nameA = teamNameForSort(rowA).normalize("NFKC");
+        const nameB = teamNameForSort(rowB).normalize("NFKC");
+        return nameCollator.compare(nameA, nameB);
       });
       if (rows.every((row, index) => row === sorted[index])) return;
       const anchorRow = rows[rows.length - 1].nextSibling;
