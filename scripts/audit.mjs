@@ -18,7 +18,9 @@ for (const file of htmlFiles) {
   const source = fs.readFileSync(path.join(root, file), "utf8");
 
   const ids = new Map();
-  for (const match of source.matchAll(/\bid=["']([^"']+)["']/gi)) {
+  // 動的なHTML文字列内の id= は実DOMの重複ではないため、静的HTMLだけを検査する。
+  const staticMarkup = source.replace(/<script\b[^>]*>[\s\S]*?<\/script>/gi, "");
+  for (const match of staticMarkup.matchAll(/\bid=["']([^"']+)["']/gi)) {
     ids.set(match[1], (ids.get(match[1]) || 0) + 1);
   }
   for (const [id, count] of ids) {
