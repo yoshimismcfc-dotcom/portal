@@ -468,6 +468,19 @@ if (!swSource.includes("./event-links.js")) {
   fail("sw.js", "日程連携用JavaScriptが事前キャッシュ対象にありません");
 }
 
+
+for (const [name, source] of [["duty_match.html", dutyMatchSource], ["tournament.html", tournamentSource], ["accounting.html", accountingSource]]) {
+  if (!source.includes("linked-date-disclosure") || !source.includes('class="linked-date-summary"')) {
+    fail(name, "試合調整と連動する日程一覧が折りたたみ表示ではありません");
+  }
+  if (/<details[^>]*linked-date-disclosure[^>]*\sopen(?:\s|>)/i.test(source)) {
+    fail(name, "日程一覧が初期状態で開いています");
+  }
+}
+if (!guideSource.includes("通常は閉じています") || !guideSource.includes("見出しをタップして開く")) {
+  fail("guide.html", "日程一覧の折りたたみ操作が説明されていません");
+}
+
 const rulesPath = path.join(root, "database.rules.json");
 if (fs.existsSync(rulesPath)) {
   try {

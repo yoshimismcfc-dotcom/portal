@@ -1121,3 +1121,50 @@ body[data-theme="light"] .ledger-edit-table td:last-child {
 body[data-theme="light"] .auto-alert.alert-rain .alert-title{color:#175ca8}
 body[data-theme="light"] .auto-alert.alert-heat .alert-title{color:#a61f36}
 @media(max-width:480px){.auto-alert-head{align-items:flex-start}.auto-alert .alert-title{font-size:.82rem}.auto-alert .btn-line-copy{padding:5px 8px;font-size:.68rem}}
+
+/* 試合調整と連動する日程一覧：必要な時だけ開く共通折りたたみ */
+.linked-date-disclosure > .linked-date-summary {
+  list-style: none;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  min-height: 48px;
+  padding: 11px 14px;
+  border: 1px solid rgba(114, 214, 255, .48);
+  border-radius: 14px;
+  background: rgba(4, 35, 67, .72);
+  color: var(--cyan);
+  font-size: .92rem;
+  font-weight: 900;
+  cursor: pointer;
+  -webkit-tap-highlight-color: transparent;
+}
+.linked-date-disclosure > .linked-date-summary::-webkit-details-marker { display: none; }
+.linked-date-disclosure > .linked-date-summary::after {
+  content: "＋";
+  flex: 0 0 auto;
+  color: var(--cyan);
+  font-size: 1.2rem;
+  line-height: 1;
+}
+.linked-date-disclosure[open] > .linked-date-summary::after { content: "−"; }
+.linked-date-summary-hint {
+  margin-left: auto;
+  color: var(--ink-3);
+  font-size: .68rem;
+  font-weight: 800;
+  white-space: nowrap;
+}
+.linked-date-disclosure[open] .linked-date-summary-hint { display: none; }
+.linked-date-disclosure-body { padding-top: 10px; }
+.linked-date-summary:focus-visible {
+  outline: 3px solid rgba(114, 214, 255, .45);
+  outline-offset: 3px;
+}
+body[data-theme="light"] .linked-date-disclosure > .linked-date-summary {
+  border-color: #1680ad;
+  background: #e7f6fc;
+  color: #075779;
+}
+body[data-theme="light"] .linked-date-disclosure > .linked-date-summary::after { color: #075779; }
+body[data-theme="light"] .linked-date-summary-hint { color: #4f6577; }
