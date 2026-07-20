@@ -1207,29 +1207,14 @@ function enhanceCalendarUpcomingAgenda() {
   catch(e){console.warn("auto alert local settings error:",e);}
 
   function calcWbgt(temp,humidity){return 0.735*temp+0.0374*humidity+0.00292*temp*humidity-4.064;}
-  function ensureAlertStatus(heatEl){
+  function clearAlertStatus(){
     var status=document.getElementById("auto-alert-status");
-    if(status)return status;
-    status=document.createElement("div");
-    status.id="auto-alert-status";
-    status.className="auto-alert alert-status show";
-    status.setAttribute("role","status");
-    status.setAttribute("aria-live","polite");
-    status.innerHTML='<div class="auto-alert-head"><div class="alert-title"><span class="auto-alert-label">自動アラート</span><span>🔎 予報確認状況</span></div></div><div class="alert-body" id="auto-alert-status-body">確認しています…</div>';
-    heatEl.insertAdjacentElement("afterend",status);
-    if(!document.getElementById("auto-alert-status-style")){
-      var style=document.createElement("style");
-      style.id="auto-alert-status-style";
-      style.textContent='.auto-alert.alert-status{display:block!important;border-color:rgba(0,180,230,.42);background:rgba(0,100,150,.12)}.auto-alert.alert-status[data-state="safe"]{border-color:rgba(0,190,105,.45);background:rgba(0,150,85,.1)}.auto-alert.alert-status[data-state="waiting"]{border-color:rgba(255,190,40,.42);background:rgba(180,120,0,.1)}.auto-alert.alert-status[data-state="error"]{border-color:rgba(255,80,100,.45);background:rgba(180,30,50,.1)}.auto-alert.alert-status .alert-body{white-space:pre-line}';
-      document.head.appendChild(style);
-    }
-    return status;
+    if(status)status.remove();
   }
-  function setAlertStatus(heatEl,message,state){
-    var status=ensureAlertStatus(heatEl);
-    status.dataset.state=state||"checking";
-    var body=document.getElementById("auto-alert-status-body");
-    if(body)body.textContent=message;
+  function setAlertStatus(){
+    // 確認中・対象外・正常・通信エラーは画面に常設しない。
+    // 雨またはWBGTが設定基準に該当したときだけ、既存の警告枠を表示する。
+    clearAlertStatus();
   }
   function dateTimeLabel(date,includeTime){
     var days=["日","月","火","水","木","金","土"];
