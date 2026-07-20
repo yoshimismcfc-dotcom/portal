@@ -11,14 +11,24 @@
   <link rel="stylesheet" href="common.css">
   <script src="common.js"></script>
   <style>
-    .gesture-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:12px}
+    .referee-tab-list{display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:7px;overflow:visible}
+    .referee-tab-list .tab-btn{min-width:0;padding:11px 6px;font-size:.78rem;line-height:1.25;border-radius:12px}
+    .referee-tab-list .tab-btn.active{box-shadow:0 0 0 2px rgba(0,212,255,.18),0 8px 24px rgba(0,0,0,.22)}
+    .quick-jump{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:8px;margin:12px 0 18px}
+    .quick-jump button{min-height:48px;border:1px solid rgba(0,212,255,.35);border-radius:12px;background:rgba(0,212,255,.08);color:var(--ink);font:inherit;font-size:.76rem;font-weight:900;line-height:1.35;padding:7px;cursor:pointer}
+    .quick-jump button:active{transform:scale(.97)}
+    .gesture-grid{counter-reset:signal;display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:14px}
     .gesture-card{
-      background:var(--surface-lt);border-radius:var(--r12);padding:14px 10px;
-      text-align:center;border:1px solid var(--line-2);
+      counter-increment:signal;position:relative;overflow:hidden;
+      background:linear-gradient(160deg,rgba(16,48,84,.96),rgba(5,22,42,.96));border-radius:16px;padding:14px 12px 13px;
+      text-align:center;border:1px solid rgba(0,212,255,.3);box-shadow:0 10px 24px rgba(0,0,0,.16);
     }
-    .gesture-card strong{display:block;font-size:.84rem;color:#ffffff;margin-bottom:4px;font-weight:900}
-    .gesture-card p{font-size:.72rem;color:#a8d4f0;margin:0;line-height:1.45}
-    @media(max-width:480px){.gesture-grid{grid-template-columns:repeat(2,1fr)}}
+    .gesture-card::before{content:counter(signal);position:absolute;top:9px;left:9px;width:25px;height:25px;border-radius:50%;display:grid;place-items:center;background:var(--orange);color:#fff;font-size:.72rem;font-weight:900;z-index:2}
+    .gesture-card svg{display:block!important;width:112px!important;height:136px!important;margin:0 auto 10px!important;padding:8px;background:radial-gradient(circle at 50% 35%,#173d67 0,#07182c 72%);border:1px solid rgba(255,255,255,.12);border-radius:14px;filter:drop-shadow(0 6px 8px rgba(0,0,0,.25))}
+    .gesture-card strong{display:block;font-size:.98rem;color:#ffffff;margin-bottom:7px;font-weight:900;letter-spacing:.01em}
+    .gesture-card p{font-size:.8rem;color:#c8eaff;margin:0;line-height:1.55;padding:7px 8px;background:rgba(0,212,255,.07);border-radius:9px}
+    .gesture-card p::before{content:"合図｜";color:var(--cyan);font-weight:900}
+    .gesture-hint{margin:-2px 0 12px;padding:9px 11px;border-radius:10px;background:rgba(255,176,32,.1);border-left:3px solid #ffb020;color:var(--ink-2);font-size:.78rem;line-height:1.55}
     .guide-section{margin-bottom:20px}
     .guide-section h3{font-size:.95rem;font-weight:900;color:#ffffff;margin-bottom:10px;padding-left:10px;border-left:3px solid var(--orange)}
     .guide-list{list-style:none;display:grid;gap:6px}
@@ -53,9 +63,10 @@
     .diagram-card h4{color:#fff;font-size:.86rem;margin:0 0 8px}
     .diagram-card p{color:#b7d7e9;font-size:.74rem;line-height:1.55;margin:8px 0 0}
     .diagram-card svg{display:block;width:100%;height:auto;background:#eaf7ee;border-radius:10px}
-    .signal-steps{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:8px}
-    .signal-step{text-align:center;padding:10px 6px;border-radius:12px;background:rgba(255,255,255,.045);border:1px solid var(--line-2);font-size:.73rem;color:var(--ink-3);line-height:1.45}
-    .signal-step b{display:block;color:var(--cyan);font-size:.82rem;margin-bottom:4px}
+    .signal-steps{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:8px}
+    .signal-step{text-align:center;padding:10px 7px;border-radius:12px;background:rgba(255,255,255,.045);border:1px solid var(--line-2);font-size:.73rem;color:var(--ink-3);line-height:1.45}
+    .signal-step b{display:block;color:var(--cyan);font-size:.82rem;margin:5px 0 4px}
+    .signal-step svg{display:block;width:82px;height:82px;margin:0 auto;background:#07182c;border-radius:11px;border:1px solid rgba(0,212,255,.2)}
     .change-card{border:1px solid var(--line-2);border-radius:14px;overflow:hidden;margin-bottom:12px;background:rgba(255,255,255,.035)}
     .change-head{display:flex;align-items:center;gap:8px;padding:10px 12px;background:rgba(0,212,255,.1);font-weight:900;color:var(--ink)}
     .change-year{padding:3px 8px;border-radius:99px;background:var(--orange);color:#fff;font-size:.7rem;white-space:nowrap}
@@ -64,10 +75,17 @@
     .change-body b{display:block;color:var(--cyan);margin-bottom:3px}
     .source-links{font-size:.72rem;line-height:1.75;color:var(--ink-3);padding:12px;border-left:3px solid var(--cyan);background:rgba(0,212,255,.07);border-radius:0 10px 10px 0}
     .source-links a{color:var(--cyan);font-weight:800}
+    body[data-theme="light"] .referee-tab-list .tab-btn{color:#17324d;background:#eef5fb;border-color:#b8ccdc}
+    body[data-theme="light"] .referee-tab-list .tab-btn.active{background:#075a91;color:#fff;border-color:#075a91}
+    body[data-theme="light"] .quick-jump button{background:#e8f5fc;color:#17324d;border-color:#75b8d9}
+    body[data-theme="light"] .gesture-card{background:linear-gradient(160deg,#133d65,#071b31)}
+    body[data-theme="light"] .gesture-card strong{color:#fff}
+    body[data-theme="light"] .gesture-card p{color:#d8f1ff}
     body[data-theme="light"] .diagram-card{background:#f7fbff}
     body[data-theme="light"] .diagram-card h4{color:var(--ink)}
     body[data-theme="light"] .diagram-card p{color:var(--ink-2)}
-    @media(max-width:560px){.diagram-grid,.quick-priority{grid-template-columns:1fr}.change-body{grid-template-columns:1fr}.signal-steps{grid-template-columns:1fr 1fr 1fr}}
+    @media(max-width:620px){.referee-tab-list{grid-template-columns:repeat(3,minmax(0,1fr))}.quick-jump{grid-template-columns:repeat(2,minmax(0,1fr))}.diagram-grid,.quick-priority{grid-template-columns:1fr}.change-body{grid-template-columns:1fr}.signal-steps{grid-template-columns:1fr 1fr}}
+    @media(max-width:370px){.gesture-grid{grid-template-columns:1fr}.gesture-card svg{width:124px!important;height:148px!important}}
   </style>
 </head>
 <body>
@@ -81,7 +99,14 @@
       <div class="hero-sub">少年サッカー（8人制）の審判役割・ジェスチャー・試合前チェックリストです。</div></div>
   </div>
 
-  <div class="tab-list" role="tablist">
+  <div class="quick-jump" aria-label="審判ガイドのクイック確認">
+    <button type="button" onclick="openRefereeSection('main-ref','main-gestures')">⚽ 主審の合図</button>
+    <button type="button" onclick="openRefereeSection('assist-ref','assistant-gestures')">🚩 副審の旗</button>
+    <button type="button" onclick="openRefereeSection('assist-ref','offside-master')">📐 オフサイド</button>
+    <button type="button" onclick="openRefereeSection('changes','tab-changes')">🆕 改正点</button>
+  </div>
+
+  <div class="tab-list referee-tab-list" role="tablist" aria-label="審判ガイドの項目">
     <button class="tab-btn active" data-tab="main-ref">⚽ 主審</button>
     <button class="tab-btn" data-tab="assist-ref">🚩 副審</button>
     <button class="tab-btn" data-tab="fourth-ref">⏱️ 第4審判</button>
@@ -111,8 +136,9 @@
           <li>負傷者が出た場合はプレーを止め、安全を確認してから再開。</li>
         </ul>
       </div>
-      <div class="guide-section">
+      <div class="guide-section" id="main-gestures">
         <h3>主審のジェスチャー</h3>
+        <p class="gesture-hint">笛を吹いたら、いったん止まってから大きく合図します。腕を素早く振り回さず、選手が方向を確認できるまで保持します。</p>
         <div class="gesture-grid">
 
           <!-- フリーキック -->
@@ -218,8 +244,9 @@
           <li>交代の申し出を受け付け、主審に伝える。</li>
         </ul>
       </div>
-      <div class="guide-section">
+      <div class="guide-section" id="assistant-gestures">
         <h3>副審のジェスチャー（旗）</h3>
+        <p class="gesture-hint">旗は主審から見える側の手で、静止して明確に。持ち替えは腰より下で行い、旗を振り回しません。</p>
         <div class="gesture-grid">
 
           <!-- スローイン（自チーム） -->
@@ -483,11 +510,24 @@
               <p>フリーキックや通常のパスは例外ではありません。例外の再開後、別の味方が触れた次のプレーから通常判定です。</p>
             </article>
           </div>
-          <h3 style="margin-top:18px">旗の順番：上げる → 笛を待つ → 位置</h3>
+          <h3 style="margin-top:18px">オフサイドの旗：垂直 → 主審の笛 → 場所</h3>
           <div class="signal-steps">
-            <div class="signal-step"><b>1 まず垂直</b>右手で旗を真上。急いで角度を付けない。</div>
-            <div class="signal-step"><b>2 主審を見る</b>アイコンタクト。主審の笛まで旗を維持。</div>
-            <div class="signal-step"><b>3 場所を示す</b>近い側＝斜め下、中央＝水平、遠い側＝斜め上。</div>
+            <div class="signal-step">
+              <svg viewBox="0 0 82 82" role="img" aria-label="旗を垂直に上げる"><circle cx="41" cy="20" r="8" fill="#fff"/><line x1="41" y1="28" x2="41" y2="61" stroke="#fff" stroke-width="7"/><line x1="36" y1="36" x2="24" y2="16" stroke="#fff" stroke-width="6" stroke-linecap="round"/><line x1="24" y1="16" x2="24" y2="2" stroke="#31d7ff" stroke-width="3"/><polygon points="24,2 42,8 24,14" fill="#ffb020"/></svg>
+              <b>1 垂直に上げる</b>右手で真上へ。主審を見て笛を待つ。
+            </div>
+            <div class="signal-step">
+              <svg viewBox="0 0 82 82" role="img" aria-label="近い側は旗を斜め下"><circle cx="41" cy="20" r="8" fill="#fff"/><line x1="41" y1="28" x2="41" y2="61" stroke="#fff" stroke-width="7"/><line x1="36" y1="36" x2="18" y2="56" stroke="#fff" stroke-width="6" stroke-linecap="round"/><line x1="18" y1="56" x2="8" y2="67" stroke="#31d7ff" stroke-width="3"/><polygon points="8,67 22,60 15,75" fill="#ffb020"/></svg>
+              <b>近い側</b>副審に近い場所は斜め下。
+            </div>
+            <div class="signal-step">
+              <svg viewBox="0 0 82 82" role="img" aria-label="中央は旗を水平"><circle cx="41" cy="20" r="8" fill="#fff"/><line x1="41" y1="28" x2="41" y2="61" stroke="#fff" stroke-width="7"/><line x1="36" y1="36" x2="16" y2="36" stroke="#fff" stroke-width="6" stroke-linecap="round"/><line x1="16" y1="36" x2="3" y2="36" stroke="#31d7ff" stroke-width="3"/><polygon points="3,30 3,42 17,36" fill="#ffb020"/></svg>
+              <b>中央</b>フィールド中央付近は水平。
+            </div>
+            <div class="signal-step">
+              <svg viewBox="0 0 82 82" role="img" aria-label="遠い側は旗を斜め上"><circle cx="41" cy="20" r="8" fill="#fff"/><line x1="41" y1="28" x2="41" y2="61" stroke="#fff" stroke-width="7"/><line x1="36" y1="36" x2="18" y2="17" stroke="#fff" stroke-width="6" stroke-linecap="round"/><line x1="18" y1="17" x2="8" y2="7" stroke="#31d7ff" stroke-width="3"/><polygon points="8,7 23,11 13,22" fill="#ffb020"/></svg>
+              <b>遠い側</b>副審から遠い場所は斜め上。
+            </div>
           </div>
         </div>
         <button class="btn btn-line-copy" type="button" onclick="copyAssistantPrinciples()" style="width:100%;margin-top:12px">📋 副審の心得をLINEコピー</button>
@@ -628,6 +668,14 @@
 </main>
 <footer class="site-footer"></footer>
 <script>
+function openRefereeSection(tabName, sectionId){
+  var tabButton=document.querySelector('.referee-tab-list .tab-btn[data-tab="'+tabName+'"]');
+  if(tabButton) tabButton.click();
+  window.setTimeout(function(){
+    var target=document.getElementById(sectionId);
+    if(target) target.scrollIntoView({behavior:"smooth",block:"start"});
+  },80);
+}
 function copyCheckList(){
   var text=[
     "【審判チェックリスト】",
