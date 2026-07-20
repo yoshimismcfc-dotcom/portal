@@ -461,6 +461,9 @@ if (!guideSource.includes("未保存を含む全日程") || !guideSource.include
 if (!dutyMatchSource.includes('scrollIntoView({behavior:"smooth",block:"start"})') || !tournamentSource.includes('document.querySelector("#doc-youkou .panel")') || !accountingSource.includes("focusLinkedAccountingEditor")) {
   fail("大会連携", "試合調整から入力画面へ直接移動する処理がありません");
 }
+if (!financeSource.includes("r-notify-accountant") || !financeSource.includes("notificationUnread") || !financeSource.includes("enableAccountantDeviceNotifications") || !financeSource.includes("isCoachFinanceEntry")) {
+  fail("finance.html", "会計担当だけに表示する申請通知の仕組みがありません");
+}
 if (!accountingSource.includes("syncAccountingWithGameAdjust") || !accountingSource.includes("isUntouchedAccountingPlaceholder") || !accountingSource.includes("_accountingCloudReady&&_gameAdjustCloudReady")) {
   fail("accounting.html", "試合調整の日程と会計大会名を安全に自動同期する処理がありません");
 }
