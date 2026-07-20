@@ -434,8 +434,14 @@ if (!coachSource.includes("sameDay=dates.filter") || !coachSource.includes("同�
 if (!coachSource.includes("coach-event-browser") || !coachSource.includes("renderTournamentBrowser") || !coachSource.includes("data-coach-event-id") || !coachSource.includes('role="tablist"')) {
   fail("coach.html", "次の大会直下に日程連動の大会選択タブがありません");
 }
+if (!coachSource.includes("preparationFor") || !coachSource.includes("coach-attention") || !coachSource.includes("copyCoachPreparationSummary") || !coachSource.includes('dbListen("duty_match"') || !coachSource.includes('dbListen("tournament_saves"') || !coachSource.includes('dbListen("accounting"')) {
+  fail("coach.html", "大会準備状況・要対応・LINEコピーが共通データに連動していません");
+}
 if (!guideSource.includes("その直下の<strong>大会一覧</strong>") || !guideSource.includes("日付・カテゴリーごとの大会タブ")) {
   fail("guide.html", "コーチ専用フォルダの大会一覧タブが説明されていません");
+}
+if (!guideSource.includes("準備完了数（4項目）") || !guideSource.includes("「要対応」") || !guideSource.includes("準備状況をLINEコピー")) {
+  fail("guide.html", "大会準備状況・要対応・LINE共有が説明されていません");
 }
 if (!gameAdjustSource.includes('new URLSearchParams(location.search).get("dateId")') || !gameAdjustSource.includes("var requested=entries.find")) {
   fail("game_adjust.html", "コーチ専用メニューで選択した日程を直接表示できません");

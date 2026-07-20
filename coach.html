@@ -150,6 +150,35 @@
     body[data-theme="light"] .coach-event-tab[aria-selected="true"]{background:#fff4e4;color:#10283d;border-color:#dc8b2e}
     body[data-theme="light"] .coach-event-selected{background:#fff;border-color:#9fc5d9}
 
+
+    .coach-attention{margin:0 0 10px;padding:10px;border-radius:11px;border:1px solid rgba(255,204,0,.28);background:rgba(255,204,0,.07)}
+    .coach-attention.is-ready{border-color:rgba(0,204,102,.32);background:rgba(0,204,102,.07)}
+    .coach-attention-head{display:flex;justify-content:space-between;gap:8px;align-items:center;color:#ffe58a;font-size:.7rem;font-weight:900}
+    .coach-attention.is-ready .coach-attention-head{color:#72f0ad}
+    .coach-attention-list{display:flex;gap:6px;overflow-x:auto;margin-top:7px;padding-bottom:2px;scrollbar-width:none}
+    .coach-attention-list::-webkit-scrollbar{display:none}
+    .coach-attention-item{flex:0 0 auto;max-width:190px;padding:7px 9px;border:1px solid rgba(255,204,0,.3);border-radius:9px;background:rgba(4,18,35,.7);color:#fff;text-align:left;cursor:pointer}
+    .coach-attention-item strong,.coach-attention-item span{display:block;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+    .coach-attention-item strong{font-size:.68rem}.coach-attention-item span{margin-top:2px;color:#e8ca74;font-size:.6rem}
+    .coach-preparation-grid{display:grid;grid-template-columns:1fr 1fr;gap:6px;margin-top:10px}
+    .coach-preparation-item{min-height:38px;padding:7px 9px;border:1px solid rgba(255,204,0,.28);border-radius:9px;background:rgba(255,204,0,.06);color:#ffe58a;font-size:.64rem;font-weight:900;display:flex;align-items:center;justify-content:space-between;gap:5px}
+    .coach-preparation-item.is-ready{border-color:rgba(0,204,102,.3);background:rgba(0,204,102,.07);color:#72f0ad}
+    .coach-event-countdown{display:inline-flex;margin-top:7px;padding:3px 8px;border-radius:999px;background:rgba(0,212,255,.1);border:1px solid rgba(0,212,255,.25);color:#65dfff;font-size:.62rem;font-weight:900}
+    .coach-event-tab-progress{display:block;margin-top:3px;font-size:.58rem;font-weight:900;color:#ffdb70}
+    .coach-event-tab[aria-selected="true"] .coach-event-tab-progress{color:#fff0bd}
+    .coach-share-button{width:100%;min-height:42px;margin-top:9px;border:1px solid rgba(0,204,102,.4);border-radius:10px;background:rgba(0,204,102,.1);color:#72f0ad;font-weight:900;cursor:pointer}
+    .coach-share-button:focus-visible,.coach-attention-item:focus-visible{outline:3px solid var(--cyan);outline-offset:2px}
+    body[data-theme="light"] .coach-attention{background:#fff9df;border-color:#c79800}
+    body[data-theme="light"] .coach-attention.is-ready{background:#e9fff3;border-color:#36a86f}
+    body[data-theme="light"] .coach-attention-head{color:#6d5200}
+    body[data-theme="light"] .coach-attention.is-ready .coach-attention-head{color:#087443}
+    body[data-theme="light"] .coach-attention-item{background:#fff;color:#10283d;border-color:#d0a629}
+    body[data-theme="light"] .coach-attention-item span{color:#6d5200}
+    body[data-theme="light"] .coach-preparation-item{background:#fff9df;color:#6d5200;border-color:#d0a629}
+    body[data-theme="light"] .coach-preparation-item.is-ready{background:#e9fff3;color:#087443;border-color:#36a86f}
+    body[data-theme="light"] .coach-event-countdown{color:#075f86;background:#e9f8ff;border-color:#5aa9c9}
+    body[data-theme="light"] .coach-share-button{background:#e9fff3;color:#087443;border-color:#36a86f}
+
     @media(max-width:640px){
       .coach-welcome{padding:14px}
       .coach-welcome-head{display:block}
@@ -729,56 +758,148 @@ document.addEventListener("DOMContentLoaded", function(){
 <script id="coach-hub-enhancement">
 (function(){
   "use strict";
-  function escText(value){return String(value==null?"":value);}
   var COACH_EVENT_KEY="smc_coach_selected_event_v1";
   var selectedCoachEventId=(function(){try{return sessionStorage.getItem(COACH_EVENT_KEY)||"";}catch(e){return "";}})();
+  var coachState={gameAdjust:null,duties:[],tournamentSaves:{},accounting:{tournaments:[]}};
+
   function rememberCoachEvent(id){
     selectedCoachEventId=String(id||"");
     try{sessionStorage.setItem(COACH_EVENT_KEY,selectedCoachEventId);}catch(e){}
+  }
+  function linkedDuty(dateId){
+    return (Array.isArray(coachState.duties)?coachState.duties:[]).find(function(match){
+      return match&&String(match.gameAdjustDateId||"")===String(dateId)||match&&String(match.id||"")==="ga_"+String(dateId);
+    });
+  }
+  function linkedAccounting(dateId){
+    var list=coachState.accounting&&Array.isArray(coachState.accounting.tournaments)?coachState.accounting.tournaments:[];
+    return list.find(function(record){
+      return record&&String(record.gameAdjustDateId||"")===String(dateId)||record&&String(record.id||"")==="accounting_game_"+String(dateId);
+    });
+  }
+  function hasAccountingInput(record){
+    if(!record)return false;
+    if(String(record.venue||"").trim()||Number(record.carry))return true;
+    return ["income","expense"].some(function(kind){
+      return (Array.isArray(record[kind])?record[kind]:[]).some(function(row){
+        return Number(row&&row.unit)||Number(row&&row.qty)||String(row&&row.memo||"").trim()&&String(row.memo)!=="大会名・開催日・会場・参加費を入力してください";
+      });
+    });
+  }
+  function preparationFor(item){
+    var duty=linkedDuty(item.id);
+    var duties=duty&&Array.isArray(duty.duties)?duty.duties:[];
+    var dutyTotal=duties.length?duties.filter(function(task){return task&&task.status!=="na";}).length:10;
+    var dutyDone=duties.filter(function(task){return task&&task.status==="done";}).length;
+    var saves=coachState.tournamentSaves&&typeof coachState.tournamentSaves==="object"?Object.values(coachState.tournamentSaves):[];
+    var youkou=saves.some(function(entry){return entry&&String(entry.gameAdjustDateId||"")===String(item.id)&&entry.type==="youkou";});
+    var taisen=saves.some(function(entry){return entry&&String(entry.gameAdjustDateId||"")===String(item.id)&&entry.type==="taisen";});
+    var accounting=linkedAccounting(item.id);
+    var accountingReady=hasAccountingInput(accounting);
+    var completeCount=(dutyTotal>0&&dutyDone>=dutyTotal?1:0)+(youkou?1:0)+(taisen?1:0)+(accountingReady?1:0);
+    var issues=[];
+    if(!(dutyTotal>0&&dutyDone>=dutyTotal))issues.push("任務 "+dutyDone+"/"+dutyTotal);
+    if(!youkou)issues.push("要綱");
+    if(!taisen)issues.push("対戦表");
+    if(!accountingReady)issues.push(accounting?"会計入力":"会計作成");
+    return {dutyDone:dutyDone,dutyTotal:dutyTotal,youkou:youkou,taisen:taisen,accountingExists:!!accounting,accountingReady:accountingReady,completeCount:completeCount,issues:issues};
+  }
+  function countdownFor(item){
+    var date=window.SMCEventLinks&&SMCEventLinks.parseIso(item&&item.dateIso);
+    if(!date)return "日付未設定";
+    var now=new Date(),today=new Date(now.getFullYear(),now.getMonth(),now.getDate());
+    var days=Math.round((date-today)/86400000);
+    if(days===0)return "本日";
+    if(days>0)return "大会まであと"+days+"日";
+    return "終了（"+Math.abs(days)+"日前）";
+  }
+  function preparationHtml(prep){
+    var dutyReady=prep.dutyTotal>0&&prep.dutyDone>=prep.dutyTotal;
+    return '<div class="coach-preparation-grid" aria-label="大会準備状況">'
+      +'<div class="coach-preparation-item'+(dutyReady?' is-ready':'')+'"><span>👥 任務</span><strong>'+prep.dutyDone+'/'+prep.dutyTotal+'</strong></div>'
+      +'<div class="coach-preparation-item'+(prep.youkou?' is-ready':'')+'"><span>📝 要綱</span><strong>'+(prep.youkou?'保存済':'未保存')+'</strong></div>'
+      +'<div class="coach-preparation-item'+(prep.taisen?' is-ready':'')+'"><span>📋 対戦表</span><strong>'+(prep.taisen?'保存済':'未保存')+'</strong></div>'
+      +'<div class="coach-preparation-item'+(prep.accountingReady?' is-ready':'')+'"><span>💴 会計</span><strong>'+(prep.accountingReady?'入力あり':prep.accountingExists?'入力待ち':'未作成')+'</strong></div>'
+      +'</div>';
+  }
+  function renderAttention(sorted){
+    var now=new Date(),today=new Date(now.getFullYear(),now.getMonth(),now.getDate());
+    var upcoming=sorted.slice().filter(function(item){
+      var date=SMCEventLinks.parseIso(item.dateIso);
+      return date&&date>=today;
+    }).sort(function(a,b){return SMCEventLinks.parseIso(a.dateIso)-SMCEventLinks.parseIso(b.dateIso);});
+    var needing=upcoming.filter(function(item){return preparationFor(item).completeCount<4;}).slice(0,6);
+    if(!needing.length){
+      return '<div class="coach-attention is-ready"><div class="coach-attention-head"><span>✅ 今後の大会準備</span><span>未完了項目なし</span></div></div>';
+    }
+    return '<div class="coach-attention"><div class="coach-attention-head"><span>⚠️ 要対応</span><span>'+needing.length+'大会</span></div>'
+      +'<div class="coach-attention-list">'+needing.map(function(item){
+        var prep=preparationFor(item);
+        return '<button type="button" class="coach-attention-item" data-coach-attention-id="'+escapeHtml(String(item.id||""))+'"><strong>'+escapeHtml(SMCEventLinks.label(item)+' '+(item.cat||""))+'</strong><span>'+escapeHtml(prep.issues.join("・"))+'</span></button>';
+      }).join("")+'</div></div>';
+  }
+  function copyText(textValue){
+    if(navigator.clipboard&&window.isSecureContext)return navigator.clipboard.writeText(textValue);
+    return new Promise(function(resolve,reject){
+      var area=document.createElement("textarea");
+      area.value=textValue;area.style.position="fixed";area.style.opacity="0";
+      document.body.appendChild(area);area.select();
+      try{document.execCommand("copy")?resolve():reject(new Error("copy failed"));}catch(error){reject(error);}
+      area.remove();
+    });
+  }
+  function copyCoachPreparationSummary(item){
+    var prep=preparationFor(item);
+    var lines=["【大会準備状況】",item.tournamentName||"大会名未設定",
+      [SMCEventLinks.label(item),item.cat,countdownFor(item)].filter(Boolean).join(" ／ "),
+      "👥 任務分担："+prep.dutyDone+"/"+prep.dutyTotal+(prep.dutyDone>=prep.dutyTotal?" 完了":""),
+      "📝 大会要綱："+(prep.youkou?"保存済み":"未保存"),
+      "📋 対戦表："+(prep.taisen?"保存済み":"未保存"),
+      "💴 会計："+(prep.accountingReady?"入力あり":prep.accountingExists?"入力待ち":"未作成"),
+      prep.issues.length?"要対応："+prep.issues.join("、"):"準備項目はすべて完了しています"];
+    copyText(lines.join("\n")).then(function(){
+      if(typeof flash==="function")flash("大会準備状況をコピーしました");
+    }).catch(function(){alert("コピーできませんでした。画面を開き直してお試しください。");});
   }
   function renderTournamentBrowser(dates,next){
     var root=document.getElementById("coach-event-browser");
     if(!root||!window.SMCEventLinks)return;
     var sorted=SMCEventLinks.sortDates(dates);
     if(!sorted.length){
-      root.innerHTML='<div class="coach-event-browser-head"><div class="coach-event-browser-title">🏆 大会一覧</div></div>'
-        +'<div class="coach-event-empty">登録済みの大会はありません</div>';
+      root.innerHTML='<div class="coach-event-browser-head"><div class="coach-event-browser-title">🏆 大会一覧</div></div><div class="coach-event-empty">登録済みの大会はありません</div>';
       return;
     }
     var selected=sorted.find(function(item){return String(item.id)===selectedCoachEventId;});
-    if(!selected){
-      selected=next||sorted[0];
-      rememberCoachEvent(selected.id);
-    }
+    if(!selected){selected=next||sorted[0];rememberCoachEvent(selected.id);}
     var tabs=sorted.map(function(item){
-      var active=String(item.id)===String(selected.id);
+      var active=String(item.id)===String(selected.id),prep=preparationFor(item);
       var tabDate=SMCEventLinks.label(item)+(item.cat?" · "+item.cat:"");
-      var tabName=item.tournamentName||"大会名未設定";
       return '<button type="button" class="coach-event-tab" role="tab" aria-selected="'+(active?"true":"false")+'" tabindex="'+(active?"0":"-1")+'" data-coach-event-id="'+escapeHtml(String(item.id||""))+'">'
-        +'<span class="coach-event-tab-date">'+escapeHtml(tabDate)+'</span>'
-        +'<span class="coach-event-tab-name">'+escapeHtml(tabName)+'</span></button>';
+        +'<span class="coach-event-tab-date">'+escapeHtml(tabDate)+'</span><span class="coach-event-tab-name">'+escapeHtml(item.tournamentName||"大会名未設定")+'</span>'
+        +'<span class="coach-event-tab-progress">準備 '+prep.completeCount+'/4</span></button>';
     }).join("");
-    var title=selected.tournamentName||"大会名未設定";
+    var prep=preparationFor(selected);
     var meta=[SMCEventLinks.label(selected),selected.cat,selected.target!=null?"目標 "+selected.target+"チーム":""].filter(Boolean).join(" ／ ");
     root.innerHTML='<div class="coach-event-browser-head"><div class="coach-event-browser-title">🏆 大会一覧</div><div class="coach-event-browser-help">'+sorted.length+'件・横にスライドできます</div></div>'
+      +renderAttention(sorted)
       +'<div class="coach-event-tabs" role="tablist" aria-label="大会を選択">'+tabs+'</div>'
-      +'<div class="coach-event-selected" role="tabpanel">'
-      +'<div class="coach-event-selected-title">'+escapeHtml(title)+'</div>'
-      +'<div class="coach-event-selected-meta">'+escapeHtml(meta)+'</div>'
+      +'<div class="coach-event-selected" role="tabpanel"><div class="coach-event-selected-title">'+escapeHtml(selected.tournamentName||"大会名未設定")+'</div>'
+      +'<div class="coach-event-selected-meta">'+escapeHtml(meta)+'</div><span class="coach-event-countdown">'+escapeHtml(countdownFor(selected))+'</span>'
+      +preparationHtml(prep)
       +'<div class="coach-next-actions">'
-      +'<a href="'+escapeHtml(SMCEventLinks.href("game_adjust.html",selected))+'">📊 試合調整</a>'
-      +'<a href="'+escapeHtml(SMCEventLinks.href("duty_match.html",selected))+'">👥 任務分担</a>'
-      +'<a href="'+escapeHtml(SMCEventLinks.href("tournament.html",selected))+'">📋 要綱・対戦表</a>'
-      +'<a href="'+escapeHtml(SMCEventLinks.href("accounting.html",selected))+'">💴 会計・決算</a>'
-      +'</div></div>';
-    root.querySelectorAll("[data-coach-event-id]").forEach(function(button){
+      +'<a href="'+escapeHtml(SMCEventLinks.href("game_adjust.html",selected))+'">📊 試合調整</a><a href="'+escapeHtml(SMCEventLinks.href("duty_match.html",selected))+'">👥 任務分担</a>'
+      +'<a href="'+escapeHtml(SMCEventLinks.href("tournament.html",selected))+'">📋 要綱・対戦表</a><a href="'+escapeHtml(SMCEventLinks.href("accounting.html",selected))+'">💴 会計・決算</a></div>'
+      +'<button type="button" class="coach-share-button" data-coach-copy-id="'+escapeHtml(String(selected.id||""))+'">📋 準備状況をLINEコピー</button></div>';
+    root.querySelectorAll("[data-coach-event-id],[data-coach-attention-id]").forEach(function(button){
       button.addEventListener("click",function(){
-        rememberCoachEvent(button.getAttribute("data-coach-event-id"));
+        rememberCoachEvent(button.getAttribute("data-coach-event-id")||button.getAttribute("data-coach-attention-id"));
         renderTournamentBrowser(sorted,next);
         var active=root.querySelector('[aria-selected="true"]');
-        if(active)active.focus({preventScroll:true});
+        if(active)active.scrollIntoView({behavior:"smooth",block:"nearest",inline:"center"});
       });
     });
+    var copyButton=root.querySelector("[data-coach-copy-id]");
+    if(copyButton)copyButton.addEventListener("click",function(){copyCoachPreparationSummary(selected);});
   }
   function renderNextEvent(value){
     var root=document.getElementById("coach-next-event");
@@ -787,54 +908,41 @@ document.addEventListener("DOMContentLoaded", function(){
     var next=SMCEventLinks.nearest(dates);
     renderTournamentBrowser(dates,next);
     if(!next){
-      root.innerHTML='<div class="coach-next-kicker">次に予定している試合</div>'
-        +'<div class="coach-next-title">日程はまだ登録されていません</div>'
-        +'<div class="coach-next-meta">「試合調整」から最初の日程を追加してください</div>'
-        +'<div class="coach-next-actions"><a href="game_adjust.html">📊 試合調整を開く</a></div>';
+      root.innerHTML='<div class="coach-next-kicker">次に予定している試合</div><div class="coach-next-title">日程はまだ登録されていません</div><div class="coach-next-meta">「試合調整」から最初の日程を追加してください</div><div class="coach-next-actions"><a href="game_adjust.html">📊 試合調整を開く</a></div>';
       return;
     }
-    var sameDay=dates.filter(function(item){return item.dateIso&&item.dateIso===next.dateIso;})
-      .sort(function(a,b){
-        return String(a.tournamentName||a.cat||"").localeCompare(String(b.tournamentName||b.cat||""),"ja");
-      });
+    var sameDay=dates.filter(function(item){return item.dateIso&&item.dateIso===next.dateIso;}).sort(function(a,b){
+      return String(a.tournamentName||a.cat||"").localeCompare(String(b.tournamentName||b.cat||""),"ja");
+    });
     var count=sameDay.length;
     var rows=sameDay.map(function(item,index){
-      var title=(item.tournamentName||"大会名未設定");
+      var title=item.tournamentName||"大会名未設定";
       var meta=[SMCEventLinks.label(item),item.cat,item.target!=null?"目標 "+item.target+"チーム":""].filter(Boolean).join(" ／ ");
       var badge=count>1?'<span class="coach-next-row-badge">同日 '+(index+1)+' / '+count+'</span>':"";
-      return '<article class="coach-next-row">'+badge
-        +'<div class="coach-next-title">'+escapeHtml(title)+'</div>'
-        +'<div class="coach-next-meta">'+escapeHtml(meta)+'</div>'
-        +'<div class="coach-next-actions">'
-        +'<a href="'+escapeHtml(SMCEventLinks.href("game_adjust.html",item))+'">📊 試合調整</a>'
-        +'<a href="'+escapeHtml(SMCEventLinks.href("duty_match.html",item))+'">👥 任務分担</a>'
-        +'<a href="'+escapeHtml(SMCEventLinks.href("tournament.html",item))+'">📋 要綱・対戦表</a>'
-        +'<a href="'+escapeHtml(SMCEventLinks.href("accounting.html",item))+'">💴 会計・決算</a>'
-        +'</div></article>';
+      return '<article class="coach-next-row">'+badge+'<div class="coach-next-title">'+escapeHtml(title)+'</div><div class="coach-next-meta">'+escapeHtml(meta)+'</div>'
+        +'<div class="coach-next-actions"><a href="'+escapeHtml(SMCEventLinks.href("game_adjust.html",item))+'">📊 試合調整</a>'
+        +'<a href="'+escapeHtml(SMCEventLinks.href("duty_match.html",item))+'">👥 任務分担</a><a href="'+escapeHtml(SMCEventLinks.href("tournament.html",item))+'">📋 要綱・対戦表</a>'
+        +'<a href="'+escapeHtml(SMCEventLinks.href("accounting.html",item))+'">💴 会計・決算</a></div></article>';
     }).join("");
-    root.innerHTML='<div class="coach-next-kicker">次に予定している試合'+(count>1?"（同日 "+count+"件）":"")+'</div>'
-      +'<div class="coach-next-event-list">'+rows+'</div>';
+    root.innerHTML='<div class="coach-next-kicker">次に予定している試合'+(count>1?"（同日 "+count+"件）":"")+'</div><div class="coach-next-event-list">'+rows+'</div>';
   }
+  function refreshCoachHub(){renderNextEvent(coachState.gameAdjust);}
   function setupSearch(){
-    var input=document.getElementById("coach-menu-search");
-    var count=document.getElementById("coach-search-count");
+    var input=document.getElementById("coach-menu-search"),count=document.getElementById("coach-search-count");
     var cards=Array.from(document.querySelectorAll("#coach-content .c-card"));
     if(!input)return;
     function update(){
-      var query=input.value.trim().toLocaleLowerCase("ja");
-      var shown=0;
-      cards.forEach(function(card){
-        var hit=!query||card.textContent.toLocaleLowerCase("ja").includes(query);
-        card.classList.toggle("coach-card-hidden",!hit);
-        if(hit)shown++;
-      });
+      var query=input.value.trim().toLocaleLowerCase("ja"),shown=0;
+      cards.forEach(function(card){var hit=!query||card.textContent.toLocaleLowerCase("ja").includes(query);card.classList.toggle("coach-card-hidden",!hit);if(hit)shown++;});
       count.textContent=shown+"件";
     }
-    input.addEventListener("input",update);
-    update();
+    input.addEventListener("input",update);update();
   }
   document.addEventListener("DOMContentLoaded",setupSearch);
-  dbListen("game_adjust",renderNextEvent,"smc_game_adj_v1",null);
+  dbListen("game_adjust",function(value){coachState.gameAdjust=value;refreshCoachHub();},"smc_game_adj_v1",null);
+  dbListen("duty_match",function(value){coachState.duties=Array.isArray(value)?value:[];refreshCoachHub();},"smc_duty_match_v3",[]);
+  dbListen("tournament_saves",function(value){coachState.tournamentSaves=value&&typeof value==="object"?value:{};refreshCoachHub();},"tournament_saves",{});
+  dbListen("accounting",function(value){coachState.accounting=value&&typeof value==="object"?value:{tournaments:[]};refreshCoachHub();},"smc_accounting_v1",{tournaments:[]});
 })();
 </script>
 </body>
