@@ -440,7 +440,7 @@ if (!coachSource.includes("preparationFor") || !coachSource.includes("coach-atte
 if (!(coachSource.indexOf("セクション：試合・大会") < coachSource.indexOf("セクション：コーチ共有") && coachSource.indexOf("セクション：コーチ共有") < coachSource.indexOf("セクション：お知らせ管理"))) {
   fail("coach.html", "コーチメニューが試合・共有・お知らせの推奨順ではありません");
 }
-if (!guideSource.includes("その直下の<strong>大会一覧</strong>") || !guideSource.includes("日付・カテゴリーごとの大会タブ")) {
+if (!guideSource.includes("最初に<strong>大会一覧</strong>") || !guideSource.includes("同日開催の複数大会も別々に選べます")) {
   fail("guide.html", "コーチ専用フォルダの大会一覧タブが説明されていません");
 }
 if (!guideSource.includes("準備完了数") || !guideSource.includes("要対応項目") || !guideSource.includes("準備状況をLINEコピー")) {
