@@ -428,6 +428,9 @@ if (!dutyMatchSource.includes('dbListen("duty_match"') || !tournamentSource.incl
 if (!coachSource.includes("coach-event-browser") || !coachSource.includes("coach-menu-search") || !coachSource.includes('dbListen("game_adjust"')) {
   fail("coach.html", "大会一覧またはメニュー検索がありません");
 }
+if (!coachSource.includes("confirmedTeamCount") || !coachSource.includes('"決定 "+confirmed+"チーム"')) {
+  fail("coach.html", "大会一覧に現在決定している参加チーム数が表示されません");
+}
 if (coachSource.includes('id="coach-next-event"') || coachSource.includes("function renderNextEvent")) {
   fail("coach.html", "削除した「次に予定している試合」の表示処理が残っています");
 }
