@@ -264,6 +264,31 @@
       return match ? Number(match[1]) : 1000;
     }
   
+    function teamNameForSort(row) {
+      const cell = row?.children?.[0];
+      if (!cell) return "";
+      const copy = cell.cloneNode(true);
+      copy.querySelectorAll("button").forEach((button) => button.remove());
+      return copy.textContent.replace(/\s+/g, " ").trim();
+    }
+
+    function sortTeamRowsForActiveDate() {
+      const tbody = table.tBodies[0];
+      if (!tbody) return;
+      const rows = Array.from(tbody.rows).filter((row) => row.querySelector("button.status-btn"));
+      if (rows.length < 2) return;
+      const sorted = rows.slice().sort((rowA, rowB) => {
+        const statusA = rowA.children[activeDateIndex]?.querySelector("button.status-btn")?.textContent.trim() || "－";
+        const statusB = rowB.children[activeDateIndex]?.querySelector("button.status-btn")?.textContent.trim() || "－";
+        const okDifference = Number(statusB === "OK") - Number(statusA === "OK");
+        if (okDifference) return okDifference;
+        return teamNameForSort(rowA).localeCompare(teamNameForSort(rowB), "ja", { numeric: true, sensitivity: "base" });
+      });
+      if (rows.every((row, index) => row === sorted[index])) return;
+      const anchorRow = rows[rows.length - 1].nextSibling;
+      sorted.forEach((row) => tbody.insertBefore(row, anchorRow));
+    }
+
     function syncDateColumns() {
       if (syncing) return;
       syncing = true;
@@ -332,6 +357,7 @@
         return option;
       }));
       select.value = activeDateId;
+      sortTeamRowsForActiveDate();
   
       table.querySelectorAll("tr").forEach((row) => {
         const cells = Array.from(row.children);
