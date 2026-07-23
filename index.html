@@ -3,7 +3,7 @@
 <head>
   <meta charset="utf-8">
   <meta name="robots" content="noindex,nofollow">
-  <meta name="app-version" content="20260721-05">
+  <meta name="app-version" content="20260723-01">
   <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
   <meta http-equiv="Pragma" content="no-cache">
   <meta http-equiv="Expires" content="0">
@@ -25,7 +25,8 @@
     .portal-hero::after{content:"";position:absolute;left:50%;top:50%;width:260px;height:260px;border:1px solid rgba(255,255,255,.08);border-radius:50%;transform:translate(-50%,-50%);pointer-events:none}
     .portal-hero h1{font-size:clamp(1.05rem,4vw,1.4rem);font-weight:900;color:#fff;letter-spacing:.04em;line-height:1.25;margin-bottom:6px;text-shadow:0 2px 12px rgba(0,0,0,.4);position:relative;z-index:1}
     .portal-hero .sub{font-size:.68rem;color:rgba(255,255,255,.6);position:relative;z-index:1}
-    .hero-emblem{font-size:2.8rem;margin-bottom:8px;position:relative;z-index:1;filter:drop-shadow(0 0 12px rgba(255,255,255,.3));animation:ball-bounce 2s ease-in-out infinite}
+    /* 2026-07: 常時アニメーションをやめ、内容へ集中しやすくする */
+    .hero-emblem{font-size:2.8rem;margin-bottom:8px;position:relative;z-index:1;filter:drop-shadow(0 0 12px rgba(255,255,255,.3))}
     .hero-badge{display:inline-flex;align-items:center;gap:6px;background:rgba(255,255,255,.12);border:1px solid rgba(255,255,255,.2);border-radius:99px;padding:3px 14px;font-size:.6rem;font-weight:900;color:rgba(255,255,255,.82);letter-spacing:.12em;margin-bottom:10px}
     .hero-stripe-bottom{position:absolute;bottom:0;left:0;right:0;height:4px;background:linear-gradient(90deg,#003087 0%,#003087 50%,#bc002d 50%,#bc002d 100%)}
     .pitch-section-divider{height:30px;margin:4px 0 14px;background:linear-gradient(90deg,#1a5c1a,#2d8c2d,#1a5c1a);border-radius:var(--r8);position:relative;overflow:hidden;display:flex;align-items:center;justify-content:center;gap:8px}
@@ -76,15 +77,25 @@
     <div class="hero-stripe-bottom"></div>
   </div>
 
-  <!-- ⚡ よく使う QUICK ACCESS -->
-  <div class="pitch-section-divider" id="sec-quick"><span class="psd-text">⚡ よく使う</span><span class="psd-sub">QUICK ACCESS</span></div>
+  <!-- 2026-07 UX改善: 初めての方が最初の操作を迷わない4導線 -->
+  <section class="home-start" aria-labelledby="home-start-title">
+    <h2 class="home-start-title" id="home-start-title">まず、何をしますか？</h2>
+    <p class="home-start-lead">目的を選ぶと、必要な画面へすぐ移動できます。</p>
+    <div class="home-start-grid">
+      <a class="home-start-action" href="calendar.html"><span class="home-start-icon" aria-hidden="true">📅</span><span class="home-start-copy"><strong>予定を見る</strong><small>練習・試合の日程</small></span></a>
+      <a class="home-start-action" href="attendance.html"><span class="home-start-icon" aria-hidden="true">✋</span><span class="home-start-copy"><strong>出欠を回答</strong><small>参加・欠席を登録</small></span></a>
+      <a class="home-start-action" href="coach.html"><span class="home-start-icon" aria-hidden="true">📁</span><span class="home-start-copy"><strong>コーチ専用</strong><small>試合・大会を準備</small></span></a>
+      <a class="home-start-action" href="guide.html"><span class="home-start-icon" aria-hidden="true">🆘</span><span class="home-start-copy"><strong>使い方を見る</strong><small>困ったときの説明</small></span></a>
+    </div>
+  </section>
+
+  <!-- 2026-07 UX改善: 補助機能は主導線と分けて表示 -->
+  <div class="pitch-section-divider" id="sec-quick"><span class="psd-text">⚡ よく使う補助機能</span><span class="psd-sub">QUICK TOOLS</span></div>
   <div class="card-grid" style="margin-bottom:20px">
-    <a class="menu-card accent" href="calendar.html"><div class="card-icon">📅</div><div class="card-label">チームカレンダー</div><div class="card-desc">Schedule &amp; Events</div><span class="card-badge">Google</span></a>
-    <a class="menu-card" href="attendance.html"><div class="card-icon">✋</div><div class="card-label">出欠確認</div><div class="card-desc">Attendance Check</div></a>
-    <a class="menu-card accent" href="coach.html"><div class="card-icon">⚙️</div><div class="card-label">運営メニュー</div><div class="card-desc">Team Management</div></a>
-    <a class="menu-card" href="todo.html"><div class="card-icon">📌</div><div class="card-label">やることリスト</div><div class="card-desc">Team Task Board</div></a>
-    <a class="menu-card accent" href="weather.html"><div class="card-icon">🌤️</div><div class="card-label">天気・WBGT</div><div class="card-desc">Weather &amp; Heat Stroke Risk</div><span class="card-badge">GPS</span></a>
-    <a class="menu-card" href="guide.html"><div class="card-icon">📖</div><div class="card-label">説明書・ヘルプ</div><div class="card-desc">How to Use This App</div></a>
+    <a class="menu-card" href="todo.html"><div class="card-icon">📌</div><div class="card-label">やることリスト</div><div class="card-desc">チームの作業を確認</div></a>
+    <a class="menu-card accent" href="weather.html"><div class="card-icon">🌤️</div><div class="card-label">天気・WBGT</div><div class="card-desc">天気と熱中症リスク</div><span class="card-badge">GPS</span></a>
+    <a class="menu-card" href="members.html"><div class="card-icon">📒</div><div class="card-label">団員名簿</div><div class="card-desc">連絡先・団員情報</div></a>
+    <a class="menu-card" href="finance.html"><div class="card-icon">💴</div><div class="card-label">会計業務</div><div class="card-desc">立替・集金・報告</div></a>
   </div>
 
   <!-- 👨‍👩‍👦 入団・連絡 JOIN & CONTACT -->
