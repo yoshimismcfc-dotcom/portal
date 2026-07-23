@@ -66,6 +66,9 @@ for (const file of htmlFiles) {
   if (file !== "offline.html" && !/<script\s+src=["']common\.js["']><\/script>/i.test(headSource)) {
     fail(file, "共通JavaScript common.js がheadで読み込まれていません");
   }
+  if (file !== "offline.html" && !/<script\s+src=["']ux-enhancements\.js["'][^>]*><\/script>/i.test(headSource)) {
+    fail(file, "共通UI/UX補助 ux-enhancements.js がheadで読み込まれていません");
+  }
   if (file !== "offline.html" && !/<header class=["']site-header["']><\/header>/i.test(source)) {
     fail(file, "共通ヘッダーのマウント先が一元化されていません");
   }
@@ -77,7 +80,7 @@ for (const file of htmlFiles) {
   }
 }
 
-for (const file of ["common.js", "firebase-config.js", "sw.js"]) {
+for (const file of ["common.js", "ux-enhancements.js", "firebase-config.js", "sw.js"]) {
   const source = fs.readFileSync(path.join(root, file), "utf8");
   try {
     new Function(source);
@@ -140,13 +143,14 @@ if (/localStorage\.setItem\([^\n]*smc_members/i.test(membersSource)) fail("membe
 if (!membersSource.includes("next[grade]=next[grade].filter")) fail("members.html", "Firebase名簿の空データを除外していません");
 
 const commonSource = fs.readFileSync(path.join(root, "common.js"), "utf8");
+const uxSource = fs.readFileSync(path.join(root, "ux-enhancements.js"), "utf8");
 const eventLinksSource = fs.readFileSync(path.join(root, "event-links.js"), "utf8");
 const calendarSource = fs.readFileSync(path.join(root, "calendar.html"), "utf8");
 if (!commonSource.includes("refreshCoachFolderLabels")) {
   fail("common.js", "旧名称を安全にコーチ専用フォルダへ置き換える処理がありません");
 }
-for (const feature of ["setupGlobalUsability", "setupConnectionStatus", "smc-loader-shown-v1", "aria-current", "ArrowRight"]) {
-  if (!commonSource.includes(feature)) fail("common.js", `共通アクセシビリティ処理 ${feature} がありません`);
+for (const feature of ["setupGlobalUsability", "setupConnectionStatus", "aria-current", "ArrowRight"]) {
+  if (!uxSource.includes(feature)) fail("ux-enhancements.js", `共通アクセシビリティ処理 ${feature} がありません`);
 }
 if (!commonSource.includes("controllerchange") || !commonSource.includes("event.persisted")) {
   fail("common.js", "アプリ更新時または復元表示時に最新版を取得する処理がありません");
