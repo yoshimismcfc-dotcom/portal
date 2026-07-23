@@ -110,6 +110,10 @@ if (!indexVersion || !swVersion || indexVersion !== swVersion) {
 if (!commonCssSource.includes("--body-tail: #e8eef7")) {
   fail("common.css", "ライトモードのページ背景が暗色のままです");
 }
+// 2026-07品質基準: 全画面の操作性・アクセシビリティ基盤を退行させない。
+for (const token of ["--tap-min:", "--space-4:", ".skip-link", ".connection-banner", "@media (pointer: coarse)"]) {
+  if (!commonCssSource.includes(token)) fail("common.css", `共通UX基盤 ${token} がありません`);
+}
 
 const tournamentSource = fs.readFileSync(path.join(root, "tournament.html"), "utf8");
 const tournamentVersion = tournamentSource.match(/name=["']app-version["'][^>]*content=["']([^"']+)/i)?.[1];
@@ -140,6 +144,9 @@ const eventLinksSource = fs.readFileSync(path.join(root, "event-links.js"), "utf
 const calendarSource = fs.readFileSync(path.join(root, "calendar.html"), "utf8");
 if (!commonSource.includes("refreshCoachFolderLabels")) {
   fail("common.js", "旧名称を安全にコーチ専用フォルダへ置き換える処理がありません");
+}
+for (const feature of ["setupGlobalUsability", "setupConnectionStatus", "smc-loader-shown-v1", "aria-current", "ArrowRight"]) {
+  if (!commonSource.includes(feature)) fail("common.js", `共通アクセシビリティ処理 ${feature} がありません`);
 }
 if (!commonSource.includes("controllerchange") || !commonSource.includes("event.persisted")) {
   fail("common.js", "アプリ更新時または復元表示時に最新版を取得する処理がありません");
