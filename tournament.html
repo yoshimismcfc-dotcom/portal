@@ -5,7 +5,7 @@
   <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate, max-age=0">
   <meta http-equiv="Pragma" content="no-cache">
   <meta http-equiv="Expires" content="-1">
-  <meta name="app-version" content="20260721-05">
+  <meta name="app-version" content="20260725-1">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <meta name="robots" content="noindex,nofollow">
   <title>大会要綱・対戦表 v5｜吉見SMC FC</title>
@@ -13,6 +13,7 @@
   <link rel="stylesheet" href="common.css">
   <script src="common.js"></script>
   <script src="event-links.js"></script>
+  <script src="tournament-scheduler.js"></script>
   <style>
     /* ====== タブ ====== */
     .doc-tab-bar{display:flex;gap:0;margin-bottom:20px;border-radius:var(--r8);overflow:hidden;border:1px solid var(--line-2)}
@@ -176,6 +177,35 @@
     .linked-date-name{white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
     body[data-theme="light"] .linked-tournament-filter{background:#fff;color:#10283d;border-color:#1689b4}
     @media(max-width:620px){.linked-workflow-head{display:block}.linked-tournament-filter{width:100%;margin:9px 0}.linked-date-item{padding:10px}}
+    /* 対戦順最適化・LINE案内 */
+    .schedule-assist{margin:12px 0;padding:12px;border:1px solid rgba(0,212,255,.35);border-radius:12px;background:rgba(0,120,180,.08)}
+    .schedule-assist-head{display:flex;align-items:center;justify-content:space-between;gap:10px;flex-wrap:wrap}
+    .schedule-assist-title{font-size:.88rem;font-weight:900;color:#8fe7ff}
+    .schedule-toggle{display:flex;align-items:center;gap:8px;min-height:44px;color:var(--ink);font-size:.82rem;font-weight:800}
+    .schedule-toggle input{width:22px;height:22px}
+    .schedule-actions{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px;margin-top:10px}
+    .schedule-report{display:none;margin-top:10px;padding:10px 12px;border-radius:9px;font-size:.78rem;line-height:1.65;white-space:pre-line}
+    .schedule-report.show{display:block}
+    .schedule-report.optimal{color:#9ff5c5;background:rgba(0,190,100,.1);border:1px solid rgba(0,220,120,.35)}
+    .schedule-report.warning{color:#ffe39a;background:rgba(230,170,0,.1);border:1px solid rgba(255,200,40,.4)}
+    .game-fixed{display:inline-flex;align-items:center;gap:3px;font-size:.62rem;white-space:nowrap}
+    .game-fixed input{width:15px;height:15px}
+    .line-modal{width:min(620px,100%)}
+    .line-type-tabs{display:grid;grid-template-columns:repeat(3,1fr);gap:6px;margin-bottom:12px}
+    .line-type-btn{min-height:44px;padding:8px;border:1px solid var(--line-2);border-radius:9px;background:var(--surface);color:var(--ink);font:inherit;font-size:.72rem;font-weight:900}
+    .line-type-btn.active{border-color:#00d4ff;background:rgba(0,160,220,.18);color:#9cecff}
+    .line-preview{width:100%;min-height:300px;resize:vertical;line-height:1.7}
+    .missing-fields{display:none;margin:8px 0;padding:9px 11px;border-radius:8px;background:rgba(255,190,0,.1);border:1px solid rgba(255,190,0,.35);color:#ffe09a;font-size:.72rem;line-height:1.6}
+    .missing-fields.show{display:block}
+    body[data-theme="light"] .schedule-assist{background:#eefaff}
+    body[data-theme="light"] .schedule-assist-title{color:#075d84}
+    body[data-theme="light"] .schedule-report.optimal{color:#075f32}
+    body[data-theme="light"] .schedule-report.warning,body[data-theme="light"] .missing-fields{color:#704d00}
+    @media(max-width:520px){
+      .schedule-actions{grid-template-columns:1fr}
+      .line-type-tabs{grid-template-columns:1fr}
+      .line-modal{padding:16px}
+    }
   </style>
 </head>
 <body>
@@ -305,9 +335,24 @@
       </div>
       <div class="sec">⚽ チーム設定</div>
       <div id="team-inputs"></div>
+      <div class="schedule-assist">
+        <div class="schedule-assist-head">
+          <div class="schedule-assist-title">✨ 連続試合をできるだけ避ける</div>
+          <label class="schedule-toggle"><input type="checkbox" id="schedule-optimize" checked>自動調整する</label>
+        </div>
+        <div class="schedule-actions">
+          <button class="btn btn-primary btn-sm" type="button" onclick="buildTaisen(true)">対戦表を自動作成</button>
+          <button class="btn btn-outline btn-sm" type="button" onclick="optimizeCurrentSchedule()">現在の順番を最適化</button>
+        </div>
+        <div class="schedule-actions">
+          <button class="btn btn-outline btn-sm" type="button" onclick="undoSchedule()" id="schedule-undo" disabled>↩ 元に戻す</button>
+          <button class="btn btn-outline btn-sm" type="button" onclick="openLineInvite()">💬 LINE案内を作成</button>
+        </div>
+        <div class="schedule-report" id="schedule-report" role="status" aria-live="polite"></div>
+      </div>
       <div class="btn-group">
         <button class="btn btn-outline btn-sm" onclick="copyTournamentTemplate('taisen')">📑 テンプレートをコピー</button>
-        <button class="btn btn-primary" onclick="buildTaisen()" style="flex:1 1 140px">📊 対戦表を生成</button>
+        <button class="btn btn-primary" onclick="buildTaisen(true)" style="flex:1 1 140px">📊 対戦表を生成</button>
         <button class="btn btn-outline btn-sm" onclick="openSaveModal('taisen')">💾 保存</button>
         <button class="btn btn-outline btn-sm" onclick="openLoadModal('taisen')">📂 読込</button>
         <button class="btn btn-cyan btn-sm no-print" onclick="buildAndPrintLandscape()" id="tai-print-btn">🖨 印刷・PDF</button>
@@ -348,6 +393,34 @@
     </div>
     <div style="display:flex;justify-content:flex-end;margin-top:10px">
       <button class="btn btn-outline btn-sm" onclick="closeLoadModal()">閉じる</button>
+    </div>
+  </div>
+</div>
+
+<!-- 対戦チーム向けLINE案内文 -->
+<div class="save-modal-bg" id="modal-line" onclick="if(event.target.id==='modal-line')closeLineInvite()">
+  <div class="save-modal line-modal" role="dialog" aria-modal="true" aria-labelledby="line-modal-title">
+    <h3 id="line-modal-title">💬 対戦チームへのLINE案内</h3>
+    <div class="line-type-tabs" role="tablist" aria-label="文章の種類">
+      <button class="line-type-btn active" type="button" data-line-type="request">対戦依頼</button>
+      <button class="line-type-btn" type="button" data-line-type="confirmed">参加確定後</button>
+      <button class="line-type-btn" type="button" data-line-type="reminder">確認・リマインド</button>
+    </div>
+    <div class="fg2">
+      <div class="form-group"><label class="form-label">相手チーム名</label><input class="form-control" id="line-team" list="line-team-options" placeholder="例：〇〇FC"><datalist id="line-team-options"></datalist></div>
+      <div class="form-group"><label class="form-label">返信期限</label><input class="form-control" id="line-deadline" type="date"></div>
+      <div class="form-group"><label class="form-label">集合時間</label><input class="form-control" id="line-meeting" placeholder="例：8:00"></div>
+      <div class="form-group"><label class="form-label">開始予定</label><input class="form-control" id="line-kickoff" placeholder="例：9:00"></div>
+      <div class="form-group"><label class="form-label">会場地図URL</label><input class="form-control" id="line-map" type="url" inputmode="url" placeholder="https://..."></div>
+      <div class="form-group"><label class="form-label">要綱・対戦表URL</label><input class="form-control" id="line-doc-url" type="url" inputmode="url" placeholder="https://..."></div>
+    </div>
+    <div class="form-group"><label class="form-label">持ち物・補足</label><textarea class="form-control" id="line-items" rows="2" placeholder="例：正副ユニフォーム、審判服、昼食"></textarea></div>
+    <div class="missing-fields" id="line-missing" role="status"></div>
+    <div class="form-group"><label class="form-label">送信前に編集できます</label><textarea class="form-control line-preview" id="line-preview"></textarea></div>
+    <div class="btn-group">
+      <button class="btn btn-outline btn-sm" type="button" onclick="generateLineInvite()">🔄 作り直す</button>
+      <button class="btn-line-copy sm" type="button" onclick="copyLineInvite()">📋 LINEコピー</button>
+      <button class="btn btn-outline btn-sm" type="button" onclick="closeLineInvite()">閉じる</button>
     </div>
   </div>
 </div>
@@ -442,7 +515,67 @@ function toggleLunch(){
   document.getElementById("lunch-settings").style.display = cb.checked ? "block" : "none";
 }
 
-function buildTaisen(){
+var _lastTournamentSchedule=null;
+var _scheduleUndo=null;
+
+function scheduleSignature(courts,blocks){
+  return JSON.stringify({courts:courts,teams:blocks.map(function(block){return block.teams;})});
+}
+function cloneScheduleState(state){
+  return state?JSON.parse(JSON.stringify(state)):null;
+}
+function optimizeBlockMatches(matches){
+  if(!window.SMCTournamentScheduler)return {matches:matches,report:{consecutiveCount:0,consecutive:[],teamRest:{},status:"optimal"}};
+  return SMCTournamentScheduler.optimize(matches,{beamWidth:260});
+}
+function updateScheduleReport(reports){
+  var box=document.getElementById("schedule-report");
+  if(!box)return;
+  var count=reports.reduce(function(sum,report){return sum+(report.consecutiveCount||0);},0);
+  var affected=[];
+  reports.forEach(function(report){
+    (report.consecutive||[]).forEach(function(item){
+      affected.push(item.team+"（第"+(item.previousIndex+1)+"・"+(item.index+1)+"試合）");
+    });
+  });
+  var rests={};
+  reports.forEach(function(report){
+    Object.keys(report.teamRest||{}).forEach(function(team){rests[team]=report.teamRest[team];});
+  });
+  var restText=Object.keys(rests).sort(function(a,b){return a.localeCompare(b,"ja");}).map(function(team){
+    return team+"：最短"+(rests[team].minimum===null?"－":rests[team].minimum+"試合休み");
+  }).join("／");
+  box.className="schedule-report show "+(count?"warning":"optimal");
+  box.textContent=count
+    ?"調整済み：連続試合が"+count+"回残っています。\n"+affected.join("、")+(restText?"\n"+restText:"")
+    :"最適：連続試合はありません。"+(restText?"\n"+restText:"");
+}
+function toggleGameFixed(blockIndex,matchId,checked){
+  if(!_lastTournamentSchedule||!_lastTournamentSchedule.blocks[blockIndex])return;
+  _lastTournamentSchedule.blocks[blockIndex].matches.forEach(function(match){
+    if(match.id===matchId)match.fixed=!!checked;
+  });
+}
+function undoSchedule(){
+  if(!_scheduleUndo)return;
+  _lastTournamentSchedule=cloneScheduleState(_scheduleUndo);
+  _scheduleUndo=null;
+  document.getElementById("schedule-undo").disabled=true;
+  buildTaisen(false);
+}
+function optimizeCurrentSchedule(){
+  if(!_lastTournamentSchedule){buildTaisen(true);return;}
+  _scheduleUndo=cloneScheduleState(_lastTournamentSchedule);
+  _lastTournamentSchedule.blocks.forEach(function(block){
+    var result=optimizeBlockMatches(block.matches);
+    block.matches=result.matches;
+    block.report=result.report;
+  });
+  document.getElementById("schedule-undo").disabled=false;
+  buildTaisen(false);
+}
+
+function buildTaisen(forceNew){
   var courts=+gv("t-courts"),gmin=+gv("t-min")||40,st=gv("t-start")||"08:30";
   var title=gv("t-title"),dateStr=fmtDate(gv("t-date")),place=gv("t-place");
 
@@ -454,13 +587,38 @@ function buildTaisen(){
       var el=document.getElementById("t-"+c+"-"+i);
       teams.push(el&&el.value.trim()?el.value.trim():"チーム"+(i+1));
     }
-    // 総当たり組み合わせ
-    var matches=[];
-    for(var a=0;a<teams.length;a++)
-      for(var b=a+1;b<teams.length;b++)
-        matches.push([a,b]);
+    var matches=window.SMCTournamentScheduler
+      ? SMCTournamentScheduler.createRoundRobin(teams)
+      : [];
     blocks.push({idx:c,label:courts===1?"":["A面","B面"][c],blkLabel:courts===1?"":["Aブロック","Bブロック"][c],teams:teams,matches:matches});
   }
+  var allTeamNames=[].concat.apply([],blocks.map(function(block){return block.teams;}));
+  var duplicateTeam=allTeamNames.find(function(team,index){return allTeamNames.indexOf(team)!==index;});
+  if(duplicateTeam){
+    alert("「"+duplicateTeam+"」が複数のブロックに登録されています。同じ時刻に重複出場しないよう、チーム名を確認してください。");
+    return;
+  }
+  var signature=scheduleSignature(courts,blocks);
+  if(forceNew||!_lastTournamentSchedule||_lastTournamentSchedule.signature!==signature){
+    _scheduleUndo=_lastTournamentSchedule?cloneScheduleState(_lastTournamentSchedule):null;
+    var shouldOptimize=document.getElementById("schedule-optimize").checked;
+    blocks.forEach(function(block){
+      var result=shouldOptimize?optimizeBlockMatches(block.matches):{matches:block.matches,report:SMCTournamentScheduler.evaluate(block.matches)};
+      block.matches=result.matches;
+      block.report=result.report;
+    });
+    _lastTournamentSchedule={signature:signature,blocks:blocks.map(function(block){
+      return {matches:block.matches,report:block.report};
+    })};
+    document.getElementById("schedule-undo").disabled=!_scheduleUndo;
+  }else{
+    blocks.forEach(function(block,index){
+      block.matches=_lastTournamentSchedule.blocks[index].matches;
+      block.report=SMCTournamentScheduler.evaluate(block.matches);
+      _lastTournamentSchedule.blocks[index].report=block.report;
+    });
+  }
+  updateScheduleReport(blocks.map(function(block){return block.report;}));
 
   /* ---- スケジュール組み立て ---- */
   // 2コートの場合：同じ時刻に各コートで1試合ずつ進行
@@ -483,7 +641,8 @@ function buildTaisen(){
       var nextMins  = toMins(cur);
       var lunchMins = toMins(lunchStart);
       // 次の試合開始が昼食開始時刻以降になった → この試合の前に昼食行を挿入
-      if(nextMins >= lunchMins){
+      // 試合が昼食開始をまたぐ場合も、試合を昼食後へ送る。
+      if(nextMins + gmin > lunchMins){
         var lunchEnd = addMins(lunchStart, lunchMin);
         schedsByTime.push({time:lunchStart, games:[], isBreak:true, breakLabel:lunchLabel, breakMin:lunchMin});
         cur = lunchEnd; // 昼食後の時刻から試合再開
@@ -494,14 +653,13 @@ function buildTaisen(){
     for(var ci=0;ci<courts;ci++){
       if(mi<blocks[ci].matches.length){
         var m=blocks[ci].matches[mi];
-        slot.games.push({blkIdx:ci,home:blocks[ci].teams[m[0]],away:blocks[ci].teams[m[1]]});
+        slot.games.push({blkIdx:ci,id:m.id,home:m.home,away:m.away,fixed:!!m.fixed});
       }
     }
     schedsByTime.push(slot);
     cur=addMins(cur,gmin);
   }
-  var restStart=cur;
-  var finalStart=addMins(restStart,10);
+  var finalStart=cur;
   var sf=addMins(finalStart,gmin);
   var closingTime=addMins(sf,gmin);
 
@@ -534,11 +692,11 @@ if(slot.isBreak){
         }
         slot.games.forEach(function(g){
           if(g.blkIdx===blk.idx){
-            h+='<tr'+(si%2===1?' class="tr-alt-bg"':"")+'>';
+            h+='<tr class="taisen-game-row'+(si%2===1?' tr-alt-bg':'')+'" data-match-id="'+esc3(g.id)+'">';
             h+='<td>'+no+'</td><td>'+slot.time+'</td>';
             h+='<td class="td-home">'+escapeHtml(g.home)+'</td>';
             h+='<td class="td-score"></td><td class="td-vs">－</td><td class="td-score"></td>';
-            h+='<td class="td-away">'+escapeHtml(g.away)+'</td>';
+            h+='<td class="td-away">'+escapeHtml(g.away)+'<label class="game-fixed no-print"><input class="game-fixed-input" type="checkbox" data-block-index="'+blk.idx+'" data-match-id="'+esc3(g.id)+'" '+(g.fixed?'checked ':'')+'>固定</label></td>';
             h+='</tr>';
             no++;
           }
@@ -586,7 +744,6 @@ if(slot.isBreak){
     h+='<th class="sched-th" style="width:26px">得</th><th class="sched-th" style="width:18px">-</th><th class="sched-th" style="width:26px">得</th>';
     h+='<th class="sched-th">アウェイ</th><th class="sched-th" style="width:55px">備考</th>';
     h+='</tr></thead><tbody>';
-    h+='<tr><td colspan="9" class="tr-break-td">— 休 憩 —</td></tr>';
     var fn=1;
     [[finalStart,"A4位","B4位","4位同士"],[finalStart,"A3位","B3位","3位同士"],
      [sf,"A2位","B2位","2位同士"],[sf,"A1位","B1位","1位同士"]].forEach(function(f,i){
@@ -617,11 +774,11 @@ if(slot.isBreak){
         return;
       }
       slot.games.forEach(function(g,gi){
-        h+='<tr'+(si%2===1?' class="tr-alt-bg"':"")+'>';
+        h+='<tr class="taisen-game-row'+(si%2===1?' tr-alt-bg':'')+'" data-match-id="'+esc3(g.id)+'">';
         h+='<td>'+(si+1)+'</td><td>'+slot.time+'</td>';
         h+='<td class="td-home">'+escapeHtml(g.home)+'</td>';
         h+='<td class="td-score"></td><td class="td-vs">－</td><td class="td-score"></td>';
-        h+='<td class="td-away">'+escapeHtml(g.away)+'</td><td></td></tr>';
+        h+='<td class="td-away">'+escapeHtml(g.away)+'<label class="game-fixed no-print"><input class="game-fixed-input" type="checkbox" data-block-index="0" data-match-id="'+esc3(g.id)+'" '+(g.fixed?'checked ':'')+'>固定</label></td><td></td></tr>';
       });
     });
     h+='<tr><td colspan="8" class="tr-closing-td">🏆 閉会式　'+closingTime+'～</td></tr>';
@@ -656,6 +813,11 @@ if(slot.isBreak){
 
   var pv=document.getElementById("taisen-preview");
   pv.innerHTML=h;
+  pv.querySelectorAll(".game-fixed-input").forEach(function(input){
+    input.addEventListener("change",function(){
+      toggleGameFixed(Number(input.dataset.blockIndex),input.dataset.matchId,input.checked);
+    });
+  });
   document.getElementById("t-guide").style.display="block";
   pv.scrollIntoView({behavior:"smooth",block:"start"});
 }
@@ -679,9 +841,9 @@ function getYoukouText(){
 }
 function getTaisenText(){
   var f=function(id){var el=document.getElementById(id);return el?el.value.trim():"";};
-  var t="【"+f("taisen-title")+"】 対戦表\n";
-  if(f("taisen-date"))  t+="📅 "+f("taisen-date")+"\n";
-  if(f("taisen-venue")) t+="📍 "+f("taisen-venue")+"\n";
+  var t="【"+f("t-title")+"】 対戦表\n";
+  if(f("t-date"))  t+="📅 "+f("t-date")+"\n";
+  if(f("t-place")) t+="📍 "+f("t-place")+"\n";
   var rows=document.querySelectorAll(".taisen-game-row");
   if(rows.length){
     t+="\n";
@@ -704,6 +866,140 @@ function copyTaisen(){
   if(!t.replace(/\s/g,"")){alert("先に対戦表を生成してください");return;}
   navigator.clipboard.writeText(t).then(function(){alert("対戦表をコピーしました！LINEに貼り付けてください。");}).catch(function(){alert("コピーできませんでした。");});
 }
+
+/* ===== 対戦チーム向けLINE案内 ===== */
+var _lineInviteType="request";
+function lineValue(id){var el=document.getElementById(id);return el?el.value.trim():"";}
+function validPublicUrl(value){
+  if(!value)return "";
+  try{
+    var parsed=new URL(value);
+    return parsed.protocol==="http:"||parsed.protocol==="https:"?parsed.href:"";
+  }catch(error){return "";}
+}
+function displayDateForLine(value){
+  if(!value)return "";
+  return fmtDate(value).replace(/年/,"年").replace(/\//g,"月");
+}
+function firstTime(text){
+  var match=String(text||"").match(/(?:午前|午後|AM|PM)?\s*(\d{1,2})[:：](\d{2})/i);
+  return match?match[1]+":"+match[2]:"";
+}
+function lineField(label,value){
+  return value?"【"+label+"】"+value+"\n":"";
+}
+function collectLineInviteData(){
+  var mapRaw=lineValue("line-map"),docRaw=lineValue("line-doc-url");
+  var selectedTeam=lineValue("line-team"),plannedMatches=0;
+  if(_lastTournamentSchedule&&selectedTeam){
+    _lastTournamentSchedule.blocks.forEach(function(block){
+      block.matches.forEach(function(match){
+        if(match.home===selectedTeam||match.away===selectedTeam)plannedMatches++;
+      });
+    });
+  }
+  return {
+    team:selectedTeam,
+    title:gv("y-title")||gv("t-title"),
+    date:gv("y-date")||gv("t-date"),
+    category:gv("y-cat"),
+    place:gv("y-place")||gv("t-place"),
+    meeting:lineValue("line-meeting"),
+    reception:gv("y-uketsuke"),
+    kickoff:lineValue("line-kickoff")||gv("t-start"),
+    format:gv("y-format"),
+    matchTime:gv("y-time"),
+    plannedMatches:plannedMatches?plannedMatches+"試合":"",
+    fee:gv("y-fee"),
+    lunch:document.getElementById("lunch-enable").checked
+      ? "あり（"+(gv("lunch-start")||"時刻未設定")+"から"+(gv("lunch-min")||"60")+"分）"
+      : "",
+    parking:gv("y-parking"),
+    rain:gv("y-rain"),
+    deadline:lineValue("line-deadline"),
+    representative:gv("y-rep"),
+    contact:gv("y-contact"),
+    map:validPublicUrl(mapRaw),
+    documentUrl:validPublicUrl(docRaw),
+    items:lineValue("line-items"),
+    invalidUrls:(mapRaw&&!validPublicUrl(mapRaw)||docRaw&&!validPublicUrl(docRaw))
+  };
+}
+function generateLineInvite(){
+  var data=collectLineInviteData(),missing=[];
+  [["相手チーム名",data.team],["大会名",data.title],["開催日",data.date],["カテゴリー",data.category],["会場",data.place]]
+    .forEach(function(pair){if(!pair[1])missing.push(pair[0]);});
+  if(data.invalidUrls)missing.push("URLは http または https で入力してください");
+  var greeting=(data.team?data.team+"チーム\n":"〇〇チーム\n")+"ご担当者様\n\nいつもお世話になっております。\n吉見SMC"+(data.representative?"の"+data.representative.replace(/^吉見SMC(代表)?\s*/,""):"")+"です。\n\n";
+  var body="";
+  if(_lineInviteType==="confirmed"){
+    body="このたびはご参加いただき、ありがとうございます。\n当日の詳細をご案内いたします。\n\n";
+  }else if(_lineInviteType==="reminder"){
+    body="先日ご案内した下記日程について、確認のためご連絡いたしました。\nご都合をご確認のうえ、ご返信をお願いいたします。\n\n";
+  }else{
+    body="下記の日程で大会（練習試合）を予定しております。\nご参加いただけるか、ご都合をお伺いできますでしょうか。\n\n";
+  }
+  body+=lineField("大会名",data.title);
+  body+=lineField("日程",data.date?fmtDate(data.date):"");
+  body+=lineField("カテゴリー",data.category);
+  body+=lineField("会場",data.place);
+  body+=lineField("集合",data.meeting);
+  body+=lineField("受付",data.reception);
+  body+=lineField("開始予定",data.kickoff);
+  body+=lineField("試合形式",[data.format,data.matchTime].filter(Boolean).join("・"));
+  body+=lineField("予定対戦数",data.plannedMatches);
+  body+=lineField("参加費",data.fee);
+  body+=lineField("昼食休憩",data.lunch);
+  body+=lineField("駐車場",data.parking);
+  body+=lineField("持ち物・補足",data.items);
+  body+=lineField("雨天時",data.rain);
+  body+=lineField("返信期限",data.deadline?fmtDate(data.deadline):"");
+  if(data.map)body+="\n会場地図：\n"+data.map+"\n";
+  if(data.documentUrl)body+="\n大会要綱・対戦表：\n"+data.documentUrl+"\n";
+  var closing=_lineInviteType==="confirmed"
+    ?"\n当日はどうぞよろしくお願いいたします。"
+    :"\nご都合をご確認いただき、ご返信をお願いいたします。\nどうぞよろしくお願いいたします。";
+  closing+="\n\n吉見SMC";
+  if(data.representative)closing+="\n担当："+data.representative;
+  if(data.contact)closing+="\n連絡先："+data.contact;
+  document.getElementById("line-preview").value=greeting+body+closing;
+  var warning=document.getElementById("line-missing");
+  warning.classList.toggle("show",missing.length>0);
+  warning.textContent=missing.length?"送信前に確認してください："+missing.join("、"):"";
+}
+function openLineInvite(){
+  var candidates=[].concat.apply([],captureTeamValues()).filter(function(team){
+    return team&& !/吉見|yoshimi/i.test(team);
+  }).filter(function(team,index,array){return array.indexOf(team)===index;});
+  var list=document.getElementById("line-team-options");
+  list.innerHTML=candidates.map(function(team){return '<option value="'+esc3(team)+'"></option>';}).join("");
+  if(!lineValue("line-team")&&candidates.length)document.getElementById("line-team").value=candidates[0];
+  var reception=gv("y-uketsuke");
+  if(!lineValue("line-meeting"))document.getElementById("line-meeting").value=firstTime(reception);
+  if(!lineValue("line-kickoff"))document.getElementById("line-kickoff").value=gv("t-start");
+  document.getElementById("modal-line").classList.add("open");
+  generateLineInvite();
+  window.setTimeout(function(){document.getElementById("line-team").focus();},100);
+}
+function closeLineInvite(){document.getElementById("modal-line").classList.remove("open");}
+function copyLineInvite(){
+  var text=lineValue("line-preview");
+  if(!text){alert("文章を作成してください");return;}
+  if(navigator.clipboard&&navigator.clipboard.writeText){
+    navigator.clipboard.writeText(text).then(function(){alert("LINE案内文をコピーしました！");})
+      .catch(function(){alert("コピーできませんでした。文章を長押ししてコピーしてください。");});
+  }else{
+    var area=document.getElementById("line-preview");area.focus();area.select();
+    alert("文章を選択しました。コピーしてください。");
+  }
+}
+document.querySelectorAll("[data-line-type]").forEach(function(button){
+  button.addEventListener("click",function(){
+    _lineInviteType=button.dataset.lineType;
+    document.querySelectorAll("[data-line-type]").forEach(function(item){item.classList.toggle("active",item===button);});
+    generateLineInvite();
+  });
+});
 
 /* ===== 印刷 ===== */
 function buildAndPrintPortrait(){
@@ -806,35 +1102,60 @@ var YOUKOU_FIELDS = ["y-title","y-cat","y-date","y-place","y-host",
   "y-ref","y-award","y-rain","y-parking","y-rep","y-contact"];
 
 // 対戦表フィールドを収集
-var TAISEN_FIELDS = ["t-title","t-date","t-place","t-min","t-courts","t-start","t-guide"];
+var TAISEN_FIELDS = ["t-title","t-date","t-place","t-min","t-courts","t-start",
+  "lunch-enable","lunch-start","lunch-min","lunch-label"];
 
 function collectFields(fields){
   var data = {};
   fields.forEach(function(id){
     var el = document.getElementById(id);
-    if(el) data[id] = el.value;
+    if(el) data[id] = el.type==="checkbox" ? el.checked : el.value;
   });
   return data;
 }
 function applyFields(data){
   Object.keys(data).forEach(function(id){
     var el = document.getElementById(id);
-    if(el) el.value = data[id];
+    if(el){
+      if(el.type==="checkbox")el.checked=!!data[id];
+      else el.value=data[id];
+    }
   });
+  toggleLunch();
 }
 
 function captureTeamValues(){
-  var teams = [];
-  for(var i=0;i<16;i++){
-    var el = document.getElementById("t-team-"+i);
-    if(el) teams.push(el.value);
+  var teams=[];
+  var courts=Number(gv("t-courts"))||1;
+  for(var c=0;c<courts;c++){
+    var countEl=document.getElementById("cnt-"+c);
+    var count=countEl?Number(countEl.value):0;
+    var block=[];
+    for(var i=0;i<count;i++){
+      var el=document.getElementById("t-"+c+"-"+i);
+      block.push(el?el.value:"");
+    }
+    teams.push(block);
   }
   return teams;
 }
 function applyTeamValues(teams){
-  (teams||[]).forEach(function(value,index){
-    var el = document.getElementById("t-team-"+index);
-    if(el) el.value = value;
+  if(!Array.isArray(teams)||!teams.length)return;
+  // 旧形式（一次元配列）も読み込めるようにする。
+  var blocks=Array.isArray(teams[0])?teams:[teams];
+  var courtSelect=document.getElementById("t-courts");
+  if(courtSelect)courtSelect.value=String(Math.min(Math.max(blocks.length,1),2));
+  updateTeamInputs();
+  blocks.slice(0,2).forEach(function(block,c){
+    var countEl=document.getElementById("cnt-"+c);
+    if(countEl){
+      countEl.value=String(Math.min(Math.max(block.length,2),8));
+      updateNames(c);
+    }
+    block.forEach(function(value,index){
+      var el=document.getElementById("t-"+c+"-"+index);
+      if(el)el.value=value;
+    });
   });
 }
 var TOURNAMENT_TEMPLATES = {
@@ -1011,15 +1332,8 @@ function execSave(){
   };
   // チーム数やチーム名も保存（対戦表）
   if(_saveType==="taisen"){
-    var teamInputs = document.querySelectorAll("[id^='t-'][id*='-0']");
-    var teams = [];
-    for(var i=0;i<16;i++){
-      var el = document.getElementById("t-team-"+i);
-      if(el) teams.push(el.value);
-    }
-    entry.data.teams = JSON.stringify(teams);
-    var cntEl = document.getElementById("t-teamcount");
-    if(cntEl) entry.data["t-teamcount"] = cntEl.value;
+    entry.data.teams=JSON.stringify(captureTeamValues());
+    if(_lastTournamentSchedule)entry.data.optimizedSchedule=JSON.stringify(_lastTournamentSchedule);
   }
   var linkedExisting = _activeGameAdjustDateId
     ? linkedEntries(_activeGameAdjustDateId,_saveType)[0]
@@ -1095,6 +1409,9 @@ function applySaveEntry(item){
   applyFields(item.data||{});
   if(item.type==="taisen" && item.data && item.data.teams){
     try{ applyTeamValues(JSON.parse(item.data.teams)); }catch(e){}
+    try{
+      _lastTournamentSchedule=item.data.optimizedSchedule?JSON.parse(item.data.optimizedSchedule):null;
+    }catch(error){_lastTournamentSchedule=null;}
   }
   if(item.type==="youkou" && Array.isArray(item.customRows)){
     _customRows = JSON.parse(JSON.stringify(item.customRows));
