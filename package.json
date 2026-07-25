@@ -1,9 +1,9 @@
 {
   "name": "yoshimi-smc-portal",
   "private": true,
-  "version": "20260721.05.0",
+  "version": "20260725.1.0",
   "scripts": {
-    "test": "node scripts/audit.mjs && node scripts/firebase-save.test.mjs"
+    "test": "node scripts/audit.mjs && node scripts/firebase-save.test.mjs && node scripts/tournament-scheduler.test.mjs"
   },
   "engines": {
     "node": ">=20"
