@@ -518,6 +518,25 @@ for (const match of precacheBlock.matchAll(/["']\.\/([^"']*)["']/g)) {
   if (!fs.existsSync(path.join(root, target))) fail("sw.js", `事前キャッシュ対象がありません: ./${match[1]}`);
 }
 
+// スマートフォンの入力とタップ領域を守る検査（2026-07-29 追加）
+// iOS Safariは入力欄の文字が16px未満だとフォーカス時に画面を自動拡大するため、
+// タッチ端末向けの下限指定が消えていないか確認する。
+const cssSource = fs.readFileSync(path.join(root, "common.css"), "utf8");
+const coarseBlocks = [...cssSource.matchAll(/@media\s*\(pointer:\s*coarse\)\s*\{([\s\S]*?)\n\}/g)]
+  .map((match) => match[1])
+  .join("\n");
+if (!/font-size:\s*max\(16px/.test(coarseBlocks)) {
+  fail("common.css", "タッチ端末で入力欄を16px以上にする指定がありません（iOSで入力時に画面が自動拡大します）");
+}
+for (const tapClass of [".btn-sm", ".back-btn", ".tab-btn", ".btn-line-copy"]) {
+  if (!coarseBlocks.includes(tapClass)) {
+    fail("common.css", `タッチ端末で ${tapClass} のタップ領域を広げる指定がありません`);
+  }
+}
+if (!/min-height:\s*44px/.test(coarseBlocks)) {
+  fail("common.css", "タッチ端末のタップ領域が44px未満です");
+}
+
 if (failures.length) {
   console.error(`\n${failures.length} 件の問題が見つかりました:`);
   for (const message of failures) console.error(`- ${message}`);
