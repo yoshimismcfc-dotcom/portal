@@ -1168,3 +1168,42 @@ body[data-theme="light"] .linked-date-disclosure > .linked-date-summary {
 }
 body[data-theme="light"] .linked-date-disclosure > .linked-date-summary::after { color: #075779; }
 body[data-theme="light"] .linked-date-summary-hint { color: #4f6577; }
+
+/* ============================================================
+   スマートフォン操作性の底上げ（2026-07-29）
+   iPhone Safari・LINE内ブラウザでの入力とタップを安定させる。
+   タッチ端末だけに適用し、パソコン表示は従来のままにする。
+   ============================================================ */
+
+/* iOS Safariは入力欄の文字が16px未満だと、タップした瞬間に画面を自動拡大する。
+   拡大されると横スクロールが起きて入力欄やボタンが画面外へ出るため、
+   タッチ端末では16pxを下限にして自動拡大自体を止める。
+   max()で既存指定より小さくならないようにし、
+   選択肢はネイティブの選択画面が開くため対象外にして表の幅を保つ。 */
+@media (pointer: coarse) {
+  input:not([type="checkbox"]):not([type="radio"]):not([type="range"]):not([type="button"]):not([type="submit"]):not([type="color"]),
+  textarea,
+  textarea.form-control {
+    font-size: max(16px, 1em);
+  }
+}
+
+/* 指で押す領域を44px以上にする（Apple・Googleの推奨値）。
+   小さいボタンは画面が狭い端末で押し間違えの原因になるため、
+   タッチ端末のみ高さを引き上げる。 */
+@media (pointer: coarse) {
+  .btn-sm,
+  .back-btn,
+  .tab-btn {
+    min-height: 44px;
+  }
+  .btn-line-copy {
+    min-height: 44px;
+    padding: 8px 14px;
+  }
+  /* 表の行内に入る小型のコピーボタンは、行の高さを崩さない範囲で広げる。 */
+  .btn-line-copy.sm {
+    min-height: 40px;
+    padding: 8px 12px;
+  }
+}
