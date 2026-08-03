@@ -10,6 +10,7 @@ const PRECACHE_URLS = [
   "./offline.html",
   "./common.css",
   "./common.js",
+  "./usage-counter.js",
   "./event-links.js",
   "./tournament-scheduler.js",
   "./firebase-config.js",

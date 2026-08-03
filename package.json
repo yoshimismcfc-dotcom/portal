@@ -3,7 +3,7 @@
   "private": true,
   "version": "20260729.1.0",
   "scripts": {
-    "test": "node scripts/audit.mjs && node scripts/firebase-save.test.mjs && node scripts/tournament-scheduler.test.mjs"
+    "test": "node scripts/audit.mjs && node scripts/firebase-save.test.mjs && node scripts/tournament-scheduler.test.mjs && node scripts/usage-counter.test.mjs"
   },
   "engines": {
     "node": ">=20"

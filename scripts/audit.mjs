@@ -136,6 +136,7 @@ if (/localStorage\.setItem\([^\n]*smc_members/i.test(membersSource)) fail("membe
 if (!membersSource.includes("next[grade]=next[grade].filter")) fail("members.html", "Firebase名簿の空データを除外していません");
 
 const commonSource = fs.readFileSync(path.join(root, "common.js"), "utf8");
+const usageCounterSource = fs.readFileSync(path.join(root, "usage-counter.js"), "utf8");
 const eventLinksSource = fs.readFileSync(path.join(root, "event-links.js"), "utf8");
 const calendarSource = fs.readFileSync(path.join(root, "calendar.html"), "utf8");
 if (!commonSource.includes("refreshCoachFolderLabels")) {
@@ -487,6 +488,15 @@ if (!guideSource.includes("入力欄まで自動で移動") || !guideSource.incl
 }
 if (!swSource.includes("./event-links.js")) {
   fail("sw.js", "日程連携用JavaScriptが事前キャッシュ対象にありません");
+}
+if (!commonSource.includes('script.src = "usage-counter.js"') || !swSource.includes("./usage-counter.js")) {
+  fail("匿名利用カウンター", "共通読込またはPWA事前キャッシュにusage-counter.jsがありません");
+}
+if (!usageCounterSource.includes('var STORAGE_ROOT = "usage_stats_v1"') || !usageCounterSource.includes("FEATURE_LABELS") || !usageCounterSource.includes("transaction")) {
+  fail("usage-counter.js", "固定機能キーによる匿名の回数加算処理がありません");
+}
+for (const forbidden of ["navigator.userAgent", "geolocation", "fingerprint", "location.search", "location.hash", "localStorage"]) {
+  if (usageCounterSource.includes(forbidden)) fail("usage-counter.js", `匿名集計に不要な情報を参照しています: ${forbidden}`);
 }
 
 
