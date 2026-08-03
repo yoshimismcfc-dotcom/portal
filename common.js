@@ -1102,6 +1102,17 @@ function enhanceCalendarUpcomingAgenda() {
   });
 })();
 
+/* ===== 個人情報を保存しない匿名の機能別カウンター =====
+   月・機能キー・回数だけをFirebaseへ保存する。実装本体を分離し、
+   Firebase未使用ページでは必要なSDKを遅延読み込みして表示速度への影響を抑える。 */
+(function(){
+  if(typeof document === "undefined" || document.querySelector('script[src$="usage-counter.js"]')) return;
+  var script = document.createElement("script");
+  script.src = "usage-counter.js";
+  script.defer = true;
+  document.head.appendChild(script);
+})();
+
 /* ===== Service Worker 登録（操作中の強制再読込なし） ===== */
 (function(){
   if(!('serviceWorker' in navigator)) return;
