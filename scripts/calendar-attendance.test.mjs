@@ -30,7 +30,15 @@ assert.ok(message.indexOf("U8 大会") < message.indexOf("U10 練習試合"), "�
 assert.equal(message.includes("URLなし"), false);
 
 const commonSource = fs.readFileSync(path.join(root, "common.js"), "utf8");
+const calendarHtml = fs.readFileSync(path.join(root, "calendar.html"), "utf8");
+const attendanceHtml = fs.readFileSync(path.join(root, "attendance.html"), "utf8");
 assert.ok(commonSource.includes("const UPCOMING_DAYS = 90"), "カレンダーの取得期間が90日になっていません");
 assert.ok(commonSource.includes("end.setDate(end.getDate() + UPCOMING_DAYS)"), "90日設定がAPI取得期間へ使われていません");
+assert.ok(commonSource.includes('href="attendance.html#match-attendance"'), "カレンダーから参加案内への入口がありません");
+assert.ok(commonSource.includes("if (!isCalendarPage) return;"), "出欠ページとカレンダーの表示分岐がありません");
+assert.ok(attendanceHtml.includes('id="match-attendance"'), "出欠ページに試合参加案内の本体がありません");
+assert.ok(attendanceHtml.includes('id="calendar-attendance-copy"'), "出欠ページにLINE一括コピーボタンがありません");
+assert.ok(attendanceHtml.includes('src="calendar-attendance.js"'), "出欠ページで調整さんURLの安全な抽出処理を読み込んでいません");
+assert.equal(calendarHtml.includes('id="calendar-attendance-copy"'), false, "カレンダーHTMLに管理用のコピーボタンを重複配置しないでください");
 
-console.log("OK: 調整さんURLの安全な抽出とLINE案内文を検査しました。");
+console.log("OK: 調整さんURLの安全な抽出、LINE案内文、画面の役割分担を検査しました。");
