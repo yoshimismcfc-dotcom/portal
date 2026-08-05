@@ -680,7 +680,8 @@ function enhanceCalendarUpcomingAgenda() {
     if (!calendarFrame || !calendarWrap || document.getElementById("calendar-upcoming-agenda")) return;
 
     const PUBLIC_CALENDAR_KEY = ["AIzaSyDRH2RymQBOFCcXIDDjJc", "EbBdyuVmfXLnQ"].join("");
-    const CACHE_KEY = "smc-calendar-upcoming-v7";
+    const CACHE_KEY = "smc-calendar-upcoming-v8";
+    const UPCOMING_DAYS = 90;
     const CALENDARS = [
       { id: "yoshimi.smc.fc@gmail.com", color: "#616161", label: "全体" },
       { id: "fceff821382e14ab8c504a20e126273e4fc5883bf387a7ae30262ca6e8c9ec05@group.calendar.google.com", color: "#f09300", label: "U10" },
@@ -778,7 +779,7 @@ function enhanceCalendarUpcomingAgenda() {
         <div class="calendar-upcoming-skeleton"></div>
         <div class="calendar-upcoming-skeleton"></div>
       </div>
-      <p class="calendar-upcoming-note">Googleカレンダーの今後45日間を日付順に表示します。予定をタップするとGoogleカレンダーで詳細を確認できます。</p>
+      <p class="calendar-upcoming-note">Googleカレンダーの今後${UPCOMING_DAYS}日間を日付順に表示します。予定をタップするとGoogleカレンダーで詳細を確認できます。</p>
       <section class="calendar-attendance" id="calendar-attendance" aria-labelledby="calendar-attendance-title" hidden>
         <div class="calendar-attendance-head">
           <div>
@@ -938,7 +939,7 @@ function enhanceCalendarUpcomingAgenda() {
       if (!events.length) {
         const empty = document.createElement("div");
         empty.className = "calendar-upcoming-state";
-        empty.textContent = "今後45日間に登録されている予定はありません。";
+        empty.textContent = `今後${UPCOMING_DAYS}日間に登録されている予定はありません。`;
         list.appendChild(empty);
         return;
       }
@@ -1088,7 +1089,7 @@ function enhanceCalendarUpcomingAgenda() {
       refreshButton.disabled = true;
       const now = new Date();
       const end = new Date(now);
-      end.setDate(end.getDate() + 45);
+      end.setDate(end.getDate() + UPCOMING_DAYS);
       try {
         const results = await Promise.allSettled(CALENDARS.map((calendar) => fetchCalendar(calendar, now.toISOString(), end.toISOString())));
         const successful = results.filter((result) => result.status === "fulfilled");
