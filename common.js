@@ -908,14 +908,19 @@ function enhanceCalendarUpcomingAgenda() {
           else throw new Error("Clipboard API unavailable");
           attendanceStatus.textContent = "コピーしました。LINEのトークまたは一斉配信画面へ貼り付けてください。";
         } catch (error) {
-          const textarea = document.createElement("textarea");
-          textarea.value = message;
-          textarea.setAttribute("readonly", "");
-          textarea.style.cssText = "position:fixed;left:-9999px;top:0";
-          document.body.appendChild(textarea);
-          textarea.select();
-          const copied = document.execCommand("copy");
-          textarea.remove();
+          let copied = false;
+          try {
+            const textarea = document.createElement("textarea");
+            textarea.value = message;
+            textarea.setAttribute("readonly", "");
+            textarea.style.cssText = "position:fixed;left:-9999px;top:0";
+            document.body.appendChild(textarea);
+            textarea.select();
+            copied = typeof document.execCommand === "function" && document.execCommand("copy");
+            textarea.remove();
+          } catch (fallbackError) {
+            copied = false;
+          }
           attendanceStatus.textContent = copied
             ? "コピーしました。LINEへ貼り付けてください。"
             : "コピーできませんでした。ブラウザの共有機能をご利用ください。";
