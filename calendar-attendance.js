@@ -62,17 +62,21 @@
   function normalizeEntries(events){
     var seen = new Set();
     return (Array.isArray(events) ? events : []).map(function(event){
+      var title = text(event && event.title) || "（タイトル未設定）";
+      var start = text(event && event.start);
+      var url = safeChouseisanUrl(event && (event.attendanceUrl || event.url));
       return {
-        title: text(event && event.title) || "（タイトル未設定）",
-        start: text(event && event.start),
-        dateLabel: formatDate(event && event.start),
-        url: safeChouseisanUrl(event && (event.attendanceUrl || event.url))
+        title: title,
+        start: start,
+        dateLabel: formatDate(start),
+        category: text(event && event.label) || "その他",
+        url: url,
+        key: [title, start, url].join("|")
       };
     }).filter(function(entry){
       if(!entry.url) return false;
-      var key = [entry.title, entry.start, entry.url].join("|");
-      if(seen.has(key)) return false;
-      seen.add(key);
+      if(seen.has(entry.key)) return false;
+      seen.add(entry.key);
       return true;
     }).sort(function(left, right){
       return left.start.localeCompare(right.start) || left.title.localeCompare(right.title, "ja");

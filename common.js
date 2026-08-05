@@ -733,11 +733,20 @@ function enhanceCalendarUpcomingAgenda() {
         .calendar-attendance-head{display:flex;align-items:flex-start;justify-content:space-between;gap:12px;margin-bottom:12px}
         .calendar-attendance-title{margin:0;color:#8ce7ff;font-size:1rem;font-weight:950}
         .calendar-attendance-help{margin:3px 0 0;color:#b8d9ec;font-size:.68rem;line-height:1.55}
+        .calendar-attendance-tools{display:grid;grid-template-columns:minmax(0,1fr) auto auto;align-items:end;gap:8px;margin:2px 0 8px}
+        .calendar-attendance-category-label{display:grid;gap:4px;color:#b8d9ec;font-size:.68rem;font-weight:900}
+        .calendar-attendance-category-label select{min-height:44px;width:100%;padding:8px 34px 8px 10px;border:1px solid rgba(94,139,188,.65);border-radius:10px;background:#08264d;color:#fff;font:inherit;font-size:.8rem;font-weight:800}
+        .calendar-attendance-tool-button{min-height:44px;padding:8px 12px;border:1px solid rgba(0,212,255,.48);border-radius:10px;background:rgba(0,93,148,.3);color:#bdefff;font:inherit;font-size:.72rem;font-weight:900;cursor:pointer}
+        .calendar-attendance-tool-button:disabled,.calendar-attendance-category-label select:disabled{opacity:.5;cursor:not-allowed}
+        .calendar-attendance-selection-summary{margin:0 0 8px;color:#ffd36d;font-size:.72rem;font-weight:900}
         .calendar-attendance-list{display:grid;gap:8px}
-        .calendar-attendance-item{display:grid;grid-template-columns:minmax(0,1fr) auto;gap:6px 12px;padding:11px 12px;border:1px solid rgba(94,139,188,.45);border-radius:12px;background:rgba(5,29,61,.72)}
-        .calendar-attendance-name{color:#fff;font-size:.84rem;font-weight:900;line-height:1.45;overflow-wrap:anywhere}
+        .calendar-attendance-item{display:grid;grid-template-columns:auto minmax(0,1fr) auto;gap:6px 10px;padding:11px 12px;border:1px solid rgba(94,139,188,.45);border-radius:12px;background:rgba(5,29,61,.72);cursor:pointer}
+        .calendar-attendance-item.is-selected{border-color:rgba(0,212,255,.72);background:rgba(4,47,84,.9)}
+        .calendar-attendance-check{grid-row:1/3;align-self:center;width:22px;height:22px;margin:0;accent-color:#00c86f;cursor:pointer}
+        .calendar-attendance-name{display:flex;align-items:center;gap:7px;min-width:0;color:#fff;font-size:.84rem;font-weight:900;line-height:1.45;overflow-wrap:anywhere}
+        .calendar-attendance-category{flex-shrink:0;padding:2px 7px;border:1px solid rgba(0,212,255,.45);border-radius:999px;color:#8ce7ff;font-size:.58rem;font-weight:900}
         .calendar-attendance-date{color:#ffd36d;font-size:.72rem;font-weight:900;white-space:nowrap}
-        .calendar-attendance-url{grid-column:1/-1;color:#78ddff;font-size:.68rem;font-weight:700;overflow-wrap:anywhere;text-decoration:underline}
+        .calendar-attendance-url{grid-column:2/-1;color:#78ddff;font-size:.68rem;font-weight:700;overflow-wrap:anywhere;text-decoration:underline}
         .calendar-attendance-copy{width:100%;min-height:48px;margin-top:12px;border:1px solid #00c86f;border-radius:12px;background:linear-gradient(135deg,#00a94f,#00c86f);color:#fff;font:inherit;font-size:.86rem;font-weight:950;cursor:pointer;box-shadow:0 6px 18px rgba(0,150,78,.24)}
         .calendar-attendance-copy:focus-visible{outline:3px solid #fff;outline-offset:2px}
         .calendar-attendance-status{min-height:1.5em;margin:7px 0 0;color:#a8f5ca;font-size:.7rem;font-weight:800;text-align:center}
@@ -758,7 +767,13 @@ function enhanceCalendarUpcomingAgenda() {
         body[data-theme="light"] .calendar-attendance{border-color:#2285a7;background:linear-gradient(145deg,#f3f9ff,#e7f3fb)}
         body[data-theme="light"] .calendar-attendance-title{color:#075d84}
         body[data-theme="light"] .calendar-attendance-help{color:#385873}
+        body[data-theme="light"] .calendar-attendance-category-label{color:#385873}
+        body[data-theme="light"] .calendar-attendance-category-label select{border-color:#8fa9c5;background:#fff;color:#102944}
+        body[data-theme="light"] .calendar-attendance-tool-button{border-color:#3785a5;background:#e5f5fa;color:#075d84}
+        body[data-theme="light"] .calendar-attendance-selection-summary{color:#8a5100}
         body[data-theme="light"] .calendar-attendance-item{border-color:#9cb4cb;background:#fff}
+        body[data-theme="light"] .calendar-attendance-item.is-selected{border-color:#2285a7;background:#eefaff}
+        body[data-theme="light"] .calendar-attendance-category{border-color:#3785a5;color:#075d84}
         body[data-theme="light"] .calendar-attendance-name{color:#102944}
         body[data-theme="light"] .calendar-attendance-date{color:#8a5100}
         body[data-theme="light"] .calendar-attendance-url{color:#075d84}
@@ -769,7 +784,7 @@ function enhanceCalendarUpcomingAgenda() {
           .calendar-event-card{grid-template-columns:54px 4px minmax(0,1fr) 16px;gap:10px;min-height:90px;padding:10px 10px 10px 7px}
           .calendar-event-date{min-height:64px}.calendar-event-day{font-size:1.55rem}.calendar-event-title{font-size:.86rem}.calendar-event-meta{font-size:.66rem}
           .calendar-attendance-gateway{grid-template-columns:auto minmax(0,1fr);padding:13px 12px}.calendar-attendance-gateway-arrow{grid-column:2}
-          .calendar-attendance{padding:14px 12px}.calendar-attendance-head{display:block}.calendar-attendance-item{grid-template-columns:1fr}.calendar-attendance-date,.calendar-attendance-url{grid-column:1}
+          .calendar-attendance{padding:14px 12px}.calendar-attendance-head{display:block}.calendar-attendance-tools{grid-template-columns:1fr 1fr}.calendar-attendance-category-label{grid-column:1/-1}.calendar-attendance-tool-button{width:100%}.calendar-attendance-item{grid-template-columns:auto minmax(0,1fr)}.calendar-attendance-check{grid-row:1/4}.calendar-attendance-date,.calendar-attendance-url{grid-column:2}
         }
       `;
       document.head.appendChild(style);
@@ -818,9 +833,16 @@ function enhanceCalendarUpcomingAgenda() {
     const attendanceCopy = attendancePage?.querySelector("#calendar-attendance-copy");
     const attendanceStatus = attendancePage?.querySelector("#calendar-attendance-status");
     const attendanceRefresh = attendancePage?.querySelector("#calendar-attendance-refresh");
+    const attendanceCategory = attendancePage?.querySelector("#calendar-attendance-category");
+    const attendanceSelectAll = attendancePage?.querySelector("#calendar-attendance-select-all");
+    const attendanceClear = attendancePage?.querySelector("#calendar-attendance-clear");
+    const attendanceSelectionSummary = attendancePage?.querySelector("#calendar-attendance-selection-summary");
     const days = ["日", "月", "火", "水", "木", "金", "土"];
     let requestInFlight = false;
     let lastLoadedAt = 0;
+    let attendanceEntries = [];
+    let selectedAttendanceKeys = new Set();
+    let attendanceSelectionTouched = false;
 
     function parseStart(event) {
       if (event.allDay) {
@@ -887,6 +909,32 @@ function enhanceCalendarUpcomingAgenda() {
       target.append(dot, text);
     }
 
+    function updateAttendanceSelection() {
+      if (!attendanceList || !attendanceCopy || !attendanceSelectionSummary) return;
+      attendanceList.querySelectorAll("[data-attendance-key]").forEach((item) => {
+        const selected = selectedAttendanceKeys.has(item.dataset.attendanceKey);
+        item.classList.toggle("is-selected", selected);
+        const checkbox = item.querySelector(".calendar-attendance-check");
+        if (checkbox) checkbox.checked = selected;
+      });
+      const selectedCount = attendanceEntries.filter((entry) => selectedAttendanceKeys.has(entry.key)).length;
+      attendanceCopy.disabled = selectedCount === 0;
+      attendanceCopy.textContent = selectedCount
+        ? `📋 選択した${selectedCount}件をLINE文にコピー`
+        : "📋 配信する試合を選択してください";
+      attendanceSelectionSummary.textContent = `${selectedCount}件選択中／全${attendanceEntries.length}件`;
+    }
+
+    function selectAttendanceEntries(category) {
+      attendanceSelectionTouched = true;
+      selectedAttendanceKeys.clear();
+      attendanceEntries.forEach((entry) => {
+        if (category === "__all" || entry.category === category) selectedAttendanceKeys.add(entry.key);
+      });
+      if (attendanceStatus) attendanceStatus.textContent = "";
+      updateAttendanceSelection();
+    }
+
     function renderAttendance(events) {
       const helper = window.SMCCalendarAttendance;
       const entries = helper ? helper.normalizeEntries(events) : [];
@@ -894,24 +942,76 @@ function enhanceCalendarUpcomingAgenda() {
         attendanceGateway.hidden = entries.length === 0;
         if (entries.length) attendanceGatewayCount.textContent = `調整さんが登録された試合が${entries.length}件あります`;
       }
-      if (!attendanceSection || !attendanceList || !attendanceCount || !attendanceCopy || !attendanceStatus) return;
+      if (!attendanceSection || !attendanceList || !attendanceCount || !attendanceCopy || !attendanceStatus || !attendanceCategory || !attendanceSelectAll || !attendanceClear || !attendanceSelectionSummary) return;
+
+      attendanceEntries = entries;
+      const validKeys = new Set(entries.map((entry) => entry.key));
+      selectedAttendanceKeys = attendanceSelectionTouched
+        ? new Set(Array.from(selectedAttendanceKeys).filter((key) => validKeys.has(key)))
+        : new Set(entries.map((entry) => entry.key));
       attendanceList.replaceChildren();
       attendanceStatus.textContent = "";
       attendanceCount.textContent = `${entries.length}件`;
-      attendanceCopy.disabled = entries.length === 0;
+
+      attendanceCategory.replaceChildren();
+      const promptOption = document.createElement("option");
+      promptOption.value = "";
+      promptOption.textContent = "カテゴリーを選んでください";
+      attendanceCategory.appendChild(promptOption);
+      Array.from(new Set(entries.map((entry) => entry.category))).sort((left, right) => left.localeCompare(right, "ja")).forEach((category) => {
+        const option = document.createElement("option");
+        option.value = category;
+        option.textContent = `${category}だけ選択`;
+        attendanceCategory.appendChild(option);
+      });
+      attendanceCategory.disabled = entries.length === 0;
+      attendanceSelectAll.disabled = entries.length === 0;
+      attendanceClear.disabled = entries.length === 0;
+
+      attendanceCategory.onchange = function(){
+        if (!attendanceCategory.value) return;
+        selectAttendanceEntries(attendanceCategory.value);
+        attendanceCategory.value = "";
+      };
+      attendanceSelectAll.onclick = function(){ selectAttendanceEntries("__all"); };
+      attendanceClear.onclick = function(){ selectAttendanceEntries("__none"); };
+
       if (!entries.length) {
         const empty = document.createElement("div");
         empty.className = "calendar-upcoming-state";
         empty.textContent = `今後${UPCOMING_DAYS}日間に、調整さんURLが登録された試合はありません。`;
         attendanceList.appendChild(empty);
+        updateAttendanceSelection();
         return;
       }
+
       entries.forEach((entry) => {
         const item = document.createElement("div");
         item.className = "calendar-attendance-item";
-        const title = document.createElement("div");
-        title.className = "calendar-attendance-name";
+        item.dataset.attendanceKey = entry.key;
+        item.setAttribute("role", "group");
+
+        const checkbox = document.createElement("input");
+        checkbox.type = "checkbox";
+        checkbox.className = "calendar-attendance-check";
+        checkbox.setAttribute("aria-label", `${entry.title}をLINE配信に含める`);
+        checkbox.addEventListener("change", () => {
+          attendanceSelectionTouched = true;
+          if (checkbox.checked) selectedAttendanceKeys.add(entry.key);
+          else selectedAttendanceKeys.delete(entry.key);
+          attendanceStatus.textContent = "";
+          updateAttendanceSelection();
+        });
+
+        const name = document.createElement("div");
+        name.className = "calendar-attendance-name";
+        const title = document.createElement("span");
         title.textContent = entry.title;
+        const category = document.createElement("span");
+        category.className = "calendar-attendance-category";
+        category.textContent = entry.category;
+        name.append(title, category);
+
         const date = document.createElement("div");
         date.className = "calendar-attendance-date";
         date.textContent = entry.dateLabel;
@@ -922,16 +1022,28 @@ function enhanceCalendarUpcomingAgenda() {
         link.rel = "noopener noreferrer";
         link.textContent = entry.url;
         link.setAttribute("aria-label", `${entry.title}の調整さんを開く`);
-        item.append(title, date, link);
+        item.addEventListener("click", (event) => {
+          if (event.target.closest("a,input")) return;
+          checkbox.click();
+        });
+        item.append(checkbox, name, date, link);
         attendanceList.appendChild(item);
       });
+      updateAttendanceSelection();
+
       attendanceCopy.onclick = async function(){
-        const message = helper.buildLineMessage(events);
-        if (!message) return;
+        const selectedEvents = attendanceEntries
+          .filter((entry) => selectedAttendanceKeys.has(entry.key))
+          .map((entry) => ({title:entry.title, start:entry.start, attendanceUrl:entry.url, label:entry.category}));
+        const message = helper.buildLineMessage(selectedEvents);
+        if (!message) {
+          attendanceStatus.textContent = "配信する試合を1件以上選択してください。";
+          return;
+        }
         try {
           if (navigator.clipboard?.writeText) await navigator.clipboard.writeText(message);
           else throw new Error("Clipboard API unavailable");
-          attendanceStatus.textContent = "コピーしました。LINEのトークまたは一斉配信画面へ貼り付けてください。";
+          attendanceStatus.textContent = "選択した試合だけをコピーしました。LINEのトークまたは一斉配信画面へ貼り付けてください。";
         } catch (error) {
           let copied = false;
           try {
@@ -944,7 +1056,7 @@ function enhanceCalendarUpcomingAgenda() {
             copied = typeof document.execCommand === "function" && document.execCommand("copy");
             textarea.remove();
           } catch (fallbackError) { copied = false; }
-          attendanceStatus.textContent = copied ? "コピーしました。LINEへ貼り付けてください。" : "コピーできませんでした。ブラウザの共有機能をご利用ください。";
+          attendanceStatus.textContent = copied ? "選択した試合だけをコピーしました。LINEへ貼り付けてください。" : "コピーできませんでした。ブラウザの共有機能をご利用ください。";
         }
       };
     }

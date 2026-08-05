@@ -29,6 +29,17 @@ assert.ok(message.includes("【タイトル】U8 大会\n【日付】8月30日�
 assert.ok(message.indexOf("U8 大会") < message.indexOf("U10 練習試合"), "日付順になっていません");
 assert.equal(message.includes("URLなし"), false);
 
+const categorized = attendance.normalizeEntries([
+  {title:"U10 練習試合", start:"2026-09-06", label:"U10", attendanceUrl:"https://chouseisan.com/s?h=cat-u10"}
+]);
+assert.equal(categorized[0].category, "U10");
+assert.ok(categorized[0].key.includes("U10 練習試合"), "試合選択用の安定キーがありません");
+
+const selectedMessage = attendance.buildLineMessage([
+  {title:"U10だけ", start:"2026-09-06", label:"U10", attendanceUrl:"https://chouseisan.com/s?h=selected"}
+]);
+assert.ok(selectedMessage.includes("U10だけ"));
+
 const commonSource = fs.readFileSync(path.join(root, "common.js"), "utf8");
 const calendarHtml = fs.readFileSync(path.join(root, "calendar.html"), "utf8");
 const attendanceHtml = fs.readFileSync(path.join(root, "attendance.html"), "utf8");
@@ -38,7 +49,12 @@ assert.ok(commonSource.includes('href="attendance.html#match-attendance"'), "カ
 assert.ok(commonSource.includes("if (!isCalendarPage) return;"), "出欠ページとカレンダーの表示分岐がありません");
 assert.ok(attendanceHtml.includes('id="match-attendance"'), "出欠ページに試合参加案内の本体がありません");
 assert.ok(attendanceHtml.includes('id="calendar-attendance-copy"'), "出欠ページにLINE一括コピーボタンがありません");
+assert.ok(attendanceHtml.includes('id="calendar-attendance-category"'), "カテゴリー別の一括選択がありません");
+assert.ok(attendanceHtml.includes('id="calendar-attendance-select-all"'), "全選択ボタンがありません");
+assert.ok(attendanceHtml.includes('id="calendar-attendance-clear"'), "選択解除ボタンがありません");
+assert.ok(commonSource.includes("selectedAttendanceKeys"), "選択した試合だけをコピーする処理がありません");
+assert.ok(commonSource.includes("selectedEvents"), "LINE文生成へ選択結果を反映していません");
 assert.ok(attendanceHtml.includes('src="calendar-attendance.js"'), "出欠ページで調整さんURLの安全な抽出処理を読み込んでいません");
 assert.equal(calendarHtml.includes('id="calendar-attendance-copy"'), false, "カレンダーHTMLに管理用のコピーボタンを重複配置しないでください");
 
-console.log("OK: 調整さんURLの安全な抽出、LINE案内文、画面の役割分担を検査しました。");
+console.log("OK: 調整さんURLの安全な抽出、試合・カテゴリー選択、LINE案内文、画面の役割分担を検査しました。");
