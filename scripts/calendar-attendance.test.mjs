@@ -33,6 +33,15 @@ const categorized = attendance.normalizeEntries([
   {title:"U10 練習試合", start:"2026-09-06", label:"U10", attendanceUrl:"https://chouseisan.com/s?h=cat-u10"}
 ]);
 assert.equal(categorized[0].category, "U10");
+assert.equal(categorized[0].color, "#f09300");
+assert.equal(attendance.safeCategoryColor("", "U12"), "#8e24aa");
+assert.equal(attendance.safeCategoryColor("", "U11"), "#d50000");
+assert.equal(attendance.safeCategoryColor("", "U9"), "#e4c441");
+assert.equal(attendance.safeCategoryColor("", "U8"), "#7cb342");
+assert.equal(attendance.safeCategoryColor("", "U7"), "#0b8043");
+assert.equal(attendance.safeCategoryColor("", "全体"), "#616161");
+assert.equal(attendance.safeCategoryColor("", "その他"), "#4285f4");
+assert.equal(attendance.safeCategoryColor("javascript:alert(1)", "未登録"), "#4285f4");
 assert.ok(categorized[0].key.includes("U10 練習試合"), "試合選択用の安定キーがありません");
 
 const selectedMessage = attendance.buildLineMessage([
@@ -54,7 +63,8 @@ assert.ok(attendanceHtml.includes('id="calendar-attendance-select-all"'), "全�
 assert.ok(attendanceHtml.includes('id="calendar-attendance-clear"'), "選択解除ボタンがありません");
 assert.ok(commonSource.includes("selectedAttendanceKeys"), "選択した試合だけをコピーする処理がありません");
 assert.ok(commonSource.includes("selectedEvents"), "LINE文生成へ選択結果を反映していません");
+assert.ok(commonSource.includes("category.style.backgroundColor"), "カテゴリー色を画面へ反映していません");
 assert.ok(attendanceHtml.includes('src="calendar-attendance.js"'), "出欠ページで調整さんURLの安全な抽出処理を読み込んでいません");
 assert.equal(calendarHtml.includes('id="calendar-attendance-copy"'), false, "カレンダーHTMLに管理用のコピーボタンを重複配置しないでください");
 
-console.log("OK: 調整さんURLの安全な抽出、試合・カテゴリー選択、LINE案内文、画面の役割分担を検査しました。");
+console.log("OK: 調整さんURLの安全な抽出、試合・カテゴリー選択、カテゴリー色、LINE案内文、画面の役割分担を検査しました。");
