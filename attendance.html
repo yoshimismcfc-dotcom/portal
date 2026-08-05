@@ -7,9 +7,10 @@
   <meta http-equiv="Pragma" content="no-cache">
   <meta http-equiv="Expires" content="0">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>出欠確認｜吉見SMC FC</title>
+  <title>出欠確認・参加案内｜吉見SMC FC</title>
   <script src="firebase-config.js"></script>
   <link rel="stylesheet" href="common.css">
+  <script src="calendar-attendance.js"></script>
   <script src="common.js"></script>
   <style>
     .attend-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:18px}
@@ -42,8 +43,8 @@
   <a class="back-btn" href="index.html">ホームに戻る</a>
   <div class="hero-band">
     <div class="hero-emoji">✋</div>
-    <div><div class="hero-title">出欠確認</div>
-      <div class="hero-sub">回答先が異なります。間違えないようご注意ください。</div></div>
+    <div><div class="hero-title">出欠確認・参加案内</div>
+      <div class="hero-sub">出欠回答と、試合参加のLINE案内をまとめています。</div></div>
   </div>
 
   <div id="page-guidance" class="dynamic-notice guidance" style="display:none"><span class="notice-label">📢 INFO</span><span id="guidance-text"></span></div>
@@ -87,6 +88,24 @@
       </a>
     </div>
   </div>
+
+  <section class="calendar-attendance attendance-page-panel" id="match-attendance" aria-labelledby="calendar-attendance-title">
+    <div class="calendar-attendance-head">
+      <div>
+        <h2 class="calendar-attendance-title" id="calendar-attendance-title">📣 保護者向け・試合参加のご案内</h2>
+        <p class="calendar-attendance-help">カレンダーに登録された今後90日間の「タイトル・日付・調整さんURL」を自動でまとめます。</p>
+      </div>
+      <div class="calendar-upcoming-actions">
+        <span class="calendar-upcoming-badge" id="calendar-attendance-count">確認中</span>
+        <button class="calendar-upcoming-refresh" id="calendar-attendance-refresh" type="button" aria-label="試合参加の案内を最新状態に更新">↻ 更新</button>
+      </div>
+    </div>
+    <div class="calendar-attendance-list" id="calendar-attendance-list" aria-live="polite">
+      <div class="calendar-upcoming-state">カレンダーから予定を確認しています…</div>
+    </div>
+    <button class="calendar-attendance-copy btn-line-copy" id="calendar-attendance-copy" type="button" data-usage-event="line_copy" disabled>📋 保護者向けLINE文を一括コピー</button>
+    <p class="calendar-attendance-status" id="calendar-attendance-status" role="status" aria-live="polite"></p>
+  </section>
 </main>
 <footer class="site-footer"></footer>
 <script>
