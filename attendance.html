@@ -93,17 +93,28 @@
     <div class="calendar-attendance-head">
       <div>
         <h2 class="calendar-attendance-title" id="calendar-attendance-title">📣 保護者向け・試合参加のご案内</h2>
-        <p class="calendar-attendance-help">カレンダーに登録された今後90日間の「タイトル・日付・調整さんURL」を自動でまとめます。</p>
+        <p class="calendar-attendance-help">配信する試合をチェックしてください。カテゴリー単位の一括選択にも対応しています。</p>
       </div>
       <div class="calendar-upcoming-actions">
         <span class="calendar-upcoming-badge" id="calendar-attendance-count">確認中</span>
         <button class="calendar-upcoming-refresh" id="calendar-attendance-refresh" type="button" aria-label="試合参加の案内を最新状態に更新">↻ 更新</button>
       </div>
     </div>
+    <div class="calendar-attendance-tools" aria-label="配信する試合の選択操作">
+      <label class="calendar-attendance-category-label" for="calendar-attendance-category">
+        <span>カテゴリーで選択</span>
+        <select id="calendar-attendance-category" disabled>
+          <option value="">カテゴリーを選んでください</option>
+        </select>
+      </label>
+      <button class="calendar-attendance-tool-button" id="calendar-attendance-select-all" type="button" disabled>全選択</button>
+      <button class="calendar-attendance-tool-button" id="calendar-attendance-clear" type="button" disabled>選択解除</button>
+    </div>
+    <p class="calendar-attendance-selection-summary" id="calendar-attendance-selection-summary" aria-live="polite">0件選択中</p>
     <div class="calendar-attendance-list" id="calendar-attendance-list" aria-live="polite">
       <div class="calendar-upcoming-state">カレンダーから予定を確認しています…</div>
     </div>
-    <button class="calendar-attendance-copy btn-line-copy" id="calendar-attendance-copy" type="button" data-usage-event="line_copy" disabled>📋 保護者向けLINE文を一括コピー</button>
+    <button class="calendar-attendance-copy btn-line-copy" id="calendar-attendance-copy" type="button" data-usage-event="line_copy" disabled>📋 選択した試合をLINE文にコピー</button>
     <p class="calendar-attendance-status" id="calendar-attendance-status" role="status" aria-live="polite"></p>
   </section>
 </main>
