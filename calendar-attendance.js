@@ -30,6 +30,24 @@
     }
   }
 
+  var CATEGORY_COLORS = {
+    "全体": "#616161",
+    "U12": "#8e24aa",
+    "U11": "#d50000",
+    "U10": "#f09300",
+    "U9": "#e4c441",
+    "U8": "#7cb342",
+    "U7": "#0b8043",
+    "その他": "#4285f4"
+  };
+
+  function safeCategoryColor(value, category){
+    var categoryName = text(category);
+    if(CATEGORY_COLORS[categoryName]) return CATEGORY_COLORS[categoryName];
+    var color = text(value).toLowerCase();
+    return /^#[0-9a-f]{6}$/.test(color) ? color : CATEGORY_COLORS["その他"];
+  }
+
   function extractChouseisanUrl(){
     var values = Array.prototype.slice.call(arguments);
     for(var i = 0; i < values.length; i += 1){
@@ -65,11 +83,13 @@
       var title = text(event && event.title) || "（タイトル未設定）";
       var start = text(event && event.start);
       var url = safeChouseisanUrl(event && (event.attendanceUrl || event.url));
+      var category = text(event && event.label) || "その他";
       return {
         title: title,
         start: start,
         dateLabel: formatDate(start),
-        category: text(event && event.label) || "その他",
+        category: category,
+        color: safeCategoryColor(event && event.color, category),
         url: url,
         key: [title, start, url].join("|")
       };
@@ -107,6 +127,7 @@
 
   return {
     safeChouseisanUrl: safeChouseisanUrl,
+    safeCategoryColor: safeCategoryColor,
     extractChouseisanUrl: extractChouseisanUrl,
     formatDate: formatDate,
     normalizeEntries: normalizeEntries,
