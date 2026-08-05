@@ -1010,6 +1010,9 @@ function enhanceCalendarUpcomingAgenda() {
         const category = document.createElement("span");
         category.className = "calendar-attendance-category";
         category.textContent = entry.category;
+        category.style.color = entry.color;
+        category.style.borderColor = entry.color;
+        category.style.backgroundColor = entry.color + "22";
         name.append(title, category);
 
         const date = document.createElement("div");
