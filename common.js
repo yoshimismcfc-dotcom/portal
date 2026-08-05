@@ -677,7 +677,9 @@
 function enhanceCalendarUpcomingAgenda() {
     const calendarFrame = document.getElementById("gcal-iframe");
     const calendarWrap = calendarFrame?.closest(".gcal-wrap");
-    if (!calendarFrame || !calendarWrap || document.getElementById("calendar-upcoming-agenda")) return;
+    const attendancePage = document.getElementById("match-attendance");
+    const isCalendarPage = Boolean(calendarFrame && calendarWrap);
+    if ((!isCalendarPage && !attendancePage) || (isCalendarPage && document.getElementById("calendar-upcoming-agenda"))) return;
 
     const PUBLIC_CALENDAR_KEY = ["AIzaSyDRH2RymQBOFCcXIDDjJc", "EbBdyuVmfXLnQ"].join("");
     const CACHE_KEY = "smc-calendar-upcoming-v8";
@@ -719,6 +721,13 @@ function enhanceCalendarUpcomingAgenda() {
         @keyframes calendarSkeleton{to{background-position-x:-250%}}
         .calendar-upcoming-retry{min-height:40px;padding:8px 16px;border:1px solid #58ccef;border-radius:999px;background:rgba(45,190,230,.12);color:#b9efff;font:inherit;font-size:.75rem;font-weight:900;cursor:pointer}
         .calendar-upcoming-note{margin:9px 2px 0;color:var(--ink-3);font-size:.69rem;line-height:1.6}
+        .calendar-attendance-gateway{display:grid;grid-template-columns:auto minmax(0,1fr) auto;align-items:center;gap:12px;margin-top:18px;padding:14px 16px;border:1px solid rgba(0,212,255,.45);border-radius:14px;background:linear-gradient(145deg,rgba(0,48,95,.78),rgba(10,35,72,.88));color:#fff;text-decoration:none}
+        .calendar-attendance-gateway[hidden]{display:none}
+        .calendar-attendance-gateway:hover,.calendar-attendance-gateway:focus-visible{border-color:#7be8ff;outline:none;box-shadow:0 0 0 3px rgba(0,212,255,.18)}
+        .calendar-attendance-gateway-icon{font-size:1.45rem}
+        .calendar-attendance-gateway-title{display:block;color:#8ce7ff;font-size:.9rem;font-weight:950;line-height:1.45}
+        .calendar-attendance-gateway-help{display:block;margin-top:2px;color:#b8d9ec;font-size:.68rem;line-height:1.5}
+        .calendar-attendance-gateway-arrow{color:#8ce7ff;font-size:.78rem;font-weight:950;white-space:nowrap}
         .calendar-attendance{margin-top:18px;padding:16px;border:1px solid rgba(0,212,255,.45);border-radius:16px;background:linear-gradient(145deg,rgba(0,48,95,.78),rgba(10,35,72,.88))}
         .calendar-attendance[hidden]{display:none}
         .calendar-attendance-head{display:flex;align-items:flex-start;justify-content:space-between;gap:12px;margin-bottom:12px}
@@ -743,6 +752,9 @@ function enhanceCalendarUpcomingAgenda() {
         body[data-theme="light"] .calendar-event-arrow{color:#147ca2}
         body[data-theme="light"] .calendar-upcoming-state{border-color:#8fa9c5;background:#edf4fb;color:#36546d}
         body[data-theme="light"] .calendar-upcoming-retry{border-color:#147ca2;background:#e5f5fa;color:#075d84}
+        body[data-theme="light"] .calendar-attendance-gateway{border-color:#2285a7;background:linear-gradient(145deg,#f3f9ff,#e7f3fb);color:#102944}
+        body[data-theme="light"] .calendar-attendance-gateway-title,body[data-theme="light"] .calendar-attendance-gateway-arrow{color:#075d84}
+        body[data-theme="light"] .calendar-attendance-gateway-help{color:#385873}
         body[data-theme="light"] .calendar-attendance{border-color:#2285a7;background:linear-gradient(145deg,#f3f9ff,#e7f3fb)}
         body[data-theme="light"] .calendar-attendance-title{color:#075d84}
         body[data-theme="light"] .calendar-attendance-help{color:#385873}
@@ -756,53 +768,56 @@ function enhanceCalendarUpcomingAgenda() {
           .calendar-upcoming-title{font-size:1rem}
           .calendar-event-card{grid-template-columns:54px 4px minmax(0,1fr) 16px;gap:10px;min-height:90px;padding:10px 10px 10px 7px}
           .calendar-event-date{min-height:64px}.calendar-event-day{font-size:1.55rem}.calendar-event-title{font-size:.86rem}.calendar-event-meta{font-size:.66rem}
+          .calendar-attendance-gateway{grid-template-columns:auto minmax(0,1fr);padding:13px 12px}.calendar-attendance-gateway-arrow{grid-column:2}
           .calendar-attendance{padding:14px 12px}.calendar-attendance-head{display:block}.calendar-attendance-item{grid-template-columns:1fr}.calendar-attendance-date,.calendar-attendance-url{grid-column:1}
         }
       `;
       document.head.appendChild(style);
     }
 
-    const section = document.createElement("section");
-    section.className = "calendar-upcoming";
-    section.id = "calendar-upcoming-agenda";
-    section.setAttribute("aria-labelledby", "calendar-upcoming-title");
-    section.innerHTML = `
-      <div class="calendar-upcoming-heading">
-        <h2 class="calendar-upcoming-title" id="calendar-upcoming-title">📋 今後の予定</h2>
-        <div class="calendar-upcoming-actions">
-          <span class="calendar-upcoming-badge" id="calendar-upcoming-badge">自動更新</span>
-          <button class="calendar-upcoming-refresh" id="calendar-upcoming-refresh" type="button" aria-label="今後の予定を最新状態に更新">↻ 更新</button>
-        </div>
-      </div>
-      <div class="calendar-upcoming-list" id="calendar-upcoming-list" aria-live="polite" aria-busy="true">
-        <div class="calendar-upcoming-skeleton"></div>
-        <div class="calendar-upcoming-skeleton"></div>
-        <div class="calendar-upcoming-skeleton"></div>
-      </div>
-      <p class="calendar-upcoming-note">Googleカレンダーの今後${UPCOMING_DAYS}日間を日付順に表示します。予定をタップするとGoogleカレンダーで詳細を確認できます。</p>
-      <section class="calendar-attendance" id="calendar-attendance" aria-labelledby="calendar-attendance-title" hidden>
-        <div class="calendar-attendance-head">
-          <div>
-            <h3 class="calendar-attendance-title" id="calendar-attendance-title">📣 試合参加のご案内</h3>
-            <p class="calendar-attendance-help">カレンダーから「タイトル・日付・調整さんURL」を自動でまとめます。</p>
+    let section = null;
+    if (isCalendarPage) {
+      section = document.createElement("section");
+      section.className = "calendar-upcoming";
+      section.id = "calendar-upcoming-agenda";
+      section.setAttribute("aria-labelledby", "calendar-upcoming-title");
+      section.innerHTML = `
+        <div class="calendar-upcoming-heading">
+          <h2 class="calendar-upcoming-title" id="calendar-upcoming-title">📋 今後の予定</h2>
+          <div class="calendar-upcoming-actions">
+            <span class="calendar-upcoming-badge" id="calendar-upcoming-badge">自動更新</span>
+            <button class="calendar-upcoming-refresh" id="calendar-upcoming-refresh" type="button" aria-label="今後の予定を最新状態に更新">↻ 更新</button>
           </div>
-          <span class="calendar-upcoming-badge" id="calendar-attendance-count"></span>
         </div>
-        <div class="calendar-attendance-list" id="calendar-attendance-list"></div>
-        <button class="calendar-attendance-copy btn-line-copy" id="calendar-attendance-copy" type="button" data-usage-event="line_copy">📋 保護者向けLINE文を一括コピー</button>
-        <p class="calendar-attendance-status" id="calendar-attendance-status" role="status" aria-live="polite"></p>
-      </section>
-    `;
-    calendarWrap.after(section);
+        <div class="calendar-upcoming-list" id="calendar-upcoming-list" aria-live="polite" aria-busy="true">
+          <div class="calendar-upcoming-skeleton"></div>
+          <div class="calendar-upcoming-skeleton"></div>
+          <div class="calendar-upcoming-skeleton"></div>
+        </div>
+        <p class="calendar-upcoming-note">Googleカレンダーの今後${UPCOMING_DAYS}日間を日付順に表示します。予定をタップするとGoogleカレンダーで詳細を確認できます。</p>
+        <a class="calendar-attendance-gateway" id="calendar-attendance-gateway" href="attendance.html#match-attendance" hidden>
+          <span class="calendar-attendance-gateway-icon" aria-hidden="true">📣</span>
+          <span>
+            <span class="calendar-attendance-gateway-title">出欠確認・参加案内</span>
+            <span class="calendar-attendance-gateway-help" id="calendar-attendance-gateway-count"></span>
+          </span>
+          <span class="calendar-attendance-gateway-arrow">案内を開く ›</span>
+        </a>
+      `;
+      calendarWrap.after(section);
+    }
 
-    const list = section.querySelector("#calendar-upcoming-list");
-    const badge = section.querySelector("#calendar-upcoming-badge");
-    const refreshButton = section.querySelector("#calendar-upcoming-refresh");
-    const attendanceSection = section.querySelector("#calendar-attendance");
-    const attendanceList = section.querySelector("#calendar-attendance-list");
-    const attendanceCount = section.querySelector("#calendar-attendance-count");
-    const attendanceCopy = section.querySelector("#calendar-attendance-copy");
-    const attendanceStatus = section.querySelector("#calendar-attendance-status");
+    const list = section?.querySelector("#calendar-upcoming-list");
+    const badge = section?.querySelector("#calendar-upcoming-badge");
+    const refreshButton = section?.querySelector("#calendar-upcoming-refresh");
+    const attendanceGateway = section?.querySelector("#calendar-attendance-gateway");
+    const attendanceGatewayCount = section?.querySelector("#calendar-attendance-gateway-count");
+    const attendanceSection = attendancePage;
+    const attendanceList = attendancePage?.querySelector("#calendar-attendance-list");
+    const attendanceCount = attendancePage?.querySelector("#calendar-attendance-count");
+    const attendanceCopy = attendancePage?.querySelector("#calendar-attendance-copy");
+    const attendanceStatus = attendancePage?.querySelector("#calendar-attendance-status");
+    const attendanceRefresh = attendancePage?.querySelector("#calendar-attendance-refresh");
     const days = ["日", "月", "火", "水", "木", "金", "土"];
     let requestInFlight = false;
     let lastLoadedAt = 0;
@@ -875,12 +890,22 @@ function enhanceCalendarUpcomingAgenda() {
     function renderAttendance(events) {
       const helper = window.SMCCalendarAttendance;
       const entries = helper ? helper.normalizeEntries(events) : [];
+      if (attendanceGateway) {
+        attendanceGateway.hidden = entries.length === 0;
+        if (entries.length) attendanceGatewayCount.textContent = `調整さんが登録された試合が${entries.length}件あります`;
+      }
+      if (!attendanceSection || !attendanceList || !attendanceCount || !attendanceCopy || !attendanceStatus) return;
       attendanceList.replaceChildren();
       attendanceStatus.textContent = "";
-      attendanceSection.hidden = entries.length === 0;
-      if (!entries.length) return;
       attendanceCount.textContent = `${entries.length}件`;
-
+      attendanceCopy.disabled = entries.length === 0;
+      if (!entries.length) {
+        const empty = document.createElement("div");
+        empty.className = "calendar-upcoming-state";
+        empty.textContent = `今後${UPCOMING_DAYS}日間に、調整さんURLが登録された試合はありません。`;
+        attendanceList.appendChild(empty);
+        return;
+      }
       entries.forEach((entry) => {
         const item = document.createElement("div");
         item.className = "calendar-attendance-item";
@@ -900,7 +925,6 @@ function enhanceCalendarUpcomingAgenda() {
         item.append(title, date, link);
         attendanceList.appendChild(item);
       });
-
       attendanceCopy.onclick = async function(){
         const message = helper.buildLineMessage(events);
         if (!message) return;
@@ -919,22 +943,19 @@ function enhanceCalendarUpcomingAgenda() {
             textarea.select();
             copied = typeof document.execCommand === "function" && document.execCommand("copy");
             textarea.remove();
-          } catch (fallbackError) {
-            copied = false;
-          }
-          attendanceStatus.textContent = copied
-            ? "コピーしました。LINEへ貼り付けてください。"
-            : "コピーできませんでした。ブラウザの共有機能をご利用ください。";
+          } catch (fallbackError) { copied = false; }
+          attendanceStatus.textContent = copied ? "コピーしました。LINEへ貼り付けてください。" : "コピーできませんでした。ブラウザの共有機能をご利用ください。";
         }
       };
     }
 
     function renderEvents(events, cached) {
+      renderAttendance(events);
+      if (!isCalendarPage) return;
       list.replaceChildren();
       list.setAttribute("aria-busy", "false");
       badge.textContent = cached ? "保存データ" : "自動更新";
       setTodayNotice(events);
-      renderAttendance(events);
 
       if (!events.length) {
         const empty = document.createElement("div");
@@ -1004,10 +1025,22 @@ function enhanceCalendarUpcomingAgenda() {
     }
 
     function renderError() {
+      if (attendanceGateway) attendanceGateway.hidden = true;
+      if (attendanceSection && attendanceList && attendanceStatus && attendanceCopy) {
+        attendanceList.replaceChildren();
+        attendanceCopy.disabled = true;
+        attendanceStatus.textContent = "予定を取得できませんでした。通信環境を確認して、もう一度お試しください。";
+        const retry = document.createElement("button");
+        retry.type = "button";
+        retry.className = "calendar-upcoming-retry";
+        retry.textContent = "もう一度読み込む";
+        retry.addEventListener("click", () => loadEvents(true));
+        attendanceList.appendChild(retry);
+      }
+      if (!isCalendarPage) return;
       list.replaceChildren();
       list.setAttribute("aria-busy", "false");
       badge.textContent = "取得エラー";
-      attendanceSection.hidden = true;
       const state = document.createElement("div");
       state.className = "calendar-upcoming-state";
       const text = document.createElement("span");
@@ -1078,15 +1111,18 @@ function enhanceCalendarUpcomingAgenda() {
       const cache = readCache();
       if (!force && cache?.events) {
         renderEvents(cache.events, true);
-        list.setAttribute("aria-busy", "true");
-        badge.textContent = "更新中";
-      } else {
+        if (isCalendarPage) {
+          list.setAttribute("aria-busy", "true");
+          badge.textContent = "更新中";
+        } else if (attendanceStatus) attendanceStatus.textContent = "最新の予定を確認しています…";
+      } else if (isCalendarPage) {
         list.setAttribute("aria-busy", "true");
         list.innerHTML = '<div class="calendar-upcoming-skeleton"></div><div class="calendar-upcoming-skeleton"></div>';
         badge.textContent = "読込中";
-      }
+      } else if (attendanceStatus) attendanceStatus.textContent = "カレンダーから予定を確認しています…";
       requestInFlight = true;
-      refreshButton.disabled = true;
+      if (refreshButton) refreshButton.disabled = true;
+      if (attendanceRefresh) attendanceRefresh.disabled = true;
       const now = new Date();
       const end = new Date(now);
       end.setDate(end.getDate() + UPCOMING_DAYS);
@@ -1106,11 +1142,13 @@ function enhanceCalendarUpcomingAgenda() {
         else renderError();
       } finally {
         requestInFlight = false;
-        refreshButton.disabled = false;
+        if (refreshButton) refreshButton.disabled = false;
+        if (attendanceRefresh) attendanceRefresh.disabled = false;
       }
     }
 
-    refreshButton.addEventListener("click", () => loadEvents(true));
+    if (refreshButton) refreshButton.addEventListener("click", () => loadEvents(true));
+    if (attendanceRefresh) attendanceRefresh.addEventListener("click", () => loadEvents(true));
     document.addEventListener("visibilitychange", () => {
       if (document.visibilityState === "visible" && Date.now() - lastLoadedAt > 60 * 1000) {
         loadEvents(false);
