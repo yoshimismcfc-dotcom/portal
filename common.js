@@ -1373,19 +1373,61 @@ function enhanceCalendarUpcomingAgenda() {
   document.head.appendChild(script);
 })();
 
-/* ===== Service Worker 登録（操作中の強制再読込なし） ===== */
+/* ===== Service Worker 登録（安全な自動更新） ===== */
 (function(){
   if(!('serviceWorker' in navigator)) return;
 
   var SW_PATH = location.pathname.replace(/\/[^\/]*$/, '/') + 'sw.js';
+  var hadController = Boolean(navigator.serviceWorker.controller);
+  var reloadPending = false;
+  var pendingInput = false;
+  var reloadStarted = false;
 
-  // 新しいWorkerへの切替は通知だけにし、入力中の画面を強制再読込しない。
+  function isEditingField(){
+    var active = document.activeElement;
+    return Boolean(active && active.matches && active.matches('input,textarea,select,[contenteditable="true"]'));
+  }
+
+  function reloadWhenSafe(){
+    if(!reloadPending || reloadStarted || pendingInput || isEditingField()) return;
+    reloadStarted = true;
+    window.location.reload();
+  }
+
+  // 利用者が入力した内容は、保存完了前の自動更新で消さない。
+  document.addEventListener('input', function(event){
+    if(event.isTrusted) pendingInput = true;
+  }, true);
+  document.addEventListener('change', function(event){
+    if(event.isTrusted) pendingInput = true;
+  }, true);
+  document.addEventListener('focusout', function(){
+    window.setTimeout(reloadWhenSafe, 0);
+  }, true);
+  window.addEventListener('smc:save-status', function(event){
+    var detail = event.detail || {};
+    if(detail.cloudSaved || detail.localSaved){
+      pendingInput = false;
+      window.setTimeout(reloadWhenSafe, 100);
+    }
+  });
+
+  // 初回インストールでは再読込せず、既存アプリの更新時だけ自動で最新版へ切り替える。
   navigator.serviceWorker.addEventListener('controllerchange', function(){
     try{ window.dispatchEvent(new CustomEvent('smc:app-updated')); }catch(e){}
+    if(!hadController){
+      hadController = true;
+      return;
+    }
+    reloadPending = true;
+    reloadWhenSafe();
   });
 
   navigator.serviceWorker.register(SW_PATH).then(function(reg){
-    reg.update();
+    function checkForUpdate(){
+      reg.update().catch(function(){});
+    }
+    checkForUpdate();
     reg.addEventListener('updatefound', function(){
       var newWorker = reg.installing;
       if(!newWorker) return;
@@ -1395,11 +1437,19 @@ function enhanceCalendarUpcomingAgenda() {
         }
       });
     });
+
+    // アプリを開いたままでも定期的に更新を確認し、画面復帰時はすぐ再確認する。
+    window.setInterval(function(){
+      if(document.visibilityState === 'visible') checkForUpdate();
+    }, 5 * 60 * 1000);
+    document.addEventListener('visibilitychange', function(){
+      if(document.visibilityState === 'visible') checkForUpdate();
+    });
   }).catch(function(err){
     console.log('SW登録エラー:', err);
   });
 
-  // iPhoneの戻る操作では画面を維持したまま、次回取得用の更新確認だけ行う。
+  // iPhoneの戻る操作でも、表示を壊さず最新版の有無を確認する。
   window.addEventListener('pageshow', function(event){
     if(!event.persisted) return;
     navigator.serviceWorker.getRegistration(SW_PATH).then(function(reg){
