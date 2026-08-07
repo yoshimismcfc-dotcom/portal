@@ -1391,7 +1391,7 @@ function enhanceCalendarUpcomingAgenda() {
   function reloadWhenSafe(){
     if(!reloadPending || reloadStarted || pendingInput || isEditingField()) return;
     reloadStarted = true;
-    window.location.reload();
+    window.location.replace(window.location.href);
   }
 
   // 利用者が入力した内容は、保存完了前の自動更新で消さない。
