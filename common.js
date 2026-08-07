@@ -1652,7 +1652,7 @@ function enhanceCalendarUpcomingAgenda() {
             dayLabel+" "+timeLabel+"の屋外練習に雨の予報があります。"+sourceLabel+"\n"
             +"・最大降水確率："+rainMax+"%（設定基準 "+rainThreshold+"%）\n"
             +"・室内用シューズをご用意ください\n"
-            +"・雨天時の会場："+venue+(rainSchedule?"\n・"+rainSchedule:"");
+            +"・雨天時の会場："+venue+(rainSchedule?"\n・"+rainSchedule:"")+"\n"\n            +"※練習時間や場所を変更する場合は、グループLINEでご連絡します。参加前に最新の連絡をご確認ください。";
           rainEl.classList.add("show");
         }
         if(wbgtMax>=heatThreshold){
