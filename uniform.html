@@ -151,6 +151,20 @@
     .template-color-editor.open{display:block}
     .template-color-editor-title{font-size:.86rem;font-weight:900;color:var(--ink);margin-bottom:4px}
     body[data-theme="light"] .template-color-editor{background:#f8fbff}
+    #modal-add .modal{display:flex;flex-direction:column}
+    #modal-add .modal h3{order:0}
+    .uniform-color-section{order:1}
+    .uniform-entry-step-title{display:none;order:2;margin:8px 0 10px;padding:9px 12px;border-radius:var(--r8);background:rgba(0,223,122,.1);border:1px solid rgba(0,223,122,.3);color:var(--ink);font-size:.82rem;font-weight:900}
+    .uniform-entry-step-title.ready{display:block}
+    .uniform-entry-field{display:none}
+    .uniform-entry-field.ready{display:block}
+    .uniform-entry-row{order:3}
+    .uniform-entry-row.ready{display:grid}
+    .uniform-size-group{order:4}
+    .uniform-memo-group{order:5}
+    .uniform-save-actions{order:6}
+    #u-save-btn{display:none}
+    #u-save-btn.ready{display:inline-flex}
     @media(max-width:520px){
       .cf-body>div{overflow-x:visible!important}
       .uni-table{font-size:.74rem}
@@ -221,23 +235,23 @@
 <div class="modal-bg" id="modal-add">
   <div class="modal">
     <h3 id="add-title">ユニフォームを追加</h3>
-    <div class="fg2">
+    <div class="fg2 uniform-entry-field uniform-entry-row">
       <div class="form-group"><label class="form-label">背番号</label>
         <input class="form-control" id="u-num" type="number" placeholder="例：10" style="text-align:center"></div>
-      <div class="form-group"><label class="form-label">貸出先の選手名</label>
+      <div class="form-group"><label class="form-label">団員名（貸出先）</label>
         <input class="form-control" id="u-player" placeholder="例：吉見太郎（倉庫保管なら空欄）">
         <div class="custom-color-note" style="margin-top:5px">名前を入力すると「選手に貸出中」、空欄にすると「倉庫保管」になります。</div>
       </div>
     </div>
-    <div class="form-group"><label class="form-label">サイズ</label>
+    <div class="form-group uniform-entry-field uniform-size-group"><label class="form-label">サイズ</label>
       <select class="form-control" id="u-size">
         <option>100</option><option>110</option><option>120</option><option>130</option>
         <option>140</option><option>150</option><option>160</option>
         <option>SS</option><option>S</option><option>M</option><option>L</option><option>XL</option>
       </select></div>
-    <div class="form-group">
+    <div class="form-group uniform-color-section">
       <label class="form-label">ユニフォームカラー</label>
-      <div class="template-guide"><strong>① 下の色見本から組み合わせを選んでください。</strong><br>選んだ色の名前が見本の下に表示されます。</div>
+      <div class="template-guide"><strong>① 最初に色の組み合わせを選んでください。</strong><br>色を選ぶと、背番号・サイズ・団員名の入力欄が表示されます。</div>
       <div class="form-label" style="margin-top:8px">組み合わせテンプレートから選ぶ</div>
       <div class="template-list" id="uniform-pair-templates" aria-label="ユニフォームカラーの組み合わせテンプレート"></div>
       <div class="custom-color-note">色見本をタップして選択します。長押しすると順番を変更できます。</div>
@@ -284,12 +298,13 @@
         </div>
       </div>
     </div>
-    <div class="form-group"><label class="form-label">メモ</label>
+    <div class="uniform-entry-step-title" id="uniform-entry-step-title">② 背番号・サイズ・団員名を入力してください</div>
+    <div class="form-group uniform-entry-field uniform-memo-group"><label class="form-label">メモ</label>
       <input class="form-control" id="u-memo" placeholder="例：上下セット"></div>
-    <div class="modal-btns">
+    <div class="modal-btns uniform-save-actions">
       <button class="btn btn-outline btn-sm" id="u-del-btn" style="color:var(--red);border-color:rgba(255,68,102,.4);display:none" onclick="deleteUni()">🗑 削除</button>
       <button class="btn btn-outline" onclick="closeM('modal-add')">キャンセル</button>
-      <button class="btn btn-primary" onclick="saveUni()">保存</button>
+      <button class="btn btn-primary" id="u-save-btn" onclick="saveUni()">保存</button>
     </div>
   </div>
 </div>
@@ -556,7 +571,15 @@ function selectPairTemplate(templateId){
   document.getElementById("u-sub-cname").value=p.subName||"";
   document.getElementById("u-sub-ccode").value=safeColor(p.subCode,p.mainCode);
   toggleTemplateColorEditor(false);
+  setUniformDetailsReady(true,p.mainName+(p.subName?" × "+p.subName:""));
   buildSingleColorPalettes();buildPairTemplates();
+}
+function setUniformDetailsReady(ready,colorLabel){
+  document.querySelectorAll("#modal-add .uniform-entry-field").forEach(function(field){field.classList.toggle("ready",!!ready);});
+  var title=document.getElementById("uniform-entry-step-title");
+  title.classList.toggle("ready",!!ready);
+  title.textContent=ready?"② 「"+(colorLabel||"選択した色")+"」の背番号・サイズ・団員名を入力してください":"② 背番号・サイズ・団員名を入力してください";
+  document.getElementById("u-save-btn").classList.toggle("ready",!!ready);
 }
 function toggleTemplateColorEditor(forceOpen){
   var editor=document.getElementById("template-color-editor");
@@ -609,6 +632,7 @@ function addCurrentPairTemplate(){
   });
   saveColorTemplates(items);buildPairTemplates();
   toggleTemplateColorEditor(false);
+  setUniformDetailsReady(true,name);
   alert("「"+name+"」をテンプレートに追加しました。");
 }
 function colorCodeForName(name,fallback){
@@ -629,13 +653,14 @@ function openAdd(){
   document.getElementById("u-del-btn").style.display="none";
   ["u-num","u-player","u-memo"].forEach(function(id){document.getElementById(id).value="";});
   document.getElementById("u-size").value="130";
-  document.getElementById("u-main-cname").value="オレンジ";
+  document.getElementById("u-main-cname").value="";
   document.getElementById("u-main-ccode").value="#e85c1e";
-  document.getElementById("u-sub-cname").value="赤";
+  document.getElementById("u-sub-cname").value="";
   document.getElementById("u-sub-ccode").value="#bc002d";
   buildColorOptions();
   buildPairTemplates();
   toggleTemplateColorEditor(false);
+  setUniformDetailsReady(false);
   document.getElementById("modal-add").classList.add("open");
 }
 function openEdit(id){
@@ -654,6 +679,7 @@ function openEdit(id){
   buildColorOptions();
   buildPairTemplates();
   toggleTemplateColorEditor(false);
+  setUniformDetailsReady(true,uniformColorLabel(u));
   document.getElementById("modal-add").classList.add("open");
 }
 function saveUni(){
