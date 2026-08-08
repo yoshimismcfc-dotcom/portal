@@ -38,6 +38,10 @@
     .cf-toggle{font-size:.75rem;color:rgba(255,255,255,.6);transition:transform .2s;flex-shrink:0}
     .cf-toggle.open{transform:rotate(90deg)}
     .cf-toggle-button{display:grid;place-items:center;width:34px;height:34px;padding:0;border:0;border-radius:50%;background:rgba(0,0,0,.14);cursor:pointer}
+    .folder-order-controls{display:flex;gap:4px;flex-shrink:0}
+    .folder-order-btn{width:34px;height:34px;border:1px solid rgba(255,255,255,.38);border-radius:8px;background:rgba(0,0,0,.18);color:inherit;font-size:1rem;font-weight:900;cursor:pointer}
+    #color-folders.folder-reorder-mode .cf-stats,
+    #color-folders.folder-reorder-mode .cf-toggle-button{display:none}
     .cf-body{display:none;background:#0a1824}
     .cf-body.open{display:block}
 
@@ -228,12 +232,15 @@
 
   <div class="stat-row" id="stat-row"></div>
 
-  <div class="template-guide" style="margin-bottom:14px"><strong>色の帯をタップして、背番号・サイズ・団員名を入力します。</strong><br>右端の矢印は一覧の開閉です。</div>
+  <div class="template-guide" style="margin-bottom:10px"><strong>色の帯をタップして、背番号・サイズ・団員名を入力します。</strong><br>右端の矢印は一覧の開閉です。</div>
+  <div style="margin-bottom:14px">
+    <button type="button" class="btn btn-outline btn-sm" id="folder-reorder-button" onclick="setFolderReorderMode()">↕ 色の順番を変更</button>
+  </div>
 
   <div id="color-folders"></div>
 
   <div style="display:flex;gap:8px;margin:18px 0 14px;flex-wrap:wrap">
-    <button class="btn btn-primary" onclick="openAdd()">＋ 新しい色からユニフォームを追加</button>
+    <button class="btn btn-primary" onclick="openAddWithColorPicker()">＋ メイン・サブカラーを選んで追加</button>
     <button class="btn btn-outline btn-sm" onclick="showHistory()">📋 貸出履歴</button>
     <button class="btn btn-outline btn-sm" onclick="exportUniformCSV()">📥 CSV出力</button>
     <button class="btn-line-copy sm" onclick="copyUniformList()">📋 LINEコピー</button>
@@ -271,8 +278,8 @@
       </div>
       <datalist id="uniform-color-options"></datalist>
       <div class="template-color-editor" id="template-color-editor">
-        <div class="template-color-editor-title">新しい色の組み合わせを追加</div>
-        <div class="custom-color-note" style="margin-bottom:10px">メインとサブの色を設定して追加してください。追加したテンプレートは全員が使えます。</div>
+        <div class="template-color-editor-title">メインカラーとサブカラーを選ぶ</div>
+        <div class="custom-color-note" style="margin-bottom:10px">ユニフォームのメイン色とサブ色をそれぞれ選んでください。1色の場合はサブカラーを「なし」にします。</div>
         <div class="uniform-color-pair">
           <div class="uniform-color-field">
             <h4>メインカラー（必須）</h4>
@@ -303,14 +310,17 @@
         </div>
         <div class="custom-color-actions" style="justify-content:flex-end;margin:12px 0 0">
           <button type="button" class="btn btn-outline btn-sm" onclick="toggleTemplateColorEditor(false)">キャンセル</button>
-          <button type="button" class="btn btn-primary btn-sm" onclick="addCurrentPairTemplate()">この組み合わせをテンプレートに追加</button>
+          <button type="button" class="btn btn-outline btn-sm" onclick="addCurrentPairTemplate()">テンプレートにも追加</button>
+          <button type="button" class="btn btn-primary btn-sm" onclick="useCurrentColorsForUniform()">この色でユニフォームを登録</button>
         </div>
       </div>
     </div>
     <div class="uniform-entry-step-title" id="uniform-entry-step-title">② 背番号・サイズ・団員名を入力してください</div>
     <div class="uniform-number-guide" id="uniform-number-guide"></div>
-    <div class="form-group uniform-entry-field uniform-memo-group"><label class="form-label">メモ</label>
-      <input class="form-control" id="u-memo" placeholder="例：上下セット"></div>
+    <div class="form-group uniform-entry-field uniform-memo-group"><label class="form-label">備考（特徴・用途）</label>
+      <input class="form-control" id="u-memo" placeholder="例：縦じま、キーパー用、長袖、上下セット">
+      <div class="custom-color-note" style="margin-top:5px">ユニフォームの見分け方や用途を入力できます。</div>
+    </div>
     <div class="modal-btns uniform-save-actions">
       <button class="btn btn-outline btn-sm" id="u-del-btn" style="color:var(--red);border-color:rgba(255,68,102,.4);display:none" onclick="deleteUni()">🗑 削除</button>
       <button class="btn btn-outline" onclick="closeM('modal-add')">キャンセル</button>
@@ -352,10 +362,10 @@
 
 <footer class="site-footer"></footer>
 <script>
-var KU="smc_uniform_v3",KH="smc_uniform_hist_v1",KT="smc_uniform_color_templates_v1";
+var KU="smc_uniform_v3",KH="smc_uniform_hist_v1",KT="smc_uniform_color_templates_v1",KFO="smc_uniform_folder_order_v1";
 var editId=null,lendId=null;
-var _unifData=[], _histData=[], _colorTemplates=[];
-var _templateReorderMode=false,_templateLongPressed=false;
+var _unifData=[], _histData=[], _colorTemplates=[],_folderOrder=[];
+var _templateReorderMode=false,_templateLongPressed=false,_folderReorderMode=false;
 
 function loadU(){ return _unifData; }
 function saveU(d){
@@ -404,6 +414,10 @@ function saveColorTemplates(items){
   _colorTemplates=items;
   dbSave("uniform_color_templates",items,KT,null);
 }
+function saveFolderOrder(items){
+  _folderOrder=items.slice();
+  dbSave("uniform_folder_order",_folderOrder,KFO,null);
+}
 // loadU/saveU/loadH/saveH は上部で定義済み
 function getPalette(cname){return PALETTE.find(function(p){return p.name===cname;})||{c1:"#555",c2:"#777",code:"#555"};}
 function uniformColorLabel(u){
@@ -447,7 +461,15 @@ function renderFolders(){
     map[k].items.push(u);
   });
   var container=document.getElementById("color-folders"),html="";
-  Object.keys(map).forEach(function(cname,fi){
+  var baseNames=Object.keys(map).filter(function(name){return map[name].items.length;});
+  var folderNames=baseNames.slice().sort(function(a,b){
+    var ai=_folderOrder.indexOf(a),bi=_folderOrder.indexOf(b);
+    if(ai>=0&&bi>=0)return ai-bi;
+    if(ai>=0)return -1;if(bi>=0)return 1;
+    return baseNames.indexOf(a)-baseNames.indexOf(b);
+  });
+  container.classList.toggle("folder-reorder-mode",_folderReorderMode);
+  folderNames.forEach(function(cname,fi){
     var cg=map[cname];
     if(!cg.items.length)return;
     // 背番号順ソート
@@ -478,17 +500,21 @@ function renderFolders(){
     var sampleMainCode=safeColor(sample.mainColorCode||sample.ccode||cg.p.c1,"#666666");
     var sampleSubName=sample.subColorName||"";
     var sampleSubCode=safeColor(sample.subColorCode||cg.p.c2,sampleMainCode);
+    var orderControls=_folderReorderMode
+      ?'<div class="folder-order-controls"><button type="button" class="folder-order-btn" aria-label="'+escapeHtml(cname)+'を上へ" onclick="event.stopPropagation();moveColorFolder('+inlineJsArg(cname)+',-1)">↑</button><button type="button" class="folder-order-btn" aria-label="'+escapeHtml(cname)+'を下へ" onclick="event.stopPropagation();moveColorFolder('+inlineJsArg(cname)+',1)">↓</button></div>'
+      :'';
     html+='<div class="color-folder">'
       +'<div class="cf-header'+lightClass+'" style="background:'+hdrGrad+'" role="button" tabindex="0" aria-label="'+escapeHtml(cname)+'のユニフォームを追加"'
-      +' onclick="openAddForColor('+inlineJsArg(cname)+','+inlineJsArg(sampleMainName)+','+inlineJsArg(sampleMainCode)+','+inlineJsArg(sampleSubName)+','+inlineJsArg(sampleSubCode)+')"'
+      +' onclick="handleColorFolderClick('+inlineJsArg(cname)+','+inlineJsArg(sampleMainName)+','+inlineJsArg(sampleMainCode)+','+inlineJsArg(sampleSubName)+','+inlineJsArg(sampleSubCode)+')"'
       +' onkeydown="if(event.key===\'Enter\'||event.key===\' \'){event.preventDefault();this.click();}">'
       +'<div class="cf-swatch" style="background:'+cg.p.code+'"></div>'
-      +'<div class="cf-name"><span class="cf-name-main">'+escapeHtml(cname)+'</span><span class="cf-add-hint">＋ 背番号・サイズ・団員名を入力</span></div>'
+      +'<div class="cf-name"><span class="cf-name-main">'+escapeHtml(cname)+'</span><span class="cf-add-hint">'+(_folderReorderMode?'上下ボタンで順番を変更':'＋ 背番号・サイズ・団員名を入力')+'</span></div>'
       +'<div class="cf-stats">'
       +'<span class="cf-total">全'+items.length+'着</span>'
       +'<span class="cf-free">倉庫'+free+'</span>'
       +'<span class="cf-lent">選手'+lent+'</span>'
       +'</div>'
+      +orderControls
       +'<button type="button" class="cf-toggle-button" aria-label="'+escapeHtml(cname)+'の一覧を開閉" onclick="event.stopPropagation();toggleFolder(\''+bodyId+'\')"><span class="cf-toggle open" id="ft'+bodyId+'">▶</span></button>'
       +'</div>'
       +'<div class="cf-body open" id="'+bodyId+'">'
@@ -511,6 +537,37 @@ function toggleFolder(id){
   var b=document.getElementById(id),ic=document.getElementById("ft"+id);
   var o=b.classList.contains("open");
   b.classList.toggle("open",!o);if(ic)ic.classList.toggle("open",!o);
+}
+
+function handleColorFolderClick(colorLabel,mainName,mainCode,subName,subCode){
+  if(_folderReorderMode)return;
+  openAddForColor(colorLabel,mainName,mainCode,subName,subCode);
+}
+function currentColorFolderNames(){
+  var found=[];
+  loadU().forEach(function(item){
+    var name=uniformColorLabel(item)||"その他";
+    if(found.indexOf(name)<0)found.push(name);
+  });
+  var names=PALETTE.map(function(item){return item.name;}).filter(function(name){return found.indexOf(name)>=0;});
+  found.forEach(function(name){if(names.indexOf(name)<0)names.push(name);});
+  return names.sort(function(a,b){
+    var ai=_folderOrder.indexOf(a),bi=_folderOrder.indexOf(b);
+    if(ai>=0&&bi>=0)return ai-bi;
+    if(ai>=0)return -1;if(bi>=0)return 1;
+    return 0;
+  });
+}
+function setFolderReorderMode(force){
+  _folderReorderMode=typeof force==="boolean"?force:!_folderReorderMode;
+  document.getElementById("folder-reorder-button").textContent=_folderReorderMode?"並び替えを完了":"↕ 色の順番を変更";
+  renderFolders();
+}
+function moveColorFolder(name,delta){
+  var names=currentColorFolderNames(),index=names.indexOf(name),next=index+delta;
+  if(index<0||next<0||next>=names.length)return;
+  var moved=names.splice(index,1)[0];names.splice(next,0,moved);
+  saveFolderOrder(names);renderFolders();
 }
 
 function openAddForColor(colorLabel,mainName,mainCode,subName,subCode){
@@ -627,6 +684,18 @@ function toggleTemplateColorEditor(forceOpen){
   editor.classList.toggle("open",open);
   document.getElementById("template-color-add-open").textContent=open?"色の追加を閉じる":"＋ テンプレートに色を追加";
   if(open){buildColorOptions();buildSingleColorPalettes();}
+}
+function openAddWithColorPicker(){
+  openAdd();
+  toggleTemplateColorEditor(true);
+}
+function useCurrentColorsForUniform(){
+  var mainName=document.getElementById("u-main-cname").value.trim();
+  var subName=document.getElementById("u-sub-cname").value.trim();
+  if(!mainName){alert("メインカラーを選んでください。");return;}
+  var colorLabel=mainName+(subName?" × "+subName:"");
+  toggleTemplateColorEditor(false);buildPairTemplates();
+  setUniformDetailsReady(true,colorLabel);
 }
 function wireTemplateLongPress(){
   document.querySelectorAll("#uniform-pair-templates .cp-sw").forEach(function(button){
@@ -854,6 +923,10 @@ function startUniformSync(){
     _colorTemplates=Array.isArray(val)?val.filter(function(item){return item&&item.id&&item.mainName;}):[];
     if(document.getElementById("modal-add").classList.contains("open")){buildColorOptions();buildPairTemplates();}
   }, KT, []);
+  dbListen("uniform_folder_order", function(val){
+    _folderOrder=Array.isArray(val)?val.filter(function(name){return typeof name==="string"&&name.trim();}):[];
+    renderFolders();
+  }, KFO, []);
 }
 startUniformSync();
 
@@ -864,7 +937,7 @@ function uniformCsvCell(value){
   return '"'+text.replace(/"/g,'""')+'"';
 }
 function exportUniformCSV(){
-  var rows=[["背番号","選手名","サイズ","メインカラー","メイン表示色","サブカラー","サブ表示色","状態","貸出先","貸出日","返却予定日","メモ"]];
+  var rows=[["背番号","選手名","サイズ","メインカラー","メイン表示色","サブカラー","サブ表示色","状態","貸出先","貸出日","返却予定日","備考"]];
   loadU().slice().sort(function(a,b){
     var colorDiff=String(a.cname||"").localeCompare(String(b.cname||""),"ja");
     return colorDiff||Number(a.num||0)-Number(b.num||0);
