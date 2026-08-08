@@ -485,7 +485,15 @@ function renderFolders(){
     var free=items.filter(function(u){return !u.lentTo;}).length;
     var lent=items.length-free;
     var bodyId="cfb"+fi;
-    var hdrGrad="linear-gradient(135deg,"+cg.p.c1+","+cg.p.c2+")";
+    var sample=items[0]||{};
+    var sampleMainName=sample.mainColorName||sample.cname||cname;
+    var sampleMainCode=safeColor(sample.mainColorCode||sample.ccode||cg.p.c1,"#666666");
+    var sampleSubName=sample.subColorName||"";
+    var sampleSubCode=safeColor(sample.subColorCode||cg.p.c2,sampleMainCode);
+    var presetPair=PAIR_TEMPLATE_NAMES[cname]||[];
+    var hasSubColor=!!sampleSubName||!!presetPair[1];
+    var bandSubColor=hasSubColor?sampleSubCode:sampleMainCode;
+    var hdrGrad="linear-gradient(90deg,"+sampleMainCode+" 0%,"+sampleMainCode+" 75%,"+bandSubColor+" 75%,"+bandSubColor+" 100%)";
     var lightClass=isLightFolder(cg.p)?" is-light":"";
 
     // テーブル行生成
@@ -503,11 +511,6 @@ function renderFolders(){
         +'</tr>';
     }).join("");
 
-    var sample=items[0]||{};
-    var sampleMainName=sample.mainColorName||sample.cname||cname;
-    var sampleMainCode=safeColor(sample.mainColorCode||sample.ccode||cg.p.c1,"#666666");
-    var sampleSubName=sample.subColorName||"";
-    var sampleSubCode=safeColor(sample.subColorCode||cg.p.c2,sampleMainCode);
     var orderControls=_folderReorderMode
       ?'<div class="folder-order-controls"><button type="button" class="folder-order-btn" aria-label="'+escapeHtml(cname)+'を上へ" onclick="event.stopPropagation();moveColorFolder('+inlineJsArg(cname)+',-1)">↑</button><button type="button" class="folder-order-btn" aria-label="'+escapeHtml(cname)+'を下へ" onclick="event.stopPropagation();moveColorFolder('+inlineJsArg(cname)+',1)">↓</button></div>'
       :'';
