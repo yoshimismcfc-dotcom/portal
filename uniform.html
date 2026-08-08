@@ -198,9 +198,11 @@
     .uniform-size-group{order:4}
     .uniform-condition-group{order:5}
     .uniform-memo-group{order:6}
-    .uniform-save-actions{order:7}
-    #u-save-btn{display:none}
-    #u-save-btn.ready{display:inline-flex}
+    .uniform-save-message{display:none;order:7;margin:2px 0 0;padding:9px 12px;border:1px solid rgba(0,223,122,.38);border-radius:var(--r8);background:rgba(0,223,122,.1);color:#5cffae;font-size:.76rem;font-weight:900;line-height:1.45}
+    .uniform-save-message.show{display:block}
+    .uniform-save-actions{order:8}
+    #u-save-btn,#u-save-close-btn{display:none}
+    #u-save-btn.ready,#u-save-close-btn.ready{display:inline-flex}
     @media(max-width:520px){
       .color-folder{margin-bottom:10px}
       .cf-header{grid-template-columns:minmax(0,3fr) minmax(68px,1fr);min-height:90px}
@@ -385,10 +387,12 @@
       <input class="form-control" id="u-memo" placeholder="例：縦じま、キーパー用、長袖、上下セット">
       <div class="custom-color-note" style="margin-top:5px">ユニフォームの見分け方や用途を入力できます。</div>
     </div>
+    <div class="uniform-save-message" id="u-save-message" role="status" aria-live="polite"></div>
     <div class="modal-btns uniform-save-actions">
       <button class="btn btn-outline btn-sm" id="u-del-btn" style="color:var(--red);border-color:rgba(255,68,102,.4);display:none" onclick="deleteUni()">🗑 削除</button>
       <button class="btn btn-outline" onclick="closeM('modal-add')">キャンセル</button>
-      <button class="btn btn-primary" id="u-save-btn" onclick="saveUni()">保存</button>
+      <button class="btn btn-outline" id="u-save-close-btn" onclick="saveUni(true)">保存して終了</button>
+      <button class="btn btn-primary" id="u-save-btn" onclick="saveUni(false)">保存して次へ</button>
     </div>
   </div>
 </div>
@@ -773,7 +777,23 @@ function setUniformDetailsReady(ready,colorLabel){
   title.classList.toggle("ready",!!ready);
   title.textContent=ready?"「"+(colorLabel||"選択した色")+"」の背番号・サイズ・団員名を入力してください":"背番号・サイズ・団員名を入力してください";
   document.getElementById("u-save-btn").classList.toggle("ready",!!ready);
+  document.getElementById("u-save-close-btn").classList.toggle("ready",!!ready&&!editId);
   updateUniformNumberGuide(ready?colorLabel:"");
+}
+function clearUniformSaveMessage(){
+  var message=document.getElementById("u-save-message");
+  message.classList.remove("show");message.textContent="";
+}
+function prepareNextUniformEntry(colorLabel,savedNumber){
+  document.getElementById("u-num").value="";
+  document.getElementById("u-player").value="";
+  document.getElementById("u-memo").value="";
+  document.getElementById("add-title").textContent="続けてユニフォームを追加";
+  updateUniformNumberGuide(colorLabel);
+  var message=document.getElementById("u-save-message");
+  message.textContent="背番号 #"+savedNumber+" を保存しました。続けて次の背番号を入力できます。";
+  message.classList.add("show");
+  window.setTimeout(function(){document.getElementById("u-num").focus();},50);
 }
 function updateUniformNumberGuide(colorLabel){
   var guide=document.getElementById("uniform-number-guide");
@@ -868,6 +888,8 @@ function openAdd(){
   document.querySelector("#modal-add .uniform-color-section").classList.remove("direct-color","edit-mode");
   document.querySelectorAll("#modal-add .uniform-color-field").forEach(function(field){field.classList.remove("custom-entry");});
   document.getElementById("add-title").textContent="ユニフォームを追加";
+  document.getElementById("u-save-btn").textContent="保存して次へ";
+  clearUniformSaveMessage();
   document.getElementById("u-del-btn").style.display="none";
   ["u-num","u-player","u-memo"].forEach(function(id){document.getElementById(id).value="";});
   document.getElementById("u-size").value="130";
@@ -890,6 +912,8 @@ function openEdit(id){
   document.querySelector("#modal-add .uniform-color-section").classList.add("edit-mode");
   document.querySelectorAll("#modal-add .uniform-color-field").forEach(function(field){field.classList.remove("custom-entry");});
   document.getElementById("add-title").textContent="ユニフォームを編集";
+  document.getElementById("u-save-btn").textContent="変更を保存";
+  clearUniformSaveMessage();
   document.getElementById("u-del-btn").style.display="inline-flex";
   document.getElementById("u-num").value=u.num;
   document.getElementById("u-player").value=u.lentTo||u.player||"";
@@ -907,7 +931,7 @@ function openEdit(id){
   setUniformDetailsReady(true,uniformColorLabel(u));
   document.getElementById("modal-add").classList.add("open");
 }
-function saveUni(){
+function saveUni(closeAfter){
   var num=document.getElementById("u-num").value.trim();
   if(!num){alert("背番号を入力してください");return;}
   var mainColorName=document.getElementById("u-main-cname").value.trim();
@@ -916,6 +940,7 @@ function saveUni(){
   var condition=normalizeCondition(document.getElementById("u-condition").value);
   if(!condition){alert("ユニフォームの状態を選択してください");return;}
   var colorName=mainColorName+(subColorName?" × "+subColorName:"");
+  var editing=!!editId;
   var data=loadU(),id=editId||("u"+Date.now());
   var duplicateNumber=data.some(function(item){
     return item.id!==id&&String(item.num||"")===num&&uniformColorLabel(item)===colorName;
@@ -958,7 +983,9 @@ function saveUni(){
     });
     saveH(history);
   }
-  closeM("modal-add");render();
+  render();
+  if(closeAfter||editing){closeM("modal-add");return;}
+  prepareNextUniformEntry(colorName,num);
 }
 function deleteUni(){
   if(!editId||!confirm("削除しますか？"))return;
