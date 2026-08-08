@@ -10,7 +10,7 @@ const renderAt = source.indexOf("function renderFolders()");
 if (paletteAt < 0 || renderAt < 0 || syncAt < 0 || !(paletteAt < renderAt && renderAt < syncAt)) {
   throw new Error("ユニフォーム同期は色・一覧描画の定義後に開始してください");
 }
-if (!source.includes('data-label="氏名"') || !source.includes("escapeHtml(u.lentTo||u.player||'—')")) {
+if (!source.includes('data-label="氏名・状態"') || !source.includes("escapeHtml(u.lentTo||u.player||'—')")) {
   throw new Error("貸出先の氏名を安全に一覧表示する処理がありません");
 }
 if (!source.includes('val.filter(function(item){return item && typeof item==="object";})')) {
@@ -27,7 +27,7 @@ if (!source.includes('if(!mainColorName){alert("メインカラーを入力し�
 if (!source.includes("function exportUniformCSV()") || !source.includes("function uniformCsvCell(value)")) {
   throw new Error("ユニフォームCSV出力処理がありません");
 }
-if (!source.includes('["背番号","選手名","サイズ","メインカラー","メイン表示色","サブカラー","サブ表示色","状態","貸出先","貸出日","返却予定日","備考"]')) {
+if (!source.includes('["背番号","選手名","サイズ","ユニフォーム状態","メインカラー","メイン表示色","サブカラー","サブ表示色","保管・貸出状況","貸出先","貸出日","返却予定日","備考"]')) {
   throw new Error("ユニフォームCSVに必要な列が揃っていません");
 }
 if (!source.includes('if(/^[=+\\-@\\t\\r]/.test(text))')) {
@@ -81,7 +81,7 @@ if (!source.includes("previousHolder!==holderName")) {
 
 for (const required of [
   'data-label="背番号"',
-  'data-label="氏名"',
+  'data-label="氏名・状態"',
   'data-label="状況"',
   'class="status-action is-lent"',
   'class="status-action is-free"',
@@ -148,6 +148,28 @@ for (const required of [
   'dbListen("uniform_color_templates"'
 ]) {
   if (!source.includes(required)) throw new Error("スマホ縦表示または共有テンプレート管理が不足しています: " + required);
+}
+
+for (const required of [
+  'id="uniform-condition-filter"',
+  'id="condition-filter-count"',
+  'id="u-condition"',
+  "var UNIFORM_CONDITIONS=[",
+  '{id:"unused",label:"未使用"',
+  '{id:"like_new",label:"未使用に近い"',
+  '{id:"good",label:"目立った傷や汚れなし"',
+  '{id:"fair",label:"やや傷や汚れあり"',
+  '{id:"damaged",label:"傷や汚れあり"',
+  '{id:"poor",label:"全体的に状態が悪い"',
+  "function conditionBadge(value)",
+  "function setConditionFilter(value)",
+  'if(_conditionFilter==="__unset")return !condition',
+  'condition:condition',
+  'alert("ユニフォームの状態を選択してください")',
+  'conditionLabel(u.condition)',
+  'class="condition-badge condition-unset"'
+]) {
+  if (!source.includes(required)) throw new Error("ユニフォーム状態の登録・表示・絞り込みが不足しています: " + required);
 }
 if (!source.includes("setTimeout(function(){_templateLongPressed=true;setTemplateReorderMode(true);},600)")) {
   throw new Error("テンプレートの長押し判定がありません");
