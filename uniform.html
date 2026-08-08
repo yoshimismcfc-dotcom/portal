@@ -236,6 +236,8 @@
       <div class="uniform-color-pair">
         <div class="uniform-color-field">
           <h4>メインカラー（必須）</h4>
+          <div class="custom-color-note">登録済みの色から選択</div>
+          <div class="color-palette" id="main-color-options" aria-label="共有されているメインカラー"></div>
           <div class="uniform-color-row">
             <label>カラー名
               <input class="form-control" id="u-main-cname" list="uniform-color-options" placeholder="例：オレンジ">
@@ -247,6 +249,8 @@
         </div>
         <div class="uniform-color-field">
           <h4>サブカラー（任意）</h4>
+          <div class="custom-color-note">登録済みの色から選択</div>
+          <div class="color-palette" id="sub-color-options" aria-label="共有されているサブカラー"></div>
           <div class="uniform-color-row">
             <label>カラー名
               <input class="form-control" id="u-sub-cname" list="uniform-color-options" placeholder="例：赤">
@@ -465,15 +469,18 @@ function toggleFolder(id){
 
 function availableSingleColors(){
   var colors=COLOR_CHOICES.slice();
+  function addColor(color){
+    var name=String(color.name||"").trim();
+    if(!name||colors.some(function(p){return p.name.toLocaleLowerCase("ja")===name.toLocaleLowerCase("ja");}))return;
+    colors.push({name:name,code:safeColor(color.code,"#666666")});
+  }
   loadU().forEach(function(u){
-    [
-      {name:u.mainColorName||u.cname,code:u.mainColorCode||u.ccode},
-      {name:u.subColorName,code:u.subColorCode}
-    ].forEach(function(color){
-      var name=String(color.name||"").trim();
-      if(!name||colors.some(function(p){return p.name===name;}))return;
-      colors.push({name:name,code:safeColor(color.code,"#666666")});
-    });
+    addColor({name:u.mainColorName||u.cname,code:u.mainColorCode||u.ccode});
+    addColor({name:u.subColorName,code:u.subColorCode});
+  });
+  loadColorTemplates().forEach(function(template){
+    addColor({name:template.mainName,code:template.mainCode});
+    addColor({name:template.subName,code:template.subCode});
   });
   return colors;
 }
@@ -481,6 +488,29 @@ function buildColorOptions(){
   document.getElementById("uniform-color-options").innerHTML=availableSingleColors().map(function(p){
     return '<option value="'+escapeHtml(p.name)+'"></option>';
   }).join("");
+  buildSingleColorPalettes();
+}
+function buildSingleColorPalettes(){
+  var colors=availableSingleColors();
+  ["main","sub"].forEach(function(role){
+    var selected=document.getElementById("u-"+role+"-cname").value.trim();
+    var html=colors.map(function(p){
+      return '<button type="button" class="cp-sw'+(p.name===selected?" sel":"")+'" title="'+escapeHtml(p.name)
+        +'" aria-label="'+escapeHtml(p.name)+'" style="background:'+safeColor(p.code,"#666666")+'"'
+        +' onclick="chooseSharedColor('+inlineJsArg(role)+','+inlineJsArg(p.name)+','+inlineJsArg(p.code)+')"></button>';
+    }).join("");
+    if(role==="sub")html+='<button type="button" class="template-mini-btn" aria-label="サブカラーなし" title="サブカラーなし" onclick="clearSubColor()">なし</button>';
+    document.getElementById(role+"-color-options").innerHTML=html;
+  });
+}
+function chooseSharedColor(role,name,code){
+  document.getElementById("u-"+role+"-cname").value=name;
+  document.getElementById("u-"+role+"-ccode").value=safeColor(code,"#666666");
+  buildSingleColorPalettes();buildPairTemplates();
+}
+function clearSubColor(){
+  document.getElementById("u-sub-cname").value="";
+  buildSingleColorPalettes();buildPairTemplates();
 }
 function buildPairTemplates(){
   var selectedMain=document.getElementById("u-main-cname").value.trim();
@@ -723,7 +753,7 @@ function startUniformSync(){
   }, KH, []);
   dbListen("uniform_color_templates", function(val){
     _colorTemplates=Array.isArray(val)?val.filter(function(item){return item&&item.id&&item.mainName;}):[];
-    if(document.getElementById("modal-add").classList.contains("open"))buildPairTemplates();
+    if(document.getElementById("modal-add").classList.contains("open")){buildColorOptions();buildPairTemplates();}
   }, KT, []);
 }
 startUniformSync();
