@@ -17,4 +17,13 @@ if (!source.includes('aria-label="縦50メートル、横32メートルの低学
   throw new Error("6人制ピッチ図の読み上げ説明がありません");
 }
 
+const eightAt = source.indexOf('alt="8人制サッカーピッチ寸法図"');
+const sixAt = source.indexOf('class="six-pitch-card"');
+if (eightAt < 0 || sixAt <= eightAt) {
+  throw new Error("メインの8人制ピッチより前に6人制ピッチが表示されています");
+}
+if (!source.includes("参考：低学年6人制")) {
+  throw new Error("低学年6人制が参考情報として区別されていません");
+}
+
 console.log("pitch dimensions tests passed");
