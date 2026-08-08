@@ -119,6 +119,8 @@
     .condition-poor{color:#ffb078;border-color:rgba(255,145,80,.55);background:rgba(170,60,20,.16)}
     .condition-unset{color:#c5d1df;border-color:rgba(197,209,223,.36);background:rgba(120,135,150,.12)}
     .condition-help{min-height:2.6em;margin-top:5px;color:var(--ink-3);font-size:.7rem;line-height:1.45}
+    .duplicate-number-warning{display:none;margin-top:6px;padding:7px 8px;border:1px solid rgba(255,185,55,.5);border-radius:7px;background:rgba(255,170,30,.12);color:#ffd36a;font-size:.68rem;font-weight:900;line-height:1.45}
+    .duplicate-number-warning.show{display:block}
 
     /* ===== モーダル ===== */
     .modal-bg{position:fixed;inset:0;background:rgba(0,0,0,.82);display:none;place-items:center;z-index:200;backdrop-filter:blur(6px);padding:16px}
@@ -307,7 +309,9 @@
     <h3 id="add-title">ユニフォームを追加</h3>
     <div class="fg2 uniform-entry-field uniform-entry-row">
       <div class="form-group"><label class="form-label">背番号</label>
-        <input class="form-control" id="u-num" type="number" placeholder="例：10" style="text-align:center"></div>
+        <input class="form-control" id="u-num" type="number" placeholder="例：10" style="text-align:center" oninput="updateDuplicateNumberWarning()">
+        <div class="duplicate-number-warning" id="u-duplicate-warning" role="status" aria-live="polite"></div>
+      </div>
       <div class="form-group"><label class="form-label">団員名（貸出先）</label>
         <input class="form-control" id="u-player" placeholder="例：吉見太郎（倉庫保管なら空欄）">
         <div class="custom-color-note" style="margin-top:5px">名前を入力すると「選手に貸出中」、空欄にすると「倉庫保管」になります。</div>
@@ -487,6 +491,23 @@ function updateConditionHelp(){
   document.getElementById("u-condition-help").textContent=found?found.help:"ユニフォームを確認して、最も近い状態を選んでください。";
 }
 function setConditionFilter(value){_conditionFilter=String(value||"");renderFolders();}
+function findDuplicateUniforms(num,colorName,id){
+  return loadU().filter(function(item){
+    return item.id!==id&&String(item.num||"")===String(num||"")&&uniformColorLabel(item)===colorName;
+  });
+}
+function updateDuplicateNumberWarning(){
+  var warning=document.getElementById("u-duplicate-warning");
+  var num=document.getElementById("u-num").value.trim();
+  var mainName=document.getElementById("u-main-cname").value.trim();
+  var subName=document.getElementById("u-sub-cname").value.trim();
+  var colorName=mainName+(subName?" × "+subName:"");
+  var duplicates=num&&mainName?findDuplicateUniforms(num,colorName,editId||""):[];
+  if(!duplicates.length){warning.classList.remove("show");warning.textContent="";return;}
+  var details=duplicates.map(function(item){return (item.size||"サイズ未設定")+"／"+(item.lentTo||item.player||"倉庫");}).join("、");
+  warning.textContent="⚠ 同じ色の背番号 #"+num+" が "+duplicates.length+"着あります（"+details+"）。同じ番号のまま保存できます。";
+  warning.classList.add("show");
+}
 var PAIR_TEMPLATE_NAMES={
   "オレンジ赤縦じま":["オレンジ","赤"],
   "白赤":["白","赤"],
@@ -683,6 +704,7 @@ function openAddForColor(colorLabel,mainName,mainCode,subName,subCode){
   document.getElementById("u-sub-ccode").value=safeColor(subCode,mainCode);
   buildColorOptions();buildPairTemplates();
   setUniformDetailsReady(true,colorLabel);
+  updateDuplicateNumberWarning();
 }
 
 function availableSingleColors(){
@@ -732,11 +754,11 @@ function chooseSharedColor(role,name,code){
   document.getElementById("u-"+role+"-cname").value=name;
   document.getElementById("u-"+role+"-ccode").value=safeColor(code,"#666666");
   document.getElementById("u-"+role+"-cname").closest(".uniform-color-field").classList.remove("custom-entry");
-  buildSingleColorPalettes();buildPairTemplates();
+  buildSingleColorPalettes();buildPairTemplates();updateDuplicateNumberWarning();
 }
 function clearSubColor(){
   document.getElementById("u-sub-cname").value="";
-  buildSingleColorPalettes();buildPairTemplates();
+  buildSingleColorPalettes();buildPairTemplates();updateDuplicateNumberWarning();
 }
 function buildPairTemplates(){
   var selectedMain=document.getElementById("u-main-cname").value.trim();
@@ -769,7 +791,7 @@ function selectPairTemplate(templateId){
   document.getElementById("u-sub-ccode").value=safeColor(p.subCode,p.mainCode);
   toggleTemplateColorEditor(false);
   setUniformDetailsReady(true,p.mainName+(p.subName?" × "+p.subName:""));
-  buildSingleColorPalettes();buildPairTemplates();
+  buildSingleColorPalettes();buildPairTemplates();updateDuplicateNumberWarning();
 }
 function setUniformDetailsReady(ready,colorLabel){
   document.querySelectorAll("#modal-add .uniform-entry-field").forEach(function(field){field.classList.toggle("ready",!!ready);});
@@ -784,15 +806,16 @@ function clearUniformSaveMessage(){
   var message=document.getElementById("u-save-message");
   message.classList.remove("show");message.textContent="";
 }
-function prepareNextUniformEntry(colorLabel,savedNumber){
+function prepareNextUniformEntry(colorLabel,savedNumber,duplicateCount){
   document.getElementById("u-num").value="";
   document.getElementById("u-player").value="";
   document.getElementById("u-memo").value="";
   document.getElementById("add-title").textContent="続けてユニフォームを追加";
   updateUniformNumberGuide(colorLabel);
   var message=document.getElementById("u-save-message");
-  message.textContent="背番号 #"+savedNumber+" を保存しました。続けて次の背番号を入力できます。";
+  message.textContent=(duplicateCount?"同じ背番号 #"+savedNumber+" として保存しました。":"背番号 #"+savedNumber+" を保存しました。")+" 続けて次の背番号を入力できます。";
   message.classList.add("show");
+  updateDuplicateNumberWarning();
   window.setTimeout(function(){document.getElementById("u-num").focus();},50);
 }
 function updateUniformNumberGuide(colorLabel){
@@ -823,6 +846,7 @@ function useCurrentColorsForUniform(){
   var colorLabel=mainName+(subName?" × "+subName:"");
   toggleTemplateColorEditor(false);buildPairTemplates();
   setUniformDetailsReady(true,colorLabel);
+  updateDuplicateNumberWarning();
 }
 function wireTemplateLongPress(){
   document.querySelectorAll("#uniform-pair-templates .cp-sw").forEach(function(button){
@@ -890,6 +914,8 @@ function openAdd(){
   document.getElementById("add-title").textContent="ユニフォームを追加";
   document.getElementById("u-save-btn").textContent="保存して次へ";
   clearUniformSaveMessage();
+  document.getElementById("u-duplicate-warning").classList.remove("show");
+  document.getElementById("u-duplicate-warning").textContent="";
   document.getElementById("u-del-btn").style.display="none";
   ["u-num","u-player","u-memo"].forEach(function(id){document.getElementById(id).value="";});
   document.getElementById("u-size").value="130";
@@ -929,6 +955,7 @@ function openEdit(id){
   buildPairTemplates();
   toggleTemplateColorEditor(false);
   setUniformDetailsReady(true,uniformColorLabel(u));
+  updateDuplicateNumberWarning();
   document.getElementById("modal-add").classList.add("open");
 }
 function saveUni(closeAfter){
@@ -942,17 +969,7 @@ function saveUni(closeAfter){
   var colorName=mainColorName+(subColorName?" × "+subColorName:"");
   var editing=!!editId;
   var data=loadU(),id=editId||("u"+Date.now());
-  var duplicateItems=data.filter(function(item){
-    return item.id!==id&&String(item.num||"")===num&&uniformColorLabel(item)===colorName;
-  });
-  if(duplicateItems.length){
-    var duplicateDetails=duplicateItems.map(function(item){
-      return "・サイズ "+(item.size||"未設定")+"／"+(item.lentTo||item.player||"倉庫保管");
-    }).join("\n");
-    var duplicateMessage="同じ色「"+colorName+"」に背番号 #"+num+" がすでに "+duplicateItems.length+"着あります。\n\n"
-      +duplicateDetails+"\n\n同じ番号の別のユニフォームとして登録しますか？";
-    if(!confirm(duplicateMessage))return;
-  }
+  var duplicateItems=findDuplicateUniforms(num,colorName,id);
   var exist=data.find(function(x){return x.id===id;});
   var previousHolder=exist&&exist.lentTo?String(exist.lentTo):"";
   var holderName=document.getElementById("u-player").value.trim();
@@ -992,7 +1009,7 @@ function saveUni(closeAfter){
   }
   render();
   if(closeAfter||editing){closeM("modal-add");return;}
-  prepareNextUniformEntry(colorName,num);
+  prepareNextUniformEntry(colorName,num,duplicateItems.length);
 }
 function deleteUni(){
   if(!editId||!confirm("削除しますか？"))return;
