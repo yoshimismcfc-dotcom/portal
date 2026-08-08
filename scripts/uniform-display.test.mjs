@@ -27,7 +27,7 @@ if (!source.includes('if(!mainColorName){alert("メインカラーを入力し�
 if (!source.includes("function exportUniformCSV()") || !source.includes("function uniformCsvCell(value)")) {
   throw new Error("ユニフォームCSV出力処理がありません");
 }
-if (!source.includes('["背番号","選手名","サイズ","メインカラー","メイン表示色","サブカラー","サブ表示色","状態","貸出先","貸出日","返却予定日","メモ"]')) {
+if (!source.includes('["背番号","選手名","サイズ","メインカラー","メイン表示色","サブカラー","サブ表示色","状態","貸出先","貸出日","返却予定日","備考"]')) {
   throw new Error("ユニフォームCSVに必要な列が揃っていません");
 }
 if (!source.includes('if(/^[=+\\-@\\t\\r]/.test(text))')) {
@@ -93,10 +93,19 @@ for (const required of [
   'class="cf-toggle-button"',
   'classList.add("direct-color")',
   'classList.remove("direct-color")',
-  "＋ 新しい色からユニフォームを追加",
+  "＋ メイン・サブカラーを選んで追加",
+  "function openAddWithColorPicker()",
+  "function useCurrentColorsForUniform()",
+  "この色でユニフォームを登録",
+  "備考（特徴・用途）",
+  "キーパー用",
+  "function setFolderReorderMode(force)",
+  "function moveColorFolder(name,delta)",
+  'dbSave("uniform_folder_order"',
+  'dbListen("uniform_folder_order"',
   "組み合わせテンプレートから選ぶ",
   "＋ テンプレートに色を追加",
-  "この組み合わせをテンプレートに追加",
+  "テンプレートにも追加",
   "function toggleTemplateColorEditor(forceOpen)",
   "function setUniformDetailsReady(ready,colorLabel)",
   "function updateUniformNumberGuide(colorLabel)",
@@ -120,7 +129,7 @@ for (const required of [
 if (!source.includes("setTimeout(function(){_templateLongPressed=true;setTemplateReorderMode(true);},600)")) {
   throw new Error("テンプレートの長押し判定がありません");
 }
-if (!(source.indexOf('id="color-folders"') < source.indexOf("＋ 新しい色からユニフォームを追加"))) {
+if (!(source.indexOf('id="color-folders"') < source.indexOf("＋ メイン・サブカラーを選んで追加"))) {
   throw new Error("補助操作ボタンは色一覧より下に配置してください");
 }
 
