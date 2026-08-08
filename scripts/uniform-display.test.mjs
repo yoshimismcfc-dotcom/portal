@@ -17,24 +17,36 @@ if (!source.includes('val.filter(function(item){return item && typeof item==="ob
   throw new Error("Firebase配列内の空要素を除外する処理がありません");
 }
 
-if (!source.includes("function availablePalette()") || !source.includes("function startCustomColor()")) {
-  throw new Error("任意カラーを追加・再利用する処理がありません");
+if (!source.includes("function availableSingleColors()") || !source.includes('list="uniform-color-options"')) {
+  throw new Error("任意カラーを入力・再利用する処理がありません");
 }
-if (!source.includes("＋ 新しいカラーを追加") || !source.includes("追加した色は次回から候補に表示されます")) {
-  throw new Error("任意カラー追加の操作案内がありません");
-}
-if (!source.includes('if(!colorName){alert("カラー名を入力するか、登録済みのカラーを選んでください")')) {
-  throw new Error("カラー名の未入力チェックがありません");
+if (!source.includes('if(!mainColorName){alert("メインカラーを入力してください")')) {
+  throw new Error("メインカラーの未入力チェックがありません");
 }
 
 if (!source.includes("function exportUniformCSV()") || !source.includes("function uniformCsvCell(value)")) {
   throw new Error("ユニフォームCSV出力処理がありません");
 }
-if (!source.includes('["背番号","選手名","サイズ","カラー","表示色","状態","貸出先","貸出日","返却予定日","メモ"]')) {
+if (!source.includes('["背番号","選手名","サイズ","メインカラー","メイン表示色","サブカラー","サブ表示色","状態","貸出先","貸出日","返却予定日","メモ"]')) {
   throw new Error("ユニフォームCSVに必要な列が揃っていません");
 }
 if (!source.includes('if(/^[=+\\-@\\t\\r]/.test(text))')) {
   throw new Error("CSV数式インジェクション対策がありません");
+}
+
+for (const required of [
+  "メインカラー（必須）",
+  "サブカラー（任意）",
+  "mainColorName:mainColorName",
+  "subColorName:subColorName",
+  'u.mainColorName||u.cname||""',
+  'u.mainColorCode||u.ccode',
+  '"メインカラー","メイン表示色","サブカラー","サブ表示色"'
+]) {
+  if (!source.includes(required)) throw new Error("メイン・サブカラー対応が不足しています: " + required);
+}
+if (!source.includes('subColorName?document.getElementById("u-sub-ccode").value:""')) {
+  throw new Error("サブカラー未設定時の互換処理がありません");
 }
 
 console.log("uniform display tests passed");
