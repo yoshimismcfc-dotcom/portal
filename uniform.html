@@ -539,7 +539,7 @@ function selectPairTemplate(templateId){
   document.getElementById("u-main-ccode").value=safeColor(p.mainCode,"#666666");
   document.getElementById("u-sub-cname").value=p.subName||"";
   document.getElementById("u-sub-ccode").value=safeColor(p.subCode,p.mainCode);
-  buildPairTemplates();
+  buildSingleColorPalettes();buildPairTemplates();
 }
 function wireTemplateLongPress(){
   document.querySelectorAll("#uniform-pair-templates .cp-sw").forEach(function(button){
@@ -595,6 +595,7 @@ function colorCodeForName(name,fallback){
   document.getElementById("u-"+role+"-cname").addEventListener("change",function(){
     if(!this.value.trim()&&role==="sub")return;
     document.getElementById("u-"+role+"-ccode").value=colorCodeForName(this.value.trim(),document.getElementById("u-"+role+"-ccode").value);
+    buildSingleColorPalettes();buildPairTemplates();
   });
 });
 
