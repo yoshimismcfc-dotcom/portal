@@ -17,14 +17,11 @@ if (!source.includes('val.filter(function(item){return item && typeof item==="ob
   throw new Error("Firebase配列内の空要素を除外する処理がありません");
 }
 
-if (!source.includes("function availablePalette()") || !source.includes("function startCustomColor()")) {
-  throw new Error("任意カラーを追加・再利用する処理がありません");
+if (!source.includes("function availableSingleColors()") || !source.includes('list="uniform-color-options"')) {
+  throw new Error("任意カラーを入力・再利用する処理がありません");
 }
-if (!source.includes("＋ 新しいカラーを追加") || !source.includes("追加した色は次回から候補に表示されます")) {
-  throw new Error("任意カラー追加の操作案内がありません");
-}
-if (!source.includes('if(!colorName){alert("カラー名を入力するか、登録済みのカラーを選んでください")')) {
-  throw new Error("カラー名の未入力チェックがありません");
+if (!source.includes('if(!mainColorName){alert("メインカラーを入力してください")')) {
+  throw new Error("メインカラーの未入力チェックがありません");
 }
 
 if (!source.includes("function exportUniformCSV()") || !source.includes("function uniformCsvCell(value)")) {
