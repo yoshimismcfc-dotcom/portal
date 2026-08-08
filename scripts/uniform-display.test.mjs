@@ -53,7 +53,7 @@ for (const required of [
   "組み合わせテンプレート",
   'id="uniform-pair-templates"',
   "function buildPairTemplates()",
-  "function selectPairTemplate(templateName)",
+  "function selectPairTemplate(templateId)",
   '"オレンジ赤縦じま":["オレンジ","赤"]',
   '"水色ピンク":["水色","ピンク"]'
 ]) {
@@ -75,6 +75,37 @@ for (const required of [
 }
 if (!source.includes("previousHolder!==holderName")) {
   throw new Error("登録画面から貸出先を変更した履歴が保存されません");
+}
+
+for (const required of [
+  'data-label="背番号 / 選手"',
+  'data-label="保管状況 / 貸出先"',
+  'data-label="操作"',
+  ".uni-actions{display:grid;grid-template-columns:1fr",
+  "＋ 現在の2色をテンプレートに追加",
+  "色見本を長押しすると並び替えできます",
+  "function addCurrentPairTemplate()",
+  "function wireTemplateLongPress()",
+  "function movePairTemplate(index,delta)",
+  'dbSave("uniform_color_templates"',
+  'dbListen("uniform_color_templates"'
+]) {
+  if (!source.includes(required)) throw new Error("スマホ縦表示または共有テンプレート管理が不足しています: " + required);
+}
+if (!source.includes("setTimeout(function(){_templateLongPressed=true;setTemplateReorderMode(true);},600)")) {
+  throw new Error("テンプレートの長押し判定がありません");
+}
+
+for (const required of [
+  'id="main-color-options"',
+  'id="sub-color-options"',
+  "登録済みの色から選択",
+  "function buildSingleColorPalettes()",
+  "function chooseSharedColor(role,name,code)",
+  "loadColorTemplates().forEach(function(template)",
+  'toLocaleLowerCase("ja")'
+]) {
+  if (!source.includes(required)) throw new Error("全員の登録済みカラーを共有・重複排除する処理が不足しています: " + required);
 }
 
 console.log("uniform display tests passed");

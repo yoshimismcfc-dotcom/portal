@@ -132,7 +132,25 @@
     /* 履歴 */
     .hist-item{background:rgba(255,255,255,.04);border-radius:var(--r8);padding:8px 12px;font-size:.78rem;display:flex;align-items:center;gap:7px;margin-bottom:5px;flex-wrap:wrap}
     @media(max-width:400px){.fg2{grid-template-columns:1fr}}
-    @media(max-width:520px){.uni-table{font-size:.75rem}.uni-table th,.uni-table td{padding:7px 5px}.uniform-player-name{display:block;margin:3px 0 0;white-space:normal;line-height:1.35}.uniform-borrower{display:block;margin-top:4px;white-space:normal;line-height:1.35}}
+    .template-list{display:flex;gap:8px;flex-wrap:wrap;margin:6px 0}
+    .template-item{display:flex;align-items:center;gap:4px}
+    .template-order-controls{display:none;gap:3px}
+    .template-list.reorder-mode .template-order-controls{display:flex}
+    .template-mini-btn{min-width:36px;min-height:36px;border:1px solid var(--line-2);border-radius:7px;background:var(--surface-lt);color:var(--ink);font-weight:900;cursor:pointer}
+    .template-reorder-status{display:none;font-size:.74rem;color:var(--orange-2);font-weight:800;margin:6px 0}
+    .template-reorder-status.show{display:block}
+    @media(max-width:520px){
+      .cf-body>div{overflow-x:visible!important}
+      .uni-table,.uni-table tbody{display:block;width:100%}
+      .uni-table thead{display:none}
+      .uni-table tbody tr{display:block;margin:10px;border:1px solid var(--line-2);border-radius:var(--r8);padding:8px;background:var(--surface-lt)!important;cursor:default}
+      .uni-table td{display:grid;grid-template-columns:92px minmax(0,1fr);gap:8px;align-items:start;width:100%;padding:8px!important;text-align:left!important;white-space:normal!important;border-bottom:1px solid var(--line)}
+      .uni-table td:last-child{border-bottom:0}
+      .uni-table td::before{content:attr(data-label);font-size:.72rem;font-weight:900;color:var(--ink-3)}
+      .uniform-player-name,.uniform-borrower{display:block;margin:4px 0 0;white-space:normal;line-height:1.45}
+      .uni-actions{display:grid;grid-template-columns:1fr;gap:7px;width:100%}
+      .action-btn{width:100%;min-height:44px;padding:8px 10px}
+    }
   </style>
 </head>
 <body>
@@ -207,12 +225,19 @@
       <label class="form-label">ユニフォームカラー</label>
       <div class="custom-color-note" style="margin-bottom:8px">メインとサブをそれぞれ選択できます。1色のユニフォームはサブを空欄にしてください。</div>
       <div class="form-label" style="margin-top:8px">組み合わせテンプレート</div>
-      <div class="color-palette" id="uniform-pair-templates" aria-label="ユニフォームカラーの組み合わせテンプレート"></div>
-      <div class="custom-color-note" style="margin-bottom:10px">色見本をタップすると、メイン・サブの2色が一度に入力されます。</div>
+      <div class="template-list" id="uniform-pair-templates" aria-label="ユニフォームカラーの組み合わせテンプレート"></div>
+      <div class="custom-color-note">色見本をタップすると2色が入ります。色見本を長押しすると並び替えできます。</div>
+      <div class="template-reorder-status" id="template-reorder-status">並べ替えモード：矢印で移動、×で削除できます。</div>
+      <div class="custom-color-actions" style="margin-bottom:10px">
+        <button type="button" class="btn btn-outline btn-sm" onclick="addCurrentPairTemplate()">＋ 現在の2色をテンプレートに追加</button>
+        <button type="button" class="btn btn-outline btn-sm" id="template-reorder-done" style="display:none" onclick="setTemplateReorderMode(false)">並べ替え完了</button>
+      </div>
       <datalist id="uniform-color-options"></datalist>
       <div class="uniform-color-pair">
         <div class="uniform-color-field">
           <h4>メインカラー（必須）</h4>
+          <div class="custom-color-note">登録済みの色から選択</div>
+          <div class="color-palette" id="main-color-options" aria-label="共有されているメインカラー"></div>
           <div class="uniform-color-row">
             <label>カラー名
               <input class="form-control" id="u-main-cname" list="uniform-color-options" placeholder="例：オレンジ">
@@ -224,6 +249,8 @@
         </div>
         <div class="uniform-color-field">
           <h4>サブカラー（任意）</h4>
+          <div class="custom-color-note">登録済みの色から選択</div>
+          <div class="color-palette" id="sub-color-options" aria-label="共有されているサブカラー"></div>
           <div class="uniform-color-row">
             <label>カラー名
               <input class="form-control" id="u-sub-cname" list="uniform-color-options" placeholder="例：赤">
@@ -278,9 +305,10 @@
 
 <footer class="site-footer"></footer>
 <script>
-var KU="smc_uniform_v3",KH="smc_uniform_hist_v1";
+var KU="smc_uniform_v3",KH="smc_uniform_hist_v1",KT="smc_uniform_color_templates_v1";
 var editId=null,lendId=null;
-var _unifData=[], _histData=[];
+var _unifData=[], _histData=[], _colorTemplates=[];
+var _templateReorderMode=false,_templateLongPressed=false;
 
 function loadU(){ return _unifData; }
 function saveU(d){
@@ -318,6 +346,17 @@ var PAIR_TEMPLATE_NAMES={
   "黄色":["黄色",""],
   "緑":["緑",""]
 };
+function defaultColorTemplates(){
+  return PALETTE.map(function(p,index){
+    var names=PAIR_TEMPLATE_NAMES[p.name]||[p.name,""];
+    return {id:"default-"+index,name:p.name,mainName:names[0],mainCode:p.c1,subName:names[1],subCode:names[1]?p.c2:""};
+  });
+}
+function loadColorTemplates(){return _colorTemplates.length?_colorTemplates:defaultColorTemplates();}
+function saveColorTemplates(items){
+  _colorTemplates=items;
+  dbSave("uniform_color_templates",items,KT,null);
+}
 // loadU/saveU/loadH/saveH は上部で定義済み
 function getPalette(cname){return PALETTE.find(function(p){return p.name===cname;})||{c1:"#555",c2:"#777",code:"#555"};}
 function uniformColorLabel(u){
@@ -382,12 +421,12 @@ function renderFolders(){
         ?'<button class="action-btn return-btn" onclick="event.stopPropagation();openLend('+inlineJsArg(u.id)+')">倉庫へ返却</button>'
         :'<button class="action-btn lend-btn" onclick="event.stopPropagation();openLend('+inlineJsArg(u.id)+')">選手へ貸出</button>';
       return '<tr>'
-        +'<td style="white-space:nowrap"><span class="uniform-number">#'+escapeHtml(u.num)+'</span>'
+        +'<td data-label="背番号 / 選手" style="white-space:nowrap"><span class="uniform-number">#'+escapeHtml(u.num)+'</span>'
         +(u.player?' <span class="uniform-player-name">'+escapeHtml(u.player)+'</span>':'')
         +'</td>'
-        +'<td class="uniform-size" style="text-align:center;white-space:nowrap">'+escapeHtml(u.size)+'</td>'
-        +'<td>'+statusCell+'</td>'
-        +'<td><div class="uni-actions">'
+        +'<td data-label="サイズ" class="uniform-size" style="text-align:center;white-space:nowrap">'+escapeHtml(u.size)+'</td>'
+        +'<td data-label="保管状況 / 貸出先">'+statusCell+'</td>'
+        +'<td data-label="操作"><div class="uni-actions">'
         +lendReturnBtn
         +'<button class="action-btn edit-btn" onclick="event.stopPropagation();openEdit('+inlineJsArg(u.id)+')">編集</button>'
         +'<button class="action-btn del-btn" onclick="event.stopPropagation();confirmDel('+inlineJsArg(u.id)+')">削除</button>'
@@ -430,15 +469,18 @@ function toggleFolder(id){
 
 function availableSingleColors(){
   var colors=COLOR_CHOICES.slice();
+  function addColor(color){
+    var name=String(color.name||"").trim();
+    if(!name||colors.some(function(p){return p.name.toLocaleLowerCase("ja")===name.toLocaleLowerCase("ja");}))return;
+    colors.push({name:name,code:safeColor(color.code,"#666666")});
+  }
   loadU().forEach(function(u){
-    [
-      {name:u.mainColorName||u.cname,code:u.mainColorCode||u.ccode},
-      {name:u.subColorName,code:u.subColorCode}
-    ].forEach(function(color){
-      var name=String(color.name||"").trim();
-      if(!name||colors.some(function(p){return p.name===name;}))return;
-      colors.push({name:name,code:safeColor(color.code,"#666666")});
-    });
+    addColor({name:u.mainColorName||u.cname,code:u.mainColorCode||u.ccode});
+    addColor({name:u.subColorName,code:u.subColorCode});
+  });
+  loadColorTemplates().forEach(function(template){
+    addColor({name:template.mainName,code:template.mainCode});
+    addColor({name:template.subName,code:template.subCode});
   });
   return colors;
 }
@@ -446,27 +488,104 @@ function buildColorOptions(){
   document.getElementById("uniform-color-options").innerHTML=availableSingleColors().map(function(p){
     return '<option value="'+escapeHtml(p.name)+'"></option>';
   }).join("");
+  buildSingleColorPalettes();
+}
+function buildSingleColorPalettes(){
+  var colors=availableSingleColors();
+  ["main","sub"].forEach(function(role){
+    var selected=document.getElementById("u-"+role+"-cname").value.trim();
+    var html=colors.map(function(p){
+      return '<button type="button" class="cp-sw'+(p.name===selected?" sel":"")+'" title="'+escapeHtml(p.name)
+        +'" aria-label="'+escapeHtml(p.name)+'" style="background:'+safeColor(p.code,"#666666")+'"'
+        +' onclick="chooseSharedColor('+inlineJsArg(role)+','+inlineJsArg(p.name)+','+inlineJsArg(p.code)+')"></button>';
+    }).join("");
+    if(role==="sub")html+='<button type="button" class="template-mini-btn" aria-label="サブカラーなし" title="サブカラーなし" onclick="clearSubColor()">なし</button>';
+    document.getElementById(role+"-color-options").innerHTML=html;
+  });
+}
+function chooseSharedColor(role,name,code){
+  document.getElementById("u-"+role+"-cname").value=name;
+  document.getElementById("u-"+role+"-ccode").value=safeColor(code,"#666666");
+  buildSingleColorPalettes();buildPairTemplates();
+}
+function clearSubColor(){
+  document.getElementById("u-sub-cname").value="";
+  buildSingleColorPalettes();buildPairTemplates();
 }
 function buildPairTemplates(){
   var selectedMain=document.getElementById("u-main-cname").value.trim();
   var selectedSub=document.getElementById("u-sub-cname").value.trim();
-  document.getElementById("uniform-pair-templates").innerHTML=PALETTE.map(function(p){
-    var names=PAIR_TEMPLATE_NAMES[p.name]||[p.name,""];
-    var selected=names[0]===selectedMain&&names[1]===selectedSub;
-    return '<button type="button" class="cp-sw'+(selected?" sel":"")+'" title="'+escapeHtml(p.name)
-      +'" aria-label="'+escapeHtml(p.name)+'" style="background:linear-gradient(135deg,'+safeColor(p.c1,"#666666")+','+safeColor(p.c2,p.c1)+')"'
-      +' onclick="selectPairTemplate('+inlineJsArg(p.name)+')"></button>';
+  var wrap=document.getElementById("uniform-pair-templates");
+  wrap.classList.toggle("reorder-mode",_templateReorderMode);
+  wrap.innerHTML=loadColorTemplates().map(function(p,index){
+    var selected=p.mainName===selectedMain&&(p.subName||"")===selectedSub;
+    return '<div class="template-item" data-template-index="'+index+'">'
+      +'<button type="button" class="cp-sw'+(selected?" sel":"")+'" title="'+escapeHtml(p.name)
+      +'" aria-label="'+escapeHtml(p.name)+'" style="background:linear-gradient(135deg,'+safeColor(p.mainCode,"#666666")+','+safeColor(p.subCode,p.mainCode)+')"'
+      +' onclick="selectPairTemplate('+inlineJsArg(p.id)+')"></button>'
+      +'<span class="template-order-controls">'
+      +'<button type="button" class="template-mini-btn" aria-label="'+escapeHtml(p.name)+'を前へ" onclick="movePairTemplate('+index+',-1)">↑</button>'
+      +'<button type="button" class="template-mini-btn" aria-label="'+escapeHtml(p.name)+'を後ろへ" onclick="movePairTemplate('+index+',1)">↓</button>'
+      +'<button type="button" class="template-mini-btn" aria-label="'+escapeHtml(p.name)+'を削除" onclick="deletePairTemplate('+index+')">×</button>'
+      +'</span></div>';
   }).join("");
+  wireTemplateLongPress();
 }
-function selectPairTemplate(templateName){
-  var p=PALETTE.find(function(item){return item.name===templateName;});
-  var names=PAIR_TEMPLATE_NAMES[templateName];
-  if(!p||!names)return;
-  document.getElementById("u-main-cname").value=names[0];
-  document.getElementById("u-main-ccode").value=safeColor(p.c1,"#666666");
-  document.getElementById("u-sub-cname").value=names[1];
-  document.getElementById("u-sub-ccode").value=safeColor(p.c2,p.c1);
+function selectPairTemplate(templateId){
+  if(_templateLongPressed){_templateLongPressed=false;return;}
+  var p=loadColorTemplates().find(function(item){return item.id===templateId;});
+  if(!p)return;
+  document.getElementById("u-main-cname").value=p.mainName;
+  document.getElementById("u-main-ccode").value=safeColor(p.mainCode,"#666666");
+  document.getElementById("u-sub-cname").value=p.subName||"";
+  document.getElementById("u-sub-ccode").value=safeColor(p.subCode,p.mainCode);
+  buildSingleColorPalettes();buildPairTemplates();
+}
+function wireTemplateLongPress(){
+  document.querySelectorAll("#uniform-pair-templates .cp-sw").forEach(function(button){
+    var timer=null;
+    function cancel(){if(timer){clearTimeout(timer);timer=null;}}
+    button.addEventListener("pointerdown",function(){
+      cancel();
+      timer=setTimeout(function(){_templateLongPressed=true;setTemplateReorderMode(true);},600);
+    });
+    ["pointerup","pointercancel","pointerleave"].forEach(function(type){button.addEventListener(type,cancel);});
+    button.addEventListener("contextmenu",function(event){event.preventDefault();});
+  });
+}
+function setTemplateReorderMode(enabled){
+  _templateReorderMode=!!enabled;
+  document.getElementById("template-reorder-status").classList.toggle("show",_templateReorderMode);
+  document.getElementById("template-reorder-done").style.display=_templateReorderMode?"inline-flex":"none";
   buildPairTemplates();
+}
+function movePairTemplate(index,delta){
+  var items=loadColorTemplates().slice(),next=index+delta;
+  if(next<0||next>=items.length)return;
+  var moved=items.splice(index,1)[0];items.splice(next,0,moved);
+  saveColorTemplates(items);buildPairTemplates();
+}
+function deletePairTemplate(index){
+  var items=loadColorTemplates().slice(),item=items[index];
+  if(!item||!confirm("テンプレート「"+item.name+"」を削除しますか？"))return;
+  items.splice(index,1);saveColorTemplates(items);buildPairTemplates();
+}
+function addCurrentPairTemplate(){
+  var mainName=document.getElementById("u-main-cname").value.trim();
+  var subName=document.getElementById("u-sub-cname").value.trim();
+  if(!mainName){alert("先にメインカラーを入力してください");return;}
+  var defaultName=mainName+(subName?" × "+subName:"");
+  var name=prompt("テンプレート名を入力してください",defaultName);
+  if(name===null)return;
+  name=name.trim();if(!name){alert("テンプレート名を入力してください");return;}
+  var items=loadColorTemplates().slice();
+  items.push({
+    id:"custom-"+Date.now(),name:name,
+    mainName:mainName,mainCode:document.getElementById("u-main-ccode").value,
+    subName:subName,subCode:subName?document.getElementById("u-sub-ccode").value:""
+  });
+  saveColorTemplates(items);buildPairTemplates();
+  alert("テンプレートを追加しました。");
 }
 function colorCodeForName(name,fallback){
   var found=availableSingleColors().find(function(p){return p.name===name;});
@@ -476,6 +595,7 @@ function colorCodeForName(name,fallback){
   document.getElementById("u-"+role+"-cname").addEventListener("change",function(){
     if(!this.value.trim()&&role==="sub")return;
     document.getElementById("u-"+role+"-ccode").value=colorCodeForName(this.value.trim(),document.getElementById("u-"+role+"-ccode").value);
+    buildSingleColorPalettes();buildPairTemplates();
   });
 });
 
@@ -632,6 +752,10 @@ function startUniformSync(){
   dbListen("uniform_hist", function(val){
     _histData = Array.isArray(val) ? val.filter(function(item){return item && typeof item==="object";}) : [];
   }, KH, []);
+  dbListen("uniform_color_templates", function(val){
+    _colorTemplates=Array.isArray(val)?val.filter(function(item){return item&&item.id&&item.mainName;}):[];
+    if(document.getElementById("modal-add").classList.contains("open")){buildColorOptions();buildPairTemplates();}
+  }, KT, []);
 }
 startUniformSync();
 
