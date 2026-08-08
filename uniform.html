@@ -172,6 +172,7 @@
   <div style="display:flex;gap:8px;margin-bottom:14px;flex-wrap:wrap">
     <button class="btn btn-primary" onclick="openAdd()">＋ ユニフォームを追加</button>
     <button class="btn btn-outline btn-sm" onclick="showHistory()">📋 貸出履歴</button>
+    <button class="btn btn-outline btn-sm" onclick="exportUniformCSV()">📥 CSV出力</button>
     <button class="btn-line-copy sm" onclick="copyUniformList()">📋 LINEコピー</button>
   </div>
 
@@ -536,6 +537,38 @@ function startUniformSync(){
   }, KH, []);
 }
 startUniformSync();
+
+function uniformCsvCell(value){
+  var text=String(value==null?"":value).replace(/\r?\n/g," ");
+  // Excelなどで開いた際に、入力値が数式として実行されることを防ぐ。
+  if(/^[=+\-@\t\r]/.test(text))text="'"+text;
+  return '"'+text.replace(/"/g,'""')+'"';
+}
+function exportUniformCSV(){
+  var rows=[["背番号","選手名","サイズ","カラー","表示色","状態","貸出先","貸出日","返却予定日","メモ"]];
+  loadU().slice().sort(function(a,b){
+    var colorDiff=String(a.cname||"").localeCompare(String(b.cname||""),"ja");
+    return colorDiff||Number(a.num||0)-Number(b.num||0);
+  }).forEach(function(u){
+    rows.push([
+      u.num||"",u.player||"",u.size||"",u.cname||"",safeColor(u.ccode,""),
+      u.lentTo?"貸出中":"在庫あり",u.lentTo||"",u.lentDate||"",u.retDate||"",u.memo||""
+    ]);
+  });
+  if(rows.length===1){alert("出力するユニフォームデータがありません");return;}
+  var csv="\uFEFF"+rows.map(function(row){return row.map(uniformCsvCell).join(",");}).join("\r\n");
+  var url=URL.createObjectURL(new Blob([csv],{type:"text/csv;charset=utf-8"}));
+  var link=document.createElement("a");
+  var today=new Date();
+  var dateText=today.getFullYear()+String(today.getMonth()+1).padStart(2,"0")+String(today.getDate()).padStart(2,"0");
+  link.href=url;
+  link.download="吉見SMC_ユニフォーム貸出_"+dateText+".csv";
+  link.style.display="none";
+  document.body.appendChild(link);
+  link.click();
+  link.remove();
+  window.setTimeout(function(){URL.revokeObjectURL(url);},0);
+}
 
 function copyUniformList(){
   var items = _unifData.filter(function(u){ return u.lentTo; });
