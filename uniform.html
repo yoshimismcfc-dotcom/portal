@@ -39,14 +39,14 @@
     .cf-body.open{display:block}
 
     /* ===== 一覧テーブル ===== */
-    .uni-table{width:100%;border-collapse:collapse;font-size:.82rem}
+    .uni-table{width:100%;border-collapse:collapse;table-layout:fixed;font-size:.82rem}
     .uni-table thead tr{background:#003087}
     .uni-table th{
       color:#fff;font-weight:900;font-size:.75rem;
       padding:8px 8px;text-align:center;white-space:nowrap;
       border-bottom:2px solid rgba(255,255,255,.2);
     }
-    .uni-table th:first-child{text-align:left;padding-left:12px}
+    .uni-table th:first-child{text-align:center}
     .uni-table tbody tr{
       border-bottom:1px solid rgba(255,255,255,.07);
       transition:.12s;cursor:pointer;
@@ -57,14 +57,13 @@
       padding:9px 8px;color:#e0f0ff;text-align:center;
       vertical-align:middle;
     }
-    .uni-table td:first-child{text-align:left;padding-left:12px;font-weight:700;color:#fff}
-    .uni-table td:nth-child(2){font-size:1.05rem;font-weight:900;color:#fff}
+    .uni-table td:first-child{text-align:center;font-weight:700;color:#fff}
     /* ステータスバッジ */
     .badge-free{display:inline-block;background:rgba(0,255,136,.15);color:#00ff88;border:1px solid rgba(0,255,136,.35);border-radius:99px;padding:2px 9px;font-size:.72rem;font-weight:700;white-space:nowrap}
     .badge-lent{display:inline-block;background:rgba(255,68,102,.15);color:#ff6680;border:1px solid rgba(255,68,102,.35);border-radius:99px;padding:2px 9px;font-size:.72rem;font-weight:700;white-space:nowrap}
     .who-text{font-size:.72rem;color:#94c4e4;display:inline;margin-left:5px}
     .uniform-number{font-size:1rem;font-weight:900;color:#fff}
-    .uniform-player-name{font-size:.82rem;font-weight:800;color:#b9dcf3;margin-left:5px}
+    .uniform-player-name{display:block;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;font-size:.82rem;font-weight:800;color:#b9dcf3}
     .uniform-size{color:#fff}
     .uniform-borrower{font-size:.76rem;font-weight:700;color:#b9dcf3}
     body[data-theme="light"] .cf-body{background:#f8fbff}
@@ -75,8 +74,13 @@
     body[data-theme="light"] .uniform-player-name,
     body[data-theme="light"] .uniform-size,
     body[data-theme="light"] .uniform-borrower{color:#14243a!important}
-    /* アクションボタン列 */
-    .uni-actions{display:flex;gap:5px;justify-content:center;align-items:center}
+    /* 状況ボタンと編集 */
+    .status-action{display:inline-flex;flex-direction:column;align-items:center;justify-content:center;gap:1px;min-width:74px;min-height:39px;border:1px solid;border-radius:8px;background:none;font-weight:900;cursor:pointer;line-height:1.05}
+    .status-action .status-main{font-size:.72rem;white-space:nowrap}
+    .status-action .status-next{font-size:.58rem;font-weight:800;opacity:.82;white-space:nowrap}
+    .status-action.is-lent{color:#ff6680;border-color:rgba(255,68,102,.45);background:rgba(255,68,102,.12)}
+    .status-action.is-free{color:#00df7a;border-color:rgba(0,223,122,.42);background:rgba(0,223,122,.1)}
+    .uni-actions{display:flex;justify-content:center;align-items:center}
     .action-btn{
       border:1px solid;border-radius:6px;padding:4px 9px;
       font-size:.7rem;font-weight:700;cursor:pointer;
@@ -90,6 +94,7 @@
     .action-btn.edit-btn:hover{background:rgba(0,212,255,.1)}
     .action-btn.del-btn{color:#ff6680;border-color:rgba(255,68,102,.35)}
     .action-btn.del-btn:hover{background:rgba(255,68,102,.12)}
+    .edit-icon-btn{width:36px;height:36px;border:1px solid rgba(0,212,255,.35);border-radius:8px;background:rgba(0,212,255,.06);color:var(--cyan);font-size:1rem;cursor:pointer}
 
     /* ===== モーダル ===== */
     .modal-bg{position:fixed;inset:0;background:rgba(0,0,0,.82);display:none;place-items:center;z-index:200;backdrop-filter:blur(6px);padding:16px}
@@ -133,7 +138,9 @@
     .hist-item{background:rgba(255,255,255,.04);border-radius:var(--r8);padding:8px 12px;font-size:.78rem;display:flex;align-items:center;gap:7px;margin-bottom:5px;flex-wrap:wrap}
     @media(max-width:400px){.fg2{grid-template-columns:1fr}}
     .template-list{display:flex;gap:8px;flex-wrap:wrap;margin:6px 0}
-    .template-item{display:flex;align-items:center;gap:4px}
+    .template-item{display:flex;flex-direction:column;align-items:center;gap:4px}
+    .template-color-name{display:none;max-width:92px;color:var(--ink);font-size:.66rem;font-weight:900;line-height:1.25;text-align:center;overflow-wrap:anywhere}
+    .template-color-name.show{display:block}
     .template-order-controls{display:none;gap:3px}
     .template-list.reorder-mode .template-order-controls{display:flex}
     .template-mini-btn{min-width:36px;min-height:36px;border:1px solid var(--line-2);border-radius:7px;background:var(--surface-lt);color:var(--ink);font-weight:900;cursor:pointer}
@@ -141,15 +148,17 @@
     .template-reorder-status.show{display:block}
     @media(max-width:520px){
       .cf-body>div{overflow-x:visible!important}
-      .uni-table,.uni-table tbody{display:block;width:100%}
-      .uni-table thead{display:none}
-      .uni-table tbody tr{display:block;margin:10px;border:1px solid var(--line-2);border-radius:var(--r8);padding:8px;background:var(--surface-lt)!important;cursor:default}
-      .uni-table td{display:grid;grid-template-columns:92px minmax(0,1fr);gap:8px;align-items:start;width:100%;padding:8px!important;text-align:left!important;white-space:normal!important;border-bottom:1px solid var(--line)}
-      .uni-table td:last-child{border-bottom:0}
-      .uni-table td::before{content:attr(data-label);font-size:.72rem;font-weight:900;color:var(--ink-3)}
-      .uniform-player-name,.uniform-borrower{display:block;margin:4px 0 0;white-space:normal;line-height:1.45}
-      .uni-actions{display:grid;grid-template-columns:1fr;gap:7px;width:100%}
-      .action-btn{width:100%;min-height:44px;padding:8px 10px}
+      .uni-table{font-size:.74rem}
+      .uni-table th{padding:7px 2px;font-size:.64rem}
+      .uni-table td{height:50px;padding:5px 2px!important;overflow:hidden}
+      .uni-table th:nth-child(1){width:42px}
+      .uni-table th:nth-child(2){width:45px}
+      .uni-table th:nth-child(4){width:80px}
+      .uni-table th:nth-child(5){width:40px}
+      .uniform-number{font-size:.9rem}
+      .uniform-player-name{font-size:.72rem;padding:0 3px}
+      .status-action{min-width:72px;min-height:38px;padding:2px 4px}
+      .edit-icon-btn{width:34px;height:34px}
     }
   </style>
 </head>
@@ -415,22 +424,14 @@ function renderFolders(){
     var rows=items.map(function(u){
       var isLent=!!u.lentTo;
       var statusCell=isLent
-        ?'<span class="badge-lent">選手に貸出中</span><br><span class="uniform-borrower">👤 '+escapeHtml(u.lentTo)+(u.lentDate?'　'+escapeHtml(u.lentDate)+'〜':'')+'</span>'
-        :'<span class="badge-free">🏠 倉庫保管</span>';
-      var lendReturnBtn=isLent
-        ?'<button class="action-btn return-btn" onclick="event.stopPropagation();openLend('+inlineJsArg(u.id)+')">倉庫へ返却</button>'
-        :'<button class="action-btn lend-btn" onclick="event.stopPropagation();openLend('+inlineJsArg(u.id)+')">選手へ貸出</button>';
+        ?'<button class="status-action is-lent" onclick="event.stopPropagation();openLend('+inlineJsArg(u.id)+')" aria-label="貸出中。タップして返却"><span class="status-main">貸出中</span><span class="status-next">返却する ›</span></button>'
+        :'<button class="status-action is-free" onclick="event.stopPropagation();openLend('+inlineJsArg(u.id)+')" aria-label="倉庫保管。タップして貸出"><span class="status-main">倉庫</span><span class="status-next">貸出する ›</span></button>';
       return '<tr>'
-        +'<td data-label="背番号 / 選手" style="white-space:nowrap"><span class="uniform-number">#'+escapeHtml(u.num)+'</span>'
-        +(u.player?' <span class="uniform-player-name">'+escapeHtml(u.player)+'</span>':'')
-        +'</td>'
+        +'<td data-label="背番号"><span class="uniform-number">#'+escapeHtml(u.num)+'</span></td>'
         +'<td data-label="サイズ" class="uniform-size" style="text-align:center;white-space:nowrap">'+escapeHtml(u.size)+'</td>'
-        +'<td data-label="保管状況 / 貸出先">'+statusCell+'</td>'
-        +'<td data-label="操作"><div class="uni-actions">'
-        +lendReturnBtn
-        +'<button class="action-btn edit-btn" onclick="event.stopPropagation();openEdit('+inlineJsArg(u.id)+')">編集</button>'
-        +'<button class="action-btn del-btn" onclick="event.stopPropagation();confirmDel('+inlineJsArg(u.id)+')">削除</button>'
-        +'</div></td>'
+        +'<td data-label="氏名"><span class="uniform-player-name" title="'+escapeHtml(u.lentTo||u.player||'')+'">'+escapeHtml(u.lentTo||u.player||'—')+'</span></td>'
+        +'<td data-label="状況">'+statusCell+'</td>'
+        +'<td data-label="編集"><div class="uni-actions"><button class="edit-icon-btn" onclick="event.stopPropagation();openEdit('+inlineJsArg(u.id)+')" aria-label="#'+escapeHtml(u.num)+'を編集" title="編集">✎</button></div></td>'
         +'</tr>';
     }).join("");
 
@@ -449,7 +450,7 @@ function renderFolders(){
       +'<div style="overflow-x:auto">'
       +'<table class="uni-table">'
       +'<thead><tr>'
-      +'<th>背番号 / 選手</th><th style="width:52px">サイズ</th><th>保管状況 / 貸出先</th><th style="width:140px">操作</th>'
+      +'<th style="width:64px">背番号</th><th style="width:64px">サイズ</th><th>氏名</th><th style="width:96px">状況</th><th style="width:48px" aria-label="編集"></th>'
       +'</tr></thead>'
       +'<tbody>'+rows+'</tbody>'
       +'</table>'
@@ -519,10 +520,12 @@ function buildPairTemplates(){
   wrap.classList.toggle("reorder-mode",_templateReorderMode);
   wrap.innerHTML=loadColorTemplates().map(function(p,index){
     var selected=p.mainName===selectedMain&&(p.subName||"")===selectedSub;
+    var colorLabel=p.mainName+(p.subName?" × "+p.subName:"");
     return '<div class="template-item" data-template-index="'+index+'">'
       +'<button type="button" class="cp-sw'+(selected?" sel":"")+'" title="'+escapeHtml(p.name)
       +'" aria-label="'+escapeHtml(p.name)+'" style="background:linear-gradient(135deg,'+safeColor(p.mainCode,"#666666")+','+safeColor(p.subCode,p.mainCode)+')"'
       +' onclick="selectPairTemplate('+inlineJsArg(p.id)+')"></button>'
+      +'<span class="template-color-name'+(selected?" show":"")+'">'+escapeHtml(colorLabel)+'</span>'
       +'<span class="template-order-controls">'
       +'<button type="button" class="template-mini-btn" aria-label="'+escapeHtml(p.name)+'を前へ" onclick="movePairTemplate('+index+',-1)">↑</button>'
       +'<button type="button" class="template-mini-btn" aria-label="'+escapeHtml(p.name)+'を後ろへ" onclick="movePairTemplate('+index+',1)">↓</button>'
