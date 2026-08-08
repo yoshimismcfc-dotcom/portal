@@ -63,6 +63,18 @@
     .badge-free{display:inline-block;background:rgba(0,255,136,.15);color:#00ff88;border:1px solid rgba(0,255,136,.35);border-radius:99px;padding:2px 9px;font-size:.72rem;font-weight:700;white-space:nowrap}
     .badge-lent{display:inline-block;background:rgba(255,68,102,.15);color:#ff6680;border:1px solid rgba(255,68,102,.35);border-radius:99px;padding:2px 9px;font-size:.72rem;font-weight:700;white-space:nowrap}
     .who-text{font-size:.72rem;color:#94c4e4;display:inline;margin-left:5px}
+    .uniform-number{font-size:1rem;font-weight:900;color:#fff}
+    .uniform-player-name{font-size:.82rem;font-weight:800;color:#b9dcf3;margin-left:5px}
+    .uniform-size{color:#fff}
+    .uniform-borrower{font-size:.76rem;font-weight:700;color:#b9dcf3}
+    body[data-theme="light"] .cf-body{background:#f8fbff}
+    body[data-theme="light"] .uni-table tbody tr{border-bottom-color:#c8d6e6}
+    body[data-theme="light"] .uni-table tbody tr:nth-child(even){background:#eaf1f8}
+    body[data-theme="light"] .uni-table tbody tr:hover{background:#fff0e5}
+    body[data-theme="light"] .uniform-number,
+    body[data-theme="light"] .uniform-player-name,
+    body[data-theme="light"] .uniform-size,
+    body[data-theme="light"] .uniform-borrower{color:#14243a!important}
     /* アクションボタン列 */
     .uni-actions{display:flex;gap:5px;justify-content:center;align-items:center}
     .action-btn{
@@ -106,7 +118,7 @@
     /* 履歴 */
     .hist-item{background:rgba(255,255,255,.04);border-radius:var(--r8);padding:8px 12px;font-size:.78rem;display:flex;align-items:center;gap:7px;margin-bottom:5px;flex-wrap:wrap}
     @media(max-width:400px){.fg2{grid-template-columns:1fr}}
-    @media(max-width:520px){.uni-table{font-size:.75rem}.uni-table th,.uni-table td{padding:7px 5px}}
+    @media(max-width:520px){.uni-table{font-size:.75rem}.uni-table th,.uni-table td{padding:7px 5px}.uniform-player-name{display:block;margin:3px 0 0;white-space:normal;line-height:1.35}.uniform-borrower{display:block;margin-top:4px;white-space:normal;line-height:1.35}}
   </style>
 </head>
 <body>
@@ -311,16 +323,16 @@ function renderFolders(){
     var rows=items.map(function(u){
       var isLent=!!u.lentTo;
       var statusCell=isLent
-        ?'<span class="badge-lent">貸出中</span> <span style="font-size:.72rem;color:#94c4e4">'+escapeHtml(u.lentTo)+(u.lentDate?' '+escapeHtml(u.lentDate)+'〜':'')+'</span>'
+        ?'<span class="badge-lent">貸出中</span> <span class="uniform-borrower">'+escapeHtml(u.lentTo)+(u.lentDate?' '+escapeHtml(u.lentDate)+'〜':'')+'</span>'
         :'<span class="badge-free">在庫あり</span>';
       var lendReturnBtn=isLent
         ?'<button class="action-btn return-btn" onclick="event.stopPropagation();openLend('+inlineJsArg(u.id)+')">返却</button>'
         :'<button class="action-btn lend-btn" onclick="event.stopPropagation();openLend('+inlineJsArg(u.id)+')">貸出</button>';
       return '<tr>'
-        +'<td style="white-space:nowrap"><span style="font-size:1rem;font-weight:900;color:#fff">#'+escapeHtml(u.num)+'</span>'
-        +(u.player?' <span style="font-size:.78rem;color:#94c4e4">'+escapeHtml(u.player)+'</span>':'')
+        +'<td style="white-space:nowrap"><span class="uniform-number">#'+escapeHtml(u.num)+'</span>'
+        +(u.player?' <span class="uniform-player-name">'+escapeHtml(u.player)+'</span>':'')
         +'</td>'
-        +'<td style="text-align:center;color:#fff;white-space:nowrap">'+escapeHtml(u.size)+'</td>'
+        +'<td class="uniform-size" style="text-align:center;white-space:nowrap">'+escapeHtml(u.size)+'</td>'
         +'<td>'+statusCell+'</td>'
         +'<td><div class="uni-actions">'
         +lendReturnBtn
