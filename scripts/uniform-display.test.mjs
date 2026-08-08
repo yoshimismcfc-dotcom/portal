@@ -213,6 +213,23 @@ for (const required of [
 ]) {
   if (!source.includes(required)) throw new Error("靴下の色別在庫管理が不足しています: " + required);
 }
+
+for (const required of [
+  'var UNIFORM_ILLUSTRATIONS={',
+  '"水色 × ピンク":{src:"assets/uniform-water-pink.svg"',
+  'class="cf-uniform-illustration"',
+  '.cf-summary:has(.cf-uniform-illustration) .cf-name',
+  'var illustration=UNIFORM_ILLUSTRATIONS[cname]',
+  '+illustrationHtml'
+]) {
+  if (!source.includes(required)) throw new Error("色カードのユニフォームイラスト表示が不足しています: " + required);
+}
+if (!source.includes("靴下在庫・入力") || !source.includes("タップして追加・数量変更")) {
+  throw new Error("靴下の入力場所を示す案内がありません");
+}
+if (!fs.existsSync(path.join(root, "assets", "uniform-water-pink.svg"))) {
+  throw new Error("水色×ピンクのユニフォームイラストがありません");
+}
 if (!source.includes("setTimeout(function(){_templateLongPressed=true;setTemplateReorderMode(true);},600)")) {
   throw new Error("テンプレートの長押し判定がありません");
 }
