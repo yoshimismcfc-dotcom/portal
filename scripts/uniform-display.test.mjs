@@ -53,7 +53,7 @@ for (const required of [
   "組み合わせテンプレート",
   'id="uniform-pair-templates"',
   "function buildPairTemplates()",
-  "function selectPairTemplate(templateName)",
+  "function selectPairTemplate(templateId)",
   '"オレンジ赤縦じま":["オレンジ","赤"]',
   '"水色ピンク":["水色","ピンク"]'
 ]) {
