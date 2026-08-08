@@ -159,6 +159,9 @@
     .uniform-color-section{order:1}
     .uniform-entry-step-title{display:none;order:2;margin:8px 0 10px;padding:9px 12px;border-radius:var(--r8);background:rgba(0,223,122,.1);border:1px solid rgba(0,223,122,.3);color:var(--ink);font-size:.82rem;font-weight:900}
     .uniform-entry-step-title.ready{display:block}
+    .uniform-number-guide{display:none;order:2;margin:-4px 0 10px;padding:8px 12px;border-radius:var(--r8);background:rgba(255,139,31,.09);border:1px solid rgba(255,139,31,.25);color:var(--ink-2);font-size:.74rem;line-height:1.5}
+    .uniform-number-guide.ready{display:block}
+    .uniform-number-guide strong{color:var(--orange-2)}
     .uniform-entry-field{display:none}
     .uniform-entry-field.ready{display:block}
     .uniform-entry-row{order:3}
@@ -304,6 +307,7 @@
       </div>
     </div>
     <div class="uniform-entry-step-title" id="uniform-entry-step-title">② 背番号・サイズ・団員名を入力してください</div>
+    <div class="uniform-number-guide" id="uniform-number-guide"></div>
     <div class="form-group uniform-entry-field uniform-memo-group"><label class="form-label">メモ</label>
       <input class="form-control" id="u-memo" placeholder="例：上下セット"></div>
     <div class="modal-btns uniform-save-actions">
@@ -603,6 +607,17 @@ function setUniformDetailsReady(ready,colorLabel){
   title.classList.toggle("ready",!!ready);
   title.textContent=ready?"② 「"+(colorLabel||"選択した色")+"」の背番号・サイズ・団員名を入力してください":"② 背番号・サイズ・団員名を入力してください";
   document.getElementById("u-save-btn").classList.toggle("ready",!!ready);
+  updateUniformNumberGuide(ready?colorLabel:"");
+}
+function updateUniformNumberGuide(colorLabel){
+  var guide=document.getElementById("uniform-number-guide");
+  if(!colorLabel){guide.classList.remove("ready");guide.innerHTML="";return;}
+  var numbers=loadU().filter(function(item){return item.id!==editId&&uniformColorLabel(item)===colorLabel;})
+    .map(function(item){return String(item.num||"");})
+    .filter(Boolean)
+    .sort(function(a,b){return Number(a)-Number(b)||a.localeCompare(b,"ja",{numeric:true});});
+  guide.classList.add("ready");
+  guide.innerHTML='<strong>この色の登録済み背番号：</strong>'+(numbers.length?numbers.map(function(num){return "#"+escapeHtml(num);}).join("、"):"まだありません");
 }
 function toggleTemplateColorEditor(forceOpen){
   var editor=document.getElementById("template-color-editor");
@@ -713,6 +728,10 @@ function saveUni(){
   if(!mainColorName){alert("メインカラーを入力してください");return;}
   var colorName=mainColorName+(subColorName?" × "+subColorName:"");
   var data=loadU(),id=editId||("u"+Date.now());
+  var duplicateNumber=data.some(function(item){
+    return item.id!==id&&String(item.num||"")===num&&uniformColorLabel(item)===colorName;
+  });
+  if(duplicateNumber){alert("この色には背番号 #"+num+" がすでに登録されています。別の背番号を確認してください。");return;}
   var exist=data.find(function(x){return x.id===id;});
   var previousHolder=exist&&exist.lentTo?String(exist.lentTo):"";
   var holderName=document.getElementById("u-player").value.trim();
