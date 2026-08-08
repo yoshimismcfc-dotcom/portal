@@ -96,4 +96,16 @@ if (!source.includes("setTimeout(function(){_templateLongPressed=true;setTemplat
   throw new Error("テンプレートの長押し判定がありません");
 }
 
+for (const required of [
+  'id="main-color-options"',
+  'id="sub-color-options"',
+  "登録済みの色から選択",
+  "function buildSingleColorPalettes()",
+  "function chooseSharedColor(role,name,code)",
+  "loadColorTemplates().forEach(function(template)",
+  'toLocaleLowerCase("ja")'
+]) {
+  if (!source.includes(required)) throw new Error("全員の登録済みカラーを共有・重複排除する処理が不足しています: " + required);
+}
+
 console.log("uniform display tests passed");
