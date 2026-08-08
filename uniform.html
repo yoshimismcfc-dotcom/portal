@@ -146,6 +146,11 @@
     .template-mini-btn{min-width:36px;min-height:36px;border:1px solid var(--line-2);border-radius:7px;background:var(--surface-lt);color:var(--ink);font-weight:900;cursor:pointer}
     .template-reorder-status{display:none;font-size:.74rem;color:var(--orange-2);font-weight:800;margin:6px 0}
     .template-reorder-status.show{display:block}
+    .template-guide{border:1px solid rgba(0,212,255,.25);border-radius:var(--r8);padding:10px 12px;background:rgba(0,212,255,.07);color:var(--ink-2);font-size:.78rem;line-height:1.55;margin-bottom:8px}
+    .template-color-editor{display:none;margin-top:10px;padding:12px;border:1px solid var(--line-2);border-radius:var(--r12);background:rgba(255,255,255,.035)}
+    .template-color-editor.open{display:block}
+    .template-color-editor-title{font-size:.86rem;font-weight:900;color:var(--ink);margin-bottom:4px}
+    body[data-theme="light"] .template-color-editor{background:#f8fbff}
     @media(max-width:520px){
       .cf-body>div{overflow-x:visible!important}
       .uni-table{font-size:.74rem}
@@ -232,42 +237,50 @@
       </select></div>
     <div class="form-group">
       <label class="form-label">ユニフォームカラー</label>
-      <div class="custom-color-note" style="margin-bottom:8px">メインとサブをそれぞれ選択できます。1色のユニフォームはサブを空欄にしてください。</div>
-      <div class="form-label" style="margin-top:8px">組み合わせテンプレート</div>
+      <div class="template-guide"><strong>① 下の色見本から組み合わせを選んでください。</strong><br>選んだ色の名前が見本の下に表示されます。</div>
+      <div class="form-label" style="margin-top:8px">組み合わせテンプレートから選ぶ</div>
       <div class="template-list" id="uniform-pair-templates" aria-label="ユニフォームカラーの組み合わせテンプレート"></div>
-      <div class="custom-color-note">色見本をタップすると2色が入ります。色見本を長押しすると並び替えできます。</div>
+      <div class="custom-color-note">色見本をタップして選択します。長押しすると順番を変更できます。</div>
       <div class="template-reorder-status" id="template-reorder-status">並べ替えモード：矢印で移動、×で削除できます。</div>
       <div class="custom-color-actions" style="margin-bottom:10px">
-        <button type="button" class="btn btn-outline btn-sm" onclick="addCurrentPairTemplate()">＋ 現在の2色をテンプレートに追加</button>
+        <button type="button" class="btn btn-outline btn-sm" id="template-color-add-open" onclick="toggleTemplateColorEditor()">＋ テンプレートに色を追加</button>
         <button type="button" class="btn btn-outline btn-sm" id="template-reorder-done" style="display:none" onclick="setTemplateReorderMode(false)">並べ替え完了</button>
       </div>
       <datalist id="uniform-color-options"></datalist>
-      <div class="uniform-color-pair">
-        <div class="uniform-color-field">
-          <h4>メインカラー（必須）</h4>
-          <div class="custom-color-note">登録済みの色から選択</div>
-          <div class="color-palette" id="main-color-options" aria-label="共有されているメインカラー"></div>
-          <div class="uniform-color-row">
-            <label>カラー名
-              <input class="form-control" id="u-main-cname" list="uniform-color-options" placeholder="例：オレンジ">
-            </label>
-            <label>表示色
-              <input class="custom-color-input" type="color" id="u-main-ccode" value="#e85c1e" aria-label="メインカラーの表示色">
-            </label>
+      <div class="template-color-editor" id="template-color-editor">
+        <div class="template-color-editor-title">新しい色の組み合わせを追加</div>
+        <div class="custom-color-note" style="margin-bottom:10px">メインとサブの色を設定して追加してください。追加したテンプレートは全員が使えます。</div>
+        <div class="uniform-color-pair">
+          <div class="uniform-color-field">
+            <h4>メインカラー（必須）</h4>
+            <div class="custom-color-note">登録済みの色から選択</div>
+            <div class="color-palette" id="main-color-options" aria-label="共有されているメインカラー"></div>
+            <div class="uniform-color-row">
+              <label>カラー名
+                <input class="form-control" id="u-main-cname" list="uniform-color-options" placeholder="例：オレンジ">
+              </label>
+              <label>表示色
+                <input class="custom-color-input" type="color" id="u-main-ccode" value="#e85c1e" aria-label="メインカラーの表示色">
+              </label>
+            </div>
+          </div>
+          <div class="uniform-color-field">
+            <h4>サブカラー（任意）</h4>
+            <div class="custom-color-note">1色だけの場合は「なし」</div>
+            <div class="color-palette" id="sub-color-options" aria-label="共有されているサブカラー"></div>
+            <div class="uniform-color-row">
+              <label>カラー名
+                <input class="form-control" id="u-sub-cname" list="uniform-color-options" placeholder="例：赤">
+              </label>
+              <label>表示色
+                <input class="custom-color-input" type="color" id="u-sub-ccode" value="#bc002d" aria-label="サブカラーの表示色">
+              </label>
+            </div>
           </div>
         </div>
-        <div class="uniform-color-field">
-          <h4>サブカラー（任意）</h4>
-          <div class="custom-color-note">登録済みの色から選択</div>
-          <div class="color-palette" id="sub-color-options" aria-label="共有されているサブカラー"></div>
-          <div class="uniform-color-row">
-            <label>カラー名
-              <input class="form-control" id="u-sub-cname" list="uniform-color-options" placeholder="例：赤">
-            </label>
-            <label>表示色
-              <input class="custom-color-input" type="color" id="u-sub-ccode" value="#bc002d" aria-label="サブカラーの表示色">
-            </label>
-          </div>
+        <div class="custom-color-actions" style="justify-content:flex-end;margin:12px 0 0">
+          <button type="button" class="btn btn-outline btn-sm" onclick="toggleTemplateColorEditor(false)">キャンセル</button>
+          <button type="button" class="btn btn-primary btn-sm" onclick="addCurrentPairTemplate()">この組み合わせをテンプレートに追加</button>
         </div>
       </div>
     </div>
@@ -542,7 +555,15 @@ function selectPairTemplate(templateId){
   document.getElementById("u-main-ccode").value=safeColor(p.mainCode,"#666666");
   document.getElementById("u-sub-cname").value=p.subName||"";
   document.getElementById("u-sub-ccode").value=safeColor(p.subCode,p.mainCode);
+  toggleTemplateColorEditor(false);
   buildSingleColorPalettes();buildPairTemplates();
+}
+function toggleTemplateColorEditor(forceOpen){
+  var editor=document.getElementById("template-color-editor");
+  var open=typeof forceOpen==="boolean"?forceOpen:!editor.classList.contains("open");
+  editor.classList.toggle("open",open);
+  document.getElementById("template-color-add-open").textContent=open?"色の追加を閉じる":"＋ テンプレートに色を追加";
+  if(open){buildColorOptions();buildSingleColorPalettes();}
 }
 function wireTemplateLongPress(){
   document.querySelectorAll("#uniform-pair-templates .cp-sw").forEach(function(button){
@@ -577,18 +598,18 @@ function addCurrentPairTemplate(){
   var mainName=document.getElementById("u-main-cname").value.trim();
   var subName=document.getElementById("u-sub-cname").value.trim();
   if(!mainName){alert("先にメインカラーを入力してください");return;}
-  var defaultName=mainName+(subName?" × "+subName:"");
-  var name=prompt("テンプレート名を入力してください",defaultName);
-  if(name===null)return;
-  name=name.trim();if(!name){alert("テンプレート名を入力してください");return;}
   var items=loadColorTemplates().slice();
+  var duplicate=items.some(function(item){return item.mainName===mainName&&(item.subName||"")===subName;});
+  if(duplicate){alert("この色の組み合わせは、すでにテンプレートにあります。");return;}
+  var name=mainName+(subName?" × "+subName:"");
   items.push({
     id:"custom-"+Date.now(),name:name,
     mainName:mainName,mainCode:document.getElementById("u-main-ccode").value,
     subName:subName,subCode:subName?document.getElementById("u-sub-ccode").value:""
   });
   saveColorTemplates(items);buildPairTemplates();
-  alert("テンプレートを追加しました。");
+  toggleTemplateColorEditor(false);
+  alert("「"+name+"」をテンプレートに追加しました。");
 }
 function colorCodeForName(name,fallback){
   var found=availableSingleColors().find(function(p){return p.name===name;});
@@ -614,6 +635,7 @@ function openAdd(){
   document.getElementById("u-sub-ccode").value="#bc002d";
   buildColorOptions();
   buildPairTemplates();
+  toggleTemplateColorEditor(false);
   document.getElementById("modal-add").classList.add("open");
 }
 function openEdit(id){
@@ -631,6 +653,7 @@ function openEdit(id){
   document.getElementById("u-sub-ccode").value=safeColor(u.subColorCode,"#bc002d");
   buildColorOptions();
   buildPairTemplates();
+  toggleTemplateColorEditor(false);
   document.getElementById("modal-add").classList.add("open");
 }
 function saveUni(){
