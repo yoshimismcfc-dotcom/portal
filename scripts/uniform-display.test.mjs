@@ -10,7 +10,7 @@ const renderAt = source.indexOf("function renderFolders()");
 if (paletteAt < 0 || renderAt < 0 || syncAt < 0 || !(paletteAt < renderAt && renderAt < syncAt)) {
   throw new Error("ユニフォーム同期は色・一覧描画の定義後に開始してください");
 }
-if (!source.includes('class="uniform-borrower"') || !source.includes("escapeHtml(u.lentTo)")) {
+if (!source.includes('data-label="氏名"') || !source.includes("escapeHtml(u.lentTo||u.player||'—')")) {
   throw new Error("貸出先の氏名を安全に一覧表示する処理がありません");
 }
 if (!source.includes('val.filter(function(item){return item && typeof item==="object";})')) {
@@ -54,6 +54,8 @@ for (const required of [
   'id="uniform-pair-templates"',
   "function buildPairTemplates()",
   "function selectPairTemplate(templateId)",
+  'class="template-color-name',
+  'p.mainName+(p.subName?" × "+p.subName:"")',
   '"オレンジ赤縦じま":["オレンジ","赤"]',
   '"水色ピンク":["水色","ピンク"]'
 ]) {
@@ -65,8 +67,8 @@ for (const required of [
   "名前を入力すると「選手に貸出中」、空欄にすると「倉庫保管」",
   "🏠 倉庫保管",
   "選手に貸出中",
-  "選手へ貸出",
-  "倉庫へ返却",
+  "貸出する",
+  "返却する",
   'entry.storageLocation="player"',
   'entry.storageLocation="warehouse"',
   "u.lentTo||u.player||"
@@ -78,10 +80,13 @@ if (!source.includes("previousHolder!==holderName")) {
 }
 
 for (const required of [
-  'data-label="背番号 / 選手"',
-  'data-label="保管状況 / 貸出先"',
-  'data-label="操作"',
-  ".uni-actions{display:grid;grid-template-columns:1fr",
+  'data-label="背番号"',
+  'data-label="氏名"',
+  'data-label="状況"',
+  'class="status-action is-lent"',
+  'class="status-action is-free"',
+  'class="edit-icon-btn"',
+  ".uni-table{font-size:.74rem}",
   "＋ 現在の2色をテンプレートに追加",
   "色見本を長押しすると並び替えできます",
   "function addCurrentPairTemplate()",
