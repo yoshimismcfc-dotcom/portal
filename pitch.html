@@ -63,6 +63,24 @@
     .tool-name{font-size:.82rem;font-weight:900;color:#fff;margin-bottom:3px}
     .tool-desc{font-size:.72rem;color:#94c4e4;line-height:1.55}
 
+    /* 低学年6人制ピッチ */
+    .six-pitch-card{border:1px solid rgba(0,212,255,.3);border-radius:var(--r12);padding:14px;margin:0 0 18px;background:rgba(0,212,255,.06)}
+    .six-pitch-title{font-size:1rem;font-weight:900;color:var(--cyan);margin-bottom:5px}
+    .six-pitch-note{font-size:.76rem;color:var(--ink-2);line-height:1.65;margin-bottom:12px}
+    .six-pitch-visual{position:relative;width:min(100%,500px);aspect-ratio:50/32;margin:0 auto 12px;background:#247a36;border:3px solid #fff;box-sizing:border-box}
+    .six-pitch-visual::before{content:"";position:absolute;top:0;bottom:0;left:50%;border-left:2px solid rgba(255,255,255,.9)}
+    .six-penalty-line{position:absolute;top:0;bottom:0;border-left:2px dashed rgba(255,255,255,.82)}
+    .six-penalty-line.left{left:20%}.six-penalty-line.right{right:20%}
+    .six-goal{position:absolute;top:40%;height:20%;width:8px;border:2px solid #fff;background:rgba(255,255,255,.15)}
+    .six-goal.left{left:-11px}.six-goal.right{right:-11px}
+    .six-length-label{position:absolute;left:50%;top:6px;transform:translateX(-50%);background:rgba(0,0,0,.55);color:#fff;border-radius:99px;padding:2px 8px;font-size:.7rem;font-weight:900}
+    .six-width-label{position:absolute;right:5px;top:50%;transform:translateY(-50%);background:rgba(0,0,0,.55);color:#fff;border-radius:99px;padding:2px 8px;font-size:.7rem;font-weight:900}
+    .six-dim-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px}
+    .six-dim-item{background:var(--surface-lt);border:1px solid var(--line);border-radius:var(--r8);padding:9px 10px}
+    .six-dim-item strong{display:block;color:var(--ink);font-size:.78rem;margin-bottom:2px}
+    .six-dim-item span{color:var(--ink-2);font-size:.75rem;line-height:1.45}
+    @media(max-width:430px){.six-dim-grid{grid-template-columns:1fr}.six-pitch-card{padding:12px}}
+
     /* ポイントボックス */
     .point-box{border-radius:var(--r8);padding:11px 14px;font-size:.8rem;line-height:1.75;margin-bottom:10px}
     .point-box.info{background:rgba(0,212,255,.08);border:1px solid rgba(0,212,255,.25);color:#a0d4f0}
@@ -79,7 +97,7 @@
     <div class="hero-emoji">📐</div>
     <div>
       <div class="hero-title">ピッチサイズ</div>
-      <div class="hero-sub">小学生8人制（JFA推奨）のコートサイズと設営方法を解説します。</div>
+      <div class="hero-sub">小学生8人制と低学年6人制のコートサイズ・設営方法を解説します。</div>
     </div>
   </div>
 
@@ -97,6 +115,28 @@
       8人制は11人制のコート約半分の大きさ。大人のコート1面に2面作れます。<br>
       日本サッカー協会（JFA）推奨サイズ：<strong style="color:var(--orange)">縦68m × 横50m</strong>
     </div>
+
+    <section class="six-pitch-card" aria-labelledby="six-pitch-heading">
+      <div class="six-pitch-title" id="six-pitch-heading">⚽ 低学年6人制ピッチ（設営目安）</div>
+      <div class="six-pitch-note">
+        低学年の6人制では大会ごとに寸法が異なるため、<strong>大会要項の指定を最優先</strong>してください。
+        指定がない場合の実用的な目安として、縦50m×横32mを使用できます。
+      </div>
+      <div class="six-pitch-visual" role="img" aria-label="縦50メートル、横32メートルの低学年6人制ピッチ図">
+        <span class="six-penalty-line left"></span>
+        <span class="six-penalty-line right"></span>
+        <span class="six-goal left"></span>
+        <span class="six-goal right"></span>
+        <span class="six-length-label">縦 50m</span>
+        <span class="six-width-label">横 32m</span>
+      </div>
+      <div class="six-dim-grid">
+        <div class="six-dim-item"><strong>コート全体</strong><span>縦50m × 横32m</span></div>
+        <div class="six-dim-item"><strong>対角線</strong><span>約59.4m（長方形確認用）</span></div>
+        <div class="six-dim-item"><strong>ペナルティーエリアの目安</strong><span>各ゴールラインから10m</span></div>
+        <div class="six-dim-item"><strong>ゴール・その他の寸法</strong><span>主催大会の要項・使用ゴールに合わせる</span></div>
+      </div>
+    </section>
 
     <!-- ピッチ図 -->
     <div style="border-radius:var(--r12);overflow:hidden;margin-bottom:16px;text-align:center;background:#1e3a1e;padding:8px">
