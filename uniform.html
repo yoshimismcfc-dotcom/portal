@@ -20,9 +20,11 @@
 
     /* ===== カラーフォルダ ===== */
     .color-folder{margin-bottom:14px;border-radius:var(--r12);overflow:hidden;border:1px solid var(--line-2)}
-    .cf-header{display:grid;grid-template-columns:minmax(0,3fr) minmax(70px,1fr);align-items:stretch;min-height:94px;user-select:none;transition:.15s}
+    .cf-header{position:relative;display:grid;grid-template-columns:minmax(0,3fr) minmax(70px,1fr);align-items:stretch;min-height:94px;user-select:none;transition:.15s}
     .cf-summary{display:flex;align-items:center;min-width:0;padding:10px 12px;border:0;background:transparent;color:inherit;text-align:left;cursor:pointer}
     .cf-summary:hover{background:rgba(255,255,255,.07)}
+    .cf-summary:has(.cf-uniform-illustration) .cf-name{max-width:calc(66.666% - 40px)}
+    .cf-uniform-illustration{position:absolute;z-index:1;left:50%;top:50%;transform:translate(-50%,-50%);width:58px;height:70px;object-fit:contain;pointer-events:none;padding:4px;border:1px solid rgba(255,255,255,.58);border-radius:12px;background:rgba(255,255,255,.32);filter:drop-shadow(0 2px 3px rgba(0,0,0,.26))}
     .cf-header.is-light .cf-name{color:#071126;text-shadow:none}
     .cf-swatch{width:18px;height:18px;border-radius:50%;flex-shrink:0;border:2px solid rgba(255,255,255,.35);box-shadow:0 0 6px rgba(0,0,0,.5)}
     .cf-name{min-width:0;font-size:.98rem;font-weight:900;color:#fff;flex:1;display:flex;flex-direction:column;align-items:flex-start;gap:6px;text-shadow:0 1px 3px rgba(0,0,0,.65)}
@@ -124,7 +126,9 @@
     /* ===== 靴下在庫 ===== */
     .socks-section{margin:18px 0 14px;border:1px solid rgba(0,212,255,.3);border-radius:var(--r16);overflow:hidden;background:var(--surface-lt)}
     .socks-section-header{display:flex;align-items:center;gap:10px;width:100%;min-height:58px;padding:10px 14px;border:0;background:linear-gradient(135deg,rgba(0,48,135,.72),rgba(0,118,168,.5));color:#fff;text-align:left;cursor:pointer}
-    .socks-section-title{flex:1;font-size:.95rem;font-weight:900}
+    .socks-section-copy{display:flex;flex:1;min-width:0;flex-direction:column;gap:2px}
+    .socks-section-title{font-size:.95rem;font-weight:900}
+    .socks-section-hint{color:#c7f5ff;font-size:.66rem;font-weight:800}
     .socks-section-total{padding:4px 9px;border-radius:99px;background:rgba(5,15,30,.62);color:#65e8ff;font-size:.72rem;font-weight:900;white-space:nowrap}
     .socks-section-toggle{font-size:.8rem;transition:transform .2s}
     .socks-section-toggle.open{transform:rotate(90deg)}
@@ -240,6 +244,8 @@
       .color-folder{margin-bottom:10px}
       .cf-header{grid-template-columns:minmax(0,3fr) minmax(68px,1fr);min-height:90px}
       .cf-summary{padding:9px 10px}
+      .cf-summary:has(.cf-uniform-illustration) .cf-name{max-width:calc(66.666% - 31px)}
+      .cf-uniform-illustration{width:46px;height:58px;margin-right:7px;padding:3px;border-radius:10px}
       .cf-name{font-size:.9rem;gap:5px}
       .cf-stats{gap:6px;font-size:.62rem;padding:4px 7px}
       .cf-open-hint{font-size:.62rem;padding:3px 7px}
@@ -340,7 +346,7 @@
   <section class="socks-section" aria-labelledby="socks-section-title">
     <button type="button" class="socks-section-header" id="socks-section-header" aria-expanded="false" aria-controls="socks-section-body" onclick="toggleSocksSection()">
       <span style="font-size:1.4rem" aria-hidden="true">🧦</span>
-      <span class="socks-section-title" id="socks-section-title">靴下在庫</span>
+      <span class="socks-section-copy"><span class="socks-section-title" id="socks-section-title">靴下在庫・入力</span><span class="socks-section-hint">タップして追加・数量変更</span></span>
       <span class="socks-section-total" id="socks-total">合計0足</span>
       <span class="socks-section-toggle" id="socks-section-toggle">▶</span>
     </button>
@@ -633,6 +639,9 @@ function isLightFolder(p){
   return hexLightness(p.c1)>150;
 }
 function safeColor(value,fallback){return /^#[0-9a-f]{6}$/i.test(String(value||""))?String(value):fallback;}
+var UNIFORM_ILLUSTRATIONS={
+  "水色 × ピンク":{src:"assets/uniform-water-pink.svg",alt:"水色を中心にピンクの肩・脇を配したユニフォームのイラスト"}
+};
 
 function renderStats(){
   var d=loadU(),total=d.length,free=d.filter(function(u){return !u.lentTo;}).length;
@@ -692,6 +701,8 @@ function renderFolders(){
     var bandSubColor=hasSubColor?sampleSubCode:sampleMainCode;
     var hdrGrad="linear-gradient(90deg,"+sampleMainCode+" 0%,"+sampleMainCode+" 75%,"+bandSubColor+" 75%,"+bandSubColor+" 100%)";
     var lightClass=isLightFolder(cg.p)?" is-light":"";
+    var illustration=UNIFORM_ILLUSTRATIONS[cname];
+    var illustrationHtml=illustration?'<img class="cf-uniform-illustration" src="'+escapeHtml(illustration.src)+'" alt="'+escapeHtml(illustration.alt)+'">':'';
 
     // テーブル行生成
     var rows=items.map(function(u){
@@ -714,6 +725,7 @@ function renderFolders(){
     html+='<div class="color-folder">'
       +'<div class="cf-header'+lightClass+'" style="background:'+hdrGrad+'">'
       +'<button type="button" class="cf-summary" id="fs'+bodyId+'" aria-expanded="false" aria-controls="'+bodyId+'" aria-label="'+escapeHtml(cname)+'の一覧を開く" onclick="toggleFolder(\''+bodyId+'\')">'
+      +illustrationHtml
       +'<span class="cf-name"><span class="cf-name-main">'+escapeHtml(cname)+'</span>'
       +'<span class="cf-stats">'
       +'<span class="cf-total">全'+items.length+'着</span>'
