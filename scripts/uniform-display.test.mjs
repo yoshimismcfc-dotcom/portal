@@ -88,9 +88,12 @@ for (const required of [
   'class="edit-icon-btn"',
   ".uni-table{font-size:.74rem}",
   "function openAddForColor(colorLabel,mainName,mainCode,subName,subCode)",
-  "＋ この色に追加",
+  "＋ 背番号・サイズ・団員名を入力",
   "右端の矢印は一覧の開閉です",
   'class="cf-toggle-button"',
+  'classList.add("direct-color")',
+  'classList.remove("direct-color")',
+  "＋ 新しい色からユニフォームを追加",
   "組み合わせテンプレートから選ぶ",
   "＋ テンプレートに色を追加",
   "この組み合わせをテンプレートに追加",
@@ -116,6 +119,9 @@ for (const required of [
 }
 if (!source.includes("setTimeout(function(){_templateLongPressed=true;setTemplateReorderMode(true);},600)")) {
   throw new Error("テンプレートの長押し判定がありません");
+}
+if (!(source.indexOf('id="color-folders"') < source.indexOf("＋ 新しい色からユニフォームを追加"))) {
+  throw new Error("補助操作ボタンは色一覧より下に配置してください");
 }
 
 for (const required of [
