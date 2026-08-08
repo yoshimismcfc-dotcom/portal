@@ -267,7 +267,7 @@
       </select></div>
     <div class="form-group uniform-color-section">
       <label class="form-label">ユニフォームカラー</label>
-      <div class="template-guide"><strong>① 最初に色の組み合わせを選んでください。</strong><br>色を選ぶと、背番号・サイズ・団員名の入力欄が表示されます。</div>
+      <div class="template-guide"><strong>最初に色の組み合わせを選んでください。</strong><br>色を選ぶと、背番号・サイズ・団員名の入力欄が表示されます。</div>
       <div class="form-label" style="margin-top:8px">組み合わせテンプレートから選ぶ</div>
       <div class="template-list" id="uniform-pair-templates" aria-label="ユニフォームカラーの組み合わせテンプレート"></div>
       <div class="custom-color-note">色見本をタップして選択します。長押しすると順番を変更できます。</div>
@@ -315,7 +315,7 @@
         </div>
       </div>
     </div>
-    <div class="uniform-entry-step-title" id="uniform-entry-step-title">② 背番号・サイズ・団員名を入力してください</div>
+    <div class="uniform-entry-step-title" id="uniform-entry-step-title">背番号・サイズ・団員名を入力してください</div>
     <div class="uniform-number-guide" id="uniform-number-guide"></div>
     <div class="form-group uniform-entry-field uniform-memo-group"><label class="form-label">備考（特徴・用途）</label>
       <input class="form-control" id="u-memo" placeholder="例：縦じま、キーパー用、長袖、上下セット">
@@ -664,7 +664,7 @@ function setUniformDetailsReady(ready,colorLabel){
   document.querySelectorAll("#modal-add .uniform-entry-field").forEach(function(field){field.classList.toggle("ready",!!ready);});
   var title=document.getElementById("uniform-entry-step-title");
   title.classList.toggle("ready",!!ready);
-  title.textContent=ready?"② 「"+(colorLabel||"選択した色")+"」の背番号・サイズ・団員名を入力してください":"② 背番号・サイズ・団員名を入力してください";
+  title.textContent=ready?"「"+(colorLabel||"選択した色")+"」の背番号・サイズ・団員名を入力してください":"背番号・サイズ・団員名を入力してください";
   document.getElementById("u-save-btn").classList.toggle("ready",!!ready);
   updateUniformNumberGuide(ready?colorLabel:"");
 }
