@@ -217,6 +217,7 @@ for (const required of [
 for (const required of [
   'var UNIFORM_ILLUSTRATIONS={',
   '"水色 × ピンク":{src:"assets/uniform-water-pink.svg"',
+  '"水色ピンク":{src:"assets/uniform-water-pink.svg"',
   'class="cf-uniform-illustration"',
   '.cf-summary:has(.cf-uniform-illustration) .cf-name',
   'var illustration=UNIFORM_ILLUSTRATIONS[cname]',
