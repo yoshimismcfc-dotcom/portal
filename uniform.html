@@ -20,26 +20,30 @@
 
     /* ===== カラーフォルダ ===== */
     .color-folder{margin-bottom:14px;border-radius:var(--r12);overflow:hidden;border:1px solid var(--line-2)}
-    .cf-header{display:grid;grid-template-columns:minmax(0,1fr) auto;align-items:stretch;gap:8px;padding:8px;user-select:none;transition:.15s}
-    .cf-summary{display:flex;align-items:center;gap:9px;min-width:0;padding:3px 4px;border:0;background:transparent;color:inherit;text-align:left;cursor:pointer}
-    .cf-summary:hover{filter:brightness(1.08)}
+    .cf-header{display:grid;grid-template-columns:minmax(0,3fr) minmax(70px,1fr);align-items:stretch;min-height:94px;user-select:none;transition:.15s}
+    .cf-summary{display:flex;align-items:center;min-width:0;padding:10px 12px;border:0;background:transparent;color:inherit;text-align:left;cursor:pointer}
+    .cf-summary:hover{background:rgba(255,255,255,.07)}
     .cf-header.is-light .cf-name{color:#071126;text-shadow:none}
     .cf-swatch{width:18px;height:18px;border-radius:50%;flex-shrink:0;border:2px solid rgba(255,255,255,.35);box-shadow:0 0 6px rgba(0,0,0,.5)}
-    .cf-name{min-width:0;font-size:.9rem;font-weight:900;color:#fff;flex:1;display:flex;flex-direction:column;gap:3px;text-shadow:0 1px 3px rgba(0,0,0,.65)}
+    .cf-name{min-width:0;font-size:.98rem;font-weight:900;color:#fff;flex:1;display:flex;flex-direction:column;align-items:flex-start;gap:6px;text-shadow:0 1px 3px rgba(0,0,0,.65)}
     .cf-name-main{overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
-    .cf-stats{display:flex;gap:7px;width:max-content;max-width:100%;font-size:.65rem;padding:3px 7px;border-radius:99px;background:rgba(5,15,30,.78);box-shadow:0 1px 3px rgba(0,0,0,.2);text-shadow:none}
+    .cf-stats{display:flex;gap:8px;width:max-content;max-width:100%;font-size:.67rem;padding:4px 8px;border-radius:99px;background:rgba(5,15,30,.82);box-shadow:0 1px 3px rgba(0,0,0,.2);text-shadow:none}
     .cf-free{color:#5cffae;font-weight:800}
     .cf-lent{color:#ff91a5;font-weight:800}
     .cf-total{color:#fff;font-weight:700}
-    .cf-toggle-wrap{display:flex;align-items:center;gap:4px;flex-shrink:0;color:#fff;font-size:.65rem;font-weight:900;text-shadow:0 1px 3px rgba(0,0,0,.65)}
+    .cf-open-hint{display:inline-flex;align-items:center;gap:5px;padding:3px 8px;border:1px solid rgba(255,255,255,.38);border-radius:99px;background:rgba(5,15,30,.32);color:#fff;font-size:.67rem;font-weight:900;line-height:1.2;text-shadow:0 1px 2px rgba(0,0,0,.65)}
+    .cf-header.is-light .cf-open-hint{border-color:rgba(5,15,30,.25);background:rgba(255,255,255,.5);color:#071126;text-shadow:none}
     .cf-toggle{font-size:.75rem;color:#fff;transition:transform .2s;flex-shrink:0}
+    .cf-header.is-light .cf-toggle{color:#071126}
     .cf-toggle.open{transform:rotate(90deg)}
-    .cf-add-button{display:inline-flex;align-items:center;justify-content:center;align-self:stretch;min-width:62px;padding:0 9px;border:1px solid rgba(255,255,255,.48);border-radius:9px;background:rgba(5,15,30,.72);color:#fff;font-size:.72rem;font-weight:900;line-height:1.2;cursor:pointer;box-shadow:0 1px 3px rgba(0,0,0,.25)}
-    .cf-add-button:hover{background:rgba(5,15,30,.88)}
+    .cf-add-button{display:inline-flex;flex-direction:column;align-items:center;justify-content:center;gap:3px;margin:8px;border:1px solid rgba(255,255,255,.5);border-radius:12px;background:rgba(5,15,30,.48);color:#fff;font-size:.62rem;font-weight:900;line-height:1.2;cursor:pointer;text-shadow:0 1px 2px rgba(0,0,0,.65);backdrop-filter:blur(2px)}
+    .cf-add-button:hover{background:rgba(5,15,30,.68)}
+    .cf-add-icon{display:grid;place-items:center;width:28px;height:28px;border-radius:50%;background:rgba(255,255,255,.17);font-size:1.25rem;line-height:1}
+    .cf-add-label{white-space:nowrap}
     .folder-order-controls{display:flex;gap:4px;flex-shrink:0}
     .folder-order-btn{width:34px;height:34px;border:1px solid rgba(255,255,255,.38);border-radius:8px;background:rgba(0,0,0,.18);color:inherit;font-size:1rem;font-weight:900;cursor:pointer}
     #color-folders.folder-reorder-mode .cf-stats,
-    #color-folders.folder-reorder-mode .cf-toggle-wrap,
+    #color-folders.folder-reorder-mode .cf-open-hint,
     #color-folders.folder-reorder-mode .cf-add-button{display:none}
     .cf-body{display:none;background:#0a1824}
     .cf-body.open{display:block}
@@ -183,13 +187,14 @@
     #u-save-btn{display:none}
     #u-save-btn.ready{display:inline-flex}
     @media(max-width:520px){
-      .cf-header{gap:6px;padding:7px}
-      .cf-summary{gap:7px;padding-left:2px}
-      .cf-swatch{width:16px;height:16px}
-      .cf-name{font-size:.84rem}
-      .cf-stats{gap:5px;font-size:.6rem;padding:3px 6px}
-      .cf-toggle-wrap{font-size:.6rem}
-      .cf-add-button{min-width:58px;padding:0 7px;font-size:.68rem}
+      .color-folder{margin-bottom:10px}
+      .cf-header{grid-template-columns:minmax(0,3fr) minmax(68px,1fr);min-height:90px}
+      .cf-summary{padding:9px 10px}
+      .cf-name{font-size:.9rem;gap:5px}
+      .cf-stats{gap:6px;font-size:.62rem;padding:4px 7px}
+      .cf-open-hint{font-size:.62rem;padding:3px 7px}
+      .cf-add-button{margin:7px 6px;font-size:.59rem}
+      .cf-add-icon{width:26px;height:26px;font-size:1.15rem}
       .cf-body>div{overflow-x:visible!important}
       .uni-table{font-size:.74rem}
       .uni-table th{padding:7px 2px;font-size:.64rem}
@@ -524,16 +529,16 @@ function renderFolders(){
     html+='<div class="color-folder">'
       +'<div class="cf-header'+lightClass+'" style="background:'+hdrGrad+'">'
       +'<button type="button" class="cf-summary" id="fs'+bodyId+'" aria-expanded="false" aria-controls="'+bodyId+'" aria-label="'+escapeHtml(cname)+'の一覧を開く" onclick="toggleFolder(\''+bodyId+'\')">'
-      +'<span class="cf-swatch" style="background:'+cg.p.code+'"></span>'
       +'<span class="cf-name"><span class="cf-name-main">'+escapeHtml(cname)+'</span>'
       +'<span class="cf-stats">'
       +'<span class="cf-total">全'+items.length+'着</span>'
       +'<span class="cf-free">倉庫'+free+'</span>'
       +'<span class="cf-lent">貸出'+lent+'</span>'
-      +'</span></span>'
-      +'<span class="cf-toggle-wrap"><span class="cf-toggle" id="ft'+bodyId+'">▶</span><span id="fl'+bodyId+'">一覧</span></span>'
+      +'</span>'
+      +'<span class="cf-open-hint"><span class="cf-toggle" id="ft'+bodyId+'">▶</span><span id="fl'+bodyId+'">一覧を見る</span></span>'
+      +'</span>'
       +'</button>'
-      +(_folderReorderMode?orderControls:'<button type="button" class="cf-add-button" aria-label="'+escapeHtml(cname)+'にユニフォームを追加" onclick="openAddForColor('+inlineJsArg(cname)+','+inlineJsArg(sampleMainName)+','+inlineJsArg(sampleMainCode)+','+inlineJsArg(sampleSubName)+','+inlineJsArg(sampleSubCode)+')">＋追加</button>')
+      +(_folderReorderMode?orderControls:'<button type="button" class="cf-add-button" aria-label="'+escapeHtml(cname)+'にユニフォームを追加" onclick="openAddForColor('+inlineJsArg(cname)+','+inlineJsArg(sampleMainName)+','+inlineJsArg(sampleMainCode)+','+inlineJsArg(sampleSubName)+','+inlineJsArg(sampleSubCode)+')"><span class="cf-add-icon">＋</span><span class="cf-add-label">この色に追加</span></button>')
       +'</div>'
       +'<div class="cf-body" id="'+bodyId+'">'
       +'<div style="overflow-x:auto">'
@@ -556,7 +561,7 @@ function toggleFolder(id){
   var o=b.classList.contains("open");
   b.classList.toggle("open",!o);if(ic)ic.classList.toggle("open",!o);
   if(summary){summary.setAttribute("aria-expanded",String(!o));summary.setAttribute("aria-label",summary.getAttribute("aria-label").replace(o?"閉じる":"開く",o?"開く":"閉じる"));}
-  if(label)label.textContent=o?"一覧":"閉じる";
+  if(label)label.textContent=o?"一覧を見る":"一覧を閉じる";
 }
 function currentColorFolderNames(){
   var found=[];
