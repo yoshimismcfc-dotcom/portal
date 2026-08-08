@@ -22,20 +22,16 @@
     .color-folder{margin-bottom:14px;border-radius:var(--r12);overflow:hidden;border:1px solid var(--line-2)}
     .cf-header{display:flex;align-items:center;gap:10px;padding:11px 14px;cursor:pointer;user-select:none;transition:.15s}
     .cf-header:hover{filter:brightness(1.1)}
-    .cf-header.is-light .cf-name,
-    .cf-header.is-light .cf-total,
-    .cf-header.is-light .cf-toggle{color:#071126}
-    .cf-header.is-light .cf-free{color:#007a45}
-    .cf-header.is-light .cf-lent{color:#b0122f}
+    .cf-header.is-light .cf-name{color:#071126;text-shadow:none}
     .cf-swatch{width:18px;height:18px;border-radius:50%;flex-shrink:0;border:2px solid rgba(255,255,255,.35);box-shadow:0 0 6px rgba(0,0,0,.5)}
-    .cf-name{min-width:0;font-size:.9rem;font-weight:900;color:#fff;flex:1;display:flex;flex-direction:column;gap:1px}
+    .cf-name{min-width:0;font-size:.9rem;font-weight:900;color:#fff;flex:1;display:flex;flex-direction:column;gap:1px;text-shadow:0 1px 3px rgba(0,0,0,.65)}
     .cf-name-main{overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
     .cf-add-hint{font-size:.6rem;font-weight:800;opacity:.88;white-space:nowrap}
-    .cf-stats{display:flex;gap:8px;font-size:.72rem;flex-shrink:0}
-    .cf-free{color:#00ff88;font-weight:700}
-    .cf-lent{color:#ff4466;font-weight:700}
-    .cf-total{color:rgba(255,255,255,.65)}
-    .cf-toggle{font-size:.75rem;color:rgba(255,255,255,.6);transition:transform .2s;flex-shrink:0}
+    .cf-stats{display:flex;gap:7px;font-size:.7rem;flex-shrink:0;padding:5px 7px;border-radius:99px;background:rgba(5,15,30,.78);box-shadow:0 1px 3px rgba(0,0,0,.2)}
+    .cf-free{color:#5cffae;font-weight:800}
+    .cf-lent{color:#ff91a5;font-weight:800}
+    .cf-total{color:#fff;font-weight:700}
+    .cf-toggle{font-size:.75rem;color:#fff;transition:transform .2s;flex-shrink:0}
     .cf-toggle.open{transform:rotate(90deg)}
     .cf-toggle-button{display:grid;place-items:center;width:34px;height:34px;padding:0;border:0;border-radius:50%;background:rgba(0,0,0,.14);cursor:pointer}
     .folder-order-controls{display:flex;gap:4px;flex-shrink:0}
@@ -441,7 +437,8 @@ function hexLightness(hex){
   return (r*299+g*587+b*114)/1000;
 }
 function isLightFolder(p){
-  return hexLightness(p.c1)>185 || hexLightness(p.c2)>185 || hexLightness(p.code)>185;
+  // 色名は左側のメインカラー上に表示されるため、メイン色だけで文字色を決める。
+  return hexLightness(p.c1)>150;
 }
 function safeColor(value,fallback){return /^#[0-9a-f]{6}$/i.test(String(value||""))?String(value):fallback;}
 
