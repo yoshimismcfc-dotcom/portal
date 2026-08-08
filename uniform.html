@@ -28,13 +28,16 @@
     .cf-header.is-light .cf-free{color:#007a45}
     .cf-header.is-light .cf-lent{color:#b0122f}
     .cf-swatch{width:18px;height:18px;border-radius:50%;flex-shrink:0;border:2px solid rgba(255,255,255,.35);box-shadow:0 0 6px rgba(0,0,0,.5)}
-    .cf-name{font-size:.9rem;font-weight:900;color:#fff;flex:1}
+    .cf-name{min-width:0;font-size:.9rem;font-weight:900;color:#fff;flex:1;display:flex;flex-direction:column;gap:1px}
+    .cf-name-main{overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+    .cf-add-hint{font-size:.6rem;font-weight:800;opacity:.82;white-space:nowrap}
     .cf-stats{display:flex;gap:8px;font-size:.72rem;flex-shrink:0}
     .cf-free{color:#00ff88;font-weight:700}
     .cf-lent{color:#ff4466;font-weight:700}
     .cf-total{color:rgba(255,255,255,.65)}
     .cf-toggle{font-size:.75rem;color:rgba(255,255,255,.6);transition:transform .2s;flex-shrink:0}
     .cf-toggle.open{transform:rotate(90deg)}
+    .cf-toggle-button{display:grid;place-items:center;width:34px;height:34px;padding:0;border:0;border-radius:50%;background:rgba(0,0,0,.14);cursor:pointer}
     .cf-body{display:none;background:#0a1824}
     .cf-body.open{display:block}
 
@@ -227,6 +230,8 @@
     <button class="btn btn-outline btn-sm" onclick="exportUniformCSV()">📥 CSV出力</button>
     <button class="btn-line-copy sm" onclick="copyUniformList()">📋 LINEコピー</button>
   </div>
+
+  <div class="template-guide" style="margin-bottom:14px"><strong>色の帯をタップすると、その色のユニフォームを追加できます。</strong><br>右端の矢印は一覧の開閉です。</div>
 
   <div id="color-folders"></div>
 </main>
@@ -463,16 +468,23 @@ function renderFolders(){
         +'</tr>';
     }).join("");
 
+    var sample=items[0]||{};
+    var sampleMainName=sample.mainColorName||sample.cname||cname;
+    var sampleMainCode=safeColor(sample.mainColorCode||sample.ccode||cg.p.c1,"#666666");
+    var sampleSubName=sample.subColorName||"";
+    var sampleSubCode=safeColor(sample.subColorCode||cg.p.c2,sampleMainCode);
     html+='<div class="color-folder">'
-      +'<div class="cf-header'+lightClass+'" style="background:'+hdrGrad+'" onclick="toggleFolder(\''+bodyId+'\')">'
+      +'<div class="cf-header'+lightClass+'" style="background:'+hdrGrad+'" role="button" tabindex="0" aria-label="'+escapeHtml(cname)+'のユニフォームを追加"'
+      +' onclick="openAddForColor('+inlineJsArg(cname)+','+inlineJsArg(sampleMainName)+','+inlineJsArg(sampleMainCode)+','+inlineJsArg(sampleSubName)+','+inlineJsArg(sampleSubCode)+')"'
+      +' onkeydown="if(event.key===\'Enter\'||event.key===\' \'){event.preventDefault();this.click();}">'
       +'<div class="cf-swatch" style="background:'+cg.p.code+'"></div>'
-      +'<div class="cf-name">'+escapeHtml(cname)+'</div>'
+      +'<div class="cf-name"><span class="cf-name-main">'+escapeHtml(cname)+'</span><span class="cf-add-hint">＋ この色に追加</span></div>'
       +'<div class="cf-stats">'
       +'<span class="cf-total">全'+items.length+'着</span>'
       +'<span class="cf-free">倉庫'+free+'</span>'
       +'<span class="cf-lent">選手'+lent+'</span>'
       +'</div>'
-      +'<span class="cf-toggle open" id="ft'+bodyId+'">▶</span>'
+      +'<button type="button" class="cf-toggle-button" aria-label="'+escapeHtml(cname)+'の一覧を開閉" onclick="event.stopPropagation();toggleFolder(\''+bodyId+'\')"><span class="cf-toggle open" id="ft'+bodyId+'">▶</span></button>'
       +'</div>'
       +'<div class="cf-body open" id="'+bodyId+'">'
       +'<div style="overflow-x:auto">'
@@ -494,6 +506,17 @@ function toggleFolder(id){
   var b=document.getElementById(id),ic=document.getElementById("ft"+id);
   var o=b.classList.contains("open");
   b.classList.toggle("open",!o);if(ic)ic.classList.toggle("open",!o);
+}
+
+function openAddForColor(colorLabel,mainName,mainCode,subName,subCode){
+  openAdd();
+  document.getElementById("add-title").textContent="この色にユニフォームを追加";
+  document.getElementById("u-main-cname").value=mainName||colorLabel;
+  document.getElementById("u-main-ccode").value=safeColor(mainCode,"#666666");
+  document.getElementById("u-sub-cname").value=subName||"";
+  document.getElementById("u-sub-ccode").value=safeColor(subCode,mainCode);
+  buildColorOptions();buildPairTemplates();
+  setUniformDetailsReady(true,colorLabel);
 }
 
 function availableSingleColors(){
