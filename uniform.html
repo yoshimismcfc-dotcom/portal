@@ -151,6 +151,8 @@
     .template-order-controls{display:none;gap:3px}
     .template-list.reorder-mode .template-order-controls{display:flex}
     .template-mini-btn{min-width:36px;min-height:36px;border:1px solid var(--line-2);border-radius:7px;background:var(--surface-lt);color:var(--ink);font-weight:900;cursor:pointer}
+    .custom-color-create-btn{min-height:36px;border:1px dashed var(--orange);border-radius:8px;background:rgba(255,139,31,.09);color:var(--orange-2);padding:5px 9px;font-size:.68rem;font-weight:900;cursor:pointer;white-space:nowrap}
+    .uniform-color-field.custom-entry{border-color:var(--orange);box-shadow:0 0 0 2px rgba(255,139,31,.13)}
     .template-reorder-status{display:none;font-size:.74rem;color:var(--orange-2);font-weight:800;margin:6px 0}
     .template-reorder-status.show{display:block}
     .template-guide{border:1px solid rgba(0,212,255,.25);border-radius:var(--r8);padding:10px 12px;background:rgba(0,212,255,.07);color:var(--ink-2);font-size:.78rem;line-height:1.55;margin-bottom:8px}
@@ -288,10 +290,10 @@
         <div class="uniform-color-pair">
           <div class="uniform-color-field">
             <h4>メインカラー（必須）</h4>
-            <div class="custom-color-note">登録済みの色から選択</div>
+            <div class="custom-color-note">登録済みの色から選択できます。一覧にない色も追加できます。</div>
             <div class="color-palette" id="main-color-options" aria-label="共有されているメインカラー"></div>
             <div class="uniform-color-row">
-              <label>カラー名
+              <label>カラー名（自由入力可）
                 <input class="form-control" id="u-main-cname" list="uniform-color-options" placeholder="例：オレンジ">
               </label>
               <label>表示色
@@ -301,10 +303,10 @@
           </div>
           <div class="uniform-color-field">
             <h4>サブカラー（任意）</h4>
-            <div class="custom-color-note">1色だけの場合は「なし」</div>
+            <div class="custom-color-note">1色だけの場合は「なし」。一覧にない色も追加できます。</div>
             <div class="color-palette" id="sub-color-options" aria-label="共有されているサブカラー"></div>
             <div class="uniform-color-row">
-              <label>カラー名
+              <label>カラー名（自由入力可）
                 <input class="form-control" id="u-sub-cname" list="uniform-color-options" placeholder="例：赤">
               </label>
               <label>表示色
@@ -396,7 +398,8 @@ var PALETTE=[
 var COLOR_CHOICES=[
   {name:"オレンジ",code:"#e85c1e"},{name:"赤",code:"#bc002d"},{name:"白",code:"#f0f0f0"},
   {name:"水色",code:"#4ab8e8"},{name:"ピンク",code:"#f06090"},{name:"黄色",code:"#f5d300"},
-  {name:"緑",code:"#228b22"},{name:"黒",code:"#222222"},{name:"紺",code:"#003087"}
+  {name:"緑",code:"#228b22"},{name:"黒",code:"#222222"},{name:"紺",code:"#003087"},
+  {name:"青",code:"#1769aa"},{name:"グレー",code:"#7b8794"},{name:"紫",code:"#7546a8"}
 ];
 var PAIR_TEMPLATE_NAMES={
   "オレンジ赤縦じま":["オレンジ","赤"],
@@ -619,13 +622,21 @@ function buildSingleColorPalettes(){
         +'" aria-label="'+escapeHtml(p.name)+'" style="background:'+safeColor(p.code,"#666666")+'"'
         +' onclick="chooseSharedColor('+inlineJsArg(role)+','+inlineJsArg(p.name)+','+inlineJsArg(p.code)+')"></button>';
     }).join("");
+    html+='<button type="button" class="custom-color-create-btn" onclick="startCustomColorEntry('+inlineJsArg(role)+')">＋ 一覧にない色</button>';
     if(role==="sub")html+='<button type="button" class="template-mini-btn" aria-label="サブカラーなし" title="サブカラーなし" onclick="clearSubColor()">なし</button>';
     document.getElementById(role+"-color-options").innerHTML=html;
   });
 }
+function startCustomColorEntry(role){
+  var nameInput=document.getElementById("u-"+role+"-cname");
+  nameInput.value="";
+  nameInput.closest(".uniform-color-field").classList.add("custom-entry");
+  nameInput.focus();
+}
 function chooseSharedColor(role,name,code){
   document.getElementById("u-"+role+"-cname").value=name;
   document.getElementById("u-"+role+"-ccode").value=safeColor(code,"#666666");
+  document.getElementById("u-"+role+"-cname").closest(".uniform-color-field").classList.remove("custom-entry");
   buildSingleColorPalettes();buildPairTemplates();
 }
 function clearSubColor(){
@@ -764,6 +775,7 @@ function colorCodeForName(name,fallback){
 function openAdd(){
   editId=null;
   document.querySelector("#modal-add .uniform-color-section").classList.remove("direct-color","edit-mode");
+  document.querySelectorAll("#modal-add .uniform-color-field").forEach(function(field){field.classList.remove("custom-entry");});
   document.getElementById("add-title").textContent="ユニフォームを追加";
   document.getElementById("u-del-btn").style.display="none";
   ["u-num","u-player","u-memo"].forEach(function(id){document.getElementById(id).value="";});
@@ -783,6 +795,7 @@ function openEdit(id){
   editId=id;
   document.querySelector("#modal-add .uniform-color-section").classList.remove("direct-color");
   document.querySelector("#modal-add .uniform-color-section").classList.add("edit-mode");
+  document.querySelectorAll("#modal-add .uniform-color-field").forEach(function(field){field.classList.remove("custom-entry");});
   document.getElementById("add-title").textContent="ユニフォームを編集";
   document.getElementById("u-del-btn").style.display="inline-flex";
   document.getElementById("u-num").value=u.num;
