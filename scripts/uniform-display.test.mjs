@@ -187,6 +187,32 @@ for (const required of [
 ]) {
   if (!source.includes(required)) throw new Error("ユニフォーム状態の登録・表示・絞り込みが不足しています: " + required);
 }
+
+for (const required of [
+  "靴下在庫",
+  'id="socks-section-body"',
+  'id="sock-list"',
+  'id="modal-sock"',
+  'id="sock-quantity"',
+  "function toggleSocksSection(forceOpen)",
+  "function renderSocks()",
+  "function buildSockTemplates()",
+  "function selectSockTemplate(templateId)",
+  "function openSockAdd()",
+  "function openSockEdit(id)",
+  "function saveSock()",
+  "function deleteSock()",
+  'dbSave("uniform_socks"',
+  'dbListen("uniform_socks"',
+  'KS="smc_uniform_socks_v1"',
+  'entry.quantity=quantity',
+  '在庫数を0以上の整数で入力してください',
+  '左右1組を「1足」',
+  'main+" 75%,"+sub+" 75%,',
+  '色ごとの在庫数だけを管理します'
+]) {
+  if (!source.includes(required)) throw new Error("靴下の色別在庫管理が不足しています: " + required);
+}
 if (!source.includes("setTimeout(function(){_templateLongPressed=true;setTemplateReorderMode(true);},600)")) {
   throw new Error("テンプレートの長押し判定がありません");
 }
