@@ -162,6 +162,11 @@
     #modal-add .modal h3{order:0}
     .uniform-color-section{order:1}
     .uniform-color-section.direct-color{display:none}
+    .uniform-color-section.edit-mode>.form-label,
+    .uniform-color-section.edit-mode>.template-guide,
+    .uniform-color-section.edit-mode>#uniform-pair-templates,
+    .uniform-color-section.edit-mode>.template-selection-note,
+    .uniform-color-section.edit-mode>#template-reorder-status{display:none}
     .uniform-entry-step-title{display:none;order:2;margin:8px 0 10px;padding:9px 12px;border-radius:var(--r8);background:rgba(0,223,122,.1);border:1px solid rgba(0,223,122,.3);color:var(--ink);font-size:.82rem;font-weight:900}
     .uniform-entry-step-title.ready{display:block}
     .uniform-number-guide{display:none;order:2;margin:-4px 0 10px;padding:8px 12px;border-radius:var(--r8);background:rgba(255,139,31,.09);border:1px solid rgba(255,139,31,.25);color:var(--ink-2);font-size:.74rem;line-height:1.5}
@@ -270,7 +275,7 @@
       <div class="template-guide"><strong>最初に色の組み合わせを選んでください。</strong><br>色を選ぶと、背番号・サイズ・団員名の入力欄が表示されます。</div>
       <div class="form-label" style="margin-top:8px">組み合わせテンプレートから選ぶ</div>
       <div class="template-list" id="uniform-pair-templates" aria-label="ユニフォームカラーの組み合わせテンプレート"></div>
-      <div class="custom-color-note">色見本をタップして選択します。長押しすると順番を変更できます。</div>
+      <div class="custom-color-note template-selection-note">色見本をタップして選択します。長押しすると順番を変更できます。</div>
       <div class="template-reorder-status" id="template-reorder-status">並べ替えモード：矢印で移動、×で削除できます。</div>
       <div class="custom-color-actions" style="margin-bottom:10px">
         <button type="button" class="btn btn-outline btn-sm" id="template-color-add-open" onclick="toggleTemplateColorEditor()">＋ テンプレートに色を追加</button>
@@ -758,7 +763,7 @@ function colorCodeForName(name,fallback){
 
 function openAdd(){
   editId=null;
-  document.querySelector("#modal-add .uniform-color-section").classList.remove("direct-color");
+  document.querySelector("#modal-add .uniform-color-section").classList.remove("direct-color","edit-mode");
   document.getElementById("add-title").textContent="ユニフォームを追加";
   document.getElementById("u-del-btn").style.display="none";
   ["u-num","u-player","u-memo"].forEach(function(id){document.getElementById(id).value="";});
@@ -777,6 +782,7 @@ function openEdit(id){
   var u=loadU().find(function(x){return x.id===id;});if(!u)return;
   editId=id;
   document.querySelector("#modal-add .uniform-color-section").classList.remove("direct-color");
+  document.querySelector("#modal-add .uniform-color-section").classList.add("edit-mode");
   document.getElementById("add-title").textContent="ユニフォームを編集";
   document.getElementById("u-del-btn").style.display="inline-flex";
   document.getElementById("u-num").value=u.num;
