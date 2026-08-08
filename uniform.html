@@ -110,6 +110,12 @@
     .custom-color-box .form-control{margin-top:4px}
     .custom-color-input{width:52px;height:44px;border:1px solid var(--line);border-radius:8px;cursor:pointer;padding:3px;background:var(--surface-lt)}
     body[data-theme="light"] .custom-color-box{background:#f8fbff}
+    .uniform-color-pair{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+    .uniform-color-field{border:1px solid var(--line);border-radius:var(--r8);padding:10px;background:rgba(255,255,255,.04)}
+    .uniform-color-field h4{font-size:.78rem;font-weight:900;color:var(--ink);margin:0 0 8px}
+    .uniform-color-row{display:grid;grid-template-columns:minmax(0,1fr) 52px;gap:8px;align-items:end}
+    body[data-theme="light"] .uniform-color-field{background:#f8fbff}
+    @media(max-width:400px){.uniform-color-pair{grid-template-columns:1fr}}
     /* 注意事項 */
     .uniform-note{background:linear-gradient(135deg,rgba(255,139,31,.14),rgba(139,18,48,.14));border:1px solid rgba(255,139,31,.28);border-radius:var(--r12);padding:16px;margin:0 0 16px}
     .uniform-note h2{font-size:1rem;font-weight:900;color:var(--orange-2);margin:0 0 8px}
@@ -196,20 +202,32 @@
         <option>SS</option><option>S</option><option>M</option><option>L</option><option>XL</option>
       </select></div>
     <div class="form-group">
-      <label class="form-label">カラー</label>
-      <div class="custom-color-note">登録済みの色を選ぶか、新しいカラーを自由に追加できます。</div>
-      <div class="color-palette" id="cp" aria-label="登録済みカラー"></div>
-      <div class="custom-color-actions">
-        <button type="button" class="btn btn-outline btn-sm" onclick="startCustomColor()">＋ 新しいカラーを追加</button>
-        <span class="custom-color-note">追加した色は次回から候補に表示されます</span>
-      </div>
-      <div class="custom-color-box" id="custom-color-box">
-        <label>カラー名
-          <input class="form-control" id="u-cname" placeholder="例：紺色・黒金・青白">
-        </label>
-        <label>表示色
-          <input class="custom-color-input" type="color" id="u-ccode" value="#e85c1e" aria-label="表示色を選択">
-        </label>
+      <label class="form-label">ユニフォームカラー</label>
+      <div class="custom-color-note" style="margin-bottom:8px">メインとサブをそれぞれ選択できます。1色のユニフォームはサブを空欄にしてください。</div>
+      <datalist id="uniform-color-options"></datalist>
+      <div class="uniform-color-pair">
+        <div class="uniform-color-field">
+          <h4>メインカラー（必須）</h4>
+          <div class="uniform-color-row">
+            <label>カラー名
+              <input class="form-control" id="u-main-cname" list="uniform-color-options" placeholder="例：オレンジ">
+            </label>
+            <label>表示色
+              <input class="custom-color-input" type="color" id="u-main-ccode" value="#e85c1e" aria-label="メインカラーの表示色">
+            </label>
+          </div>
+        </div>
+        <div class="uniform-color-field">
+          <h4>サブカラー（任意）</h4>
+          <div class="uniform-color-row">
+            <label>カラー名
+              <input class="form-control" id="u-sub-cname" list="uniform-color-options" placeholder="例：赤">
+            </label>
+            <label>表示色
+              <input class="custom-color-input" type="color" id="u-sub-ccode" value="#bc002d" aria-label="サブカラーの表示色">
+            </label>
+          </div>
+        </div>
       </div>
     </div>
     <div class="form-group"><label class="form-label">メモ</label>
@@ -280,8 +298,18 @@ var PALETTE=[
   {name:"黄色",            c1:"#f5d300",c2:"#ffec60",code:"#e6c800"},
   {name:"緑",              c1:"#228b22",c2:"#32cd32",code:"#228b22"},
 ];
+var COLOR_CHOICES=[
+  {name:"オレンジ",code:"#e85c1e"},{name:"赤",code:"#bc002d"},{name:"白",code:"#f0f0f0"},
+  {name:"水色",code:"#4ab8e8"},{name:"ピンク",code:"#f06090"},{name:"黄色",code:"#f5d300"},
+  {name:"緑",code:"#228b22"},{name:"黒",code:"#222222"},{name:"紺",code:"#003087"}
+];
 // loadU/saveU/loadH/saveH は上部で定義済み
 function getPalette(cname){return PALETTE.find(function(p){return p.name===cname;})||{c1:"#555",c2:"#777",code:"#555"};}
+function uniformColorLabel(u){
+  var main=String(u.mainColorName||u.cname||"").trim();
+  var sub=String(u.subColorName||"").trim();
+  return main+(sub?" × "+sub:"");
+}
 function hexLightness(hex){
   hex=String(hex||"").replace("#","");
   if(hex.length===3)hex=hex.split("").map(function(c){return c+c;}).join("");
@@ -309,10 +337,11 @@ function renderFolders(){
   PALETTE.forEach(function(p){map[p.name]={p:p,items:[]};});
   map["その他"]={p:{code:"#666",c1:"#555",c2:"#777"},items:[]};
   data.forEach(function(u){
-    var k=u.cname||"その他";
+    var k=uniformColorLabel(u)||"その他";
     if(!map[k]){
-      var customColor=safeColor(u.ccode,"#666666");
-      map[k]={p:{code:customColor,c1:customColor,c2:"#777777"},items:[]};
+      var mainColor=safeColor(u.mainColorCode||u.ccode,"#666666");
+      var subColor=safeColor(u.subColorCode,mainColor);
+      map[k]={p:{code:mainColor,c1:mainColor,c2:subColor},items:[]};
     }
     map[k].items.push(u);
   });
@@ -384,37 +413,35 @@ function toggleFolder(id){
   b.classList.toggle("open",!o);if(ic)ic.classList.toggle("open",!o);
 }
 
-function availablePalette(){
-  var colors=PALETTE.slice();
+function availableSingleColors(){
+  var colors=COLOR_CHOICES.slice();
   loadU().forEach(function(u){
-    var name=String(u.cname||"").trim();
-    var code=safeColor(u.ccode,"#666666");
-    if(!name||colors.some(function(p){return p.name===name;}))return;
-    colors.push({name:name,c1:code,c2:code,code:code,custom:true});
+    [
+      {name:u.mainColorName||u.cname,code:u.mainColorCode||u.ccode},
+      {name:u.subColorName,code:u.subColorCode}
+    ].forEach(function(color){
+      var name=String(color.name||"").trim();
+      if(!name||colors.some(function(p){return p.name===name;}))return;
+      colors.push({name:name,code:safeColor(color.code,"#666666")});
+    });
   });
   return colors;
 }
-function buildPalette(selName){
-  document.getElementById("cp").innerHTML=availablePalette().map(function(p){
-    var label=p.name+(p.custom?"（追加カラー）":"");
-    return '<button type="button" class="cp-sw'+(p.name===selName?" sel":"")+'" title="'+escapeHtml(label)
-      +'" aria-label="'+escapeHtml(label)+'" style="background:linear-gradient(135deg,'+safeColor(p.c1,"#666666")+','+safeColor(p.c2,"#666666")+')"'
-      +' onclick="selPalette('+inlineJsArg(p.name)+','+inlineJsArg(p.code||p.c1)+')"></button>';
+function buildColorOptions(){
+  document.getElementById("uniform-color-options").innerHTML=availableSingleColors().map(function(p){
+    return '<option value="'+escapeHtml(p.name)+'"></option>';
   }).join("");
 }
-function selPalette(name,code){
-  document.getElementById("u-cname").value=name;
-  document.getElementById("u-ccode").value=safeColor(code,"#666666");
-  document.getElementById("custom-color-box").classList.remove("is-custom");
-  document.querySelectorAll(".cp-sw").forEach(function(sw){sw.classList.toggle("sel",sw.title.replace("（追加カラー）","")===name);});
+function colorCodeForName(name,fallback){
+  var found=availableSingleColors().find(function(p){return p.name===name;});
+  return found?safeColor(found.code,fallback):fallback;
 }
-function startCustomColor(){
-  document.getElementById("u-cname").value="";
-  document.getElementById("u-ccode").value="#4285f4";
-  document.getElementById("custom-color-box").classList.add("is-custom");
-  document.querySelectorAll(".cp-sw").forEach(function(sw){sw.classList.remove("sel");});
-  document.getElementById("u-cname").focus();
-}
+["main","sub"].forEach(function(role){
+  document.getElementById("u-"+role+"-cname").addEventListener("change",function(){
+    if(!this.value.trim()&&role==="sub")return;
+    document.getElementById("u-"+role+"-ccode").value=colorCodeForName(this.value.trim(),document.getElementById("u-"+role+"-ccode").value);
+  });
+});
 
 function openAdd(){
   editId=null;
@@ -422,9 +449,11 @@ function openAdd(){
   document.getElementById("u-del-btn").style.display="none";
   ["u-num","u-player","u-memo"].forEach(function(id){document.getElementById(id).value="";});
   document.getElementById("u-size").value="130";
-  document.getElementById("u-cname").value=PALETTE[0].name;
-  document.getElementById("u-ccode").value=PALETTE[0].c1;
-  buildPalette(PALETTE[0].name);
+  document.getElementById("u-main-cname").value="オレンジ";
+  document.getElementById("u-main-ccode").value="#e85c1e";
+  document.getElementById("u-sub-cname").value="赤";
+  document.getElementById("u-sub-ccode").value="#bc002d";
+  buildColorOptions();
   document.getElementById("modal-add").classList.add("open");
 }
 function openEdit(id){
@@ -436,16 +465,20 @@ function openEdit(id){
   document.getElementById("u-player").value=u.player||"";
   document.getElementById("u-size").value=u.size;
   document.getElementById("u-memo").value=u.memo||"";
-  document.getElementById("u-cname").value=u.cname||"";
-  document.getElementById("u-ccode").value=u.ccode||"#e85c1e";
-  buildPalette(u.cname);
+  document.getElementById("u-main-cname").value=u.mainColorName||u.cname||"";
+  document.getElementById("u-main-ccode").value=safeColor(u.mainColorCode||u.ccode,"#e85c1e");
+  document.getElementById("u-sub-cname").value=u.subColorName||"";
+  document.getElementById("u-sub-ccode").value=safeColor(u.subColorCode,"#bc002d");
+  buildColorOptions();
   document.getElementById("modal-add").classList.add("open");
 }
 function saveUni(){
   var num=document.getElementById("u-num").value.trim();
   if(!num){alert("背番号を入力してください");return;}
-  var colorName=document.getElementById("u-cname").value.trim();
-  if(!colorName){alert("カラー名を入力するか、登録済みのカラーを選んでください");return;}
+  var mainColorName=document.getElementById("u-main-cname").value.trim();
+  var subColorName=document.getElementById("u-sub-cname").value.trim();
+  if(!mainColorName){alert("メインカラーを入力してください");return;}
+  var colorName=mainColorName+(subColorName?" × "+subColorName:"");
   var data=loadU(),id=editId||("u"+Date.now());
   var exist=data.find(function(x){return x.id===id;});
   var entry=Object.assign(exist||{},{
@@ -453,8 +486,13 @@ function saveUni(){
     player:document.getElementById("u-player").value.trim(),
     size:document.getElementById("u-size").value,
     memo:document.getElementById("u-memo").value.trim(),
+    // cname/ccodeは旧画面との互換性を保つため、組み合わせ名とメイン色も保存する。
     cname:colorName,
-    ccode:document.getElementById("u-ccode").value
+    ccode:document.getElementById("u-main-ccode").value,
+    mainColorName:mainColorName,
+    mainColorCode:document.getElementById("u-main-ccode").value,
+    subColorName:subColorName,
+    subColorCode:subColorName?document.getElementById("u-sub-ccode").value:""
   });
   if(!exist)data.push(entry);
   saveU(data);closeM("modal-add");render();
@@ -545,13 +583,14 @@ function uniformCsvCell(value){
   return '"'+text.replace(/"/g,'""')+'"';
 }
 function exportUniformCSV(){
-  var rows=[["背番号","選手名","サイズ","カラー","表示色","状態","貸出先","貸出日","返却予定日","メモ"]];
+  var rows=[["背番号","選手名","サイズ","メインカラー","メイン表示色","サブカラー","サブ表示色","状態","貸出先","貸出日","返却予定日","メモ"]];
   loadU().slice().sort(function(a,b){
     var colorDiff=String(a.cname||"").localeCompare(String(b.cname||""),"ja");
     return colorDiff||Number(a.num||0)-Number(b.num||0);
   }).forEach(function(u){
     rows.push([
-      u.num||"",u.player||"",u.size||"",u.cname||"",safeColor(u.ccode,""),
+      u.num||"",u.player||"",u.size||"",u.mainColorName||u.cname||"",safeColor(u.mainColorCode||u.ccode,""),
+      u.subColorName||"",safeColor(u.subColorCode,""),
       u.lentTo?"貸出中":"在庫あり",u.lentTo||"",u.lentDate||"",u.retDate||"",u.memo||""
     ]);
   });
