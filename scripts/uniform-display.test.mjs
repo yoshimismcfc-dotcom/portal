@@ -132,6 +132,9 @@ if (!source.includes("setTimeout(function(){_templateLongPressed=true;setTemplat
 if (!(source.indexOf('id="color-folders"') < source.indexOf("＋ メイン・サブカラーを選んで追加"))) {
   throw new Error("補助操作ボタンは色一覧より下に配置してください");
 }
+if (source.includes("①") || source.includes("②")) {
+  throw new Error("追加画面に分かりづらい手順番号を表示しないでください");
+}
 
 for (const required of [
   'id="main-color-options"',
