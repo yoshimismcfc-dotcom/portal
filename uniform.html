@@ -204,6 +204,9 @@
     <div class="form-group">
       <label class="form-label">ユニフォームカラー</label>
       <div class="custom-color-note" style="margin-bottom:8px">メインとサブをそれぞれ選択できます。1色のユニフォームはサブを空欄にしてください。</div>
+      <div class="form-label" style="margin-top:8px">組み合わせテンプレート</div>
+      <div class="color-palette" id="uniform-pair-templates" aria-label="ユニフォームカラーの組み合わせテンプレート"></div>
+      <div class="custom-color-note" style="margin-bottom:10px">色見本をタップすると、メイン・サブの2色が一度に入力されます。</div>
       <datalist id="uniform-color-options"></datalist>
       <div class="uniform-color-pair">
         <div class="uniform-color-field">
@@ -303,6 +306,16 @@ var COLOR_CHOICES=[
   {name:"水色",code:"#4ab8e8"},{name:"ピンク",code:"#f06090"},{name:"黄色",code:"#f5d300"},
   {name:"緑",code:"#228b22"},{name:"黒",code:"#222222"},{name:"紺",code:"#003087"}
 ];
+var PAIR_TEMPLATE_NAMES={
+  "オレンジ赤縦じま":["オレンジ","赤"],
+  "白赤":["白","赤"],
+  "白":["白",""],
+  "水色ピンク":["水色","ピンク"],
+  "水色オレンジ":["水色","オレンジ"],
+  "オレンジ":["オレンジ",""],
+  "黄色":["黄色",""],
+  "緑":["緑",""]
+};
 // loadU/saveU/loadH/saveH は上部で定義済み
 function getPalette(cname){return PALETTE.find(function(p){return p.name===cname;})||{c1:"#555",c2:"#777",code:"#555"};}
 function uniformColorLabel(u){
@@ -432,6 +445,27 @@ function buildColorOptions(){
     return '<option value="'+escapeHtml(p.name)+'"></option>';
   }).join("");
 }
+function buildPairTemplates(){
+  var selectedMain=document.getElementById("u-main-cname").value.trim();
+  var selectedSub=document.getElementById("u-sub-cname").value.trim();
+  document.getElementById("uniform-pair-templates").innerHTML=PALETTE.map(function(p){
+    var names=PAIR_TEMPLATE_NAMES[p.name]||[p.name,""];
+    var selected=names[0]===selectedMain&&names[1]===selectedSub;
+    return '<button type="button" class="cp-sw'+(selected?" sel":"")+'" title="'+escapeHtml(p.name)
+      +'" aria-label="'+escapeHtml(p.name)+'" style="background:linear-gradient(135deg,'+safeColor(p.c1,"#666666")+','+safeColor(p.c2,p.c1)+')"'
+      +' onclick="selectPairTemplate('+inlineJsArg(p.name)+')"></button>';
+  }).join("");
+}
+function selectPairTemplate(templateName){
+  var p=PALETTE.find(function(item){return item.name===templateName;});
+  var names=PAIR_TEMPLATE_NAMES[templateName];
+  if(!p||!names)return;
+  document.getElementById("u-main-cname").value=names[0];
+  document.getElementById("u-main-ccode").value=safeColor(p.c1,"#666666");
+  document.getElementById("u-sub-cname").value=names[1];
+  document.getElementById("u-sub-ccode").value=safeColor(p.c2,p.c1);
+  buildPairTemplates();
+}
 function colorCodeForName(name,fallback){
   var found=availableSingleColors().find(function(p){return p.name===name;});
   return found?safeColor(found.code,fallback):fallback;
@@ -454,6 +488,7 @@ function openAdd(){
   document.getElementById("u-sub-cname").value="赤";
   document.getElementById("u-sub-ccode").value="#bc002d";
   buildColorOptions();
+  buildPairTemplates();
   document.getElementById("modal-add").classList.add("open");
 }
 function openEdit(id){
@@ -470,6 +505,7 @@ function openEdit(id){
   document.getElementById("u-sub-cname").value=u.subColorName||"";
   document.getElementById("u-sub-ccode").value=safeColor(u.subColorCode,"#bc002d");
   buildColorOptions();
+  buildPairTemplates();
   document.getElementById("modal-add").classList.add("open");
 }
 function saveUni(){
