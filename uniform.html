@@ -102,6 +102,14 @@
     .color-palette{display:flex;gap:8px;flex-wrap:wrap;margin-top:6px;margin-bottom:6px}
     .cp-sw{width:28px;height:28px;border-radius:50%;border:3px solid transparent;cursor:pointer;transition:.12s;flex-shrink:0;box-shadow:0 2px 6px rgba(0,0,0,.4)}
     .cp-sw.sel{border-color:#fff;box-shadow:0 0 0 2px var(--orange),0 2px 6px rgba(0,0,0,.4)}
+    .custom-color-actions{display:flex;align-items:center;gap:8px;flex-wrap:wrap;margin:8px 0}
+    .custom-color-note{font-size:.72rem;color:var(--ink-3);line-height:1.5}
+    .custom-color-box{display:grid;grid-template-columns:minmax(0,1fr) 52px;gap:8px;align-items:end;padding:10px;border:1px solid var(--line);border-radius:var(--r8);background:rgba(255,255,255,.04)}
+    .custom-color-box.is-custom{border-color:var(--orange);box-shadow:0 0 0 2px rgba(255,139,31,.12)}
+    .custom-color-box label{font-size:.72rem;font-weight:800;color:var(--ink-2)}
+    .custom-color-box .form-control{margin-top:4px}
+    .custom-color-input{width:52px;height:44px;border:1px solid var(--line);border-radius:8px;cursor:pointer;padding:3px;background:var(--surface-lt)}
+    body[data-theme="light"] .custom-color-box{background:#f8fbff}
     /* 注意事項 */
     .uniform-note{background:linear-gradient(135deg,rgba(255,139,31,.14),rgba(139,18,48,.14));border:1px solid rgba(255,139,31,.28);border-radius:var(--r12);padding:16px;margin:0 0 16px}
     .uniform-note h2{font-size:1rem;font-weight:900;color:var(--orange-2);margin:0 0 8px}
@@ -188,10 +196,19 @@
       </select></div>
     <div class="form-group">
       <label class="form-label">カラー</label>
-      <div class="color-palette" id="cp"></div>
-      <div style="display:flex;gap:8px;margin-top:6px;align-items:center">
-        <input class="form-control" id="u-cname" placeholder="色の名前" style="flex:1">
-        <input type="color" id="u-ccode" value="#e85c1e" style="width:42px;height:42px;border:none;border-radius:8px;cursor:pointer;padding:2px;background:var(--surface-lt)">
+      <div class="custom-color-note">登録済みの色を選ぶか、新しいカラーを自由に追加できます。</div>
+      <div class="color-palette" id="cp" aria-label="登録済みカラー"></div>
+      <div class="custom-color-actions">
+        <button type="button" class="btn btn-outline btn-sm" onclick="startCustomColor()">＋ 新しいカラーを追加</button>
+        <span class="custom-color-note">追加した色は次回から候補に表示されます</span>
+      </div>
+      <div class="custom-color-box" id="custom-color-box">
+        <label>カラー名
+          <input class="form-control" id="u-cname" placeholder="例：紺色・黒金・青白">
+        </label>
+        <label>表示色
+          <input class="custom-color-input" type="color" id="u-ccode" value="#e85c1e" aria-label="表示色を選択">
+        </label>
       </div>
     </div>
     <div class="form-group"><label class="form-label">メモ</label>
@@ -366,17 +383,36 @@ function toggleFolder(id){
   b.classList.toggle("open",!o);if(ic)ic.classList.toggle("open",!o);
 }
 
+function availablePalette(){
+  var colors=PALETTE.slice();
+  loadU().forEach(function(u){
+    var name=String(u.cname||"").trim();
+    var code=safeColor(u.ccode,"#666666");
+    if(!name||colors.some(function(p){return p.name===name;}))return;
+    colors.push({name:name,c1:code,c2:code,code:code,custom:true});
+  });
+  return colors;
+}
 function buildPalette(selName){
-  document.getElementById("cp").innerHTML=PALETTE.map(function(p){
-    return '<div class="cp-sw'+(p.name===selName?" sel":"")+'" title="'+p.name
-      +'" style="background:linear-gradient(135deg,'+p.c1+','+p.c2+')"'
-      +' onclick="selPalette(\''+p.name.replace(/'/g,"\\'")+'\',\''+p.c1+'\')"></div>';
+  document.getElementById("cp").innerHTML=availablePalette().map(function(p){
+    var label=p.name+(p.custom?"（追加カラー）":"");
+    return '<button type="button" class="cp-sw'+(p.name===selName?" sel":"")+'" title="'+escapeHtml(label)
+      +'" aria-label="'+escapeHtml(label)+'" style="background:linear-gradient(135deg,'+safeColor(p.c1,"#666666")+','+safeColor(p.c2,"#666666")+')"'
+      +' onclick="selPalette('+inlineJsArg(p.name)+','+inlineJsArg(p.code||p.c1)+')"></button>';
   }).join("");
 }
 function selPalette(name,code){
   document.getElementById("u-cname").value=name;
-  document.getElementById("u-ccode").value=code;
-  document.querySelectorAll(".cp-sw").forEach(function(s){s.classList.toggle("sel",s.title===name);});
+  document.getElementById("u-ccode").value=safeColor(code,"#666666");
+  document.getElementById("custom-color-box").classList.remove("is-custom");
+  document.querySelectorAll(".cp-sw").forEach(function(sw){sw.classList.toggle("sel",sw.title.replace("（追加カラー）","")===name);});
+}
+function startCustomColor(){
+  document.getElementById("u-cname").value="";
+  document.getElementById("u-ccode").value="#4285f4";
+  document.getElementById("custom-color-box").classList.add("is-custom");
+  document.querySelectorAll(".cp-sw").forEach(function(sw){sw.classList.remove("sel");});
+  document.getElementById("u-cname").focus();
 }
 
 function openAdd(){
@@ -407,6 +443,8 @@ function openEdit(id){
 function saveUni(){
   var num=document.getElementById("u-num").value.trim();
   if(!num){alert("背番号を入力してください");return;}
+  var colorName=document.getElementById("u-cname").value.trim();
+  if(!colorName){alert("カラー名を入力するか、登録済みのカラーを選んでください");return;}
   var data=loadU(),id=editId||("u"+Date.now());
   var exist=data.find(function(x){return x.id===id;});
   var entry=Object.assign(exist||{},{
@@ -414,7 +452,7 @@ function saveUni(){
     player:document.getElementById("u-player").value.trim(),
     size:document.getElementById("u-size").value,
     memo:document.getElementById("u-memo").value.trim(),
-    cname:document.getElementById("u-cname").value.trim()||"その他",
+    cname:colorName,
     ccode:document.getElementById("u-ccode").value
   });
   if(!exist)data.push(entry);
