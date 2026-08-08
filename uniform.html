@@ -942,10 +942,17 @@ function saveUni(closeAfter){
   var colorName=mainColorName+(subColorName?" × "+subColorName:"");
   var editing=!!editId;
   var data=loadU(),id=editId||("u"+Date.now());
-  var duplicateNumber=data.some(function(item){
+  var duplicateItems=data.filter(function(item){
     return item.id!==id&&String(item.num||"")===num&&uniformColorLabel(item)===colorName;
   });
-  if(duplicateNumber){alert("この色には背番号 #"+num+" がすでに登録されています。別の背番号を確認してください。");return;}
+  if(duplicateItems.length){
+    var duplicateDetails=duplicateItems.map(function(item){
+      return "・サイズ "+(item.size||"未設定")+"／"+(item.lentTo||item.player||"倉庫保管");
+    }).join("\n");
+    var duplicateMessage="同じ色「"+colorName+"」に背番号 #"+num+" がすでに "+duplicateItems.length+"着あります。\n\n"
+      +duplicateDetails+"\n\n同じ番号の別のユニフォームとして登録しますか？";
+    if(!confirm(duplicateMessage))return;
+  }
   var exist=data.find(function(x){return x.id===id;});
   var previousHolder=exist&&exist.lentTo?String(exist.lentTo):"";
   var holderName=document.getElementById("u-player").value.trim();
