@@ -49,4 +49,15 @@ if (!source.includes('subColorName?document.getElementById("u-sub-ccode").value:
   throw new Error("サブカラー未設定時の互換処理がありません");
 }
 
+for (const required of [
+  "組み合わせテンプレート",
+  'id="uniform-pair-templates"',
+  "function buildPairTemplates()",
+  "function selectPairTemplate(templateName)",
+  '"オレンジ赤縦じま":["オレンジ","赤"]',
+  '"水色ピンク":["水色","ピンク"]'
+]) {
+  if (!source.includes(required)) throw new Error("カラーテンプレートの復元が不足しています: " + required);
+}
+
 console.log("uniform display tests passed");
