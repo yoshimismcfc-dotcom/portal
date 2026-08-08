@@ -63,7 +63,7 @@ for (const required of [
 }
 
 for (const required of [
-  "貸出先の選手名",
+  "団員名（貸出先）",
   "名前を入力すると「選手に貸出中」、空欄にすると「倉庫保管」",
   "🏠 倉庫保管",
   "選手に貸出中",
@@ -91,6 +91,10 @@ for (const required of [
   "＋ テンプレートに色を追加",
   "この組み合わせをテンプレートに追加",
   "function toggleTemplateColorEditor(forceOpen)",
+  "function setUniformDetailsReady(ready,colorLabel)",
+  "最初に色の組み合わせを選んでください",
+  "背番号・サイズ・団員名を入力してください",
+  'id="u-save-btn"',
   "長押しすると順番を変更できます",
   "function addCurrentPairTemplate()",
   "function wireTemplateLongPress()",
