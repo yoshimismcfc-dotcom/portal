@@ -37,4 +37,19 @@ if (!source.includes('if(/^[=+\\-@\\t\\r]/.test(text))')) {
   throw new Error("CSV数式インジェクション対策がありません");
 }
 
+for (const required of [
+  "メインカラー（必須）",
+  "サブカラー（任意）",
+  "mainColorName:mainColorName",
+  "subColorName:subColorName",
+  'u.mainColorName||u.cname||""',
+  'u.mainColorCode||u.ccode',
+  '"メインカラー","メイン表示色","サブカラー","サブ表示色"'
+]) {
+  if (!source.includes(required)) throw new Error("メイン・サブカラー対応が不足しています: " + required);
+}
+if (!source.includes('subColorName?document.getElementById("u-sub-ccode").value:""')) {
+  throw new Error("サブカラー未設定時の互換処理がありません");
+}
+
 console.log("uniform display tests passed");
