@@ -60,4 +60,21 @@ for (const required of [
   if (!source.includes(required)) throw new Error("カラーテンプレートの復元が不足しています: " + required);
 }
 
+for (const required of [
+  "貸出先の選手名",
+  "名前を入力すると「選手に貸出中」、空欄にすると「倉庫保管」",
+  "🏠 倉庫保管",
+  "選手に貸出中",
+  "選手へ貸出",
+  "倉庫へ返却",
+  'entry.storageLocation="player"',
+  'entry.storageLocation="warehouse"',
+  "u.lentTo||u.player||"
+]) {
+  if (!source.includes(required)) throw new Error("保管状況の分かりやすい表示・自動判定が不足しています: " + required);
+}
+if (!source.includes("previousHolder!==holderName")) {
+  throw new Error("登録画面から貸出先を変更した履歴が保存されません");
+}
+
 console.log("uniform display tests passed");

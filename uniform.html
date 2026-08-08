@@ -143,7 +143,7 @@
     <div class="hero-emoji">👕</div>
     <div>
       <div class="hero-title">ユニフォーム貸出管理</div>
-      <div class="hero-sub">カラー別フォルダで一覧管理。背番号・選手名・貸出先を記録します。</div>
+      <div class="hero-sub">ユニフォームが倉庫にあるか、どの選手が持っているかを分かりやすく管理します。</div>
     </div>
   </div>
   <div class="notice-bar">☁️ データはFirebase（クラウド）で保存・共有されます。</div>
@@ -192,8 +192,10 @@
     <div class="fg2">
       <div class="form-group"><label class="form-label">背番号</label>
         <input class="form-control" id="u-num" type="number" placeholder="例：10" style="text-align:center"></div>
-      <div class="form-group"><label class="form-label">選手名</label>
-        <input class="form-control" id="u-player" placeholder="例：吉見太郎"></div>
+      <div class="form-group"><label class="form-label">貸出先の選手名</label>
+        <input class="form-control" id="u-player" placeholder="例：吉見太郎（倉庫保管なら空欄）">
+        <div class="custom-color-note" style="margin-top:5px">名前を入力すると「選手に貸出中」、空欄にすると「倉庫保管」になります。</div>
+      </div>
     </div>
     <div class="form-group"><label class="form-label">サイズ</label>
       <select class="form-control" id="u-size">
@@ -339,8 +341,8 @@ function renderStats(){
   var d=loadU(),total=d.length,free=d.filter(function(u){return !u.lentTo;}).length;
   document.getElementById("stat-row").innerHTML=
     '<div class="stat-card"><div class="sv">'+total+'</div><div class="sl">総在庫</div></div>'
-    +'<div class="stat-card"><div class="sv" style="color:#00ff88">'+free+'</div><div class="sl">貸出可</div></div>'
-    +'<div class="stat-card"><div class="sv" style="color:#ff4466">'+(total-free)+'</div><div class="sl">貸出中</div></div>';
+    +'<div class="stat-card"><div class="sv" style="color:#00ff88">'+free+'</div><div class="sl">倉庫保管</div></div>'
+    +'<div class="stat-card"><div class="sv" style="color:#ff4466">'+(total-free)+'</div><div class="sl">選手に貸出中</div></div>';
 }
 
 function renderFolders(){
@@ -374,11 +376,11 @@ function renderFolders(){
     var rows=items.map(function(u){
       var isLent=!!u.lentTo;
       var statusCell=isLent
-        ?'<span class="badge-lent">貸出中</span> <span class="uniform-borrower">'+escapeHtml(u.lentTo)+(u.lentDate?' '+escapeHtml(u.lentDate)+'〜':'')+'</span>'
-        :'<span class="badge-free">在庫あり</span>';
+        ?'<span class="badge-lent">選手に貸出中</span><br><span class="uniform-borrower">👤 '+escapeHtml(u.lentTo)+(u.lentDate?'　'+escapeHtml(u.lentDate)+'〜':'')+'</span>'
+        :'<span class="badge-free">🏠 倉庫保管</span>';
       var lendReturnBtn=isLent
-        ?'<button class="action-btn return-btn" onclick="event.stopPropagation();openLend('+inlineJsArg(u.id)+')">返却</button>'
-        :'<button class="action-btn lend-btn" onclick="event.stopPropagation();openLend('+inlineJsArg(u.id)+')">貸出</button>';
+        ?'<button class="action-btn return-btn" onclick="event.stopPropagation();openLend('+inlineJsArg(u.id)+')">倉庫へ返却</button>'
+        :'<button class="action-btn lend-btn" onclick="event.stopPropagation();openLend('+inlineJsArg(u.id)+')">選手へ貸出</button>';
       return '<tr>'
         +'<td style="white-space:nowrap"><span class="uniform-number">#'+escapeHtml(u.num)+'</span>'
         +(u.player?' <span class="uniform-player-name">'+escapeHtml(u.player)+'</span>':'')
@@ -399,8 +401,8 @@ function renderFolders(){
       +'<div class="cf-name">'+escapeHtml(cname)+'</div>'
       +'<div class="cf-stats">'
       +'<span class="cf-total">全'+items.length+'着</span>'
-      +'<span class="cf-free">在庫'+free+'</span>'
-      +'<span class="cf-lent">貸出'+lent+'</span>'
+      +'<span class="cf-free">倉庫'+free+'</span>'
+      +'<span class="cf-lent">選手'+lent+'</span>'
       +'</div>'
       +'<span class="cf-toggle open" id="ft'+bodyId+'">▶</span>'
       +'</div>'
@@ -408,7 +410,7 @@ function renderFolders(){
       +'<div style="overflow-x:auto">'
       +'<table class="uni-table">'
       +'<thead><tr>'
-      +'<th>背番号 / 名前</th><th style="width:52px">サイズ</th><th>状態 / 貸出先</th><th style="width:120px">操作</th>'
+      +'<th>背番号 / 選手</th><th style="width:52px">サイズ</th><th>保管状況 / 貸出先</th><th style="width:140px">操作</th>'
       +'</tr></thead>'
       +'<tbody>'+rows+'</tbody>'
       +'</table>'
@@ -497,7 +499,7 @@ function openEdit(id){
   document.getElementById("add-title").textContent="ユニフォームを編集";
   document.getElementById("u-del-btn").style.display="inline-flex";
   document.getElementById("u-num").value=u.num;
-  document.getElementById("u-player").value=u.player||"";
+  document.getElementById("u-player").value=u.lentTo||u.player||"";
   document.getElementById("u-size").value=u.size;
   document.getElementById("u-memo").value=u.memo||"";
   document.getElementById("u-main-cname").value=u.mainColorName||u.cname||"";
@@ -517,9 +519,11 @@ function saveUni(){
   var colorName=mainColorName+(subColorName?" × "+subColorName:"");
   var data=loadU(),id=editId||("u"+Date.now());
   var exist=data.find(function(x){return x.id===id;});
+  var previousHolder=exist&&exist.lentTo?String(exist.lentTo):"";
+  var holderName=document.getElementById("u-player").value.trim();
   var entry=Object.assign(exist||{},{
     id:id,num:num,
-    player:document.getElementById("u-player").value.trim(),
+    player:holderName,
     size:document.getElementById("u-size").value,
     memo:document.getElementById("u-memo").value.trim(),
     // cname/ccodeは旧画面との互換性を保つため、組み合わせ名とメイン色も保存する。
@@ -530,8 +534,27 @@ function saveUni(){
     subColorName:subColorName,
     subColorCode:subColorName?document.getElementById("u-sub-ccode").value:""
   });
+  if(holderName){
+    entry.lentTo=holderName;
+    entry.lentDate=entry.lentDate||new Date().toISOString().slice(0,10);
+    entry.storageLocation="player";
+  }else{
+    delete entry.lentTo;delete entry.lentDate;delete entry.retDate;
+    entry.storageLocation="warehouse";
+  }
   if(!exist)data.push(entry);
-  saveU(data);closeM("modal-add");render();
+  saveU(data);
+  if(previousHolder!==holderName){
+    var history=loadH();
+    history.push({
+      type:holderName?"貸出":"返却",
+      date:new Date().toISOString().slice(0,10),
+      num:entry.num,cname:entry.cname,player:holderName||previousHolder,
+      name:holderName||previousHolder,retDate:""
+    });
+    saveH(history);
+  }
+  closeM("modal-add");render();
 }
 function deleteUni(){
   if(!editId||!confirm("削除しますか？"))return;
@@ -550,8 +573,8 @@ function openLend(id){
   var isLent=!!u.lentTo;
   document.getElementById("lend-title").textContent="【"+u.cname+"】#"+u.num+(u.player?" "+u.player:"")+" ("+u.size+")";
   document.getElementById("lend-info").innerHTML=isLent
-    ?"<span style='color:#ff8888'>🔴 貸出中</span><br>借りている人：<strong style='color:#fff'>"+escapeHtml(u.lentTo)+"</strong><br>貸出日："+escapeHtml(u.lentDate)+(u.retDate?"　返却予定："+escapeHtml(u.retDate):"")
-    :"<span style='color:#00ff88'>🟢 在庫あり</span>";
+    ?"<span style='color:#ff8888'>🔴 選手に貸出中</span><br>持っている選手：<strong style='color:#fff'>"+escapeHtml(u.lentTo)+"</strong><br>貸出日："+escapeHtml(u.lentDate)+(u.retDate?"　返却予定："+escapeHtml(u.retDate):"")
+    :"<span style='color:#00ff88'>🏠 倉庫保管</span>";
   document.getElementById("lend-form").style.display=isLent?"none":"block";
   var btn=document.getElementById("lend-btn");
   if(isLent){btn.textContent="✅ 返却済みにする";btn.onclick=doReturn;}
@@ -567,7 +590,7 @@ function doLend(){
   var name=document.getElementById("l-name").value.trim();
   if(!name){alert("氏名を入力してください");return;}
   var data=loadU(),u=data.find(function(x){return x.id===lendId;});if(!u)return;
-  u.lentTo=name;u.lentDate=document.getElementById("l-date").value;u.retDate=document.getElementById("l-ret").value;
+  u.player=name;u.lentTo=name;u.lentDate=document.getElementById("l-date").value;u.retDate=document.getElementById("l-ret").value;u.storageLocation="player";
   saveU(data);
   var h=loadH();h.push({type:"貸出",date:u.lentDate,num:u.num,cname:u.cname,player:u.player||"",name:name,retDate:u.retDate||""});saveH(h);
   closeM("modal-lend");render();
@@ -575,7 +598,7 @@ function doLend(){
 function doReturn(){
   var data=loadU(),u=data.find(function(x){return x.id===lendId;});if(!u)return;
   var h=loadH();h.push({type:"返却",date:new Date().toISOString().slice(0,10),num:u.num,cname:u.cname,player:u.player||"",name:u.lentTo,retDate:""});saveH(h);
-  delete u.lentTo;delete u.lentDate;delete u.retDate;
+  u.player="";delete u.lentTo;delete u.lentDate;delete u.retDate;u.storageLocation="warehouse";
   saveU(data);closeM("modal-lend");render();
 }
 function showHistory(){
@@ -627,7 +650,7 @@ function exportUniformCSV(){
     rows.push([
       u.num||"",u.player||"",u.size||"",u.mainColorName||u.cname||"",safeColor(u.mainColorCode||u.ccode,""),
       u.subColorName||"",safeColor(u.subColorCode,""),
-      u.lentTo?"貸出中":"在庫あり",u.lentTo||"",u.lentDate||"",u.retDate||"",u.memo||""
+      u.lentTo?"選手に貸出中":"倉庫保管",u.lentTo||"",u.lentDate||"",u.retDate||"",u.memo||""
     ]);
   });
   if(rows.length===1){alert("出力するユニフォームデータがありません");return;}
