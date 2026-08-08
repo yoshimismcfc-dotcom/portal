@@ -121,6 +121,37 @@
     .condition-help{min-height:2.6em;margin-top:5px;color:var(--ink-3);font-size:.7rem;line-height:1.45}
     .duplicate-number-warning{display:none;margin-top:6px;padding:7px 8px;border:1px solid rgba(255,185,55,.5);border-radius:7px;background:rgba(255,170,30,.12);color:#ffd36a;font-size:.68rem;font-weight:900;line-height:1.45}
     .duplicate-number-warning.show{display:block}
+    /* ===== 靴下在庫 ===== */
+    .socks-section{margin:18px 0 14px;border:1px solid rgba(0,212,255,.3);border-radius:var(--r16);overflow:hidden;background:var(--surface-lt)}
+    .socks-section-header{display:flex;align-items:center;gap:10px;width:100%;min-height:58px;padding:10px 14px;border:0;background:linear-gradient(135deg,rgba(0,48,135,.72),rgba(0,118,168,.5));color:#fff;text-align:left;cursor:pointer}
+    .socks-section-title{flex:1;font-size:.95rem;font-weight:900}
+    .socks-section-total{padding:4px 9px;border-radius:99px;background:rgba(5,15,30,.62);color:#65e8ff;font-size:.72rem;font-weight:900;white-space:nowrap}
+    .socks-section-toggle{font-size:.8rem;transition:transform .2s}
+    .socks-section-toggle.open{transform:rotate(90deg)}
+    .socks-section-body{display:none;padding:12px}
+    .socks-section-body.open{display:block}
+    .socks-guide{margin:0 0 10px;color:var(--ink-2);font-size:.76rem;line-height:1.55}
+    .sock-list{display:grid;gap:9px}
+    .sock-card{display:grid;grid-template-columns:minmax(0,1fr) auto;align-items:center;min-height:60px;border:1px solid var(--line-2);border-radius:var(--r12);overflow:hidden}
+    .sock-card-info{display:flex;flex-direction:column;justify-content:center;gap:4px;min-width:0;height:100%;padding:9px 12px;color:#fff;text-shadow:0 1px 3px rgba(0,0,0,.65)}
+    .sock-card.is-light .sock-card-info{color:#071126;text-shadow:none}
+    .sock-color-name{overflow:hidden;text-overflow:ellipsis;white-space:nowrap;font-size:.86rem;font-weight:900}
+    .sock-count{width:max-content;padding:3px 8px;border-radius:99px;background:rgba(5,15,30,.78);color:#fff;font-size:.68rem;font-weight:900;text-shadow:none}
+    .sock-edit-button{align-self:stretch;min-width:76px;padding:5px 9px;border:0;border-left:1px solid rgba(255,255,255,.25);background:rgba(5,15,30,.72);color:#fff;font-size:.7rem;font-weight:900;cursor:pointer}
+    .sock-add-actions{display:flex;justify-content:flex-end;margin-top:11px}
+    .sock-template-list{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:7px;margin:7px 0 10px}
+    .sock-template-button{min-width:0;min-height:46px;padding:6px 7px;border:2px solid transparent;border-radius:9px;color:#fff;font-size:.68rem;font-weight:900;text-shadow:0 1px 3px rgba(0,0,0,.75);cursor:pointer;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+    .sock-template-button.is-light{color:#071126;text-shadow:none}
+    .sock-template-button.selected{border-color:#fff;box-shadow:0 0 0 2px var(--orange)}
+    .sock-selected-preview{display:none;min-height:48px;margin:8px 0 12px;padding:9px 12px;border:1px solid var(--line-2);border-radius:var(--r8);color:#fff;font-size:.8rem;font-weight:900;text-shadow:0 1px 3px rgba(0,0,0,.65)}
+    .sock-selected-preview.show{display:flex;align-items:center}
+    .sock-custom-editor{display:none;margin:8px 0 12px;padding:10px;border:1px solid var(--line-2);border-radius:var(--r8);background:rgba(255,255,255,.04)}
+    .sock-custom-editor.open{display:block}
+    .sock-color-row{display:grid;grid-template-columns:minmax(0,1fr) 48px;gap:7px;align-items:end;margin-bottom:8px}
+    .sock-color-row:last-child{margin-bottom:0}
+    .sock-color-row label{color:var(--ink-2);font-size:.7rem;font-weight:900}
+    .sock-color-input{width:48px;height:42px;padding:3px;border:1px solid var(--line);border-radius:8px;background:var(--surface-lt)}
+    body[data-theme="light"] .sock-custom-editor{background:#f8fbff}
 
     /* ===== モーダル ===== */
     .modal-bg{position:fixed;inset:0;background:rgba(0,0,0,.82);display:none;place-items:center;z-index:200;backdrop-filter:blur(6px);padding:16px}
@@ -230,6 +261,10 @@
       .condition-filter-bar{padding:9px 10px}
       .condition-filter-label{font-size:.7rem;gap:6px}
       .condition-filter-label .form-control{font-size:.7rem}
+      .socks-section-body{padding:10px}
+      .sock-card{min-height:57px}
+      .sock-card-info{padding:8px 10px}
+      .sock-edit-button{min-width:70px;padding:4px 7px;font-size:.66rem}
     }
   </style>
 </head>
@@ -301,6 +336,20 @@
     <button class="btn btn-outline btn-sm" onclick="exportUniformCSV()">📥 CSV出力</button>
     <button class="btn-line-copy sm" onclick="copyUniformList()">📋 LINEコピー</button>
   </div>
+
+  <section class="socks-section" aria-labelledby="socks-section-title">
+    <button type="button" class="socks-section-header" id="socks-section-header" aria-expanded="false" aria-controls="socks-section-body" onclick="toggleSocksSection()">
+      <span style="font-size:1.4rem" aria-hidden="true">🧦</span>
+      <span class="socks-section-title" id="socks-section-title">靴下在庫</span>
+      <span class="socks-section-total" id="socks-total">合計0足</span>
+      <span class="socks-section-toggle" id="socks-section-toggle">▶</span>
+    </button>
+    <div class="socks-section-body" id="socks-section-body">
+      <p class="socks-guide">色ごとの在庫数だけを管理します。背番号・サイズ・団員名の入力はありません。</p>
+      <div class="sock-list" id="sock-list"></div>
+      <div class="sock-add-actions"><button type="button" class="btn btn-primary btn-sm" onclick="openSockAdd()">＋ 靴下の色を追加</button></div>
+    </div>
+  </section>
 </main>
 
 <!-- 追加/編集モーダル -->
@@ -432,11 +481,41 @@
   </div>
 </div>
 
+<!-- 靴下在庫モーダル -->
+<div class="modal-bg" id="modal-sock">
+  <div class="modal">
+    <h3 id="sock-modal-title">靴下の色と在庫数</h3>
+    <div class="form-label">ユニフォームと同じ色分けから選ぶ</div>
+    <div class="sock-template-list" id="sock-template-list"></div>
+    <button type="button" class="btn btn-outline btn-sm" onclick="toggleSockCustomEditor(true)">＋ 一覧にない色</button>
+    <div class="sock-custom-editor" id="sock-custom-editor">
+      <div class="sock-color-row">
+        <label>メインカラー（必須）<input class="form-control" id="sock-main-name" list="uniform-color-options" placeholder="例：赤" oninput="updateSockCustomColor()"></label>
+        <input class="sock-color-input" type="color" id="sock-main-code" value="#bc002d" aria-label="靴下のメイン表示色" oninput="updateSockCustomColor()">
+      </div>
+      <div class="sock-color-row">
+        <label>サブカラー（任意）<input class="form-control" id="sock-sub-name" list="uniform-color-options" placeholder="1色なら空欄" oninput="updateSockCustomColor()"></label>
+        <input class="sock-color-input" type="color" id="sock-sub-code" value="#ffffff" aria-label="靴下のサブ表示色" oninput="updateSockCustomColor()">
+      </div>
+    </div>
+    <div class="sock-selected-preview" id="sock-selected-preview"></div>
+    <div class="form-group"><label class="form-label">在庫数（足）</label>
+      <input class="form-control" id="sock-quantity" type="number" min="0" step="1" inputmode="numeric" placeholder="例：12" style="text-align:center">
+      <div class="custom-color-note" style="margin-top:5px">左右1組を「1足」として入力してください。</div>
+    </div>
+    <div class="modal-btns">
+      <button class="btn btn-outline btn-sm" id="sock-delete-btn" style="color:var(--red);border-color:rgba(255,68,102,.4);display:none" onclick="deleteSock()">🗑 削除</button>
+      <button class="btn btn-outline" onclick="closeM('modal-sock')">キャンセル</button>
+      <button class="btn btn-primary" onclick="saveSock()">保存</button>
+    </div>
+  </div>
+</div>
+
 <footer class="site-footer"></footer>
 <script>
-var KU="smc_uniform_v3",KH="smc_uniform_hist_v1",KT="smc_uniform_color_templates_v1",KFO="smc_uniform_folder_order_v1";
-var editId=null,lendId=null;
-var _unifData=[], _histData=[], _colorTemplates=[],_folderOrder=[];
+var KU="smc_uniform_v3",KH="smc_uniform_hist_v1",KT="smc_uniform_color_templates_v1",KFO="smc_uniform_folder_order_v1",KS="smc_uniform_socks_v1";
+var editId=null,lendId=null,sockEditId=null;
+var _unifData=[], _histData=[], _colorTemplates=[],_folderOrder=[],_sockData=[];
 var _conditionFilter="";
 var _templateReorderMode=false,_templateLongPressed=false,_folderReorderMode=false;
 
@@ -450,6 +529,8 @@ function saveH(d){
   _histData=d;
   dbSave("uniform_hist", d, KH, null);
 }
+function loadSocks(){return _sockData;}
+function saveSocks(items){_sockData=items;dbSave("uniform_socks",items,KS,null);}
 
 var PALETTE=[
   {name:"オレンジ赤縦じま",c1:"#e85c1e",c2:"#bc002d",code:"#e85c1e"},
@@ -658,6 +739,103 @@ function renderFolders(){
   });
   document.getElementById("color-folders").innerHTML=html||
     '<div style="text-align:center;color:var(--ink-3);padding:36px;font-size:.88rem">'+(allData.length?'選択した状態のユニフォームはありません。':'ユニフォームがありません。「＋ ユニフォームを追加」から登録してください。')+'</div>';
+}
+
+function sockColorLabel(item){return uniformColorLabel(item);}
+function toggleSocksSection(forceOpen){
+  var body=document.getElementById("socks-section-body"),toggle=document.getElementById("socks-section-toggle"),header=document.getElementById("socks-section-header");
+  var open=typeof forceOpen==="boolean"?forceOpen:!body.classList.contains("open");
+  body.classList.toggle("open",open);toggle.classList.toggle("open",open);header.setAttribute("aria-expanded",String(open));
+}
+function renderSocks(){
+  var items=loadSocks().slice().sort(function(a,b){return sockColorLabel(a).localeCompare(sockColorLabel(b),"ja");});
+  var total=items.reduce(function(sum,item){return sum+(Number(item.quantity)||0);},0);
+  document.getElementById("socks-total").textContent="合計"+total+"足";
+  document.getElementById("sock-list").innerHTML=items.length?items.map(function(item){
+    var main=safeColor(item.mainColorCode,"#666666"),subName=String(item.subColorName||"").trim(),sub=subName?safeColor(item.subColorCode,main):main;
+    var band="linear-gradient(90deg,"+main+" 0%,"+main+" 75%,"+sub+" 75%,"+sub+" 100%)";
+    var light=hexLightness(main)>150?" is-light":"";
+    return '<div class="sock-card'+light+'" style="background:'+band+'">'
+      +'<div class="sock-card-info"><span class="sock-color-name">'+escapeHtml(sockColorLabel(item))+'</span><span class="sock-count">在庫 '+(Number(item.quantity)||0)+'足</span></div>'
+      +'<button type="button" class="sock-edit-button" onclick="openSockEdit('+inlineJsArg(item.id)+')">数量変更</button></div>';
+  }).join(""):'<div style="padding:18px;text-align:center;color:var(--ink-3);font-size:.78rem">まだ靴下が登録されていません。</div>';
+}
+function currentSockColorLabel(){
+  var main=document.getElementById("sock-main-name").value.trim(),sub=document.getElementById("sock-sub-name").value.trim();
+  return main+(sub?" × "+sub:"");
+}
+function buildSockTemplates(){
+  var selected=currentSockColorLabel();
+  document.getElementById("sock-template-list").innerHTML=loadColorTemplates().map(function(item){
+    var label=item.mainName+(item.subName?" × "+item.subName:"");
+    var main=safeColor(item.mainCode,"#666666"),sub=item.subName?safeColor(item.subCode,main):main;
+    return '<button type="button" class="sock-template-button'+(label===selected?" selected":"")+(hexLightness(main)>150?" is-light":"")+'" style="background:linear-gradient(90deg,'+main+' 0%,'+main+' 75%,'+sub+' 75%,'+sub+' 100%)" onclick="selectSockTemplate('+inlineJsArg(item.id)+')">'+escapeHtml(label)+'</button>';
+  }).join("");
+}
+function updateSockPreview(){
+  var preview=document.getElementById("sock-selected-preview"),mainName=document.getElementById("sock-main-name").value.trim(),subName=document.getElementById("sock-sub-name").value.trim();
+  if(!mainName){preview.classList.remove("show");preview.textContent="";buildSockTemplates();return;}
+  var main=safeColor(document.getElementById("sock-main-code").value,"#666666"),sub=subName?safeColor(document.getElementById("sock-sub-code").value,main):main;
+  preview.textContent="選択中："+mainName+(subName?" × "+subName:"");
+  preview.style.background="linear-gradient(90deg,"+main+" 0%,"+main+" 75%,"+sub+" 75%,"+sub+" 100%)";
+  preview.style.color=hexLightness(main)>150?"#071126":"#fff";
+  preview.classList.add("show");buildSockTemplates();
+}
+function selectSockTemplate(templateId){
+  var template=loadColorTemplates().find(function(item){return item.id===templateId;});if(!template)return;
+  document.getElementById("sock-main-name").value=template.mainName;
+  document.getElementById("sock-main-code").value=safeColor(template.mainCode,"#666666");
+  document.getElementById("sock-sub-name").value=template.subName||"";
+  document.getElementById("sock-sub-code").value=safeColor(template.subCode,template.mainCode);
+  toggleSockCustomEditor(false);updateSockPreview();
+  if(!sockEditId){
+    var existing=loadSocks().find(function(item){return sockColorLabel(item)===currentSockColorLabel();});
+    if(existing){sockEditId=existing.id;document.getElementById("sock-quantity").value=Number(existing.quantity)||0;document.getElementById("sock-modal-title").textContent="靴下の在庫数を変更";document.getElementById("sock-delete-btn").style.display="inline-flex";}
+  }
+}
+function toggleSockCustomEditor(forceOpen){
+  var editor=document.getElementById("sock-custom-editor");
+  var open=typeof forceOpen==="boolean"?forceOpen:!editor.classList.contains("open");
+  editor.classList.toggle("open",open);
+  if(open&&!sockEditId){document.getElementById("sock-main-name").value="";document.getElementById("sock-sub-name").value="";updateSockPreview();}
+}
+function updateSockCustomColor(){updateSockPreview();}
+function resetSockModal(){
+  sockEditId=null;document.getElementById("sock-modal-title").textContent="靴下の色と在庫数";
+  document.getElementById("sock-main-name").value="";document.getElementById("sock-main-code").value="#bc002d";
+  document.getElementById("sock-sub-name").value="";document.getElementById("sock-sub-code").value="#ffffff";
+  document.getElementById("sock-quantity").value="";document.getElementById("sock-delete-btn").style.display="none";
+  toggleSockCustomEditor(false);updateSockPreview();buildSockTemplates();
+}
+function openSockAdd(){buildColorOptions();resetSockModal();document.getElementById("modal-sock").classList.add("open");}
+function openSockEdit(id){
+  var item=loadSocks().find(function(sock){return sock.id===id;});if(!item)return;
+  buildColorOptions();sockEditId=id;document.getElementById("sock-modal-title").textContent="靴下の在庫数を変更";
+  document.getElementById("sock-main-name").value=item.mainColorName||"";document.getElementById("sock-main-code").value=safeColor(item.mainColorCode,"#666666");
+  document.getElementById("sock-sub-name").value=item.subColorName||"";document.getElementById("sock-sub-code").value=safeColor(item.subColorCode,item.mainColorCode);
+  document.getElementById("sock-quantity").value=Number(item.quantity)||0;document.getElementById("sock-delete-btn").style.display="inline-flex";
+  toggleSockCustomEditor(false);updateSockPreview();document.getElementById("modal-sock").classList.add("open");
+}
+function saveSock(){
+  var mainName=document.getElementById("sock-main-name").value.trim(),subName=document.getElementById("sock-sub-name").value.trim();
+  var quantity=Number(document.getElementById("sock-quantity").value);
+  if(!mainName){alert("靴下の色を選択してください");return;}
+  if(!Number.isInteger(quantity)||quantity<0){alert("在庫数を0以上の整数で入力してください");return;}
+  var label=mainName+(subName?" × "+subName:""),items=loadSocks().slice();
+  var duplicate=items.find(function(item){return item.id!==sockEditId&&sockColorLabel(item)===label;});
+  if(duplicate){alert("この色の靴下はすでに登録されています。「数量変更」から更新してください。");return;}
+  var entry=items.find(function(item){return item.id===sockEditId;});
+  if(!entry){entry={id:"s"+Date.now()};items.push(entry);}
+  entry.mainColorName=mainName;entry.mainColorCode=safeColor(document.getElementById("sock-main-code").value,"#666666");
+  entry.subColorName=subName;entry.subColorCode=subName?safeColor(document.getElementById("sock-sub-code").value,entry.mainColorCode):"";entry.quantity=quantity;
+  if(!loadColorTemplates().some(function(template){return template.mainName===mainName&&(template.subName||"")===subName;})){
+    var templates=loadColorTemplates().slice();templates.push({id:"sock-color-"+Date.now(),name:label,mainName:mainName,mainCode:entry.mainColorCode,subName:subName,subCode:entry.subColorCode});saveColorTemplates(templates);
+  }
+  saveSocks(items);renderSocks();closeM("modal-sock");toggleSocksSection(true);
+}
+function deleteSock(){
+  if(!sockEditId||!confirm("この色の靴下在庫を削除しますか？"))return;
+  saveSocks(loadSocks().filter(function(item){return item.id!==sockEditId;}));renderSocks();closeM("modal-sock");
 }
 
 function toggleFolder(id){
@@ -1072,10 +1250,10 @@ function showHistory(){
   document.getElementById("modal-hist").classList.add("open");
 }
 function closeM(id){document.getElementById(id).classList.remove("open");}
-["modal-add","modal-lend","modal-hist"].forEach(function(id){
+["modal-add","modal-lend","modal-hist","modal-sock"].forEach(function(id){
   document.getElementById(id).addEventListener("click",function(e){if(e.target.id===id)closeM(id);});
 });
-function render(){renderStats();renderFolders();}
+function render(){renderStats();renderFolders();renderSocks();}
 
 function startUniformSync(){
   // 描画に必要な色・関数の準備後に同期を開始する。
@@ -1090,11 +1268,16 @@ function startUniformSync(){
   dbListen("uniform_color_templates", function(val){
     _colorTemplates=Array.isArray(val)?val.filter(function(item){return item&&item.id&&item.mainName;}):[];
     if(document.getElementById("modal-add").classList.contains("open")){buildColorOptions();buildPairTemplates();}
+    if(document.getElementById("modal-sock").classList.contains("open"))buildSockTemplates();
   }, KT, []);
   dbListen("uniform_folder_order", function(val){
     _folderOrder=Array.isArray(val)?val.filter(function(name){return typeof name==="string"&&name.trim();}):[];
     renderFolders();
   }, KFO, []);
+  dbListen("uniform_socks", function(val){
+    _sockData=Array.isArray(val)?val.filter(function(item){return item&&item.id&&typeof item==="object";}):[];
+    renderSocks();
+  }, KS, []);
 }
 startUniformSync();
 
