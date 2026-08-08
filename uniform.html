@@ -252,15 +252,6 @@ function saveH(d){
   dbSave("uniform_hist", d, KH, null);
 }
 
-// リアルタイム同期
-dbListen("uniform", function(val){
-  _unifData = Array.isArray(val) ? val : [];
-  render();
-}, KU, []);
-dbListen("uniform_hist", function(val){
-  _histData = Array.isArray(val) ? val : [];
-}, KH, []);
-
 var PALETTE=[
   {name:"オレンジ赤縦じま",c1:"#e85c1e",c2:"#bc002d",code:"#e85c1e"},
   {name:"白赤",            c1:"#f0f0f0",c2:"#bc002d",code:"#dd1122"},
@@ -494,7 +485,19 @@ function closeM(id){document.getElementById(id).classList.remove("open");}
   document.getElementById(id).addEventListener("click",function(e){if(e.target.id===id)closeM(id);});
 });
 function render(){renderStats();renderFolders();}
-// render()はdbListenで呼ばれる
+
+function startUniformSync(){
+  // 描画に必要な色・関数の準備後に同期を開始する。
+  // dbListenは端末キャッシュを同期的に返す場合があるため、定義前に呼ぶと一覧だけ描画できない。
+  dbListen("uniform", function(val){
+    _unifData = Array.isArray(val) ? val.filter(function(item){return item && typeof item==="object";}) : [];
+    render();
+  }, KU, []);
+  dbListen("uniform_hist", function(val){
+    _histData = Array.isArray(val) ? val.filter(function(item){return item && typeof item==="object";}) : [];
+  }, KH, []);
+}
+startUniformSync();
 
 function copyUniformList(){
   var items = _unifData.filter(function(u){ return u.lentTo; });
