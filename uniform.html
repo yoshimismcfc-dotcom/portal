@@ -18,7 +18,15 @@
     .uniform-recovery.show{display:grid;grid-template-columns:minmax(0,1fr) auto}
     .uniform-recovery strong{display:block;color:#ffd58a;font-size:.83rem}.uniform-recovery span{display:block;margin-top:3px;color:var(--ink-2);font-size:.7rem;line-height:1.55}
     .uniform-sync-status{margin:8px 0 12px;color:var(--ink-3);font-size:.68rem}.uniform-sync-status.ready{color:#71e6aa}
-    @media(max-width:560px){.uniform-recovery.show{grid-template-columns:1fr}.uniform-recovery .btn{width:100%}}
+    .backup-health{display:flex;align-items:center;gap:7px;margin:8px 0 0;color:#79e8b5;font-size:.68rem;font-weight:800}
+    .backup-health::before{content:"";width:8px;height:8px;border-radius:50%;background:#27d786;box-shadow:0 0 0 4px rgba(39,215,134,.12)}
+    .backup-list{display:grid;gap:8px;max-height:48vh;overflow:auto;margin:12px 0;padding-right:2px}
+    .backup-item{display:grid;grid-template-columns:minmax(0,1fr) auto;gap:8px;align-items:center;padding:11px;border:1px solid var(--line-2);border-radius:10px;background:rgba(255,255,255,.04)}
+    .backup-item strong{display:block;color:var(--ink);font-size:.78rem}.backup-item span{display:block;margin-top:3px;color:var(--ink-3);font-size:.66rem;line-height:1.45}
+    .backup-empty{padding:20px 10px;text-align:center;color:var(--ink-3);font-size:.75rem;line-height:1.7}
+    .backup-preview{display:none;margin-top:10px;padding:12px;border:1px solid rgba(242,165,50,.55);border-radius:10px;background:rgba(242,165,50,.1);font-size:.74rem;line-height:1.7}
+    .backup-preview.show{display:block}.backup-preview strong{color:#ffd58a}.backup-preview .btn{width:100%;margin-top:10px}
+    @media(max-width:560px){.uniform-recovery.show{grid-template-columns:1fr}.uniform-recovery .btn{width:100%}.backup-item{grid-template-columns:1fr}.backup-item .btn{width:100%}}
     .stat-card{background:var(--surface-lt);border-radius:var(--r8);padding:12px;text-align:center;border:1px solid var(--line)}
     .stat-card .sv{font-size:1.6rem;font-weight:900;color:#fff}
     .stat-card .sl{font-size:.7rem;color:var(--ink-3);margin-top:2px}
@@ -352,6 +360,7 @@
   </div>
   <div class="notice-bar">☁️ データはFirebase（クラウド）で保存・共有されます。</div>
   <div class="uniform-sync-status" id="uniform-sync-status" role="status" aria-live="polite">クラウドの最新在庫を確認しています…</div>
+  <div class="backup-health" id="uniform-backup-health">変更前の自動バックアップが有効です</div>
   <div class="uniform-recovery" id="uniform-recovery" role="alert">
     <div><strong>この端末に復元できる在庫があります</strong><span id="uniform-recovery-message"></span></div>
     <button class="btn btn-primary btn-sm" type="button" onclick="restoreDeviceInventory()">不足分を復元する</button>
@@ -433,6 +442,7 @@
   <div style="display:flex;gap:8px;margin:18px 0 14px;flex-wrap:wrap">
     <button class="btn btn-primary" onclick="openAddWithColorPicker()">＋ メイン・サブカラーを選んで追加</button>
     <button class="btn btn-outline btn-sm" onclick="showHistory()">📋 貸出履歴</button>
+    <button class="btn btn-outline btn-sm" onclick="openUniformBackupCenter()">🛟 バックアップ・復元</button>
     <button class="btn btn-outline btn-sm" onclick="exportUniformCSV()">📥 CSV出力</button>
     <button class="btn-line-copy sm" onclick="copyUniformList()">📋 LINEコピー</button>
   </div>
@@ -595,6 +605,21 @@
   </div>
 </div>
 
+<!-- 在庫バックアップ・復元モーダル -->
+<div class="modal-bg" id="modal-uniform-backup">
+  <div class="modal">
+    <h3>🛟 在庫バックアップ・復元</h3>
+    <div class="template-guide">在庫を変更するたびに、変更前の状態を自動保存しています。戻したい日時と着数を確認してから復元できます。</div>
+    <div class="modal-btns" style="justify-content:flex-start">
+      <button class="btn btn-outline btn-sm" type="button" onclick="createManualUniformBackup()">現在の在庫を保存</button>
+      <button class="btn btn-outline btn-sm" type="button" onclick="loadUniformBackups()">一覧を更新</button>
+    </div>
+    <div class="backup-list" id="uniform-backup-list"><div class="backup-empty">バックアップを読み込んでいます…</div></div>
+    <div class="backup-preview" id="uniform-backup-preview"></div>
+    <div class="modal-btns"><button class="btn btn-outline" onclick="closeM('modal-uniform-backup')">閉じる</button></div>
+  </div>
+</div>
+
 <!-- 靴下在庫モーダル -->
 <div class="modal-bg" id="modal-sock">
   <div class="modal">
@@ -701,6 +726,7 @@ var KU="smc_uniform_v3",KH="smc_uniform_hist_v1",KT="smc_uniform_color_templates
 var editId=null,lendId=null,sockEditId=null,pantsEditId=null;
 var _unifData=[], _histData=[], _colorTemplates=[],_folderOrder=[],_colorCategories={},_sockData=[],_pantsData=[];
 var _uniformCloudReady=false,_uniformBackupSequence=0,_deviceRecoverySnapshot=null,_uniformPersistedSnapshot=[];
+var _uniformWriteInFlight=false,_uniformDailyBackupDone=false,_uniformBackupCache={},_selectedUniformBackupKey="";
 var _conditionFilter="";
 var _uniformView="color";
 var _pairPrimaryColor="",_pairSecondaryColor="";
@@ -740,23 +766,78 @@ function ensureUniformCloudReady(){
   return false;
 }
 function cloneUniformItems(items){return JSON.parse(JSON.stringify(Array.isArray(items)?items:[]));}
+function uniformStableSignature(items){try{return JSON.stringify(cloneUniformItems(items));}catch(error){return "";}}
+function setUniformBackupHealth(message,isError){
+  var el=document.getElementById("uniform-backup-health");if(!el)return;
+  el.textContent=message||"変更前の自動バックアップが有効です";
+  el.style.color=isError?"#ff8197":"#79e8b5";
+}
+function readUniformCloud(){
+  return new Promise(function(resolve){
+    if(!FIREBASE_READY||!FIREBASE_DB){resolve({ok:false,error:new Error("クラウドへ接続できません。")});return;}
+    FIREBASE_DB.ref("uniform").once("value").then(function(snapshot){
+      var value=snapshot.val();resolve({ok:true,items:Array.isArray(value)?value.filter(function(item){return item&&typeof item==="object";}):[]});
+    }).catch(function(error){resolve({ok:false,error:error});});
+  });
+}
+function writeUniformWithConflictCheck(next,expected){
+  return new Promise(function(resolve){
+    if(!FIREBASE_READY||!FIREBASE_DB){resolve({ok:false,error:new Error("クラウドへ接続できません。")});return;}
+    var expectedSignature=uniformStableSignature(expected),conflictItems=[];
+    FIREBASE_DB.ref("uniform").transaction(function(current){
+      var actual=Array.isArray(current)?current.filter(function(item){return item&&typeof item==="object";}):[];
+      if(uniformStableSignature(actual)!==expectedSignature){conflictItems=cloneUniformItems(actual);return;}
+      return cloneUniformItems(next);
+    },function(error,committed,snapshot){
+      if(error){resolve({ok:false,error:error});return;}
+      if(!committed){resolve({ok:false,conflict:true,items:conflictItems});return;}
+      try{localStorage.setItem(KU,JSON.stringify(next));}catch(cacheError){}
+      resolve({ok:true,cloudSaved:true,items:cloneUniformItems(snapshot&&snapshot.val?snapshot.val():next)});
+    },false);
+  });
+}
 function loadU(){ return _unifData; }
 function saveU(d,reason){
-  var next=cloneUniformItems(d),previous=cloneUniformItems(_uniformPersistedSnapshot.length?_uniformPersistedSnapshot:_unifData);
+  if(!_uniformCloudReady){ensureUniformCloudReady();return Promise.resolve({ok:false,notReady:true});}
+  if(_uniformWriteInFlight){alert("別の在庫変更を保存中です。『クラウド同期済み』になってから、もう一度お試しください。");return Promise.resolve({ok:false,busy:true});}
+  var next=cloneUniformItems(d),previous=cloneUniformItems(_uniformPersistedSnapshot);
+  _uniformWriteInFlight=true;setUniformBackupHealth("安全確認とバックアップを実行中…",false);
   _unifData=next;
   var backupId="b"+Date.now()+"_"+(++_uniformBackupSequence);
-  var backup={createdAt:new Date().toISOString(),reason:reason||"before_change",items:previous};
-  var backupPromise=previous.length?dbSave("uniform_backups/"+backupId,backup,null,null):Promise.resolve({ok:true});
-  return backupPromise.then(function(result){
+  var backup;
+  return readUniformCloud().then(function(cloud){
+    if(!cloud.ok)throw cloud.error||new Error("クラウドの最新在庫を確認できませんでした。");
+    if(uniformStableSignature(cloud.items)!==uniformStableSignature(previous)){
+      _unifData=cloneUniformItems(cloud.items);_uniformPersistedSnapshot=cloneUniformItems(cloud.items);
+      try{localStorage.setItem(KU,JSON.stringify(cloud.items));}catch(cacheError){}
+      render();alert("ほかの端末で在庫が更新されました。古いデータでの上書きを停止し、最新の在庫を読み直しました。内容を確認して、もう一度操作してください。");
+      return {ok:false,conflict:true,stopped:true};
+    }
+    backup={createdAt:new Date().toISOString(),reason:reason||"before_change",itemCount:cloud.items.length,schemaVersion:2,items:cloneUniformItems(cloud.items)};
+    return dbSave("uniform_backups/"+backupId,backup,null,null);
+  }).then(function(result){
+    if(result&&result.stopped)return result;
     if(!result||!result.ok){
       _unifData=previous;render();
       alert("安全バックアップを作成できなかったため、在庫の変更を中止しました。通信状態を確認してください。");
       return result||{ok:false};
     }
-    return dbSave("uniform",next,KU,null);
+    return writeUniformWithConflictCheck(next,backup.items);
   }).then(function(result){
-    if(result&&result.ok)_uniformPersistedSnapshot=cloneUniformItems(next);
+    if(result&&result.stopped){setUniformBackupHealth("競合を検知し、上書きを停止しました",true);return result;}
+    if(result&&result.ok){_uniformPersistedSnapshot=cloneUniformItems(next);setUniformBackupHealth("バックアップ済み・競合保護中",false);}
+    else if(result&&result.conflict){
+      var latest=cloneUniformItems(result.items||previous);_unifData=latest;_uniformPersistedSnapshot=latest;render();
+      alert("保存中にほかの端末から更新がありました。上書きを停止して最新データへ戻しました。");
+      setUniformBackupHealth("競合を検知し、上書きを停止しました",true);
+    }
     renderUniformRecovery();return result;
+  }).catch(function(error){
+    _unifData=previous;render();setUniformBackupHealth("バックアップまたは保存に失敗しました",true);
+    alert(error&&error.message?error.message:"安全確認に失敗したため、在庫の変更を中止しました。");
+    return {ok:false,error:error};
+  }).finally(function(){
+    _uniformWriteInFlight=false;
   });
 }
 function restoreDeviceInventory(){
@@ -767,6 +848,84 @@ function restoreDeviceInventory(){
   var merged=loadU().concat(missing.map(function(item){return Object.assign({},item);}));
   saveU(merged,"device_recovery").then(function(result){
     if(result&&result.ok){render();renderUniformRecovery();alert(missing.length+"着を復元しました。");}
+  });
+}
+function japanDateKey(){
+  try{return new Intl.DateTimeFormat("en-CA",{timeZone:"Asia/Tokyo",year:"numeric",month:"2-digit",day:"2-digit"}).format(new Date()).replace(/\//g,"-");}
+  catch(error){return new Date().toISOString().slice(0,10);}
+}
+function ensureDailyUniformBackup(items){
+  if(_uniformDailyBackupDone||!FIREBASE_READY||!FIREBASE_DB)return;
+  _uniformDailyBackupDone=true;
+  var key="daily_"+japanDateKey();
+  var backup={createdAt:new Date().toISOString(),reason:"daily_open",itemCount:items.length,schemaVersion:2,items:cloneUniformItems(items)};
+  FIREBASE_DB.ref("uniform_backups/"+key).transaction(function(current){return current||backup;},function(error){
+    if(error){_uniformDailyBackupDone=false;setUniformBackupHealth("本日の自動バックアップを確認できません",true);}
+    else setUniformBackupHealth("本日のバックアップあり・競合保護中",false);
+  },false);
+}
+function backupItemsFromValue(value){
+  if(Array.isArray(value))return cloneUniformItems(value);
+  return value&&Array.isArray(value.items)?cloneUniformItems(value.items):[];
+}
+function backupReasonLabel(reason,key){
+  if(reason==="daily_open"||String(key||"").indexOf("daily_")===0)return "日次バックアップ";
+  if(reason==="manual")return "手動バックアップ";
+  if(String(reason||"").indexOf("backup_restore:")===0)return "復元前バックアップ";
+  if(reason==="device_recovery")return "端末復元前";
+  if(String(key||"").indexOf("post_restore_")===0)return "復元直後の保護データ";
+  if(String(key||"").indexOf("pre_restore_")===0)return "復元作業前の保護データ";
+  return "変更前バックアップ";
+}
+function backupDateLabel(value,key){
+  var raw=value&&value.createdAt;
+  if(raw){try{return new Date(raw).toLocaleString("ja-JP",{timeZone:"Asia/Tokyo",year:"numeric",month:"2-digit",day:"2-digit",hour:"2-digit",minute:"2-digit"});}catch(error){}}
+  var match=String(key||"").match(/(20\d{6})[_-]?(\d{6})?/);
+  if(!match)return "日時不明";
+  var d=match[1],t=match[2]||"";return d.slice(0,4)+"/"+d.slice(4,6)+"/"+d.slice(6,8)+(t?" "+t.slice(0,2)+":"+t.slice(2,4):"");
+}
+function openUniformBackupCenter(){
+  if(!ensureUniformCloudReady())return;
+  _selectedUniformBackupKey="";document.getElementById("uniform-backup-preview").classList.remove("show");
+  document.getElementById("modal-uniform-backup").classList.add("open");loadUniformBackups();
+}
+function loadUniformBackups(){
+  var list=document.getElementById("uniform-backup-list");if(!list)return;
+  list.innerHTML='<div class="backup-empty">バックアップを読み込んでいます…</div>';
+  if(!FIREBASE_READY||!FIREBASE_DB){list.innerHTML='<div class="backup-empty">クラウドへ接続できません。</div>';return;}
+  FIREBASE_DB.ref("uniform_backups").once("value").then(function(snapshot){
+    var values=snapshot.val()||{},entries=Object.keys(values).map(function(key){
+      var value=values[key],items=backupItemsFromValue(value);return {key:key,value:value,items:items,date:value&&value.createdAt||"",count:items.length};
+    }).filter(function(entry){return entry.items.length||entry.value&&entry.value.itemCount===0;});
+    entries.sort(function(a,b){return String(b.date||b.key).localeCompare(String(a.date||a.key));});
+    entries=entries.slice(0,30);_uniformBackupCache={};entries.forEach(function(entry){_uniformBackupCache[entry.key]=entry;});
+    if(!entries.length){list.innerHTML='<div class="backup-empty">利用できるバックアップはまだありません。</div>';return;}
+    list.innerHTML=entries.map(function(entry){
+      return '<div class="backup-item"><div><strong>'+escapeHtml(backupDateLabel(entry.value,entry.key))+'　'+entry.count+'着</strong><span>'+escapeHtml(backupReasonLabel(entry.value&&entry.value.reason,entry.key))+'</span></div><button class="btn btn-outline btn-sm" type="button" onclick="selectUniformBackup(\''+encodeURIComponent(entry.key)+'\')">内容を確認</button></div>';
+    }).join("");
+  }).catch(function(){list.innerHTML='<div class="backup-empty">バックアップを読み込めませんでした。通信状態を確認してください。</div>';});
+}
+function selectUniformBackup(encodedKey){
+  var key=decodeURIComponent(encodedKey||""),entry=_uniformBackupCache[key],preview=document.getElementById("uniform-backup-preview");if(!entry||!preview)return;
+  _selectedUniformBackupKey=key;
+  var current=loadU().length,difference=entry.count-current,diffText=difference===0?"現在と同じ着数です":difference>0?"現在より "+difference+"着多いデータです":"現在より "+Math.abs(difference)+"着少ないデータです";
+  preview.innerHTML='<strong>'+escapeHtml(backupDateLabel(entry.value,entry.key))+' の在庫</strong><br>バックアップ：'+entry.count+'着 ／ 現在：'+current+'着<br>'+escapeHtml(diffText)+'<br><button class="btn btn-primary" type="button" onclick="restoreSelectedUniformBackup()">このバックアップへ戻す</button>';
+  preview.classList.add("show");preview.scrollIntoView({behavior:"smooth",block:"nearest"});
+}
+function createManualUniformBackup(){
+  if(!ensureUniformCloudReady())return;
+  readUniformCloud().then(function(cloud){
+    if(!cloud.ok)throw cloud.error||new Error("最新在庫を確認できませんでした。");
+    var id="manual_"+Date.now(),backup={createdAt:new Date().toISOString(),reason:"manual",itemCount:cloud.items.length,schemaVersion:2,items:cloneUniformItems(cloud.items)};
+    return dbSave("uniform_backups/"+id,backup,null,null);
+  }).then(function(result){if(result&&result.ok){alert("現在の在庫をバックアップしました。");loadUniformBackups();}else throw new Error("バックアップを保存できませんでした。");}).catch(function(error){alert(error&&error.message?error.message:"バックアップを保存できませんでした。");});
+}
+function restoreSelectedUniformBackup(){
+  var entry=_uniformBackupCache[_selectedUniformBackupKey];if(!entry||!ensureUniformCloudReady())return;
+  var answer=prompt("現在の "+loadU().length+"着を、選択した "+entry.count+"着の状態へ戻します。\n復元前の現在データも自動保存されます。\n実行する場合は『復元』と入力してください。");
+  if(answer!=="復元"){if(answer!==null)alert("入力が一致しないため、復元を中止しました。");return;}
+  saveU(entry.items,"backup_restore:"+entry.key).then(function(result){
+    if(result&&result.ok){render();alert(entry.count+"着のバックアップへ復元しました。復元前の状態もバックアップから戻せます。");loadUniformBackups();}
   });
 }
 captureDeviceUniformSnapshot();
@@ -990,8 +1149,9 @@ function saveFolderColorChange(){
   var categoryLabels=normalizeCategoryLabels(document.getElementById("folder-categories").value);
   if(nextColorName!==_folderColorEditName)delete categories[_folderColorEditName];
   if(categoryLabels.length)categories[nextColorName]=categoryLabels;else delete categories[nextColorName];
-  Promise.all([saveU(data),saveColorCategories(categories)]).then(function(){
-    closeM("modal-folder-color");render();
+  saveU(data,"folder_color_change").then(function(result){
+    if(!result||!result.ok)return;
+    return saveColorCategories(categories).then(function(){closeM("modal-folder-color");render();});
   });
 }
 
@@ -1805,32 +1965,34 @@ function saveUni(closeAfter){
     entry.storageLocation="warehouse";
   }
   if(!exist)data.push(entry);
-  saveU(data);
-  if(previousHolder!==holderName){
-    var history=loadH();
-    history.push({
-      type:holderName?"貸出":"返却",
-      date:new Date().toISOString().slice(0,10),
-      num:entry.num,cname:entry.cname,player:holderName||previousHolder,
-      name:holderName||previousHolder,retDate:""
-    });
-    saveH(history);
-  }
-  render();
-  if(closeAfter||editing){closeM("modal-add");return;}
-  prepareNextUniformEntry(colorName,num,duplicateItems.length);
+  saveU(data,editing?"uniform_edit":"uniform_add").then(function(result){
+    if(!result||!result.ok)return;
+    if(previousHolder!==holderName){
+      var history=loadH();
+      history.push({
+        type:holderName?"貸出":"返却",
+        date:new Date().toISOString().slice(0,10),
+        num:entry.num,cname:entry.cname,player:holderName||previousHolder,
+        name:holderName||previousHolder,retDate:""
+      });
+      saveH(history);
+    }
+    render();
+    if(closeAfter||editing){closeM("modal-add");return;}
+    prepareNextUniformEntry(colorName,num,duplicateItems.length);
+  });
 }
 function deleteUni(){
   if(!ensureUniformCloudReady())return;
   if(!editId||!confirm("削除しますか？"))return;
-  saveU(loadU().filter(function(x){return x.id!==editId;}));closeM("modal-add");render();
+  saveU(loadU().filter(function(x){return x.id!==editId;}),"uniform_delete").then(function(result){if(result&&result.ok){closeM("modal-add");render();}});
 }
 function confirmDel(id){
   if(!ensureUniformCloudReady())return;
   var u=loadU().find(function(x){return x.id===id;});
   if(!u)return;
   if(!confirm("#"+u.num+(u.player?" "+u.player:"")+" を削除しますか？"))return;
-  saveU(loadU().filter(function(x){return x.id!==id;}));render();
+  saveU(loadU().filter(function(x){return x.id!==id;}),"uniform_delete").then(function(result){if(result&&result.ok)render();});
 }
 
 function openLend(id){
@@ -1858,16 +2020,21 @@ function doLend(){
   if(!name){alert("氏名を入力してください");return;}
   var data=loadU(),u=data.find(function(x){return x.id===lendId;});if(!u)return;
   u.player=name;u.lentTo=name;u.lentDate=document.getElementById("l-date").value;u.retDate=document.getElementById("l-ret").value;u.storageLocation="player";
-  saveU(data);
-  var h=loadH();h.push({type:"貸出",date:u.lentDate,num:u.num,cname:u.cname,player:u.player||"",name:name,retDate:u.retDate||""});saveH(h);
-  closeM("modal-lend");render();
+  saveU(data,"uniform_lend").then(function(result){
+    if(!result||!result.ok)return;
+    var h=loadH();h.push({type:"貸出",date:u.lentDate,num:u.num,cname:u.cname,player:u.player||"",name:name,retDate:u.retDate||""});saveH(h);
+    closeM("modal-lend");render();
+  });
 }
 function doReturn(){
   if(!ensureUniformCloudReady())return;
   var data=loadU(),u=data.find(function(x){return x.id===lendId;});if(!u)return;
-  var h=loadH();h.push({type:"返却",date:new Date().toISOString().slice(0,10),num:u.num,cname:u.cname,player:u.player||"",name:u.lentTo,retDate:""});saveH(h);
+  var historyEntry={type:"返却",date:new Date().toISOString().slice(0,10),num:u.num,cname:u.cname,player:u.player||"",name:u.lentTo,retDate:""};
   u.player="";delete u.lentTo;delete u.lentDate;delete u.retDate;u.storageLocation="warehouse";
-  saveU(data);closeM("modal-lend");render();
+  saveU(data,"uniform_return").then(function(result){
+    if(!result||!result.ok)return;
+    var h=loadH();h.push(historyEntry);saveH(h);closeM("modal-lend");render();
+  });
 }
 function showHistory(){
   var h=loadH().reverse();
@@ -1885,7 +2052,7 @@ function showHistory(){
   document.getElementById("modal-hist").classList.add("open");
 }
 function closeM(id){document.getElementById(id).classList.remove("open");}
-["modal-add","modal-lend","modal-hist","modal-sock","modal-pants","modal-folder-color"].forEach(function(id){
+["modal-add","modal-lend","modal-hist","modal-uniform-backup","modal-sock","modal-pants","modal-folder-color"].forEach(function(id){
   document.getElementById(id).addEventListener("click",function(e){if(e.target.id===id)closeM(id);});
 });
 function render(){renderStats();renderFolders();renderNumberOverview();renderPants();renderSocks();renderUniformRecovery();}
@@ -1896,7 +2063,10 @@ function startUniformSync(){
   dbListen("uniform", function(val,meta){
     var cleanUniforms=Array.isArray(val)?val.filter(function(item){return item&&typeof item==="object";}):[];
     var goalkeeperMigration=normalizeGoalkeeperUniforms(cleanUniforms);_unifData=goalkeeperMigration.items;
-    if(meta&&meta.authoritative){_uniformCloudReady=true;_uniformPersistedSnapshot=cloneUniformItems(_unifData);}
+    if(meta&&meta.authoritative){
+      _uniformCloudReady=true;_uniformPersistedSnapshot=cloneUniformItems(cleanUniforms);
+      ensureDailyUniformBackup(cleanUniforms);
+    }
     var syncStatus=document.getElementById("uniform-sync-status");
     if(syncStatus){
       syncStatus.classList.toggle("ready",_uniformCloudReady);
@@ -1904,7 +2074,7 @@ function startUniformSync(){
     }
     // 端末キャッシュは古い／不完全な可能性があるため、絶対にクラウドへ書き戻さない。
     // 色名の移行保存は、Firebaseから届いた権威ある全件データに対してのみ行う。
-    if(meta&&meta.authoritative&&goalkeeperMigration.changed)dbSave("uniform",_unifData,KU,null);
+    if(meta&&meta.authoritative&&goalkeeperMigration.changed&&!_uniformWriteInFlight)saveU(_unifData,"goalkeeper_color_migration");
     render();
   }, KU, []);
   dbListen("uniform_hist", function(val){
