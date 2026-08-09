@@ -5,7 +5,7 @@
   <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate, max-age=0">
   <meta http-equiv="Pragma" content="no-cache">
   <meta http-equiv="Expires" content="-1">
-  <meta name="app-version" content="20260809-7">
+  <meta name="app-version" content="20260809-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <meta name="robots" content="noindex,nofollow">
   <title>大会要綱・対戦表 v5｜吉見SMC FC</title>
@@ -19,6 +19,7 @@
   <style>
     @page smc-youkou-page{size:A4 portrait;margin:6mm}
     @page smc-taisen-page{size:A4 landscape;margin:5mm}
+    @page smc-taisen-one-page{size:A4 portrait;margin:5mm}
     /* ====== タブ ====== */
     .doc-tab-bar{display:flex;gap:0;margin-bottom:20px;border-radius:var(--r8);overflow:hidden;border:1px solid var(--line-2)}
     .doc-tab-btn{flex:1;padding:12px 8px;font:inherit;font-size:.88rem;font-weight:900;background:var(--surface-lt);color:#6aaccc;border:none;cursor:pointer;transition:.15s;display:flex;align-items:center;justify-content:center;gap:6px}
@@ -54,6 +55,7 @@
     .req-sheet.pdf-capture{width:794px!important;max-width:none!important;padding:22px 26px 18px!important}
     .tai-sheet.pdf-capture{width:1123px!important;max-width:none!important;padding:16px 20px 14px!important;font-size:9pt!important;line-height:1.4!important}
     .tai-sheet.pdf-capture .courts-row{grid-template-columns:repeat(2,minmax(0,1fr))!important}
+    .tai-sheet.pdf-capture.pdf-one-court{width:794px!important;max-width:none!important;padding:22px 26px 18px!important;font-size:9pt!important}
     /* PDF専用：入力画面とは分離した、配布資料向けの仕上げ */
     .req-sheet.pdf-capture{border:1px solid #cbd5e1!important;padding:30px 36px 24px!important;color:#172033!important}
     .req-sheet.pdf-capture .req-title{font-size:18pt!important;letter-spacing:.08em!important;padding-bottom:9px!important;margin-bottom:15px!important;border-bottom:3px solid #e66a22!important;color:#173b66!important}
@@ -105,6 +107,7 @@
       /* 対戦表 */
       .tai-sheet{box-shadow:none!important;border-radius:0!important;margin:0!important;padding:0!important;max-width:100%!important;background:#fff!important;color:#000!important;width:100%!important}
       body[data-print-target="tournament-schedule"] .tai-sheet{page:smc-taisen-page}
+      body[data-print-target="tournament-schedule"][data-court-layout="one"] .tai-sheet{page:smc-taisen-one-page}
       html body[data-print-target="tournament-schedule"] #taisen-preview .tai-sheet{width:100%!important;max-width:100%!important;zoom:1!important;font-size:7.6pt!important;line-height:1.16!important;overflow:visible!important}
       .tai-sheet *{color:#000!important}
       .sched-th{background:#003087!important;color:#fff!important}
@@ -386,7 +389,7 @@
       <div class="sec">⏱ 試合設定</div>
       <div class="fg1">
         <div class="form-group"><label class="form-label">コート数</label>
-          <select class="form-control" id="t-courts" onchange="updateTeamInputs()">
+          <select class="form-control" id="t-courts" onchange="updateTeamInputs();updatePdfOrientationLabel()">
             <option value="1">1面</option>
             <option value="2" selected>2面（A・B面）</option>
           </select></div>
@@ -459,8 +462,8 @@
     </div>
     <div class="pdf-guide no-print" id="t-guide">
       <span class="pdf-guide-title">📄 対戦表をPDFにする方法</span>
-      <div class="pdf-guide-note">端末の印刷設定に左右されず、「A4・横」のPDFを直接作成します。</div>
-      <div class="pdf-steps"><div class="pdf-step"><span class="pdf-step-no">1</span><span>上の<strong>「対戦表をA4横PDFで作成」</strong>をタップ</span></div><div class="pdf-step"><span class="pdf-step-no">2</span><span>「PDFができました」と表示されるまで待つ</span></div><div class="pdf-step"><span class="pdf-step-no">3</span><span>「共有・印刷」または「PDFを開く」を選ぶ</span></div></div>
+      <div class="pdf-guide-note" id="t-pdf-orientation-note">2面はA4横、1面はA4縦で自動作成します。</div>
+      <div class="pdf-steps"><div class="pdf-step"><span class="pdf-step-no">1</span><span>上の<strong id="t-pdf-guide-button">「対戦表をA4横PDFで作成」</strong>をタップ</span></div><div class="pdf-step"><span class="pdf-step-no">2</span><span>「PDFができました」と表示されるまで待つ</span></div><div class="pdf-step"><span class="pdf-step-no">3</span><span>「共有・印刷」または「PDFを開く」を選ぶ</span></div></div>
       <div class="pdf-device-help">🍎 <strong>iPhone・iPad：</strong>「共有・印刷」から「プリント」「ファイルに保存」「LINE」を選べます。<br>🤖 <strong>Android：</strong>「PDFを開く」から共有・印刷できます。<br>💻 <strong>パソコン：</strong>「PDFを開く」から保存・印刷できます。</div>
     </div>
     <div id="taisen-preview" style="margin-top:12px"></div>
@@ -1252,7 +1255,9 @@ function buildAndPrintPortrait(){
   smcPrint({orientation:"portrait",target:"tournament-guidelines",margin:"6mm"});
 }
 function buildAndPrintLandscape(){
-  if(buildTaisen()!==false)smcPrint({orientation:"landscape",target:"tournament-schedule",margin:"5mm"});
+  var orientation=selectedScheduleOrientation();
+  document.body.dataset.courtLayout=orientation==="portrait"?"one":"two";
+  if(buildTaisen()!==false)smcPrint({orientation:orientation,target:"tournament-schedule",margin:"5mm"});
 }
 
 var _pdfReadyUrl="";
@@ -1261,7 +1266,19 @@ var _pdfReadyFile=null;
 function safePdfFilename(value){
   return String(value||"SMC大会").replace(/[\\/:*?"<>|]/g,"_").replace(/\s+/g," ").trim();
 }
-function showPdfReadyModal(blob,filename,isSchedule){
+function selectedScheduleOrientation(){
+  return Number(gv("t-courts"))===1?"portrait":"landscape";
+}
+function updatePdfOrientationLabel(){
+  var portrait=selectedScheduleOrientation()==="portrait";
+  var label=portrait?"A4縦":"A4横";
+  var button=document.getElementById("tai-print-btn");
+  var guideButton=document.getElementById("t-pdf-guide-button");
+  if(button)button.textContent="📄 対戦表を"+label+"PDFで作成";
+  if(guideButton)guideButton.textContent="「対戦表を"+label+"PDFで作成」";
+  document.body.dataset.courtLayout=portrait?"one":"two";
+}
+function showPdfReadyModal(blob,filename,pageLabel){
   if(_pdfReadyUrl)URL.revokeObjectURL(_pdfReadyUrl);
   _pdfReadyUrl=URL.createObjectURL(blob);
   try{_pdfReadyFile=new File([blob],filename,{type:"application/pdf"});}
@@ -1271,7 +1288,7 @@ function showPdfReadyModal(blob,filename,isSchedule){
   openLink.href=_pdfReadyUrl;
   downloadLink.href=_pdfReadyUrl;
   downloadLink.download=filename;
-  document.getElementById("pdf-ready-note").textContent=(isSchedule?"A4横":"A4縦")+"で作成しました。「共有・印刷する」からプリント、ファイル保存、LINE送信を選べます。";
+  document.getElementById("pdf-ready-note").textContent=pageLabel+"で作成しました。「共有・印刷する」からプリント、ファイル保存、LINE送信を選べます。";
   var shareButton=document.getElementById("pdf-share-btn");
   var canShare=!!(navigator.share&&_pdfReadyFile);
   if(canShare&&navigator.canShare){
@@ -1297,6 +1314,9 @@ async function shareGeneratedPdf(){
 /* iPhoneの印刷方向設定に依存せず、用紙方向を確定したPDFを直接生成する */
 async function exportA4Pdf(kind){
   var isSchedule=kind==="taisen";
+  var scheduleOrientation=isSchedule?selectedScheduleOrientation():"portrait";
+  var scheduleLandscape=isSchedule&&scheduleOrientation==="landscape";
+  var pageLabel=isSchedule?(scheduleLandscape?"A4横":"A4縦"):"A4縦";
   var button=document.getElementById(isSchedule?"tai-print-btn":"you-print-btn");
   var originalLabel=button?button.textContent:"";
   try{
@@ -1312,6 +1332,7 @@ async function exportA4Pdf(kind){
     var sheet=document.querySelector(isSchedule?"#taisen-preview .tai-sheet":"#youkou-preview .req-sheet");
     if(!sheet)throw new Error("プレビューを作成できませんでした。");
     sheet.classList.add("pdf-capture");
+    if(isSchedule&&!scheduleLandscape)sheet.classList.add("pdf-one-court");
     if(document.fonts&&document.fonts.ready)await document.fonts.ready;
     await new Promise(function(resolve){requestAnimationFrame(function(){requestAnimationFrame(resolve);});});
     var canvas;
@@ -1326,23 +1347,40 @@ async function exportA4Pdf(kind){
         windowHeight:sheet.scrollHeight
       });
     }finally{
-      sheet.classList.remove("pdf-capture");
+      sheet.classList.remove("pdf-capture","pdf-one-court");
     }
     var JsPdf=window.jspdf.jsPDF;
-    var pdf=new JsPdf({orientation:isSchedule?"landscape":"portrait",unit:"mm",format:"a4",compress:true});
+    var pdf=new JsPdf({orientation:scheduleLandscape?"landscape":"portrait",unit:"mm",format:"a4",compress:true});
     var pageWidth=pdf.internal.pageSize.getWidth();
     var pageHeight=pdf.internal.pageSize.getHeight();
-    var margin=isSchedule?4:6;
+    var margin=isSchedule?(scheduleLandscape?4:5):6;
     var maxWidth=pageWidth-margin*2;
     var maxHeight=pageHeight-margin*2;
-    var ratio=Math.min(maxWidth/canvas.width,maxHeight/canvas.height);
-    var drawWidth=canvas.width*ratio;
-    var drawHeight=canvas.height*ratio;
-    var x=(pageWidth-drawWidth)/2;
-    var y=margin;
-    pdf.addImage(canvas.toDataURL("image/jpeg",.94),"JPEG",x,y,drawWidth,drawHeight,undefined,"FAST");
-    var filename=safePdfFilename(isSchedule?gv("t-title"):gv("y-title"))+(isSchedule?"_対戦表_A4横.pdf":"_大会要項_A4縦.pdf");
-    showPdfReadyModal(pdf.output("blob"),filename,isSchedule);
+    var widthRatio=maxWidth/canvas.width;
+    var heightAtReadableWidth=canvas.height*widthRatio;
+    if(isSchedule&&!scheduleLandscape&&heightAtReadableWidth>maxHeight*1.08){
+      var sliceHeight=Math.max(1,Math.floor(maxHeight/widthRatio));
+      var offset=0,pageIndex=0;
+      while(offset<canvas.height){
+        var currentHeight=Math.min(sliceHeight,canvas.height-offset);
+        var slice=document.createElement("canvas");
+        slice.width=canvas.width;slice.height=currentHeight;
+        var context=slice.getContext("2d");
+        context.fillStyle="#fff";context.fillRect(0,0,slice.width,slice.height);
+        context.drawImage(canvas,0,offset,canvas.width,currentHeight,0,0,canvas.width,currentHeight);
+        if(pageIndex>0)pdf.addPage("a4","portrait");
+        pdf.addImage(slice.toDataURL("image/jpeg",.94),"JPEG",margin,margin,maxWidth,currentHeight*widthRatio,undefined,"FAST");
+        offset+=currentHeight;pageIndex++;
+      }
+    }else{
+      var ratio=Math.min(widthRatio,maxHeight/canvas.height);
+      var drawWidth=canvas.width*ratio;
+      var drawHeight=canvas.height*ratio;
+      var x=(pageWidth-drawWidth)/2;
+      pdf.addImage(canvas.toDataURL("image/jpeg",.94),"JPEG",x,margin,drawWidth,drawHeight,undefined,"FAST");
+    }
+    var filename=safePdfFilename(isSchedule?gv("t-title"):gv("y-title"))+(isSchedule?(scheduleLandscape?"_対戦表_A4横.pdf":"_対戦表_A4縦.pdf"):"_大会要項_A4縦.pdf");
+    showPdfReadyModal(pdf.output("blob"),filename,pageLabel);
   }catch(error){
     alert(error&&error.message?error.message:"PDFを作成できませんでした。もう一度お試しください。");
   }finally{
@@ -1356,6 +1394,7 @@ async function exportA4Pdf(kind){
   var ds=now.getFullYear()+"-"+String(now.getMonth()+1).padStart(2,"0")+"-"+String(now.getDate()).padStart(2,"0");
   ["y-date","t-date"].forEach(function(id){var e=document.getElementById(id);if(e)e.value=ds;});
   updateTeamInputs();
+  updatePdfOrientationLabel();
 })();
 
 /* ===== カスタム項目（基本情報） ===== */
@@ -1474,6 +1513,7 @@ function applyFields(data){
   });
   toggleLunch();
   toggleCeremonies();
+  updatePdfOrientationLabel();
 }
 
 function captureTeamValues(){
@@ -1498,6 +1538,7 @@ function applyTeamValues(teams){
   var courtSelect=document.getElementById("t-courts");
   if(courtSelect)courtSelect.value=String(Math.min(Math.max(blocks.length,1),2));
   updateTeamInputs();
+  updatePdfOrientationLabel();
   blocks.slice(0,2).forEach(function(block,c){
     var countEl=document.getElementById("cnt-"+c);
     if(countEl){
