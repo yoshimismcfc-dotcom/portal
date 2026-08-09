@@ -77,7 +77,7 @@ for (const file of htmlFiles) {
   }
 }
 
-for (const file of ["common.js", "firebase-config.js", "sw.js"]) {
+for (const file of ["common.js", "firebase-config.js", "sw.js", "tournament-guidelines.js"]) {
   const source = fs.readFileSync(path.join(root, file), "utf8");
   try {
     new Function(source);
@@ -113,6 +113,7 @@ if (!commonCssSource.includes("--body-tail: #e8eef7")) {
 
 const tournamentSource = fs.readFileSync(path.join(root, "tournament.html"), "utf8");
 const tournamentSchedulerSource = fs.readFileSync(path.join(root, "tournament-scheduler.js"), "utf8");
+const tournamentGuidelinesSource = fs.readFileSync(path.join(root, "tournament-guidelines.js"), "utf8");
 const tournamentVersion = tournamentSource.match(/name=["']app-version["'][^>]*content=["']([^"']+)/i)?.[1];
 if (tournamentVersion !== swVersion) {
   fail("PWA", `tournament.html のバージョンが一致しません: ${tournamentVersion || "なし"}`);
@@ -410,14 +411,17 @@ if (!tournamentSource.includes(".tai-sheet.pdf-capture .score-input") || !tourna
 if (!tournamentSource.includes("selectedScheduleOrientation") || !tournamentSource.includes("pdf-one-court") || !tournamentSource.includes("smc-taisen-one-page") || !tournamentSource.includes("_対戦表_A4縦.pdf") || !tournamentSource.includes("scheduleLandscape?\"landscape\":\"portrait\"")) {
   fail("tournament.html", "対戦表PDFが2面=A4横、1面=A4縦へ自動切替されていません");
 }
-if (!tournamentSource.includes("#doc-youkou #y-date,#doc-taisen #t-date") || !tournamentSource.includes("#y-date::-webkit-date-and-time-value") || !tournamentSource.includes("min-inline-size:0!important")) {
+if (!tournamentSource.includes("#doc-youkou .guideline-content-input[type=date],#doc-taisen #t-date") || !tournamentSource.includes(".guideline-content-input[type=date]::-webkit-date-and-time-value") || !tournamentSource.includes("min-inline-size:0!important")) {
   fail("tournament.html", "iPhoneで大会要綱の期日入力欄が横にはみ出す対策がありません");
 }
 if (!tournamentSource.includes("手書きにも使える得点記入枠") || !tournamentSource.includes(".tai-sheet.pdf-capture.pdf-one-court .st td") || !tournamentSource.includes("border:1.5px solid #c78313!important")) {
   fail("tournament.html", "対戦表の印刷版が得点記入枠付きの読みやすいレイアウトになっていません");
 }
-if (!tournamentSource.includes('id="y-ceremony"') || !tournamentSource.includes('id="y-label-ceremony"') || !tournamentSource.includes("getCustomRows().forEach(function(row){addSection") || !tournamentSource.includes("moveCustomRow") || !tournamentSource.includes('"y-ceremony","y-notes"')) {
-  fail("tournament.html", "大会要項の開閉会式・本文・項目名・自由追加項目を編集して保存できません");
+for (const feature of ["guideline-card-list","deleteGuidelineItem","undoGuidelineDelete","bindGuidelineLongPress","restoreStandard","guidelineMeta","guidelineSections","safePageBreaks"]) {
+  if (!tournamentSource.includes(feature)) fail("tournament.html", `大会要項の自由編集機能が不足しています: ${feature}`);
+}
+for (const feature of ["DEFAULT_META","DEFAULT_SECTIONS","migrateLegacy","activeItems","missingStandards","restoreStandard"]) {
+  if (!tournamentGuidelinesSource.includes(feature)) fail("tournament-guidelines.js", `大会要項データモデルが不足しています: ${feature}`);
 }
 if (!commonSource.includes('data-print-target="tournament-guidelines"') || !tournamentSource.includes("@page smc-taisen-page") || !tournamentSource.includes("size:A4 landscape")) {
   fail("common.js", "要項・対戦表をA4一枚へ収める印刷調整がありません");
