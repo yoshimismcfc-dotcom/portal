@@ -400,6 +400,20 @@ if (!guideSource.includes("固定10分休憩はありません")) {
 if (!commonSource.includes('data-print-target="tournament-schedule"') || !commonSource.includes("tournament-print-enhanced-style")) {
   fail("common.js", "対戦表の印刷専用デザインがありません");
 }
+if (!tournamentSource.includes("要項をA4縦1枚でPDF・印刷") || !tournamentSource.includes("対戦表をA4横1枚でPDF・印刷") || !tournamentSource.includes("pdf-device-help")) {
+  fail("tournament.html", "要項・対戦表のPDF保存手順が分かりやすく表示されていません");
+}
+if (!commonSource.includes('data-print-target="tournament-guidelines"') || !commonSource.includes("zoom:.9")) {
+  fail("common.js", "要項・対戦表をA4一枚へ収める印刷調整がありません");
+}
+for (const ceremonyField of ["opening-enable", "opening-start", "opening-min", "closing-enable", "closing-start", "closing-min"]) {
+  if (!tournamentSource.includes(`id="${ceremonyField}"`) || !tournamentSource.includes(`"${ceremonyField}"`)) {
+    fail("tournament.html", `開閉会式の入力・保存項目がありません: ${ceremonyField}`);
+  }
+}
+if (!tournamentSource.includes("ceremonyBanner") || !tournamentSource.includes("automaticClosingTime")) {
+  fail("tournament.html", "開閉会式の任意表示または閉会式時刻の自動計算がありません");
+}
 if (!commonSource.includes("#doc-taisen #t-date") || !commonSource.includes("min-inline-size:0")) {
   fail("common.js", "対戦表の期日入力欄にスマホ向け横幅補正がありません");
 }
