@@ -378,6 +378,16 @@ for (const required of [
 if (!source.includes("setTimeout(function(){_templateLongPressed=true;setTemplateReorderMode(true);},600)")) {
   throw new Error("テンプレートの長押し判定がありません");
 }
+for (const required of [
+  'id="folder-categories"',
+  "function normalizeCategoryLabels(value)",
+  "function categoryLabelsForFolder(colorName,items)",
+  'class="cf-category-list" aria-label="使用カテゴリー"',
+  'dbSave("uniform_color_categories"',
+  'dbListen("uniform_color_categories"'
+]) {
+  if (!source.includes(required)) throw new Error("色帯の使用カテゴリー表示・保存が不足しています: " + required);
+}
 if (!(source.indexOf('id="color-folders"') < source.indexOf("＋ メイン・サブカラーを選んで追加"))) {
   throw new Error("補助操作ボタンは色一覧より下に配置してください");
 }
