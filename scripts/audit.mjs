@@ -420,6 +420,9 @@ if (!tournamentSource.includes("手書きにも使える得点記入枠") || !to
 for (const feature of ["guideline-card-list","deleteGuidelineItem","undoGuidelineDelete","bindGuidelineLongPress","restoreStandard","guidelineMeta","guidelineSections","safePageBreaks"]) {
   if (!tournamentSource.includes(feature)) fail("tournament.html", `大会要項の自由編集機能が不足しています: ${feature}`);
 }
+if (!tournamentSource.includes("guideline-quick-input") || !tournamentSource.includes("項目設定") || !tournamentSource.includes("表示されている入力欄へそのまま入力")) {
+  fail("tournament.html", "大会要項が前の画面のように直接入力できる分かりやすい構成になっていません");
+}
 for (const feature of ["fitGuidelineCaptureToA4","pdf-guideline-compact","pdf-guideline-tight","splitThreshold=isSchedule?1.08:1.24"]) {
   if (!tournamentSource.includes(feature)) fail("tournament.html", `大会要項のA4縦1枚への自動調整が不足しています: ${feature}`);
 }
