@@ -216,6 +216,7 @@ for (const required of [
 
 for (const required of [
   'var UNIFORM_ILLUSTRATIONS={',
+  '"白":{src:"assets/uniform-white.svg"',
   '"オレンジ × 赤":{src:"assets/uniform-orange-red-stripes.svg"',
   '"オレンジ赤縦じま":{src:"assets/uniform-orange-red-stripes.svg"',
   '"オレンジ赤縦縞":{src:"assets/uniform-orange-red-stripes.svg"',
@@ -266,6 +267,9 @@ if (!fs.existsSync(path.join(root, "assets", "uniform-white-red.svg"))) {
 if (!fs.existsSync(path.join(root, "assets", "uniform-white-blue-collar.svg"))) {
   throw new Error("白×青の襟付きユニフォームイラストがありません");
 }
+if (!fs.existsSync(path.join(root, "assets", "uniform-white.svg"))) {
+  throw new Error("白ユニフォームのイラストがありません");
+}
 
 for (const required of [
   "背番号別（大会用）",
@@ -280,7 +284,7 @@ for (const required of [
   'class="number-color-free">倉庫 ',
   'class="number-color-lent">貸出 ',
   'data-color-name="',
-  'renderStats();renderFolders();renderNumberOverview();renderSocks();',
+  'renderStats();renderFolders();renderNumberOverview();renderPants();renderSocks();',
   'setConditionFilter(value){_conditionFilter=String(value||"");renderFolders();renderNumberOverview();}'
 ]) {
   if (!source.includes(required)) throw new Error("大会用の背番号別表示が不足しています: " + required);
@@ -306,6 +310,37 @@ for (const required of [
   'renderPairComparison(data);'
 ]) {
   if (!source.includes(required)) throw new Error("正副2色の背番号比較が不足しています: " + required);
+}
+
+for (const required of [
+  "パンツ在庫・入力",
+  "タップして色・サイズ・在庫数を登録",
+  'id="pants-section-body"',
+  'id="pants-list"',
+  'id="modal-pants"',
+  'id="pants-main-name"',
+  'id="pants-size"',
+  'id="pants-quantity"',
+  "function togglePantsSection(forceOpen)",
+  "function renderPants()",
+  "function buildPantsTemplates()",
+  "function selectPantsTemplate(templateId)",
+  "function openPantsAdd()",
+  "function openPantsEdit(id)",
+  "function savePants()",
+  "function deletePants()",
+  'dbSave("uniform_pants"',
+  'dbListen("uniform_pants"',
+  'KP="smc_uniform_pants_v1"',
+  'entry.size=size;entry.quantity=quantity',
+  "パンツのサイズを入力してください",
+  "同じ色・サイズのパンツはすでに登録されています",
+  "サイズ '+escapeHtml(item.size||\"—\")+'　在庫 '",
+  "パンツを色・サイズ別に管理します",
+  'renderPants();renderSocks();',
+  '"modal-pants"'
+]) {
+  if (!source.includes(required)) throw new Error("パンツの色・サイズ別在庫管理が不足しています: " + required);
 }
 if (!source.includes("setTimeout(function(){_templateLongPressed=true;setTemplateReorderMode(true);},600)")) {
   throw new Error("テンプレートの長押し判定がありません");
