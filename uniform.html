@@ -123,6 +123,24 @@
     .condition-help{min-height:2.6em;margin-top:5px;color:var(--ink-3);font-size:.7rem;line-height:1.45}
     .duplicate-number-warning{display:none;margin-top:6px;padding:7px 8px;border:1px solid rgba(255,185,55,.5);border-radius:7px;background:rgba(255,170,30,.12);color:#ffd36a;font-size:.68rem;font-weight:900;line-height:1.45}
     .duplicate-number-warning.show{display:block}
+    /* ===== 大会用・背番号別表示 ===== */
+    .uniform-view-switch{display:grid;grid-template-columns:1fr 1fr;gap:7px;margin:0 0 12px;padding:4px;border:1px solid var(--line-2);border-radius:var(--r12);background:var(--surface-lt)}
+    .uniform-view-button{min-height:42px;padding:7px 9px;border:0;border-radius:9px;background:transparent;color:var(--ink-2);font-size:.78rem;font-weight:900;cursor:pointer}
+    .uniform-view-button.active{background:linear-gradient(135deg,#003087,#087aa9);color:#fff;box-shadow:0 2px 8px rgba(0,48,135,.28)}
+    .number-overview{margin:0 0 14px}
+    .number-overview-guide{margin:0 0 9px;padding:9px 11px;border:1px solid rgba(0,212,255,.25);border-radius:var(--r8);background:rgba(0,212,255,.07);color:var(--ink-2);font-size:.72rem;line-height:1.5}
+    .number-overview-list{display:grid;gap:8px}
+    .number-overview-row{display:grid;grid-template-columns:48px minmax(0,1fr);gap:8px;align-items:stretch;padding:7px;border:1px solid var(--line-2);border-radius:var(--r12);background:var(--surface-lt)}
+    .number-overview-number{display:grid;place-items:center;min-height:48px;border-radius:9px;background:#003087;color:#fff;font-size:1rem;font-weight:900}
+    .number-color-list{display:flex;min-width:0;gap:6px;flex-wrap:wrap}
+    .number-color-chip{display:grid;grid-template-columns:9px minmax(0,1fr) auto;align-items:center;gap:7px;min-width:min(210px,100%);max-width:100%;min-height:48px;padding:5px 8px 5px 5px;border:1px solid var(--line);border-radius:9px;background:rgba(255,255,255,.04);color:var(--ink);text-align:left;cursor:pointer}
+    .number-color-chip:hover{border-color:var(--cyan);background:rgba(0,212,255,.08)}
+    .number-color-band{align-self:stretch;border-radius:6px}
+    .number-color-name{min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;font-size:.72rem;font-weight:900}
+    .number-color-counts{display:flex;flex-direction:column;align-items:flex-end;gap:2px;font-size:.61rem;font-weight:900;white-space:nowrap}
+    .number-color-free{color:#00df7a}
+    .number-color-lent{color:#ff6680}
+    body[data-theme="light"] .number-color-chip{background:#fff}
     /* ===== 靴下在庫 ===== */
     .socks-section{margin:18px 0 14px;border:1px solid rgba(0,212,255,.3);border-radius:var(--r16);overflow:hidden;background:var(--surface-lt)}
     .socks-section-header{display:flex;align-items:center;gap:10px;width:100%;min-height:58px;padding:10px 14px;border:0;background:linear-gradient(135deg,rgba(0,48,135,.72),rgba(0,118,168,.5));color:#fff;text-align:left;cursor:pointer}
@@ -267,6 +285,10 @@
       .condition-filter-bar{padding:9px 10px}
       .condition-filter-label{font-size:.7rem;gap:6px}
       .condition-filter-label .form-control{font-size:.7rem}
+      .uniform-view-button{font-size:.72rem;padding:6px 5px}
+      .number-overview-row{grid-template-columns:43px minmax(0,1fr);gap:6px;padding:6px}
+      .number-overview-number{min-height:46px;font-size:.9rem}
+      .number-color-chip{width:100%;min-width:0;min-height:46px}
       .socks-section-body{padding:10px}
       .sock-card{min-height:57px}
       .sock-card-info{padding:8px 10px}
@@ -330,11 +352,20 @@
     </label>
     <span class="condition-filter-count" id="condition-filter-count">全件表示</span>
   </div>
-  <div style="margin-bottom:14px">
-    <button type="button" class="btn btn-outline btn-sm" id="folder-reorder-button" onclick="setFolderReorderMode()">↕ 色の順番を変更</button>
+  <div class="uniform-view-switch" role="tablist" aria-label="ユニフォームの表示方法">
+    <button type="button" class="uniform-view-button active" id="uniform-view-color-button" role="tab" aria-selected="true" onclick="setUniformView('color')">🎨 色別</button>
+    <button type="button" class="uniform-view-button" id="uniform-view-number-button" role="tab" aria-selected="false" onclick="setUniformView('number')">🔢 背番号別（大会用）</button>
   </div>
-
-  <div id="color-folders"></div>
+  <section class="number-overview" id="uniform-number-view" aria-label="大会用の背番号別ユニフォーム一覧" hidden>
+    <p class="number-overview-guide"><strong>番号ごとに使える色を確認できます。</strong><br>色をタップすると、その色の詳しい一覧が開きます。</p>
+    <div class="number-overview-list" id="number-overview-list"></div>
+  </section>
+  <div id="uniform-color-view">
+    <div style="margin-bottom:14px">
+      <button type="button" class="btn btn-outline btn-sm" id="folder-reorder-button" onclick="setFolderReorderMode()">↕ 色の順番を変更</button>
+    </div>
+    <div id="color-folders"></div>
+  </div>
 
   <div style="display:flex;gap:8px;margin:18px 0 14px;flex-wrap:wrap">
     <button class="btn btn-primary" onclick="openAddWithColorPicker()">＋ メイン・サブカラーを選んで追加</button>
@@ -523,6 +554,7 @@ var KU="smc_uniform_v3",KH="smc_uniform_hist_v1",KT="smc_uniform_color_templates
 var editId=null,lendId=null,sockEditId=null;
 var _unifData=[], _histData=[], _colorTemplates=[],_folderOrder=[],_sockData=[];
 var _conditionFilter="";
+var _uniformView="color";
 var _templateReorderMode=false,_templateLongPressed=false,_folderReorderMode=false;
 
 function loadU(){ return _unifData; }
@@ -577,7 +609,7 @@ function updateConditionHelp(){
   var found=conditionDefinition(document.getElementById("u-condition").value);
   document.getElementById("u-condition-help").textContent=found?found.help:"ユニフォームを確認して、最も近い状態を選んでください。";
 }
-function setConditionFilter(value){_conditionFilter=String(value||"");renderFolders();}
+function setConditionFilter(value){_conditionFilter=String(value||"");renderFolders();renderNumberOverview();}
 function findDuplicateUniforms(num,colorName,id){
   return loadU().filter(function(item){
     return item.id!==id&&String(item.num||"")===String(num||"")&&uniformColorLabel(item)===colorName;
@@ -654,6 +686,74 @@ function renderStats(){
     +'<div class="stat-card"><div class="sv" style="color:#ff4466">'+(total-free)+'</div><div class="sl">選手に貸出中</div></div>';
 }
 
+function setUniformView(view){
+  _uniformView=view==="number"?"number":"color";
+  var colorView=document.getElementById("uniform-color-view"),numberView=document.getElementById("uniform-number-view");
+  var colorButton=document.getElementById("uniform-view-color-button"),numberButton=document.getElementById("uniform-view-number-button");
+  var showNumbers=_uniformView==="number";
+  colorView.hidden=showNumbers;numberView.hidden=!showNumbers;
+  colorButton.classList.toggle("active",!showNumbers);numberButton.classList.toggle("active",showNumbers);
+  colorButton.setAttribute("aria-selected",String(!showNumbers));numberButton.setAttribute("aria-selected",String(showNumbers));
+  if(showNumbers)renderNumberOverview();
+}
+function compareUniformNumberLabels(a,b){
+  var aNumeric=/^\d+$/.test(a),bNumeric=/^\d+$/.test(b);
+  if(aNumeric&&bNumeric)return Number(a)-Number(b);
+  if(aNumeric)return -1;if(bNumeric)return 1;
+  return a.localeCompare(b,"ja");
+}
+function renderNumberOverview(){
+  var list=document.getElementById("number-overview-list");if(!list)return;
+  var data=loadU().filter(function(item){
+    var condition=normalizeCondition(item.condition);
+    if(!_conditionFilter)return true;
+    if(_conditionFilter==="__unset")return !condition;
+    return condition===_conditionFilter;
+  });
+  var numbers=Object.create(null);
+  data.forEach(function(item){
+    var number=String(item.num==null?"":item.num).trim()||"未設定";
+    var colorName=uniformColorLabel(item)||"その他";
+    if(!numbers[number])numbers[number]=Object.create(null);
+    if(!numbers[number][colorName])numbers[number][colorName]={items:[],main:safeColor(item.mainColorCode||item.ccode,"#666666"),sub:safeColor(item.subColorCode,item.mainColorCode||item.ccode||"#666666"),hasSub:!!String(item.subColorName||"").trim()};
+    numbers[number][colorName].items.push(item);
+  });
+  var numberNames=Object.keys(numbers).sort(compareUniformNumberLabels);
+  if(!numberNames.length){
+    list.innerHTML='<div style="text-align:center;color:var(--ink-3);padding:30px 12px;font-size:.82rem">'+(loadU().length?'選択した状態のユニフォームはありません。':'ユニフォームがありません。')+'</div>';
+    return;
+  }
+  list.innerHTML=numberNames.map(function(number){
+    var colors=numbers[number];
+    var colorNames=Object.keys(colors).sort(function(a,b){
+      var ai=_folderOrder.indexOf(a),bi=_folderOrder.indexOf(b);
+      if(ai>=0&&bi>=0)return ai-bi;if(ai>=0)return -1;if(bi>=0)return 1;
+      return a.localeCompare(b,"ja");
+    });
+    var chips=colorNames.map(function(colorName){
+      var group=colors[colorName],free=group.items.filter(function(item){return !item.lentTo;}).length,lent=group.items.length-free;
+      var sub=group.hasSub?group.sub:group.main;
+      var band="linear-gradient(180deg,"+group.main+" 0%,"+group.main+" 75%,"+sub+" 75%,"+sub+" 100%)";
+      var label="#"+number+"、"+colorName+"、倉庫"+free+"着、貸出"+lent+"着。詳しい一覧を開く";
+      return '<button type="button" class="number-color-chip" aria-label="'+escapeHtml(label)+'" onclick="showColorFromNumber('+inlineJsArg(colorName)+')">'
+        +'<span class="number-color-band" style="background:'+band+'"></span>'
+        +'<span class="number-color-name">'+escapeHtml(colorName)+'</span>'
+        +'<span class="number-color-counts"><span class="number-color-free">倉庫 '+free+'</span><span class="number-color-lent">貸出 '+lent+'</span></span>'
+        +'</button>';
+    }).join("");
+    return '<div class="number-overview-row"><div class="number-overview-number">#'+escapeHtml(number)+'</div><div class="number-color-list">'+chips+'</div></div>';
+  }).join("");
+}
+function showColorFromNumber(colorName){
+  setUniformView("color");
+  var folders=Array.prototype.slice.call(document.querySelectorAll(".color-folder[data-color-name]"));
+  var target=folders.find(function(folder){return folder.getAttribute("data-color-name")===colorName;});
+  if(!target)return;
+  var body=target.querySelector(".cf-body");
+  if(body&&!body.classList.contains("open"))toggleFolder(body.id);
+  window.setTimeout(function(){target.scrollIntoView({behavior:"smooth",block:"center"});},40);
+}
+
 function renderFolders(){
   var allData=loadU();
   var data=allData.filter(function(item){
@@ -725,7 +825,7 @@ function renderFolders(){
     var orderControls=_folderReorderMode
       ?'<div class="folder-order-controls"><button type="button" class="folder-order-btn" aria-label="'+escapeHtml(cname)+'を上へ" onclick="event.stopPropagation();moveColorFolder('+inlineJsArg(cname)+',-1)">↑</button><button type="button" class="folder-order-btn" aria-label="'+escapeHtml(cname)+'を下へ" onclick="event.stopPropagation();moveColorFolder('+inlineJsArg(cname)+',1)">↓</button></div>'
       :'';
-    html+='<div class="color-folder">'
+    html+='<div class="color-folder" data-color-name="'+escapeHtml(cname)+'">'
       +'<div class="cf-header'+lightClass+'" style="background:'+hdrGrad+'">'
       +'<button type="button" class="cf-summary" id="fs'+bodyId+'" aria-expanded="false" aria-controls="'+bodyId+'" aria-label="'+escapeHtml(cname)+'の一覧を開く" onclick="toggleFolder(\''+bodyId+'\')">'
       +illustrationHtml
@@ -1268,7 +1368,7 @@ function closeM(id){document.getElementById(id).classList.remove("open");}
 ["modal-add","modal-lend","modal-hist","modal-sock"].forEach(function(id){
   document.getElementById(id).addEventListener("click",function(e){if(e.target.id===id)closeM(id);});
 });
-function render(){renderStats();renderFolders();renderSocks();}
+function render(){renderStats();renderFolders();renderNumberOverview();renderSocks();}
 
 function startUniformSync(){
   // 描画に必要な色・関数の準備後に同期を開始する。
