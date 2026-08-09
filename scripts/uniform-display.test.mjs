@@ -80,6 +80,28 @@ if (!source.includes("previousHolder!==holderName")) {
 }
 
 for (const required of [
+  'KR="smc_uniform_recovery_snapshot_v1"',
+  "function captureDeviceUniformSnapshot()",
+  "function missingDeviceUniforms()",
+  "function restoreDeviceInventory()",
+  'dbSave("uniform_backups/"+backupId',
+  "function ensureUniformCloudReady()",
+  'meta&&meta.authoritative',
+  "_uniformPersistedSnapshot=cloneUniformItems(_unifData)",
+  "安全バックアップを作成できなかったため、在庫の変更を中止しました",
+  "現在のクラウド在庫へ追加しますか？",
+  "現在の\"+loadU().length+\"着は削除・変更しません"
+]) {
+  if (!source.includes(required)) throw new Error("倉庫在庫の復元・自動バックアップ対策が不足しています: " + required);
+}
+for (const functionName of ["saveFolderColorChange","saveUni","deleteUni","confirmDel","doLend","doReturn"]) {
+  const start = source.indexOf("function " + functionName + "(");
+  if (start < 0 || !source.slice(start, start + 150).includes("ensureUniformCloudReady()")) {
+    throw new Error(functionName + " はクラウド同期完了前の上書きを防止してください");
+  }
+}
+
+for (const required of [
   'data-label="背番号"',
   'data-label="氏名・状態"',
   'data-label="状況"',
