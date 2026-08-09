@@ -112,6 +112,7 @@ if (!commonCssSource.includes("--body-tail: #e8eef7")) {
 }
 
 const tournamentSource = fs.readFileSync(path.join(root, "tournament.html"), "utf8");
+const tournamentSchedulerSource = fs.readFileSync(path.join(root, "tournament-scheduler.js"), "utf8");
 const tournamentVersion = tournamentSource.match(/name=["']app-version["'][^>]*content=["']([^"']+)/i)?.[1];
 if (tournamentVersion !== swVersion) {
   fail("PWA", `tournament.html のバージョンが一致しません: ${tournamentVersion || "なし"}`);
@@ -403,8 +404,14 @@ if (!commonSource.includes('data-print-target="tournament-schedule"') || !common
 if (!tournamentSource.includes("要項をA4縦1枚でPDF・印刷") || !tournamentSource.includes("対戦表をA4横1枚でPDF・印刷") || !tournamentSource.includes("pdf-device-help")) {
   fail("tournament.html", "要項・対戦表のPDF保存手順が分かりやすく表示されていません");
 }
-if (!commonSource.includes('data-print-target="tournament-guidelines"') || !commonSource.includes("zoom:.9")) {
+if (!commonSource.includes('data-print-target="tournament-guidelines"') || !tournamentSource.includes("@page smc-taisen-page") || !tournamentSource.includes("size:A4 landscape")) {
   fail("common.js", "要項・対戦表をA4一枚へ収める印刷調整がありません");
+}
+for (const resultFeature of ["score-input", "handleScoreInput", "updateTournamentResults", "tournament_match_results", "result-save-status", "matchResults"]) {
+  if (!tournamentSource.includes(resultFeature)) fail("tournament.html", `試合結果の入力・自動保存・反映が不足しています: ${resultFeature}`);
+}
+if (!tournamentSchedulerSource.includes("calculateStandings") || !tournamentSource.includes("if(buildTaisen()!==false)smcPrint")) {
+  fail("tournament.html", "順位自動計算または閉会式を復活させない生成失敗処理がありません");
 }
 for (const ceremonyField of ["opening-enable", "opening-start", "opening-min", "closing-enable", "closing-start", "closing-min"]) {
   if (!tournamentSource.includes(`id="${ceremonyField}"`) || !tournamentSource.includes(`"${ceremonyField}"`)) {
