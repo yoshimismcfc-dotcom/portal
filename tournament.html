@@ -5,7 +5,7 @@
   <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate, max-age=0">
   <meta http-equiv="Pragma" content="no-cache">
   <meta http-equiv="Expires" content="-1">
-  <meta name="app-version" content="20260809-8">
+  <meta name="app-version" content="20260809-9">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <meta name="robots" content="noindex,nofollow">
   <title>大会要綱・対戦表 v5｜吉見SMC FC</title>
@@ -32,6 +32,11 @@
     .sec{font-size:.72rem;font-weight:900;color:var(--cyan);letter-spacing:.1em;text-transform:uppercase;margin:14px 0 8px;padding-bottom:5px;border-bottom:1px solid var(--line)}
     /* 入力欄 視認性改善 */
     #doc-youkou .form-control,#doc-taisen .form-control{background:#1e3a5a!important;color:#fff!important;border-color:rgba(0,212,255,.4)!important;max-width:100%;box-sizing:border-box;word-break:break-word;overflow-wrap:break-word}
+    /* iPhone Safariの日付入力が固有の最小幅で横にはみ出す問題を防ぐ */
+    #doc-youkou #y-date,#doc-taisen #t-date{display:block!important;width:100%!important;min-width:0!important;max-width:100%!important;inline-size:100%!important;min-inline-size:0!important;box-sizing:border-box!important;overflow:hidden!important}
+    #doc-youkou #y-date::-webkit-date-and-time-value,#doc-taisen #t-date::-webkit-date-and-time-value{min-width:0!important;width:100%!important;text-align:left!important}
+    #doc-youkou #y-date::-webkit-datetime-edit,#doc-taisen #t-date::-webkit-datetime-edit{min-width:0!important;max-width:100%!important;padding:0!important}
+    #doc-youkou #y-date::-webkit-calendar-picker-indicator,#doc-taisen #t-date::-webkit-calendar-picker-indicator{flex:0 0 auto!important;margin:0 2px 0 5px!important}
     #doc-youkou textarea.form-control,#doc-taisen textarea.form-control{line-height:1.6;word-break:break-word;white-space:pre-wrap;overflow-wrap:break-word}
     #doc-youkou .panel,#doc-taisen .panel{overflow:hidden;word-break:break-word}
     #doc-youkou .form-group,#doc-taisen .form-group{min-width:0;overflow:hidden}
