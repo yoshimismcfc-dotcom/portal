@@ -216,6 +216,11 @@ for (const required of [
 
 for (const required of [
   'var UNIFORM_ILLUSTRATIONS={',
+  '"オレンジ × 赤":{src:"assets/uniform-orange-red-stripes.svg"',
+  '"オレンジ赤縦じま":{src:"assets/uniform-orange-red-stripes.svg"',
+  '"オレンジ赤縦縞":{src:"assets/uniform-orange-red-stripes.svg"',
+  '"白 × 黒":{src:"assets/uniform-white-black.svg"',
+  '"白黒":{src:"assets/uniform-white-black.svg"',
   '"水色 × ピンク":{src:"assets/uniform-water-pink.svg"',
   '"水色ピンク":{src:"assets/uniform-water-pink.svg"',
   '"水色 × オレンジ":{src:"assets/uniform-water-orange.svg"',
@@ -240,6 +245,12 @@ if (!fs.existsSync(path.join(root, "assets", "uniform-orange-navy.svg"))) {
 }
 if (!fs.existsSync(path.join(root, "assets", "uniform-water-orange.svg"))) {
   throw new Error("水色×オレンジのユニフォームイラストがありません");
+}
+if (!fs.existsSync(path.join(root, "assets", "uniform-orange-red-stripes.svg"))) {
+  throw new Error("オレンジ×赤縦縞のユニフォームイラストがありません");
+}
+if (!fs.existsSync(path.join(root, "assets", "uniform-white-black.svg"))) {
+  throw new Error("白×黒のユニフォームイラストがありません");
 }
 
 for (const required of [
