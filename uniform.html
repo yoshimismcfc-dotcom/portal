@@ -1902,16 +1902,18 @@ function startUniformSync(){
       syncStatus.classList.toggle("ready",_uniformCloudReady);
       syncStatus.textContent=_uniformCloudReady?"クラウド同期済み（最新 "+_unifData.length+"着）":"端末内の在庫を表示中・クラウドの最新在庫を確認しています…";
     }
-    if(goalkeeperMigration.changed)dbSave("uniform",_unifData,KU,null);
+    // 端末キャッシュは古い／不完全な可能性があるため、絶対にクラウドへ書き戻さない。
+    // 色名の移行保存は、Firebaseから届いた権威ある全件データに対してのみ行う。
+    if(meta&&meta.authoritative&&goalkeeperMigration.changed)dbSave("uniform",_unifData,KU,null);
     render();
   }, KU, []);
   dbListen("uniform_hist", function(val){
     _histData = Array.isArray(val) ? val.filter(function(item){return item && typeof item==="object";}) : [];
   }, KH, []);
-  dbListen("uniform_color_templates", function(val){
+  dbListen("uniform_color_templates", function(val,meta){
     var cleanTemplates=Array.isArray(val)?val.filter(function(item){return item&&item.id&&item.mainName;}):[];
     var goalkeeperTemplates=normalizeGoalkeeperTemplates(cleanTemplates);_colorTemplates=goalkeeperTemplates.items;
-    if(goalkeeperTemplates.changed)dbSave("uniform_color_templates",_colorTemplates,KT,null);
+    if(meta&&meta.authoritative&&goalkeeperTemplates.changed)dbSave("uniform_color_templates",_colorTemplates,KT,null);
     if(document.getElementById("modal-add").classList.contains("open")){buildColorOptions();buildPairTemplates();}
     if(document.getElementById("modal-sock").classList.contains("open"))buildSockTemplates();
     if(document.getElementById("modal-pants").classList.contains("open"))buildPantsTemplates();
