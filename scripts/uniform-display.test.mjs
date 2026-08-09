@@ -218,6 +218,8 @@ for (const required of [
   'var UNIFORM_ILLUSTRATIONS={',
   '"水色 × ピンク":{src:"assets/uniform-water-pink.svg"',
   '"水色ピンク":{src:"assets/uniform-water-pink.svg"',
+  '"オレンジ × 紺":{src:"assets/uniform-orange-navy.svg"',
+  '"オレンジ紺":{src:"assets/uniform-orange-navy.svg"',
   'class="cf-uniform-illustration"',
   '.cf-summary:has(.cf-uniform-illustration) .cf-name',
   'var illustration=UNIFORM_ILLUSTRATIONS[cname]',
@@ -230,6 +232,9 @@ if (!source.includes("靴下在庫・入力") || !source.includes("タップし�
 }
 if (!fs.existsSync(path.join(root, "assets", "uniform-water-pink.svg"))) {
   throw new Error("水色×ピンクのユニフォームイラストがありません");
+}
+if (!fs.existsSync(path.join(root, "assets", "uniform-orange-navy.svg"))) {
+  throw new Error("オレンジ×紺のユニフォームイラストがありません");
 }
 if (!source.includes("setTimeout(function(){_templateLongPressed=true;setTemplateReorderMode(true);},600)")) {
   throw new Error("テンプレートの長押し判定がありません");
