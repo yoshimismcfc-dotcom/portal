@@ -5,7 +5,7 @@
   <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate, max-age=0">
   <meta http-equiv="Pragma" content="no-cache">
   <meta http-equiv="Expires" content="-1">
-  <meta name="app-version" content="20260809-13">
+  <meta name="app-version" content="20260809-14">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <meta name="robots" content="noindex,nofollow">
   <title>大会要綱・対戦表 v5｜吉見SMC FC</title>
@@ -242,22 +242,25 @@
     .saved-item-del:hover{color:#ff4466;background:rgba(255,68,102,.1)}
     /* 折り返し対応 */
     .wrap-flex{display:flex;flex-wrap:wrap;gap:8px;align-items:center}
-    /* 大会要項：折りたたみカード編集 */
+    /* 大会要項：前の入力画面を踏襲した、直接入力できるカード */
     .guideline-editor-head{display:flex;align-items:flex-end;justify-content:space-between;gap:10px;margin-top:12px}
     .guideline-editor-head .sec{margin-bottom:3px;flex:1}
     .guideline-editor-hint{color:var(--ink-3);font-size:.7rem;line-height:1.5;margin-bottom:7px}
     .guideline-card-list{display:grid;gap:8px;margin-bottom:8px}
+    #guideline-meta-list{grid-template-columns:repeat(2,minmax(0,1fr))}
     .guideline-card{border:1px solid var(--line-2);border-radius:11px;background:rgba(255,255,255,.035);overflow:hidden;transition:border-color .15s,box-shadow .15s,opacity .15s}
     .guideline-card.dragging{opacity:.72;border-color:#00d4ff;box-shadow:0 8px 24px rgba(0,0,0,.28)}
     .guideline-card.is-hidden{opacity:.72}
-    .guideline-card-summary{display:grid;grid-template-columns:42px minmax(0,1fr) auto;gap:8px;align-items:center;padding:9px 10px}
+    .guideline-card-summary{display:grid;grid-template-columns:38px minmax(0,1fr) auto;gap:8px;align-items:center;padding:8px 10px 5px}
     .guideline-drag-handle{display:grid;place-items:center;width:38px;height:42px;border:1px solid rgba(0,212,255,.3);border-radius:8px;background:rgba(0,160,220,.08);color:#8fe7ff;font-size:1.1rem;cursor:grab;touch-action:none;user-select:none;-webkit-user-select:none}
     .guideline-card-title{font-size:.84rem;font-weight:900;color:var(--ink);overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
-    .guideline-card-excerpt{font-size:.68rem;color:var(--ink-3);overflow:hidden;text-overflow:ellipsis;white-space:nowrap;margin-top:2px}
-    .guideline-card-badges{display:flex;align-items:center;gap:5px;margin-top:4px}
+    .guideline-card-badges{display:flex;align-items:center;gap:5px;margin-top:3px}
     .guideline-badge{display:inline-flex;padding:2px 6px;border-radius:99px;background:rgba(0,212,136,.13);color:#75e8ad;font-size:.6rem;font-weight:900}
     .guideline-badge.hidden{background:rgba(148,163,184,.14);color:#b7c2cf}
-    .guideline-edit-toggle{min-width:64px;min-height:38px;padding:6px 9px;border:1px solid rgba(0,212,255,.35);border-radius:8px;background:rgba(0,160,220,.1);color:#8fe7ff;font:800 .72rem/1.2 inherit;cursor:pointer}
+    .guideline-edit-toggle{min-width:70px;min-height:38px;padding:6px 9px;border:1px solid rgba(0,212,255,.35);border-radius:8px;background:rgba(0,160,220,.1);color:#8fe7ff;font:800 .72rem/1.2 inherit;cursor:pointer;white-space:nowrap}
+    .guideline-quick-input{padding:5px 10px 10px}
+    .guideline-quick-input .form-control{margin:0}
+    .guideline-quick-input textarea{min-height:78px;resize:vertical;line-height:1.5}
     .guideline-card-editor{display:none;padding:10px;border-top:1px solid var(--line-2);background:rgba(0,0,0,.08)}
     .guideline-card.open .guideline-card-editor{display:block}
     .guideline-card-editor textarea{min-height:104px;resize:vertical;line-height:1.55}
@@ -281,7 +284,7 @@
     body[data-theme="light"] .guideline-card-editor{background:#f1f6fb}
     body[data-theme="light"] .guideline-badge{color:#075f32;background:#dff7e9}
     body[data-theme="light"] .guideline-badge.hidden{color:#475569;background:#e2e8f0}
-    @media(max-width:560px){.guideline-editor-head{display:block}.guideline-editor-head .btn{width:100%;margin-bottom:8px}.guideline-card-summary{grid-template-columns:38px minmax(0,1fr) auto;padding:8px}.guideline-drag-handle{width:34px}.guideline-edit-toggle{min-width:56px;padding:5px}.guideline-card-actions{display:grid;grid-template-columns:1fr 1fr}.guideline-card-actions .btn,.guideline-visible-toggle{width:100%;justify-content:center}.guideline-restore{grid-template-columns:1fr}.guideline-restore .btn{width:100%}}
+    @media(max-width:560px){#guideline-meta-list{grid-template-columns:1fr}.guideline-editor-head{display:block}.guideline-editor-head .btn{width:100%;margin-bottom:8px}.guideline-card-summary{grid-template-columns:34px minmax(0,1fr) auto;padding:8px 8px 4px}.guideline-drag-handle{width:32px;height:38px}.guideline-edit-toggle{min-width:62px;padding:5px}.guideline-quick-input{padding:4px 8px 9px}.guideline-card-actions{display:grid;grid-template-columns:1fr 1fr}.guideline-card-actions .btn,.guideline-visible-toggle{width:100%;justify-content:center}.guideline-restore{grid-template-columns:1fr}.guideline-restore .btn{width:100%}}
     .btn-group{display:flex;flex-wrap:wrap;gap:6px;margin-top:10px;width:100%;box-sizing:border-box}
     .linked-workflow{margin:0 0 14px;padding:13px;border:2px solid rgba(0,212,255,.45);border-radius:14px;background:linear-gradient(135deg,rgba(0,92,150,.18),rgba(0,212,255,.06))}
     .linked-workflow h3{font-size:.9rem;font-weight:900;color:#8fe7ff;margin-bottom:4px}
@@ -381,14 +384,14 @@
       <div class="form-group"><label class="form-label" for="y-title">大会名</label><input class="form-control" id="y-title" value="U9 吉見SMC大会" oninput="scheduleGuidelinePreview()"></div>
 
       <div class="guideline-editor-head">
-        <div><div class="sec">🗓 基本情報</div><div class="guideline-editor-hint">期日・場所など。空欄または非表示の項目は要項に載りません。</div></div>
+        <div><div class="sec">🗓 基本情報</div><div class="guideline-editor-hint">前の画面と同じように、表示されている入力欄へそのまま入力してください。</div></div>
         <button class="btn btn-outline btn-sm" type="button" onclick="openGuidelineAddModal('meta')">＋ 基本情報を追加</button>
       </div>
       <div class="guideline-card-list" id="guideline-meta-list"></div>
       <div class="guideline-restore" id="guideline-meta-restore"></div>
 
       <div class="guideline-editor-head">
-        <div><div class="sec">📝 要項本文</div><div class="guideline-editor-hint">カードを開くと項目名と文章をすべて編集できます。本文は1行ごとに箇条書きになります。</div></div>
+        <div><div class="sec">📝 要項本文</div><div class="guideline-editor-hint">文章は直接入力できます。項目名の変更・並べ替え・削除は「項目設定」を開いてください。</div></div>
         <button class="btn btn-primary btn-sm" type="button" onclick="openGuidelineAddModal('section')">＋ 要項に項目を追加</button>
       </div>
       <div class="guideline-card-list" id="guideline-section-list"></div>
@@ -648,18 +651,23 @@ function guidelineExcerpt(value){
 }
 function renderGuidelineCard(kind,item,index,total){
   var open=!!_guidelineOpen[item.id],hidden=!item.visible;
-  var input=item.inputType==="date"&&kind==="meta"
-    ? '<input class="form-control guideline-content-input" type="date" data-guideline-field="content" value="'+esc3(item.content)+'">'
-    : '<textarea class="form-control guideline-content-input" data-guideline-field="content" rows="'+(kind==="meta"?2:5)+'">'+esc3(item.content)+'</textarea>';
+  var input;
+  if(item.inputType==="date"&&kind==="meta"){
+    input='<input class="form-control guideline-content-input" aria-label="'+esc3(item.title)+'の内容" type="date" data-guideline-field="content" value="'+esc3(item.content)+'">';
+  }else if(kind==="meta"){
+    input='<input class="form-control guideline-content-input" aria-label="'+esc3(item.title)+'の内容" type="text" data-guideline-field="content" value="'+esc3(item.content)+'">';
+  }else{
+    input='<textarea class="form-control guideline-content-input" aria-label="'+esc3(item.title)+'の内容" data-guideline-field="content" rows="3">'+esc3(item.content)+'</textarea>';
+  }
   return '<div class="guideline-card'+(open?' open':'')+(hidden?' is-hidden':'')+'" data-guideline-kind="'+kind+'" data-guideline-id="'+esc3(item.id)+'">'
     +'<div class="guideline-card-summary">'
       +'<button class="guideline-drag-handle" type="button" aria-label="長押しして並べ替え">☰</button>'
-      +'<div><div class="guideline-card-title">'+esc3(item.title||"項目名未入力")+'</div><div class="guideline-card-excerpt">'+esc3(guidelineExcerpt(item.content))+'</div><div class="guideline-card-badges"><span class="guideline-badge'+(hidden?' hidden':'')+'">'+(hidden?'非表示':'表示中')+'</span><span class="guideline-badge">'+(item.type==="standard"?'標準':'追加')+'</span></div></div>'
-      +'<button class="guideline-edit-toggle" type="button" data-guideline-action="toggle">'+(open?'閉じる':'編集')+'</button>'
+      +'<div><div class="guideline-card-title">'+esc3(item.title||"項目名未入力")+'</div><div class="guideline-card-badges"><span class="guideline-badge'+(hidden?' hidden':'')+'">'+(hidden?'非表示':'表示中')+'</span><span class="guideline-badge">'+(item.type==="standard"?'標準':'追加')+'</span></div></div>'
+      +'<button class="guideline-edit-toggle" type="button" data-guideline-action="toggle">'+(open?'設定を閉じる':'項目設定')+'</button>'
     +'</div>'
+    +'<div class="guideline-quick-input">'+input+'</div>'
     +'<div class="guideline-card-editor">'
       +'<div class="form-group"><label class="form-label">項目名</label><input class="form-control" data-guideline-field="title" value="'+esc3(item.title)+'"></div>'
-      +'<div class="form-group"><label class="form-label">内容'+(kind==="section"?'（1行ごとに箇条書き）':'')+'</label>'+input+'</div>'
       +'<div class="guideline-card-actions">'
         +'<label class="guideline-visible-toggle"><input type="checkbox" data-guideline-field="visible" '+(item.visible?'checked':'')+'>要項に表示する</label>'
         +'<button class="btn btn-outline btn-sm" type="button" data-guideline-action="up" '+(index===0?'disabled':'')+'>↑ 上へ</button>'
