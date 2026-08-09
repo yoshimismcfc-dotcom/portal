@@ -5,7 +5,7 @@
   <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate, max-age=0">
   <meta http-equiv="Pragma" content="no-cache">
   <meta http-equiv="Expires" content="-1">
-  <meta name="app-version" content="20260809-3">
+  <meta name="app-version" content="20260809-4">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <meta name="robots" content="noindex,nofollow">
   <title>大会要綱・対戦表 v5｜吉見SMC FC</title>
@@ -15,6 +15,8 @@
   <script src="event-links.js"></script>
   <script src="tournament-scheduler.js"></script>
   <style>
+    @page smc-youkou-page{size:A4 portrait;margin:6mm}
+    @page smc-taisen-page{size:A4 landscape;margin:5mm}
     /* ====== タブ ====== */
     .doc-tab-bar{display:flex;gap:0;margin-bottom:20px;border-radius:var(--r8);overflow:hidden;border:1px solid var(--line-2)}
     .doc-tab-btn{flex:1;padding:12px 8px;font:inherit;font-size:.88rem;font-weight:900;background:var(--surface-lt);color:#6aaccc;border:none;cursor:pointer;transition:.15s;display:flex;align-items:center;justify-content:center;gap:6px}
@@ -57,9 +59,11 @@
       .doc-section.active{display:block!important}
       /* 要綱 */
       .req-sheet{box-shadow:none!important;border-radius:0!important;margin:0!important;padding:0!important;max-width:100%!important;background:#fff!important;color:#000!important;width:100%!important}
+      body[data-print-target="tournament-guidelines"] .req-sheet{page:smc-youkou-page}
       .req-sheet *{color:#000!important}
       /* 対戦表 */
       .tai-sheet{box-shadow:none!important;border-radius:0!important;margin:0!important;padding:0!important;max-width:100%!important;background:#fff!important;color:#000!important;width:100%!important}
+      body[data-print-target="tournament-schedule"] .tai-sheet{page:smc-taisen-page}
       .tai-sheet *{color:#000!important}
       .sched-th{background:#003087!important;color:#fff!important}
       .rank-th{background:#1a5c1a!important;color:#fff!important}
@@ -71,6 +75,7 @@
       .td-score{background:#fffbe6!important}
       .tr-alt-bg{background:#fafcff!important}
       .rank-alt{background:#f6fff6!important}
+      .score-input{width:100%!important;min-height:0!important;padding:0!important;border:0!important;outline:0!important;background:transparent!important;color:#000!important;font-size:9pt!important;box-shadow:none!important;-moz-appearance:textfield}
     }
 
     /* ====== 要綱プレビュー ====== */
@@ -107,12 +112,18 @@
     .tai-sub{text-align:center;font-size:8.5pt;color:#555;margin-bottom:10px}
     .block-hd{background:#003087;color:#fff;font-size:9.5pt;font-weight:bold;padding:4px 10px;border-radius:4px;margin:10px 0 5px;display:inline-block}
     /* スケジュール表 */
-    .st{width:100%;border-collapse:collapse;margin-bottom:10px}
+    .st{width:100%;border-collapse:collapse;table-layout:fixed;margin-bottom:10px}
     .st .sched-th{background:#003087;color:#fff;padding:4px 4px;text-align:center;font-size:7.5pt;border:1px solid #0050cc;white-space:normal;word-break:break-all}
     .st td{border:1px solid #ccc;padding:5px 6px;text-align:center;vertical-align:middle;font-size:8.5pt}
     .st .td-home{text-align:left;padding-left:5px;font-weight:500;word-break:break-all;max-width:80px}
     .st .td-away{text-align:right;padding-right:5px;font-weight:500;word-break:break-all;max-width:80px}
     .st .td-score{background:#fffbe6;min-width:28px}
+    .score-input{display:block;width:42px;max-width:100%;min-height:36px;margin:0 auto;padding:4px 2px;border:2px solid #e0a900;border-radius:7px;background:#fff;color:#172033;font:900 .95rem/1 Arial,sans-serif;text-align:center;box-sizing:border-box}
+    .score-input:focus{outline:3px solid rgba(0,110,220,.22);border-color:#1769aa}
+    .score-input::-webkit-inner-spin-button,.score-input::-webkit-outer-spin-button{-webkit-appearance:none;margin:0}
+    .result-entry-help{display:flex;align-items:center;justify-content:space-between;gap:8px;flex-wrap:wrap;margin:7px 0;padding:8px 10px;border:1px solid #b7d6eb;border-radius:8px;background:#eef8ff;color:#16415f;font-size:.74rem;font-weight:800}
+    .result-save-status{display:inline-flex;align-items:center;min-height:26px;padding:3px 8px;border-radius:99px;background:#e2e8f0;color:#334155;font-size:.68rem;font-weight:900;white-space:nowrap}
+    .result-save-status.saving{background:#fff3c4;color:#704b00}.result-save-status.saved{background:#dff7e9;color:#075f32}.result-save-status.error{background:#ffe2e2;color:#8a1c1c}
     .st .td-vs{background:#f0f0f0;color:#888;font-size:7.5pt}
     .st .tr-alt-bg td{background:#f8fbff}
     /* 休憩・閉会 */
@@ -138,6 +149,7 @@
     /* コート別スケジュール横並び */
     .courts-row{display:grid;grid-template-columns:1fr 1fr;gap:16px}
     @media(max-width:600px){.courts-row{grid-template-columns:1fr}}
+    @media(max-width:600px){.rct{width:100%;table-layout:fixed}.rct th,.rct td{min-width:0;padding:3px 2px;font-size:6.8pt}.rt th,.rt td{padding:3px 2px;font-size:7pt}}
 
     /* ===== 保存・読み込みモーダル ===== */
     .save-modal-bg{position:fixed;inset:0;background:rgba(0,0,0,.85);display:none;place-items:center;z-index:300;backdrop-filter:blur(6px);padding:14px}
@@ -222,6 +234,7 @@
       .pdf-steps{grid-template-columns:1fr}
       .line-type-tabs{grid-template-columns:1fr}
       .line-modal{padding:16px}
+      .tai-sheet{padding:10px 8px}.st td{padding:4px 2px}.score-input{width:38px;min-height:38px}
     }
   </style>
 </head>
@@ -557,6 +570,10 @@ function toggleCeremonies(){
   var closing=document.getElementById("closing-enable");
   document.getElementById("opening-settings").style.display=opening.checked?"grid":"none";
   document.getElementById("closing-settings").style.display=closing.checked?"grid":"none";
+  var preview=document.getElementById("taisen-preview");
+  if(!opening.checked)preview.querySelectorAll(".ceremony-opening").forEach(function(item){item.remove();});
+  if(!closing.checked)preview.querySelectorAll(".ceremony-closing,.tr-closing-td").forEach(function(item){(item.closest("tr")||item).remove();});
+  if(preview.querySelector(".tai-sheet")&&(opening.checked||closing.checked))buildTaisen(false);
 }
 function ceremonyBanner(kind,label,start,minutes,isAutomatic){
   if(!start)return "";
@@ -567,6 +584,91 @@ function ceremonyBanner(kind,label,start,minutes,isAutomatic){
 
 var _lastTournamentSchedule=null;
 var _scheduleUndo=null;
+var _currentTournamentBlocks=[];
+var _matchResults={};
+var _allTournamentResults={};
+var _resultContextKey="";
+var _resultSaveTimer=null;
+
+function matchResultKey(blockIndex,home,away){
+  var teams=[String(home||""),String(away||"")].sort(function(a,b){return a.localeCompare(b,"ja");});
+  return "b"+blockIndex+"|"+encodeURIComponent(teams[0])+"|"+encodeURIComponent(teams[1]);
+}
+function tournamentResultSetKey(){
+  if(_activeGameAdjustDateId)return "date_"+encodeURIComponent(_activeGameAdjustDateId).replace(/\./g,"%2E");
+  return "standalone_"+encodeURIComponent((gv("t-date")||"undated")+"|"+(gv("t-title")||"untitled")).replace(/\./g,"%2E");
+}
+function syncMatchResultsForContext(){
+  var key=tournamentResultSetKey();
+  if(key===_resultContextKey)return;
+  _resultContextKey=key;
+  var stored=_allTournamentResults[key];
+  _matchResults=stored&&stored.results&&typeof stored.results==="object"?JSON.parse(JSON.stringify(stored.results)):{};
+}
+function storedMatchResult(key,home,away){
+  var result=_matchResults[key];if(!result)return null;
+  if(result.home===away&&result.away===home)return {home:home,away:away,homeScore:result.awayScore,awayScore:result.homeScore};
+  return result;
+}
+function scoreInputHtml(key,side,team,value){
+  return '<input class="score-input no-print-border" type="number" inputmode="numeric" min="0" max="99" step="1" value="'+escapeHtml(value)+'" data-side="'+side+'" aria-label="'+escapeHtml(team)+'の得点">';
+}
+function setResultSaveStatus(state,text){
+  document.querySelectorAll(".result-save-status").forEach(function(status){status.className="result-save-status "+state;status.textContent=text;});
+}
+function scheduleTournamentResultsSave(){
+  window.clearTimeout(_resultSaveTimer);setResultSaveStatus("saving","保存中…");
+  _resultSaveTimer=window.setTimeout(function(){
+    var key=_resultContextKey||tournamentResultSetKey();
+    _allTournamentResults[key]={updatedAt:new Date().toISOString(),results:JSON.parse(JSON.stringify(_matchResults))};
+    dbSave("tournament_match_results",_allTournamentResults,RESULTS_KEY,function(){setResultSaveStatus("saved","クラウド保存済み");},function(){setResultSaveStatus("error","保存失敗・再入力不要");});
+  },500);
+}
+function handleScoreInput(input){
+  var row=input.closest(".taisen-game-row"),homeInput=row.querySelector('[data-side="home"]'),awayInput=row.querySelector('[data-side="away"]');
+  [homeInput,awayInput].forEach(function(field){
+    if(field.value!==""){var value=Math.max(0,Math.min(99,Math.floor(Number(field.value)||0)));field.value=String(value);}
+  });
+  var key=row.dataset.resultKey,home=row.dataset.home,away=row.dataset.away;
+  if(homeInput.value===""&&awayInput.value==="")delete _matchResults[key];
+  else _matchResults[key]={home:home,away:away,homeScore:homeInput.value,awayScore:awayInput.value};
+  updateTournamentResults();scheduleTournamentResultsSave();
+}
+function resultsForBlock(blockIndex,block){
+  var results={};
+  block.matches.forEach(function(match){
+    var stored=storedMatchResult(matchResultKey(blockIndex,match.home,match.away),match.home,match.away);
+    if(stored)results[match.id]={homeScore:stored.homeScore,awayScore:stored.awayScore};
+  });
+  return results;
+}
+function updateTournamentResults(){
+  if(!window.SMCTournamentScheduler||!SMCTournamentScheduler.calculateStandings)return;
+  _currentTournamentBlocks.forEach(function(block,blockIndex){
+    var standings=SMCTournamentScheduler.calculateStandings(block.teams,block.matches,resultsForBlock(blockIndex,block));
+    var body=document.querySelector('.rank-body[data-block-index="'+blockIndex+'"]');if(!body)return;
+    var rows={};body.querySelectorAll(".rank-row").forEach(function(row){rows[row.dataset.team]=row;});
+    standings.forEach(function(stat,index){
+      var row=rows[stat.team];if(!row)return;
+      row.classList.toggle("rank-alt",index%2===1);body.appendChild(row);
+      [["rank",stat.rank],["played",stat.played],["wins",stat.wins],["draws",stat.draws],["losses",stat.losses],["gf",stat.goalsFor],["ga",stat.goalsAgainst],["gd",stat.goalDifference],["points",stat.points]].forEach(function(pair){var cell=row.querySelector('[data-stat="'+pair[0]+'"]');if(cell)cell.textContent=pair[1];});
+    });
+  });
+  document.querySelectorAll(".round-result").forEach(function(cell){
+    var result=storedMatchResult(cell.dataset.resultKey,cell.dataset.rowTeam,cell.dataset.opponent);
+    var complete=result&&result.homeScore!==""&&result.awayScore!=="";
+    cell.textContent=complete?(String(result.homeScore)+"－"+String(result.awayScore)):"";
+  });
+}
+function applyMatchResultsToInputs(){
+  document.querySelectorAll(".taisen-game-row").forEach(function(row){
+    var result=storedMatchResult(row.dataset.resultKey,row.dataset.home,row.dataset.away)||{};
+    var home=row.querySelector('[data-side="home"]'),away=row.querySelector('[data-side="away"]');
+    if(home)home.value=result.homeScore===undefined?"":result.homeScore;
+    if(away)away.value=result.awayScore===undefined?"":result.awayScore;
+  });
+  updateTournamentResults();
+}
 
 function scheduleSignature(courts,blocks){
   return JSON.stringify({courts:courts,teams:blocks.map(function(block){return block.teams;})});
@@ -626,6 +728,7 @@ function optimizeCurrentSchedule(){
 }
 
 function buildTaisen(forceNew){
+  syncMatchResultsForContext();
   var courts=+gv("t-courts"),gmin=+gv("t-min")||40,st=gv("t-start")||"08:30";
   var title=gv("t-title"),dateStr=fmtDate(gv("t-date")),place=gv("t-place");
 
@@ -646,7 +749,7 @@ function buildTaisen(forceNew){
   var duplicateTeam=allTeamNames.find(function(team,index){return allTeamNames.indexOf(team)!==index;});
   if(duplicateTeam){
     alert("「"+duplicateTeam+"」が複数のブロックに登録されています。同じ時刻に重複出場しないよう、チーム名を確認してください。");
-    return;
+    return false;
   }
   var signature=scheduleSignature(courts,blocks);
   if(forceNew||!_lastTournamentSchedule||_lastTournamentSchedule.signature!==signature){
@@ -669,6 +772,7 @@ function buildTaisen(forceNew){
     });
   }
   updateScheduleReport(blocks.map(function(block){return block.report;}));
+  _currentTournamentBlocks=blocks.map(function(block){return {teams:block.teams.slice(),matches:block.matches.map(function(match){return Object.assign({},match);})};});
 
   /* ---- スケジュール組み立て ---- */
   // 2コートの場合：同じ時刻に各コートで1試合ずつ進行
@@ -726,6 +830,7 @@ function buildTaisen(forceNew){
   h+='<div class="tai-title">'+escapeHtml(title)+'　対戦表</div>';
   h+='<div class="tai-sub">'+escapeHtml((dateStr?dateStr+"　":"")+place)+'</div>';
   if(openingEnabled)h+=ceremonyBanner("opening","🎤 開会式",openingStart,openingMin,false);
+  h+='<div class="result-entry-help no-print"><span>⚽ 得点を入力すると、順位表と総当たり表へ自動反映されます。</span><span class="result-save-status">得点未入力</span></div>';
 
   if(courts===2){
     /* 2コート：A面・B面を横に並べてスケジュール表示 */
@@ -737,9 +842,9 @@ function buildTaisen(forceNew){
       h+='<th class="sched-th" style="width:24px">No</th>';
       h+='<th class="sched-th" style="width:48px">開始</th>';
       h+='<th class="sched-th">ホーム</th>';
-      h+='<th class="sched-th" style="width:26px">得</th>';
+      h+='<th class="sched-th" style="width:40px">得</th>';
       h+='<th class="sched-th" style="width:18px">-</th>';
-      h+='<th class="sched-th" style="width:26px">得</th>';
+      h+='<th class="sched-th" style="width:40px">得</th>';
       h+='<th class="sched-th">アウェイ</th>';
       h+='</tr></thead><tbody>';
       var no=1;
@@ -751,10 +856,11 @@ if(slot.isBreak){
         }
         slot.games.forEach(function(g){
           if(g.blkIdx===blk.idx){
-            h+='<tr class="taisen-game-row'+(si%2===1?' tr-alt-bg':'')+'" data-match-id="'+esc3(g.id)+'">';
+            var resultKey=matchResultKey(g.blkIdx,g.home,g.away),stored=storedMatchResult(resultKey,g.home,g.away)||{};
+            h+='<tr class="taisen-game-row'+(si%2===1?' tr-alt-bg':'')+'" data-match-id="'+esc3(g.id)+'" data-result-key="'+esc3(resultKey)+'" data-home="'+esc3(g.home)+'" data-away="'+esc3(g.away)+'">';
             h+='<td>'+no+'</td><td>'+slot.time+'</td>';
             h+='<td class="td-home">'+escapeHtml(g.home)+'</td>';
-            h+='<td class="td-score"></td><td class="td-vs">－</td><td class="td-score"></td>';
+            h+='<td class="td-score">'+scoreInputHtml(resultKey,"home",g.home,stored.homeScore===undefined?"":stored.homeScore)+'</td><td class="td-vs">－</td><td class="td-score">'+scoreInputHtml(resultKey,"away",g.away,stored.awayScore===undefined?"":stored.awayScore)+'</td>';
             h+='<td class="td-away">'+escapeHtml(g.away)+'<label class="game-fixed no-print"><input class="game-fixed-input" type="checkbox" data-block-index="'+blk.idx+'" data-match-id="'+esc3(g.id)+'" '+(g.fixed?'checked ':'')+'>固定</label></td>';
             h+='</tr>';
             no++;
@@ -769,11 +875,11 @@ if(slot.isBreak){
       h+='<th class="rank-th">#</th><th class="rank-th">チーム名</th>';
       h+='<th class="rank-th">試</th><th class="rank-th">勝</th><th class="rank-th">分</th><th class="rank-th">負</th>';
       h+='<th class="rank-th">得</th><th class="rank-th">失</th><th class="rank-th">差</th><th class="rank-th">点</th>';
-      h+='</tr></thead><tbody>';
+      h+='</tr></thead><tbody class="rank-body" data-block-index="'+blk.idx+'">';
       blk.teams.forEach(function(t,i){
-        h+='<tr'+(i%2===1?' class="rank-alt"':"")+'>';
-        h+='<td>'+(i+1)+'</td><td class="td-name">'+escapeHtml(t)+'</td>';
-        h+='<td>0</td><td>0</td><td>0</td><td>0</td><td>0</td><td>0</td><td>0</td><td>0</td></tr>';
+        h+='<tr class="rank-row'+(i%2===1?' rank-alt':'')+'" data-team="'+esc3(t)+'">';
+        h+='<td data-stat="rank">'+(i+1)+'</td><td class="td-name">'+escapeHtml(t)+'</td>';
+        h+='<td data-stat="played">0</td><td data-stat="wins">0</td><td data-stat="draws">0</td><td data-stat="losses">0</td><td data-stat="gf">0</td><td data-stat="ga">0</td><td data-stat="gd">0</td><td data-stat="points">0</td></tr>';
       });
       h+='</tbody></table>';
 
@@ -785,7 +891,8 @@ if(slot.isBreak){
       blk.teams.forEach(function(t1,i){
         h+='<tr><th class="round-th-h">'+escapeHtml(t1)+'</th>';
         blk.teams.forEach(function(t2,j){
-          h+=i===j?'<td class="td-self">－</td>':'<td class="td-score"></td>';
+          var roundKey=matchResultKey(blk.idx,t1,t2);
+          h+=i===j?'<td class="td-self">－</td>':'<td class="td-score round-result" data-result-key="'+esc3(roundKey)+'" data-row-team="'+esc3(t1)+'" data-opponent="'+esc3(t2)+'"></td>';
         });
         h+='</tr>';
       });
@@ -800,16 +907,17 @@ if(slot.isBreak){
     h+='<th class="sched-th" style="width:24px">No</th><th class="sched-th" style="width:48px">開始</th>';
     h+='<th class="sched-th" style="width:60px">区分</th>';
     h+='<th class="sched-th">ホーム</th>';
-    h+='<th class="sched-th" style="width:26px">得</th><th class="sched-th" style="width:18px">-</th><th class="sched-th" style="width:26px">得</th>';
+    h+='<th class="sched-th" style="width:40px">得</th><th class="sched-th" style="width:18px">-</th><th class="sched-th" style="width:40px">得</th>';
     h+='<th class="sched-th">アウェイ</th><th class="sched-th" style="width:55px">備考</th>';
     h+='</tr></thead><tbody>';
     var fn=1;
     [[finalStart,"A4位","B4位","4位同士"],[finalStart,"A3位","B3位","3位同士"],
      [sf,"A2位","B2位","2位同士"],[sf,"A1位","B1位","1位同士"]].forEach(function(f,i){
-      h+='<tr'+(i>=2?' class="tr-final"':"")+'>';
+      var finalKey=matchResultKey("final",f[1],f[2]),finalStored=storedMatchResult(finalKey,f[1],f[2])||{};
+      h+='<tr class="taisen-game-row final-game-row'+(i>=2?' tr-final':'')+'" data-result-key="'+esc3(finalKey)+'" data-home="'+esc3(f[1])+'" data-away="'+esc3(f[2])+'">';
       h+='<td>'+fn+'</td><td>'+f[0]+'</td><td>順位戦</td>';
       h+='<td class="td-home">'+f[1]+'</td>';
-      h+='<td class="td-score"></td><td class="td-vs">－</td><td class="td-score"></td>';
+      h+='<td class="td-score">'+scoreInputHtml(finalKey,"home",f[1],finalStored.homeScore===undefined?"":finalStored.homeScore)+'</td><td class="td-vs">－</td><td class="td-score">'+scoreInputHtml(finalKey,"away",f[2],finalStored.awayScore===undefined?"":finalStored.awayScore)+'</td>';
       h+='<td class="td-away">'+f[2]+'</td><td>'+f[3]+'</td></tr>';
       fn++;
     });
@@ -823,7 +931,7 @@ if(slot.isBreak){
     h+='<table class="st"><thead><tr>';
     h+='<th class="sched-th" style="width:28px">No</th><th class="sched-th" style="width:52px">開始</th>';
     h+='<th class="sched-th">ホーム</th>';
-    h+='<th class="sched-th" style="width:30px">得</th><th class="sched-th" style="width:20px">-</th><th class="sched-th" style="width:30px">得</th>';
+    h+='<th class="sched-th" style="width:42px">得</th><th class="sched-th" style="width:20px">-</th><th class="sched-th" style="width:42px">得</th>';
     h+='<th class="sched-th">アウェイ</th><th class="sched-th" style="width:60px">備考</th>';
     h+='</tr></thead><tbody>';
     schedsByTime.forEach(function(slot,si){
@@ -833,10 +941,11 @@ if(slot.isBreak){
         return;
       }
       slot.games.forEach(function(g,gi){
-        h+='<tr class="taisen-game-row'+(si%2===1?' tr-alt-bg':'')+'" data-match-id="'+esc3(g.id)+'">';
+        var resultKey=matchResultKey(g.blkIdx,g.home,g.away),stored=storedMatchResult(resultKey,g.home,g.away)||{};
+        h+='<tr class="taisen-game-row'+(si%2===1?' tr-alt-bg':'')+'" data-match-id="'+esc3(g.id)+'" data-result-key="'+esc3(resultKey)+'" data-home="'+esc3(g.home)+'" data-away="'+esc3(g.away)+'">';
         h+='<td>'+(si+1)+'</td><td>'+slot.time+'</td>';
         h+='<td class="td-home">'+escapeHtml(g.home)+'</td>';
-        h+='<td class="td-score"></td><td class="td-vs">－</td><td class="td-score"></td>';
+        h+='<td class="td-score">'+scoreInputHtml(resultKey,"home",g.home,stored.homeScore===undefined?"":stored.homeScore)+'</td><td class="td-vs">－</td><td class="td-score">'+scoreInputHtml(resultKey,"away",g.away,stored.awayScore===undefined?"":stored.awayScore)+'</td>';
         h+='<td class="td-away">'+escapeHtml(g.away)+'<label class="game-fixed no-print"><input class="game-fixed-input" type="checkbox" data-block-index="0" data-match-id="'+esc3(g.id)+'" '+(g.fixed?'checked ':'')+'>固定</label></td><td></td></tr>';
       });
     });
@@ -848,10 +957,10 @@ if(slot.isBreak){
     h+='<th class="rank-th">#</th><th class="rank-th">チーム名</th>';
     h+='<th class="rank-th">試</th><th class="rank-th">勝</th><th class="rank-th">分</th><th class="rank-th">負</th>';
     h+='<th class="rank-th">得</th><th class="rank-th">失</th><th class="rank-th">差</th><th class="rank-th">点</th>';
-    h+='</tr></thead><tbody>';
+    h+='</tr></thead><tbody class="rank-body" data-block-index="0">';
     blk.teams.forEach(function(t,i){
-      h+='<tr'+(i%2===1?' class="rank-alt"':"")+'><td>'+(i+1)+'</td><td class="td-name">'+escapeHtml(t)+'</td>';
-      h+='<td>0</td><td>0</td><td>0</td><td>0</td><td>0</td><td>0</td><td>0</td><td>0</td></tr>';
+      h+='<tr class="rank-row'+(i%2===1?' rank-alt':'')+'" data-team="'+esc3(t)+'"><td data-stat="rank">'+(i+1)+'</td><td class="td-name">'+escapeHtml(t)+'</td>';
+      h+='<td data-stat="played">0</td><td data-stat="wins">0</td><td data-stat="draws">0</td><td data-stat="losses">0</td><td data-stat="gf">0</td><td data-stat="ga">0</td><td data-stat="gd">0</td><td data-stat="points">0</td></tr>';
     });
     h+='</tbody></table>';
 
@@ -861,7 +970,7 @@ if(slot.isBreak){
     h+='</tr></thead><tbody>';
     blk.teams.forEach(function(t1,i){
       h+='<tr><th class="round-th-h">'+escapeHtml(t1)+'</th>';
-      blk.teams.forEach(function(t2,j){h+=i===j?'<td class="td-self">－</td>':'<td class="td-score"></td>';});
+      blk.teams.forEach(function(t2,j){var roundKey=matchResultKey(0,t1,t2);h+=i===j?'<td class="td-self">－</td>':'<td class="td-score round-result" data-result-key="'+esc3(roundKey)+'" data-row-team="'+esc3(t1)+'" data-opponent="'+esc3(t2)+'"></td>';});
       h+='</tr>';
     });
     h+='</tbody></table>';
@@ -877,8 +986,12 @@ if(slot.isBreak){
       toggleGameFixed(Number(input.dataset.blockIndex),input.dataset.matchId,input.checked);
     });
   });
+  pv.querySelectorAll(".score-input").forEach(function(input){input.addEventListener("input",function(){handleScoreInput(input);});});
+  updateTournamentResults();
+  if(Object.keys(_matchResults).length)setResultSaveStatus("saved","保存済みの得点を表示");
   document.getElementById("t-guide").style.display="block";
   pv.scrollIntoView({behavior:"smooth",block:"start"});
+  return true;
 }
 
 /* ===== LINEコピー ===== */
@@ -911,10 +1024,11 @@ function getTaisenText(){
   if(rows.length){
     t+="\n";
     rows.forEach(function(r){
-      var cells=r.querySelectorAll("td,th");
-      var line=[];
-      cells.forEach(function(c){if(c.textContent.trim())line.push(c.textContent.trim());});
-      if(line.length) t+=line.join(" vs ")+"\n";
+      var cells=r.querySelectorAll("td,th"),time=cells[1]?cells[1].textContent.trim():"";
+      var home=r.dataset.home||"",away=r.dataset.away||"";
+      var homeScore=r.querySelector('[data-side="home"]'),awayScore=r.querySelector('[data-side="away"]');
+      var complete=homeScore&&awayScore&&homeScore.value!==""&&awayScore.value!=="";
+      if(home&&away)t+=(time?time+"　":"")+home+(complete?" "+homeScore.value+"－"+awayScore.value+" ":" vs ")+away+"\n";
     });
   }
   if(document.getElementById("closing-enable").checked){
@@ -1074,8 +1188,7 @@ function buildAndPrintPortrait(){
   smcPrint({orientation:"portrait",target:"tournament-guidelines",margin:"6mm"});
 }
 function buildAndPrintLandscape(){
-  buildTaisen();
-  smcPrint({orientation:"landscape",target:"tournament-schedule",margin:"5mm"});
+  if(buildTaisen()!==false)smcPrint({orientation:"landscape",target:"tournament-schedule",margin:"5mm"});
 }
 
 /* ===== 初期化 ===== */
@@ -1127,7 +1240,7 @@ function getCustomRows(){
 function esc3(s){ return String(s||"").replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;").replace(/"/g,"&quot;"); }
 
 /* ===== クラウド保存・読込 ===== */
-var SAVE_KEY = "tournament_saves";
+var SAVE_KEY = "tournament_saves",RESULTS_KEY="tournament_match_results_v1";
 var _saveType = "youkou"; // "youkou" or "taisen"
 var _allSaves = {};
 var TOURNAMENT_CONTEXT = (function(){
@@ -1162,6 +1275,17 @@ dbListen("tournament_saves", function(val){
     }
   }, 0);
 }, SAVE_KEY, {});
+dbListen("tournament_match_results",function(val){
+  _allTournamentResults=val&&typeof val==="object"?val:{};
+  var key=tournamentResultSetKey(),contextChanged=key!==_resultContextKey;_resultContextKey=key;
+  var stored=_allTournamentResults[key];
+  if(stored&&stored.results&&typeof stored.results==="object")_matchResults=JSON.parse(JSON.stringify(stored.results));
+  else if(contextChanged)_matchResults={};
+  if(document.querySelector("#taisen-preview .tai-sheet")){
+    applyMatchResultsToInputs();
+    if(Object.keys(_matchResults).length)setResultSaveStatus("saved","クラウド保存済み");
+  }
+},RESULTS_KEY,{});
 
 // 要綱フィールドを収集
 var YOUKOU_FIELDS = ["y-title","y-cat","y-date","y-place","y-host",
@@ -1403,6 +1527,7 @@ function execSave(){
   if(_saveType==="taisen"){
     entry.data.teams=JSON.stringify(captureTeamValues());
     if(_lastTournamentSchedule)entry.data.optimizedSchedule=JSON.stringify(_lastTournamentSchedule);
+    entry.data.matchResults=JSON.stringify(_matchResults);
   }
   var linkedExisting = _activeGameAdjustDateId
     ? linkedEntries(_activeGameAdjustDateId,_saveType)[0]
@@ -1476,9 +1601,18 @@ document.getElementById("saved-list").addEventListener("keydown",function(event)
 function applySaveEntry(item){
   if(!item) return;
   applyFields(item.data||{});
+  if(item.gameAdjustDateId){
+    _activeGameAdjustDateId=item.gameAdjustDateId;
+    _activeDateMeta=linkedMetaFromEntry(item);
+  }
   if(item.type==="taisen" && !Object.prototype.hasOwnProperty.call(item.data||{},"closing-enable")){
     document.getElementById("closing-enable").checked=true;
     toggleCeremonies();
+  }
+  if(item.type==="taisen"){
+    _resultContextKey=tournamentResultSetKey();
+    var cloudSet=_allTournamentResults[_resultContextKey];
+    try{_matchResults=item.data&&item.data.matchResults?JSON.parse(item.data.matchResults):(cloudSet&&cloudSet.results?JSON.parse(JSON.stringify(cloudSet.results)):{});}catch(resultError){_matchResults={};}
   }
   if(item.type==="taisen" && item.data && item.data.teams){
     try{ applyTeamValues(JSON.parse(item.data.teams)); }catch(e){}
@@ -1489,10 +1623,6 @@ function applySaveEntry(item){
   if(item.type==="youkou" && Array.isArray(item.customRows)){
     _customRows = JSON.parse(JSON.stringify(item.customRows));
     renderCustomRows();
-  }
-  if(item.gameAdjustDateId){
-    _activeGameAdjustDateId=item.gameAdjustDateId;
-    _activeDateMeta=linkedMetaFromEntry(item);
   }
   if(item.type==="youkou") buildYoukou();
   else buildTaisen();
