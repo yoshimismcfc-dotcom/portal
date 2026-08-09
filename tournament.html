@@ -5,7 +5,7 @@
   <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate, max-age=0">
   <meta http-equiv="Pragma" content="no-cache">
   <meta http-equiv="Expires" content="-1">
-  <meta name="app-version" content="20260810-19">
+  <meta name="app-version" content="20260810-20">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <meta name="robots" content="noindex,nofollow">
   <title>大会要綱・対戦表 v5｜吉見SMC FC</title>
@@ -416,9 +416,9 @@
         <span><span class="venue-map-option-title">会場案内図を2ページ目に追加</span><span class="venue-map-option-note">チェックすると、1ページ目に大会要項、2ページ目に吉見町ふれあい広場の案内図を入れた1つのPDFを作成します。</span></span>
       </label>
       <div class="venue-map-preview" id="venue-map-preview">
-        <img src="assets/yoshimi-fureai-venue-guide.svg" alt="吉見町ふれあい広場会場案内図のプレビュー">
+        <img src="assets/yoshimi-fureai-venue-guide.png" alt="吉見町ふれあい広場会場案内図のプレビュー">
         <div><strong>吉見町ふれあい広場 会場案内図</strong><span>A4縦の2ページ目へ、縮小せず追加します。</span></div>
-        <a class="btn btn-outline btn-sm" href="assets/yoshimi-fureai-venue-guide.svg" target="_blank" rel="noopener">案内図を確認</a>
+        <a class="btn btn-outline btn-sm" href="assets/yoshimi-fureai-venue-guide.png" target="_blank" rel="noopener">案内図を確認</a>
       </div>
       <div class="btn-group">
         <button class="btn btn-primary" onclick="buildYoukou()" style="flex:1 1 140px">👁 プレビュー</button>
@@ -1477,18 +1477,23 @@ function loadVenueMapImage(){
     image.decoding="async";
     image.onload=function(){resolve(image);};
     image.onerror=function(){reject(new Error("会場案内図を読み込めませんでした。通信状態を確認して、もう一度お試しください。"));};
-    image.src="assets/yoshimi-fureai-venue-guide.svg?v=20260809-16";
+    // SVGは一部端末のダークモードで配色が変換されるため、白背景を固定した印刷用PNGを使う。
+    image.src="assets/yoshimi-fureai-venue-guide.png?v=20260810-20";
   });
 }
 async function addVenueMapPage(pdf){
   var image=await loadVenueMapImage();
   var canvas=document.createElement("canvas");
-  canvas.width=1654;canvas.height=2339;
-  var context=canvas.getContext("2d");
+  canvas.width=2480;canvas.height=3508;
+  var context=canvas.getContext("2d",{alpha:false});
+  context.globalCompositeOperation="copy";
   context.fillStyle="#fff";context.fillRect(0,0,canvas.width,canvas.height);
+  context.globalCompositeOperation="source-over";
+  context.imageSmoothingEnabled=true;context.imageSmoothingQuality="high";
   context.drawImage(image,0,0,canvas.width,canvas.height);
   pdf.addPage("a4","portrait");
-  pdf.addImage(canvas.toDataURL("image/jpeg",.96),"JPEG",0,0,210,297,undefined,"FAST");
+  pdf.setFillColor(255,255,255);pdf.rect(0,0,210,297,"F");
+  pdf.addImage(canvas.toDataURL("image/jpeg",.98),"JPEG",0,0,210,297,undefined,"FAST");
 }
 function showPdfReadyModal(blob,filename,pageLabel){
   if(_pdfReadyUrl)URL.revokeObjectURL(_pdfReadyUrl);
