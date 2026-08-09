@@ -20,7 +20,7 @@
 
     /* ===== カラーフォルダ ===== */
     .color-folder{margin-bottom:14px;border-radius:var(--r12);overflow:hidden;border:1px solid var(--line-2)}
-    .cf-header{position:relative;display:grid;grid-template-columns:minmax(0,3fr) minmax(70px,1fr);align-items:stretch;min-height:94px;user-select:none;transition:.15s}
+    .cf-header{position:relative;display:grid;grid-template-columns:minmax(0,3fr) minmax(70px,1fr);align-items:stretch;min-height:104px;user-select:none;transition:.15s}
     .cf-summary{display:flex;align-items:center;min-width:0;padding:10px 12px;border:0;background:transparent;color:inherit;text-align:left;cursor:pointer}
     .cf-summary:hover{background:rgba(255,255,255,.07)}
     .cf-summary:has(.cf-uniform-illustration) .cf-name{max-width:calc(66.666% - 40px)}
@@ -29,6 +29,9 @@
     .cf-swatch{width:18px;height:18px;border-radius:50%;flex-shrink:0;border:2px solid rgba(255,255,255,.35);box-shadow:0 0 6px rgba(0,0,0,.5)}
     .cf-name{min-width:0;font-size:.98rem;font-weight:900;color:#fff;flex:1;display:flex;flex-direction:column;align-items:flex-start;gap:6px;text-shadow:0 1px 3px rgba(0,0,0,.65)}
     .cf-name-main{overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+    .cf-category-list{display:flex;flex-wrap:wrap;gap:4px;max-width:100%}
+    .cf-category-chip{display:inline-flex;align-items:center;min-height:21px;padding:2px 7px;border:1px solid rgba(255,255,255,.5);border-radius:99px;background:rgba(5,15,30,.78);color:#fff;font-size:.61rem;font-weight:900;line-height:1.15;text-shadow:none;white-space:nowrap}
+    .cf-category-chip.is-unset{border-style:dashed;color:#d7e3ec;background:rgba(5,15,30,.58)}
     .cf-stats{display:flex;gap:8px;width:max-content;max-width:100%;font-size:.67rem;padding:4px 8px;border-radius:99px;background:rgba(5,15,30,.82);box-shadow:0 1px 3px rgba(0,0,0,.2);text-shadow:none}
     .cf-free{color:#5cffae;font-weight:800}
     .cf-lent{color:#ff91a5;font-weight:800}
@@ -287,7 +290,7 @@
     #u-save-btn.ready,#u-save-close-btn.ready{display:inline-flex}
     @media(max-width:520px){
       .color-folder{margin-bottom:10px}
-      .cf-header{grid-template-columns:minmax(0,3fr) minmax(68px,1fr);min-height:90px}
+      .cf-header{grid-template-columns:minmax(0,3fr) minmax(68px,1fr);min-height:104px}
       .cf-summary{padding:9px 10px}
       .cf-summary:has(.cf-uniform-illustration) .cf-name{max-width:calc(66.666% - 31px)}
       .cf-uniform-illustration{width:46px;height:58px;margin-right:7px;padding:3px;border-radius:10px}
@@ -650,8 +653,13 @@
 <!-- 色フォルダ一括変更モーダル -->
 <div class="modal-bg" id="modal-folder-color">
   <div class="modal">
-    <h3>色をまとめて変更</h3>
-    <div class="template-guide" id="folder-color-guide">この色に登録されているユニフォームをまとめて変更します。</div>
+    <h3>色・使用カテゴリーを設定</h3>
+    <div class="template-guide" id="folder-color-guide">この色の表示と使用カテゴリーをまとめて変更します。</div>
+    <div class="form-group" style="margin-bottom:12px"><label class="form-label">使用カテゴリー</label>
+      <input class="form-control" id="folder-categories" list="uniform-category-options" placeholder="例：U10、U12、GK">
+      <datalist id="uniform-category-options"><option value="U6"><option value="U7"><option value="U8"><option value="U9"><option value="U10"><option value="U11"><option value="U12"><option value="GK"></datalist>
+      <div class="custom-color-note">複数ある場合は「、」で区切って入力してください。色帯にラベルで表示されます。</div>
+    </div>
     <div class="uniform-color-pair">
       <div class="uniform-color-field">
         <h4>メインカラー（必須）</h4>
@@ -679,9 +687,9 @@
 
 <footer class="site-footer"></footer>
 <script>
-var KU="smc_uniform_v3",KH="smc_uniform_hist_v1",KT="smc_uniform_color_templates_v1",KFO="smc_uniform_folder_order_v1",KS="smc_uniform_socks_v1",KP="smc_uniform_pants_v1";
+var KU="smc_uniform_v3",KH="smc_uniform_hist_v1",KT="smc_uniform_color_templates_v1",KFO="smc_uniform_folder_order_v1",KC="smc_uniform_color_categories_v1",KS="smc_uniform_socks_v1",KP="smc_uniform_pants_v1";
 var editId=null,lendId=null,sockEditId=null,pantsEditId=null;
-var _unifData=[], _histData=[], _colorTemplates=[],_folderOrder=[],_sockData=[],_pantsData=[];
+var _unifData=[], _histData=[], _colorTemplates=[],_folderOrder=[],_colorCategories={},_sockData=[],_pantsData=[];
 var _conditionFilter="";
 var _uniformView="color";
 var _pairPrimaryColor="",_pairSecondaryColor="";
@@ -785,6 +793,19 @@ function saveFolderOrder(items){
   _folderOrder=items.slice();
   dbSave("uniform_folder_order",_folderOrder,KFO,null);
 }
+function normalizeCategoryLabels(value){
+  var values=Array.isArray(value)?value:String(value||"").split(/[、,，／/\s]+/);
+  return values.map(function(label){return String(label||"").trim().toUpperCase();}).filter(function(label,index,all){return label&&all.indexOf(label)===index;}).slice(0,6);
+}
+function categoryLabelsForFolder(colorName,items){
+  var labels=normalizeCategoryLabels(_colorCategories[colorName]);
+  if(!labels.length&&(items||[]).some(function(item){return String(item.memo||"").indexOf("キーパー")>=0;}))labels=["GK"];
+  return labels;
+}
+function saveColorCategories(items){
+  _colorCategories=items;
+  return dbSave("uniform_color_categories",items,KC,null);
+}
 // loadU/saveU/loadH/saveH は上部で定義済み
 function getPalette(cname){return PALETTE.find(function(p){return p.name===cname;})||{c1:"#555",c2:"#777",code:"#555"};}
 function uniformColorLabel(u){
@@ -878,6 +899,7 @@ function openFolderColorEdit(colorName){
   document.getElementById("folder-main-code").value=safeColor(sample.mainColorCode||sample.ccode,"#666666");
   document.getElementById("folder-sub-name").value=sample.subColorName||"";
   document.getElementById("folder-sub-code").value=safeColor(sample.subColorCode,sample.mainColorCode||sample.ccode||"#666666");
+  document.getElementById("folder-categories").value=categoryLabelsForFolder(colorName,items).join("、");
   document.getElementById("folder-color-guide").innerHTML='<strong>'+escapeHtml(colorName)+'（'+items.length+'着）</strong><br>この色に登録されているユニフォームをまとめて変更します。';
   document.getElementById("folder-color-save-button").textContent=items.length+"着の色を変更";
   updateFolderColorPreview();document.getElementById("modal-folder-color").classList.add("open");
@@ -886,7 +908,7 @@ function saveFolderColorChange(){
   var mainName=document.getElementById("folder-main-name").value.trim(),subName=document.getElementById("folder-sub-name").value.trim();
   if(!mainName){alert("メインカラーを入力してください");return;}
   var mainCode=safeColor(document.getElementById("folder-main-code").value,"#666666"),subCode=subName?safeColor(document.getElementById("folder-sub-code").value,mainCode):"";
-  var changed=0,data=loadU().slice();
+  var changed=0,data=loadU().slice(),categories=Object.assign({},_colorCategories);
   data.forEach(function(item){
     if(uniformColorLabel(item)!==_folderColorEditName)return;
     item.mainColorName=mainName;item.mainColorCode=mainCode;item.subColorName=subName;item.subColorCode=subCode;item.cname=mainName;item.ccode=mainCode;
@@ -894,7 +916,13 @@ function saveFolderColorChange(){
     changed++;
   });
   if(!changed)return;
-  saveU(data);closeM("modal-folder-color");render();
+  var nextColorName=mainName+(subName?" × "+subName:"");
+  var categoryLabels=normalizeCategoryLabels(document.getElementById("folder-categories").value);
+  if(nextColorName!==_folderColorEditName)delete categories[_folderColorEditName];
+  if(categoryLabels.length)categories[nextColorName]=categoryLabels;else delete categories[nextColorName];
+  Promise.all([saveU(data),saveColorCategories(categories)]).then(function(){
+    closeM("modal-folder-color");render();
+  });
 }
 
 function renderStats(){
@@ -1105,6 +1133,10 @@ function renderFolders(){
     var lightClass=isLightFolder(cg.p)?" is-light":"";
     var illustration=uniformIllustrationFor(cname);
     var illustrationHtml=illustration?'<img class="cf-uniform-illustration" src="'+escapeHtml(illustration.src)+'" alt="'+escapeHtml(illustration.alt)+'">':'';
+    var categoryLabels=categoryLabelsForFolder(cname,items);
+    var categoryHtml=categoryLabels.length
+      ?categoryLabels.map(function(label){return '<span class="cf-category-chip">'+escapeHtml(label)+'</span>';}).join("")
+      :'<span class="cf-category-chip is-unset">カテゴリー未設定</span>';
 
     // テーブル行生成
     var rows=items.map(function(u){
@@ -1129,6 +1161,7 @@ function renderFolders(){
       +'<button type="button" class="cf-summary" id="fs'+bodyId+'" aria-expanded="false" aria-controls="'+bodyId+'" aria-label="'+escapeHtml(cname)+'の一覧を開く" onclick="toggleFolder(\''+bodyId+'\')">'
       +illustrationHtml
       +'<span class="cf-name"><span class="cf-name-main">'+escapeHtml(cname)+'</span>'
+      +'<span class="cf-category-list" aria-label="使用カテゴリー">'+categoryHtml+'</span>'
       +'<span class="cf-stats">'
       +'<span class="cf-total">全'+items.length+'着</span>'
       +'<span class="cf-free">倉庫'+free+'</span>'
@@ -1137,7 +1170,7 @@ function renderFolders(){
       +'<span class="cf-open-hint"><span class="cf-toggle" id="ft'+bodyId+'">▶</span><span id="fl'+bodyId+'">一覧を見る</span></span>'
       +'</span>'
       +'</button>'
-      +(_folderReorderMode?'':'<button type="button" class="cf-color-edit-button" aria-label="'+escapeHtml(cname)+'の色を変更" onclick="event.stopPropagation();openFolderColorEdit('+inlineJsArg(cname)+')">🎨<span>色変更</span></button>')
+      +(_folderReorderMode?'':'<button type="button" class="cf-color-edit-button" aria-label="'+escapeHtml(cname)+'の色と使用カテゴリーを設定" onclick="event.stopPropagation();openFolderColorEdit('+inlineJsArg(cname)+')">✎<span>設定</span></button>')
       +(_folderReorderMode?orderControls:'<button type="button" class="cf-add-button" aria-label="'+escapeHtml(cname)+'にユニフォームを追加" onclick="openAddForColor('+inlineJsArg(cname)+','+inlineJsArg(sampleMainName)+','+inlineJsArg(sampleMainCode)+','+inlineJsArg(sampleSubName)+','+inlineJsArg(sampleSubCode)+')"><span class="cf-add-icon">＋</span><span class="cf-add-label">この色に追加</span></button>')
       +'</div>'
       +'<div class="cf-body" id="'+bodyId+'">'
@@ -1806,6 +1839,10 @@ function startUniformSync(){
     _folderOrder=Array.isArray(val)?val.filter(function(name){return typeof name==="string"&&name.trim();}):[];
     renderFolders();
   }, KFO, []);
+  dbListen("uniform_color_categories", function(val){
+    _colorCategories=val&&typeof val==="object"&&!Array.isArray(val)?val:{};
+    renderFolders();
+  }, KC, {});
   dbListen("uniform_socks", function(val){
     _sockData=Array.isArray(val)?val.filter(function(item){return item&&item.id&&typeof item==="object";}):[];
     renderSocks();
