@@ -37,4 +37,27 @@ function teams(count){return Array.from({length:count},(_,i)=>"チーム"+(i+1))
   assert.equal(scheduler.validate(result.matches).valid,true);
 }
 
+{
+  const standings=scheduler.calculateStandings(
+    ["A","B","C"],
+    [{id:"ab",home:"A",away:"B"},{id:"ac",home:"A",away:"C"},{id:"bc",home:"B",away:"C"}],
+    {ab:{homeScore:0,awayScore:0},ac:{homeScore:2,awayScore:1},bc:{homeScore:"",awayScore:3}}
+  );
+  assert.deepEqual(standings.map(row=>row.team),["A","B","C"]);
+  assert.deepEqual(standings.map(row=>[row.played,row.wins,row.draws,row.losses,row.goalsFor,row.goalsAgainst,row.points]),[
+    [2,1,1,0,2,1,4],[1,0,1,0,0,0,1],[1,0,0,1,1,2,0]
+  ]);
+  const sameRank=scheduler.calculateStandings(["A","B"],[{id:"ab",home:"A",away:"B"}],{});
+  assert.deepEqual(sameRank.map(row=>row.rank),[1,1]);
+}
+
+{
+  const headToHead=scheduler.calculateStandings(
+    ["A","B","C","D"],
+    [{id:"ab",home:"A",away:"B"},{id:"ac",home:"A",away:"C"},{id:"ad",home:"A",away:"D"},{id:"bc",home:"B",away:"C"},{id:"bd",home:"B",away:"D"}],
+    {ab:{homeScore:1,awayScore:0},ac:{homeScore:0,awayScore:1},ad:{homeScore:1,awayScore:0},bc:{homeScore:1,awayScore:0},bd:{homeScore:1,awayScore:0}}
+  );
+  assert.ok(headToHead.findIndex(row=>row.team==="A")<headToHead.findIndex(row=>row.team==="B"));
+}
+
 console.log("tournament scheduler tests: ok");
