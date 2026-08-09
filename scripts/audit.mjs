@@ -407,6 +407,9 @@ if (!tournamentSource.includes("要項をA4縦PDFで作成") || !tournamentSourc
 if (!tournamentSource.includes(".tai-sheet.pdf-capture .score-input") || !tournamentSource.includes(".tai-sheet.pdf-capture .rct") || !tournamentSource.includes("hasPlayedMatch?stat.rank:\"－\"") || !tournamentSource.includes("pdf-footnote")) {
   fail("tournament.html", "対戦表PDFの配布用デザイン、得点欄、未実施順位の表示が整っていません");
 }
+if (!tournamentSource.includes("selectedScheduleOrientation") || !tournamentSource.includes("pdf-one-court") || !tournamentSource.includes("smc-taisen-one-page") || !tournamentSource.includes("_対戦表_A4縦.pdf") || !tournamentSource.includes("scheduleLandscape?\"landscape\":\"portrait\"")) {
+  fail("tournament.html", "対戦表PDFが2面=A4横、1面=A4縦へ自動切替されていません");
+}
 if (!commonSource.includes('data-print-target="tournament-guidelines"') || !tournamentSource.includes("@page smc-taisen-page") || !tournamentSource.includes("size:A4 landscape")) {
   fail("common.js", "要項・対戦表をA4一枚へ収める印刷調整がありません");
 }
