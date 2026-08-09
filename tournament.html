@@ -5,7 +5,7 @@
   <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate, max-age=0">
   <meta http-equiv="Pragma" content="no-cache">
   <meta http-equiv="Expires" content="-1">
-  <meta name="app-version" content="20260809-9">
+  <meta name="app-version" content="20260809-10">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <meta name="robots" content="noindex,nofollow">
   <title>大会要綱・対戦表 v5｜吉見SMC FC</title>
@@ -79,7 +79,12 @@
     .tai-sheet.pdf-capture .st .tr-alt-bg td{background:#f5f8fc!important}
     .tai-sheet.pdf-capture .st .td-score{background:#f8fafc!important;padding:1px 2px!important}
     .tai-sheet.pdf-capture .st .td-vs{background:#eef2f6!important;color:#64748b!important}
-    .tai-sheet.pdf-capture .score-input{display:block!important;width:100%!important;height:22px!important;min-height:0!important;margin:0!important;padding:0!important;border:0!important;border-radius:0!important;outline:0!important;background:transparent!important;box-shadow:none!important;color:#0f2740!important;font:900 10pt/22px Arial,sans-serif!important;text-align:center!important;-webkit-appearance:none!important;appearance:none!important}
+    /* PDFでは入力部品ではなく、手書きにも使える得点記入枠として表示 */
+    .tai-sheet.pdf-capture .score-input{display:block!important;width:30px!important;max-width:calc(100% - 4px)!important;height:23px!important;min-height:0!important;margin:0 auto!important;padding:0!important;border:1.5px solid #c78313!important;border-radius:4px!important;outline:0!important;background:#fff!important;box-shadow:none!important;color:#0f2740!important;font:900 10pt/21px Arial,sans-serif!important;text-align:center!important;-webkit-appearance:none!important;appearance:none!important}
+    .tai-sheet.pdf-capture.pdf-one-court .st td{height:34px!important;padding-top:5px!important;padding-bottom:5px!important;font-size:8.8pt!important}
+    .tai-sheet.pdf-capture.pdf-one-court .score-input{width:34px!important;height:27px!important;font-size:11pt!important;line-height:25px!important}
+    .tai-sheet.pdf-capture.pdf-one-court .rt td{padding:5px!important;font-size:8.2pt!important}
+    .tai-sheet.pdf-capture.pdf-one-court .rct th,.tai-sheet.pdf-capture.pdf-one-court .rct td{height:26px!important;font-size:7.5pt!important}
     .tai-sheet.pdf-capture .rt{margin-bottom:7px!important}
     .tai-sheet.pdf-capture .rt .rank-th{padding:4px!important;background:#285943!important;color:#fff!important;border-color:#3f725e!important;font-size:7pt!important}
     .tai-sheet.pdf-capture .rt td{padding:4px!important;border-color:#a8b6ae!important;color:#172033!important;font-size:7.7pt!important}
@@ -125,7 +130,7 @@
       .td-score{background:#fffbe6!important}
       .tr-alt-bg{background:#fafcff!important}
       .rank-alt{background:#f6fff6!important}
-      .score-input{width:100%!important;min-height:0!important;padding:0!important;border:0!important;outline:0!important;background:transparent!important;color:#000!important;font-size:9pt!important;box-shadow:none!important;-moz-appearance:textfield}
+      .score-input{display:block!important;width:30px!important;max-width:calc(100% - 4px)!important;height:22px!important;min-height:0!important;margin:0 auto!important;padding:0!important;border:1.2pt solid #9a650c!important;border-radius:3px!important;outline:0!important;background:#fff!important;color:#000!important;font:900 9pt/20px Arial,sans-serif!important;text-align:center!important;box-shadow:none!important;-webkit-appearance:none!important;-moz-appearance:textfield!important;appearance:none!important}
     }
 
     /* ====== 要綱プレビュー ====== */
