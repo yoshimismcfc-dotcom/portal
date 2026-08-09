@@ -5,7 +5,7 @@
   <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate, max-age=0">
   <meta http-equiv="Pragma" content="no-cache">
   <meta http-equiv="Expires" content="-1">
-  <meta name="app-version" content="20260809-11">
+  <meta name="app-version" content="20260809-12">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <meta name="robots" content="noindex,nofollow">
   <title>大会要綱・対戦表 v5｜吉見SMC FC</title>
@@ -14,6 +14,7 @@
   <script src="common.js"></script>
   <script src="event-links.js"></script>
   <script src="tournament-scheduler.js"></script>
+  <script src="tournament-guidelines.js"></script>
   <script defer src="https://cdn.jsdelivr.net/npm/html2canvas@1.4.1/dist/html2canvas.min.js"></script>
   <script defer src="https://cdn.jsdelivr.net/npm/jspdf@2.5.2/dist/jspdf.umd.min.js"></script>
   <style>
@@ -33,10 +34,10 @@
     /* 入力欄 視認性改善 */
     #doc-youkou .form-control,#doc-taisen .form-control{background:#1e3a5a!important;color:#fff!important;border-color:rgba(0,212,255,.4)!important;max-width:100%;box-sizing:border-box;word-break:break-word;overflow-wrap:break-word}
     /* iPhone Safariの日付入力が固有の最小幅で横にはみ出す問題を防ぐ */
-    #doc-youkou #y-date,#doc-taisen #t-date{display:block!important;width:100%!important;min-width:0!important;max-width:100%!important;inline-size:100%!important;min-inline-size:0!important;box-sizing:border-box!important;overflow:hidden!important}
-    #doc-youkou #y-date::-webkit-date-and-time-value,#doc-taisen #t-date::-webkit-date-and-time-value{min-width:0!important;width:100%!important;text-align:left!important}
-    #doc-youkou #y-date::-webkit-datetime-edit,#doc-taisen #t-date::-webkit-datetime-edit{min-width:0!important;max-width:100%!important;padding:0!important}
-    #doc-youkou #y-date::-webkit-calendar-picker-indicator,#doc-taisen #t-date::-webkit-calendar-picker-indicator{flex:0 0 auto!important;margin:0 2px 0 5px!important}
+    #doc-youkou .guideline-content-input[type=date],#doc-taisen #t-date{display:block!important;width:100%!important;min-width:0!important;max-width:100%!important;inline-size:100%!important;min-inline-size:0!important;box-sizing:border-box!important;overflow:hidden!important}
+    #doc-youkou .guideline-content-input[type=date]::-webkit-date-and-time-value,#doc-taisen #t-date::-webkit-date-and-time-value{min-width:0!important;width:100%!important;text-align:left!important}
+    #doc-youkou .guideline-content-input[type=date]::-webkit-datetime-edit,#doc-taisen #t-date::-webkit-datetime-edit{min-width:0!important;max-width:100%!important;padding:0!important}
+    #doc-youkou .guideline-content-input[type=date]::-webkit-calendar-picker-indicator,#doc-taisen #t-date::-webkit-calendar-picker-indicator{flex:0 0 auto!important;margin:0 2px 0 5px!important}
     #doc-youkou textarea.form-control,#doc-taisen textarea.form-control{line-height:1.6;word-break:break-word;white-space:pre-wrap;overflow-wrap:break-word}
     #doc-youkou .panel,#doc-taisen .panel{overflow:hidden;word-break:break-word}
     #doc-youkou .form-group,#doc-taisen .form-group{min-width:0;overflow:hidden}
@@ -114,6 +115,7 @@
       body[data-print-target="tournament-guidelines"] .req-sheet{page:smc-youkou-page}
       .req-sheet *{color:#000!important}
       .req-sheet .req-info th{background:#003087!important;color:#fff!important}
+      .req-section{break-inside:avoid;page-break-inside:avoid}
       /* 対戦表 */
       .tai-sheet{box-shadow:none!important;border-radius:0!important;margin:0!important;padding:0!important;max-width:100%!important;background:#fff!important;color:#000!important;width:100%!important}
       body[data-print-target="tournament-schedule"] .tai-sheet{page:smc-taisen-page}
@@ -150,6 +152,7 @@
     .req-num::before{content:"";display:block;width:3px;height:14px;background:#003087;border-radius:2px}
     .req-li{margin:0;padding-left:1.4em;font-size:9.5pt;line-height:1.85;color:#111}
     .req-li li{margin-bottom:1px}
+    .req-section{break-inside:avoid;page-break-inside:avoid}
     .req-contact{background:#f0f4ff;border:1px solid #c0cce8;border-radius:6px;padding:7px 11px;margin-top:10px;font-size:9pt}
     .req-contact b{color:#003087}
 
@@ -226,21 +229,46 @@
     .saved-item-del:hover{color:#ff4466;background:rgba(255,68,102,.1)}
     /* 折り返し対応 */
     .wrap-flex{display:flex;flex-wrap:wrap;gap:8px;align-items:center}
-    /* カスタム項目行 */
-    .youkou-edit-help{margin:6px 0 10px;padding:9px 11px;border:1px solid rgba(0,212,255,.28);border-radius:9px;background:rgba(0,120,180,.08);color:var(--ink-3);font-size:.72rem;line-height:1.6}
-    .youkou-label-editor{margin:0 0 12px;border:1px solid var(--line-2);border-radius:10px;background:rgba(255,255,255,.025);overflow:hidden}
-    .youkou-label-editor summary{padding:10px 12px;color:#8fe7ff;font-size:.78rem;font-weight:900;cursor:pointer;list-style-position:inside}
-    .youkou-label-editor-body{padding:4px 10px 10px}
-    .custom-row{display:grid;grid-template-columns:minmax(100px,.55fr) minmax(0,1.45fr) auto;gap:6px;align-items:start;margin-bottom:8px;padding:8px;border:1px solid var(--line-2);border-radius:9px;background:rgba(255,255,255,.025)}
-    .custom-row .custom-label{min-width:0}
-    .custom-row .custom-val{min-width:0}
-    .custom-row-actions{display:flex;flex-direction:column;gap:4px}
-    .custom-move-btn{background:none;border:1px solid rgba(0,212,255,.3);color:#7dd3fc;border-radius:6px;padding:5px 7px;cursor:pointer;font-size:.72rem;line-height:1}
-    .custom-row .del-row-btn{background:none;border:1px solid rgba(255,68,102,.4);color:#ff6680;border-radius:6px;padding:5px 8px;cursor:pointer;font-size:.8rem;flex-shrink:0;line-height:1;margin-top:2px}
-    .custom-row .del-row-btn:hover{background:rgba(255,68,102,.1)}
-    .add-row-btn{display:flex;align-items:center;gap:6px;padding:7px 12px;background:rgba(0,212,255,.07);border:1px dashed rgba(0,212,255,.3);border-radius:var(--r8);color:var(--cyan);font-size:.8rem;font-weight:700;cursor:pointer;width:100%;margin-top:4px;box-sizing:border-box}
-    .add-row-btn:hover{background:rgba(0,212,255,.13)}
-    @media(max-width:560px){.custom-row{grid-template-columns:1fr}.custom-row-actions{flex-direction:row;justify-content:flex-end}.custom-row .del-row-btn{margin-top:0}}
+    /* 大会要項：折りたたみカード編集 */
+    .guideline-editor-head{display:flex;align-items:flex-end;justify-content:space-between;gap:10px;margin-top:12px}
+    .guideline-editor-head .sec{margin-bottom:3px;flex:1}
+    .guideline-editor-hint{color:var(--ink-3);font-size:.7rem;line-height:1.5;margin-bottom:7px}
+    .guideline-card-list{display:grid;gap:8px;margin-bottom:8px}
+    .guideline-card{border:1px solid var(--line-2);border-radius:11px;background:rgba(255,255,255,.035);overflow:hidden;transition:border-color .15s,box-shadow .15s,opacity .15s}
+    .guideline-card.dragging{opacity:.72;border-color:#00d4ff;box-shadow:0 8px 24px rgba(0,0,0,.28)}
+    .guideline-card.is-hidden{opacity:.72}
+    .guideline-card-summary{display:grid;grid-template-columns:42px minmax(0,1fr) auto;gap:8px;align-items:center;padding:9px 10px}
+    .guideline-drag-handle{display:grid;place-items:center;width:38px;height:42px;border:1px solid rgba(0,212,255,.3);border-radius:8px;background:rgba(0,160,220,.08);color:#8fe7ff;font-size:1.1rem;cursor:grab;touch-action:none;user-select:none;-webkit-user-select:none}
+    .guideline-card-title{font-size:.84rem;font-weight:900;color:var(--ink);overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+    .guideline-card-excerpt{font-size:.68rem;color:var(--ink-3);overflow:hidden;text-overflow:ellipsis;white-space:nowrap;margin-top:2px}
+    .guideline-card-badges{display:flex;align-items:center;gap:5px;margin-top:4px}
+    .guideline-badge{display:inline-flex;padding:2px 6px;border-radius:99px;background:rgba(0,212,136,.13);color:#75e8ad;font-size:.6rem;font-weight:900}
+    .guideline-badge.hidden{background:rgba(148,163,184,.14);color:#b7c2cf}
+    .guideline-edit-toggle{min-width:64px;min-height:38px;padding:6px 9px;border:1px solid rgba(0,212,255,.35);border-radius:8px;background:rgba(0,160,220,.1);color:#8fe7ff;font:800 .72rem/1.2 inherit;cursor:pointer}
+    .guideline-card-editor{display:none;padding:10px;border-top:1px solid var(--line-2);background:rgba(0,0,0,.08)}
+    .guideline-card.open .guideline-card-editor{display:block}
+    .guideline-card-editor textarea{min-height:104px;resize:vertical;line-height:1.55}
+    .guideline-card-actions{display:flex;flex-wrap:wrap;gap:6px;margin-top:9px}
+    .guideline-card-actions .btn{min-height:38px;padding:7px 9px;font-size:.68rem}
+    .guideline-card-actions .btn-danger{border:1px solid rgba(255,88,112,.58);background:rgba(190,28,55,.16);color:#ff9bad}
+    .guideline-card-actions .btn-danger:hover{background:rgba(210,35,65,.28)}
+    .guideline-visible-toggle{display:flex;align-items:center;gap:7px;min-height:38px;padding:7px 9px;border:1px solid var(--line-2);border-radius:8px;color:var(--ink);font-size:.72rem;font-weight:800}
+    .guideline-visible-toggle input{width:18px;height:18px}
+    .guideline-restore{display:none;grid-template-columns:minmax(0,1fr) auto;gap:7px;align-items:center;margin:8px 0 12px;padding:8px;border:1px dashed rgba(0,212,255,.35);border-radius:9px}
+    .guideline-restore.show{display:grid}
+    .guideline-restore select{min-width:0}
+    .guideline-template-actions{display:flex;align-items:center;gap:9px;flex-wrap:wrap;margin:14px 0 4px;padding-top:10px;border-top:1px solid var(--line)}
+    .guideline-template-actions span{color:var(--ink-3);font-size:.66rem;line-height:1.5}
+    .guideline-undo{position:fixed;left:50%;bottom:22px;z-index:450;display:none;align-items:center;gap:12px;transform:translateX(-50%);width:min(420px,calc(100% - 28px));padding:11px 13px;border:1px solid rgba(0,212,255,.5);border-radius:12px;background:#10283d;color:#fff;box-shadow:0 12px 36px rgba(0,0,0,.48);font-size:.76rem;font-weight:800}
+    .guideline-undo.show{display:flex}.guideline-undo span{flex:1}.guideline-undo button{white-space:nowrap}
+    .guideline-add-position{display:grid;grid-template-columns:1fr;gap:5px}
+    .guideline-content-input[type="date"]{display:block!important;width:100%!important;min-width:0!important;max-width:100%!important;inline-size:100%!important;min-inline-size:0!important;box-sizing:border-box!important;overflow:hidden!important}
+    .guideline-content-input[type="date"]::-webkit-date-and-time-value{min-width:0!important;width:100%!important;text-align:left!important}
+    body[data-theme="light"] .guideline-card{background:#f8fbff;border-color:#c7d4e2}
+    body[data-theme="light"] .guideline-card-editor{background:#f1f6fb}
+    body[data-theme="light"] .guideline-badge{color:#075f32;background:#dff7e9}
+    body[data-theme="light"] .guideline-badge.hidden{color:#475569;background:#e2e8f0}
+    @media(max-width:560px){.guideline-editor-head{display:block}.guideline-editor-head .btn{width:100%;margin-bottom:8px}.guideline-card-summary{grid-template-columns:38px minmax(0,1fr) auto;padding:8px}.guideline-drag-handle{width:34px}.guideline-edit-toggle{min-width:56px;padding:5px}.guideline-card-actions{display:grid;grid-template-columns:1fr 1fr}.guideline-card-actions .btn,.guideline-visible-toggle{width:100%;justify-content:center}.guideline-restore{grid-template-columns:1fr}.guideline-restore .btn{width:100%}}
     .btn-group{display:flex;flex-wrap:wrap;gap:6px;margin-top:10px;width:100%;box-sizing:border-box}
     .linked-workflow{margin:0 0 14px;padding:13px;border:2px solid rgba(0,212,255,.45);border-radius:14px;background:linear-gradient(135deg,rgba(0,92,150,.18),rgba(0,212,255,.06))}
     .linked-workflow h3{font-size:.9rem;font-weight:900;color:#8fe7ff;margin-bottom:4px}
@@ -336,87 +364,28 @@
   <!-- ===== 大会要綱 ===== -->
   <div class="doc-section active" id="doc-youkou">
     <div class="panel no-print">
-      <div class="sec">📌 基本情報</div>
-      <div class="fg2">
-        <div class="form-group"><label class="form-label">大会名</label><input class="form-control" id="y-title" value="U9 吉見SMC大会"></div>
-        <div class="form-group"><label class="form-label">カテゴリー</label><input class="form-control" id="y-cat" value="U9（3年生以下 ※4年生女子も参加可）"></div>
+      <div class="sec">📌 大会名</div>
+      <div class="form-group"><label class="form-label" for="y-title">大会名</label><input class="form-control" id="y-title" value="U9 吉見SMC大会" oninput="scheduleGuidelinePreview()"></div>
+
+      <div class="guideline-editor-head">
+        <div><div class="sec">🗓 基本情報</div><div class="guideline-editor-hint">期日・場所など。空欄または非表示の項目は要項に載りません。</div></div>
+        <button class="btn btn-outline btn-sm" type="button" onclick="openGuidelineAddModal('meta')">＋ 基本情報を追加</button>
       </div>
-      <div class="fg3">
-        <div class="form-group"><label class="form-label">期日</label><input class="form-control" id="y-date" type="date"></div>
-        <div class="form-group"><label class="form-label">場所</label><input class="form-control" id="y-place" value="吉見ふれあい広場 天然芝グラウンド"></div>
-        <div class="form-group"><label class="form-label">主催</label><input class="form-control" id="y-host" value="吉見SMC"></div>
+      <div class="guideline-card-list" id="guideline-meta-list"></div>
+      <div class="guideline-restore" id="guideline-meta-restore"></div>
+
+      <div class="guideline-editor-head">
+        <div><div class="sec">📝 要項本文</div><div class="guideline-editor-hint">カードを開くと項目名と文章をすべて編集できます。本文は1行ごとに箇条書きになります。</div></div>
+        <button class="btn btn-primary btn-sm" type="button" onclick="openGuidelineAddModal('section')">＋ 要項に項目を追加</button>
       </div>
-      <div class="fg2">
-        <div class="form-group"><label class="form-label">受付</label><input class="form-control" id="y-uketsuke" value="8:00より受付（参加費徴収）"></div>
-        <div class="form-group"><label class="form-label">参加費</label><input class="form-control" id="y-fee" value="1チーム5,000円（受付にて集金）"></div>
-      </div>
-      <div class="sec">⚽ 試合ルール</div>
-      <div class="fg3">
-        <div class="form-group"><label class="form-label">競技形式</label><input class="form-control" id="y-format" value="8人制（最少6名）"></div>
-        <div class="form-group"><label class="form-label">試合時間</label><input class="form-control" id="y-time" value="15分ハーフ（15-5-15分）"></div>
-        <div class="form-group"><label class="form-label">選手交代</label><input class="form-control" id="y-sub" value="自由（再出場可）"></div>
-      </div>
-      <div class="form-group"><label class="form-label">順位決定</label><textarea class="form-control" id="y-rank" rows="2" style="resize:vertical;min-height:64px">勝3点・分1点・負0点 → 勝点→得失点差→総得点→当該対戦→抽選</textarea></div>
-      <div class="fg2">
-        <div class="form-group"><label class="form-label">審判</label><textarea class="form-control" id="y-ref" rows="2" style="resize:vertical;min-height:64px">当該チームで相談（1審・2審・3審）</textarea></div>
-        <div class="form-group"><label class="form-label">表彰</label><textarea class="form-control" id="y-award" rows="2" style="resize:vertical;min-height:64px">1〜3位にトロフィー・優秀選手賞：各チーム1名</textarea></div>
-      </div>
-      <div class="sec">📝 要項本文（すべて編集できます）</div>
-      <div class="youkou-edit-help">各欄は1行ごとに箇条書きとして要項へ表示されます。文章をすべて消した項目は要項に表示されません。不要な文章は削除し、必要な文章は自由に追加してください。</div>
-      <details class="youkou-label-editor">
-        <summary>項目名も変更する</summary>
-        <div class="youkou-label-editor-body fg3">
-          <div class="form-group"><label class="form-label">目的</label><input class="form-control" id="y-label-purpose" value="目的"></div>
-          <div class="form-group"><label class="form-label">対象学年</label><input class="form-control" id="y-label-category" value="対象学年"></div>
-          <div class="form-group"><label class="form-label">試合方法</label><input class="form-control" id="y-label-method" value="試合方法"></div>
-          <div class="form-group"><label class="form-label">選手交代</label><input class="form-control" id="y-label-sub" value="選手交代"></div>
-          <div class="form-group"><label class="form-label">競技規則</label><input class="form-control" id="y-label-rules" value="競技規則・ユニフォーム"></div>
-          <div class="form-group"><label class="form-label">順位決定</label><input class="form-control" id="y-label-rank" value="順位決定"></div>
-          <div class="form-group"><label class="form-label">審判</label><input class="form-control" id="y-label-ref" value="審判"></div>
-          <div class="form-group"><label class="form-label">開閉会式</label><input class="form-control" id="y-label-ceremony" value="開会式・閉会式"></div>
-          <div class="form-group"><label class="form-label">参加費</label><input class="form-control" id="y-label-fee" value="参加費"></div>
-          <div class="form-group"><label class="form-label">表彰</label><input class="form-control" id="y-label-award" value="表彰"></div>
-          <div class="form-group"><label class="form-label">注意事項</label><input class="form-control" id="y-label-notes" value="注意事項"></div>
-          <div class="form-group"><label class="form-label">雨天時</label><input class="form-control" id="y-label-rain" value="雨天時"></div>
-        </div>
-      </details>
-      <div class="form-group"><label class="form-label">大会の目的</label><textarea class="form-control" id="y-purpose" rows="3">試合を通して少年少女サッカーの普及を目指します。
-チーム間の友好と親善を図り、サッカーの楽しさを知ってもらいます。
-試合経験を通して、選手相互の技術向上を図ります。</textarea></div>
-      <div class="fg2">
-        <div class="form-group"><label class="form-label">試合方法の補足</label><textarea class="form-control" id="y-format-notes" rows="3">暑熱時は、飲水タイムを設けます。</textarea></div>
-        <div class="form-group"><label class="form-label">選手交代の補足</label><textarea class="form-control" id="y-sub-notes" rows="3">できるだけ多くの選手が出場できるようご配慮ください。</textarea></div>
-      </div>
-      <div class="fg2">
-        <div class="form-group"><label class="form-label">ルール・ユニフォーム</label><textarea class="form-control" id="y-rules-extra" rows="4">日本サッカー協会8人制競技規則に準じます。
-細かな運用は、当日の進行状況により主催者判断で調整します。
-ユニフォームは正副いずれかを用意し、必要に応じてビブスで対応します。</textarea></div>
-        <div class="form-group"><label class="form-label">審判の補足</label><textarea class="form-control" id="y-ref-notes" rows="4">審判服の着用をお願いします。
-笛・時計などは各自でご準備ください。</textarea></div>
-      </div>
-      <div class="form-group"><label class="form-label">開会式・閉会式</label><textarea class="form-control" id="y-ceremony" rows="3">開会式は行いません。試合開始までに各チーム集合してください。
-全試合終了後、表彰を含む閉会式を行います。</textarea></div>
-      <div class="form-group"><label class="form-label">注意事項</label><textarea class="form-control" id="y-notes" rows="5">代表者会議を受付後に行いますので、本部へお集まりください。
-熱中症・感染症には十分に注意してください。
-飲水は各チームで十分に準備し、選手の体調管理をお願いします。
-ゴミは各チームで持ち帰りをお願いします。</textarea></div>
-      <div class="fg2">
-        <div class="form-group"><label class="form-label">雨天時</label><textarea class="form-control" id="y-rain" rows="3" style="resize:vertical;min-height:96px">当日AM6:00頃に実施可否を判断し、各チームへ連絡します。</textarea></div>
-        <div class="form-group"><label class="form-label">駐車場</label><textarea class="form-control" id="y-parking" rows="3" style="resize:vertical;min-height:96px">会場周辺に3か所。路上駐車禁止。乗り合わせにご協力ください。</textarea></div>
-      </div>
-      <div class="sec">📞 問い合わせ</div>
-      <div class="fg2">
-        <div class="form-group"><label class="form-label">代表者名</label><textarea class="form-control" id="y-rep" rows="2" style="resize:vertical;min-height:64px">吉見SMC代表　片山孝俊</textarea></div>
-        <div class="form-group"><label class="form-label">電話・メール</label><textarea class="form-control" id="y-contact" rows="2" style="resize:vertical;min-height:64px">090-3595-1970 / yoshimi.smc.fc@gmail.com</textarea></div>
-      </div>
-      <div class="sec">➕ 自由追加項目</div>
-      <div class="youkou-edit-help">「持ち物」「かき氷の案内」など、必要な項目を追加できます。追加した項目は要項の本文・PDF・保存データへ反映されます。</div>
-      <div id="custom-rows-wrap" style="margin-bottom:6px"></div>
-      <div class="add-row-btn" onclick="addCustomRow()" style="margin-bottom:12px">
-        ＋ 要項に新しい項目を追加する
+      <div class="guideline-card-list" id="guideline-section-list"></div>
+      <div class="guideline-restore" id="guideline-section-restore"></div>
+
+      <div class="guideline-template-actions">
+        <button class="btn btn-outline btn-sm" type="button" onclick="resetGuidelineTemplate()">↺ 標準テンプレートに戻す</button>
+        <span>現在の要項を初期状態へ戻します。実行前に確認画面が表示されます。</span>
       </div>
       <div class="btn-group">
-        <button class="btn btn-outline btn-sm" onclick="copyTournamentTemplate('youkou')">📑 テンプレートをコピー</button>
         <button class="btn btn-primary" onclick="buildYoukou()" style="flex:1 1 140px">👁 プレビュー</button>
         <button class="btn btn-outline btn-sm" onclick="openSaveModal('youkou')">💾 保存</button>
         <button class="btn btn-outline btn-sm" onclick="openLoadModal('youkou')">📂 読込</button>
@@ -583,6 +552,22 @@
   </div>
 </div>
 
+<!-- 要項項目追加モーダル -->
+<div class="save-modal-bg" id="modal-guideline-add" onclick="if(event.target.id==='modal-guideline-add')closeGuidelineAddModal()">
+  <div class="save-modal" role="dialog" aria-modal="true" aria-labelledby="guideline-add-title">
+    <h3 id="guideline-add-title">＋ 要項に項目を追加</h3>
+    <div class="form-group"><label class="form-label" for="guideline-add-name">項目名</label><input class="form-control" id="guideline-add-name" placeholder="例：かき氷の案内"></div>
+    <div class="form-group"><label class="form-label" for="guideline-add-content">内容</label><textarea class="form-control" id="guideline-add-content" rows="5" placeholder="1行ごとに箇条書きとして表示されます"></textarea></div>
+    <div class="form-group guideline-add-position"><label class="form-label" for="guideline-add-position">追加する位置</label><select class="form-control" id="guideline-add-position"></select></div>
+    <div class="btn-group">
+      <button class="btn btn-outline btn-sm" type="button" onclick="closeGuidelineAddModal()">キャンセル</button>
+      <button class="btn btn-primary" type="button" onclick="confirmGuidelineAdd()">追加して編集する</button>
+    </div>
+  </div>
+</div>
+
+<div class="guideline-undo" id="guideline-undo" role="status" aria-live="polite"><span id="guideline-undo-text">項目を削除しました</span><button class="btn btn-cyan btn-sm" type="button" onclick="undoGuidelineDelete()">元に戻す</button></div>
+
 <!-- PDF完成モーダル：iPhoneのポップアップ制限を避け、完成後の操作を明確にする -->
 <div class="save-modal-bg" id="modal-pdf-ready" onclick="if(event.target.id==='modal-pdf-ready')closePdfReadyModal()">
   <div class="save-modal pdf-ready-card" role="dialog" aria-modal="true" aria-labelledby="pdf-ready-title">
@@ -621,44 +606,149 @@ function fmtDate(val){
   return d.toLocaleDateString("ja-JP",{year:"numeric",month:"long",day:"numeric",weekday:"short"});
 }
 
-/* ===== 要綱 ===== */
-function buildYoukou(){
-  var title=gv("y-title"),dateStr=fmtDate(gv("y-date"));
-  var h='<div class="req-sheet">';
-  h+='<div class="req-title">'+escapeHtml(title)+'　大会要項</div>';
-  h+='<table class="req-info"><tbody>';
-  h+='<tr><th>期日</th><td>'+escapeHtml(dateStr||"　　年　月　日")+'</td><th>場所</th><td>'+escapeHtml(gv("y-place"))+'</td></tr>';
-  h+='<tr><th>受付</th><td>'+escapeHtml(gv("y-uketsuke"))+'</td><th>主催</th><td>'+escapeHtml(gv("y-host"))+'</td></tr>';
-  h+='</tbody></table>';
-  h+='<div style="font-weight:bold;font-size:11pt;margin-bottom:5px;color:#003087;border-bottom:1px solid #c0cce8;padding-bottom:3px">開催要項</div>';
-  function lines(value){return String(value||"").split(/\r?\n/).map(function(item){return item.trim();}).filter(Boolean);}
-  function sec(n,t,items){
-    items=(items||[]).filter(function(item){return String(item||"").trim();});
-    if(!items.length)return "";
-    var r='<div class="req-num">'+escapeHtml(n)+'）'+escapeHtml(t)+'</div><ul class="req-li">';
-    items.forEach(function(i){r+='<li>'+escapeHtml(i)+'</li>';});return r+'</ul>';
+/* ===== 大会要項：動的カード編集 ===== */
+var _guidelineState=window.SMCGuidelines?SMCGuidelines.defaults():{schemaVersion:2,meta:[],sections:[]};
+var _guidelineOpen={};
+var _guidelinePreviewTimer=null;
+var _guidelineUndoState=null;
+var _guidelineUndoTimer=null;
+var _guidelineAddKind="section";
+
+function guidelineList(kind){return kind==="meta"?_guidelineState.meta:_guidelineState.sections;}
+function setGuidelineList(kind,list){
+  var current=guidelineList(kind),previousOrder={};current.forEach(function(item,index){previousOrder[item.id]=index;});
+  var normalized=SMCGuidelines.normalizeList(list,kind),now=new Date().toISOString();
+  normalized.forEach(function(item,index){if(Object.prototype.hasOwnProperty.call(previousOrder,item.id)&&previousOrder[item.id]!==index)item.updatedAt=now;});
+  _guidelineState[kind==="meta"?"meta":"sections"]=normalized;
+}
+function guidelineItem(kind,id){return guidelineList(kind).find(function(item){return item.id===id;});}
+function guidelineByKey(kind,key){return guidelineList(kind).find(function(item){return item.standardKey===key;});}
+function guidelineStandardContent(kind,key){var item=guidelineByKey(kind,key);return item&&item.visible?String(item.content||"").trim():"";}
+function guidelineLines(value){return String(value||"").split(/\r?\n/).map(function(item){return item.trim();}).filter(Boolean);}
+function scheduleGuidelinePreview(){
+  window.clearTimeout(_guidelinePreviewTimer);
+  _guidelinePreviewTimer=window.setTimeout(function(){buildYoukou(true);},120);
+}
+function guidelineExcerpt(value){
+  var first=guidelineLines(value)[0]||"内容未入力";
+  return first.length>44?first.slice(0,44)+"…":first;
+}
+function renderGuidelineCard(kind,item,index,total){
+  var open=!!_guidelineOpen[item.id],hidden=!item.visible;
+  var input=item.inputType==="date"&&kind==="meta"
+    ? '<input class="form-control guideline-content-input" type="date" data-guideline-field="content" value="'+esc3(item.content)+'">'
+    : '<textarea class="form-control guideline-content-input" data-guideline-field="content" rows="'+(kind==="meta"?2:5)+'">'+esc3(item.content)+'</textarea>';
+  return '<div class="guideline-card'+(open?' open':'')+(hidden?' is-hidden':'')+'" data-guideline-kind="'+kind+'" data-guideline-id="'+esc3(item.id)+'">'
+    +'<div class="guideline-card-summary">'
+      +'<button class="guideline-drag-handle" type="button" aria-label="長押しして並べ替え">☰</button>'
+      +'<div><div class="guideline-card-title">'+esc3(item.title||"項目名未入力")+'</div><div class="guideline-card-excerpt">'+esc3(guidelineExcerpt(item.content))+'</div><div class="guideline-card-badges"><span class="guideline-badge'+(hidden?' hidden':'')+'">'+(hidden?'非表示':'表示中')+'</span><span class="guideline-badge">'+(item.type==="standard"?'標準':'追加')+'</span></div></div>'
+      +'<button class="guideline-edit-toggle" type="button" data-guideline-action="toggle">'+(open?'閉じる':'編集')+'</button>'
+    +'</div>'
+    +'<div class="guideline-card-editor">'
+      +'<div class="form-group"><label class="form-label">項目名</label><input class="form-control" data-guideline-field="title" value="'+esc3(item.title)+'"></div>'
+      +'<div class="form-group"><label class="form-label">内容'+(kind==="section"?'（1行ごとに箇条書き）':'')+'</label>'+input+'</div>'
+      +'<div class="guideline-card-actions">'
+        +'<label class="guideline-visible-toggle"><input type="checkbox" data-guideline-field="visible" '+(item.visible?'checked':'')+'>要項に表示する</label>'
+        +'<button class="btn btn-outline btn-sm" type="button" data-guideline-action="up" '+(index===0?'disabled':'')+'>↑ 上へ</button>'
+        +'<button class="btn btn-outline btn-sm" type="button" data-guideline-action="down" '+(index===total-1?'disabled':'')+'>↓ 下へ</button>'
+        +'<button class="btn btn-outline btn-sm" type="button" data-guideline-action="duplicate">⧉ 複製</button>'
+        +'<button class="btn btn-danger btn-sm" type="button" data-guideline-action="delete">削除</button>'
+      +'</div>'
+    +'</div></div>';
+}
+function renderGuidelineList(kind){
+  var list=guidelineList(kind),wrap=document.getElementById(kind==="meta"?"guideline-meta-list":"guideline-section-list");
+  if(!wrap)return;
+  wrap.innerHTML=list.map(function(item,index){return renderGuidelineCard(kind,item,index,list.length);}).join("");
+  wrap.querySelectorAll(".guideline-card").forEach(function(card){bindGuidelineCard(card);});
+  renderGuidelineRestore(kind);
+}
+function renderGuidelineEditors(openId){
+  if(openId)_guidelineOpen[openId]=true;
+  renderGuidelineList("meta");renderGuidelineList("section");
+}
+function bindGuidelineCard(card){
+  var kind=card.dataset.guidelineKind,id=card.dataset.guidelineId;
+  card.querySelectorAll("[data-guideline-field]").forEach(function(field){
+    field.addEventListener(field.type==="checkbox"?"change":"input",function(){
+      var item=guidelineItem(kind,id);if(!item)return;
+      if(field.dataset.guidelineField==="visible")item.visible=field.checked;
+      else item[field.dataset.guidelineField]=field.value;
+      item.updatedAt=new Date().toISOString();
+      var title=card.querySelector(".guideline-card-title"),excerpt=card.querySelector(".guideline-card-excerpt");
+      if(title)title.textContent=item.title||"項目名未入力";
+      if(excerpt)excerpt.textContent=guidelineExcerpt(item.content);
+      if(field.dataset.guidelineField==="visible")renderGuidelineList(kind);
+      scheduleGuidelinePreview();
+    });
+  });
+  card.querySelectorAll("[data-guideline-action]").forEach(function(button){
+    button.addEventListener("click",function(){handleGuidelineAction(kind,id,button.dataset.guidelineAction);});
+  });
+  bindGuidelineLongPress(card.querySelector(".guideline-drag-handle"),card,kind);
+}
+function handleGuidelineAction(kind,id,action){
+  var list=guidelineList(kind),index=list.findIndex(function(item){return item.id===id;});if(index<0)return;
+  if(action==="toggle"){
+    _guidelineOpen[id]=!_guidelineOpen[id];renderGuidelineList(kind);return;
   }
-  var sectionNo=0;
-  function addSection(name,items){var section=sec(++sectionNo,name,items);if(section)h+=section;else sectionNo--;}
-  addSection(gv("y-label-purpose")||"目的",lines(gv("y-purpose")));
-  addSection(gv("y-label-category")||"対象学年",lines(gv("y-cat")));
-  addSection(gv("y-label-method")||"試合方法",lines(gv("y-format")).concat(lines(gv("y-time")),lines(gv("y-format-notes"))));
-  addSection(gv("y-label-sub")||"選手交代",lines(gv("y-sub")).concat(lines(gv("y-sub-notes"))));
-  addSection(gv("y-label-rules")||"競技規則・ユニフォーム",lines(gv("y-rules-extra")));
-  addSection(gv("y-label-rank")||"順位決定",lines(gv("y-rank")));
-  addSection(gv("y-label-ref")||"審判",lines(gv("y-ref")).concat(lines(gv("y-ref-notes"))));
-  addSection(gv("y-label-ceremony")||"開会式・閉会式",lines(gv("y-ceremony")));
-  addSection(gv("y-label-fee")||"参加費",lines(gv("y-fee")));
-  addSection(gv("y-label-award")||"表彰",lines(gv("y-award")));
-  addSection(gv("y-label-notes")||"注意事項",lines(gv("y-notes")).concat(lines(gv("y-parking"))));
-  addSection(gv("y-label-rain")||"雨天時",lines(gv("y-rain")));
-  getCustomRows().forEach(function(row){addSection(row.label||"追加項目",lines(row.val));});
-  h+='<div class="req-contact"><b>📞 お問い合わせ</b>　'+escapeHtml(gv("y-rep"))+'　／　'+escapeHtml(gv("y-contact"))+'</div>';
-  h+='</div>';
-  var pv=document.getElementById("youkou-preview");
-  pv.innerHTML=h;pv.style.display="block";
-  document.getElementById("y-guide").style.display="block";
-  pv.scrollIntoView({behavior:"smooth",block:"start"});
+  if(action==="up"||action==="down"){
+    var next=index+(action==="up"?-1:1);setGuidelineList(kind,SMCGuidelines.move(list,index,next));renderGuidelineEditors(id);buildYoukou(true);return;
+  }
+  if(action==="duplicate"){
+    var duplicated=SMCGuidelines.duplicate(list,index);setGuidelineList(kind,duplicated);var copy=duplicated[index+1];renderGuidelineEditors(copy&&copy.id);buildYoukou(true);return;
+  }
+  if(action==="delete")deleteGuidelineItem(kind,id);
+}
+function deleteGuidelineItem(kind,id){
+  var list=guidelineList(kind),index=list.findIndex(function(item){return item.id===id;});if(index<0)return;
+  var item=list[index];
+  if(!confirm("「"+(item.title||"この項目")+"」を削除しますか？\n削除後も下の『元に戻す』から復元できます。"))return;
+  _guidelineUndoState={kind:kind,item:SMCGuidelines.clone(item),index:index};
+  list.splice(index,1);setGuidelineList(kind,list);delete _guidelineOpen[id];renderGuidelineEditors();buildYoukou(true);showGuidelineUndo(item.title);
+}
+function showGuidelineUndo(title){
+  var bar=document.getElementById("guideline-undo");document.getElementById("guideline-undo-text").textContent="「"+(title||"項目")+"」を削除しました";bar.classList.add("show");
+  window.clearTimeout(_guidelineUndoTimer);_guidelineUndoTimer=window.setTimeout(function(){bar.classList.remove("show");_guidelineUndoState=null;},7000);
+}
+function undoGuidelineDelete(){
+  if(!_guidelineUndoState)return;
+  var state=_guidelineUndoState,list=guidelineList(state.kind);list.splice(Math.min(state.index,list.length),0,state.item);setGuidelineList(state.kind,list);_guidelineUndoState=null;window.clearTimeout(_guidelineUndoTimer);document.getElementById("guideline-undo").classList.remove("show");renderGuidelineEditors(state.item.id);buildYoukou(true);
+}
+function renderGuidelineRestore(kind){
+  var wrap=document.getElementById(kind==="meta"?"guideline-meta-restore":"guideline-section-restore");if(!wrap)return;
+  var missing=SMCGuidelines.missingStandards(guidelineList(kind),kind);
+  if(!missing.length){wrap.classList.remove("show");wrap.innerHTML="";return;}
+  wrap.classList.add("show");wrap.innerHTML='<select class="form-control" aria-label="削除した標準項目"><option value="">削除した標準項目を選択</option>'+missing.map(function(item){return '<option value="'+esc3(item.standardKey)+'">'+esc3(item.title)+'</option>';}).join("")+'</select><button class="btn btn-outline btn-sm" type="button">標準項目を追加</button>';
+  wrap.querySelector("button").addEventListener("click",function(){var key=wrap.querySelector("select").value;if(!key)return;var restored=SMCGuidelines.restoreStandard(guidelineList(kind),kind,key);setGuidelineList(kind,restored);var item=restored[restored.length-1];renderGuidelineEditors(item&&item.id);buildYoukou(true);});
+}
+function openGuidelineAddModal(kind){
+  _guidelineAddKind=kind;var list=guidelineList(kind);document.getElementById("guideline-add-title").textContent=kind==="meta"?"＋ 基本情報を追加":"＋ 要項に項目を追加";document.getElementById("guideline-add-name").value="";document.getElementById("guideline-add-content").value="";
+  document.getElementById("guideline-add-position").innerHTML='<option value="0">先頭に追加</option>'+list.map(function(item,index){return '<option value="'+(index+1)+'">「'+esc3(item.title||"項目")+'」の後</option>';}).join("");document.getElementById("guideline-add-position").value=String(list.length);document.getElementById("modal-guideline-add").classList.add("open");window.setTimeout(function(){document.getElementById("guideline-add-name").focus();},100);
+}
+function closeGuidelineAddModal(){document.getElementById("modal-guideline-add").classList.remove("open");}
+function confirmGuidelineAdd(){
+  var title=document.getElementById("guideline-add-name").value.trim(),content=document.getElementById("guideline-add-content").value.trim();if(!title){alert("項目名を入力してください");return;}
+  var list=guidelineList(_guidelineAddKind),position=Math.max(0,Math.min(list.length,Number(document.getElementById("guideline-add-position").value)||0));var item={id:SMCGuidelines.makeId(_guidelineAddKind),standardKey:"",title:title,content:content,inputType:"text",visible:true,type:"custom",updatedAt:new Date().toISOString()};list.splice(position,0,item);setGuidelineList(_guidelineAddKind,list);closeGuidelineAddModal();renderGuidelineEditors(item.id);buildYoukou(true);window.setTimeout(function(){var safeId=window.CSS&&CSS.escape?CSS.escape(item.id):item.id.replace(/[^a-zA-Z0-9_-]/g,"\\$&");var card=document.querySelector('[data-guideline-id="'+safeId+'"]');if(card)card.scrollIntoView({behavior:"smooth",block:"center"});},120);
+}
+function resetGuidelineTemplate(){
+  if(!confirm("現在の大会要項を標準テンプレートに戻しますか？\n編集・追加・削除した内容はすべて初期状態へ戻ります。"))return;
+  var currentDate=(guidelineItem("meta","meta-date")||{}).content||"";_guidelineState=SMCGuidelines.defaults();var dateItem=guidelineItem("meta","meta-date");if(dateItem)dateItem.content=currentDate;_guidelineOpen={};renderGuidelineEditors();buildYoukou(true);
+}
+function bindGuidelineLongPress(handle,card,kind){
+  if(!handle)return;var timer=null,active=false,startX=0,startY=0,pointerId=null;
+  function finish(){window.clearTimeout(timer);if(!active)return;active=false;card.classList.remove("dragging");try{handle.releasePointerCapture(pointerId);}catch(ignore){}var ids=Array.from(card.parentNode.querySelectorAll(".guideline-card")).map(function(node){return node.dataset.guidelineId;});var source=guidelineList(kind),map={};source.forEach(function(item){map[item.id]=item;});setGuidelineList(kind,ids.map(function(id){return map[id];}).filter(Boolean));renderGuidelineEditors(card.dataset.guidelineId);buildYoukou(true);}
+  handle.addEventListener("pointerdown",function(event){pointerId=event.pointerId;startX=event.clientX;startY=event.clientY;timer=window.setTimeout(function(){active=true;card.classList.add("dragging");try{handle.setPointerCapture(pointerId);}catch(ignore){}},450);});
+  handle.addEventListener("pointermove",function(event){if(!active){if(Math.abs(event.clientX-startX)>8||Math.abs(event.clientY-startY)>8)window.clearTimeout(timer);return;}event.preventDefault();var target=document.elementFromPoint(event.clientX,event.clientY);var targetCard=target&&target.closest(".guideline-card");if(!targetCard||targetCard===card||targetCard.parentNode!==card.parentNode)return;var rect=targetCard.getBoundingClientRect();card.parentNode.insertBefore(card,event.clientY<rect.top+rect.height/2?targetCard:targetCard.nextSibling);});
+  handle.addEventListener("pointerup",finish);handle.addEventListener("pointercancel",finish);
+}
+function buildYoukou(silent){
+  var title=gv("y-title"),meta=SMCGuidelines.activeItems(_guidelineState.meta),sections=SMCGuidelines.activeItems(_guidelineState.sections),h='<div class="req-sheet">';
+  h+='<div class="req-title">'+escapeHtml(title?title+'　大会要項':'大会要項')+'</div>';
+  if(meta.length){h+='<table class="req-info"><tbody>';for(var mi=0;mi<meta.length;mi+=2){var left=meta[mi],right=meta[mi+1];var leftValue=left.inputType==="date"?fmtDate(left.content):left.content;h+='<tr><th>'+escapeHtml(left.title)+'</th><td'+(!right?' colspan="3"':'')+'>'+escapeHtml(leftValue)+'</td>';if(right){var rightValue=right.inputType==="date"?fmtDate(right.content):right.content;h+='<th>'+escapeHtml(right.title)+'</th><td>'+escapeHtml(rightValue)+'</td>';}h+='</tr>';}h+='</tbody></table>';}
+  if(sections.length)h+='<div style="font-weight:bold;font-size:11pt;margin-bottom:5px;color:#003087;border-bottom:1px solid #c0cce8;padding-bottom:3px">開催要項</div>';
+  sections.forEach(function(section,index){h+='<div class="req-section"><div class="req-num">'+(index+1)+'）'+escapeHtml(section.title)+'</div><ul class="req-li">';guidelineLines(section.content).forEach(function(line){h+='<li>'+escapeHtml(line)+'</li>';});h+='</ul></div>';});
+  h+='</div>';var pv=document.getElementById("youkou-preview");pv.innerHTML=h;pv.style.display="block";document.getElementById("y-guide").style.display="block";if(!silent)pv.scrollIntoView({behavior:"smooth",block:"start"});
 }
 
 /* ===== 対戦表チーム入力 ===== */
@@ -1126,34 +1216,9 @@ if(slot.isBreak){
 
 /* ===== LINEコピー ===== */
 function getYoukouText(){
-  var f=function(id){var el=document.getElementById(id);return el?el.value.trim():"";};
-  var lines=function(value){return String(value||"").split(/\r?\n/).map(function(item){return item.trim();}).filter(Boolean);};
-  var t="【"+f("y-title")+"】\n";
-  if(f("y-cat"))     t+="カテゴリー："+f("y-cat")+"\n";
-  if(f("y-date"))    t+="📅 "+f("y-date")+"\n";
-  if(f("y-place"))   t+="📍 "+f("y-place")+"\n";
-  if(f("y-host"))    t+="主催："+f("y-host")+"\n";
-  if(f("y-uketsuke"))t+="受付："+f("y-uketsuke")+"\n";
-  var sections=[
-    [f("y-label-purpose")||"目的",lines(f("y-purpose"))],
-    [f("y-label-method")||"試合方法",lines(f("y-format")).concat(lines(f("y-time")),lines(f("y-format-notes")))],
-    [f("y-label-sub")||"選手交代",lines(f("y-sub")).concat(lines(f("y-sub-notes")))],
-    [f("y-label-rules")||"競技規則・ユニフォーム",lines(f("y-rules-extra"))],
-    [f("y-label-rank")||"順位決定",lines(f("y-rank"))],
-    [f("y-label-ref")||"審判",lines(f("y-ref")).concat(lines(f("y-ref-notes")))],
-    [f("y-label-ceremony")||"開会式・閉会式",lines(f("y-ceremony"))],
-    [f("y-label-fee")||"参加費",lines(f("y-fee"))],
-    [f("y-label-award")||"表彰",lines(f("y-award"))],
-    [f("y-label-notes")||"注意事項",lines(f("y-notes")).concat(lines(f("y-parking")))],
-    [f("y-label-rain")||"雨天時",lines(f("y-rain"))]
-  ];
-  getCustomRows().forEach(function(row){sections.push([row.label||"追加項目",lines(row.val)]);});
-  sections.forEach(function(section){
-    if(!section[1].length)return;
-    t+="\n【"+section[0]+"】\n"+section[1].map(function(item){return "・"+item;}).join("\n")+"\n";
-  });
-  if(f("y-rep"))     t+="\n担当："+f("y-rep")+"\n";
-  if(f("y-contact")) t+="連絡先："+f("y-contact")+"\n";
+  var t="【"+gv("y-title")+"】\n";
+  SMCGuidelines.activeItems(_guidelineState.meta).forEach(function(item){var value=item.inputType==="date"?fmtDate(item.content):item.content;t+=item.title+"："+value+"\n";});
+  SMCGuidelines.activeItems(_guidelineState.sections).forEach(function(section){var lines=guidelineLines(section.content);if(!lines.length)return;t+="\n【"+section.title+"】\n"+lines.map(function(item){return "・"+item;}).join("\n")+"\n";});
   return t;
 }
 function getTaisenText(){
@@ -1217,6 +1282,8 @@ function lineField(label,value){
 function collectLineInviteData(){
   var mapRaw=lineValue("line-map"),docRaw=lineValue("line-doc-url");
   var selectedTeam=lineValue("line-team"),plannedMatches=0;
+  var methodLines=guidelineLines(guidelineStandardContent("section","method"));
+  var contactLines=guidelineLines(guidelineStandardContent("section","contact"));
   if(_lastTournamentSchedule&&selectedTeam){
     _lastTournamentSchedule.blocks.forEach(function(block){
       block.matches.forEach(function(match){
@@ -1227,24 +1294,24 @@ function collectLineInviteData(){
   return {
     team:selectedTeam,
     title:gv("y-title")||gv("t-title"),
-    date:gv("y-date")||gv("t-date"),
-    category:gv("y-cat"),
-    place:gv("y-place")||gv("t-place"),
+    date:guidelineStandardContent("meta","date")||gv("t-date"),
+    category:guidelineStandardContent("section","category"),
+    place:guidelineStandardContent("meta","place")||gv("t-place"),
     meeting:lineValue("line-meeting"),
-    reception:gv("y-uketsuke"),
+    reception:guidelineStandardContent("meta","reception"),
     kickoff:lineValue("line-kickoff")||gv("t-start"),
-    format:gv("y-format"),
-    matchTime:gv("y-time"),
+    format:methodLines[0]||"",
+    matchTime:methodLines[1]||"",
     plannedMatches:plannedMatches?plannedMatches+"試合":"",
-    fee:gv("y-fee"),
+    fee:guidelineStandardContent("section","fee"),
     lunch:document.getElementById("lunch-enable").checked
       ? "あり（"+(gv("lunch-start")||"時刻未設定")+"から"+(gv("lunch-min")||"60")+"分）"
       : "",
-    parking:gv("y-parking"),
-    rain:gv("y-rain"),
+    parking:guidelineStandardContent("section","notes"),
+    rain:guidelineStandardContent("section","rain"),
     deadline:lineValue("line-deadline"),
-    representative:gv("y-rep"),
-    contact:gv("y-contact"),
+    representative:contactLines[0]||"",
+    contact:contactLines.slice(1).join(" / "),
     map:validPublicUrl(mapRaw),
     documentUrl:validPublicUrl(docRaw),
     items:lineValue("line-items"),
@@ -1300,7 +1367,7 @@ function openLineInvite(){
   var list=document.getElementById("line-team-options");
   list.innerHTML=candidates.map(function(team){return '<option value="'+esc3(team)+'"></option>';}).join("");
   if(!lineValue("line-team")&&candidates.length)document.getElementById("line-team").value=candidates[0];
-  var reception=gv("y-uketsuke");
+  var reception=guidelineStandardContent("meta","reception");
   if(!lineValue("line-meeting"))document.getElementById("line-meeting").value=firstTime(reception);
   if(!lineValue("line-kickoff"))document.getElementById("line-kickoff").value=gv("t-start");
   document.getElementById("modal-line").classList.add("open");
@@ -1413,7 +1480,7 @@ async function exportA4Pdf(kind){
     if(isSchedule&&!scheduleLandscape)sheet.classList.add("pdf-one-court");
     if(document.fonts&&document.fonts.ready)await document.fonts.ready;
     await new Promise(function(resolve){requestAnimationFrame(function(){requestAnimationFrame(resolve);});});
-    var canvas;
+    var canvas,safePageBreaks=[];
     try{
       canvas=await window.html2canvas(sheet,{
         scale:2,
@@ -1424,6 +1491,13 @@ async function exportA4Pdf(kind){
         windowWidth:sheet.scrollWidth,
         windowHeight:sheet.scrollHeight
       });
+      if(!isSchedule){
+        var sheetTop=sheet.getBoundingClientRect().top;
+        var captureScale=canvas.height/Math.max(1,sheet.scrollHeight);
+        safePageBreaks=Array.from(sheet.querySelectorAll(".req-section")).map(function(section){
+          return Math.max(0,Math.round((section.getBoundingClientRect().top-sheetTop)*captureScale));
+        }).filter(function(value,index,array){return value>0&&array.indexOf(value)===index;}).sort(function(a,b){return a-b;});
+      }
     }finally{
       sheet.classList.remove("pdf-capture","pdf-one-court");
     }
@@ -1440,7 +1514,12 @@ async function exportA4Pdf(kind){
       var sliceHeight=Math.max(1,Math.floor(maxHeight/widthRatio));
       var offset=0,pageIndex=0;
       while(offset<canvas.height){
-        var currentHeight=Math.min(sliceHeight,canvas.height-offset);
+        var desiredEnd=Math.min(canvas.height,offset+sliceHeight),safeEnd=desiredEnd;
+        if(!isSchedule&&desiredEnd<canvas.height){
+          var candidates=safePageBreaks.filter(function(point){return point>offset+sliceHeight*.42&&point<=desiredEnd;});
+          if(candidates.length)safeEnd=candidates[candidates.length-1];
+        }
+        var currentHeight=Math.max(1,safeEnd-offset);
         var slice=document.createElement("canvas");
         slice.width=canvas.width;slice.height=currentHeight;
         var context=slice.getContext("2d");
@@ -1470,58 +1549,15 @@ async function exportA4Pdf(kind){
 (function(){
   var now=new Date();
   var ds=now.getFullYear()+"-"+String(now.getMonth()+1).padStart(2,"0")+"-"+String(now.getDate()).padStart(2,"0");
-  ["y-date","t-date"].forEach(function(id){var e=document.getElementById(id);if(e)e.value=ds;});
+  var guidelineDate=guidelineByKey("meta","date");
+  if(guidelineDate&&!guidelineDate.content)guidelineDate.content=ds;
+  var scheduleDate=document.getElementById("t-date");
+  if(scheduleDate)scheduleDate.value=ds;
+  renderGuidelineEditors();
+  buildYoukou(true);
   updateTeamInputs();
   updatePdfOrientationLabel();
 })();
-
-/* ===== カスタム項目（基本情報） ===== */
-var _customRows = []; // [{id, label, val}]
-
-function addCustomRow(label, val){
-  var id = "cr_" + Date.now() + "_" + Math.random().toString(36).slice(2,6);
-  _customRows.push({id:id, label:label||"", val:val||""});
-  renderCustomRows();
-}
-
-function removeCustomRow(id){
-  _customRows = _customRows.filter(function(r){ return r.id!==id; });
-  renderCustomRows();
-}
-function moveCustomRow(index,direction){
-  var next=index+direction;
-  if(index<0||next<0||index>=_customRows.length||next>=_customRows.length)return;
-  var item=_customRows.splice(index,1)[0];
-  _customRows.splice(next,0,item);
-  renderCustomRows();
-}
-
-function renderCustomRows(){
-  var wrap = document.getElementById("custom-rows-wrap");
-  if(!wrap) return;
-  if(!_customRows.length){ wrap.innerHTML=""; return; }
-  var html2 = "";
-  _customRows.forEach(function(r, idx){
-    html2 += "<div class=\"custom-row\">";
-    html2 += "<input class=\"form-control custom-label\" placeholder=\"項目名\" value=\"" + esc3(r.label) + "\"";
-    html2 += " oninput=\"_customRows[" + idx + "].label=this.value\">";
-    html2 += "<textarea class=\"form-control custom-val\" rows=\"2\" placeholder=\"内容\"";
-    html2 += " oninput=\"_customRows[" + idx + "].val=this.value;autoResize(this)\">";
-    html2 += esc3(r.val);
-    html2 += "</textarea>";
-    html2 += "<div class=\"custom-row-actions\">";
-    html2 += "<button class=\"custom-move-btn\" type=\"button\" aria-label=\"上へ移動\" onclick=\"moveCustomRow("+idx+",-1)\""+(idx===0?" disabled":"")+">▲</button>";
-    html2 += "<button class=\"custom-move-btn\" type=\"button\" aria-label=\"下へ移動\" onclick=\"moveCustomRow("+idx+",1)\""+(idx===_customRows.length-1?" disabled":"")+">▼</button>";
-    html2 += "<button class=\"del-row-btn\" type=\"button\" aria-label=\"削除\" onclick=\"removeCustomRow('"+r.id+"')\">🗑</button></div>";
-    html2 += "</div>";
-  });
-  wrap.innerHTML = html2;
-  wrap.querySelectorAll("textarea").forEach(function(el){ autoResize(el); });
-}
-
-function getCustomRows(){
-  return _customRows.filter(function(r){ return r.label.trim()||r.val.trim(); });
-}
 
 function esc3(s){ return String(s||"").replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;").replace(/"/g,"&quot;"); }
 
@@ -1574,13 +1610,7 @@ dbListen("tournament_match_results",function(val){
 },RESULTS_KEY,{});
 
 // 要綱フィールドを収集
-var YOUKOU_FIELDS = ["y-title","y-cat","y-date","y-place","y-host",
-  "y-uketsuke","y-fee","y-format","y-time","y-sub","y-rank",
-  "y-ref","y-award","y-purpose","y-format-notes","y-sub-notes","y-rules-extra",
-  "y-ref-notes","y-ceremony","y-notes","y-rain","y-parking","y-rep","y-contact",
-  "y-label-purpose","y-label-category","y-label-method","y-label-sub","y-label-rules",
-  "y-label-rank","y-label-ref","y-label-ceremony","y-label-fee","y-label-award",
-  "y-label-notes","y-label-rain"];
+var YOUKOU_FIELDS = ["y-title"];
 
 // 対戦表フィールドを収集
 var TAISEN_FIELDS = ["t-title","t-date","t-place","t-min","t-courts","t-start",
@@ -1644,7 +1674,7 @@ function applyTeamValues(teams){
   });
 }
 var TOURNAMENT_TEMPLATES = {
-  youkou:{data:collectFields(YOUKOU_FIELDS),customRows:JSON.parse(JSON.stringify(_customRows))},
+  youkou:{data:collectFields(YOUKOU_FIELDS),guidelineState:SMCGuidelines.defaults()},
   taisen:{data:collectFields(TAISEN_FIELDS),teams:captureTeamValues()}
 };
 
@@ -1654,11 +1684,13 @@ function copyTournamentTemplate(type, silent){
   if(!silent && !confirm((type==="youkou"?"大会要綱":"対戦表")+"の標準テンプレートをコピーしますか？\n現在の入力内容はテンプレートで置き換わります。")) return;
   applyFields(JSON.parse(JSON.stringify(template.data)));
   if(type==="youkou"){
-    _customRows = JSON.parse(JSON.stringify(template.customRows||[]));
-    renderCustomRows();
+    _guidelineState=SMCGuidelines.createState(SMCGuidelines.clone(template.guidelineState));
     if(_activeDateMeta.name) document.getElementById("y-title").value = _activeDateMeta.name;
-    if(_activeDateMeta.category) document.getElementById("y-cat").value = _activeDateMeta.category;
-    if(_activeDateMeta.dateIso) document.getElementById("y-date").value = _activeDateMeta.dateIso;
+    var categoryItem=guidelineByKey("section","category");
+    var dateItem=guidelineByKey("meta","date");
+    if(categoryItem&&_activeDateMeta.category)categoryItem.content=_activeDateMeta.category;
+    if(dateItem&&_activeDateMeta.dateIso)dateItem.content=_activeDateMeta.dateIso;
+    renderGuidelineEditors();
     buildYoukou();
   } else {
     applyTeamValues(template.teams||[]);
@@ -1676,13 +1708,26 @@ function linkedEntries(dateId, type){
     })
     .sort(function(a,b){ return (b[1].savedAt||"").localeCompare(a[1].savedAt||""); });
 }
+function savedGuidelineState(entry){
+  if(!entry||entry.type!=="youkou")return null;
+  if(entry.guidelineState&&Array.isArray(entry.guidelineState.meta)&&Array.isArray(entry.guidelineState.sections)){
+    return SMCGuidelines.createState(entry.guidelineState);
+  }
+  if(Array.isArray(entry.guidelineMeta)&&Array.isArray(entry.guidelineSections)){
+    return SMCGuidelines.createState({meta:entry.guidelineMeta,sections:entry.guidelineSections});
+  }
+  return null;
+}
 function linkedMetaFromEntry(entry){
   var data = (entry && entry.data) || {};
+  var state=savedGuidelineState(entry);
+  var dateItem=state&&state.meta.find(function(item){return item.standardKey==="date";});
+  var categoryItem=state&&state.sections.find(function(item){return item.standardKey==="category";});
   return {
     name:(entry&&entry.name)||data["y-title"]||data["t-title"]||"",
-    dateIso:(entry&&entry.dateIso)||data["y-date"]||data["t-date"]||"",
+    dateIso:(entry&&entry.dateIso)||(dateItem&&dateItem.content)||data["y-date"]||data["t-date"]||"",
     dateLabel:(entry&&entry.dateLabel)||"",
-    category:(entry&&entry.category)||data["y-cat"]||""
+    category:(entry&&entry.category)||(categoryItem&&categoryItem.content)||data["y-cat"]||""
   };
 }
 function renderLinkedTournamentDates(){
@@ -1772,10 +1817,15 @@ function hydrateLinkedDate(dateId, meta){
     document.getElementById("t-title").value=requestedMeta.name;
   }
   if(requestedMeta.dateIso){
-    document.getElementById("y-date").value=requestedMeta.dateIso;
+    var linkedDateItem=guidelineByKey("meta","date");
+    if(linkedDateItem)linkedDateItem.content=requestedMeta.dateIso;
     document.getElementById("t-date").value=requestedMeta.dateIso;
   }
-  if(requestedMeta.category) document.getElementById("y-cat").value=requestedMeta.category;
+  if(requestedMeta.category){
+    var linkedCategoryItem=guidelineByKey("section","category");
+    if(linkedCategoryItem)linkedCategoryItem.content=requestedMeta.category;
+  }
+  renderGuidelineEditors();
   buildYoukou();
   buildTaisen();
   renderLinkedTournamentDates();
@@ -1803,18 +1853,30 @@ function closeSaveModal(){ document.getElementById("modal-save").classList.remov
 function execSave(){
   var name = document.getElementById("save-name-input").value.trim();
   if(!name){ alert("保存名を入力してください"); return; }
+  var savedAt=new Date().toISOString();
+  if(_saveType==="youkou"){
+    ["meta","sections"].forEach(function(key){
+      _guidelineState[key].forEach(function(item,index){item.order=index;if(!item.updatedAt)item.updatedAt=savedAt;});
+    });
+  }
   var fields = _saveType==="youkou" ? YOUKOU_FIELDS : TAISEN_FIELDS;
+  var guidelineDate=guidelineStandardContent("meta","date");
+  var guidelineCategory=guidelineStandardContent("section","category");
   var entry = {
     name: name,
     type: _saveType,
-    savedAt: new Date().toISOString(),
+    savedAt: savedAt,
     gameAdjustDateId: _activeGameAdjustDateId || "",
-    dateIso: _activeDateMeta.dateIso || "",
+    dateIso: _activeDateMeta.dateIso || (_saveType==="youkou"?guidelineDate:gv("t-date")) || "",
     dateLabel: _activeDateMeta.dateLabel || "",
-    category: _activeDateMeta.category || "",
-    data: collectFields(fields),
-    customRows: _saveType==="youkou" ? JSON.parse(JSON.stringify(_customRows)) : []
+    category: _activeDateMeta.category || (_saveType==="youkou"?guidelineCategory:"") || "",
+    data: collectFields(fields)
   };
+  if(_saveType==="youkou"){
+    entry.guidelineSchemaVersion=SMCGuidelines.SCHEMA_VERSION;
+    entry.guidelineMeta=SMCGuidelines.clone(_guidelineState.meta);
+    entry.guidelineSections=SMCGuidelines.clone(_guidelineState.sections);
+  }
   // チーム数やチーム名も保存（対戦表）
   if(_saveType==="taisen"){
     entry.data.teams=JSON.stringify(captureTeamValues());
@@ -1893,10 +1955,6 @@ document.getElementById("saved-list").addEventListener("keydown",function(event)
 function applySaveEntry(item){
   if(!item) return;
   var entryData=item.data||{};
-  // 旧データに新しい編集欄がない場合は、標準文例で補完して互換性を保つ。
-  if(item.type==="youkou"&&TOURNAMENT_TEMPLATES.youkou){
-    entryData=Object.assign({},JSON.parse(JSON.stringify(TOURNAMENT_TEMPLATES.youkou.data)),entryData);
-  }
   applyFields(entryData);
   if(item.gameAdjustDateId){
     _activeGameAdjustDateId=item.gameAdjustDateId;
@@ -1917,9 +1975,22 @@ function applySaveEntry(item){
       _lastTournamentSchedule=item.data.optimizedSchedule?JSON.parse(item.data.optimizedSchedule):null;
     }catch(error){_lastTournamentSchedule=null;}
   }
-  if(item.type==="youkou" && Array.isArray(item.customRows)){
-    _customRows = JSON.parse(JSON.stringify(item.customRows));
-    renderCustomRows();
+  if(item.type==="youkou"){
+    var savedState=savedGuidelineState(item);
+    _guidelineState=savedState||SMCGuidelines.createState(null,entryData);
+    // 旧版の自由追加欄も本文項目へ変換し、内容を失わず移行する。
+    if(!savedState&&Array.isArray(item.customRows)){
+      item.customRows.forEach(function(row){
+        if(!row||!(String(row.label||"").trim()||String(row.val||"").trim()))return;
+        _guidelineState.sections.push({
+          id:row.id||SMCGuidelines.makeId("legacy"),standardKey:"",title:String(row.label||"項目"),
+          content:String(row.val||""),visible:true,type:"custom",order:_guidelineState.sections.length,
+          updatedAt:item.savedAt||""
+        });
+      });
+      _guidelineState.sections=SMCGuidelines.normalizeList(_guidelineState.sections,"section");
+    }
+    renderGuidelineEditors();
   }
   if(item.type==="youkou") buildYoukou();
   else buildTaisen();
