@@ -141,6 +141,30 @@
     .number-color-free{color:#00df7a}
     .number-color-lent{color:#ff6680}
     body[data-theme="light"] .number-color-chip{background:#fff}
+    .pair-comparison{margin:0 0 12px;padding:12px;border:1px solid rgba(255,139,31,.38);border-radius:var(--r12);background:linear-gradient(135deg,rgba(255,139,31,.1),rgba(0,48,135,.1))}
+    .pair-comparison-title{margin:0 0 4px;color:var(--ink);font-size:.88rem;font-weight:900}
+    .pair-comparison-guide{margin:0 0 10px;color:var(--ink-2);font-size:.69rem;line-height:1.45}
+    .pair-color-selectors{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+    .pair-color-selector{display:block;min-width:0;color:var(--ink-2);font-size:.68rem;font-weight:900}
+    .pair-color-selector .form-control{width:100%;height:40px;margin-top:4px;padding:6px 28px 6px 8px;font-size:.72rem}
+    .pair-summary{display:none;gap:5px;flex-wrap:wrap;margin:10px 0 0}
+    .pair-summary.show{display:flex}
+    .pair-summary-badge{padding:4px 7px;border-radius:99px;background:rgba(5,15,30,.72);font-size:.64rem;font-weight:900}
+    .pair-summary-ready{color:#5cffae}.pair-summary-check{color:#ffd36a}.pair-summary-missing{color:#ff91a5}
+    .pair-results{display:grid;gap:7px;margin-top:9px}
+    .pair-result-row{display:grid;grid-template-columns:46px minmax(0,1fr);gap:7px;padding:7px;border:1px solid var(--line-2);border-radius:10px;background:var(--surface-lt)}
+    .pair-result-number{display:grid;place-items:center;border-radius:8px;background:#003087;color:#fff;font-size:.92rem;font-weight:900}
+    .pair-result-main{display:grid;grid-template-columns:1fr 1fr auto;gap:5px;align-items:stretch;min-width:0}
+    .pair-side{display:flex;min-width:0;flex-direction:column;justify-content:center;gap:2px;padding:6px;border-radius:8px;background:rgba(255,255,255,.04)}
+    .pair-side-label{overflow:hidden;text-overflow:ellipsis;white-space:nowrap;color:var(--ink);font-size:.63rem;font-weight:900}
+    .pair-side-count{font-size:.59rem;font-weight:900;white-space:nowrap}
+    .pair-side-count .free{color:#00df7a}.pair-side-count .lent{color:#ff6680}
+    .pair-verdict{display:grid;place-items:center;min-width:58px;padding:5px;border:1px solid;border-radius:8px;font-size:.63rem;font-weight:900;text-align:center;line-height:1.25}
+    .pair-verdict.ready{color:#5cffae;border-color:rgba(92,255,174,.42);background:rgba(0,180,100,.1)}
+    .pair-verdict.check{color:#ffd36a;border-color:rgba(255,211,106,.45);background:rgba(210,140,0,.1)}
+    .pair-verdict.missing{color:#ff91a5;border-color:rgba(255,145,165,.45);background:rgba(210,40,70,.1)}
+    .pair-empty{padding:16px 8px;color:var(--ink-3);font-size:.72rem;text-align:center}
+    .number-all-title{margin:14px 0 8px;color:var(--ink);font-size:.76rem;font-weight:900}
     /* ===== 靴下在庫 ===== */
     .socks-section{margin:18px 0 14px;border:1px solid rgba(0,212,255,.3);border-radius:var(--r16);overflow:hidden;background:var(--surface-lt)}
     .socks-section-header{display:flex;align-items:center;gap:10px;width:100%;min-height:58px;padding:10px 14px;border:0;background:linear-gradient(135deg,rgba(0,48,135,.72),rgba(0,118,168,.5));color:#fff;text-align:left;cursor:pointer}
@@ -289,6 +313,13 @@
       .number-overview-row{grid-template-columns:43px minmax(0,1fr);gap:6px;padding:6px}
       .number-overview-number{min-height:46px;font-size:.9rem}
       .number-color-chip{width:100%;min-width:0;min-height:46px}
+      .pair-comparison{padding:10px}
+      .pair-result-row{grid-template-columns:41px minmax(0,1fr);gap:5px;padding:5px}
+      .pair-result-main{grid-template-columns:minmax(0,1fr) minmax(0,1fr) 52px;gap:4px}
+      .pair-side{padding:5px 4px}
+      .pair-side-label{font-size:.59rem}
+      .pair-side-count{display:flex;flex-direction:column;font-size:.56rem}
+      .pair-verdict{min-width:0;padding:4px 2px;font-size:.58rem}
       .socks-section-body{padding:10px}
       .sock-card{min-height:57px}
       .sock-card-info{padding:8px 10px}
@@ -357,7 +388,22 @@
     <button type="button" class="uniform-view-button" id="uniform-view-number-button" role="tab" aria-selected="false" onclick="setUniformView('number')">🔢 背番号別（大会用）</button>
   </div>
   <section class="number-overview" id="uniform-number-view" aria-label="大会用の背番号別ユニフォーム一覧" hidden>
+    <div class="pair-comparison" aria-labelledby="pair-comparison-title">
+      <h3 class="pair-comparison-title" id="pair-comparison-title">正・副ユニフォームの番号確認</h3>
+      <p class="pair-comparison-guide">試合で使う2色を選ぶと、同じ番号が両方にあるか確認できます。</p>
+      <div class="pair-color-selectors">
+        <label class="pair-color-selector">正ユニフォーム
+          <select class="form-control" id="pair-primary-color" onchange="setPairColor('primary',this.value)"></select>
+        </label>
+        <label class="pair-color-selector">副ユニフォーム
+          <select class="form-control" id="pair-secondary-color" onchange="setPairColor('secondary',this.value)"></select>
+        </label>
+      </div>
+      <div class="pair-summary" id="pair-summary" aria-live="polite"></div>
+      <div class="pair-results" id="pair-results"></div>
+    </div>
     <p class="number-overview-guide"><strong>番号ごとに使える色を確認できます。</strong><br>色をタップすると、その色の詳しい一覧が開きます。</p>
+    <div class="number-all-title">すべての色を番号別に見る</div>
     <div class="number-overview-list" id="number-overview-list"></div>
   </section>
   <div id="uniform-color-view">
@@ -555,6 +601,7 @@ var editId=null,lendId=null,sockEditId=null;
 var _unifData=[], _histData=[], _colorTemplates=[],_folderOrder=[],_sockData=[];
 var _conditionFilter="";
 var _uniformView="color";
+var _pairPrimaryColor="",_pairSecondaryColor="";
 var _templateReorderMode=false,_templateLongPressed=false,_folderReorderMode=false;
 
 function loadU(){ return _unifData; }
@@ -704,6 +751,85 @@ function compareUniformNumberLabels(a,b){
   if(aNumeric)return -1;if(bNumeric)return 1;
   return a.localeCompare(b,"ja");
 }
+function availableUniformColorNames(){
+  var seen=Object.create(null),names=[];
+  loadU().forEach(function(item){
+    var name=uniformColorLabel(item)||"その他";
+    if(!seen[name]){seen[name]=true;names.push(name);}
+  });
+  return names.sort(function(a,b){
+    var ai=_folderOrder.indexOf(a),bi=_folderOrder.indexOf(b);
+    if(ai>=0&&bi>=0)return ai-bi;if(ai>=0)return -1;if(bi>=0)return 1;
+    return a.localeCompare(b,"ja");
+  });
+}
+function setPairColor(role,value){
+  if(role==="primary")_pairPrimaryColor=String(value||"");
+  else _pairSecondaryColor=String(value||"");
+  renderPairComparison();
+}
+function renderPairComparison(filteredData){
+  var primarySelect=document.getElementById("pair-primary-color"),secondarySelect=document.getElementById("pair-secondary-color");
+  var results=document.getElementById("pair-results"),summary=document.getElementById("pair-summary");
+  if(!primarySelect||!secondarySelect||!results||!summary)return;
+  var colors=availableUniformColorNames();
+  if(colors.indexOf(_pairPrimaryColor)<0)_pairPrimaryColor=colors[0]||"";
+  if(colors.indexOf(_pairSecondaryColor)<0||_pairSecondaryColor===_pairPrimaryColor){
+    _pairSecondaryColor=colors.find(function(name){return name!==_pairPrimaryColor;})||"";
+  }
+  var options='<option value="">色を選択</option>'+colors.map(function(name){return '<option value="'+escapeHtml(name)+'">'+escapeHtml(name)+'</option>';}).join("");
+  primarySelect.innerHTML=options;secondarySelect.innerHTML=options;
+  primarySelect.value=_pairPrimaryColor;secondarySelect.value=_pairSecondaryColor;
+  if(!_pairPrimaryColor||!_pairSecondaryColor){
+    summary.classList.remove("show");summary.innerHTML="";
+    results.innerHTML='<div class="pair-empty">比較する2色を選択してください。</div>';return;
+  }
+  if(_pairPrimaryColor===_pairSecondaryColor){
+    summary.classList.remove("show");summary.innerHTML="";
+    results.innerHTML='<div class="pair-empty">正と副は違う色を選択してください。</div>';return;
+  }
+  var data=Array.isArray(filteredData)?filteredData:loadU().filter(function(item){
+    var condition=normalizeCondition(item.condition);
+    if(!_conditionFilter)return true;
+    if(_conditionFilter==="__unset")return !condition;
+    return condition===_conditionFilter;
+  });
+  var selected=data.filter(function(item){var name=uniformColorLabel(item)||"その他";return name===_pairPrimaryColor||name===_pairSecondaryColor;});
+  var numbers=Object.create(null);
+  selected.forEach(function(item){
+    var number=String(item.num==null?"":item.num).trim()||"未設定";
+    var name=uniformColorLabel(item)||"その他";
+    if(!numbers[number])numbers[number]={primary:[],secondary:[]};
+    numbers[number][name===_pairPrimaryColor?"primary":"secondary"].push(item);
+  });
+  var numberNames=Object.keys(numbers).sort(compareUniformNumberLabels),ready=0,check=0,missing=0;
+  if(!numberNames.length){
+    summary.classList.remove("show");summary.innerHTML="";
+    results.innerHTML='<div class="pair-empty">選択した2色のユニフォームがありません。</div>';return;
+  }
+  results.innerHTML=numberNames.map(function(number){
+    var pair=numbers[number];
+    var primaryFree=pair.primary.filter(function(item){return !item.lentTo;}).length,primaryLent=pair.primary.length-primaryFree;
+    var secondaryFree=pair.secondary.filter(function(item){return !item.lentTo;}).length,secondaryLent=pair.secondary.length-secondaryFree;
+    var verdictClass="missing",verdictText="不足";
+    if(pair.primary.length&&pair.secondary.length){
+      if(primaryFree&&secondaryFree){verdictClass="ready";verdictText="使用可";ready++;}
+      else{verdictClass="check";verdictText="貸出確認";check++;}
+    }else missing++;
+    function sideHtml(label,free,lent,total){
+      return '<div class="pair-side"><span class="pair-side-label">'+escapeHtml(label)+'</span>'
+        +(total?'<span class="pair-side-count"><span class="free">倉庫 '+free+'</span> <span class="lent">貸出 '+lent+'</span></span>':'<span class="pair-side-count"><span class="lent">番号なし</span></span>')+'</div>';
+    }
+    return '<div class="pair-result-row"><div class="pair-result-number">#'+escapeHtml(number)+'</div><div class="pair-result-main">'
+      +sideHtml("正｜"+_pairPrimaryColor,primaryFree,primaryLent,pair.primary.length)
+      +sideHtml("副｜"+_pairSecondaryColor,secondaryFree,secondaryLent,pair.secondary.length)
+      +'<span class="pair-verdict '+verdictClass+'">'+verdictText+'</span></div></div>';
+  }).join("");
+  summary.innerHTML='<span class="pair-summary-badge pair-summary-ready">使用可 '+ready+'番号</span>'
+    +'<span class="pair-summary-badge pair-summary-check">貸出確認 '+check+'番号</span>'
+    +'<span class="pair-summary-badge pair-summary-missing">不足 '+missing+'番号</span>';
+  summary.classList.add("show");
+}
 function renderNumberOverview(){
   var list=document.getElementById("number-overview-list");if(!list)return;
   var data=loadU().filter(function(item){
@@ -712,6 +838,7 @@ function renderNumberOverview(){
     if(_conditionFilter==="__unset")return !condition;
     return condition===_conditionFilter;
   });
+  renderPairComparison(data);
   var numbers=Object.create(null);
   data.forEach(function(item){
     var number=String(item.num==null?"":item.num).trim()||"未設定";
