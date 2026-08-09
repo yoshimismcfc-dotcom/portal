@@ -5,7 +5,7 @@
   <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate, max-age=0">
   <meta http-equiv="Pragma" content="no-cache">
   <meta http-equiv="Expires" content="-1">
-  <meta name="app-version" content="20260808-9">
+  <meta name="app-version" content="20260809-2">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <meta name="robots" content="noindex,nofollow">
   <title>大会要綱・対戦表 v5｜吉見SMC FC</title>
@@ -37,8 +37,14 @@
     #doc-youkou .form-label,#doc-taisen .form-label{color:#7dd3fc!important;font-weight:900}
     #doc-youkou .form-control:focus,#doc-taisen .form-control:focus{border-color:var(--orange)!important;background:#1e4a6a!important}
     /* PDF保存ガイド */
-    .pdf-guide{background:rgba(0,255,136,.07);border:1px solid rgba(0,255,136,.3);border-radius:var(--r8);padding:12px 14px;font-size:.8rem;color:#a0f0c8;line-height:1.8;margin-top:12px;display:none}
-    .pdf-guide strong{color:#00ff88;display:block;margin-bottom:4px;font-size:.85rem}
+    .pdf-guide{background:linear-gradient(135deg,rgba(0,180,120,.13),rgba(0,100,180,.1));border:2px solid rgba(0,255,136,.42);border-radius:12px;padding:13px;font-size:.78rem;color:#d5f7e6;line-height:1.55;margin:12px 0;display:block}
+    .pdf-guide-title{color:#7fffc0;display:block;margin-bottom:3px;font-size:.9rem;font-weight:900}
+    .pdf-guide-note{color:var(--ink-3);font-size:.7rem;margin-bottom:9px}
+    .pdf-steps{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:7px}
+    .pdf-step{display:flex;align-items:flex-start;gap:7px;padding:8px;border-radius:9px;background:rgba(0,0,0,.18);min-width:0}
+    .pdf-step-no{display:grid;place-items:center;flex:0 0 23px;width:23px;height:23px;border-radius:50%;background:#00d488;color:#052b20;font-size:.72rem;font-weight:1000}
+    .pdf-device-help{margin-top:9px;padding-top:8px;border-top:1px solid rgba(127,255,192,.24);font-size:.71rem;line-height:1.65}
+    .pdf-primary{flex:1 1 100%!important;min-height:48px;font-size:.9rem!important;font-weight:1000!important}
 
     /* ====== 印刷共通 ====== */
     @media print{
@@ -188,6 +194,15 @@
     .schedule-report.show{display:block}
     .schedule-report.optimal{color:#9ff5c5;background:rgba(0,190,100,.1);border:1px solid rgba(0,220,120,.35)}
     .schedule-report.warning{color:#ffe39a;background:rgba(230,170,0,.1);border:1px solid rgba(255,200,40,.4)}
+    .ceremony-settings{display:grid;gap:8px}
+    .ceremony-row{border:1px solid rgba(0,212,255,.28);border-radius:11px;padding:10px;background:rgba(0,120,180,.06)}
+    .ceremony-toggle{display:flex;align-items:center;gap:8px;min-height:36px;color:var(--ink);font-size:.84rem;font-weight:900;cursor:pointer}
+    .ceremony-toggle input{width:20px;height:20px;flex:0 0 auto}
+    .ceremony-detail{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px;margin-top:8px}
+    .ceremony-help{grid-column:1/-1;color:var(--ink-3);font-size:.7rem;line-height:1.5}
+    .ceremony-banner{display:flex;align-items:center;justify-content:center;gap:8px;margin:6px 0;padding:6px 10px;border:2px solid;border-radius:6px;font-size:8.5pt;font-weight:900;text-align:center}
+    .ceremony-opening{background:#e7f5ff;color:#075985;border-color:#38a7d7}
+    .ceremony-closing{background:#fef3e2;color:#9a3e00;border-color:#e67838}
     .game-fixed{display:inline-flex;align-items:center;gap:3px;font-size:.62rem;white-space:nowrap}
     .game-fixed input{width:15px;height:15px}
     .line-modal{width:min(620px,100%)}
@@ -203,6 +218,8 @@
     body[data-theme="light"] .schedule-report.warning,body[data-theme="light"] .missing-fields{color:#704d00}
     @media(max-width:520px){
       .schedule-actions{grid-template-columns:1fr}
+      .ceremony-detail{grid-template-columns:1fr}
+      .pdf-steps{grid-template-columns:1fr}
       .line-type-tabs{grid-template-columns:1fr}
       .line-modal{padding:16px}
     }
@@ -283,14 +300,15 @@
         <button class="btn btn-primary" onclick="buildYoukou()" style="flex:1 1 140px">👁 プレビュー</button>
         <button class="btn btn-outline btn-sm" onclick="openSaveModal('youkou')">💾 保存</button>
         <button class="btn btn-outline btn-sm" onclick="openLoadModal('youkou')">📂 読込</button>
-        <button class="btn btn-cyan btn-sm no-print" onclick="buildAndPrintPortrait()" id="you-print-btn">🖨 印刷・PDF</button>
+        <button class="btn btn-cyan no-print pdf-primary" onclick="buildAndPrintPortrait()" id="you-print-btn">📄 要項をA4縦1枚でPDF・印刷</button>
         <button class="btn-line-copy sm" onclick="copyYoukou()">📋 LINEコピー</button>
       </div>
     </div>
-    <div class="pdf-guide" id="y-guide">
-      <strong>📄 PDF保存・送信の方法（A4縦）</strong>
-      🍎 iPhone：「印刷・PDF」→ ピンチアウトで拡大 →「PDFに保存」→ LINE・メールで送信<br>
-      🤖 Android：「印刷・PDF」→ 送信先を「PDF形式で保存」に変更 → 保存して送信
+    <div class="pdf-guide no-print" id="y-guide">
+      <span class="pdf-guide-title">📄 要項をPDFにする方法</span>
+      <div class="pdf-guide-note">用紙サイズと向きは自動で「A4・縦」に設定されます。</div>
+      <div class="pdf-steps"><div class="pdf-step"><span class="pdf-step-no">1</span><span>内容を入力して、上の<strong>「要項をA4縦1枚でPDF・印刷」</strong>をタップ</span></div><div class="pdf-step"><span class="pdf-step-no">2</span><span>表示された印刷画面で、下記の端末別操作を行う</span></div><div class="pdf-step"><span class="pdf-step-no">3</span><span>PDFを保存するか、そのままLINEなどで共有</span></div></div>
+      <div class="pdf-device-help">🍎 <strong>iPhone・iPad：</strong>印刷プレビューを2本指で広げる → 共有ボタン →「ファイルに保存」またはLINE<br>🤖 <strong>Android：</strong>プリンター選択 →「PDF形式で保存」→ 保存<br>💻 <strong>パソコン：</strong>プリンター選択 →「PDFに保存」または「Microsoft Print to PDF」</div>
     </div>
     <div id="youkou-preview" style="margin-top:12px;display:none"></div>
   </div>
@@ -333,6 +351,25 @@
             <input class="form-control" id="lunch-label" value="🍱 昼食休憩"></div>
         </div>
       </div>
+      <div class="sec">🎤 開会式・閉会式（任意）</div>
+      <div class="ceremony-settings">
+        <div class="ceremony-row">
+          <label class="ceremony-toggle"><input type="checkbox" id="opening-enable" onchange="toggleCeremonies()"><span>開会式を対戦表に表示する</span></label>
+          <div class="ceremony-detail" id="opening-settings" style="display:none">
+            <div class="form-group"><label class="form-label">開始時刻</label><input class="form-control" id="opening-start" type="time" value="08:00"></div>
+            <div class="form-group"><label class="form-label">所要時間（分）</label><input class="form-control" id="opening-min" type="number" value="20" min="1" max="180"></div>
+            <div class="ceremony-help">開会式は試合スケジュールの前に表示されます。試合の開始時刻は上の「開始時刻」で調整してください。</div>
+          </div>
+        </div>
+        <div class="ceremony-row">
+          <label class="ceremony-toggle"><input type="checkbox" id="closing-enable" onchange="toggleCeremonies()" checked><span>閉会式を対戦表に表示する</span></label>
+          <div class="ceremony-detail" id="closing-settings">
+            <div class="form-group"><label class="form-label">開始時刻（空欄は自動）</label><input class="form-control" id="closing-start" type="time"></div>
+            <div class="form-group"><label class="form-label">所要時間（分）</label><input class="form-control" id="closing-min" type="number" value="20" min="1" max="180"></div>
+            <div class="ceremony-help">空欄なら全試合終了後の時刻を自動表示します。決まった時刻にしたい場合だけ入力してください。</div>
+          </div>
+        </div>
+      </div>
       <div class="sec">⚽ チーム設定</div>
       <div id="team-inputs"></div>
       <div class="schedule-assist">
@@ -355,14 +392,15 @@
         <button class="btn btn-primary" onclick="buildTaisen(true)" style="flex:1 1 140px">📊 対戦表を生成</button>
         <button class="btn btn-outline btn-sm" onclick="openSaveModal('taisen')">💾 保存</button>
         <button class="btn btn-outline btn-sm" onclick="openLoadModal('taisen')">📂 読込</button>
-        <button class="btn btn-cyan btn-sm no-print" onclick="buildAndPrintLandscape()" id="tai-print-btn">🖨 印刷・PDF</button>
+        <button class="btn btn-cyan no-print pdf-primary" onclick="buildAndPrintLandscape()" id="tai-print-btn">📄 対戦表をA4横1枚でPDF・印刷</button>
         <button class="btn-line-copy sm" onclick="copyTaisen()">📋 LINEコピー</button>
       </div>
     </div>
-    <div class="pdf-guide" id="t-guide">
-      <strong>📄 PDF保存・送信の方法（A4横）</strong>
-      🍎 iPhone：「印刷・PDF」→ ピンチアウトで拡大 →「PDFに保存」→ LINE・メールで送信<br>
-      🤖 Android：「印刷・PDF」→ 送信先を「PDF形式で保存」→ 向きを「横」に設定 → 保存
+    <div class="pdf-guide no-print" id="t-guide">
+      <span class="pdf-guide-title">📄 対戦表をPDFにする方法</span>
+      <div class="pdf-guide-note">用紙サイズと向きは自動で「A4・横」に設定されます。</div>
+      <div class="pdf-steps"><div class="pdf-step"><span class="pdf-step-no">1</span><span>内容を入力して、上の<strong>「対戦表をA4横1枚でPDF・印刷」</strong>をタップ</span></div><div class="pdf-step"><span class="pdf-step-no">2</span><span>表示された印刷画面で、下記の端末別操作を行う</span></div><div class="pdf-step"><span class="pdf-step-no">3</span><span>PDFを保存するか、そのままLINEなどで共有</span></div></div>
+      <div class="pdf-device-help">🍎 <strong>iPhone・iPad：</strong>印刷プレビューを2本指で広げる → 共有ボタン →「ファイルに保存」またはLINE<br>🤖 <strong>Android：</strong>プリンター選択 →「PDF形式で保存」→ 保存<br>💻 <strong>パソコン：</strong>プリンター選択 →「PDFに保存」または「Microsoft Print to PDF」</div>
     </div>
     <div id="taisen-preview" style="margin-top:12px"></div>
   </div>
@@ -514,6 +552,18 @@ function toggleLunch(){
   var cb = document.getElementById("lunch-enable");
   document.getElementById("lunch-settings").style.display = cb.checked ? "block" : "none";
 }
+function toggleCeremonies(){
+  var opening=document.getElementById("opening-enable");
+  var closing=document.getElementById("closing-enable");
+  document.getElementById("opening-settings").style.display=opening.checked?"grid":"none";
+  document.getElementById("closing-settings").style.display=closing.checked?"grid":"none";
+}
+function ceremonyBanner(kind,label,start,minutes,isAutomatic){
+  if(!start)return "";
+  var duration=Math.max(1,Number(minutes)||20);
+  var end=addMins(start,duration);
+  return '<div class="ceremony-banner ceremony-'+kind+'"><span>'+escapeHtml(label)+'</span><span class="ceremony-time" data-duration="'+duration+'">'+start+'〜'+end+'（'+duration+'分）'+(isAutomatic?'・自動':'')+'</span></div>';
+}
 
 var _lastTournamentSchedule=null;
 var _scheduleUndo=null;
@@ -631,6 +681,12 @@ function buildTaisen(forceNew){
   var lunchMin    = lunchEnabled ? (+gv("lunch-min")||60) : 0;
   var lunchLabel  = lunchEnabled ? (gv("lunch-label")||"🍱 昼食休憩") : "";
   var lunchInserted = false;
+  var openingEnabled=document.getElementById("opening-enable").checked;
+  var openingStart=openingEnabled?(gv("opening-start")||"08:00"):"";
+  var openingMin=openingEnabled?(+gv("opening-min")||20):0;
+  var closingEnabled=document.getElementById("closing-enable").checked;
+  var requestedClosingStart=closingEnabled?gv("closing-start"):"";
+  var closingMin=closingEnabled?(+gv("closing-min")||20):0;
 
   var schedsByTime=[]; // [{time, games:[{blkIdx,home,away}], isBreak, breakLabel}]
   var maxM=Math.max.apply(null,blocks.map(function(b){return b.matches.length;}));
@@ -662,11 +718,14 @@ function buildTaisen(forceNew){
   var finalStart=cur;
   var sf=addMins(finalStart,gmin);
   var closingTime=addMins(sf,gmin);
+  var automaticClosingTime=courts===2?closingTime:cur;
+  var displayedClosingTime=requestedClosingStart||automaticClosingTime;
 
   /* ---- HTML生成 ---- */
   var h='<div class="tai-sheet">';
   h+='<div class="tai-title">'+escapeHtml(title)+'　対戦表</div>';
   h+='<div class="tai-sub">'+escapeHtml((dateStr?dateStr+"　":"")+place)+'</div>';
+  if(openingEnabled)h+=ceremonyBanner("opening","🎤 開会式",openingStart,openingMin,false);
 
   if(courts===2){
     /* 2コート：A面・B面を横に並べてスケジュール表示 */
@@ -754,8 +813,8 @@ if(slot.isBreak){
       h+='<td class="td-away">'+f[2]+'</td><td>'+f[3]+'</td></tr>';
       fn++;
     });
-    h+='<tr><td colspan="9" class="tr-closing-td">🏆 閉会式　'+closingTime+'～</td></tr>';
     h+='</tbody></table>';
+    if(closingEnabled)h+=ceremonyBanner("closing","🏆 閉会式",displayedClosingTime,closingMin,!requestedClosingStart);
 
   } else {
     /* 1コート */
@@ -781,8 +840,8 @@ if(slot.isBreak){
         h+='<td class="td-away">'+escapeHtml(g.away)+'<label class="game-fixed no-print"><input class="game-fixed-input" type="checkbox" data-block-index="0" data-match-id="'+esc3(g.id)+'" '+(g.fixed?'checked ':'')+'>固定</label></td><td></td></tr>';
       });
     });
-    h+='<tr><td colspan="8" class="tr-closing-td">🏆 閉会式　'+closingTime+'～</td></tr>';
     h+='</tbody></table>';
+    if(closingEnabled)h+=ceremonyBanner("closing","🏆 閉会式",displayedClosingTime,closingMin,!requestedClosingStart);
 
     h+='<div class="block-hd">順位表</div>';
     h+='<table class="rt"><thead><tr>';
@@ -844,6 +903,10 @@ function getTaisenText(){
   var t="【"+f("t-title")+"】 対戦表\n";
   if(f("t-date"))  t+="📅 "+f("t-date")+"\n";
   if(f("t-place")) t+="📍 "+f("t-place")+"\n";
+  if(document.getElementById("opening-enable").checked){
+    var openingStart=f("opening-start")||"08:00",openingMin=Number(f("opening-min"))||20;
+    t+="🎤 開会式："+openingStart+"〜"+addMins(openingStart,openingMin)+"（"+openingMin+"分）\n";
+  }
   var rows=document.querySelectorAll(".taisen-game-row");
   if(rows.length){
     t+="\n";
@@ -853,6 +916,10 @@ function getTaisenText(){
       cells.forEach(function(c){if(c.textContent.trim())line.push(c.textContent.trim());});
       if(line.length) t+=line.join(" vs ")+"\n";
     });
+  }
+  if(document.getElementById("closing-enable").checked){
+    var closing=document.querySelector(".ceremony-closing");
+    if(closing)t+="🏆 "+closing.textContent.trim().replace(/^🏆\s*/,"")+"\n";
   }
   return t;
 }
@@ -1004,11 +1071,11 @@ document.querySelectorAll("[data-line-type]").forEach(function(button){
 /* ===== 印刷 ===== */
 function buildAndPrintPortrait(){
   buildYoukou();
-  smcPrint({orientation:"portrait",target:"tournament-guidelines"});
+  smcPrint({orientation:"portrait",target:"tournament-guidelines",margin:"6mm"});
 }
 function buildAndPrintLandscape(){
   buildTaisen();
-  smcPrint({orientation:"landscape",target:"tournament-schedule"});
+  smcPrint({orientation:"landscape",target:"tournament-schedule",margin:"5mm"});
 }
 
 /* ===== 初期化 ===== */
@@ -1103,7 +1170,8 @@ var YOUKOU_FIELDS = ["y-title","y-cat","y-date","y-place","y-host",
 
 // 対戦表フィールドを収集
 var TAISEN_FIELDS = ["t-title","t-date","t-place","t-min","t-courts","t-start",
-  "lunch-enable","lunch-start","lunch-min","lunch-label"];
+  "lunch-enable","lunch-start","lunch-min","lunch-label",
+  "opening-enable","opening-start","opening-min","closing-enable","closing-start","closing-min"];
 
 function collectFields(fields){
   var data = {};
@@ -1122,6 +1190,7 @@ function applyFields(data){
     }
   });
   toggleLunch();
+  toggleCeremonies();
 }
 
 function captureTeamValues(){
@@ -1407,6 +1476,10 @@ document.getElementById("saved-list").addEventListener("keydown",function(event)
 function applySaveEntry(item){
   if(!item) return;
   applyFields(item.data||{});
+  if(item.type==="taisen" && !Object.prototype.hasOwnProperty.call(item.data||{},"closing-enable")){
+    document.getElementById("closing-enable").checked=true;
+    toggleCeremonies();
+  }
   if(item.type==="taisen" && item.data && item.data.teams){
     try{ applyTeamValues(JSON.parse(item.data.teams)); }catch(e){}
     try{
