@@ -1,0 +1,20 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 220 220" role="img" aria-labelledby="title desc">
+  <title id="title">オレンジと赤の縦縞ユニフォーム</title>
+  <desc id="desc">オレンジと赤の太い縦縞に、赤い襟と脇を配したシャツのイラスト</desc>
+  <defs>
+    <clipPath id="shirtClip"><path d="M66 29 27 47 8 91l29 14 15-26 3 112c34 10 76 10 110 0l3-112 15 26 29-14-19-44-39-18-17-10H83z"/></clipPath>
+    <linearGradient id="orangeShade" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#ff7b28"/><stop offset="1" stop-color="#ed4e13"/></linearGradient>
+    <linearGradient id="redShade" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#d82547"/><stop offset="1" stop-color="#a90d32"/></linearGradient>
+    <filter id="shadow" x="-25%" y="-20%" width="150%" height="160%"><feDropShadow dx="0" dy="4" stdDeviation="4" flood-color="#041526" flood-opacity=".3"/></filter>
+  </defs>
+  <g filter="url(#shadow)" stroke="#79102a" stroke-width="3" stroke-linejoin="round">
+    <path fill="url(#orangeShade)" d="M66 29 27 47 8 91l29 14 15-26 3 112c34 10 76 10 110 0l3-112 15 26 29-14-19-44-39-18-17-10H83z"/>
+    <g clip-path="url(#shirtClip)" stroke="none">
+      <path fill="url(#redShade)" d="M54 20h22v184H54zM98 20h24v188H98zM144 20h22v184h-22z"/>
+      <path fill="url(#redShade)" opacity=".85" d="M48 70 67 43l5 154-18-6zm124 0-19-27-5 154 18-6z"/>
+    </g>
+    <path fill="url(#redShade)" d="M79 22c10-5 52-5 62 0l-5 25c-15 10-37 10-52 0z"/>
+    <path fill="#f35c1c" stroke="none" d="M88 27c10 4 34 4 44 0l-3 13c-11 6-27 6-38 0z"/>
+    <path fill="none" stroke="#ff9b66" stroke-width="3" opacity=".55" d="M69 184c27 5 55 5 82 0"/>
+  </g>
+</svg>
