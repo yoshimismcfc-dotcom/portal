@@ -413,6 +413,9 @@ if (!tournamentSource.includes("selectedScheduleOrientation") || !tournamentSour
 if (!tournamentSource.includes("#doc-youkou #y-date,#doc-taisen #t-date") || !tournamentSource.includes("#y-date::-webkit-date-and-time-value") || !tournamentSource.includes("min-inline-size:0!important")) {
   fail("tournament.html", "iPhoneで大会要綱の期日入力欄が横にはみ出す対策がありません");
 }
+if (!tournamentSource.includes("手書きにも使える得点記入枠") || !tournamentSource.includes(".tai-sheet.pdf-capture.pdf-one-court .st td") || !tournamentSource.includes("border:1.5px solid #c78313!important")) {
+  fail("tournament.html", "対戦表の印刷版が得点記入枠付きの読みやすいレイアウトになっていません");
+}
 if (!commonSource.includes('data-print-target="tournament-guidelines"') || !tournamentSource.includes("@page smc-taisen-page") || !tournamentSource.includes("size:A4 landscape")) {
   fail("common.js", "要項・対戦表をA4一枚へ収める印刷調整がありません");
 }
