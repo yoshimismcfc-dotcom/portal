@@ -236,6 +236,25 @@ if (!fs.existsSync(path.join(root, "assets", "uniform-water-pink.svg"))) {
 if (!fs.existsSync(path.join(root, "assets", "uniform-orange-navy.svg"))) {
   throw new Error("オレンジ×紺のユニフォームイラストがありません");
 }
+
+for (const required of [
+  "背番号別（大会用）",
+  'id="uniform-number-view"',
+  'id="number-overview-list"',
+  "function setUniformView(view)",
+  "function renderNumberOverview()",
+  "function showColorFromNumber(colorName)",
+  "compareUniformNumberLabels",
+  'class="number-overview-row"',
+  'class="number-color-chip"',
+  'class="number-color-free">倉庫 ',
+  'class="number-color-lent">貸出 ',
+  'data-color-name="',
+  'renderStats();renderFolders();renderNumberOverview();renderSocks();',
+  'setConditionFilter(value){_conditionFilter=String(value||"");renderFolders();renderNumberOverview();}'
+]) {
+  if (!source.includes(required)) throw new Error("大会用の背番号別表示が不足しています: " + required);
+}
 if (!source.includes("setTimeout(function(){_templateLongPressed=true;setTemplateReorderMode(true);},600)")) {
   throw new Error("テンプレートの長押し判定がありません");
 }
