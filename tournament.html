@@ -5,7 +5,7 @@
   <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate, max-age=0">
   <meta http-equiv="Pragma" content="no-cache">
   <meta http-equiv="Expires" content="-1">
-  <meta name="app-version" content="20260809-14">
+  <meta name="app-version" content="20260809-15">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <meta name="robots" content="noindex,nofollow">
   <title>大会要綱・対戦表 v5｜吉見SMC FC</title>
@@ -83,6 +83,7 @@
     .req-sheet.pdf-capture.pdf-guideline-tight .req-info th,.req-sheet.pdf-capture.pdf-guideline-tight .req-info td{padding:2px 5px!important;font-size:8pt!important}
     .req-sheet.pdf-capture.pdf-guideline-tight .req-num{margin:3px 0 0!important;font-size:8.4pt!important}
     .req-sheet.pdf-capture.pdf-guideline-tight .req-li{font-size:7.9pt!important;line-height:1.36!important}
+    .req-sheet.pdf-capture.pdf-guideline-fill{min-height:1143px!important;display:flex!important;flex-direction:column!important;justify-content:space-between!important}
     .tai-sheet.pdf-capture{border:1px solid #cbd5e1!important;padding:20px 24px 14px!important;color:#172033!important}
     .tai-sheet.pdf-capture .tai-title{font-size:17pt!important;letter-spacing:.06em!important;color:#173b66!important;border-bottom:3px solid #e66a22!important;padding-bottom:6px!important;margin:0 0 4px!important}
     .tai-sheet.pdf-capture .tai-sub{font-size:9pt!important;color:#475569!important;font-weight:700!important;margin-bottom:11px!important}
@@ -1479,11 +1480,13 @@ async function shareGeneratedPdf(){
 
 function fitGuidelineCaptureToA4(sheet){
   if(!sheet)return;
-  sheet.classList.remove("pdf-guideline-compact","pdf-guideline-tight");
+  sheet.classList.remove("pdf-guideline-compact","pdf-guideline-tight","pdf-guideline-fill");
   // A4縦から上下左右6mmの余白を除いた、実際に使える縦横比。
   var printableRatio=(297-12)/(210-12);
   if(sheet.scrollHeight/Math.max(1,sheet.scrollWidth)>printableRatio)sheet.classList.add("pdf-guideline-compact");
   if(sheet.scrollHeight/Math.max(1,sheet.scrollWidth)>printableRatio)sheet.classList.add("pdf-guideline-tight");
+  // 内容が短い場合は、文字を拡大せず項目間隔を均等化して下余白を抑える。
+  sheet.classList.add("pdf-guideline-fill");
 }
 
 /* iPhoneの印刷方向設定に依存せず、用紙方向を確定したPDFを直接生成する */
@@ -1530,7 +1533,7 @@ async function exportA4Pdf(kind){
         }).filter(function(value,index,array){return value>0&&array.indexOf(value)===index;}).sort(function(a,b){return a-b;});
       }
     }finally{
-      sheet.classList.remove("pdf-capture","pdf-one-court","pdf-guideline-compact","pdf-guideline-tight");
+      sheet.classList.remove("pdf-capture","pdf-one-court","pdf-guideline-compact","pdf-guideline-tight","pdf-guideline-fill");
     }
     var JsPdf=window.jspdf.jsPDF;
     var pdf=new JsPdf({orientation:scheduleLandscape?"landscape":"portrait",unit:"mm",format:"a4",compress:true});
