@@ -5,7 +5,7 @@
   <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate, max-age=0">
   <meta http-equiv="Pragma" content="no-cache">
   <meta http-equiv="Expires" content="-1">
-  <meta name="app-version" content="20260809-12">
+  <meta name="app-version" content="20260809-13">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <meta name="robots" content="noindex,nofollow">
   <title>大会要綱・対戦表 v5｜吉見SMC FC</title>
@@ -70,6 +70,19 @@
     .req-sheet.pdf-capture .req-num{color:#173b66!important;margin-top:10px!important}
     .req-sheet.pdf-capture .req-num::before{background:#e66a22!important}
     .req-sheet.pdf-capture .req-contact{background:#f2f6fb!important;border-color:#b8c6d6!important}
+    /* 要項は内容量を計測し、A4縦1枚へ段階的に最適化する */
+    .req-sheet.pdf-capture.pdf-guideline-compact{padding:20px 27px 17px!important;font-size:8.8pt!important;line-height:1.42!important}
+    .req-sheet.pdf-capture.pdf-guideline-compact .req-title{font-size:16pt!important;margin-bottom:9px!important;padding-bottom:6px!important}
+    .req-sheet.pdf-capture.pdf-guideline-compact .req-info{margin-bottom:7px!important}
+    .req-sheet.pdf-capture.pdf-guideline-compact .req-info th,.req-sheet.pdf-capture.pdf-guideline-compact .req-info td{padding:3px 6px!important;font-size:8.5pt!important}
+    .req-sheet.pdf-capture.pdf-guideline-compact .req-num{margin:4px 0 1px!important;font-size:9pt!important}
+    .req-sheet.pdf-capture.pdf-guideline-compact .req-li{font-size:8.5pt!important;line-height:1.48!important}
+    .req-sheet.pdf-capture.pdf-guideline-tight{padding:16px 22px 14px!important;font-size:8.1pt!important;line-height:1.34!important}
+    .req-sheet.pdf-capture.pdf-guideline-tight .req-title{font-size:15pt!important;margin-bottom:7px!important;padding-bottom:5px!important}
+    .req-sheet.pdf-capture.pdf-guideline-tight .req-info{margin-bottom:5px!important}
+    .req-sheet.pdf-capture.pdf-guideline-tight .req-info th,.req-sheet.pdf-capture.pdf-guideline-tight .req-info td{padding:2px 5px!important;font-size:8pt!important}
+    .req-sheet.pdf-capture.pdf-guideline-tight .req-num{margin:3px 0 0!important;font-size:8.4pt!important}
+    .req-sheet.pdf-capture.pdf-guideline-tight .req-li{font-size:7.9pt!important;line-height:1.36!important}
     .tai-sheet.pdf-capture{border:1px solid #cbd5e1!important;padding:20px 24px 14px!important;color:#172033!important}
     .tai-sheet.pdf-capture .tai-title{font-size:17pt!important;letter-spacing:.06em!important;color:#173b66!important;border-bottom:3px solid #e66a22!important;padding-bottom:6px!important;margin:0 0 4px!important}
     .tai-sheet.pdf-capture .tai-sub{font-size:9pt!important;color:#475569!important;font-weight:700!important;margin-bottom:11px!important}
@@ -1456,6 +1469,15 @@ async function shareGeneratedPdf(){
   }
 }
 
+function fitGuidelineCaptureToA4(sheet){
+  if(!sheet)return;
+  sheet.classList.remove("pdf-guideline-compact","pdf-guideline-tight");
+  // A4縦から上下左右6mmの余白を除いた、実際に使える縦横比。
+  var printableRatio=(297-12)/(210-12);
+  if(sheet.scrollHeight/Math.max(1,sheet.scrollWidth)>printableRatio)sheet.classList.add("pdf-guideline-compact");
+  if(sheet.scrollHeight/Math.max(1,sheet.scrollWidth)>printableRatio)sheet.classList.add("pdf-guideline-tight");
+}
+
 /* iPhoneの印刷方向設定に依存せず、用紙方向を確定したPDFを直接生成する */
 async function exportA4Pdf(kind){
   var isSchedule=kind==="taisen";
@@ -1477,6 +1499,7 @@ async function exportA4Pdf(kind){
     var sheet=document.querySelector(isSchedule?"#taisen-preview .tai-sheet":"#youkou-preview .req-sheet");
     if(!sheet)throw new Error("プレビューを作成できませんでした。");
     sheet.classList.add("pdf-capture");
+    if(!isSchedule)fitGuidelineCaptureToA4(sheet);
     if(isSchedule&&!scheduleLandscape)sheet.classList.add("pdf-one-court");
     if(document.fonts&&document.fonts.ready)await document.fonts.ready;
     await new Promise(function(resolve){requestAnimationFrame(function(){requestAnimationFrame(resolve);});});
@@ -1499,7 +1522,7 @@ async function exportA4Pdf(kind){
         }).filter(function(value,index,array){return value>0&&array.indexOf(value)===index;}).sort(function(a,b){return a-b;});
       }
     }finally{
-      sheet.classList.remove("pdf-capture","pdf-one-court");
+      sheet.classList.remove("pdf-capture","pdf-one-court","pdf-guideline-compact","pdf-guideline-tight");
     }
     var JsPdf=window.jspdf.jsPDF;
     var pdf=new JsPdf({orientation:scheduleLandscape?"landscape":"portrait",unit:"mm",format:"a4",compress:true});
@@ -1510,7 +1533,8 @@ async function exportA4Pdf(kind){
     var maxHeight=pageHeight-margin*2;
     var widthRatio=maxWidth/canvas.width;
     var heightAtReadableWidth=canvas.height*widthRatio;
-    if(!scheduleLandscape&&heightAtReadableWidth>maxHeight*1.08){
+    var splitThreshold=isSchedule?1.08:1.24;
+    if(!scheduleLandscape&&heightAtReadableWidth>maxHeight*splitThreshold){
       var sliceHeight=Math.max(1,Math.floor(maxHeight/widthRatio));
       var offset=0,pageIndex=0;
       while(offset<canvas.height){
