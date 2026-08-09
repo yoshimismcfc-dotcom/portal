@@ -733,6 +733,13 @@ var UNIFORM_ILLUSTRATIONS={
   "オレンジ × 紺":{src:"assets/uniform-orange-navy.svg",alt:"オレンジを中心に紺の襟・袖口・脇を配したユニフォームのイラスト"},
   "オレンジ紺":{src:"assets/uniform-orange-navy.svg",alt:"オレンジを中心に紺の襟・袖口・脇を配したユニフォームのイラスト"}
 };
+function uniformIllustrationFor(colorName){
+  if(UNIFORM_ILLUSTRATIONS[colorName])return UNIFORM_ILLUSTRATIONS[colorName];
+  var compact=String(colorName||"").replace(/\s/g,"");
+  if(/^オレンジ赤縦(?:じま|縞)(?:×赤)?$/.test(compact))return UNIFORM_ILLUSTRATIONS["オレンジ赤縦じま"];
+  if(/^白赤(?:×赤)?$/.test(compact))return UNIFORM_ILLUSTRATIONS["白赤"];
+  return null;
+}
 
 function renderStats(){
   var d=loadU(),total=d.length,free=d.filter(function(u){return !u.lentTo;}).length;
@@ -940,7 +947,7 @@ function renderFolders(){
     var bandSubColor=hasSubColor?sampleSubCode:sampleMainCode;
     var hdrGrad="linear-gradient(90deg,"+sampleMainCode+" 0%,"+sampleMainCode+" 75%,"+bandSubColor+" 75%,"+bandSubColor+" 100%)";
     var lightClass=isLightFolder(cg.p)?" is-light":"";
-    var illustration=UNIFORM_ILLUSTRATIONS[cname];
+    var illustration=uniformIllustrationFor(cname);
     var illustrationHtml=illustration?'<img class="cf-uniform-illustration" src="'+escapeHtml(illustration.src)+'" alt="'+escapeHtml(illustration.alt)+'">':'';
 
     // テーブル行生成
