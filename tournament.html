@@ -5,7 +5,7 @@
   <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate, max-age=0">
   <meta http-equiv="Pragma" content="no-cache">
   <meta http-equiv="Expires" content="-1">
-  <meta name="app-version" content="20260809-15">
+  <meta name="app-version" content="20260809-16">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <meta name="robots" content="noindex,nofollow">
   <title>大会要綱・対戦表 v5｜吉見SMC FC</title>
@@ -56,6 +56,15 @@
     .pdf-step-no{display:grid;place-items:center;flex:0 0 23px;width:23px;height:23px;border-radius:50%;background:#00d488;color:#052b20;font-size:.72rem;font-weight:1000}
     .pdf-device-help{margin-top:9px;padding-top:8px;border-top:1px solid rgba(127,255,192,.24);font-size:.71rem;line-height:1.65}
     .pdf-primary{flex:1 1 100%!important;min-height:48px;font-size:.9rem!important;font-weight:1000!important}
+    .venue-map-option{display:grid;grid-template-columns:auto minmax(0,1fr);gap:10px;align-items:start;margin:14px 0 10px;padding:12px;border:1px solid rgba(0,212,255,.38);border-radius:11px;background:rgba(0,160,220,.08);cursor:pointer}
+    .venue-map-option input{width:22px;height:22px;margin:2px 0 0;accent-color:#00d488}
+    .venue-map-option-title{display:block;color:var(--ink);font-size:.84rem;font-weight:1000}
+    .venue-map-option-note{display:block;margin-top:3px;color:var(--ink-3);font-size:.69rem;line-height:1.5}
+    .venue-map-preview{display:none;margin:0 0 12px;padding:9px;border:1px solid var(--line-2);border-radius:10px;background:rgba(255,255,255,.04)}
+    .venue-map-preview.show{display:grid;grid-template-columns:84px minmax(0,1fr) auto;gap:10px;align-items:center}
+    .venue-map-preview img{display:block;width:84px;aspect-ratio:210/297;object-fit:cover;border:1px solid #cbd5e1;background:#fff}
+    .venue-map-preview strong{display:block;color:var(--ink);font-size:.75rem}.venue-map-preview span{display:block;color:var(--ink-3);font-size:.65rem;line-height:1.45;margin-top:2px}
+    @media(max-width:560px){.venue-map-preview.show{grid-template-columns:72px minmax(0,1fr)}.venue-map-preview img{width:72px}.venue-map-preview .btn{grid-column:1/-1;width:100%}}
     .pdf-capture{box-shadow:none!important;border-radius:0!important;overflow:visible!important;background:#fff!important;margin:0!important}
     .pdf-capture .no-print{display:none!important}
     .req-sheet.pdf-capture{width:794px!important;max-width:none!important;padding:22px 26px 18px!important}
@@ -401,6 +410,15 @@
       <div class="guideline-template-actions">
         <button class="btn btn-outline btn-sm" type="button" onclick="resetGuidelineTemplate()">↺ 標準テンプレートに戻す</button>
         <span>現在の要項を初期状態へ戻します。実行前に確認画面が表示されます。</span>
+      </div>
+      <label class="venue-map-option" for="include-venue-map">
+        <input id="include-venue-map" type="checkbox" onchange="updateVenueMapOption()">
+        <span><span class="venue-map-option-title">会場案内図を2ページ目に追加</span><span class="venue-map-option-note">チェックすると、1ページ目に大会要項、2ページ目に吉見町ふれあい広場の案内図を入れた1つのPDFを作成します。</span></span>
+      </label>
+      <div class="venue-map-preview" id="venue-map-preview">
+        <img src="assets/yoshimi-fureai-venue-guide.svg" alt="吉見町ふれあい広場会場案内図のプレビュー">
+        <div><strong>吉見町ふれあい広場 会場案内図</strong><span>A4縦の2ページ目へ、縮小せず追加します。</span></div>
+        <a class="btn btn-outline btn-sm" href="assets/yoshimi-fureai-venue-guide.svg" target="_blank" rel="noopener">案内図を確認</a>
       </div>
       <div class="btn-group">
         <button class="btn btn-primary" onclick="buildYoukou()" style="flex:1 1 140px">👁 プレビュー</button>
@@ -1445,6 +1463,33 @@ function updatePdfOrientationLabel(){
   if(guideButton)guideButton.textContent="「対戦表を"+label+"PDFで作成」";
   document.body.dataset.courtLayout=portrait?"one":"two";
 }
+function updateVenueMapOption(){
+  var checkbox=document.getElementById("include-venue-map");
+  var preview=document.getElementById("venue-map-preview");
+  var button=document.getElementById("you-print-btn");
+  var enabled=!!(checkbox&&checkbox.checked);
+  if(preview)preview.classList.toggle("show",enabled);
+  if(button)button.textContent=enabled?"📄 要項＋案内図を2ページPDFで作成":"📄 要項をA4縦PDFで作成";
+}
+function loadVenueMapImage(){
+  return new Promise(function(resolve,reject){
+    var image=new Image();
+    image.decoding="async";
+    image.onload=function(){resolve(image);};
+    image.onerror=function(){reject(new Error("会場案内図を読み込めませんでした。通信状態を確認して、もう一度お試しください。"));};
+    image.src="assets/yoshimi-fureai-venue-guide.svg?v=20260809-16";
+  });
+}
+async function addVenueMapPage(pdf){
+  var image=await loadVenueMapImage();
+  var canvas=document.createElement("canvas");
+  canvas.width=1654;canvas.height=2339;
+  var context=canvas.getContext("2d");
+  context.fillStyle="#fff";context.fillRect(0,0,canvas.width,canvas.height);
+  context.drawImage(image,0,0,canvas.width,canvas.height);
+  pdf.addPage("a4","portrait");
+  pdf.addImage(canvas.toDataURL("image/jpeg",.96),"JPEG",0,0,210,297,undefined,"FAST");
+}
 function showPdfReadyModal(blob,filename,pageLabel){
   if(_pdfReadyUrl)URL.revokeObjectURL(_pdfReadyUrl);
   _pdfReadyUrl=URL.createObjectURL(blob);
@@ -1492,6 +1537,7 @@ function fitGuidelineCaptureToA4(sheet){
 /* iPhoneの印刷方向設定に依存せず、用紙方向を確定したPDFを直接生成する */
 async function exportA4Pdf(kind){
   var isSchedule=kind==="taisen";
+  var includeVenueMap=!isSchedule&&!!(document.getElementById("include-venue-map")||{}).checked;
   var scheduleOrientation=isSchedule?selectedScheduleOrientation():"portrait";
   var scheduleLandscape=isSchedule&&scheduleOrientation==="landscape";
   var pageLabel=isSchedule?(scheduleLandscape?"A4横":"A4縦"):"A4縦";
@@ -1571,8 +1617,10 @@ async function exportA4Pdf(kind){
       var x=(pageWidth-drawWidth)/2;
       pdf.addImage(canvas.toDataURL("image/jpeg",.94),"JPEG",x,margin,drawWidth,drawHeight,undefined,"FAST");
     }
-    var filename=safePdfFilename(isSchedule?gv("t-title"):gv("y-title"))+(isSchedule?(scheduleLandscape?"_対戦表_A4横.pdf":"_対戦表_A4縦.pdf"):"_大会要項_A4縦.pdf");
-    showPdfReadyModal(pdf.output("blob"),filename,pageLabel);
+    if(includeVenueMap)await addVenueMapPage(pdf);
+    var filename=safePdfFilename(isSchedule?gv("t-title"):gv("y-title"))+(isSchedule?(scheduleLandscape?"_対戦表_A4横.pdf":"_対戦表_A4縦.pdf"):(includeVenueMap?"_大会要項・会場案内_A4縦.pdf":"_大会要項_A4縦.pdf"));
+    var finalPageLabel=includeVenueMap?"A4縦・全"+pdf.getNumberOfPages()+"ページ":pageLabel;
+    showPdfReadyModal(pdf.output("blob"),filename,finalPageLabel);
   }catch(error){
     alert(error&&error.message?error.message:"PDFを作成できませんでした。もう一度お試しください。");
   }finally{
@@ -1590,6 +1638,7 @@ async function exportA4Pdf(kind){
   if(scheduleDate)scheduleDate.value=ds;
   renderGuidelineEditors();
   buildYoukou(true);
+  updateVenueMapOption();
   updateTeamInputs();
   updatePdfOrientationLabel();
 })();
@@ -1645,7 +1694,7 @@ dbListen("tournament_match_results",function(val){
 },RESULTS_KEY,{});
 
 // 要綱フィールドを収集
-var YOUKOU_FIELDS = ["y-title"];
+var YOUKOU_FIELDS = ["y-title","include-venue-map"];
 
 // 対戦表フィールドを収集
 var TAISEN_FIELDS = ["t-title","t-date","t-place","t-min","t-courts","t-start",
@@ -1671,6 +1720,7 @@ function applyFields(data){
   toggleLunch();
   toggleCeremonies();
   updatePdfOrientationLabel();
+  updateVenueMapOption();
 }
 
 function captureTeamValues(){

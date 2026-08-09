@@ -1,0 +1,95 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="210mm" height="297mm" viewBox="0 0 2100 2970">
+<defs>
+  <style><![CDATA[
+    text{font-family:'Noto Sans JP Thin','Noto Sans JP','Yu Gothic',sans-serif;}
+  ]]></style>
+  <filter id="soft"><feDropShadow dx="0" dy="2" stdDeviation="2" flood-opacity=".12"/></filter>
+</defs>
+<rect width="2100" height="2970" fill="#fff"/>
+<g id="title">
+  <rect x="190" y="90" width="1720" height="125" rx="7" fill="#fff" stroke="#61707c" stroke-width="3"/>
+  <text x="1050" y="173" font-size="62" font-weight="800" fill="#17212b" text-anchor="middle" class="">吉見町ふれあい広場会場案内図</text>
+</g>
+<g id="map" transform="translate(80 285)">
+  <rect x="0" y="0" width="1940" height="1350" rx="20" fill="#fafcf8" stroke="#d7ddd5" stroke-width="3"/>
+  <!-- 周辺道路 -->
+  <path d="M155 50 H1795 M155 1280 H1785 M135 85 V1240 M1810 70 V1250" fill="none" stroke="#d7dadd" stroke-width="34"/>
+  <path d="M155 50 H1795 M155 1280 H1785 M135 85 V1240 M1810 70 V1250" fill="none" stroke="#fff" stroke-width="25"/>
+  <!-- 公園外周 -->
+  <path d="M260 100 H1660 Q1730 100 1730 175 V1160 Q1730 1230 1660 1230 H290 Q220 1230 220 1160 V180 Q220 100 260 100Z" fill="#edf7df" stroke="#7bad68" stroke-width="5"/>
+  <!-- 園路 -->
+  <path d="M300 150 C470 110 660 170 740 320 C790 420 720 520 690 610 C655 720 710 920 780 1185" fill="none" stroke="#e47a9e" stroke-width="46" stroke-linecap="round"/>
+  <path d="M720 610 C875 650 1030 655 1190 650 C1380 645 1550 680 1675 820" fill="none" stroke="#e47a9e" stroke-width="42" stroke-linecap="round"/>
+  <path d="M420 1090 C660 1140 910 1200 1220 1210" fill="none" stroke="#e47a9e" stroke-width="40" stroke-linecap="round"/>
+  <!-- ピクニック広場 -->
+  <path d="M295 220 C390 130 600 145 700 270 C780 380 710 520 650 690 C610 790 460 800 330 720 C245 665 250 555 265 430 C275 350 255 270 295 220Z" fill="#f5eb6c" stroke="#d6c443" stroke-width="4"/>
+  <!-- 中央広場 -->
+  <circle cx="700" cy="640" r="115" fill="#db598b" stroke="#bd356c" stroke-width="5"/>
+  <text x="700" y="730" font-size="29" font-weight="800" fill="#fff" text-anchor="middle" class="">中央広場</text>
+  <!-- 陸上競技場：水色がトラック、薄赤が土の半円、薄緑が試合ピッチ -->
+  <rect x="800" y="220" width="820" height="500" rx="235" fill="#94d7df" stroke="#4e99a5" stroke-width="7"/>
+  <rect x="875" y="280" width="670" height="380" rx="180" fill="#e8afa4" stroke="#b9675b" stroke-width="5"/>
+  <!-- 東西の土の半円＝アップエリア -->
+  <path d="M985 280 C850 280 850 660 985 660 Z" fill="#efb7ab" stroke="#a85046" stroke-width="5"/>
+  <path d="M1435 280 C1570 280 1570 660 1435 660 Z" fill="#efb7ab" stroke="#a85046" stroke-width="5"/>
+  <!-- 薄緑色の長方形全体がピッチ -->
+  <rect x="985" y="280" width="450" height="380" fill="#d8ecbe" stroke="#171b20" stroke-width="7"/>
+  <line x1="1210" y1="280" x2="1210" y2="660" stroke="#171b20" stroke-width="7"/>
+  <text x="1098" y="490" font-size="57" font-weight="900" fill="#171b20" text-anchor="middle" class="">B面</text>
+  <text x="1322" y="490" font-size="57" font-weight="900" fill="#171b20" text-anchor="middle" class="">A面</text>
+  <text x="925" y="435" font-size="27" font-weight="900" fill="#632d28" text-anchor="middle"><tspan x="925" dy="0">アップ</tspan><tspan x="925" dy="32.94">エリア</tspan></text>
+  <text x="1495" y="435" font-size="27" font-weight="900" fill="#632d28" text-anchor="middle"><tspan x="1495" dy="0">アップ</tspan><tspan x="1495" dy="32.94">エリア</tspan></text>
+  <text x="1210" y="262" font-size="29" font-weight="700" fill="#4b463e" text-anchor="middle" class="">陸上競技場</text>
+  <!-- スタンド・本部と、黒い3区画のマット通路 -->
+  <text x="1015" y="148" font-size="27" font-weight="800" fill="#20262d" text-anchor="middle" class="">スタンド席</text>
+  <text x="1210" y="138" font-size="32" font-weight="900" fill="#20262d" text-anchor="middle" class="">本部</text>
+  <text x="1405" y="148" font-size="27" font-weight="800" fill="#20262d" text-anchor="middle" class="">スタンド席</text>
+  <path d="M975 172 L1042 165 L1062 231 L995 241 Z" fill="#3f4449" stroke="#171b20" stroke-width="4"/>
+  <rect x="1173" y="160" width="74" height="82" fill="#3f4449" stroke="#171b20" stroke-width="4"/>
+  <path d="M1378 165 L1445 172 L1425 241 L1358 231 Z" fill="#3f4449" stroke="#171b20" stroke-width="4"/>
+  <text x="1015" y="271" font-size="21" font-weight="800" fill="#c7362f" text-anchor="middle" class="">ボール使用禁止</text>
+  <text x="1405" y="271" font-size="21" font-weight="800" fill="#c7362f" text-anchor="middle" class="">ボール使用禁止</text>
+  <!-- 観戦エリア・ボール使用範囲 -->
+  <rect x="885" y="730" width="650" height="66" rx="8" fill="#fff" fill-opacity=".96" stroke="#c7362f" stroke-width="6"/>
+  <text x="1210" y="772" font-size="27" font-weight="800" fill="#c7362f" text-anchor="middle" class="">観戦エリア　トラック外周のみ</text>
+  <rect x="895" y="805" width="630" height="72" rx="7" fill="#fffaf3" stroke="#a85046" stroke-width="3"/>
+  <text x="1210" y="831" font-size="20" font-weight="800" fill="#66352f" text-anchor="middle"><tspan x="1210" dy="0">黒色部分：マット通路（3か所）</tspan><tspan x="1210" dy="28.4">ボール使用可：ピッチ＋左右アップエリアのみ</tspan></text>
+  <!-- 多目的グラウンド -->
+  <path d="M850 890 L1460 860 L1560 1110 Q1535 1190 1430 1200 L900 1175 Q830 1130 840 1040Z" fill="#8ec7ae" stroke="#5c9f86" stroke-width="5"/>
+  <text x="1195" y="1010" font-size="36" font-weight="700" fill="#315c4d" text-anchor="middle" class="">多目的グラウンド</text>
+  <circle cx="1030" cy="940" r="16" fill="#e9a966"/><circle cx="1380" cy="915" r="16" fill="#e9a966"/>
+  <circle cx="1320" cy="1060" r="16" fill="#e9a966"/><circle cx="1100" cy="1090" r="16" fill="#e9a966"/>
+  <!-- テニスコート -->
+  <rect x="330" y="855" width="310" height="235" rx="8" fill="#e9df65" stroke="#b9aa31" stroke-width="5"/>
+  <line x1="485" y1="855" x2="485" y2="1090" stroke="#fff" stroke-width="4" opacity=".8"/>
+  <rect x="350" y="905" width="270" height="135" fill="none" stroke="#fff" stroke-width="4" opacity=".8"/>
+  <text x="485" y="895" font-size="32" font-weight="700" fill="#514c22" text-anchor="middle" class="">テニスコート</text>
+  <!-- 管理棟・池 -->
+  <rect x="520" y="1110" width="260" height="85" rx="8" fill="#d7dadd" stroke="#808991" stroke-width="4"/>
+  <text x="650" y="1165" font-size="31" font-weight="800" fill="#30373d" text-anchor="middle" class="">管理棟</text>
+  <rect x="1510" y="1040" width="165" height="165" rx="10" fill="#8fb4dc" stroke="#668daf" stroke-width="4"/>
+  <text x="1592" y="1132" font-size="26" font-weight="700" fill="#314b64" text-anchor="middle" class="">調整池</text>
+  <!-- 方位 -->
+  <circle cx="115" cy="170" r="55" fill="#fff" stroke="#26313a" stroke-width="5"/>
+  <path d="M115 115 L92 180 L115 165 L138 180Z" fill="#fff" stroke="#26313a" stroke-width="4"/>
+  <text x="115" y="92" font-size="28" font-weight="800" fill="#26313a" text-anchor="middle" class="">N</text>
+  <!-- ゲート -->
+  <text x="955" y="72" font-size="30" font-weight="800" fill="#30373d" text-anchor="middle" class="">北ゲート</text>
+  <text x="95" y="680" font-size="30" font-weight="800" fill="#30373d" text-anchor="middle" class="">西ゲート</text>
+  <text x="1845" y="680" font-size="30" font-weight="800" fill="#30373d" text-anchor="middle" class="">東ゲート</text>
+  <text x="970" y="1320" font-size="30" font-weight="800" fill="#30373d" text-anchor="middle" class="">メインゲート</text>
+  <!-- トイレ -->
+  <g fill="#26313a"><rect x="760" y="110" width="38" height="38" rx="5"/><rect x="1640" y="600" width="38" height="38" rx="5"/><rect x="735" y="1170" width="38" height="38" rx="5"/></g>
+  <text x="779" y="138" font-size="17" font-weight="800" fill="#fff" text-anchor="middle" class="">WC</text><text x="1659" y="628" font-size="17" font-weight="800" fill="#fff" text-anchor="middle" class="">WC</text><text x="754" y="1198" font-size="17" font-weight="800" fill="#fff" text-anchor="middle" class="">WC</text>
+  <!-- 案内枠 -->
+  <g><rect x="1195" y="15" width="200" height="78" rx="7" fill="#fff" fill-opacity=".94" stroke="#c7362f" stroke-width="6"/><text x="1295.0" y="64.54" font-size="31" font-weight="800" fill="#c7362f" text-anchor="middle" class="">駐車場</text></g>
+  <g><rect x="30" y="500" width="180" height="74" rx="7" fill="#fff" fill-opacity=".94" stroke="#c7362f" stroke-width="6"/><text x="120.0" y="546.86" font-size="29" font-weight="800" fill="#c7362f" text-anchor="middle" class="">駐車場</text></g>
+  <g><rect x="30" y="790" width="180" height="74" rx="7" fill="#fff" fill-opacity=".94" stroke="#c7362f" stroke-width="6"/><text x="120.0" y="836.86" font-size="29" font-weight="800" fill="#c7362f" text-anchor="middle" class="">駐車場</text></g>
+  <g><rect x="1640" y="820" width="190" height="74" rx="7" fill="#fff" fill-opacity=".94" stroke="#c7362f" stroke-width="6"/><text x="1735.0" y="866.86" font-size="29" font-weight="800" fill="#c7362f" text-anchor="middle" class="">駐車場</text></g>
+  <g><rect x="1740" y="245" width="92" height="260" rx="7" fill="#fff" fill-opacity=".94" stroke="#c7362f" stroke-width="6"/><text x="1786.0" y="345.6" font-size="28" font-weight="800" fill="#c7362f" text-anchor="middle"><tspan x="1786.0" dy="0">駐</tspan><tspan x="1786.0" dy="29.400000000000002">車</tspan><tspan x="1786.0" dy="29.400000000000002">場</tspan></text></g>
+  <!-- 使用禁止表示 -->
+  <rect x="315" y="420" width="370" height="75" rx="7" fill="#fff" fill-opacity=".9" stroke="#20262d" stroke-width="6"/>
+  <text x="500" y="468" font-size="29" font-weight="800" fill="#20262d" text-anchor="middle" class="">ピクニック広場</text>
+  <rect x="265" y="500" width="390" height="175" rx="7" fill="#fff" fill-opacity=".9" stroke="#20262d" stroke-width="6"/>
+  <text x="460" y="555" font-size="29" font-weight="800" fill="#20262d" text-anchor="middle"><tspan x="460" dy="0">ピクニック広場</tspan><tspan x="460" dy="39.150000000000006">アップ・ボール</tspan><tspan x="460" dy="39.150000000000006">使用禁止</tspan></text>
+<g><circle cx="285" cy="165" r="12" fill="#d9edc0"/><circle cx="285" cy="165" r="8" fill="#5f9e53"/><circle cx="282" cy="162" r="2.6666666666666665" fill="#8fc875"/></g><g><circle cx="410" cy="165" r="15" fill="#d9edc0"/><circle cx="410" cy="165" r="11" fill="#5f9e53"/><circle cx="407" cy="162" r="3.6666666666666665" fill="#8fc875"/></g><g><circle cx="585" cy="185" r="12" fill="#d9edc0"/><circle cx="585" cy="185" r="8" fill="#5f9e53"/><circle cx="582" cy="182" r="2.6666666666666665" fill="#8fc875"/></g><g><circle cx="735" cy="210" r="12" fill="#d9edc0"/><circle cx="735" cy="210" r="8" fill="#5f9e53"/><circle cx="732" cy="207" r="2.6666666666666665" fill="#8fc875"/></g><g><circle cx="1625" cy="185" r="15" fill="#d9edc0"/><circle cx="1625" cy="185" r="11" fill="#5f9e53"/><circle cx="1622" cy="182" r="3.6666666666666665" fill="#8fc875"/></g><g><circle cx="1655" cy="560" r="15" fill="#d9edc0"/><circle cx="1655" cy="560" r="11" fill="#5f9e53"/><circle cx="1652" cy="557" r="3.6666666666666665" fill="#8fc875"/></g><g><circle cx="1655" cy="720" r="16" fill="#d9edc0"/><circle cx="1655" cy="720" r="12" fill="#5f9e53"/><circle cx="1652" cy="717" r="4.0" fill="#8fc875"/></g><g><circle cx="1645" cy="1135" r="12" fill="#d9edc0"/><circle cx="1645" cy="1135" r="8" fill="#5f9e53"/><circle cx="1642" cy="1132" r="2.6666666666666665" fill="#8fc875"/></g><g><circle cx="300" cy="740" r="13" fill="#d9edc0"/><circle cx="300" cy="740" r="9" fill="#5f9e53"/><circle cx="297" cy="737" r="3.0" fill="#8fc875"/></g><g><circle cx="280" cy="955" r="14" fill="#d9edc0"/><circle cx="280" cy="955" r="10" fill="#5f9e53"/><circle cx="277" cy="952" r="3.3333333333333335" fill="#8fc875"/></g><g><circle cx="300" cy="1155" r="14" fill="#d9edc0"/><circle cx="300" cy="1155" r="10" fill="#5f9e53"/><circle cx="297" cy="1152" r="3.3333333333333335" fill="#8fc875"/></g><g><circle cx="880" cy="1195" r="13" fill="#d9edc0"/><circle cx="880" cy="1195" r="9" fill="#5f9e53"/><circle cx="877" cy="1192" r="3.0" fill="#8fc875"/></g><g><circle cx="1050" cy="1200" r="15" fill="#d9edc0"/><circle cx="1050" cy="1200" r="11" fill="#5f9e53"/><circle cx="1047" cy="1197" r="3.6666666666666665" fill="#8fc875"/></g><g><circle cx="1390" cy="1190" r="12" fill="#d9edc0"/><circle cx="1390" cy="1190" r="8" fill="#5f9e53"/><circle cx="1387" cy="1187" r="2.6666666666666665" fill="#8fc875"/></g></g><g id="notes"><rect x="115" y="1685" width="1870" height="1150" rx="14" fill="#fff" stroke="#d7dde2" stroke-width="3"/><text x="155" y="1760" font-size="36" font-weight="800" fill="#20262d" text-anchor="start" class="">【吉見町ふれあい広場】</text><text x="190" y="1825" font-size="31" font-weight="500" fill="#20262d" text-anchor="start" class="">所在地：比企郡吉見町大字小新井 142</text><text x="155" y="1915" font-size="36" font-weight="800" fill="#20262d" text-anchor="start" class="">【会場留意事項等】</text><text x="190" y="1980" font-size="27" font-weight="500" fill="#20262d" text-anchor="start" class="">・試合コート内（芝）での飲み物は水のみ。</text><text x="190" y="2072" font-size="27" font-weight="500" fill="#20262d" text-anchor="start" class="">・アップエリアは、コート東西半円の中。ピクニック広場でのボール使用・アップは禁止。</text><text x="190" y="2164" font-size="27" font-weight="500" fill="#20262d" text-anchor="start" class="">・審判（主審・副審）スパイク不可。トレーニングシューズでお願いします。</text><text x="190" y="2256" font-size="27" font-weight="500" fill="#20262d" text-anchor="start" class="">・スタンド席前の芝エリアでタープ設置禁止・ボール使用禁止。（スタンド席内、タープ設置可能）</text><text x="190" y="2348" font-size="27" font-weight="500" fill="#20262d" text-anchor="start" class="">・試合コートへ入る際（移動）は、ラバーの上を使用。トラック内には入らない。</text><text x="190" y="2440" font-size="27" font-weight="500" fill="#20262d" text-anchor="start" class="">・観戦場所は、指定した観戦エリア（トラック外周）のみ。</text><text x="190" y="2532" font-size="27" font-weight="500" fill="#20262d" text-anchor="start" class="">・駐車場は、東ゲート・西ゲートの駐車場を使用。</text><rect x="155" y="2640" width="1790" height="105" rx="10" fill="#fff3f1" stroke="#c7362f" stroke-width="3"/><text x="1050" y="2707" font-size="31" font-weight="800" fill="#c7362f" text-anchor="middle" class="">【注意】マイクロバスは西ゲート駐車場を使用。</text></g><text x="1980" y="2910" font-size="21" fill="#7a858e" text-anchor="end">吉見SMC　会場案内</text></svg>
