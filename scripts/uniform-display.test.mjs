@@ -260,6 +260,28 @@ for (const required of [
 ]) {
   if (!source.includes(required)) throw new Error("大会用の背番号別表示が不足しています: " + required);
 }
+
+for (const required of [
+  "正・副ユニフォームの番号確認",
+  'id="pair-primary-color"',
+  'id="pair-secondary-color"',
+  'id="pair-summary"',
+  'id="pair-results"',
+  "function availableUniformColorNames()",
+  "function setPairColor(role,value)",
+  "function renderPairComparison(filteredData)",
+  'verdictText="使用可"',
+  'verdictText="貸出確認"',
+  'verdictText="不足"',
+  'pair.primary.length&&pair.secondary.length',
+  'primaryFree&&secondaryFree',
+  'class="pair-side-count"',
+  "倉庫 '+free",
+  "貸出 '+lent",
+  'renderPairComparison(data);'
+]) {
+  if (!source.includes(required)) throw new Error("正副2色の背番号比較が不足しています: " + required);
+}
 if (!source.includes("setTimeout(function(){_templateLongPressed=true;setTemplateReorderMode(true);},600)")) {
   throw new Error("テンプレートの長押し判定がありません");
 }
