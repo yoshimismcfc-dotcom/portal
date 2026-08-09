@@ -423,7 +423,7 @@ for (const feature of ["guideline-card-list","deleteGuidelineItem","undoGuidelin
 if (!tournamentSource.includes("guideline-quick-input") || !tournamentSource.includes("項目設定") || !tournamentSource.includes("表示されている入力欄へそのまま入力")) {
   fail("tournament.html", "大会要項が前の画面のように直接入力できる分かりやすい構成になっていません");
 }
-for (const feature of ["fitGuidelineCaptureToA4","pdf-guideline-compact","pdf-guideline-tight","splitThreshold=isSchedule?1.08:1.24"]) {
+for (const feature of ["fitGuidelineCaptureToA4","pdf-guideline-compact","pdf-guideline-tight","pdf-guideline-fill","min-height:1143px","splitThreshold=isSchedule?1.08:1.24"]) {
   if (!tournamentSource.includes(feature)) fail("tournament.html", `大会要項のA4縦1枚への自動調整が不足しています: ${feature}`);
 }
 for (const feature of ["DEFAULT_META","DEFAULT_SECTIONS","migrateLegacy","activeItems","missingStandards","restoreStandard"]) {
