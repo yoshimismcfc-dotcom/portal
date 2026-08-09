@@ -401,7 +401,7 @@ if (!guideSource.includes("固定10分休憩はありません")) {
 if (!commonSource.includes('data-print-target="tournament-schedule"') || !commonSource.includes("tournament-print-enhanced-style")) {
   fail("common.js", "対戦表の印刷専用デザインがありません");
 }
-if (!tournamentSource.includes("要項をA4縦1枚でPDF・印刷") || !tournamentSource.includes("対戦表をA4横1枚でPDF・印刷") || !tournamentSource.includes("pdf-device-help")) {
+if (!tournamentSource.includes("要項をA4縦PDFで表示") || !tournamentSource.includes("対戦表をA4横PDFで表示") || !tournamentSource.includes("exportA4Pdf") || !tournamentSource.includes("pdf-device-help")) {
   fail("tournament.html", "要項・対戦表のPDF保存手順が分かりやすく表示されていません");
 }
 if (!commonSource.includes('data-print-target="tournament-guidelines"') || !tournamentSource.includes("@page smc-taisen-page") || !tournamentSource.includes("size:A4 landscape")) {
