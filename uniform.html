@@ -420,6 +420,20 @@
     <button class="btn-line-copy sm" onclick="copyUniformList()">📋 LINEコピー</button>
   </div>
 
+  <section class="socks-section" aria-labelledby="pants-section-title">
+    <button type="button" class="socks-section-header" id="pants-section-header" aria-expanded="false" aria-controls="pants-section-body" onclick="togglePantsSection()">
+      <span style="font-size:1.4rem" aria-hidden="true">🩳</span>
+      <span class="socks-section-copy"><span class="socks-section-title" id="pants-section-title">パンツ在庫・入力</span><span class="socks-section-hint">タップして色・サイズ・在庫数を登録</span></span>
+      <span class="socks-section-total" id="pants-total">合計0枚</span>
+      <span class="socks-section-toggle" id="pants-section-toggle">▶</span>
+    </button>
+    <div class="socks-section-body" id="pants-section-body">
+      <p class="socks-guide">パンツを色・サイズ別に管理します。背番号や団員名の入力はありません。</p>
+      <div class="sock-list" id="pants-list"></div>
+      <div class="sock-add-actions"><button type="button" class="btn btn-primary btn-sm" onclick="openPantsAdd()">＋ パンツを追加</button></div>
+    </div>
+  </section>
+
   <section class="socks-section" aria-labelledby="socks-section-title">
     <button type="button" class="socks-section-header" id="socks-section-header" aria-expanded="false" aria-controls="socks-section-body" onclick="toggleSocksSection()">
       <span style="font-size:1.4rem" aria-hidden="true">🧦</span>
@@ -594,11 +608,45 @@
   </div>
 </div>
 
+<!-- パンツ在庫モーダル -->
+<div class="modal-bg" id="modal-pants">
+  <div class="modal">
+    <h3 id="pants-modal-title">パンツの色・サイズ・在庫数</h3>
+    <div class="form-label">ユニフォームと同じ色分けから選ぶ</div>
+    <div class="sock-template-list" id="pants-template-list"></div>
+    <button type="button" class="btn btn-outline btn-sm" onclick="togglePantsCustomEditor(true)">＋ 一覧にない色</button>
+    <div class="sock-custom-editor" id="pants-custom-editor">
+      <div class="sock-color-row">
+        <label>メインカラー（必須）<input class="form-control" id="pants-main-name" list="uniform-color-options" placeholder="例：白" oninput="updatePantsCustomColor()"></label>
+        <input class="sock-color-input" type="color" id="pants-main-code" value="#f0f0f0" aria-label="パンツのメイン表示色" oninput="updatePantsCustomColor()">
+      </div>
+      <div class="sock-color-row">
+        <label>サブカラー（任意）<input class="form-control" id="pants-sub-name" list="uniform-color-options" placeholder="1色なら空欄" oninput="updatePantsCustomColor()"></label>
+        <input class="sock-color-input" type="color" id="pants-sub-code" value="#ffffff" aria-label="パンツのサブ表示色" oninput="updatePantsCustomColor()">
+      </div>
+    </div>
+    <div class="sock-selected-preview" id="pants-selected-preview"></div>
+    <datalist id="pants-size-options"><option value="100"><option value="110"><option value="120"><option value="130"><option value="140"><option value="150"><option value="160"><option value="SS"><option value="S"><option value="M"><option value="L"><option value="XL"></datalist>
+    <div class="fg2">
+      <div class="form-group"><label class="form-label">サイズ（必須）</label>
+        <input class="form-control" id="pants-size" list="pants-size-options" placeholder="例：140 または M"></div>
+      <div class="form-group"><label class="form-label">在庫数（枚）</label>
+        <input class="form-control" id="pants-quantity" type="number" min="0" step="1" inputmode="numeric" placeholder="例：6" style="text-align:center"></div>
+    </div>
+    <div class="custom-color-note">同じ色でも、サイズごとに分けて登録します。</div>
+    <div class="modal-btns">
+      <button class="btn btn-outline btn-sm" id="pants-delete-btn" style="color:var(--red);border-color:rgba(255,68,102,.4);display:none" onclick="deletePants()">🗑 削除</button>
+      <button class="btn btn-outline" onclick="closeM('modal-pants')">キャンセル</button>
+      <button class="btn btn-primary" onclick="savePants()">保存</button>
+    </div>
+  </div>
+</div>
+
 <footer class="site-footer"></footer>
 <script>
-var KU="smc_uniform_v3",KH="smc_uniform_hist_v1",KT="smc_uniform_color_templates_v1",KFO="smc_uniform_folder_order_v1",KS="smc_uniform_socks_v1";
-var editId=null,lendId=null,sockEditId=null;
-var _unifData=[], _histData=[], _colorTemplates=[],_folderOrder=[],_sockData=[];
+var KU="smc_uniform_v3",KH="smc_uniform_hist_v1",KT="smc_uniform_color_templates_v1",KFO="smc_uniform_folder_order_v1",KS="smc_uniform_socks_v1",KP="smc_uniform_pants_v1";
+var editId=null,lendId=null,sockEditId=null,pantsEditId=null;
+var _unifData=[], _histData=[], _colorTemplates=[],_folderOrder=[],_sockData=[],_pantsData=[];
 var _conditionFilter="";
 var _uniformView="color";
 var _pairPrimaryColor="",_pairSecondaryColor="";
@@ -616,6 +664,8 @@ function saveH(d){
 }
 function loadSocks(){return _sockData;}
 function saveSocks(items){_sockData=items;dbSave("uniform_socks",items,KS,null);}
+function loadPants(){return _pantsData;}
+function savePants(items){_pantsData=items;dbSave("uniform_pants",items,KP,null);}
 
 var PALETTE=[
   {name:"オレンジ赤縦じま",c1:"#e85c1e",c2:"#bc002d",code:"#e85c1e"},
@@ -719,6 +769,7 @@ function isLightFolder(p){
 }
 function safeColor(value,fallback){return /^#[0-9a-f]{6}$/i.test(String(value||""))?String(value):fallback;}
 var UNIFORM_ILLUSTRATIONS={
+  "白":{src:"assets/uniform-white.svg",alt:"白いVネックの本体に細い青灰色のパイピングを配したユニフォームのイラスト"},
   "オレンジ × 赤":{src:"assets/uniform-orange-red-stripes.svg",alt:"オレンジと赤の太い縦縞ユニフォームのイラスト"},
   "オレンジ赤縦じま":{src:"assets/uniform-orange-red-stripes.svg",alt:"オレンジと赤の太い縦縞ユニフォームのイラスト"},
   "オレンジ赤縦縞":{src:"assets/uniform-orange-red-stripes.svg",alt:"オレンジと赤の太い縦縞ユニフォームのイラスト"},
@@ -1097,6 +1148,110 @@ function saveSock(){
 function deleteSock(){
   if(!sockEditId||!confirm("この色の靴下在庫を削除しますか？"))return;
   saveSocks(loadSocks().filter(function(item){return item.id!==sockEditId;}));renderSocks();closeM("modal-sock");
+}
+
+function pantsColorLabel(item){return uniformColorLabel(item);}
+function togglePantsSection(forceOpen){
+  var body=document.getElementById("pants-section-body"),toggle=document.getElementById("pants-section-toggle"),header=document.getElementById("pants-section-header");
+  var open=typeof forceOpen==="boolean"?forceOpen:!body.classList.contains("open");
+  body.classList.toggle("open",open);toggle.classList.toggle("open",open);header.setAttribute("aria-expanded",String(open));
+}
+function comparePantsSizes(a,b){
+  var av=String(a||""),bv=String(b||""),an=/^\d+$/.test(av),bn=/^\d+$/.test(bv);
+  if(an&&bn)return Number(av)-Number(bv);if(an)return -1;if(bn)return 1;
+  return av.localeCompare(bv,"ja",{numeric:true});
+}
+function renderPants(){
+  var items=loadPants().slice().sort(function(a,b){
+    return pantsColorLabel(a).localeCompare(pantsColorLabel(b),"ja")||comparePantsSizes(a.size,b.size);
+  });
+  var total=items.reduce(function(sum,item){return sum+(Number(item.quantity)||0);},0);
+  document.getElementById("pants-total").textContent="合計"+total+"枚";
+  document.getElementById("pants-list").innerHTML=items.length?items.map(function(item){
+    var main=safeColor(item.mainColorCode,"#666666"),subName=String(item.subColorName||"").trim(),sub=subName?safeColor(item.subColorCode,main):main;
+    var band="linear-gradient(90deg,"+main+" 0%,"+main+" 75%,"+sub+" 75%,"+sub+" 100%)";
+    var light=hexLightness(main)>150?" is-light":"";
+    return '<div class="sock-card'+light+'" style="background:'+band+'">'
+      +'<div class="sock-card-info"><span class="sock-color-name">'+escapeHtml(pantsColorLabel(item))+'</span><span class="sock-count">サイズ '+escapeHtml(item.size||"—")+'　在庫 '+(Number(item.quantity)||0)+'枚</span></div>'
+      +'<button type="button" class="sock-edit-button" onclick="openPantsEdit('+inlineJsArg(item.id)+')">変更</button></div>';
+  }).join(""):'<div style="padding:18px;text-align:center;color:var(--ink-3);font-size:.78rem">まだパンツが登録されていません。</div>';
+}
+function currentPantsColorLabel(){
+  var main=document.getElementById("pants-main-name").value.trim(),sub=document.getElementById("pants-sub-name").value.trim();
+  return main+(sub?" × "+sub:"");
+}
+function buildPantsTemplates(){
+  var selected=currentPantsColorLabel();
+  document.getElementById("pants-template-list").innerHTML=loadColorTemplates().map(function(item){
+    var label=item.mainName+(item.subName?" × "+item.subName:"");
+    var main=safeColor(item.mainCode,"#666666"),sub=item.subName?safeColor(item.subCode,main):main;
+    return '<button type="button" class="sock-template-button'+(label===selected?" selected":"")+(hexLightness(main)>150?" is-light":"")+'" style="background:linear-gradient(90deg,'+main+' 0%,'+main+' 75%,'+sub+' 75%,'+sub+' 100%)" onclick="selectPantsTemplate('+inlineJsArg(item.id)+')">'+escapeHtml(label)+'</button>';
+  }).join("");
+}
+function updatePantsPreview(){
+  var preview=document.getElementById("pants-selected-preview"),mainName=document.getElementById("pants-main-name").value.trim(),subName=document.getElementById("pants-sub-name").value.trim();
+  if(!mainName){preview.classList.remove("show");preview.textContent="";buildPantsTemplates();return;}
+  var main=safeColor(document.getElementById("pants-main-code").value,"#666666"),sub=subName?safeColor(document.getElementById("pants-sub-code").value,main):main;
+  preview.textContent="選択中："+mainName+(subName?" × "+subName:"");
+  preview.style.background="linear-gradient(90deg,"+main+" 0%,"+main+" 75%,"+sub+" 75%,"+sub+" 100%)";
+  preview.style.color=hexLightness(main)>150?"#071126":"#fff";
+  preview.classList.add("show");buildPantsTemplates();
+}
+function selectPantsTemplate(templateId){
+  var template=loadColorTemplates().find(function(item){return item.id===templateId;});if(!template)return;
+  document.getElementById("pants-main-name").value=template.mainName;
+  document.getElementById("pants-main-code").value=safeColor(template.mainCode,"#666666");
+  document.getElementById("pants-sub-name").value=template.subName||"";
+  document.getElementById("pants-sub-code").value=safeColor(template.subCode,template.mainCode);
+  togglePantsCustomEditor(false);updatePantsPreview();
+}
+function togglePantsCustomEditor(forceOpen){
+  var editor=document.getElementById("pants-custom-editor");
+  var open=typeof forceOpen==="boolean"?forceOpen:!editor.classList.contains("open");
+  editor.classList.toggle("open",open);
+  if(open&&!pantsEditId){document.getElementById("pants-main-name").value="";document.getElementById("pants-sub-name").value="";updatePantsPreview();}
+}
+function updatePantsCustomColor(){updatePantsPreview();}
+function resetPantsModal(){
+  pantsEditId=null;document.getElementById("pants-modal-title").textContent="パンツの色・サイズ・在庫数";
+  document.getElementById("pants-main-name").value="";document.getElementById("pants-main-code").value="#f0f0f0";
+  document.getElementById("pants-sub-name").value="";document.getElementById("pants-sub-code").value="#ffffff";
+  document.getElementById("pants-size").value="";document.getElementById("pants-quantity").value="";
+  document.getElementById("pants-delete-btn").style.display="none";
+  togglePantsCustomEditor(false);updatePantsPreview();buildPantsTemplates();
+}
+function openPantsAdd(){buildColorOptions();resetPantsModal();document.getElementById("modal-pants").classList.add("open");}
+function openPantsEdit(id){
+  var item=loadPants().find(function(pants){return pants.id===id;});if(!item)return;
+  buildColorOptions();pantsEditId=id;document.getElementById("pants-modal-title").textContent="パンツの在庫を変更";
+  document.getElementById("pants-main-name").value=item.mainColorName||"";document.getElementById("pants-main-code").value=safeColor(item.mainColorCode,"#666666");
+  document.getElementById("pants-sub-name").value=item.subColorName||"";document.getElementById("pants-sub-code").value=safeColor(item.subColorCode,item.mainColorCode);
+  document.getElementById("pants-size").value=item.size||"";document.getElementById("pants-quantity").value=Number(item.quantity)||0;
+  document.getElementById("pants-delete-btn").style.display="inline-flex";
+  togglePantsCustomEditor(false);updatePantsPreview();document.getElementById("modal-pants").classList.add("open");
+}
+function savePants(){
+  var mainName=document.getElementById("pants-main-name").value.trim(),subName=document.getElementById("pants-sub-name").value.trim();
+  var size=document.getElementById("pants-size").value.trim().toUpperCase(),quantity=Number(document.getElementById("pants-quantity").value);
+  if(!mainName){alert("パンツの色を選択してください");return;}
+  if(!size){alert("パンツのサイズを入力してください");return;}
+  if(!Number.isInteger(quantity)||quantity<0){alert("在庫数を0以上の整数で入力してください");return;}
+  var label=mainName+(subName?" × "+subName:""),items=loadPants().slice();
+  var duplicate=items.find(function(item){return item.id!==pantsEditId&&pantsColorLabel(item)===label&&String(item.size||"").toUpperCase()===size;});
+  if(duplicate){alert("同じ色・サイズのパンツはすでに登録されています。「変更」から更新してください。");return;}
+  var entry=items.find(function(item){return item.id===pantsEditId;});
+  if(!entry){entry={id:"p"+Date.now()};items.push(entry);}
+  entry.mainColorName=mainName;entry.mainColorCode=safeColor(document.getElementById("pants-main-code").value,"#666666");
+  entry.subColorName=subName;entry.subColorCode=subName?safeColor(document.getElementById("pants-sub-code").value,entry.mainColorCode):"";
+  entry.size=size;entry.quantity=quantity;
+  if(!loadColorTemplates().some(function(template){return template.mainName===mainName&&(template.subName||"")===subName;})){
+    var templates=loadColorTemplates().slice();templates.push({id:"pants-color-"+Date.now(),name:label,mainName:mainName,mainCode:entry.mainColorCode,subName:subName,subCode:entry.subColorCode});saveColorTemplates(templates);
+  }
+  savePants(items);renderPants();closeM("modal-pants");togglePantsSection(true);
+}
+function deletePants(){
+  if(!pantsEditId||!confirm("このパンツ在庫を削除しますか？"))return;
+  savePants(loadPants().filter(function(item){return item.id!==pantsEditId;}));renderPants();closeM("modal-pants");
 }
 
 function toggleFolder(id){
@@ -1511,10 +1666,10 @@ function showHistory(){
   document.getElementById("modal-hist").classList.add("open");
 }
 function closeM(id){document.getElementById(id).classList.remove("open");}
-["modal-add","modal-lend","modal-hist","modal-sock"].forEach(function(id){
+["modal-add","modal-lend","modal-hist","modal-sock","modal-pants"].forEach(function(id){
   document.getElementById(id).addEventListener("click",function(e){if(e.target.id===id)closeM(id);});
 });
-function render(){renderStats();renderFolders();renderNumberOverview();renderSocks();}
+function render(){renderStats();renderFolders();renderNumberOverview();renderPants();renderSocks();}
 
 function startUniformSync(){
   // 描画に必要な色・関数の準備後に同期を開始する。
@@ -1530,6 +1685,7 @@ function startUniformSync(){
     _colorTemplates=Array.isArray(val)?val.filter(function(item){return item&&item.id&&item.mainName;}):[];
     if(document.getElementById("modal-add").classList.contains("open")){buildColorOptions();buildPairTemplates();}
     if(document.getElementById("modal-sock").classList.contains("open"))buildSockTemplates();
+    if(document.getElementById("modal-pants").classList.contains("open"))buildPantsTemplates();
   }, KT, []);
   dbListen("uniform_folder_order", function(val){
     _folderOrder=Array.isArray(val)?val.filter(function(name){return typeof name==="string"&&name.trim();}):[];
@@ -1539,6 +1695,10 @@ function startUniformSync(){
     _sockData=Array.isArray(val)?val.filter(function(item){return item&&item.id&&typeof item==="object";}):[];
     renderSocks();
   }, KS, []);
+  dbListen("uniform_pants", function(val){
+    _pantsData=Array.isArray(val)?val.filter(function(item){return item&&item.id&&typeof item==="object";}):[];
+    renderPants();
+  }, KP, []);
 }
 startUniformSync();
 
