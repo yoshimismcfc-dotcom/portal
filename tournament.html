@@ -5,7 +5,7 @@
   <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate, max-age=0">
   <meta http-equiv="Pragma" content="no-cache">
   <meta http-equiv="Expires" content="-1">
-  <meta name="app-version" content="20260809-6">
+  <meta name="app-version" content="20260809-7">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <meta name="robots" content="noindex,nofollow">
   <title>大会要綱・対戦表 v5｜吉見SMC FC</title>
@@ -54,6 +54,38 @@
     .req-sheet.pdf-capture{width:794px!important;max-width:none!important;padding:22px 26px 18px!important}
     .tai-sheet.pdf-capture{width:1123px!important;max-width:none!important;padding:16px 20px 14px!important;font-size:9pt!important;line-height:1.4!important}
     .tai-sheet.pdf-capture .courts-row{grid-template-columns:repeat(2,minmax(0,1fr))!important}
+    /* PDF専用：入力画面とは分離した、配布資料向けの仕上げ */
+    .req-sheet.pdf-capture{border:1px solid #cbd5e1!important;padding:30px 36px 24px!important;color:#172033!important}
+    .req-sheet.pdf-capture .req-title{font-size:18pt!important;letter-spacing:.08em!important;padding-bottom:9px!important;margin-bottom:15px!important;border-bottom:3px solid #e66a22!important;color:#173b66!important}
+    .req-sheet.pdf-capture .req-info th{background:#173b66!important;color:#fff!important;border-color:#315a84!important}
+    .req-sheet.pdf-capture .req-info td{background:#fff!important;color:#172033!important;border-color:#aab6c3!important}
+    .req-sheet.pdf-capture .req-num{color:#173b66!important;margin-top:10px!important}
+    .req-sheet.pdf-capture .req-num::before{background:#e66a22!important}
+    .req-sheet.pdf-capture .req-contact{background:#f2f6fb!important;border-color:#b8c6d6!important}
+    .tai-sheet.pdf-capture{border:1px solid #cbd5e1!important;padding:20px 24px 14px!important;color:#172033!important}
+    .tai-sheet.pdf-capture .tai-title{font-size:17pt!important;letter-spacing:.06em!important;color:#173b66!important;border-bottom:3px solid #e66a22!important;padding-bottom:6px!important;margin:0 0 4px!important}
+    .tai-sheet.pdf-capture .tai-sub{font-size:9pt!important;color:#475569!important;font-weight:700!important;margin-bottom:11px!important}
+    .tai-sheet.pdf-capture .block-hd{display:block!important;width:auto!important;margin:9px 0 5px!important;padding:5px 9px!important;border:0!important;border-left:5px solid #e66a22!important;border-radius:2px!important;background:#eaf0f7!important;color:#173b66!important;font-size:9pt!important;letter-spacing:.02em!important}
+    .tai-sheet.pdf-capture .st{margin-bottom:9px!important}
+    .tai-sheet.pdf-capture .st .sched-th{padding:5px 4px!important;background:#173b66!important;color:#fff!important;border-color:#315a84!important;font-size:7.5pt!important;letter-spacing:.03em!important}
+    .tai-sheet.pdf-capture .st td{height:27px!important;padding:4px 5px!important;border-color:#9eabb9!important;color:#172033!important;font-size:8.2pt!important}
+    .tai-sheet.pdf-capture .st .tr-alt-bg td{background:#f5f8fc!important}
+    .tai-sheet.pdf-capture .st .td-score{background:#f8fafc!important;padding:1px 2px!important}
+    .tai-sheet.pdf-capture .st .td-vs{background:#eef2f6!important;color:#64748b!important}
+    .tai-sheet.pdf-capture .score-input{display:block!important;width:100%!important;height:22px!important;min-height:0!important;margin:0!important;padding:0!important;border:0!important;border-radius:0!important;outline:0!important;background:transparent!important;box-shadow:none!important;color:#0f2740!important;font:900 10pt/22px Arial,sans-serif!important;text-align:center!important;-webkit-appearance:none!important;appearance:none!important}
+    .tai-sheet.pdf-capture .rt{margin-bottom:7px!important}
+    .tai-sheet.pdf-capture .rt .rank-th{padding:4px!important;background:#285943!important;color:#fff!important;border-color:#3f725e!important;font-size:7pt!important}
+    .tai-sheet.pdf-capture .rt td{padding:4px!important;border-color:#a8b6ae!important;color:#172033!important;font-size:7.7pt!important}
+    .tai-sheet.pdf-capture .rt .rank-alt{background:#f2f8f4!important}
+    .tai-sheet.pdf-capture .round-title{margin:6px 0 3px!important;color:#344054!important;font-size:8pt!important;font-weight:900!important}
+    .tai-sheet.pdf-capture .rct{width:100%!important;table-layout:fixed!important;margin-bottom:9px!important}
+    .tai-sheet.pdf-capture .rct th,.tai-sheet.pdf-capture .rct td{height:22px!important;min-width:0!important;padding:3px!important;border-color:#a4afbc!important;font-size:6.9pt!important;line-height:1.15!important;word-break:normal!important;overflow-wrap:anywhere!important}
+    .tai-sheet.pdf-capture .rct .round-th-h{width:25%!important;background:#344054!important;color:#fff!important}
+    .tai-sheet.pdf-capture .rct .round-th-t{background:#526174!important;color:#fff!important}
+    .tai-sheet.pdf-capture .rct .td-score{background:#f7f9fc!important}
+    .tai-sheet.pdf-capture .rct .td-self{background:#d9dee5!important;color:#475569!important}
+    .tai-sheet.pdf-capture .ceremony-banner{margin:7px 0 4px!important;padding:5px 10px!important;border-width:1px 1px 1px 5px!important;border-radius:2px!important}
+    .tai-sheet.pdf-capture .pdf-footnote{margin-top:4px!important;padding-top:4px!important;border-top:1px solid #d6dee7!important;color:#64748b!important;font-size:7pt!important;text-align:right!important}
 
     /* ====== 印刷共通 ====== */
     @media print{
@@ -677,12 +709,13 @@ function updateTournamentResults(){
   if(!window.SMCTournamentScheduler||!SMCTournamentScheduler.calculateStandings)return;
   _currentTournamentBlocks.forEach(function(block,blockIndex){
     var standings=SMCTournamentScheduler.calculateStandings(block.teams,block.matches,resultsForBlock(blockIndex,block));
+    var hasPlayedMatch=standings.some(function(stat){return stat.played>0;});
     var body=document.querySelector('.rank-body[data-block-index="'+blockIndex+'"]');if(!body)return;
     var rows={};body.querySelectorAll(".rank-row").forEach(function(row){rows[row.dataset.team]=row;});
     standings.forEach(function(stat,index){
       var row=rows[stat.team];if(!row)return;
       row.classList.toggle("rank-alt",index%2===1);body.appendChild(row);
-      [["rank",stat.rank],["played",stat.played],["wins",stat.wins],["draws",stat.draws],["losses",stat.losses],["gf",stat.goalsFor],["ga",stat.goalsAgainst],["gd",stat.goalDifference],["points",stat.points]].forEach(function(pair){var cell=row.querySelector('[data-stat="'+pair[0]+'"]');if(cell)cell.textContent=pair[1];});
+      [["rank",hasPlayedMatch?stat.rank:"－"],["played",stat.played],["wins",stat.wins],["draws",stat.draws],["losses",stat.losses],["gf",stat.goalsFor],["ga",stat.goalsAgainst],["gd",stat.goalDifference],["points",stat.points]].forEach(function(pair){var cell=row.querySelector('[data-stat="'+pair[0]+'"]');if(cell)cell.textContent=pair[1];});
     });
   });
   document.querySelectorAll(".round-result").forEach(function(cell){
@@ -909,13 +942,13 @@ if(slot.isBreak){
       h+='</tr></thead><tbody class="rank-body" data-block-index="'+blk.idx+'">';
       blk.teams.forEach(function(t,i){
         h+='<tr class="rank-row'+(i%2===1?' rank-alt':'')+'" data-team="'+esc3(t)+'">';
-        h+='<td data-stat="rank">'+(i+1)+'</td><td class="td-name">'+escapeHtml(t)+'</td>';
+        h+='<td data-stat="rank">－</td><td class="td-name">'+escapeHtml(t)+'</td>';
         h+='<td data-stat="played">0</td><td data-stat="wins">0</td><td data-stat="draws">0</td><td data-stat="losses">0</td><td data-stat="gf">0</td><td data-stat="ga">0</td><td data-stat="gd">0</td><td data-stat="points">0</td></tr>';
       });
       h+='</tbody></table>';
 
       /* 総当り票 */
-      h+='<div style="font-size:8pt;font-weight:bold;margin:5px 0 3px;color:#333">'+blk.blkLabel+' 総当り票</div>';
+      h+='<div class="round-title">'+blk.blkLabel+' 総当り票</div>';
       h+='<table class="rct"><thead><tr><th class="round-th-h"></th>';
       blk.teams.forEach(function(t){h+='<th class="round-th-t">'+escapeHtml(t)+'</th>';});
       h+='</tr></thead><tbody>';
@@ -990,12 +1023,12 @@ if(slot.isBreak){
     h+='<th class="rank-th">得</th><th class="rank-th">失</th><th class="rank-th">差</th><th class="rank-th">点</th>';
     h+='</tr></thead><tbody class="rank-body" data-block-index="0">';
     blk.teams.forEach(function(t,i){
-      h+='<tr class="rank-row'+(i%2===1?' rank-alt':'')+'" data-team="'+esc3(t)+'"><td data-stat="rank">'+(i+1)+'</td><td class="td-name">'+escapeHtml(t)+'</td>';
+      h+='<tr class="rank-row'+(i%2===1?' rank-alt':'')+'" data-team="'+esc3(t)+'"><td data-stat="rank">－</td><td class="td-name">'+escapeHtml(t)+'</td>';
       h+='<td data-stat="played">0</td><td data-stat="wins">0</td><td data-stat="draws">0</td><td data-stat="losses">0</td><td data-stat="gf">0</td><td data-stat="ga">0</td><td data-stat="gd">0</td><td data-stat="points">0</td></tr>';
     });
     h+='</tbody></table>';
 
-    h+='<div style="font-size:8.5pt;font-weight:bold;margin:8px 0 4px;color:#333">総当り票</div>';
+    h+='<div class="round-title">総当り票</div>';
     h+='<table class="rct"><thead><tr><th class="round-th-h" style="min-width:80px"></th>';
     blk.teams.forEach(function(t){h+='<th class="round-th-t">'+escapeHtml(t)+'</th>';});
     h+='</tr></thead><tbody>';
@@ -1007,7 +1040,7 @@ if(slot.isBreak){
     h+='</tbody></table>';
   }
 
-  h+='<div style="font-size:7.5pt;color:#888;text-align:right;margin-top:6px">※ 黄色セルに得点を記入してください</div>';
+  h+='<div class="pdf-footnote">※ 得点はアプリで入力すると、順位表と総当たり表へ自動反映されます。</div>';
   h+='</div>';
 
   var pv=document.getElementById("taisen-preview");
