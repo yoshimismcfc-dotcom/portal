@@ -490,28 +490,44 @@
         body.tournament-print-enhanced #taisen-preview .st td,body.tournament-print-enhanced #taisen-preview .rt td,body.tournament-print-enhanced #taisen-preview .rct td{border-color:#8793a3;color:#172033}
         body.tournament-print-enhanced #taisen-preview .st .tr-break-td{background:#fff0c7;color:#684600;border:2px solid #d79a16;font-weight:900}
         body.tournament-print-enhanced #taisen-preview .st .tr-closing-td{background:#fde3d4;color:#8a3100;border:2px solid #e67838;font-weight:900}
+        body.tournament-print-enhanced #taisen-preview .ceremony-opening{background:#e7f5ff;color:#075985;border-color:#38a7d7}
+        body.tournament-print-enhanced #taisen-preview .ceremony-closing{background:#fde3d4;color:#8a3100;border-color:#e67838}
         body.tournament-print-enhanced #taisen-preview .st .td-score,body.tournament-print-enhanced #taisen-preview .rct .td-score{background:#fff8d8}
         body.tournament-print-enhanced #taisen-preview .rt .rank-th{background:#285943;color:#fff;border-color:#3e7560}
         body.tournament-print-enhanced #taisen-preview .rct .round-th-h{background:#344054;color:#fff}
         body.tournament-print-enhanced #taisen-preview .rct .round-th-t{background:#526174;color:#fff}
         @media print{
+          body[data-print-target="tournament-guidelines"] #youkou-preview{display:block!important;overflow:visible!important;margin:0!important}
+          body[data-print-target="tournament-guidelines"] #youkou-preview > *{min-width:0!important}
+          body[data-print-target="tournament-guidelines"] .req-sheet{width:100%!important;max-width:none!important;padding:0!important;margin:0!important;border:0!important;box-shadow:none!important;font-size:8.2pt!important;line-height:1.28!important;overflow:visible!important}
+          body[data-print-target="tournament-guidelines"] .req-title{font-size:14pt!important;margin-bottom:2.5mm!important;padding-bottom:2mm!important}
+          body[data-print-target="tournament-guidelines"] .req-info{margin-bottom:2mm!important}
+          body[data-print-target="tournament-guidelines"] .req-info th,body[data-print-target="tournament-guidelines"] .req-info td{padding:1.1mm 2mm!important;font-size:8pt!important}
+          body[data-print-target="tournament-guidelines"] .req-num{font-size:8.6pt!important;margin:1.3mm 0 .3mm!important;line-height:1.2!important}
+          body[data-print-target="tournament-guidelines"] .req-num::before{height:3mm!important}
+          body[data-print-target="tournament-guidelines"] .req-li{font-size:8pt!important;line-height:1.38!important;margin-top:0!important;margin-bottom:0!important;padding-left:1.3em!important}
+          body[data-print-target="tournament-guidelines"] .req-li li{margin-bottom:0!important}
+          body[data-print-target="tournament-guidelines"] .req-contact{padding:1.5mm 2mm!important;margin-top:2mm!important;font-size:7.8pt!important}
           body[data-print-target="tournament-schedule"] #taisen-preview{display:block!important;overflow:visible!important;margin:0!important}
           body[data-print-target="tournament-schedule"] #taisen-preview > *{min-width:0!important}
-          body[data-print-target="tournament-schedule"] .tai-sheet{width:100%!important;max-width:none!important;padding:0!important;margin:0!important;border:0!important;box-shadow:none!important;overflow:visible!important;font-size:8.5pt!important;line-height:1.28!important}
+          body[data-print-target="tournament-schedule"] .tai-sheet{width:111.12%!important;max-width:none!important;padding:0!important;margin:0!important;border:0!important;box-shadow:none!important;overflow:visible!important;font-size:7.8pt!important;line-height:1.18!important;zoom:.9}
           body[data-print-target="tournament-schedule"] .tai-title{font-size:16pt!important;color:#173b66!important;border-bottom:2.5pt solid #ea6b24!important;padding-bottom:4mm!important;margin-bottom:2mm!important}
           body[data-print-target="tournament-schedule"] .tai-sub{font-size:9.5pt!important;color:#334155!important;margin-bottom:3mm!important}
           body[data-print-target="tournament-schedule"] .courts-row,body[data-print-target="tournament-schedule"] .blocks-row{gap:5mm!important;grid-template-columns:1fr 1fr!important}
-          body[data-print-target="tournament-schedule"] .block-hd{display:block!important;width:auto!important;margin:3mm 0 1.5mm!important;padding:1.5mm 2.5mm!important;border-radius:1mm!important;background:#173b66!important;color:#fff!important;font-size:9pt!important;break-after:avoid-page;page-break-after:avoid}
-          body[data-print-target="tournament-schedule"] table{width:100%!important;margin-bottom:3mm!important;border-collapse:collapse!important}
+          body[data-print-target="tournament-schedule"] .block-hd{display:block!important;width:auto!important;margin:1.5mm 0 .8mm!important;padding:1mm 2mm!important;border-radius:1mm!important;background:#173b66!important;color:#fff!important;font-size:8pt!important;break-after:avoid-page;page-break-after:avoid}
+          body[data-print-target="tournament-schedule"] table{width:100%!important;margin-bottom:1.5mm!important;border-collapse:collapse!important}
           body[data-print-target="tournament-schedule"] thead{display:table-header-group}
           body[data-print-target="tournament-schedule"] tr{break-inside:avoid-page;page-break-inside:avoid}
           body[data-print-target="tournament-schedule"] .st .sched-th{padding:1.3mm 1mm!important;background:#173b66!important;color:#fff!important;border:1px solid #355a82!important;font-size:7.5pt!important}
-          body[data-print-target="tournament-schedule"] .st td{padding:1.5mm 1.2mm!important;border:1px solid #667085!important;background:#fff!important;color:#111827!important;font-size:8pt!important}
+          body[data-print-target="tournament-schedule"] .st td{padding:1mm .8mm!important;border:1px solid #667085!important;background:#fff!important;color:#111827!important;font-size:7.4pt!important}
           body[data-print-target="tournament-schedule"] .st .tr-alt-bg td{background:#eef3f8!important}
           body[data-print-target="tournament-schedule"] .st .td-score{background:#fff3b0!important}
           body[data-print-target="tournament-schedule"] .st .td-vs{background:#e5e7eb!important;color:#475569!important}
           body[data-print-target="tournament-schedule"] .st .tr-break-td{background:#fff0c7!important;color:#5d3d00!important;border:2px solid #c88a08!important;font-size:9pt!important;padding:2mm!important}
           body[data-print-target="tournament-schedule"] .st .tr-closing-td{background:#fde3d4!important;color:#7c2d00!important;border:2px solid #dc6b2f!important;font-size:9pt!important;padding:2mm!important}
+          body[data-print-target="tournament-schedule"] .ceremony-banner{margin:1.5mm 0!important;padding:2mm!important;font-size:9pt!important;break-inside:avoid-page;page-break-inside:avoid}
+          body[data-print-target="tournament-schedule"] .ceremony-opening{background:#e7f5ff!important;color:#075985!important;border-color:#268bb9!important}
+          body[data-print-target="tournament-schedule"] .ceremony-closing{background:#fde3d4!important;color:#7c2d00!important;border-color:#dc6b2f!important}
           body[data-print-target="tournament-schedule"] .rt .rank-th{background:#285943!important;color:#fff!important;border:1px solid #3e7560!important;font-size:7.2pt!important;padding:1.2mm .8mm!important}
           body[data-print-target="tournament-schedule"] .rt td{border:1px solid #667085!important;background:#fff!important;color:#111827!important;font-size:7.6pt!important;padding:1.2mm .8mm!important}
           body[data-print-target="tournament-schedule"] .rt .rank-alt{background:#edf7f1!important}
@@ -656,10 +672,16 @@
           row.cells[1].textContent = minutesToTime(finalsStart + (index >= 2 ? gameMinutes : 0));
         });
       }
-      const closingTime = minutesToTime(finalsStart + gameMinutes * 2);
+      const closingTime = minutesToTime(finalsTable ? finalsStart + gameMinutes * 2 : cursor);
       sheet.querySelectorAll(".tr-closing-td").forEach((cell) => {
         cell.textContent = cell.textContent.replace(/\d{1,2}:\d{2}(?=～)/, closingTime);
       });
+      if (!document.getElementById("closing-start")?.value) {
+        sheet.querySelectorAll(".ceremony-closing .ceremony-time").forEach((time) => {
+          const duration = Math.max(1, Number(time.dataset.duration) || Number(document.getElementById("closing-min")?.value) || 20);
+          time.textContent = `${closingTime}〜${addMinutes(closingTime, duration)}（${duration}分）・自動`;
+        });
+      }
     }
 
     if (typeof window.buildTaisen === "function" && !window.buildTaisen.__lunchFixed) {
