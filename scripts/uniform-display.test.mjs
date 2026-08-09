@@ -223,6 +223,8 @@ for (const required of [
   '"白黒":{src:"assets/uniform-white-black.svg"',
   '"白 × 赤":{src:"assets/uniform-white-red.svg"',
   '"白赤":{src:"assets/uniform-white-red.svg"',
+  '"白 × 青":{src:"assets/uniform-white-blue-collar.svg"',
+  '"白青":{src:"assets/uniform-white-blue-collar.svg"',
   '"水色 × ピンク":{src:"assets/uniform-water-pink.svg"',
   '"水色ピンク":{src:"assets/uniform-water-pink.svg"',
   '"水色 × オレンジ":{src:"assets/uniform-water-orange.svg"',
@@ -235,6 +237,7 @@ for (const required of [
   'var illustration=uniformIllustrationFor(cname)',
   '/^オレンジ赤縦(?:じま|縞)(?:×赤)?$/.test(compact)',
   '/^白赤(?:×赤)?$/.test(compact)',
+  '/^白青(?:×青)?$/.test(compact)',
   '+illustrationHtml'
 ]) {
   if (!source.includes(required)) throw new Error("色カードのユニフォームイラスト表示が不足しています: " + required);
@@ -259,6 +262,9 @@ if (!fs.existsSync(path.join(root, "assets", "uniform-white-black.svg"))) {
 }
 if (!fs.existsSync(path.join(root, "assets", "uniform-white-red.svg"))) {
   throw new Error("白×赤のユニフォームイラストがありません");
+}
+if (!fs.existsSync(path.join(root, "assets", "uniform-white-blue-collar.svg"))) {
+  throw new Error("白×青の襟付きユニフォームイラストがありません");
 }
 
 for (const required of [
