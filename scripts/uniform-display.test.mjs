@@ -231,7 +231,10 @@ for (const required of [
   '"オレンジ紺":{src:"assets/uniform-orange-navy.svg"',
   'class="cf-uniform-illustration"',
   '.cf-summary:has(.cf-uniform-illustration) .cf-name',
-  'var illustration=UNIFORM_ILLUSTRATIONS[cname]',
+  'function uniformIllustrationFor(colorName)',
+  'var illustration=uniformIllustrationFor(cname)',
+  '/^オレンジ赤縦(?:じま|縞)(?:×赤)?$/.test(compact)',
+  '/^白赤(?:×赤)?$/.test(compact)',
   '+illustrationHtml'
 ]) {
   if (!source.includes(required)) throw new Error("色カードのユニフォームイラスト表示が不足しています: " + required);
