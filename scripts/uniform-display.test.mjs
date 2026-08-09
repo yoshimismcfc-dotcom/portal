@@ -216,6 +216,8 @@ for (const required of [
 
 for (const required of [
   'var UNIFORM_ILLUSTRATIONS={',
+  '"緑":{src:"assets/uniform-goalkeeper-green.svg"',
+  '"黄色":{src:"assets/uniform-goalkeeper-yellow.svg"',
   '"白":{src:"assets/uniform-white.svg"',
   '"オレンジ × 赤":{src:"assets/uniform-orange-red-stripes.svg"',
   '"オレンジ赤縦じま":{src:"assets/uniform-orange-red-stripes.svg"',
@@ -269,6 +271,9 @@ if (!fs.existsSync(path.join(root, "assets", "uniform-white-blue-collar.svg"))) 
 }
 if (!fs.existsSync(path.join(root, "assets", "uniform-white.svg"))) {
   throw new Error("白ユニフォームのイラストがありません");
+}
+if (!fs.existsSync(path.join(root, "assets", "uniform-goalkeeper-green.svg")) || !fs.existsSync(path.join(root, "assets", "uniform-goalkeeper-yellow.svg"))) {
+  throw new Error("キーパー用ユニフォームのイラストがありません");
 }
 
 for (const required of [
@@ -328,11 +333,16 @@ for (const required of [
   "function openPantsAdd()",
   "function openPantsEdit(id)",
   "function savePants()",
+  "function persistPants(items)",
   "function deletePants()",
   'dbSave("uniform_pants"',
   'dbListen("uniform_pants"',
   'KP="smc_uniform_pants_v1"',
   'entry.size=size;entry.quantity=quantity',
+  'var saveRequest=persistPants(items);renderPants();',
+  'result&&result.cloudSaved',
+  "クラウドに保存しました。",
+  "クラウドに保存できませんでした。",
   "パンツのサイズを入力してください",
   "同じ色・サイズのパンツはすでに登録されています",
   "サイズ '+escapeHtml(item.size||\"—\")+'　在庫 '",
@@ -341,6 +351,29 @@ for (const required of [
   '"modal-pants"'
 ]) {
   if (!source.includes(required)) throw new Error("パンツの色・サイズ別在庫管理が不足しています: " + required);
+}
+if ((source.match(/function savePants\(/g) || []).length !== 1) {
+  throw new Error("パンツの画面保存処理とクラウド保存処理は別の関数名にしてください");
+}
+
+for (const required of [
+  "function goalkeeperSingleColor(mainName,subName)",
+  "function normalizeGoalkeeperUniforms(items)",
+  "function normalizeGoalkeeperTemplates(items)",
+  'goalkeeperSingleColor(item.mainColorName||item.cname,item.subColorName)',
+  'item.subColorName="";item.subColorCode=""',
+  'item.memo=addGoalkeeperMemo(item.memo)',
+  'if(goalkeeperMigration.changed)dbSave("uniform"',
+  'if(goalkeeperTemplates.changed)dbSave("uniform_color_templates"',
+  'class="cf-color-edit-button"',
+  "function openFolderColorEdit(colorName)",
+  "function saveFolderColorChange()",
+  'id="modal-folder-color"',
+  "この色に入っているすべての背番号を一括で変更します",
+  '"緑":{src:"assets/uniform-goalkeeper-green.svg"',
+  '"黄色":{src:"assets/uniform-goalkeeper-yellow.svg"'
+]) {
+  if (!source.includes(required)) throw new Error("キーパー色の単色化または帯からの色変更が不足しています: " + required);
 }
 if (!source.includes("setTimeout(function(){_templateLongPressed=true;setTemplateReorderMode(true);},600)")) {
   throw new Error("テンプレートの長押し判定がありません");
