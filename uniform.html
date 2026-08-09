@@ -42,11 +42,14 @@
     .cf-add-button:hover{background:rgba(5,15,30,.68)}
     .cf-add-icon{display:grid;place-items:center;width:28px;height:28px;border-radius:50%;background:rgba(255,255,255,.17);font-size:1.25rem;line-height:1}
     .cf-add-label{white-space:nowrap}
+    .cf-color-edit-button{position:absolute;z-index:3;right:calc(25% + 7px);top:7px;display:flex;align-items:center;justify-content:center;gap:3px;min-width:52px;height:32px;padding:3px 6px;border:1px solid rgba(255,255,255,.5);border-radius:9px;background:rgba(5,15,30,.58);color:#fff;font-size:.56rem;font-weight:900;cursor:pointer;text-shadow:0 1px 2px rgba(0,0,0,.65)}
+    .cf-color-edit-button:hover{background:rgba(5,15,30,.78)}
     .folder-order-controls{display:flex;gap:4px;flex-shrink:0}
     .folder-order-btn{width:34px;height:34px;border:1px solid rgba(255,255,255,.38);border-radius:8px;background:rgba(0,0,0,.18);color:inherit;font-size:1rem;font-weight:900;cursor:pointer}
     #color-folders.folder-reorder-mode .cf-stats,
     #color-folders.folder-reorder-mode .cf-open-hint,
-    #color-folders.folder-reorder-mode .cf-add-button{display:none}
+    #color-folders.folder-reorder-mode .cf-add-button,
+    #color-folders.folder-reorder-mode .cf-color-edit-button{display:none}
     .cf-body{display:none;background:#0a1824}
     .cf-body.open{display:block}
 
@@ -293,6 +296,7 @@
       .cf-open-hint{font-size:.62rem;padding:3px 7px}
       .cf-add-button{margin:7px 6px;font-size:.59rem}
       .cf-add-icon{width:26px;height:26px;font-size:1.15rem}
+      .cf-color-edit-button{right:calc(25% + 5px);top:5px;min-width:46px;height:29px;padding:2px 4px;font-size:.52rem}
       .cf-body>div{overflow-x:visible!important}
       .uni-table{font-size:.74rem}
       .uni-table th{padding:7px 2px;font-size:.64rem}
@@ -634,10 +638,41 @@
         <input class="form-control" id="pants-quantity" type="number" min="0" step="1" inputmode="numeric" placeholder="例：6" style="text-align:center"></div>
     </div>
     <div class="custom-color-note">同じ色でも、サイズごとに分けて登録します。</div>
+    <div class="custom-color-note" id="pants-save-status" role="status" aria-live="polite" style="display:none;margin-top:8px;padding:8px;border-radius:7px;font-weight:900"></div>
     <div class="modal-btns">
       <button class="btn btn-outline btn-sm" id="pants-delete-btn" style="color:var(--red);border-color:rgba(255,68,102,.4);display:none" onclick="deletePants()">🗑 削除</button>
       <button class="btn btn-outline" onclick="closeM('modal-pants')">キャンセル</button>
-      <button class="btn btn-primary" onclick="savePants()">保存</button>
+      <button class="btn btn-primary" id="pants-save-button" onclick="savePants()">保存</button>
+    </div>
+  </div>
+</div>
+
+<!-- 色フォルダ一括変更モーダル -->
+<div class="modal-bg" id="modal-folder-color">
+  <div class="modal">
+    <h3>色をまとめて変更</h3>
+    <div class="template-guide" id="folder-color-guide">この色に登録されているユニフォームをまとめて変更します。</div>
+    <div class="uniform-color-pair">
+      <div class="uniform-color-field">
+        <h4>メインカラー（必須）</h4>
+        <div class="uniform-color-row">
+          <label>カラー名<input class="form-control" id="folder-main-name" list="uniform-color-options" oninput="updateFolderColorPreview()"></label>
+          <label>表示色<input class="custom-color-input" type="color" id="folder-main-code" value="#228b22" oninput="updateFolderColorPreview()"></label>
+        </div>
+      </div>
+      <div class="uniform-color-field">
+        <h4>サブカラー（任意）</h4>
+        <div class="uniform-color-row">
+          <label>カラー名<input class="form-control" id="folder-sub-name" list="uniform-color-options" placeholder="単色なら空欄" oninput="updateFolderColorPreview()"></label>
+          <label>表示色<input class="custom-color-input" type="color" id="folder-sub-code" value="#ffffff" oninput="updateFolderColorPreview()"></label>
+        </div>
+      </div>
+    </div>
+    <div class="sock-selected-preview show" id="folder-color-preview"></div>
+    <div class="custom-color-note">この色に入っているすべての背番号を一括で変更します。背番号・サイズ・貸出状況は変わりません。</div>
+    <div class="modal-btns">
+      <button class="btn btn-outline" onclick="closeM('modal-folder-color')">キャンセル</button>
+      <button class="btn btn-primary" id="folder-color-save-button" onclick="saveFolderColorChange()">色を変更</button>
     </div>
   </div>
 </div>
@@ -650,12 +685,13 @@ var _unifData=[], _histData=[], _colorTemplates=[],_folderOrder=[],_sockData=[],
 var _conditionFilter="";
 var _uniformView="color";
 var _pairPrimaryColor="",_pairSecondaryColor="";
+var _folderColorEditName="";
 var _templateReorderMode=false,_templateLongPressed=false,_folderReorderMode=false;
 
 function loadU(){ return _unifData; }
 function saveU(d){
   _unifData=d;
-  dbSave("uniform", d, KU, null);
+  return dbSave("uniform", d, KU, null);
 }
 function loadH(){ return _histData; }
 function saveH(d){
@@ -665,7 +701,7 @@ function saveH(d){
 function loadSocks(){return _sockData;}
 function saveSocks(items){_sockData=items;dbSave("uniform_socks",items,KS,null);}
 function loadPants(){return _pantsData;}
-function savePants(items){_pantsData=items;dbSave("uniform_pants",items,KP,null);}
+function persistPants(items){_pantsData=items;return dbSave("uniform_pants",items,KP,null);}
 
 var PALETTE=[
   {name:"オレンジ赤縦じま",c1:"#e85c1e",c2:"#bc002d",code:"#e85c1e"},
@@ -769,6 +805,8 @@ function isLightFolder(p){
 }
 function safeColor(value,fallback){return /^#[0-9a-f]{6}$/i.test(String(value||""))?String(value):fallback;}
 var UNIFORM_ILLUSTRATIONS={
+  "緑":{src:"assets/uniform-goalkeeper-green.svg",alt:"緑の長袖に黒い脇パネルを配したキーパー用ユニフォームのイラスト"},
+  "黄色":{src:"assets/uniform-goalkeeper-yellow.svg",alt:"黄色の長袖に黒い脇パネルを配したキーパー用ユニフォームのイラスト"},
   "白":{src:"assets/uniform-white.svg",alt:"白いVネックの本体に細い青灰色のパイピングを配したユニフォームのイラスト"},
   "オレンジ × 赤":{src:"assets/uniform-orange-red-stripes.svg",alt:"オレンジと赤の太い縦縞ユニフォームのイラスト"},
   "オレンジ赤縦じま":{src:"assets/uniform-orange-red-stripes.svg",alt:"オレンジと赤の太い縦縞ユニフォームのイラスト"},
@@ -793,6 +831,70 @@ function uniformIllustrationFor(colorName){
   if(/^白赤(?:×赤)?$/.test(compact))return UNIFORM_ILLUSTRATIONS["白赤"];
   if(/^白青(?:×青)?$/.test(compact))return UNIFORM_ILLUSTRATIONS["白青"];
   return null;
+}
+function goalkeeperSingleColor(mainName,subName){
+  var main=String(mainName||"").replace(/\s/g,""),sub=String(subName||"").replace(/\s/g,"");
+  if((main==="緑"||main==="緑色")&&(sub==="黄色"||sub==="黄"))return "緑";
+  if((main==="黄色"||main==="黄")&&(sub==="黒"||sub==="黒色"))return "黄色";
+  return "";
+}
+function addGoalkeeperMemo(value){
+  var memo=String(value||"").trim();
+  return memo.indexOf("キーパー")>=0?memo:(memo?memo+"／キーパー用":"キーパー用");
+}
+function normalizeGoalkeeperUniforms(items){
+  var changed=false;
+  items.forEach(function(item){
+    var target=goalkeeperSingleColor(item.mainColorName||item.cname,item.subColorName);
+    if(!target)return;
+    item.mainColorName=target;item.cname=target;
+    item.mainColorCode=safeColor(item.mainColorCode||item.ccode,target==="緑"?"#228b22":"#f5d300");item.ccode=item.mainColorCode;
+    item.subColorName="";item.subColorCode="";item.memo=addGoalkeeperMemo(item.memo);changed=true;
+  });
+  return {items:items,changed:changed};
+}
+function normalizeGoalkeeperTemplates(items){
+  var changed=false,seen=Object.create(null),normalized=[];
+  items.forEach(function(item){
+    var target=goalkeeperSingleColor(item.mainName,item.subName);
+    if(target){item.mainName=target;item.name=target;item.subName="";item.subCode="";changed=true;}
+    var key=String(item.mainName||"").trim()+"\u0000"+String(item.subName||"").trim();
+    if(seen[key]){changed=true;return;}seen[key]=true;normalized.push(item);
+  });
+  return {items:normalized,changed:changed};
+}
+function updateFolderColorPreview(){
+  var mainName=document.getElementById("folder-main-name").value.trim(),subName=document.getElementById("folder-sub-name").value.trim();
+  var main=safeColor(document.getElementById("folder-main-code").value,"#666666"),sub=subName?safeColor(document.getElementById("folder-sub-code").value,main):main;
+  var preview=document.getElementById("folder-color-preview");
+  preview.textContent=mainName?"変更後："+mainName+(subName?" × "+subName:""):"メインカラーを入力してください";
+  preview.style.background="linear-gradient(90deg,"+main+" 0%,"+main+" 75%,"+sub+" 75%,"+sub+" 100%)";
+  preview.style.color=hexLightness(main)>150?"#071126":"#fff";
+}
+function openFolderColorEdit(colorName){
+  var items=loadU().filter(function(item){return uniformColorLabel(item)===colorName;});if(!items.length)return;
+  var sample=items[0];_folderColorEditName=colorName;buildColorOptions();
+  document.getElementById("folder-main-name").value=sample.mainColorName||sample.cname||"";
+  document.getElementById("folder-main-code").value=safeColor(sample.mainColorCode||sample.ccode,"#666666");
+  document.getElementById("folder-sub-name").value=sample.subColorName||"";
+  document.getElementById("folder-sub-code").value=safeColor(sample.subColorCode,sample.mainColorCode||sample.ccode||"#666666");
+  document.getElementById("folder-color-guide").innerHTML='<strong>'+escapeHtml(colorName)+'（'+items.length+'着）</strong><br>この色に登録されているユニフォームをまとめて変更します。';
+  document.getElementById("folder-color-save-button").textContent=items.length+"着の色を変更";
+  updateFolderColorPreview();document.getElementById("modal-folder-color").classList.add("open");
+}
+function saveFolderColorChange(){
+  var mainName=document.getElementById("folder-main-name").value.trim(),subName=document.getElementById("folder-sub-name").value.trim();
+  if(!mainName){alert("メインカラーを入力してください");return;}
+  var mainCode=safeColor(document.getElementById("folder-main-code").value,"#666666"),subCode=subName?safeColor(document.getElementById("folder-sub-code").value,mainCode):"";
+  var changed=0,data=loadU().slice();
+  data.forEach(function(item){
+    if(uniformColorLabel(item)!==_folderColorEditName)return;
+    item.mainColorName=mainName;item.mainColorCode=mainCode;item.subColorName=subName;item.subColorCode=subCode;item.cname=mainName;item.ccode=mainCode;
+    if(!subName&&(mainName==="緑"||mainName==="緑色"||mainName==="黄色"))item.memo=addGoalkeeperMemo(item.memo);
+    changed++;
+  });
+  if(!changed)return;
+  saveU(data);closeM("modal-folder-color");render();
 }
 
 function renderStats(){
@@ -1035,6 +1137,7 @@ function renderFolders(){
       +'<span class="cf-open-hint"><span class="cf-toggle" id="ft'+bodyId+'">▶</span><span id="fl'+bodyId+'">一覧を見る</span></span>'
       +'</span>'
       +'</button>'
+      +(_folderReorderMode?'':'<button type="button" class="cf-color-edit-button" aria-label="'+escapeHtml(cname)+'の色を変更" onclick="event.stopPropagation();openFolderColorEdit('+inlineJsArg(cname)+')">🎨<span>色変更</span></button>')
       +(_folderReorderMode?orderControls:'<button type="button" class="cf-add-button" aria-label="'+escapeHtml(cname)+'にユニフォームを追加" onclick="openAddForColor('+inlineJsArg(cname)+','+inlineJsArg(sampleMainName)+','+inlineJsArg(sampleMainCode)+','+inlineJsArg(sampleSubName)+','+inlineJsArg(sampleSubCode)+')"><span class="cf-add-icon">＋</span><span class="cf-add-label">この色に追加</span></button>')
       +'</div>'
       +'<div class="cf-body" id="'+bodyId+'">'
@@ -1218,6 +1321,7 @@ function resetPantsModal(){
   document.getElementById("pants-sub-name").value="";document.getElementById("pants-sub-code").value="#ffffff";
   document.getElementById("pants-size").value="";document.getElementById("pants-quantity").value="";
   document.getElementById("pants-delete-btn").style.display="none";
+  document.getElementById("pants-save-button").disabled=false;document.getElementById("pants-save-status").style.display="none";document.getElementById("pants-save-status").textContent="";
   togglePantsCustomEditor(false);updatePantsPreview();buildPantsTemplates();
 }
 function openPantsAdd(){buildColorOptions();resetPantsModal();document.getElementById("modal-pants").classList.add("open");}
@@ -1247,11 +1351,18 @@ function savePants(){
   if(!loadColorTemplates().some(function(template){return template.mainName===mainName&&(template.subName||"")===subName;})){
     var templates=loadColorTemplates().slice();templates.push({id:"pants-color-"+Date.now(),name:label,mainName:mainName,mainCode:entry.mainColorCode,subName:subName,subCode:entry.subColorCode});saveColorTemplates(templates);
   }
-  savePants(items);renderPants();closeM("modal-pants");togglePantsSection(true);
+  var saveButton=document.getElementById("pants-save-button"),status=document.getElementById("pants-save-status");
+  saveButton.disabled=true;status.style.display="block";status.style.color="#65e8ff";status.style.background="rgba(0,190,230,.1)";status.textContent="クラウドに保存しています…";
+  var saveRequest=persistPants(items);renderPants();
+  saveRequest.then(function(result){
+    saveButton.disabled=false;
+    if(result&&result.cloudSaved){status.style.color="#5cffae";status.style.background="rgba(0,180,100,.12)";status.textContent="クラウドに保存しました。";window.setTimeout(function(){closeM("modal-pants");togglePantsSection(true);},450);return;}
+    status.style.color="#ff91a5";status.style.background="rgba(210,40,70,.12)";status.textContent="クラウドに保存できませんでした。通信状況を確認して、もう一度保存してください。";
+  });
 }
 function deletePants(){
   if(!pantsEditId||!confirm("このパンツ在庫を削除しますか？"))return;
-  savePants(loadPants().filter(function(item){return item.id!==pantsEditId;}));renderPants();closeM("modal-pants");
+  persistPants(loadPants().filter(function(item){return item.id!==pantsEditId;}));renderPants();closeM("modal-pants");
 }
 
 function toggleFolder(id){
@@ -1666,7 +1777,7 @@ function showHistory(){
   document.getElementById("modal-hist").classList.add("open");
 }
 function closeM(id){document.getElementById(id).classList.remove("open");}
-["modal-add","modal-lend","modal-hist","modal-sock","modal-pants"].forEach(function(id){
+["modal-add","modal-lend","modal-hist","modal-sock","modal-pants","modal-folder-color"].forEach(function(id){
   document.getElementById(id).addEventListener("click",function(e){if(e.target.id===id)closeM(id);});
 });
 function render(){renderStats();renderFolders();renderNumberOverview();renderPants();renderSocks();}
@@ -1675,14 +1786,18 @@ function startUniformSync(){
   // 描画に必要な色・関数の準備後に同期を開始する。
   // dbListenは端末キャッシュを同期的に返す場合があるため、定義前に呼ぶと一覧だけ描画できない。
   dbListen("uniform", function(val){
-    _unifData = Array.isArray(val) ? val.filter(function(item){return item && typeof item==="object";}) : [];
+    var cleanUniforms=Array.isArray(val)?val.filter(function(item){return item&&typeof item==="object";}):[];
+    var goalkeeperMigration=normalizeGoalkeeperUniforms(cleanUniforms);_unifData=goalkeeperMigration.items;
+    if(goalkeeperMigration.changed)dbSave("uniform",_unifData,KU,null);
     render();
   }, KU, []);
   dbListen("uniform_hist", function(val){
     _histData = Array.isArray(val) ? val.filter(function(item){return item && typeof item==="object";}) : [];
   }, KH, []);
   dbListen("uniform_color_templates", function(val){
-    _colorTemplates=Array.isArray(val)?val.filter(function(item){return item&&item.id&&item.mainName;}):[];
+    var cleanTemplates=Array.isArray(val)?val.filter(function(item){return item&&item.id&&item.mainName;}):[];
+    var goalkeeperTemplates=normalizeGoalkeeperTemplates(cleanTemplates);_colorTemplates=goalkeeperTemplates.items;
+    if(goalkeeperTemplates.changed)dbSave("uniform_color_templates",_colorTemplates,KT,null);
     if(document.getElementById("modal-add").classList.contains("open")){buildColorOptions();buildPairTemplates();}
     if(document.getElementById("modal-sock").classList.contains("open"))buildSockTemplates();
     if(document.getElementById("modal-pants").classList.contains("open"))buildPantsTemplates();
