@@ -141,10 +141,67 @@
     return {valid:errors.length===0,errors:errors,slotTeams:slotTeams};
   }
 
+  function validScore(value){
+    if(value===""||value===null||value===undefined)return null;
+    var number=Number(value);
+    return Number.isInteger(number)&&number>=0?number:null;
+  }
+
+  function calculateStandings(teams,matches,results){
+    var rows=(teams||[]).map(function(team,index){return {
+      team:String(team||""),originalIndex:index,played:0,wins:0,draws:0,losses:0,
+      goalsFor:0,goalsAgainst:0,goalDifference:0,points:0,headToHead:0,rank:0
+    };});
+    var byTeam={};rows.forEach(function(row){byTeam[row.team]=row;});
+    var completed=[];
+    (matches||[]).forEach(function(match){
+      var result=results&&results[match.id];
+      if(!result)return;
+      var homeScore=validScore(result.homeScore),awayScore=validScore(result.awayScore);
+      if(homeScore===null||awayScore===null||!byTeam[match.home]||!byTeam[match.away])return;
+      var home=byTeam[match.home],away=byTeam[match.away];
+      home.played++;away.played++;home.goalsFor+=homeScore;home.goalsAgainst+=awayScore;
+      away.goalsFor+=awayScore;away.goalsAgainst+=homeScore;
+      if(homeScore>awayScore){home.wins++;away.losses++;home.points+=3;}
+      else if(homeScore<awayScore){away.wins++;home.losses++;away.points+=3;}
+      else{home.draws++;away.draws++;home.points++;away.points++;}
+      completed.push({home:match.home,away:match.away,homeScore:homeScore,awayScore:awayScore});
+    });
+    rows.forEach(function(row){row.goalDifference=row.goalsFor-row.goalsAgainst;});
+    var tieGroups={};
+    rows.forEach(function(row){
+      var key=[row.points,row.goalDifference,row.goalsFor].join("|");
+      if(!tieGroups[key])tieGroups[key]=[];tieGroups[key].push(row);
+    });
+    Object.keys(tieGroups).forEach(function(key){
+      var group=tieGroups[key];if(group.length<2)return;
+      var names={};group.forEach(function(row){names[row.team]=true;row.headToHead=0;});
+      completed.forEach(function(match){
+        if(!names[match.home]||!names[match.away])return;
+        var home=byTeam[match.home],away=byTeam[match.away];
+        if(match.homeScore>match.awayScore)home.headToHead+=3;
+        else if(match.homeScore<match.awayScore)away.headToHead+=3;
+        else{home.headToHead++;away.headToHead++;}
+      });
+    });
+    rows.sort(function(a,b){
+      return b.points-a.points||b.goalDifference-a.goalDifference||b.goalsFor-a.goalsFor||
+        b.headToHead-a.headToHead||a.originalIndex-b.originalIndex;
+    });
+    rows.forEach(function(row,index){
+      var previous=rows[index-1];
+      var tied=previous&&row.points===previous.points&&row.goalDifference===previous.goalDifference&&
+        row.goalsFor===previous.goalsFor&&row.headToHead===previous.headToHead;
+      row.rank=tied?previous.rank:index+1;
+    });
+    return rows;
+  }
+
   return {
     createRoundRobin:createRoundRobin,
     optimize:optimize,
     evaluate:evaluate,
-    validate:validate
+    validate:validate,
+    calculateStandings:calculateStandings
   };
 });
