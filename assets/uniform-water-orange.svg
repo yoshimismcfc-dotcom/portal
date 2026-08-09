@@ -1,0 +1,27 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 220 220" role="img" aria-labelledby="title desc">
+  <title id="title">水色とオレンジのユニフォーム</title>
+  <desc id="desc">水色を中心に、Vネック、袖口、脇へオレンジを配したシャツのイラスト</desc>
+  <defs>
+    <linearGradient id="blueShade" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#75d9ff"/>
+      <stop offset="1" stop-color="#31afe4"/>
+    </linearGradient>
+    <linearGradient id="orangeShade" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#ff942f"/>
+      <stop offset="1" stop-color="#ed5b0c"/>
+    </linearGradient>
+    <filter id="shadow" x="-25%" y="-20%" width="150%" height="160%">
+      <feDropShadow dx="0" dy="4" stdDeviation="4" flood-color="#041526" flood-opacity=".3"/>
+    </filter>
+  </defs>
+  <g filter="url(#shadow)" stroke="#075a82" stroke-width="3" stroke-linejoin="round">
+    <path fill="url(#blueShade)" d="M66 29 27 47 8 91l29 14 15-26 3 112c34 10 76 10 110 0l3-112 15 26 29-14-19-44-39-18-17-10H83z"/>
+    <path fill="url(#orangeShade)" stroke="#b94a08" d="M52 79c7-17 18-29 32-39L67 29l-13 6C43 51 39 69 37 105zm116 0c-7-17-18-29-32-39l17-11 13 6c11 16 15 34 17 70z"/>
+    <path fill="url(#blueShade)" d="m66 29-39 18L8 91l29 14 15-26c6-16 16-29 32-39zm88 0 39 18 19 44-29 14-15-26c-6-16-16-29-32-39z"/>
+    <path fill="none" stroke="#ee650d" stroke-width="5" d="M52 79c6-19 16-32 32-42M168 79c-6-19-16-32-32-42"/>
+    <path fill="url(#orangeShade)" stroke="#b94a08" d="M79 22c10-5 52-5 62 0l-5 26-26 21-26-21z"/>
+    <path fill="#4fc2ee" stroke="none" d="M88 27c10 4 34 4 44 0l-3 15-19 16-19-16z"/>
+    <path fill="url(#orangeShade)" stroke="#b94a08" d="m8 91 8-18c6 10 15 19 28 25l-7 7zm204 0-8-18c-6 10-15 19-28 25l7 7z"/>
+    <path fill="none" stroke="#9ee9ff" stroke-width="3" opacity=".7" d="M69 184c27 5 55 5 82 0"/>
+  </g>
+</svg>
