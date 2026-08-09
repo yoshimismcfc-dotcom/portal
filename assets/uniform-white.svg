@@ -1,0 +1,16 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 220 220" role="img" aria-labelledby="title desc">
+  <title id="title">白のユニフォーム</title>
+  <desc id="desc">白いVネックの本体に細い青灰色のパイピングを配したシャツのイラスト</desc>
+  <defs>
+    <linearGradient id="whiteShade" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#ffffff"/><stop offset="1" stop-color="#dfe7ed"/></linearGradient>
+    <filter id="shadow" x="-25%" y="-20%" width="150%" height="160%"><feDropShadow dx="0" dy="4" stdDeviation="4" flood-color="#041526" flood-opacity=".32"/></filter>
+  </defs>
+  <g filter="url(#shadow)" stroke="#7f91a1" stroke-width="3" stroke-linejoin="round">
+    <path fill="url(#whiteShade)" d="M66 29 27 47 8 91l29 14 15-26 3 112c34 10 76 10 110 0l3-112 15 26 29-14-19-44-39-18-17-10H83z"/>
+    <path fill="#f8fafc" d="M79 22c10-5 52-5 62 0l-5 26-26 21-26-21z"/>
+    <path fill="#dfe7ed" stroke="none" d="M88 27c10 4 34 4 44 0l-3 15-19 16-19-16z"/>
+    <path fill="none" stroke="#4d83ae" stroke-width="4" d="M52 79c6-19 16-32 32-42M168 79c-6-19-16-32-32-42M52 79c8 34 10 75 3 112M168 79c-8 34-10 75-3 112"/>
+    <path fill="none" stroke="#4d83ae" stroke-width="4" d="M58 187c33 8 71 8 104 0"/>
+    <path fill="none" stroke="#fff" stroke-width="2" opacity=".85" d="M69 181c27 5 55 5 82 0"/>
+  </g>
+</svg>
