@@ -726,6 +726,8 @@ var UNIFORM_ILLUSTRATIONS={
   "白黒":{src:"assets/uniform-white-black.svg",alt:"白地に黒い襟・袖口・裾とパイピングを配したユニフォームのイラスト"},
   "白 × 赤":{src:"assets/uniform-white-red.svg",alt:"白地に赤い襟・袖口・脇とパイピングを配したユニフォームのイラスト"},
   "白赤":{src:"assets/uniform-white-red.svg",alt:"白地に赤い襟・袖口・脇とパイピングを配したユニフォームのイラスト"},
+  "白 × 青":{src:"assets/uniform-white-blue-collar.svg",alt:"白地に白い二本線入りの青い折り襟を配したユニフォームのイラスト"},
+  "白青":{src:"assets/uniform-white-blue-collar.svg",alt:"白地に白い二本線入りの青い折り襟を配したユニフォームのイラスト"},
   "水色 × ピンク":{src:"assets/uniform-water-pink.svg",alt:"水色を中心にピンクの肩・脇を配したユニフォームのイラスト"},
   "水色ピンク":{src:"assets/uniform-water-pink.svg",alt:"水色を中心にピンクの肩・脇を配したユニフォームのイラスト"},
   "水色 × オレンジ":{src:"assets/uniform-water-orange.svg",alt:"水色を中心にオレンジの襟・袖口・脇を配したユニフォームのイラスト"},
@@ -738,6 +740,7 @@ function uniformIllustrationFor(colorName){
   var compact=String(colorName||"").replace(/\s/g,"");
   if(/^オレンジ赤縦(?:じま|縞)(?:×赤)?$/.test(compact))return UNIFORM_ILLUSTRATIONS["オレンジ赤縦じま"];
   if(/^白赤(?:×赤)?$/.test(compact))return UNIFORM_ILLUSTRATIONS["白赤"];
+  if(/^白青(?:×青)?$/.test(compact))return UNIFORM_ILLUSTRATIONS["白青"];
   return null;
 }
 
