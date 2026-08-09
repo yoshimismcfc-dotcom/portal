@@ -5,7 +5,7 @@
   <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate, max-age=0">
   <meta http-equiv="Pragma" content="no-cache">
   <meta http-equiv="Expires" content="-1">
-  <meta name="app-version" content="20260809-5">
+  <meta name="app-version" content="20260809-6">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <meta name="robots" content="noindex,nofollow">
   <title>大会要綱・対戦表 v5｜吉見SMC FC</title>
@@ -165,6 +165,12 @@
     .save-modal-bg{position:fixed;inset:0;background:rgba(0,0,0,.85);display:none;place-items:center;z-index:300;backdrop-filter:blur(6px);padding:14px}
     .save-modal-bg.open{display:grid}
     .save-modal{background:var(--surface-lt);border:1px solid var(--line-2);border-radius:var(--r16);padding:20px;width:min(480px,100%);max-height:92vh;overflow-y:auto}
+    .pdf-ready-card{text-align:center;width:min(430px,100%)}
+    .pdf-ready-icon{display:grid;place-items:center;width:64px;height:64px;margin:0 auto 10px;border-radius:50%;background:rgba(0,212,136,.16);border:2px solid rgba(0,212,136,.55);font-size:2rem}
+    .pdf-ready-title{margin:0 0 5px;color:#fff;font-size:1.15rem}
+    .pdf-ready-note{margin:0 0 15px;color:var(--ink-3);font-size:.8rem;line-height:1.65}
+    .pdf-ready-actions{display:grid;gap:9px}
+    .pdf-ready-actions .btn{width:100%;min-height:48px;justify-content:center}
     .save-modal h3{font-size:.95rem;font-weight:900;color:#fff;margin-bottom:14px}
     .saved-item{display:flex;align-items:center;gap:10px;background:rgba(255,255,255,.04);border:1px solid var(--line-2);border-radius:var(--r8);padding:10px 12px;margin-bottom:8px;cursor:pointer;transition:.15s}
     .saved-item:hover{border-color:var(--orange);background:rgba(255,107,43,.07)}
@@ -323,15 +329,15 @@
         <button class="btn btn-primary" onclick="buildYoukou()" style="flex:1 1 140px">👁 プレビュー</button>
         <button class="btn btn-outline btn-sm" onclick="openSaveModal('youkou')">💾 保存</button>
         <button class="btn btn-outline btn-sm" onclick="openLoadModal('youkou')">📂 読込</button>
-        <button class="btn btn-cyan no-print pdf-primary" onclick="exportA4Pdf('youkou')" id="you-print-btn">📄 要項をA4縦PDFで表示</button>
+        <button class="btn btn-cyan no-print pdf-primary" onclick="exportA4Pdf('youkou')" id="you-print-btn">📄 要項をA4縦PDFで作成</button>
         <button class="btn-line-copy sm" onclick="copyYoukou()">📋 LINEコピー</button>
       </div>
     </div>
     <div class="pdf-guide no-print" id="y-guide">
       <span class="pdf-guide-title">📄 要項をPDFにする方法</span>
       <div class="pdf-guide-note">端末の印刷設定に左右されず、「A4・縦」のPDFを直接作成します。</div>
-      <div class="pdf-steps"><div class="pdf-step"><span class="pdf-step-no">1</span><span>内容を入力して、上の<strong>「要項をA4縦PDFで表示」</strong>をタップ</span></div><div class="pdf-step"><span class="pdf-step-no">2</span><span>A4縦のPDFが新しい画面で開く</span></div><div class="pdf-step"><span class="pdf-step-no">3</span><span>共有ボタンから保存・印刷・LINE送信</span></div></div>
-      <div class="pdf-device-help">🍎 <strong>iPhone・iPad：</strong>開いたPDFの共有ボタンをタップ<br>🤖 <strong>Android：</strong>開いたPDFのメニューから共有・印刷<br>💻 <strong>パソコン：</strong>PDF画面の保存または印刷ボタンをクリック</div>
+      <div class="pdf-steps"><div class="pdf-step"><span class="pdf-step-no">1</span><span>上の<strong>「要項をA4縦PDFで作成」</strong>をタップ</span></div><div class="pdf-step"><span class="pdf-step-no">2</span><span>「PDFができました」と表示されるまで待つ</span></div><div class="pdf-step"><span class="pdf-step-no">3</span><span>「共有・印刷」または「PDFを開く」を選ぶ</span></div></div>
+      <div class="pdf-device-help">🍎 <strong>iPhone・iPad：</strong>「共有・印刷」から「プリント」「ファイルに保存」「LINE」を選べます。<br>🤖 <strong>Android：</strong>「PDFを開く」から共有・印刷できます。<br>💻 <strong>パソコン：</strong>「PDFを開く」から保存・印刷できます。</div>
     </div>
     <div id="youkou-preview" style="margin-top:12px;display:none"></div>
   </div>
@@ -415,15 +421,15 @@
         <button class="btn btn-primary" onclick="buildTaisen(true)" style="flex:1 1 140px">📊 対戦表を生成</button>
         <button class="btn btn-outline btn-sm" onclick="openSaveModal('taisen')">💾 保存</button>
         <button class="btn btn-outline btn-sm" onclick="openLoadModal('taisen')">📂 読込</button>
-        <button class="btn btn-cyan no-print pdf-primary" onclick="exportA4Pdf('taisen')" id="tai-print-btn">📄 対戦表をA4横PDFで表示</button>
+        <button class="btn btn-cyan no-print pdf-primary" onclick="exportA4Pdf('taisen')" id="tai-print-btn">📄 対戦表をA4横PDFで作成</button>
         <button class="btn-line-copy sm" onclick="copyTaisen()">📋 LINEコピー</button>
       </div>
     </div>
     <div class="pdf-guide no-print" id="t-guide">
       <span class="pdf-guide-title">📄 対戦表をPDFにする方法</span>
       <div class="pdf-guide-note">端末の印刷設定に左右されず、「A4・横」のPDFを直接作成します。</div>
-      <div class="pdf-steps"><div class="pdf-step"><span class="pdf-step-no">1</span><span>内容を入力して、上の<strong>「対戦表をA4横PDFで表示」</strong>をタップ</span></div><div class="pdf-step"><span class="pdf-step-no">2</span><span>A4横のPDFが新しい画面で開く</span></div><div class="pdf-step"><span class="pdf-step-no">3</span><span>共有ボタンから保存・印刷・LINE送信</span></div></div>
-      <div class="pdf-device-help">🍎 <strong>iPhone・iPad：</strong>開いたPDFの共有ボタンをタップ<br>🤖 <strong>Android：</strong>開いたPDFのメニューから共有・印刷<br>💻 <strong>パソコン：</strong>PDF画面の保存または印刷ボタンをクリック</div>
+      <div class="pdf-steps"><div class="pdf-step"><span class="pdf-step-no">1</span><span>上の<strong>「対戦表をA4横PDFで作成」</strong>をタップ</span></div><div class="pdf-step"><span class="pdf-step-no">2</span><span>「PDFができました」と表示されるまで待つ</span></div><div class="pdf-step"><span class="pdf-step-no">3</span><span>「共有・印刷」または「PDFを開く」を選ぶ</span></div></div>
+      <div class="pdf-device-help">🍎 <strong>iPhone・iPad：</strong>「共有・印刷」から「プリント」「ファイルに保存」「LINE」を選べます。<br>🤖 <strong>Android：</strong>「PDFを開く」から共有・印刷できます。<br>💻 <strong>パソコン：</strong>「PDFを開く」から保存・印刷できます。</div>
     </div>
     <div id="taisen-preview" style="margin-top:12px"></div>
   </div>
@@ -482,6 +488,21 @@
       <button class="btn btn-outline btn-sm" type="button" onclick="generateLineInvite()">🔄 作り直す</button>
       <button class="btn-line-copy sm" type="button" onclick="copyLineInvite()">📋 LINEコピー</button>
       <button class="btn btn-outline btn-sm" type="button" onclick="closeLineInvite()">閉じる</button>
+    </div>
+  </div>
+</div>
+
+<!-- PDF完成モーダル：iPhoneのポップアップ制限を避け、完成後の操作を明確にする -->
+<div class="save-modal-bg" id="modal-pdf-ready" onclick="if(event.target.id==='modal-pdf-ready')closePdfReadyModal()">
+  <div class="save-modal pdf-ready-card" role="dialog" aria-modal="true" aria-labelledby="pdf-ready-title">
+    <div class="pdf-ready-icon" aria-hidden="true">✓</div>
+    <h3 class="pdf-ready-title" id="pdf-ready-title">PDFができました</h3>
+    <p class="pdf-ready-note" id="pdf-ready-note">用紙サイズを設定したPDFです。下のボタンから共有または印刷してください。</p>
+    <div class="pdf-ready-actions">
+      <button class="btn btn-cyan" type="button" id="pdf-share-btn" onclick="shareGeneratedPdf()">共有・印刷する</button>
+      <a class="btn btn-primary" id="pdf-open-link" href="#">PDFを開く</a>
+      <a class="btn btn-outline btn-sm" id="pdf-download-link" href="#" download>PDFを保存する</a>
+      <button class="btn btn-outline btn-sm" type="button" onclick="closePdfReadyModal()">閉じる</button>
     </div>
   </div>
 </div>
@@ -1201,16 +1222,50 @@ function buildAndPrintLandscape(){
   if(buildTaisen()!==false)smcPrint({orientation:"landscape",target:"tournament-schedule",margin:"5mm"});
 }
 
+var _pdfReadyUrl="";
+var _pdfReadyFile=null;
+
+function safePdfFilename(value){
+  return String(value||"SMC大会").replace(/[\\/:*?"<>|]/g,"_").replace(/\s+/g," ").trim();
+}
+function showPdfReadyModal(blob,filename,isSchedule){
+  if(_pdfReadyUrl)URL.revokeObjectURL(_pdfReadyUrl);
+  _pdfReadyUrl=URL.createObjectURL(blob);
+  try{_pdfReadyFile=new File([blob],filename,{type:"application/pdf"});}
+  catch(error){_pdfReadyFile=null;}
+  var openLink=document.getElementById("pdf-open-link");
+  var downloadLink=document.getElementById("pdf-download-link");
+  openLink.href=_pdfReadyUrl;
+  downloadLink.href=_pdfReadyUrl;
+  downloadLink.download=filename;
+  document.getElementById("pdf-ready-note").textContent=(isSchedule?"A4横":"A4縦")+"で作成しました。「共有・印刷する」からプリント、ファイル保存、LINE送信を選べます。";
+  var shareButton=document.getElementById("pdf-share-btn");
+  var canShare=!!(navigator.share&&_pdfReadyFile);
+  if(canShare&&navigator.canShare){
+    try{canShare=navigator.canShare({files:[_pdfReadyFile]});}catch(error2){canShare=false;}
+  }
+  shareButton.style.display=canShare?"inline-flex":"none";
+  document.getElementById("modal-pdf-ready").classList.add("open");
+}
+function closePdfReadyModal(){
+  document.getElementById("modal-pdf-ready").classList.remove("open");
+  if(_pdfReadyUrl){URL.revokeObjectURL(_pdfReadyUrl);_pdfReadyUrl="";}
+  _pdfReadyFile=null;
+}
+async function shareGeneratedPdf(){
+  if(!_pdfReadyFile||!navigator.share)return;
+  try{
+    await navigator.share({files:[_pdfReadyFile],title:_pdfReadyFile.name});
+  }catch(error){
+    if(error&&error.name!=="AbortError")alert("共有画面を開けませんでした。「PDFを開く」をお試しください。");
+  }
+}
+
 /* iPhoneの印刷方向設定に依存せず、用紙方向を確定したPDFを直接生成する */
 async function exportA4Pdf(kind){
   var isSchedule=kind==="taisen";
   var button=document.getElementById(isSchedule?"tai-print-btn":"you-print-btn");
   var originalLabel=button?button.textContent:"";
-  var previewWindow=window.open("about:blank","_blank");
-  if(previewWindow){
-    previewWindow.document.title="PDFを作成しています";
-    previewWindow.document.body.innerHTML='<div style="font:700 16px/1.7 -apple-system,BlinkMacSystemFont,sans-serif;padding:32px;color:#17324d">PDFを作成しています…<br><small style="font-weight:400">この画面はそのままお待ちください。</small></div>';
-  }
   try{
     if(button){button.disabled=true;button.setAttribute("aria-busy","true");button.textContent="PDFを作成中…";}
     if(typeof window.html2canvas!=="function"||!window.jspdf||!window.jspdf.jsPDF){
@@ -1253,18 +1308,9 @@ async function exportA4Pdf(kind){
     var x=(pageWidth-drawWidth)/2;
     var y=margin;
     pdf.addImage(canvas.toDataURL("image/jpeg",.94),"JPEG",x,y,drawWidth,drawHeight,undefined,"FAST");
-    var pdfUrl=pdf.output("bloburl");
-    if(previewWindow){
-      previewWindow.location.replace(pdfUrl);
-    }else{
-      var link=document.createElement("a");
-      link.href=pdfUrl;
-      link.download=(isSchedule?gv("t-title"):gv("y-title")||"SMC大会")+(isSchedule?"_対戦表_A4横.pdf":"_大会要項_A4縦.pdf");
-      document.body.appendChild(link);link.click();link.remove();
-    }
-    window.setTimeout(function(){URL.revokeObjectURL(pdfUrl);},300000);
+    var filename=safePdfFilename(isSchedule?gv("t-title"):gv("y-title"))+(isSchedule?"_対戦表_A4横.pdf":"_大会要項_A4縦.pdf");
+    showPdfReadyModal(pdf.output("blob"),filename,isSchedule);
   }catch(error){
-    if(previewWindow)previewWindow.close();
     alert(error&&error.message?error.message:"PDFを作成できませんでした。もう一度お試しください。");
   }finally{
     if(button){button.disabled=false;button.removeAttribute("aria-busy");button.textContent=originalLabel;}
