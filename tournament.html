@@ -5,7 +5,7 @@
   <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate, max-age=0">
   <meta http-equiv="Pragma" content="no-cache">
   <meta http-equiv="Expires" content="-1">
-  <meta name="app-version" content="20260809-10">
+  <meta name="app-version" content="20260809-11">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <meta name="robots" content="noindex,nofollow">
   <title>大会要綱・対戦表 v5｜吉見SMC FC</title>
@@ -227,13 +227,20 @@
     /* 折り返し対応 */
     .wrap-flex{display:flex;flex-wrap:wrap;gap:8px;align-items:center}
     /* カスタム項目行 */
-    .custom-row{display:flex;gap:6px;align-items:flex-start;margin-bottom:8px}
-    .custom-row .custom-label{flex:0 0 110px;min-width:80px}
-    .custom-row .custom-val{flex:1;min-width:0}
+    .youkou-edit-help{margin:6px 0 10px;padding:9px 11px;border:1px solid rgba(0,212,255,.28);border-radius:9px;background:rgba(0,120,180,.08);color:var(--ink-3);font-size:.72rem;line-height:1.6}
+    .youkou-label-editor{margin:0 0 12px;border:1px solid var(--line-2);border-radius:10px;background:rgba(255,255,255,.025);overflow:hidden}
+    .youkou-label-editor summary{padding:10px 12px;color:#8fe7ff;font-size:.78rem;font-weight:900;cursor:pointer;list-style-position:inside}
+    .youkou-label-editor-body{padding:4px 10px 10px}
+    .custom-row{display:grid;grid-template-columns:minmax(100px,.55fr) minmax(0,1.45fr) auto;gap:6px;align-items:start;margin-bottom:8px;padding:8px;border:1px solid var(--line-2);border-radius:9px;background:rgba(255,255,255,.025)}
+    .custom-row .custom-label{min-width:0}
+    .custom-row .custom-val{min-width:0}
+    .custom-row-actions{display:flex;flex-direction:column;gap:4px}
+    .custom-move-btn{background:none;border:1px solid rgba(0,212,255,.3);color:#7dd3fc;border-radius:6px;padding:5px 7px;cursor:pointer;font-size:.72rem;line-height:1}
     .custom-row .del-row-btn{background:none;border:1px solid rgba(255,68,102,.4);color:#ff6680;border-radius:6px;padding:5px 8px;cursor:pointer;font-size:.8rem;flex-shrink:0;line-height:1;margin-top:2px}
     .custom-row .del-row-btn:hover{background:rgba(255,68,102,.1)}
     .add-row-btn{display:flex;align-items:center;gap:6px;padding:7px 12px;background:rgba(0,212,255,.07);border:1px dashed rgba(0,212,255,.3);border-radius:var(--r8);color:var(--cyan);font-size:.8rem;font-weight:700;cursor:pointer;width:100%;margin-top:4px;box-sizing:border-box}
     .add-row-btn:hover{background:rgba(0,212,255,.13)}
+    @media(max-width:560px){.custom-row{grid-template-columns:1fr}.custom-row-actions{flex-direction:row;justify-content:flex-end}.custom-row .del-row-btn{margin-top:0}}
     .btn-group{display:flex;flex-wrap:wrap;gap:6px;margin-top:10px;width:100%;box-sizing:border-box}
     .linked-workflow{margin:0 0 14px;padding:13px;border:2px solid rgba(0,212,255,.45);border-radius:14px;background:linear-gradient(135deg,rgba(0,92,150,.18),rgba(0,212,255,.06))}
     .linked-workflow h3{font-size:.9rem;font-weight:900;color:#8fe7ff;margin-bottom:4px}
@@ -354,20 +361,59 @@
         <div class="form-group"><label class="form-label">審判</label><textarea class="form-control" id="y-ref" rows="2" style="resize:vertical;min-height:64px">当該チームで相談（1審・2審・3審）</textarea></div>
         <div class="form-group"><label class="form-label">表彰</label><textarea class="form-control" id="y-award" rows="2" style="resize:vertical;min-height:64px">1〜3位にトロフィー・優秀選手賞：各チーム1名</textarea></div>
       </div>
+      <div class="sec">📝 要項本文（すべて編集できます）</div>
+      <div class="youkou-edit-help">各欄は1行ごとに箇条書きとして要項へ表示されます。文章をすべて消した項目は要項に表示されません。不要な文章は削除し、必要な文章は自由に追加してください。</div>
+      <details class="youkou-label-editor">
+        <summary>項目名も変更する</summary>
+        <div class="youkou-label-editor-body fg3">
+          <div class="form-group"><label class="form-label">目的</label><input class="form-control" id="y-label-purpose" value="目的"></div>
+          <div class="form-group"><label class="form-label">対象学年</label><input class="form-control" id="y-label-category" value="対象学年"></div>
+          <div class="form-group"><label class="form-label">試合方法</label><input class="form-control" id="y-label-method" value="試合方法"></div>
+          <div class="form-group"><label class="form-label">選手交代</label><input class="form-control" id="y-label-sub" value="選手交代"></div>
+          <div class="form-group"><label class="form-label">競技規則</label><input class="form-control" id="y-label-rules" value="競技規則・ユニフォーム"></div>
+          <div class="form-group"><label class="form-label">順位決定</label><input class="form-control" id="y-label-rank" value="順位決定"></div>
+          <div class="form-group"><label class="form-label">審判</label><input class="form-control" id="y-label-ref" value="審判"></div>
+          <div class="form-group"><label class="form-label">開閉会式</label><input class="form-control" id="y-label-ceremony" value="開会式・閉会式"></div>
+          <div class="form-group"><label class="form-label">参加費</label><input class="form-control" id="y-label-fee" value="参加費"></div>
+          <div class="form-group"><label class="form-label">表彰</label><input class="form-control" id="y-label-award" value="表彰"></div>
+          <div class="form-group"><label class="form-label">注意事項</label><input class="form-control" id="y-label-notes" value="注意事項"></div>
+          <div class="form-group"><label class="form-label">雨天時</label><input class="form-control" id="y-label-rain" value="雨天時"></div>
+        </div>
+      </details>
+      <div class="form-group"><label class="form-label">大会の目的</label><textarea class="form-control" id="y-purpose" rows="3">試合を通して少年少女サッカーの普及を目指します。
+チーム間の友好と親善を図り、サッカーの楽しさを知ってもらいます。
+試合経験を通して、選手相互の技術向上を図ります。</textarea></div>
+      <div class="fg2">
+        <div class="form-group"><label class="form-label">試合方法の補足</label><textarea class="form-control" id="y-format-notes" rows="3">暑熱時は、飲水タイムを設けます。</textarea></div>
+        <div class="form-group"><label class="form-label">選手交代の補足</label><textarea class="form-control" id="y-sub-notes" rows="3">できるだけ多くの選手が出場できるようご配慮ください。</textarea></div>
+      </div>
+      <div class="fg2">
+        <div class="form-group"><label class="form-label">ルール・ユニフォーム</label><textarea class="form-control" id="y-rules-extra" rows="4">日本サッカー協会8人制競技規則に準じます。
+細かな運用は、当日の進行状況により主催者判断で調整します。
+ユニフォームは正副いずれかを用意し、必要に応じてビブスで対応します。</textarea></div>
+        <div class="form-group"><label class="form-label">審判の補足</label><textarea class="form-control" id="y-ref-notes" rows="4">審判服の着用をお願いします。
+笛・時計などは各自でご準備ください。</textarea></div>
+      </div>
+      <div class="form-group"><label class="form-label">開会式・閉会式</label><textarea class="form-control" id="y-ceremony" rows="3">開会式は行いません。試合開始までに各チーム集合してください。
+全試合終了後、表彰を含む閉会式を行います。</textarea></div>
+      <div class="form-group"><label class="form-label">注意事項</label><textarea class="form-control" id="y-notes" rows="5">代表者会議を受付後に行いますので、本部へお集まりください。
+熱中症・感染症には十分に注意してください。
+飲水は各チームで十分に準備し、選手の体調管理をお願いします。
+ゴミは各チームで持ち帰りをお願いします。</textarea></div>
       <div class="fg2">
         <div class="form-group"><label class="form-label">雨天時</label><textarea class="form-control" id="y-rain" rows="3" style="resize:vertical;min-height:96px">当日AM6:00頃に実施可否を判断し、各チームへ連絡します。</textarea></div>
         <div class="form-group"><label class="form-label">駐車場</label><textarea class="form-control" id="y-parking" rows="3" style="resize:vertical;min-height:96px">会場周辺に3か所。路上駐車禁止。乗り合わせにご協力ください。</textarea></div>
       </div>
-      <!-- カスタム項目追加エリア -->
       <div class="sec">📞 問い合わせ</div>
       <div class="fg2">
         <div class="form-group"><label class="form-label">代表者名</label><textarea class="form-control" id="y-rep" rows="2" style="resize:vertical;min-height:64px">吉見SMC代表　片山孝俊</textarea></div>
         <div class="form-group"><label class="form-label">電話・メール</label><textarea class="form-control" id="y-contact" rows="2" style="resize:vertical;min-height:64px">090-3595-1970 / yoshimi.smc.fc@gmail.com</textarea></div>
       </div>
-      <!-- カスタム項目 -->
+      <div class="sec">➕ 自由追加項目</div>
+      <div class="youkou-edit-help">「持ち物」「かき氷の案内」など、必要な項目を追加できます。追加した項目は要項の本文・PDF・保存データへ反映されます。</div>
       <div id="custom-rows-wrap" style="margin-bottom:6px"></div>
       <div class="add-row-btn" onclick="addCustomRow()" style="margin-bottom:12px">
-        ＋ 基本情報に項目を追加する
+        ＋ 要項に新しい項目を追加する
       </div>
       <div class="btn-group">
         <button class="btn btn-outline btn-sm" onclick="copyTournamentTemplate('youkou')">📑 テンプレートをコピー</button>
@@ -585,21 +631,28 @@ function buildYoukou(){
   h+='<tr><th>受付</th><td>'+escapeHtml(gv("y-uketsuke"))+'</td><th>主催</th><td>'+escapeHtml(gv("y-host"))+'</td></tr>';
   h+='</tbody></table>';
   h+='<div style="font-weight:bold;font-size:11pt;margin-bottom:5px;color:#003087;border-bottom:1px solid #c0cce8;padding-bottom:3px">開催要項</div>';
+  function lines(value){return String(value||"").split(/\r?\n/).map(function(item){return item.trim();}).filter(Boolean);}
   function sec(n,t,items){
+    items=(items||[]).filter(function(item){return String(item||"").trim();});
+    if(!items.length)return "";
     var r='<div class="req-num">'+escapeHtml(n)+'）'+escapeHtml(t)+'</div><ul class="req-li">';
     items.forEach(function(i){r+='<li>'+escapeHtml(i)+'</li>';});return r+'</ul>';
   }
-  h+=sec(1,"目的",["試合を通して少年少女サッカーの普及を目指します。","チーム間の友好と親善を図り、サッカーの楽しさを知ってもらいます。","試合経験を通して、選手相互の技術向上を図ります。"]);
-  h+=sec(2,"対象学年",[gv("y-cat")]);
-  h+=sec(3,"試合方法",[gv("y-format")+"で実施します。","競技時間は"+gv("y-time")+"を基本とします。","暑熱時は、飲水タイム（ランニング）を設けてください。"]);
-  h+=sec(4,"選手交代",["選手交代は"+gv("y-sub")+"。","できるだけ多くの選手が出場できるようご配慮ください。"]);
-  h+=sec(5,"ルール",["日本サッカー協会8人制競技規則に準じます。","細かな運用は、当日の進行状況により主催者判断で調整します。","順位決定方法："+gv("y-rank"),"ユニフォームは正副いずれかを用意。ビブス対応可。"]);
-  h+=sec(6,"審判",[gv("y-ref")+"して決めてください。","審判服の着用をお願いします。笛・時計等は各自ご準備ください。"]);
-  h+=sec(7,"開閉会式",["開会式は行いません。試合開始までに各チーム集合してください。","閉会時は、全体で集合して閉会式を行います。"]);
-  h+=sec(8,"参加費",[gv("y-fee")]);
-  h+=sec(9,"表彰",[gv("y-award")]);
-  h+=sec(10,"注意事項",["代表者会議を8:00より行いますので本部に集合してください。","熱中症・感染症には十分に気をつけてください。","飲水は各チームで十分に準備し、選手の体調管理をお願いします。",gv("y-parking"),"ゴミは各チームで持ち帰りをお願いします。"]);
-  h+=sec(11,"雨天時",[gv("y-rain")]);
+  var sectionNo=0;
+  function addSection(name,items){var section=sec(++sectionNo,name,items);if(section)h+=section;else sectionNo--;}
+  addSection(gv("y-label-purpose")||"目的",lines(gv("y-purpose")));
+  addSection(gv("y-label-category")||"対象学年",lines(gv("y-cat")));
+  addSection(gv("y-label-method")||"試合方法",lines(gv("y-format")).concat(lines(gv("y-time")),lines(gv("y-format-notes"))));
+  addSection(gv("y-label-sub")||"選手交代",lines(gv("y-sub")).concat(lines(gv("y-sub-notes"))));
+  addSection(gv("y-label-rules")||"競技規則・ユニフォーム",lines(gv("y-rules-extra")));
+  addSection(gv("y-label-rank")||"順位決定",lines(gv("y-rank")));
+  addSection(gv("y-label-ref")||"審判",lines(gv("y-ref")).concat(lines(gv("y-ref-notes"))));
+  addSection(gv("y-label-ceremony")||"開会式・閉会式",lines(gv("y-ceremony")));
+  addSection(gv("y-label-fee")||"参加費",lines(gv("y-fee")));
+  addSection(gv("y-label-award")||"表彰",lines(gv("y-award")));
+  addSection(gv("y-label-notes")||"注意事項",lines(gv("y-notes")).concat(lines(gv("y-parking"))));
+  addSection(gv("y-label-rain")||"雨天時",lines(gv("y-rain")));
+  getCustomRows().forEach(function(row){addSection(row.label||"追加項目",lines(row.val));});
   h+='<div class="req-contact"><b>📞 お問い合わせ</b>　'+escapeHtml(gv("y-rep"))+'　／　'+escapeHtml(gv("y-contact"))+'</div>';
   h+='</div>';
   var pv=document.getElementById("youkou-preview");
@@ -1074,16 +1127,31 @@ if(slot.isBreak){
 /* ===== LINEコピー ===== */
 function getYoukouText(){
   var f=function(id){var el=document.getElementById(id);return el?el.value.trim():"";};
+  var lines=function(value){return String(value||"").split(/\r?\n/).map(function(item){return item.trim();}).filter(Boolean);};
   var t="【"+f("y-title")+"】\n";
   if(f("y-cat"))     t+="カテゴリー："+f("y-cat")+"\n";
   if(f("y-date"))    t+="📅 "+f("y-date")+"\n";
   if(f("y-place"))   t+="📍 "+f("y-place")+"\n";
   if(f("y-host"))    t+="主催："+f("y-host")+"\n";
   if(f("y-uketsuke"))t+="受付："+f("y-uketsuke")+"\n";
-  if(f("y-fee"))     t+="参加費："+f("y-fee")+"\n";
-  if(f("y-format"))  t+="競技形式："+f("y-format")+"\n";
-  if(f("y-time"))    t+="試合時間："+f("y-time")+"\n";
-  if(f("y-rain"))    t+="雨天時："+f("y-rain")+"\n";
+  var sections=[
+    [f("y-label-purpose")||"目的",lines(f("y-purpose"))],
+    [f("y-label-method")||"試合方法",lines(f("y-format")).concat(lines(f("y-time")),lines(f("y-format-notes")))],
+    [f("y-label-sub")||"選手交代",lines(f("y-sub")).concat(lines(f("y-sub-notes")))],
+    [f("y-label-rules")||"競技規則・ユニフォーム",lines(f("y-rules-extra"))],
+    [f("y-label-rank")||"順位決定",lines(f("y-rank"))],
+    [f("y-label-ref")||"審判",lines(f("y-ref")).concat(lines(f("y-ref-notes")))],
+    [f("y-label-ceremony")||"開会式・閉会式",lines(f("y-ceremony"))],
+    [f("y-label-fee")||"参加費",lines(f("y-fee"))],
+    [f("y-label-award")||"表彰",lines(f("y-award"))],
+    [f("y-label-notes")||"注意事項",lines(f("y-notes")).concat(lines(f("y-parking")))],
+    [f("y-label-rain")||"雨天時",lines(f("y-rain"))]
+  ];
+  getCustomRows().forEach(function(row){sections.push([row.label||"追加項目",lines(row.val)]);});
+  sections.forEach(function(section){
+    if(!section[1].length)return;
+    t+="\n【"+section[0]+"】\n"+section[1].map(function(item){return "・"+item;}).join("\n")+"\n";
+  });
   if(f("y-rep"))     t+="\n担当："+f("y-rep")+"\n";
   if(f("y-contact")) t+="連絡先："+f("y-contact")+"\n";
   return t;
@@ -1368,7 +1436,7 @@ async function exportA4Pdf(kind){
     var maxHeight=pageHeight-margin*2;
     var widthRatio=maxWidth/canvas.width;
     var heightAtReadableWidth=canvas.height*widthRatio;
-    if(isSchedule&&!scheduleLandscape&&heightAtReadableWidth>maxHeight*1.08){
+    if(!scheduleLandscape&&heightAtReadableWidth>maxHeight*1.08){
       var sliceHeight=Math.max(1,Math.floor(maxHeight/widthRatio));
       var offset=0,pageIndex=0;
       while(offset<canvas.height){
@@ -1420,6 +1488,13 @@ function removeCustomRow(id){
   _customRows = _customRows.filter(function(r){ return r.id!==id; });
   renderCustomRows();
 }
+function moveCustomRow(index,direction){
+  var next=index+direction;
+  if(index<0||next<0||index>=_customRows.length||next>=_customRows.length)return;
+  var item=_customRows.splice(index,1)[0];
+  _customRows.splice(next,0,item);
+  renderCustomRows();
+}
 
 function renderCustomRows(){
   var wrap = document.getElementById("custom-rows-wrap");
@@ -1434,7 +1509,10 @@ function renderCustomRows(){
     html2 += " oninput=\"_customRows[" + idx + "].val=this.value;autoResize(this)\">";
     html2 += esc3(r.val);
     html2 += "</textarea>";
-    html2 += "<button class=\"del-row-btn\" onclick=\"_customRows.splice(" + idx + ",1);renderCustomRows()\">🗑</button>";
+    html2 += "<div class=\"custom-row-actions\">";
+    html2 += "<button class=\"custom-move-btn\" type=\"button\" aria-label=\"上へ移動\" onclick=\"moveCustomRow("+idx+",-1)\""+(idx===0?" disabled":"")+">▲</button>";
+    html2 += "<button class=\"custom-move-btn\" type=\"button\" aria-label=\"下へ移動\" onclick=\"moveCustomRow("+idx+",1)\""+(idx===_customRows.length-1?" disabled":"")+">▼</button>";
+    html2 += "<button class=\"del-row-btn\" type=\"button\" aria-label=\"削除\" onclick=\"removeCustomRow('"+r.id+"')\">🗑</button></div>";
     html2 += "</div>";
   });
   wrap.innerHTML = html2;
@@ -1498,7 +1576,11 @@ dbListen("tournament_match_results",function(val){
 // 要綱フィールドを収集
 var YOUKOU_FIELDS = ["y-title","y-cat","y-date","y-place","y-host",
   "y-uketsuke","y-fee","y-format","y-time","y-sub","y-rank",
-  "y-ref","y-award","y-rain","y-parking","y-rep","y-contact"];
+  "y-ref","y-award","y-purpose","y-format-notes","y-sub-notes","y-rules-extra",
+  "y-ref-notes","y-ceremony","y-notes","y-rain","y-parking","y-rep","y-contact",
+  "y-label-purpose","y-label-category","y-label-method","y-label-sub","y-label-rules",
+  "y-label-rank","y-label-ref","y-label-ceremony","y-label-fee","y-label-award",
+  "y-label-notes","y-label-rain"];
 
 // 対戦表フィールドを収集
 var TAISEN_FIELDS = ["t-title","t-date","t-place","t-min","t-courts","t-start",
@@ -1810,7 +1892,12 @@ document.getElementById("saved-list").addEventListener("keydown",function(event)
 // データ読込
 function applySaveEntry(item){
   if(!item) return;
-  applyFields(item.data||{});
+  var entryData=item.data||{};
+  // 旧データに新しい編集欄がない場合は、標準文例で補完して互換性を保つ。
+  if(item.type==="youkou"&&TOURNAMENT_TEMPLATES.youkou){
+    entryData=Object.assign({},JSON.parse(JSON.stringify(TOURNAMENT_TEMPLATES.youkou.data)),entryData);
+  }
+  applyFields(entryData);
   if(item.gameAdjustDateId){
     _activeGameAdjustDateId=item.gameAdjustDateId;
     _activeDateMeta=linkedMetaFromEntry(item);
