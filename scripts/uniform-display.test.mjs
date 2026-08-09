@@ -221,6 +221,8 @@ for (const required of [
   '"オレンジ赤縦縞":{src:"assets/uniform-orange-red-stripes.svg"',
   '"白 × 黒":{src:"assets/uniform-white-black.svg"',
   '"白黒":{src:"assets/uniform-white-black.svg"',
+  '"白 × 赤":{src:"assets/uniform-white-red.svg"',
+  '"白赤":{src:"assets/uniform-white-red.svg"',
   '"水色 × ピンク":{src:"assets/uniform-water-pink.svg"',
   '"水色ピンク":{src:"assets/uniform-water-pink.svg"',
   '"水色 × オレンジ":{src:"assets/uniform-water-orange.svg"',
@@ -251,6 +253,9 @@ if (!fs.existsSync(path.join(root, "assets", "uniform-orange-red-stripes.svg")))
 }
 if (!fs.existsSync(path.join(root, "assets", "uniform-white-black.svg"))) {
   throw new Error("白×黒のユニフォームイラストがありません");
+}
+if (!fs.existsSync(path.join(root, "assets", "uniform-white-red.svg"))) {
+  throw new Error("白×赤のユニフォームイラストがありません");
 }
 
 for (const required of [
