@@ -11,7 +11,7 @@ for (const required of [
   'var CYCLE = ["－","OK","要項送付済","NG","確認中"]',
   '"要項送付済":"s-sent"',
   'function isParticipatingStatus(status){return status==="OK"||status==="要項送付済";}',
-  'class="status-btn s-sent">要項送付済</span>参加確定・送付済',
+  'class="status-btn s-sent">要項送付済</span>参加確定・送付済み',
   'ga-chip ga-chip-sent',
   'statuses={"OK":0,"要項送付済":0,"NG":0,"確認中":0,"－":0}',
   '要項送付済：" + sent.map',

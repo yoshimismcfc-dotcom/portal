@@ -128,7 +128,7 @@
       legend.innerHTML = `
         <span class="game-adjust-legend-intro">タップで切り替え →</span>
         <span class="game-adjust-legend-item"><span class="status-btn s-ok">OK</span><span class="game-adjust-legend-label">参加可</span></span>
-        <span class="game-adjust-legend-item"><span class="status-btn s-sent">要項送付済</span><span class="game-adjust-legend-label">参加確定・送付済</span></span>
+        <span class="game-adjust-legend-item"><span class="status-btn s-sent">要項送付済</span><span class="game-adjust-legend-label">参加確定・送付済み</span></span>
         <span class="game-adjust-legend-item"><span class="status-btn s-ng">NG</span><span class="game-adjust-legend-label">不可</span></span>
         <span class="game-adjust-legend-item"><span class="status-btn s-kakun">確認中</span><span class="game-adjust-legend-label">返答待ち</span></span>
         <span class="game-adjust-legend-item"><span class="status-btn s-none">－</span><span class="game-adjust-legend-label">未打診</span></span>
@@ -162,6 +162,9 @@
           body.game-adjust-enhanced .legend .game-adjust-legend-item{display:grid!important;grid-template-columns:minmax(118px,1fr) minmax(90px,.8fr);align-items:center;gap:12px;width:100%}
           body.game-adjust-enhanced .legend .game-adjust-legend-item .status-btn{width:100%!important;min-width:0!important;box-sizing:border-box}
           body.game-adjust-enhanced .legend .game-adjust-legend-label{font-size:.78rem;color:var(--ink-3);font-weight:800;text-align:left}
+          body.game-adjust-enhanced .legend .game-adjust-legend-intro{grid-column:1/-1}
+          body.game-adjust-enhanced .legend .game-adjust-legend-item{grid-template-columns:minmax(0,1fr)!important;gap:4px!important;min-width:0!important}
+          body.game-adjust-enhanced .legend .game-adjust-legend-label{text-align:center!important;font-size:.7rem!important;line-height:1.35!important;overflow-wrap:anywhere}
           .game-adjust-date-nav{display:grid;grid-template-columns:46px minmax(0,1fr) 46px;gap:9px;align-items:center;margin:12px 0;padding:11px;border:2px solid rgba(35,190,235,.72);border-radius:16px;background:linear-gradient(135deg,rgba(14,118,170,.2),rgba(25,180,220,.08));box-shadow:0 6px 20px rgba(0,0,0,.2)}
           .game-adjust-date-controls{display:grid;gap:9px;min-width:0}
           .game-adjust-date-nav label{display:block;font-size:.78rem;font-weight:900;color:#73dcff;letter-spacing:.02em}
