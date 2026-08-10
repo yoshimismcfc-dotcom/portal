@@ -362,14 +362,6 @@
   <div class="notice-bar">☁️ データはFirebase（クラウド）で保存・共有されます。</div>
   <div class="uniform-sync-status" id="uniform-sync-status" role="status" aria-live="polite">クラウドの最新在庫を確認しています…</div>
   <div class="backup-health" id="uniform-backup-health">変更前の自動バックアップが有効です</div>
-  <div class="uniform-recovery" id="uniform-recovery" role="alert">
-    <div><strong>この端末に復元できる在庫があります</strong><span id="uniform-recovery-message"></span></div>
-    <div class="uniform-recovery-actions">
-      <button class="btn btn-primary btn-sm" type="button" onclick="restoreDeviceInventory()">不足分を復元する</button>
-      <button class="btn btn-outline btn-sm" type="button" onclick="acceptCurrentUniformInventory()">現在の在庫で確定</button>
-    </div>
-  </div>
-
   <section class="uniform-note" aria-label="ユニフォームについての注意事項">
     <h2>ユニフォームについての注意事項</h2>
     <p>ユニフォームは選手の皆さんへ無償で貸し出しています。チームの大切な備品ですので、ルールを守って丁寧に扱ってください。破損や紛失、ルール違反が続く場合は、今後の貸し出し方法を有償に変更する可能性があります。</p>
@@ -614,6 +606,13 @@
   <div class="modal">
     <h3>🛟 在庫バックアップ・復元</h3>
     <div class="template-guide">在庫を変更するたびに、変更前の状態を自動保存しています。戻したい日時と着数を確認してから復元できます。</div>
+    <div class="uniform-recovery" id="uniform-recovery">
+      <div><strong>この端末だけに復元候補があります</strong><span id="uniform-recovery-message"></span></div>
+      <div class="uniform-recovery-actions">
+        <button class="btn btn-primary btn-sm" id="uniform-device-restore-button" type="button" onclick="restoreDeviceInventory()">候補を在庫へ追加</button>
+        <button class="btn btn-outline btn-sm" type="button" onclick="acceptCurrentUniformInventory()">現在の在庫で確定</button>
+      </div>
+    </div>
     <div class="modal-btns" style="justify-content:flex-start">
       <button class="btn btn-outline btn-sm" type="button" onclick="createManualUniformBackup()">現在の在庫を保存</button>
       <button class="btn btn-outline btn-sm" type="button" onclick="loadUniformBackups()">一覧を更新</button>
@@ -726,10 +725,11 @@
 
 <footer class="site-footer"></footer>
 <script>
-var KU="smc_uniform_v3",KH="smc_uniform_hist_v1",KT="smc_uniform_color_templates_v1",KFO="smc_uniform_folder_order_v1",KC="smc_uniform_color_categories_v1",KS="smc_uniform_socks_v1",KP="smc_uniform_pants_v1",KR="smc_uniform_recovery_snapshot_v1";
+var KU="smc_uniform_v3",KH="smc_uniform_hist_v1",KT="smc_uniform_color_templates_v1",KFO="smc_uniform_folder_order_v1",KC="smc_uniform_color_categories_v1",KS="smc_uniform_socks_v1",KP="smc_uniform_pants_v1",KR="smc_uniform_recovery_snapshot_v1",KRB="smc_uniform_recovery_baseline_v1";
 var editId=null,lendId=null,sockEditId=null,pantsEditId=null;
 var _unifData=[], _histData=[], _colorTemplates=[],_folderOrder=[],_colorCategories={},_sockData=[],_pantsData=[];
 var _uniformCloudReady=false,_uniformBackupSequence=0,_deviceRecoverySnapshot=null,_uniformPersistedSnapshot=[];
+var _uniformSharedRecoveryBaseline=null;
 var _uniformWriteInFlight=false,_uniformDailyBackupDone=false,_uniformBackupCache={},_selectedUniformBackupKey="";
 var _conditionFilter="";
 var _uniformView="color";
@@ -752,17 +752,47 @@ function captureDeviceUniformSnapshot(){
 function uniformIdentity(item,index){
   return String(item&&item.id||[item&&item.num,item&&item.cname,item&&item.mainColorName,item&&item.subColorName,item&&item.size,index].join("|"));
 }
+function uniformHolderName(item){
+  return String(item&&(item.lentTo||item.player)||"").trim();
+}
+function normalizeUniformLoanRecords(items){
+  var changed=false;
+  items.forEach(function(item){
+    var holder=uniformHolderName(item);
+    if(holder){
+      if(item.lentTo!==holder){item.lentTo=holder;changed=true;}
+      if(item.player!==holder){item.player=holder;changed=true;}
+      if(item.storageLocation!=="player"){item.storageLocation="player";changed=true;}
+    }else{
+      if(item.lentTo!==undefined){delete item.lentTo;changed=true;}
+      if(String(item.player||"")!==""){item.player="";changed=true;}
+      if(item.lentDate!==undefined){delete item.lentDate;changed=true;}
+      if(item.retDate!==undefined){delete item.retDate;changed=true;}
+      if(item.storageLocation!=="warehouse"){item.storageLocation="warehouse";changed=true;}
+    }
+  });
+  return {items:items,changed:changed};
+}
 function missingDeviceUniforms(){
   var candidate=_deviceRecoverySnapshot&&Array.isArray(_deviceRecoverySnapshot.items)?_deviceRecoverySnapshot.items:[];
   var current={};loadU().forEach(function(item,index){current[uniformIdentity(item,index)]=true;});
   return candidate.filter(function(item,index){return !current[uniformIdentity(item,index)];});
 }
 function renderUniformRecovery(){
-  var box=document.getElementById("uniform-recovery"),message=document.getElementById("uniform-recovery-message");
+  var box=document.getElementById("uniform-recovery"),message=document.getElementById("uniform-recovery-message"),button=document.getElementById("uniform-device-restore-button");
   if(!box||!message)return;
   var missing=_uniformCloudReady?missingDeviceUniforms():[];
   box.classList.toggle("show",missing.length>0);
-  message.textContent=missing.length?"クラウドにない "+missing.length+"着を、現在のデータを消さずに追加できます。":"";
+  var labels=missing.slice(0,6).map(function(item){return (uniformColorLabel(item)||"色未設定")+" #"+String(item.num||"番号未設定")+(item.size?"（"+item.size+"）":"");});
+  message.textContent=missing.length?"クラウドにない "+missing.length+"着です。削除済みの可能性もあるため、内容を確認してから操作してください。候補："+labels.join("、")+(missing.length>6?" ほか":""):"";
+  if(button)button.textContent="候補 "+missing.length+"着を在庫へ追加";
+}
+function applySharedUniformRecoveryBaseline(){
+  if(!_uniformCloudReady||!_uniformSharedRecoveryBaseline)return false;
+  if(_uniformSharedRecoveryBaseline.signature!==uniformStableSignature(loadU()))return false;
+  var baseline={capturedAt:_uniformSharedRecoveryBaseline.acceptedAt||new Date().toISOString(),acceptedAt:_uniformSharedRecoveryBaseline.acceptedAt||new Date().toISOString(),items:cloneUniformItems(loadU())};
+  try{localStorage.setItem(KR,JSON.stringify(baseline));}catch(error){return false;}
+  _deviceRecoverySnapshot=baseline;renderUniformRecovery();return true;
 }
 function ensureUniformCloudReady(){
   if(_uniformCloudReady)return true;
@@ -872,6 +902,12 @@ function acceptCurrentUniformInventory(){
     return dbSave("uniform_backups/"+archiveId,archive,null,null).then(function(result){return{result:result,items:cloud.items};});
   }).then(function(saved){
     if(!saved||!saved.result||!saved.result.ok)throw new Error("確定前バックアップを保存できなかったため、処理を中止しました。");
+    var shared={acceptedAt:new Date().toISOString(),itemCount:saved.items.length,signature:uniformStableSignature(saved.items)};
+    return dbSave("uniform_recovery_baseline",shared,KRB,null).then(function(result){
+      if(!result||!result.ok)throw new Error("全端末へ確定状態を共有できなかったため、処理を中止しました。");
+      _uniformSharedRecoveryBaseline=shared;return saved;
+    });
+  }).then(function(saved){
     var baseline={capturedAt:new Date().toISOString(),acceptedAt:new Date().toISOString(),items:cloneUniformItems(saved.items)};
     localStorage.setItem(KR,JSON.stringify(baseline));
     _deviceRecoverySnapshot=baseline;
@@ -920,7 +956,7 @@ function backupDateLabel(value,key){
 function openUniformBackupCenter(){
   if(!ensureUniformCloudReady())return;
   _selectedUniformBackupKey="";document.getElementById("uniform-backup-preview").classList.remove("show");
-  document.getElementById("modal-uniform-backup").classList.add("open");loadUniformBackups();
+  renderUniformRecovery();document.getElementById("modal-uniform-backup").classList.add("open");loadUniformBackups();
 }
 function loadUniformBackups(){
   var list=document.getElementById("uniform-backup-list");if(!list)return;
@@ -1025,7 +1061,7 @@ function updateDuplicateNumberWarning(){
   var colorName=mainName+(subName?" × "+subName:"");
   var duplicates=num&&mainName?findDuplicateUniforms(num,colorName,editId||""):[];
   if(!duplicates.length){warning.classList.remove("show");warning.textContent="";return;}
-  var details=duplicates.map(function(item){return (item.size||"サイズ未設定")+"／"+(item.lentTo||item.player||"倉庫");}).join("、");
+  var details=duplicates.map(function(item){return (item.size||"サイズ未設定")+"／"+(uniformHolderName(item)||"倉庫");}).join("、");
   warning.textContent="⚠ 同じ色の背番号 #"+num+" が "+duplicates.length+"着あります（"+details+"）。同じ番号のまま保存できます。";
   warning.classList.add("show");
 }
@@ -1189,7 +1225,7 @@ function saveFolderColorChange(){
 }
 
 function renderStats(){
-  var d=loadU(),total=d.length,free=d.filter(function(u){return !u.lentTo;}).length;
+  var d=loadU(),total=d.length,free=d.filter(function(u){return !uniformHolderName(u);}).length;
   document.getElementById("stat-row").innerHTML=
     '<div class="stat-card"><div class="sv">'+total+'</div><div class="sl">総在庫</div></div>'
     +'<div class="stat-card"><div class="sv" style="color:#00ff88">'+free+'</div><div class="sl">倉庫保管</div></div>'
@@ -1270,8 +1306,8 @@ function renderPairComparison(filteredData){
   }
   results.innerHTML=numberNames.map(function(number){
     var pair=numbers[number];
-    var primaryFree=pair.primary.filter(function(item){return !item.lentTo;}).length,primaryLent=pair.primary.length-primaryFree;
-    var secondaryFree=pair.secondary.filter(function(item){return !item.lentTo;}).length,secondaryLent=pair.secondary.length-secondaryFree;
+    var primaryFree=pair.primary.filter(function(item){return !uniformHolderName(item);}).length,primaryLent=pair.primary.length-primaryFree;
+    var secondaryFree=pair.secondary.filter(function(item){return !uniformHolderName(item);}).length,secondaryLent=pair.secondary.length-secondaryFree;
     var verdictClass="missing",verdictText="不足";
     if(pair.primary.length&&pair.secondary.length){
       if(primaryFree&&secondaryFree){verdictClass="ready";verdictText="使用可";ready++;}
@@ -1321,7 +1357,7 @@ function renderNumberOverview(){
       return a.localeCompare(b,"ja");
     });
     var chips=colorNames.map(function(colorName){
-      var group=colors[colorName],free=group.items.filter(function(item){return !item.lentTo;}).length,lent=group.items.length-free;
+      var group=colors[colorName],free=group.items.filter(function(item){return !uniformHolderName(item);}).length,lent=group.items.length-free;
       var sub=group.hasSub?group.sub:group.main;
       var band="linear-gradient(180deg,"+group.main+" 0%,"+group.main+" 75%,"+sub+" 75%,"+sub+" 100%)";
       var label="#"+number+"、"+colorName+"、倉庫"+free+"着、貸出"+lent+"着。詳しい一覧を開く";
@@ -1381,7 +1417,7 @@ function renderFolders(){
     if(!cg.items.length)return;
     // 背番号順ソート
     var items=cg.items.slice().sort(function(a,b){return Number(a.num)-Number(b.num);});
-    var free=items.filter(function(u){return !u.lentTo;}).length;
+    var free=items.filter(function(u){return !uniformHolderName(u);}).length;
     var lent=items.length-free;
     var bodyId="cfb"+fi;
     var sample=items[0]||{};
@@ -1403,14 +1439,14 @@ function renderFolders(){
 
     // テーブル行生成
     var rows=items.map(function(u){
-      var isLent=!!u.lentTo;
+      var holder=uniformHolderName(u),isLent=!!holder;
       var statusCell=isLent
         ?'<button class="status-action is-lent" onclick="event.stopPropagation();openLend('+inlineJsArg(u.id)+')" aria-label="貸出中。タップして返却"><span class="status-main">貸出中</span><span class="status-next">返却する ›</span></button>'
         :'<button class="status-action is-free" onclick="event.stopPropagation();openLend('+inlineJsArg(u.id)+')" aria-label="倉庫保管。タップして貸出"><span class="status-main">倉庫</span><span class="status-next">貸出する ›</span></button>';
       return '<tr>'
         +'<td data-label="背番号"><span class="uniform-number">#'+escapeHtml(u.num)+'</span></td>'
         +'<td data-label="サイズ" class="uniform-size" style="text-align:center;white-space:nowrap">'+escapeHtml(u.size)+'</td>'
-        +'<td data-label="氏名・状態"><span class="uniform-player-name" title="'+escapeHtml(u.lentTo||u.player||'')+'">'+escapeHtml(u.lentTo||u.player||'—')+'</span>'+conditionBadge(u.condition)+'</td>'
+        +'<td data-label="氏名・状態"><span class="uniform-player-name" title="'+escapeHtml(holder)+'">'+escapeHtml(holder||'—')+'</span>'+conditionBadge(u.condition)+'</td>'
         +'<td data-label="状況">'+statusCell+'</td>'
         +'<td data-label="編集"><div class="uni-actions"><button class="edit-icon-btn" onclick="event.stopPropagation();openEdit('+inlineJsArg(u.id)+')" aria-label="#'+escapeHtml(u.num)+'を編集" title="編集">✎</button></div></td>'
         +'</tr>';
@@ -1943,7 +1979,7 @@ function openEdit(id){
   clearUniformSaveMessage();
   document.getElementById("u-del-btn").style.display="inline-flex";
   document.getElementById("u-num").value=u.num;
-  document.getElementById("u-player").value=u.lentTo||u.player||"";
+  document.getElementById("u-player").value=uniformHolderName(u);
   document.getElementById("u-size").value=u.size;
   document.getElementById("u-condition").value=normalizeCondition(u.condition);
   updateConditionHelp();
@@ -1973,7 +2009,7 @@ function saveUni(closeAfter){
   var data=loadU(),id=editId||("u"+Date.now());
   var duplicateItems=findDuplicateUniforms(num,colorName,id);
   var exist=data.find(function(x){return x.id===id;});
-  var previousHolder=exist&&exist.lentTo?String(exist.lentTo):"";
+  var previousHolder=uniformHolderName(exist);
   var holderName=document.getElementById("u-player").value.trim();
   var entry=Object.assign(exist||{},{
     id:id,num:num,
@@ -2031,10 +2067,10 @@ function confirmDel(id){
 function openLend(id){
   lendId=id;
   var u=loadU().find(function(x){return x.id===id;});if(!u)return;
-  var isLent=!!u.lentTo;
+  var holder=uniformHolderName(u),isLent=!!holder;
   document.getElementById("lend-title").textContent="【"+u.cname+"】#"+u.num+(u.player?" "+u.player:"")+" ("+u.size+")";
   document.getElementById("lend-info").innerHTML=isLent
-    ?"<span style='color:#ff8888'>🔴 選手に貸出中</span><br>持っている選手：<strong style='color:#fff'>"+escapeHtml(u.lentTo)+"</strong><br>貸出日："+escapeHtml(u.lentDate)+(u.retDate?"　返却予定："+escapeHtml(u.retDate):"")
+    ?"<span style='color:#ff8888'>🔴 選手に貸出中</span><br>持っている選手：<strong style='color:#fff'>"+escapeHtml(holder)+"</strong><br>貸出日："+escapeHtml(u.lentDate||"未設定")+(u.retDate?"　返却予定："+escapeHtml(u.retDate):"")
     :"<span style='color:#00ff88'>🏠 倉庫保管</span>";
   document.getElementById("lend-form").style.display=isLent?"none":"block";
   var btn=document.getElementById("lend-btn");
@@ -2062,7 +2098,7 @@ function doLend(){
 function doReturn(){
   if(!ensureUniformCloudReady())return;
   var data=loadU(),u=data.find(function(x){return x.id===lendId;});if(!u)return;
-  var historyEntry={type:"返却",date:new Date().toISOString().slice(0,10),num:u.num,cname:u.cname,player:u.player||"",name:u.lentTo,retDate:""};
+  var holder=uniformHolderName(u),historyEntry={type:"返却",date:new Date().toISOString().slice(0,10),num:u.num,cname:u.cname,player:holder,name:holder,retDate:""};
   u.player="";delete u.lentTo;delete u.lentDate;delete u.retDate;u.storageLocation="warehouse";
   saveU(data,"uniform_return").then(function(result){
     if(!result||!result.ok)return;
@@ -2094,11 +2130,13 @@ function startUniformSync(){
   // 描画に必要な色・関数の準備後に同期を開始する。
   // dbListenは端末キャッシュを同期的に返す場合があるため、定義前に呼ぶと一覧だけ描画できない。
   dbListen("uniform", function(val,meta){
-    var cleanUniforms=Array.isArray(val)?val.filter(function(item){return item&&typeof item==="object";}):[];
-    var goalkeeperMigration=normalizeGoalkeeperUniforms(cleanUniforms);_unifData=goalkeeperMigration.items;
+    var cloudUniforms=Array.isArray(val)?val.filter(function(item){return item&&typeof item==="object";}):[];
+    var cleanUniforms=cloneUniformItems(cloudUniforms);
+    var goalkeeperMigration=normalizeGoalkeeperUniforms(cleanUniforms);
+    var loanMigration=normalizeUniformLoanRecords(goalkeeperMigration.items);_unifData=loanMigration.items;
     if(meta&&meta.authoritative){
-      _uniformCloudReady=true;_uniformPersistedSnapshot=cloneUniformItems(cleanUniforms);
-      ensureDailyUniformBackup(cleanUniforms);
+      _uniformCloudReady=true;_uniformPersistedSnapshot=cloneUniformItems(cloudUniforms);
+      ensureDailyUniformBackup(cloudUniforms);applySharedUniformRecoveryBaseline();
     }
     var syncStatus=document.getElementById("uniform-sync-status");
     if(syncStatus){
@@ -2107,9 +2145,13 @@ function startUniformSync(){
     }
     // 端末キャッシュは古い／不完全な可能性があるため、絶対にクラウドへ書き戻さない。
     // 色名の移行保存は、Firebaseから届いた権威ある全件データに対してのみ行う。
-    if(meta&&meta.authoritative&&goalkeeperMigration.changed&&!_uniformWriteInFlight)saveU(_unifData,"goalkeeper_color_migration");
+    if(meta&&meta.authoritative&&(goalkeeperMigration.changed||loanMigration.changed)&&!_uniformWriteInFlight)saveU(_unifData,"uniform_data_normalization");
     render();
   }, KU, []);
+  dbListen("uniform_recovery_baseline",function(val){
+    _uniformSharedRecoveryBaseline=val&&typeof val==="object"&&!Array.isArray(val)?val:null;
+    applySharedUniformRecoveryBaseline();
+  },KRB,{});
   dbListen("uniform_hist", function(val){
     _histData = Array.isArray(val) ? val.filter(function(item){return item && typeof item==="object";}) : [];
   }, KH, []);
@@ -2152,10 +2194,11 @@ function exportUniformCSV(){
     var colorDiff=String(a.cname||"").localeCompare(String(b.cname||""),"ja");
     return colorDiff||Number(a.num||0)-Number(b.num||0);
   }).forEach(function(u){
+    var holder=uniformHolderName(u);
     rows.push([
-      u.num||"",u.player||"",u.size||"",conditionLabel(u.condition),u.mainColorName||u.cname||"",safeColor(u.mainColorCode||u.ccode,""),
+      u.num||"",holder,u.size||"",conditionLabel(u.condition),u.mainColorName||u.cname||"",safeColor(u.mainColorCode||u.ccode,""),
       u.subColorName||"",safeColor(u.subColorCode,""),
-      u.lentTo?"選手に貸出中":"倉庫保管",u.lentTo||"",u.lentDate||"",u.retDate||"",u.memo||""
+      holder?"選手に貸出中":"倉庫保管",holder,u.lentDate||"",u.retDate||"",u.memo||""
     ]);
   });
   if(rows.length===1){alert("出力するユニフォームデータがありません");return;}
@@ -2174,13 +2217,14 @@ function exportUniformCSV(){
 }
 
 function copyUniformList(){
-  var items = _unifData.filter(function(u){ return u.lentTo; });
+  var items = _unifData.filter(function(u){ return !!uniformHolderName(u); });
   if(!items.length){ alert("現在の貸出はありません"); return; }
   var t = "【ユニフォーム貸出中一覧】\n\n";
   items.forEach(function(u){
-    t += "No."+u.num+(u.player?" "+u.player:"")+"\n";
+    var holder=uniformHolderName(u);
+    t += "No."+u.num+(holder?" "+holder:"")+"\n";
     t += "   状態："+conditionLabel(u.condition)+"\n";
-    t += "   借りた人："+u.lentTo+"\n";
+    t += "   借りた人："+holder+"\n";
     t += "   貸出日："+(u.lentDate||"未設定")+"\n\n";
   });
   navigator.clipboard.writeText(t)
