@@ -880,7 +880,6 @@ function setupUniformAdminAuth(){
   onFirebaseReady(function(){
     if(!FIREBASE_AUTH){showUniformAdminError("管理者認証を開始できませんでした。時間をおいて再度お試しください。");return;}
     FIREBASE_AUTH.onAuthStateChanged(function(user){setUniformAdminUser(user);});
-    FIREBASE_AUTH.getRedirectResult().catch(function(error){handleUniformAdminAuthError(error);});
   });
 }
 function handleUniformAdminAuthError(error){
@@ -888,15 +887,20 @@ function handleUniformAdminAuthError(error){
   if(code==="auth/operation-not-allowed")message="Googleログインの初期設定がまだ完了していません。FirebaseでGoogleログインを有効にしてください。";
   else if(code==="auth/unauthorized-domain")message="このアプリのURLがGoogleログインの許可ドメインに登録されていません。管理者へ連絡してください。";
   else if(code==="auth/network-request-failed")message="通信状態を確認して、もう一度お試しください。";
+  else if(code==="auth/popup-blocked")message="Googleログイン画面がブロックされました。ブラウザのポップアップを許可して、もう一度押してください。";
+  else if(code==="auth/popup-closed-by-user")message="Googleログイン画面が閉じられました。もう一度押して、管理者アカウントを選んでください。";
+  else if(code==="auth/cancelled-popup-request")message="別のGoogleログイン画面が開いています。開いている画面を閉じて、もう一度お試しください。";
+  else if(code)message="管理者確認に失敗しました（"+code+"）。画面を撮影して管理者へお知らせください。";
   showUniformAdminError(message);
 }
 function signInUniformAdmin(){
   showUniformAdminError("");
   if(!FIREBASE_AUTH||!window.firebase||!firebase.auth){showUniformAdminError("認証機能を読み込んでいます。数秒後にもう一度お試しください。");return;}
   try{
-    sessionStorage.setItem("smc_uniform_open_admin","1");
     var provider=new firebase.auth.GoogleAuthProvider();provider.setCustomParameters({prompt:"select_account"});
-    FIREBASE_AUTH.signInWithRedirect(provider).catch(handleUniformAdminAuthError);
+    FIREBASE_AUTH.signInWithPopup(provider).then(function(result){
+      if(result&&result.user)setUniformAdminUser(result.user);
+    }).catch(handleUniformAdminAuthError);
   }catch(error){handleUniformAdminAuthError(error);}
 }
 function signOutUniformAdmin(){

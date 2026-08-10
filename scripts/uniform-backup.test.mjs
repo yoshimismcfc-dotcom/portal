@@ -74,6 +74,7 @@ for (const protectedFunction of ["restoreDeviceInventory","acceptCurrentUniformI
 for (const required of [
   'UNIFORM_PRIMARY_ADMIN_EMAIL="yoshimi.smc.fc@gmail.com"',
   "function signInUniformAdmin()",
+  "FIREBASE_AUTH.signInWithPopup(provider)",
   "function requestUniformAdminAccess()",
   "function approveUniformAdmin(uid)",
   "function removeUniformAdmin(uid)",
@@ -81,6 +82,8 @@ for (const required of [
   "Googleで管理者確認",
   "管理者の引き継ぎ・副管理者の承認"
 ]) assert.ok(source.includes(required), "管理者認証・引き継ぎ機能が不足しています: " + required);
+assert.doesNotMatch(source, /FIREBASE_AUTH\.signInWithRedirect\(provider\)/,
+  "外部ホスティングで失敗するリダイレクト認証を使用しないでください");
 assert.match(source, /if\(!result\|\|!result\.ok\)return;[\s\S]{0,500}saveH\(history\)/,
   "在庫保存に失敗した場合は履歴を追加しないでください");
 
