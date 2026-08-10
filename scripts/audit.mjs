@@ -366,7 +366,7 @@ if (!commonSource.includes("ACTIVE_DATE_KEY") || !commonSource.includes("remembe
 if (!commonSource.includes("dateSortValue(dateIso, label)") || !commonSource.includes("fiscalYear * 10000")) {
   fail("common.js", "複数年度の日程を西暦込みの年度順で並べていません");
 }
-if (!commonSource.includes("sortTeamRowsForActiveDate") || !commonSource.includes('"確認中": 1') || !commonSource.includes('"－": 2') || !commonSource.includes('"NG": 3') || !commonSource.includes("teamReadingForSort") || !commonSource.includes("TEAM_NAME_READINGS")) {
+if (!commonSource.includes("sortTeamRowsForActiveDate") || !commonSource.includes('"要項送付済": 0') || !commonSource.includes('"確認中": 2') || !commonSource.includes('"－": 3') || !commonSource.includes('"NG": 4') || !commonSource.includes("teamReadingForSort") || !commonSource.includes("TEAM_NAME_READINGS")) {
   fail("common.js", "試合調整のチームが参加・確認中・未打診・不可・読み順で表示されません");
 }
 if (!commonSource.includes("pendingTeamSort = true") || !commonSource.includes("pendingTeamSort && sortTeamRowsForActiveDate()")) {

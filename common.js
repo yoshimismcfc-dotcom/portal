@@ -128,6 +128,7 @@
       legend.innerHTML = `
         <span class="game-adjust-legend-intro">タップで切り替え →</span>
         <span class="game-adjust-legend-item"><span class="status-btn s-ok">OK</span><span class="game-adjust-legend-label">参加可</span></span>
+        <span class="game-adjust-legend-item"><span class="status-btn s-sent">要項送付済</span><span class="game-adjust-legend-label">参加確定・送付済</span></span>
         <span class="game-adjust-legend-item"><span class="status-btn s-ng">NG</span><span class="game-adjust-legend-label">不可</span></span>
         <span class="game-adjust-legend-item"><span class="status-btn s-kakun">確認中</span><span class="game-adjust-legend-label">返答待ち</span></span>
         <span class="game-adjust-legend-item"><span class="status-btn s-none">－</span><span class="game-adjust-legend-label">未打診</span></span>
@@ -144,6 +145,7 @@
         body[data-theme="light"].game-adjust-enhanced .adj-table tbody tr:nth-child(even):not(.tr-count):not(.tr-nokori):not(.tr-biko) > :first-child{background:#c5d7e8!important}
         body[data-theme="light"].game-adjust-enhanced .adj-table .tantou-input{background:#fff!important;color:#18314b!important;border-color:#8db2c8!important}
         body[data-theme="light"].game-adjust-enhanced .adj-table .status-btn.s-ok{background:#d7f5e4!important;color:#08743d!important;border-color:#16975a!important}
+        body[data-theme="light"].game-adjust-enhanced .adj-table .status-btn.s-sent{background:#deecff!important;color:#135b9f!important;border-color:#4d8fcf!important}
         body[data-theme="light"].game-adjust-enhanced .adj-table .status-btn.s-ng{background:#ffe0e7!important;color:#a01339!important;border-color:#cf315c!important}
         body[data-theme="light"].game-adjust-enhanced .adj-table .status-btn.s-kakun{background:#fff1bd!important;color:#775800!important;border-color:#b88c00!important}
         body[data-theme="light"].game-adjust-enhanced .adj-table .status-btn.s-none{background:#e5edf5!important;color:#31536c!important;border-color:#789bb1!important}
@@ -305,12 +307,12 @@
       if (!tbody) return false;
       const rows = Array.from(tbody.rows).filter((row) => row.querySelector("button.status-btn"));
       if (rows.length < 2) return rows.length === 1;
-      const statusOrder = { "OK": 0, "確認中": 1, "－": 2, "NG": 3 };
+      const statusOrder = { "要項送付済": 0, "OK": 1, "確認中": 2, "－": 3, "NG": 4 };
       const nameCollator = new Intl.Collator("ja", { numeric: true, sensitivity: "base", ignorePunctuation: true });
       const sorted = rows.slice().sort((rowA, rowB) => {
         const statusA = rowA.children[activeDateIndex]?.querySelector("button.status-btn")?.textContent.trim() || "－";
         const statusB = rowB.children[activeDateIndex]?.querySelector("button.status-btn")?.textContent.trim() || "－";
-        const statusDifference = (statusOrder[statusA] ?? 2) - (statusOrder[statusB] ?? 2);
+        const statusDifference = (statusOrder[statusA] ?? 3) - (statusOrder[statusB] ?? 3);
         if (statusDifference) return statusDifference;
         return nameCollator.compare(teamReadingForSort(rowA), teamReadingForSort(rowB));
       });

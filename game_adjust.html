@@ -75,6 +75,7 @@
     .full-badge{display:inline-block;background:rgba(0,255,136,.18);color:#00ff88;font-size:.58rem;font-weight:900;padding:1px 6px;border-radius:99px;margin-left:4px;vertical-align:middle;animation:pop .3s ease}
     /* ステータスボタン：44px以上のタップ領域（HIG準拠） */
     .s-ok   {background:rgba(0,255,136,.2); color:#00ff88;border:1px solid rgba(0,255,136,.6)}
+    .s-sent {background:rgba(84,160,255,.22);color:#8fc5ff;border:1px solid rgba(84,160,255,.72)}
     .s-ng   {background:rgba(255,68,102,.2);color:#ff8888;border:1px solid rgba(255,68,102,.6)}
     .s-kakun{background:rgba(255,204,0,.2); color:#ffee44;border:1px solid rgba(255,204,0,.6)}
     .s-none {background:rgba(255,255,255,.07);color:#8ac8e8;border:1px solid rgba(0,212,255,.25)}
@@ -214,9 +215,10 @@
 .ga-remaining{color:#73dcff;font-weight:900}
 .ga-progress-track{height:8px;margin-top:7px;border-radius:999px;background:rgba(255,255,255,.1);overflow:hidden}
 .ga-progress-track span{display:block;height:100%;border-radius:inherit;background:linear-gradient(90deg,#00c98b,#00ff88);transition:width .25s ease}
-.ga-overview-chips{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:6px;margin-top:12px}
+.ga-overview-chips{display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:6px;margin-top:12px}
 .ga-chip{padding:7px 4px;border-radius:9px;text-align:center;font-size:.68rem;font-weight:900}
 .ga-chip-ok{background:rgba(0,255,136,.12);color:#4dffa4}
+.ga-chip-sent{background:rgba(84,160,255,.16);color:#9dccff}
 .ga-chip-wait{background:rgba(255,214,50,.13);color:#ffe66f}
 .ga-chip-ng{background:rgba(255,75,120,.13);color:#ff92af}
 .ga-chip-none{background:rgba(106,172,204,.12);color:#a8d4f0}
@@ -239,7 +241,7 @@ body[data-theme="light"] .ga-overview-note{color:#72400b;background:#fff5e5}
     <div class="hero-emoji">📊</div>
     <div>
       <div class="hero-title">試合調整</div>
-      <div class="hero-sub">タップでOK/NG/確認中を切り替え。<strong style="color:#00ff88">変更は自動保存</strong>されクラウドで全端末に同期されます。</div>
+      <div class="hero-sub">タップでOK／NG／確認中／要項送付済を切り替え。<strong style="color:#00ff88">変更は自動保存</strong>されクラウドで全端末に同期されます。</div>
     </div>
   </div>
 
@@ -249,7 +251,7 @@ body[data-theme="light"] .ga-overview-note{color:#72400b;background:#fff5e5}
       <div class="beginner-step"><span class="beginner-step-num">1</span><div><strong>日程を選ぶ</strong>「表示する日程」から、調整したい試合を選びます。</div></div>
       <div class="beginner-step"><span class="beginner-step-num">2</span><div><strong>状態をタップ</strong>各チームのボタンを押して、参加状況を切り替えます。</div></div>
       <div class="beginner-step"><span class="beginner-step-num">3</span><div><strong>保存を確認</strong>変更は自動保存。緑色の保存メッセージが出れば完了です。</div></div>
-      <p class="cycle-guide">タップするたびに <b>－ 未打診 → OK 参加可 → NG 不可 → 確認中 → －</b> の順で変わります。</p>
+      <p class="cycle-guide">タップするたびに <b>－ 未打診 → OK 参加可 → 要項送付済 → NG 不可 → 確認中 → －</b> の順で変わります。</p>
     </div>
   </details>
 
@@ -266,6 +268,7 @@ body[data-theme="light"] .ga-overview-note{color:#72400b;background:#fff5e5}
   <div class="legend" aria-hidden="true">
     タップで切替 →
     <span class="status-btn s-ok">OK</span>参加可
+    <span class="status-btn s-sent">要項送付済</span>参加確定・送付済
     <span class="status-btn s-ng">NG</span>不可
     <span class="status-btn s-kakun">確認中</span>返答待ち
     <span class="status-btn s-none">－</span>未打診
@@ -559,8 +562,9 @@ function flash(msg, col) {
 }
 
 /* ---------- ステータス切替 ---------- */
-var CYCLE = ["－","OK","NG","確認中"];
-var SCLS = {"OK":"s-ok","NG":"s-ng","確認中":"s-kakun","－":"s-none"};
+var CYCLE = ["－","OK","要項送付済","NG","確認中"];
+var SCLS = {"OK":"s-ok","要項送付済":"s-sent","NG":"s-ng","確認中":"s-kakun","－":"s-none"};
+function isParticipatingStatus(status){return status==="OK"||status==="要項送付済";}
 
 function cycleStatus(tid, did, btnEl) {
   var t = data.teams.find(function(t){ return t.id === tid; });
@@ -587,7 +591,7 @@ function cycleStatus(tid, did, btnEl) {
 /* 集計行（参加数・残り・充足バッジ）だけを再計算して更新 */
 function updateCounts(){
   data.dates.forEach(function(d, i){
-    var cnt = data.teams.filter(function(t){ return ((t.statuses||{})[d.id]||"－")==="OK"; }).length;
+    var cnt = data.teams.filter(function(t){ return isParticipatingStatus((t.statuses||{})[d.id]||"－"); }).length;
     var n = d.target - cnt;
     var cEl = document.getElementById("cnt-" + d.id);
     var rEl = document.getElementById("rem-" + d.id);
@@ -649,11 +653,13 @@ function copyAdjList(){
   var t = "【試合調整 状況】\n\n";
   data.dates.forEach(function(d){
     var ok = data.teams.filter(function(tm){ return ((tm.statuses||{})[d.id]||"－")==="OK"; });
+    var sent = data.teams.filter(function(tm){ return ((tm.statuses||{})[d.id]||"－")==="要項送付済"; });
     var kakun = data.teams.filter(function(tm){ return ((tm.statuses||{})[d.id]||"－")==="確認中"; });
-    var n = d.target - ok.length;
+    var n = d.target - ok.length - sent.length;
     t += "■ " + d.label + (d.tournamentName ? " " + d.tournamentName : "") + "（" + d.cat + "）\n";
-    t += "  参加：" + ok.length + "/" + d.target + (n<=0 ? " ✅充足" : "（あと" + n + "チーム）") + "\n";
+    t += "  参加：" + (ok.length+sent.length) + "/" + d.target + (n<=0 ? " ✅充足" : "（あと" + n + "チーム）") + "\n";
     if(ok.length)    t += "  OK：" + ok.map(function(x){return x.name;}).join("・") + "\n";
+    if(sent.length)  t += "  要項送付済：" + sent.map(function(x){return x.name;}).join("・") + "\n";
     if(kakun.length) t += "  確認中：" + kakun.map(function(x){return x.name;}).join("・") + "\n";
     var biko = (data.備考||{})[d.id];
     if(biko) t += "  備考：" + biko + "\n";
@@ -684,7 +690,7 @@ function renderTable() {
 
   var h = "<thead><tr><th class='col-fixed th-label' scope='col'>チーム</th>";
   dates.forEach(function(d) {
-    var cnt = teams.filter(function(t){ return ((t.statuses||{})[d.id]||"－")==="OK"; }).length;
+    var cnt = teams.filter(function(t){ return isParticipatingStatus((t.statuses||{})[d.id]||"－"); }).length;
     var full = (d.target - cnt) <= 0;
     h += "<th class='th-date" + (full ? " is-full" : "") + "' id='hdr-" + esc(d.id) + "' data-date-id='" + esc(d.id) + "' data-date-iso='" + esc(d.dateIso || "") + "' scope='col'>" + esc(d.label) +
          (full ? "<span class='full-badge'>✅</span>" : "") +
@@ -728,7 +734,7 @@ function renderTable() {
   // 集計行（参加数）
   h += "<tr class='tr-count'><td class='col-fixed'>✅ 参加チーム数</td>";
   dates.forEach(function(d) {
-    var cnt = teams.filter(function(t){ return ((t.statuses || {})[d.id] || "－") === "OK"; }).length;
+    var cnt = teams.filter(function(t){ return isParticipatingStatus((t.statuses || {})[d.id] || "－"); }).length;
     var full = (d.target - cnt) <= 0;
     h += "<td id='cnt-" + esc(d.id) + "'" + (full ? " class='is-full'" : "") + ">" + cnt + "<span style='font-size:.65rem;color:#8ac8e8'> /" + esc(d.target) + "</span></td>";
   });
@@ -737,7 +743,7 @@ function renderTable() {
   // 集計行（残り）
   h += "<tr class='tr-nokori'><td class='col-fixed'>残り</td>";
   dates.forEach(function(d) {
-    var cnt = teams.filter(function(t){ return ((t.statuses || {})[d.id] || "－") === "OK"; }).length;
+    var cnt = teams.filter(function(t){ return isParticipatingStatus((t.statuses || {})[d.id] || "－"); }).length;
     var n = d.target - cnt;
     var col = n <= 0 ? "#00ff88" : n === 1 ? "#ffee44" : "#ff8888";
     h += "<td id='rem-" + esc(d.id) + "' style='color:" + col + ";font-weight:900'>" + (n <= 0 ? "✅ 充足" : n) + "</td>";
@@ -1002,14 +1008,15 @@ document.addEventListener("visibilitychange", function(){
     overview=document.createElement("section");
     overview.className="game-adjust-overview";
     overview.setAttribute("aria-live","polite");
-    overview.innerHTML="<div class='ga-overview-heading'><div><span class='ga-overview-eyebrow'>選択中の試合</span><h2 class='ga-overview-title'>日程を読み込み中…</h2><p class='ga-overview-meta'></p></div><span class='ga-save-hint'>入力は自動保存</span></div><div class='ga-overview-progress'><div class='ga-overview-progress-head'><strong class='ga-progress-label'>参加 0 / 0</strong><span class='ga-remaining'>残り 0</span></div><div class='ga-progress-track' role='progressbar' aria-label='参加チーム充足率' aria-valuemin='0' aria-valuemax='100' aria-valuenow='0'><span></span></div></div><div class='ga-overview-chips'><span class='ga-chip ga-chip-ok'>OK 0</span><span class='ga-chip ga-chip-wait'>確認中 0</span><span class='ga-chip ga-chip-ng'>NG 0</span><span class='ga-chip ga-chip-none'>未打診 0</span></div><p class='ga-overview-note' hidden></p>";
+    overview.innerHTML="<div class='ga-overview-heading'><div><span class='ga-overview-eyebrow'>選択中の試合</span><h2 class='ga-overview-title'>日程を読み込み中…</h2><p class='ga-overview-meta'></p></div><span class='ga-save-hint'>入力は自動保存</span></div><div class='ga-overview-progress'><div class='ga-overview-progress-head'><strong class='ga-progress-label'>参加 0 / 0</strong><span class='ga-remaining'>残り 0</span></div><div class='ga-progress-track' role='progressbar' aria-label='参加チーム充足率' aria-valuemin='0' aria-valuemax='100' aria-valuenow='0'><span></span></div></div><div class='ga-overview-chips'><span class='ga-chip ga-chip-ok'>OK 0</span><span class='ga-chip ga-chip-sent'>要項送付済 0</span><span class='ga-chip ga-chip-wait'>確認中 0</span><span class='ga-chip ga-chip-ng'>NG 0</span><span class='ga-chip ga-chip-none'>未打診 0</span></div><p class='ga-overview-note' hidden></p>";
     wrapper.before(overview);
     return overview;
   }
   function enhanceStatusButtons(){
     document.querySelectorAll("#adj-table button.status-btn").forEach(function(button){
       var current=safeText(button.textContent)||"－";
-      var next=current==="－"?"OK":current==="OK"?"NG":current==="NG"?"確認中":"－";
+      var order=["－","OK","要項送付済","NG","確認中"],position=order.indexOf(current);
+      var next=order[(position<0?0:position+1)%order.length];
       button.title="現在："+current+"。タップすると「"+next+"」に変更";
       button.setAttribute("aria-label",button.title);
     });
@@ -1036,7 +1043,7 @@ document.addEventListener("visibilitychange", function(){
     var target=numbers?Number(numbers[2]):0;
     var remainingText=safeText(remainingCell&&remainingCell.textContent);
     var remainingNumber=Math.max(0,target-participating);
-    var statuses={"OK":0,"NG":0,"確認中":0,"－":0};
+    var statuses={"OK":0,"要項送付済":0,"NG":0,"確認中":0,"－":0};
     Array.from(table.tBodies[0].rows).forEach(function(row){
       if(row.classList.contains("tr-count")||row.classList.contains("tr-nokori")||row.classList.contains("tr-biko")) return;
       var cell=selectedCell(row,active.index);
@@ -1057,6 +1064,7 @@ document.addEventListener("visibilitychange", function(){
     track.setAttribute("aria-valuenow",String(percent));
     track.querySelector("span").style.width=percent+"%";
     overview.querySelector(".ga-chip-ok").textContent="OK "+(statuses.OK||0);
+    overview.querySelector(".ga-chip-sent").textContent="要項送付済 "+(statuses["要項送付済"]||0);
     overview.querySelector(".ga-chip-wait").textContent="確認中 "+(statuses["確認中"]||0);
     overview.querySelector(".ga-chip-ng").textContent="NG "+(statuses.NG||0);
     overview.querySelector(".ga-chip-none").textContent="未打診 "+(statuses["－"]||0);
