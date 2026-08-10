@@ -24,5 +24,9 @@ assert.ok((game.match(/isParticipatingStatus\(/g) || []).length >= 5,
 assert.match(common, /status-btn s-sent">要項送付済/);
 assert.match(common, /"要項送付済": 0, "OK": 1, "確認中": 2, "－": 3, "NG": 4/);
 assert.match(common, /status-btn\.s-sent/);
+assert.match(game, /announceGameAdjustDataRendered\(meta\)/,
+  "クラウドデータの初回描画後に並び替えを通知していません");
+assert.match(common, /addEventListener\("smc:game-adjust-data-rendered"[\s\S]*?pendingTeamSort = true/,
+  "クラウドデータ読込後の初回並び替えがありません");
 
 console.log("game adjustment guideline-sent status tests passed");

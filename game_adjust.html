@@ -412,6 +412,12 @@ let data = loadData();
 /* ---------- Firebase同期（正規化・自動復元・エコー抑制） ---------- */
 let _lastSavedStr = null; // 自分が最後に保存したデータ（エコー抑制用）
 
+function announceGameAdjustDataRendered(meta){
+  document.dispatchEvent(new CustomEvent("smc:game-adjust-data-rendered",{
+    detail:{source:(meta&&meta.source)||"remote"}
+  }));
+}
+
 // Firebaseは空配列・空オブジェクトを削除し、配列をオブジェクトで返すことがあるため正規化
 function normalizeData(d){
   if(!d || typeof d !== "object") return null;
@@ -436,6 +442,7 @@ function handleGameAdjustRemote(val, meta){
   if(!normalized){
     if(normalizeData(data)){
       renderTable();
+      announceGameAdjustDataRendered(meta);
       if(meta && meta.source === "cloud"){
         flash("☁️ クラウドが空のため端末データを表示しています", "#ffee66");
       }
@@ -449,6 +456,7 @@ function handleGameAdjustRemote(val, meta){
     if(!restored) restored = normalizeData(JSON.parse(JSON.stringify(INIT)));
     data = restored;
     renderTable();
+    announceGameAdjustDataRendered(meta);
     flash("📱 端末データを表示しています", "#8ac8e8");
     return;
   }
@@ -463,6 +471,7 @@ function handleGameAdjustRemote(val, meta){
         if(ld && JSON.stringify(ld) !== initStr){
           data = ld;
           renderTable();
+          announceGameAdjustDataRendered(meta);
           persist();
           flash("♻️ この端末のデータをクラウドに復元しました");
           return;
@@ -477,6 +486,7 @@ function handleGameAdjustRemote(val, meta){
 
   data = normalized;
   renderTable();
+  announceGameAdjustDataRendered(meta);
 }
 
 /* ---------- 保存（自動保存・デバウンス） ---------- */

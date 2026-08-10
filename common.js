@@ -470,6 +470,10 @@
     });
     new MutationObserver(() => window.requestAnimationFrame(syncDateColumns))
       .observe(table, { childList: true, subtree: true });
+    document.addEventListener("smc:game-adjust-data-rendered", () => {
+      pendingTeamSort = true;
+      window.requestAnimationFrame(syncDateColumns);
+    });
     table.addEventListener("input", (event) => {
       if (event.target.classList.contains("biko-input")) window.requestAnimationFrame(syncDateColumns);
     });
