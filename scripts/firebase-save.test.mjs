@@ -39,7 +39,16 @@ const context = {
 };
 
 vm.createContext(context);
-vm.runInContext(fs.readFileSync(path.join(root, "firebase-config.js"), "utf8"), context);
+const firebaseSource = fs.readFileSync(path.join(root, "firebase-config.js"), "utf8");
+if (!firebaseSource.includes("function loadFirebaseScript(index)") ||
+    !firebaseSource.includes("loadFirebaseScript(index + 1)") ||
+    firebaseSource.includes("scripts.forEach(function(src)")) {
+  throw new Error("Firebase SDKは app→database→auth の順番で読み込んでください");
+}
+if (!firebaseSource.includes("finishFirebaseInitialization(false)")) {
+  throw new Error("認証SDKが取得できない場合も通常のデータ同期を開始してください");
+}
+vm.runInContext(firebaseSource, context);
 
 const malicious = '\");globalThis.injected=true;//';
 const encodedArg = context.inlineJsArg(malicious);

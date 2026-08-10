@@ -33,34 +33,38 @@ function onFirebaseReady(cb){
     "https://www.gstatic.com/firebasejs/9.23.0/firebase-database-compat.js",
     "https://www.gstatic.com/firebasejs/9.23.0/firebase-auth-compat.js"
   ];
-  var loaded = 0;
+  function finishFirebaseInitialization(authAvailable){
+    try{
+      if(!firebase.apps.length) firebase.initializeApp(FIREBASE_CONFIG);
+      FIREBASE_DB = firebase.database();
+      FIREBASE_AUTH = authAvailable && typeof firebase.auth === "function" ? firebase.auth() : null;
+      FIREBASE_READY = true;
+      FIREBASE_CALLBACKS.forEach(function(cb){ cb(FIREBASE_DB); });
+      FIREBASE_CALLBACKS = [];
+      console.log("[SMC Portal] Firebase ready");
+    }catch(e){
+      FIREBASE_FAILED = true;
+      console.error("[SMC Portal] Firebase init error:", e);
+    }
+  }
 
-  scripts.forEach(function(src){
+  function loadFirebaseScript(index){
+    var src = scripts[index];
     var s = document.createElement("script");
     s.src = src;
     s.onload = function(){
-      loaded++;
-      if(loaded === scripts.length){
-        try{
-          firebase.initializeApp(FIREBASE_CONFIG);
-          FIREBASE_DB = firebase.database();
-          FIREBASE_AUTH = firebase.auth();
-          FIREBASE_READY = true;
-          FIREBASE_CALLBACKS.forEach(function(cb){ cb(FIREBASE_DB); });
-          FIREBASE_CALLBACKS = [];
-          console.log("[SMC Portal] Firebase ready");
-        }catch(e){
-          FIREBASE_FAILED = true;
-          console.error("[SMC Portal] Firebase init error:", e);
-        }
-      }
+      if(index < scripts.length - 1) loadFirebaseScript(index + 1);
+      else finishFirebaseInitialization(true);
     };
     s.onerror = function(){
-      FIREBASE_FAILED = true;
       console.error("[SMC Portal] Firebase SDK load error:", src);
+      // 認証SDKだけが取得できない場合も、通常の在庫閲覧・入力は止めない。
+      if(index === scripts.length - 1) finishFirebaseInitialization(false);
+      else FIREBASE_FAILED = true;
     };
     document.head.appendChild(s);
-  });
+  }
+  loadFirebaseScript(0);
 })();
 
 function readLocalResult(localKey, fallback){
