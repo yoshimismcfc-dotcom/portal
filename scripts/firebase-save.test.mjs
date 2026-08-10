@@ -40,6 +40,15 @@ const context = {
 
 vm.createContext(context);
 const firebaseSource = fs.readFileSync(path.join(root, "firebase-config.js"), "utf8");
+for (const requiredProjectValue of [
+  'apiKey:            "AIzaSyCzJUtjC4ODuw2zO7yg4KR6TqILE05_jNk"',
+  'messagingSenderId: "155203351289"',
+  'appId:             "1:155203351289:web:72d49675b0243684922828"'
+]) {
+  if (!firebaseSource.includes(requiredProjectValue)) {
+    throw new Error("Firebase公式Webアプリ設定と一致していません: " + requiredProjectValue);
+  }
+}
 if (!firebaseSource.includes("function loadFirebaseScript(index)") ||
     !firebaseSource.includes("loadFirebaseScript(index + 1)") ||
     firebaseSource.includes("scripts.forEach(function(src)")) {

@@ -3,13 +3,13 @@
 // ============================================================
 
 var FIREBASE_CONFIG = {
-  apiKey:            "AIzaSyJtjC40Duw2z07yg4KR6TqILE8S_jNm",
+  apiKey:            "AIzaSyCzJUtjC4ODuw2zO7yg4KR6TqILE05_jNk",
   authDomain:        "yoshimi-smc-portal.firebaseapp.com",
   databaseURL:       "https://yoshimi-smc-portal-default-rtdb.asia-southeast1.firebasedatabase.app",
   projectId:         "yoshimi-smc-portal",
   storageBucket:     "yoshimi-smc-portal.firebasestorage.app",
-  messagingSenderId: "1065203351299",
-  appId:             "1:1065203351299:web:72d49675b0243684922828"
+  messagingSenderId: "155203351289",
+  appId:             "1:155203351289:web:72d49675b0243684922828"
 };
 
 var FIREBASE_READY = false;
