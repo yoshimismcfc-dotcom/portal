@@ -34,6 +34,19 @@ for (const required of [
   "このバックアップへ戻す"
 ]) assert.ok(source.includes(required), "バックアップ復元機能が不足しています: " + required);
 
+for (const required of [
+  "function acceptCurrentUniformInventory()",
+  "現在の在庫で確定",
+  'reason:"recovery_baseline"',
+  'localStorage.setItem(KR,JSON.stringify(baseline))',
+  "復元候補はバックアップへ保存されています"
+]) assert.ok(source.includes(required), "現在の正しい在庫を復元基準にする機能が不足しています: " + required);
+const acceptStart = source.indexOf("function acceptCurrentUniformInventory()");
+const acceptEnd = source.indexOf("function japanDateKey()", acceptStart);
+const acceptBody = source.slice(acceptStart, acceptEnd);
+assert.ok(acceptBody.indexOf('dbSave("uniform_backups/"+archiveId') < acceptBody.indexOf("localStorage.setItem(KR"),
+  "復元候補のバックアップ完了前に現在在庫を確定しないでください");
+
 assert.match(source, /if\(answer!=="復元"\)/,
   "誤操作防止の復元確認が必要です");
 assert.match(source, /saveU\(entry\.items,"backup_restore:"\+entry\.key\)/,
