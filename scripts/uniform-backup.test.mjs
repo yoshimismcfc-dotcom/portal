@@ -46,6 +46,21 @@ const acceptEnd = source.indexOf("function japanDateKey()", acceptStart);
 const acceptBody = source.slice(acceptStart, acceptEnd);
 assert.ok(acceptBody.indexOf('dbSave("uniform_backups/"+archiveId') < acceptBody.indexOf("localStorage.setItem(KR"),
   "復元候補のバックアップ完了前に現在在庫を確定しないでください");
+for (const required of [
+  "function uniformHolderName(item)",
+  "function normalizeUniformLoanRecords(items)",
+  'dbSave("uniform_recovery_baseline",shared,KRB,null)',
+  'dbListen("uniform_recovery_baseline"',
+  "function applySharedUniformRecoveryBaseline()",
+  "この端末だけに復元候補があります",
+  "削除済みの可能性もあるため、内容を確認してから操作してください"
+]) assert.ok(source.includes(required), "貸出状態または全端末の復元基準共有が不足しています: " + required);
+assert.doesNotMatch(source, /var isLent=!!u\.lentTo/,
+  "空白の貸出先を貸出中と判定する旧処理が残っています");
+assert.ok(source.indexOf('id="uniform-recovery"') > source.indexOf('id="modal-uniform-backup"'),
+  "端末固有の復元候補を通常画面へ表示しないでください");
+assert.match(source, /_uniformPersistedSnapshot=cloneUniformItems\(cloudUniforms\)/,
+  "正規化前のクラウド値を競合確認の基準にしてください");
 
 assert.match(source, /if\(answer!=="復元"\)/,
   "誤操作防止の復元確認が必要です");

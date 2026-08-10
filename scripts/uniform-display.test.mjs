@@ -10,10 +10,10 @@ const renderAt = source.indexOf("function renderFolders()");
 if (paletteAt < 0 || renderAt < 0 || syncAt < 0 || !(paletteAt < renderAt && renderAt < syncAt)) {
   throw new Error("ユニフォーム同期は色・一覧描画の定義後に開始してください");
 }
-if (!source.includes('data-label="氏名・状態"') || !source.includes("escapeHtml(u.lentTo||u.player||'—')")) {
+if (!source.includes('data-label="氏名・状態"') || !source.includes("escapeHtml(holder||'—')")) {
   throw new Error("貸出先の氏名を安全に一覧表示する処理がありません");
 }
-if (!source.includes('val.filter(function(item){return item && typeof item==="object";})')) {
+if (!source.includes('val.filter(function(item){return item&&typeof item==="object";})')) {
   throw new Error("Firebase配列内の空要素を除外する処理がありません");
 }
 
@@ -71,7 +71,7 @@ for (const required of [
   "返却する",
   'entry.storageLocation="player"',
   'entry.storageLocation="warehouse"',
-  "u.lentTo||u.player||"
+  "function uniformHolderName(item)"
 ]) {
   if (!source.includes(required)) throw new Error("保管状況の分かりやすい表示・自動判定が不足しています: " + required);
 }
@@ -87,7 +87,7 @@ for (const required of [
   'dbSave("uniform_backups/"+backupId',
   "function ensureUniformCloudReady()",
   'meta&&meta.authoritative',
-  "_uniformPersistedSnapshot=cloneUniformItems(cleanUniforms)",
+  "_uniformPersistedSnapshot=cloneUniformItems(cloudUniforms)",
   "function writeUniformWithConflictCheck(next,expected)",
   'FIREBASE_DB.ref("uniform").transaction',
   "ほかの端末で在庫が更新されました。古いデータでの上書きを停止",
@@ -397,7 +397,7 @@ for (const required of [
   'goalkeeperSingleColor(item.mainColorName||item.cname,item.subColorName)',
   'item.subColorName="";item.subColorCode=""',
   'item.memo=addGoalkeeperMemo(item.memo)',
-  'if(meta&&meta.authoritative&&goalkeeperMigration.changed&&!_uniformWriteInFlight)saveU(_unifData,"goalkeeper_color_migration")',
+  'if(meta&&meta.authoritative&&(goalkeeperMigration.changed||loanMigration.changed)&&!_uniformWriteInFlight)saveU(_unifData,"uniform_data_normalization")',
   'if(meta&&meta.authoritative&&goalkeeperTemplates.changed)dbSave("uniform_color_templates"',
   'class="cf-color-edit-button"',
   "function openFolderColorEdit(colorName)",
