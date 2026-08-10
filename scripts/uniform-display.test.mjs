@@ -98,7 +98,7 @@ for (const required of [
   "function createManualUniformBackup()",
   "function restoreSelectedUniformBackup()",
   'id="modal-uniform-backup"',
-  "🛟 バックアップ・復元",
+  "🔐 管理者用・バックアップ",
   "復元前の現在データも自動保存されます",
   "安全バックアップを作成できなかったため、在庫の変更を中止しました",
   "現在のクラウド在庫へ追加しますか？",

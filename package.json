@@ -1,7 +1,7 @@
 {
   "name": "yoshimi-smc-portal",
   "private": true,
-  "version": "20260810.26.0",
+  "version": "20260810.27.0",
   "scripts": {
     "test": "node scripts/audit.mjs && node scripts/firebase-save.test.mjs && node scripts/tournament-scheduler.test.mjs && node scripts/tournament-guidelines.test.mjs && node scripts/tournament-venue-map.test.mjs && node scripts/usage-counter.test.mjs && node scripts/calendar-attendance.test.mjs && node scripts/game-adjust-status.test.mjs && node scripts/duty-match-editor.test.mjs && node scripts/uniform-display.test.mjs && node scripts/uniform-backup.test.mjs && node scripts/pitch-dimensions.test.mjs"
   },

@@ -14,6 +14,7 @@ var FIREBASE_CONFIG = {
 
 var FIREBASE_READY = false;
 var FIREBASE_DB = null;
+var FIREBASE_AUTH = null;
 var FIREBASE_CALLBACKS = [];
 var FIREBASE_FAILED = false;
 var FIREBASE_SAVE_TIMEOUT = 8000;
@@ -29,7 +30,8 @@ function onFirebaseReady(cb){
 (function(){
   var scripts = [
     "https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js",
-    "https://www.gstatic.com/firebasejs/9.23.0/firebase-database-compat.js"
+    "https://www.gstatic.com/firebasejs/9.23.0/firebase-database-compat.js",
+    "https://www.gstatic.com/firebasejs/9.23.0/firebase-auth-compat.js"
   ];
   var loaded = 0;
 
@@ -42,6 +44,7 @@ function onFirebaseReady(cb){
         try{
           firebase.initializeApp(FIREBASE_CONFIG);
           FIREBASE_DB = firebase.database();
+          FIREBASE_AUTH = firebase.auth();
           FIREBASE_READY = true;
           FIREBASE_CALLBACKS.forEach(function(cb){ cb(FIREBASE_DB); });
           FIREBASE_CALLBACKS = [];

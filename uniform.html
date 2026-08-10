@@ -27,6 +27,14 @@
     .backup-empty{padding:20px 10px;text-align:center;color:var(--ink-3);font-size:.75rem;line-height:1.7}
     .backup-preview{display:none;margin-top:10px;padding:12px;border:1px solid rgba(242,165,50,.55);border-radius:10px;background:rgba(242,165,50,.1);font-size:.74rem;line-height:1.7}
     .backup-preview.show{display:block}.backup-preview strong{color:#ffd58a}.backup-preview .btn{width:100%;margin-top:10px}
+    .admin-gate{padding:18px 14px;border:1px solid var(--line-2);border-radius:12px;background:var(--surface-lt);text-align:center}
+    .admin-gate-icon{font-size:2rem}.admin-gate h4{margin:7px 0;color:var(--ink);font-size:.92rem}.admin-gate p{margin:0 auto 14px;max-width:420px;color:var(--ink-3);font-size:.72rem;line-height:1.65}
+    .admin-gate .btn{width:100%;max-width:360px}.admin-error{display:none;margin:10px 0 0;color:#ff8197;font-size:.7rem;line-height:1.55}.admin-error.show{display:block}
+    .admin-session{display:flex;align-items:center;justify-content:space-between;gap:8px;margin:0 0 12px;padding:9px 11px;border-radius:10px;background:rgba(39,215,134,.1);border:1px solid rgba(39,215,134,.3)}
+    .admin-session span{min-width:0;color:#79e8b5;font-size:.7rem;font-weight:800;overflow-wrap:anywhere}.admin-session .btn{flex:0 0 auto}
+    .admin-handover{margin-top:15px;padding-top:13px;border-top:1px solid var(--line-2)}.admin-handover summary{cursor:pointer;color:var(--ink-2);font-size:.74rem;font-weight:800}
+    .admin-handover p{color:var(--ink-3);font-size:.68rem;line-height:1.55}.admin-request-list{display:grid;gap:7px;margin-top:10px}
+    .admin-request{display:grid;grid-template-columns:minmax(0,1fr) auto;align-items:center;gap:8px;padding:9px;border:1px solid var(--line-2);border-radius:9px;font-size:.68rem}.admin-request strong{display:block;overflow-wrap:anywhere}.admin-request small{color:var(--ink-3)}
     @media(max-width:560px){.uniform-recovery.show{grid-template-columns:1fr}.uniform-recovery-actions{min-width:0}.uniform-recovery .btn{width:100%}.backup-item{grid-template-columns:1fr}.backup-item .btn{width:100%}}
     .stat-card{background:var(--surface-lt);border-radius:var(--r8);padding:12px;text-align:center;border:1px solid var(--line)}
     .stat-card .sv{font-size:1.6rem;font-weight:900;color:#fff}
@@ -438,7 +446,7 @@
   <div style="display:flex;gap:8px;margin:18px 0 14px;flex-wrap:wrap">
     <button class="btn btn-primary" onclick="openAddWithColorPicker()">＋ メイン・サブカラーを選んで追加</button>
     <button class="btn btn-outline btn-sm" onclick="showHistory()">📋 貸出履歴</button>
-    <button class="btn btn-outline btn-sm" onclick="openUniformBackupCenter()">🛟 バックアップ・復元</button>
+    <button class="btn btn-outline btn-sm" onclick="openUniformBackupCenter()">🔐 管理者用・バックアップ</button>
     <button class="btn btn-outline btn-sm" onclick="exportUniformCSV()">📥 CSV出力</button>
     <button class="btn-line-copy sm" onclick="copyUniformList()">📋 LINEコピー</button>
   </div>
@@ -604,7 +612,23 @@
 <!-- 在庫バックアップ・復元モーダル -->
 <div class="modal-bg" id="modal-uniform-backup">
   <div class="modal">
-    <h3>🛟 在庫バックアップ・復元</h3>
+    <h3>🔐 管理者用・在庫バックアップ</h3>
+    <div id="uniform-admin-gate" class="admin-gate">
+      <div class="admin-gate-icon">🛡️</div>
+      <h4>重要な操作は管理者だけが行えます</h4>
+      <p>通常の在庫入力にログインは必要ありません。復元や現在在庫の確定を行う場合だけ、管理者のGoogleアカウントで確認します。</p>
+      <button class="btn btn-primary" type="button" onclick="signInUniformAdmin()">Googleで管理者確認</button>
+      <div id="uniform-admin-error" class="admin-error" role="alert"></div>
+    </div>
+    <div id="uniform-admin-pending" class="admin-gate" style="display:none">
+      <div class="admin-gate-icon">⏳</div>
+      <h4>管理者の承認が必要です</h4>
+      <p id="uniform-admin-pending-message"></p>
+      <button class="btn btn-primary" type="button" onclick="requestUniformAdminAccess()">管理者へ承認を依頼</button>
+      <button class="btn btn-outline btn-sm" type="button" style="margin-top:8px" onclick="signOutUniformAdmin()">別のアカウントを使う</button>
+    </div>
+    <div id="uniform-admin-content" style="display:none">
+    <div class="admin-session"><span id="uniform-admin-account">管理者確認済み</span><button class="btn btn-outline btn-sm" type="button" onclick="signOutUniformAdmin()">ログアウト</button></div>
     <div class="template-guide">在庫を変更するたびに、変更前の状態を自動保存しています。戻したい日時と着数を確認してから復元できます。</div>
     <div class="uniform-recovery" id="uniform-recovery">
       <div><strong>この端末だけに復元候補があります</strong><span id="uniform-recovery-message"></span></div>
@@ -619,6 +643,12 @@
     </div>
     <div class="backup-list" id="uniform-backup-list"><div class="backup-empty">バックアップを読み込んでいます…</div></div>
     <div class="backup-preview" id="uniform-backup-preview"></div>
+    <details class="admin-handover">
+      <summary>管理者の引き継ぎ・副管理者の承認</summary>
+      <p>後任者が自分のGoogleアカウントでログインし「管理者へ承認を依頼」を押すと、ここに表示されます。チーム用主管理者は <strong>Yoshimi.smc.fc@gmail.com</strong> です。</p>
+      <div class="admin-request-list" id="uniform-admin-request-list"><div class="backup-empty">承認待ちを確認しています…</div></div>
+    </details>
+    </div>
     <div class="modal-btns"><button class="btn btn-outline" onclick="closeM('modal-uniform-backup')">閉じる</button></div>
   </div>
 </div>
@@ -731,6 +761,8 @@ var _unifData=[], _histData=[], _colorTemplates=[],_folderOrder=[],_colorCategor
 var _uniformCloudReady=false,_uniformBackupSequence=0,_deviceRecoverySnapshot=null,_uniformPersistedSnapshot=[];
 var _uniformSharedRecoveryBaseline=null;
 var _uniformWriteInFlight=false,_uniformDailyBackupDone=false,_uniformBackupCache={},_selectedUniformBackupKey="";
+var UNIFORM_PRIMARY_ADMIN_EMAIL="yoshimi.smc.fc@gmail.com";
+var _uniformAdminUser=null,_uniformAdminApproved=false,_uniformAdminAuthStarted=false;
 var _conditionFilter="";
 var _uniformView="color";
 var _pairPrimaryColor="",_pairSecondaryColor="";
@@ -806,6 +838,101 @@ function setUniformBackupHealth(message,isError){
   el.textContent=message||"変更前の自動バックアップが有効です";
   el.style.color=isError?"#ff8197":"#79e8b5";
 }
+function normalizeAdminEmail(value){return String(value||"").trim().toLowerCase();}
+function isPrimaryUniformAdmin(user){return !!user&&normalizeAdminEmail(user.email)===UNIFORM_PRIMARY_ADMIN_EMAIL;}
+function showUniformAdminError(message){
+  var el=document.getElementById("uniform-admin-error");if(!el)return;
+  el.textContent=message||"";el.classList.toggle("show",!!message);
+}
+function renderUniformAdminAccess(){
+  var gate=document.getElementById("uniform-admin-gate"),pending=document.getElementById("uniform-admin-pending"),content=document.getElementById("uniform-admin-content"),account=document.getElementById("uniform-admin-account");
+  if(!gate||!pending||!content)return;
+  var signedIn=!!_uniformAdminUser;
+  gate.style.display=!signedIn?"block":"none";
+  pending.style.display=signedIn&&!_uniformAdminApproved?"block":"none";
+  content.style.display=signedIn&&_uniformAdminApproved?"block":"none";
+  if(account&&signedIn)account.textContent="管理者確認済み："+(_uniformAdminUser.email||_uniformAdminUser.displayName||"Googleアカウント");
+  var pendingMessage=document.getElementById("uniform-admin-pending-message");
+  if(pendingMessage&&signedIn)pendingMessage.textContent=(_uniformAdminUser.email||"このアカウント")+" はまだ管理者として承認されていません。承認を依頼した後、現在の管理者に承認してもらってください。";
+}
+function reopenUniformAdminAfterRedirect(){
+  var shouldOpen=false;try{shouldOpen=sessionStorage.getItem("smc_uniform_open_admin")==="1";if(shouldOpen)sessionStorage.removeItem("smc_uniform_open_admin");}catch(error){}
+  if(!shouldOpen)return;
+  document.getElementById("modal-uniform-backup").classList.add("open");renderUniformAdminAccess();
+}
+function setUniformAdminUser(user){
+  _uniformAdminUser=user||null;_uniformAdminApproved=false;renderUniformAdminAccess();reopenUniformAdminAfterRedirect();
+  if(!user||!FIREBASE_DB)return Promise.resolve(false);
+  if(isPrimaryUniformAdmin(user)){
+    _uniformAdminApproved=true;renderUniformAdminAccess();
+    FIREBASE_DB.ref("uniform_admins/"+user.uid).update({email:normalizeAdminEmail(user.email),displayName:user.displayName||"SMC主管理者",active:true,primary:true,lastLoginAt:new Date().toISOString()}).catch(function(){});
+    if(document.getElementById("modal-uniform-backup").classList.contains("open")){loadUniformBackups();loadUniformAdminManagement();}
+    return Promise.resolve(true);
+  }
+  return FIREBASE_DB.ref("uniform_admins/"+user.uid).once("value").then(function(snapshot){
+    var value=snapshot.val();_uniformAdminApproved=!!(value&&value.active===true);renderUniformAdminAccess();
+    if(_uniformAdminApproved&&document.getElementById("modal-uniform-backup").classList.contains("open")){loadUniformBackups();loadUniformAdminManagement();}
+    return _uniformAdminApproved;
+  }).catch(function(){renderUniformAdminAccess();return false;});
+}
+function setupUniformAdminAuth(){
+  if(_uniformAdminAuthStarted)return;_uniformAdminAuthStarted=true;
+  onFirebaseReady(function(){
+    if(!FIREBASE_AUTH){showUniformAdminError("管理者認証を開始できませんでした。時間をおいて再度お試しください。");return;}
+    FIREBASE_AUTH.onAuthStateChanged(function(user){setUniformAdminUser(user);});
+    FIREBASE_AUTH.getRedirectResult().catch(function(error){handleUniformAdminAuthError(error);});
+  });
+}
+function handleUniformAdminAuthError(error){
+  var code=error&&error.code||"",message="管理者確認に失敗しました。もう一度お試しください。";
+  if(code==="auth/operation-not-allowed")message="Googleログインの初期設定がまだ完了していません。FirebaseでGoogleログインを有効にしてください。";
+  else if(code==="auth/unauthorized-domain")message="このアプリのURLがGoogleログインの許可ドメインに登録されていません。管理者へ連絡してください。";
+  else if(code==="auth/network-request-failed")message="通信状態を確認して、もう一度お試しください。";
+  showUniformAdminError(message);
+}
+function signInUniformAdmin(){
+  showUniformAdminError("");
+  if(!FIREBASE_AUTH||!window.firebase||!firebase.auth){showUniformAdminError("認証機能を読み込んでいます。数秒後にもう一度お試しください。");return;}
+  try{
+    sessionStorage.setItem("smc_uniform_open_admin","1");
+    var provider=new firebase.auth.GoogleAuthProvider();provider.setCustomParameters({prompt:"select_account"});
+    FIREBASE_AUTH.signInWithRedirect(provider).catch(handleUniformAdminAuthError);
+  }catch(error){handleUniformAdminAuthError(error);}
+}
+function signOutUniformAdmin(){
+  if(!FIREBASE_AUTH)return;
+  FIREBASE_AUTH.signOut().then(function(){_uniformAdminUser=null;_uniformAdminApproved=false;renderUniformAdminAccess();});
+}
+function requireUniformAdmin(){
+  if(_uniformAdminUser&&_uniformAdminApproved)return true;
+  renderUniformAdminAccess();alert("この操作には管理者の確認が必要です。");return false;
+}
+function requestUniformAdminAccess(){
+  if(!_uniformAdminUser||!FIREBASE_DB)return;
+  var request={uid:_uniformAdminUser.uid,email:normalizeAdminEmail(_uniformAdminUser.email),displayName:_uniformAdminUser.displayName||"",requestedAt:new Date().toISOString(),status:"pending"};
+  FIREBASE_DB.ref("uniform_admin_requests/"+_uniformAdminUser.uid).set(request).then(function(){alert("管理者へ承認依頼を登録しました。現在の管理者に承認をお願いしてください。");}).catch(function(){alert("承認依頼を保存できませんでした。通信状態を確認してください。");});
+}
+function recordUniformAdminAudit(action,detail){
+  if(!_uniformAdminUser||!_uniformAdminApproved||!FIREBASE_DB)return Promise.resolve();
+  return FIREBASE_DB.ref("uniform_admin_audit").push({action:action,detail:detail||{},performedAt:new Date().toISOString(),performedByUid:_uniformAdminUser.uid,performedByEmail:normalizeAdminEmail(_uniformAdminUser.email)}).catch(function(){});
+}
+function loadUniformAdminManagement(){
+  var list=document.getElementById("uniform-admin-request-list");if(!list||!requireUniformAdmin()||!FIREBASE_DB)return;
+  Promise.all([FIREBASE_DB.ref("uniform_admins").once("value"),FIREBASE_DB.ref("uniform_admin_requests").once("value")]).then(function(results){
+    var admins=results[0].val()||{},requests=results[1].val()||{},rows=[];
+    Object.keys(admins).forEach(function(uid){var admin=admins[uid]||{};if(admin.active!==true)return;var primary=admin.primary===true||normalizeAdminEmail(admin.email)===UNIFORM_PRIMARY_ADMIN_EMAIL;rows.push('<div class="admin-request"><div><strong>'+escapeHtml(admin.email||admin.displayName||"管理者")+'</strong><small>'+(primary?'チーム用主管理者':'承認済み管理者')+'</small></div>'+(primary?'':'<button class="btn btn-outline btn-sm" type="button" onclick="removeUniformAdmin('+inlineJsArg(uid)+')">解除</button>')+'</div>');});
+    Object.keys(requests).forEach(function(uid){var request=requests[uid]||{};if(request.status!=="pending"||admins[uid]&&admins[uid].active===true)return;rows.push('<div class="admin-request"><div><strong>'+escapeHtml(request.email||request.displayName||"承認依頼")+'</strong><small>管理者の承認待ち</small></div><button class="btn btn-primary btn-sm" type="button" onclick="approveUniformAdmin('+inlineJsArg(uid)+')">承認</button></div>');});
+    list.innerHTML=rows.length?rows.join(""):'<div class="backup-empty">承認待ちの申請はありません。</div>';
+  }).catch(function(){list.innerHTML='<div class="backup-empty">管理者情報を読み込めませんでした。</div>';});
+}
+function approveUniformAdmin(uid){
+  if(!requireUniformAdmin()||!FIREBASE_DB)return;
+  FIREBASE_DB.ref("uniform_admin_requests/"+uid).once("value").then(function(snapshot){var request=snapshot.val();if(!request||request.status!=="pending")throw new Error("承認依頼が見つかりません。");return FIREBASE_DB.ref().update((function(){var updates={};updates["uniform_admins/"+uid]={email:normalizeAdminEmail(request.email),displayName:request.displayName||"",active:true,primary:false,approvedAt:new Date().toISOString(),approvedBy:_uniformAdminUser.uid};updates["uniform_admin_requests/"+uid+"/status"]="approved";return updates;})());}).then(function(){recordUniformAdminAudit("admin_approved",{targetUid:uid});alert("副管理者として承認しました。");loadUniformAdminManagement();}).catch(function(error){alert(error&&error.message?error.message:"管理者を承認できませんでした。");});
+}
+function removeUniformAdmin(uid){
+  if(!requireUniformAdmin()||!FIREBASE_DB||!confirm("この副管理者の権限を解除しますか？"))return;
+  FIREBASE_DB.ref("uniform_admins/"+uid+"/active").set(false).then(function(){recordUniformAdminAudit("admin_removed",{targetUid:uid});loadUniformAdminManagement();}).catch(function(){alert("管理者権限を解除できませんでした。");});
+}
 function readUniformCloud(){
   return new Promise(function(resolve){
     if(!FIREBASE_READY||!FIREBASE_DB){resolve({ok:false,error:new Error("クラウドへ接続できません。")});return;}
@@ -875,17 +1002,17 @@ function saveU(d,reason){
   });
 }
 function restoreDeviceInventory(){
-  if(!ensureUniformCloudReady())return;
+  if(!requireUniformAdmin()||!ensureUniformCloudReady())return;
   var missing=missingDeviceUniforms();
   if(!missing.length){renderUniformRecovery();alert("復元が必要な在庫はありません。");return;}
   if(!confirm("この端末に残っている "+missing.length+"着を、現在のクラウド在庫へ追加しますか？\n現在の"+loadU().length+"着は削除・変更しません。"))return;
   var merged=loadU().concat(missing.map(function(item){return Object.assign({},item);}));
   saveU(merged,"device_recovery").then(function(result){
-    if(result&&result.ok){render();renderUniformRecovery();alert(missing.length+"着を復元しました。");}
+    if(result&&result.ok){recordUniformAdminAudit("device_inventory_restored",{addedCount:missing.length,beforeCount:merged.length-missing.length,afterCount:merged.length});render();renderUniformRecovery();alert(missing.length+"着を復元しました。");}
   });
 }
 function acceptCurrentUniformInventory(){
-  if(!ensureUniformCloudReady())return;
+  if(!requireUniformAdmin()||!ensureUniformCloudReady())return;
   var missing=missingDeviceUniforms(),currentCount=loadU().length;
   if(!missing.length){renderUniformRecovery();alert("復元候補はありません。現在の在庫が基準になっています。");return;}
   if(!confirm("現在のクラウド在庫 "+currentCount+"着を、正しい在庫として確定しますか？\n\n復元候補 "+missing.length+"着は通常画面に表示しなくなります。候補データは確定前バックアップへ保存するため、必要な場合は後から確認・復元できます。"))return;
@@ -911,7 +1038,7 @@ function acceptCurrentUniformInventory(){
     var baseline={capturedAt:new Date().toISOString(),acceptedAt:new Date().toISOString(),items:cloneUniformItems(saved.items)};
     localStorage.setItem(KR,JSON.stringify(baseline));
     _deviceRecoverySnapshot=baseline;
-    renderUniformRecovery();setUniformBackupHealth("現在の在庫を基準として確定済み・バックアップ保護中",false);
+    recordUniformAdminAudit("current_inventory_accepted",{itemCount:saved.items.length,recoveryCandidateCount:missing.length});renderUniformRecovery();setUniformBackupHealth("現在の在庫を基準として確定済み・バックアップ保護中",false);
     alert("現在の "+saved.items.length+"着を正しい在庫として確定しました。\n復元候補はバックアップへ保存されています。");
   }).catch(function(error){
     setUniformBackupHealth("現在の在庫を確定できませんでした",true);
@@ -956,10 +1083,12 @@ function backupDateLabel(value,key){
 function openUniformBackupCenter(){
   if(!ensureUniformCloudReady())return;
   _selectedUniformBackupKey="";document.getElementById("uniform-backup-preview").classList.remove("show");
-  renderUniformRecovery();document.getElementById("modal-uniform-backup").classList.add("open");loadUniformBackups();
+  renderUniformRecovery();renderUniformAdminAccess();document.getElementById("modal-uniform-backup").classList.add("open");
+  if(_uniformAdminUser&&_uniformAdminApproved){loadUniformBackups();loadUniformAdminManagement();}
 }
 function loadUniformBackups(){
   var list=document.getElementById("uniform-backup-list");if(!list)return;
+  if(!requireUniformAdmin()){list.innerHTML='<div class="backup-empty">管理者の確認が必要です。</div>';return;}
   list.innerHTML='<div class="backup-empty">バックアップを読み込んでいます…</div>';
   if(!FIREBASE_READY||!FIREBASE_DB){list.innerHTML='<div class="backup-empty">クラウドへ接続できません。</div>';return;}
   FIREBASE_DB.ref("uniform_backups").once("value").then(function(snapshot){
@@ -975,6 +1104,7 @@ function loadUniformBackups(){
   }).catch(function(){list.innerHTML='<div class="backup-empty">バックアップを読み込めませんでした。通信状態を確認してください。</div>';});
 }
 function selectUniformBackup(encodedKey){
+  if(!requireUniformAdmin())return;
   var key=decodeURIComponent(encodedKey||""),entry=_uniformBackupCache[key],preview=document.getElementById("uniform-backup-preview");if(!entry||!preview)return;
   _selectedUniformBackupKey=key;
   var current=loadU().length,difference=entry.count-current,diffText=difference===0?"現在と同じ着数です":difference>0?"現在より "+difference+"着多いデータです":"現在より "+Math.abs(difference)+"着少ないデータです";
@@ -982,22 +1112,24 @@ function selectUniformBackup(encodedKey){
   preview.classList.add("show");preview.scrollIntoView({behavior:"smooth",block:"nearest"});
 }
 function createManualUniformBackup(){
-  if(!ensureUniformCloudReady())return;
+  if(!requireUniformAdmin()||!ensureUniformCloudReady())return;
   readUniformCloud().then(function(cloud){
     if(!cloud.ok)throw cloud.error||new Error("最新在庫を確認できませんでした。");
     var id="manual_"+Date.now(),backup={createdAt:new Date().toISOString(),reason:"manual",itemCount:cloud.items.length,schemaVersion:2,items:cloneUniformItems(cloud.items)};
     return dbSave("uniform_backups/"+id,backup,null,null);
-  }).then(function(result){if(result&&result.ok){alert("現在の在庫をバックアップしました。");loadUniformBackups();}else throw new Error("バックアップを保存できませんでした。");}).catch(function(error){alert(error&&error.message?error.message:"バックアップを保存できませんでした。");});
+  }).then(function(result){if(result&&result.ok){recordUniformAdminAudit("manual_backup_created",{itemCount:loadU().length});alert("現在の在庫をバックアップしました。");loadUniformBackups();}else throw new Error("バックアップを保存できませんでした。");}).catch(function(error){alert(error&&error.message?error.message:"バックアップを保存できませんでした。");});
 }
 function restoreSelectedUniformBackup(){
-  var entry=_uniformBackupCache[_selectedUniformBackupKey];if(!entry||!ensureUniformCloudReady())return;
-  var answer=prompt("現在の "+loadU().length+"着を、選択した "+entry.count+"着の状態へ戻します。\n復元前の現在データも自動保存されます。\n実行する場合は『復元』と入力してください。");
+  var entry=_uniformBackupCache[_selectedUniformBackupKey];if(!requireUniformAdmin()||!entry||!ensureUniformCloudReady())return;
+  var beforeCount=loadU().length;
+  var answer=prompt("現在の "+beforeCount+"着を、選択した "+entry.count+"着の状態へ戻します。\n復元前の現在データも自動保存されます。\n実行する場合は『復元』と入力してください。");
   if(answer!=="復元"){if(answer!==null)alert("入力が一致しないため、復元を中止しました。");return;}
   saveU(entry.items,"backup_restore:"+entry.key).then(function(result){
-    if(result&&result.ok){render();alert(entry.count+"着のバックアップへ復元しました。復元前の状態もバックアップから戻せます。");loadUniformBackups();}
+    if(result&&result.ok){recordUniformAdminAudit("backup_restored",{backupKey:entry.key,beforeCount:beforeCount,restoredCount:entry.count});render();alert(entry.count+"着のバックアップへ復元しました。復元前の状態もバックアップから戻せます。");loadUniformBackups();}
   });
 }
 captureDeviceUniformSnapshot();
+setupUniformAdminAuth();
 function loadH(){ return _histData; }
 function saveH(d){
   _histData=d;

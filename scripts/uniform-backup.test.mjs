@@ -66,6 +66,21 @@ assert.match(source, /if\(answer!=="復元"\)/,
   "誤操作防止の復元確認が必要です");
 assert.match(source, /saveU\(entry\.items,"backup_restore:"\+entry\.key\)/,
   "復元も通常の安全保存経路を使用してください");
+for (const protectedFunction of ["restoreDeviceInventory","acceptCurrentUniformInventory","createManualUniformBackup","restoreSelectedUniformBackup"]) {
+  const start = source.indexOf("function " + protectedFunction + "(");
+  assert.ok(start >= 0 && source.slice(start, start + 230).includes("requireUniformAdmin()"),
+    protectedFunction + " は管理者確認を必須にしてください");
+}
+for (const required of [
+  'UNIFORM_PRIMARY_ADMIN_EMAIL="yoshimi.smc.fc@gmail.com"',
+  "function signInUniformAdmin()",
+  "function requestUniformAdminAccess()",
+  "function approveUniformAdmin(uid)",
+  "function removeUniformAdmin(uid)",
+  'FIREBASE_DB.ref("uniform_admin_audit")',
+  "Googleで管理者確認",
+  "管理者の引き継ぎ・副管理者の承認"
+]) assert.ok(source.includes(required), "管理者認証・引き継ぎ機能が不足しています: " + required);
 assert.match(source, /if\(!result\|\|!result\.ok\)return;[\s\S]{0,500}saveH\(history\)/,
   "在庫保存に失敗した場合は履歴を追加しないでください");
 
