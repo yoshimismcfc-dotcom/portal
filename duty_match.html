@@ -53,8 +53,13 @@
     /* 状態バッジ（小さく） */
     .st{display:inline-block;font-size:.7rem;font-weight:900;padding:2px 8px;border-radius:99px;white-space:nowrap;flex-shrink:0}
     .st-done{background:rgba(0,204,102,.2);color:#00cc66;border:1px solid rgba(0,204,102,.3)}
+    .st-planned{background:rgba(0,160,255,.17);color:#68c9ff;border:1px solid rgba(0,160,255,.35)}
     .st-yet {background:rgba(255,204,0,.15);color:#ffcc00;border:1px solid rgba(255,204,0,.25)}
     .st-na  {background:rgba(255,255,255,.07);color:#96a9c4;border:1px solid rgba(255,255,255,.12)}
+    body[data-theme="light"] .st-done{color:#08783f;background:#e5f7ed;border-color:#46a977}
+    body[data-theme="light"] .st-planned{color:#075f90;background:#e5f5ff;border-color:#579ac0}
+    body[data-theme="light"] .st-yet{color:#745700;background:#fff6d6;border-color:#b99621}
+    body[data-theme="light"] .st-na{color:#526174;background:#edf1f5;border-color:#9aa8b8}
 
     /* サマリー */
     .sum-bar{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:12px}
@@ -103,11 +108,7 @@
       .mc-body-actions .btn,.mc-body-actions .btn-line-copy{padding:6px 8px!important;font-size:.65rem!important;min-height:34px!important}
     }
 
-    /* 担当者追加エリア（モーダル内） */
-    .person-add-row{display:flex;gap:6px;margin-bottom:8px}
-    .person-chips-edit{display:flex;flex-wrap:wrap;gap:5px;min-height:28px;padding:6px;background:rgba(0,0,0,.15);border-radius:8px;border:1px solid var(--line)}
-    .person-chip-edit{display:inline-flex;align-items:center;gap:4px;background:rgba(0,80,200,.3);border:1px solid rgba(0,130,255,.4);color:#88ccff;border-radius:99px;padding:3px 10px;font-size:.76rem;font-weight:700}
-    .person-chip-edit .dp{background:none;border:none;color:rgba(255,100,100,.7);cursor:pointer;font-size:.8rem;padding:0 0 0 4px}
+    .person-input-help{margin-top:6px;color:var(--ink-3);font-size:.68rem;line-height:1.45}
 
     /* 状態セレクト（小さく） */
     .st-select{border-radius:6px;border:1px solid var(--line-2);background:var(--surface-lt);color:var(--ink);font:inherit;font-size:.78rem;padding:4px 8px;cursor:pointer}
@@ -173,8 +174,8 @@
 
   <div class="sum-bar">
     <div class="sum-chip"><div class="sum-n" id="s-total" style="color:var(--cyan)">0</div><div class="sum-l">登録大会数</div></div>
-    <div class="sum-chip"><div class="sum-n" id="s-done" style="color:#00cc66">0</div><div class="sum-l">確定</div></div>
-    <div class="sum-chip"><div class="sum-n" id="s-yet" style="color:#ffcc00">0</div><div class="sum-l">未確定</div></div>
+    <div class="sum-chip"><div class="sum-n" id="s-done" style="color:#00cc66">0</div><div class="sum-l">対応済み</div></div>
+    <div class="sum-chip"><div class="sum-n" id="s-yet" style="color:#ffcc00">0</div><div class="sum-l">未完了</div></div>
   </div>
 
   <div class="add-match-btn" onclick="openAddMatch()">
@@ -230,21 +231,19 @@
       </div>
     </div>
     <div class="form-group">
-      <label class="form-label">担当者（複数可・ひとりずつ追加）</label>
-      <div class="person-add-row">
-        <input class="form-control" id="md-person-input" placeholder="例：武部コーチ" style="flex:1" onkeydown="if(event.key==='Enter'){addPerson();event.preventDefault();}">
-        <button class="btn btn-outline btn-sm" onclick="addPerson()">＋ 追加</button>
-      </div>
-      <div class="person-chips-edit" id="md-persons"></div>
+      <label class="form-label" for="md-person-input">担当者</label>
+      <input class="form-control" id="md-person-input" placeholder="例：武部コーチ、石川コーチ">
+      <div class="person-input-help">複数人の場合は「、」で区切って入力してください。この画面の「保存」だけで全員反映されます。</div>
     </div>
     <div class="g2">
       <div class="form-group"><label class="form-label">時間・目安</label>
         <input class="form-control" id="md-time" placeholder="例：7:30・前日"></div>
       <div class="form-group"><label class="form-label">状態</label>
         <select class="form-control st-select" id="md-status">
-          <option value="yet">⏳ 未</option>
-          <option value="done">✅ 確</option>
-          <option value="na">— 外</option>
+          <option value="done">✅ 対応済み</option>
+          <option value="planned">📅 対応予定</option>
+          <option value="yet">⏳ 未定</option>
+          <option value="na">— 対象外</option>
         </select>
       </div>
     </div>
@@ -279,7 +278,6 @@ var _data = [];
 var _editMatchId = null;
 var _editDutyMatchId = null;
 var _editDutyKey = null;
-var _editPersons = [];
 var LINK_CONTEXT = (function(){
   var params = new URLSearchParams(location.search);
   return {
@@ -349,9 +347,10 @@ function save(){ localStorage.setItem(KEY, JSON.stringify(_data)); dbSave("duty_
 function esc(s){ return escapeHtml(s); }
 
 function stBadge(st){
-  if(st==="done") return '<span class="st st-done">✅ 確</span>';
-  if(st==="na")   return '<span class="st st-na">— 外</span>';
-  return '<span class="st st-yet">⏳ 未</span>';
+  if(st==="done") return '<span class="st st-done">✅ 対応済み</span>';
+  if(st==="planned") return '<span class="st st-planned">📅 対応予定</span>';
+  if(st==="na")   return '<span class="st st-na">— 対象外</span>';
+  return '<span class="st st-yet">⏳ 未定</span>';
 }
 
 function renderLinkedContextPanel(allMatches){
@@ -379,7 +378,7 @@ function render(){
   sorted.forEach(function(m){
     (m.duties||[]).forEach(function(d){
       if(d.status==="done") td++;
-      else if(d.status==="yet") ty++;
+      else if(d.status!=="na") ty++;
     });
   });
   document.getElementById("s-total").textContent = sorted.length;
@@ -509,24 +508,13 @@ function deleteMatch(){
   save(); closeM("modal-match"); render();
 }
 
-/* ===== 担当者（モーダル内） ===== */
-function renderPersonChips(){
-  var wrap = document.getElementById("md-persons");
-  wrap.innerHTML = _editPersons.map(function(p,i){
-    return '<span class="person-chip-edit">'+esc(p)+'<button class="dp" onclick="removePerson('+i+')">×</button></span>';
-  }).join("");
-}
-function addPerson(){
-  var inp = document.getElementById("md-person-input");
-  var val = inp.value.trim();
-  if(!val) return;
-  if(_editPersons.indexOf(val)===-1) _editPersons.push(val);
-  inp.value = "";
-  renderPersonChips();
-}
-function removePerson(i){
-  _editPersons.splice(i,1);
-  renderPersonChips();
+/* ===== 担当者（保存時に一括反映） ===== */
+function readPersonsInput(){
+  var value = document.getElementById("md-person-input").value.trim();
+  if(!value) return [];
+  return value.split(/[、,，・\n]+/).map(function(name){ return name.trim(); }).filter(function(name,index,list){
+    return name && list.indexOf(name)===index;
+  });
 }
 
 /* ===== 任務 ===== */
@@ -534,7 +522,6 @@ function openEditDuty(matchId, dutyKey){
   var m = _data.find(function(x){ return x.id===matchId; }); if(!m) return;
   var d = (m.duties||[]).find(function(x){ return x.key===dutyKey; }); if(!d) return;
   _editDutyMatchId = matchId; _editDutyKey = dutyKey;
-  _editPersons = (d.persons||[]).slice();
   document.getElementById("md-title").textContent = d.icon+" "+d.label;
   document.getElementById("md-icon").value = d.icon;
   document.getElementById("md-label").value = d.label;
@@ -542,8 +529,7 @@ function openEditDuty(matchId, dutyKey){
   document.getElementById("md-status").value = d.status||"yet";
   document.getElementById("md-memo").value = d.memo||"";
   document.getElementById("md-del").style.display = "inline-flex";
-  document.getElementById("md-person-input").value = "";
-  renderPersonChips();
+  document.getElementById("md-person-input").value = (d.persons||[]).join("、");
   document.getElementById("modal-duty").classList.add("open");
 }
 function openEditDutyPersons(matchId, dutyKey){
@@ -556,7 +542,6 @@ function openEditDutyPersons(matchId, dutyKey){
 function openAddDuty(matchId){
   var m = _data.find(function(x){ return x.id===matchId; }); if(!m) return;
   _editDutyMatchId = matchId; _editDutyKey = null;
-  _editPersons = [];
   document.getElementById("md-title").textContent = "任務を追加";
   document.getElementById("md-icon").value = "📋";
   document.getElementById("md-label").value = "";
@@ -565,7 +550,6 @@ function openAddDuty(matchId){
   document.getElementById("md-memo").value = "";
   document.getElementById("md-del").style.display = "none";
   document.getElementById("md-person-input").value = "";
-  renderPersonChips();
   document.getElementById("modal-duty").classList.add("open");
 }
 function saveDuty(){
@@ -573,7 +557,7 @@ function saveDuty(){
   if(!label){ alert("任務名を入力してください"); return; }
   var m = _data.find(function(x){ return x.id===_editDutyMatchId; }); if(!m) return;
   if(!m.duties) m.duties=[];
-  var entry = { key: _editDutyKey||"d"+Date.now(), icon:document.getElementById("md-icon").value, label:label, persons:_editPersons.slice(), time:document.getElementById("md-time").value.trim(), status:document.getElementById("md-status").value, memo:document.getElementById("md-memo").value.trim() };
+  var entry = { key: _editDutyKey||"d"+Date.now(), icon:document.getElementById("md-icon").value, label:label, persons:readPersonsInput(), time:document.getElementById("md-time").value.trim(), status:document.getElementById("md-status").value, memo:document.getElementById("md-memo").value.trim() };
   if(_editDutyKey){
     var idx = m.duties.findIndex(function(x){ return x.key===_editDutyKey; });
     if(idx>=0) m.duties[idx]=entry; else m.duties.push(entry);
@@ -598,7 +582,8 @@ function copyText(id){
   t += "\n";
   (m.duties||[]).forEach(function(d){
     if(d.status==="na") return;
-    t += (d.status==="done"?"✅":"⏳")+" "+d.icon+" "+d.label+"\n";
+    var statusText=d.status==="done"?"✅ 対応済み":d.status==="planned"?"📅 対応予定":"⏳ 未定";
+    t += statusText+"｜"+d.icon+" "+d.label+"\n";
     if((d.persons||[]).length) t += "   担当："+d.persons.join("・")+"\n";
     if(d.time) t += "   時間："+d.time+"\n";
     if(d.memo) t += "   メモ："+d.memo+"\n";
@@ -637,7 +622,7 @@ document.getElementById("modal-duty").addEventListener("click",function(e){if(e.
       var duties=record&&Array.isArray(record.duties)?record.duties:[];
       var done=duties.filter(function(item){return item.status==="done";}).length;
       var total=duties.filter(function(item){return item.status!=="na";}).length;
-      var status=record?(done+"/"+total+" 確定"):"未作成";
+      var status=record?(done+"/"+total+" 対応済み"):"未作成";
       return '<a class="linked-date-card'+(LINK_CONTEXT.dateId===d.id?' active':'')+'" href="'+escapeHtml(SMCEventLinks.href("duty_match.html",d))+'">'
         +'<span style="min-width:0"><span class="linked-date-card-title">'+escapeHtml(SMCEventLinks.label(d))+(d.tournamentName?'｜'+escapeHtml(d.tournamentName):'')+'</span>'
         +'<span class="linked-date-card-meta">'+escapeHtml(d.cat||"カテゴリー未設定")+'</span></span>'
