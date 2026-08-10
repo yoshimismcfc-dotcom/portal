@@ -33,6 +33,15 @@ for (const required of [
   "現在の在庫を保存",
   "このバックアップへ戻す"
 ]) assert.ok(source.includes(required), "バックアップ復元機能が不足しています: " + required);
+for (const required of [
+  "function backupTimestamp(value,key)",
+  "entries.sort(function(a,b){return b.timestamp-a.timestamp",
+  "UNIFORM_BACKUP_RETENTION={change:30,daily:30,manual:15,recovery:20}",
+  "function expiredUniformBackupKeys(entries)",
+  "function pruneUniformBackups(entries)",
+  'id="uniform-backup-storage-status"',
+  "新しい日付順"
+]) assert.ok(source.includes(required), "バックアップの日付順表示または無料枠向け世代管理が不足しています: " + required);
 
 for (const required of [
   "function acceptCurrentUniformInventory()",

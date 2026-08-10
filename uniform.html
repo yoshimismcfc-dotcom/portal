@@ -25,6 +25,8 @@
     .backup-item{display:grid;grid-template-columns:minmax(0,1fr) auto;gap:8px;align-items:center;padding:11px;border:1px solid var(--line-2);border-radius:10px;background:rgba(255,255,255,.04)}
     .backup-item strong{display:block;color:var(--ink);font-size:.78rem}.backup-item span{display:block;margin-top:3px;color:var(--ink-3);font-size:.66rem;line-height:1.45}
     .backup-empty{padding:20px 10px;text-align:center;color:var(--ink-3);font-size:.75rem;line-height:1.7}
+    .backup-storage-status{margin:10px 0 2px;padding:9px 11px;border:1px solid rgba(0,212,255,.3);border-radius:9px;background:rgba(0,128,180,.1);color:var(--ink-2);font-size:.68rem;font-weight:800;line-height:1.55}
+    .backup-storage-status strong{color:#66e8ff}
     .backup-preview{display:none;margin-top:10px;padding:12px;border:1px solid rgba(242,165,50,.55);border-radius:10px;background:rgba(242,165,50,.1);font-size:.74rem;line-height:1.7}
     .backup-preview.show{display:block}.backup-preview strong{color:#ffd58a}.backup-preview .btn{width:100%;margin-top:10px}
     .admin-gate{padding:18px 14px;border:1px solid var(--line-2);border-radius:12px;background:var(--surface-lt);text-align:center}
@@ -641,6 +643,7 @@
       <button class="btn btn-outline btn-sm" type="button" onclick="createManualUniformBackup()">現在の在庫を保存</button>
       <button class="btn btn-outline btn-sm" type="button" onclick="loadUniformBackups()">一覧を更新</button>
     </div>
+    <div class="backup-storage-status" id="uniform-backup-storage-status"><strong>新しい日付順</strong>で表示します。古い自動保存は無料枠を守るため定期整理します。</div>
     <div class="backup-list" id="uniform-backup-list"><div class="backup-empty">バックアップを読み込んでいます…</div></div>
     <div class="backup-preview" id="uniform-backup-preview"></div>
     <details class="admin-handover">
@@ -1084,6 +1087,51 @@ function backupDateLabel(value,key){
   if(!match)return "日時不明";
   var d=match[1],t=match[2]||"";return d.slice(0,4)+"/"+d.slice(4,6)+"/"+d.slice(6,8)+(t?" "+t.slice(0,2)+":"+t.slice(2,4):"");
 }
+function backupTimestamp(value,key){
+  var raw=value&&!Array.isArray(value)&&value.createdAt||"",parsed=raw?Date.parse(raw):NaN;
+  if(Number.isFinite(parsed))return parsed;
+  var keyText=String(key||""),epoch=keyText.match(/(?:^|_)(1\d{12})(?:_|$)/);
+  if(epoch)return Number(epoch[1]);
+  var compact=keyText.match(/(20\d{6})[_-]?(\d{6})?/);
+  if(compact){
+    var d=compact[1],t=compact[2]||"000000";
+    return Date.UTC(Number(d.slice(0,4)),Number(d.slice(4,6))-1,Number(d.slice(6,8)),Number(t.slice(0,2))-9,Number(t.slice(2,4)),Number(t.slice(4,6)));
+  }
+  var daily=keyText.match(/daily_(20\d{2})-(\d{2})-(\d{2})/);
+  if(daily)return Date.UTC(Number(daily[1]),Number(daily[2])-1,Number(daily[3]),-9);
+  return 0;
+}
+var UNIFORM_BACKUP_RETENTION={change:30,daily:30,manual:15,recovery:20};
+function uniformBackupCategory(entry){
+  if(Array.isArray(entry.value))return "legacy";
+  var reason=String(entry.value&&entry.value.reason||""),key=String(entry.key||"");
+  if(reason==="manual"||key.indexOf("manual_")===0)return "manual";
+  if(reason==="daily_open"||key.indexOf("daily_")===0)return "daily";
+  if(reason==="device_recovery"||reason==="recovery_baseline"||reason.indexOf("backup_restore:")===0||/^(pre_restore_|post_restore_|recovery_)/.test(key))return "recovery";
+  return "change";
+}
+function expiredUniformBackupKeys(entries){
+  var counts={change:0,daily:0,manual:0,recovery:0},expired=[];
+  entries.forEach(function(entry){
+    var category=uniformBackupCategory(entry),limit=UNIFORM_BACKUP_RETENTION[category];
+    if(!limit)return;
+    counts[category]+=1;if(counts[category]>limit)expired.push(entry.key);
+  });
+  return expired;
+}
+function approximateBackupBytes(values){
+  try{return new Blob([JSON.stringify(values||{})]).size;}catch(error){return JSON.stringify(values||{}).length;}
+}
+function formatBackupBytes(bytes){
+  if(bytes<1024)return bytes+"B";
+  if(bytes<1024*1024)return Math.round(bytes/1024)+"KB";
+  return (bytes/1024/1024).toFixed(1)+"MB";
+}
+function pruneUniformBackups(entries){
+  var expired=expiredUniformBackupKeys(entries);if(!expired.length)return Promise.resolve(0);
+  var updates={};expired.forEach(function(key){updates[key]=null;});
+  return FIREBASE_DB.ref("uniform_backups").update(updates).then(function(){return expired.length;});
+}
 function openUniformBackupCenter(){
   if(!ensureUniformCloudReady())return;
   _selectedUniformBackupKey="";document.getElementById("uniform-backup-preview").classList.remove("show");
@@ -1091,20 +1139,24 @@ function openUniformBackupCenter(){
   if(_uniformAdminUser&&_uniformAdminApproved){loadUniformBackups();loadUniformAdminManagement();}
 }
 function loadUniformBackups(){
-  var list=document.getElementById("uniform-backup-list");if(!list)return;
+  var list=document.getElementById("uniform-backup-list"),status=document.getElementById("uniform-backup-storage-status");if(!list)return;
   if(!requireUniformAdmin()){list.innerHTML='<div class="backup-empty">管理者の確認が必要です。</div>';return;}
   list.innerHTML='<div class="backup-empty">バックアップを読み込んでいます…</div>';
   if(!FIREBASE_READY||!FIREBASE_DB){list.innerHTML='<div class="backup-empty">クラウドへ接続できません。</div>';return;}
   FIREBASE_DB.ref("uniform_backups").once("value").then(function(snapshot){
     var values=snapshot.val()||{},entries=Object.keys(values).map(function(key){
-      var value=values[key],items=backupItemsFromValue(value);return {key:key,value:value,items:items,date:value&&value.createdAt||"",count:items.length};
+      var value=values[key],items=backupItemsFromValue(value);return {key:key,value:value,items:items,timestamp:backupTimestamp(value,key),count:items.length};
     }).filter(function(entry){return entry.items.length||entry.value&&entry.value.itemCount===0;});
-    entries.sort(function(a,b){return String(b.date||b.key).localeCompare(String(a.date||a.key));});
-    entries=entries.slice(0,30);_uniformBackupCache={};entries.forEach(function(entry){_uniformBackupCache[entry.key]=entry;});
-    if(!entries.length){list.innerHTML='<div class="backup-empty">利用できるバックアップはまだありません。</div>';return;}
-    list.innerHTML=entries.map(function(entry){
+    entries.sort(function(a,b){return b.timestamp-a.timestamp||String(b.key).localeCompare(String(a.key));});
+    var totalCount=entries.length,totalBytes=approximateBackupBytes(values),expiredKeys=expiredUniformBackupKeys(entries),expiredSet={};expiredKeys.forEach(function(key){expiredSet[key]=true;});
+    var retained=entries.filter(function(entry){return !expiredSet[entry.key];}),visibleEntries=retained.slice(0,30);
+    _uniformBackupCache={};visibleEntries.forEach(function(entry){_uniformBackupCache[entry.key]=entry;});
+    if(status)status.innerHTML='<strong>新しい日付順</strong>・'+totalCount+'件・約'+formatBackupBytes(totalBytes)+(expiredKeys.length?'（古い自動保存 '+expiredKeys.length+'件を整理中）':'（無料枠を守る世代管理中）');
+    if(!visibleEntries.length){list.innerHTML='<div class="backup-empty">利用できるバックアップはまだありません。</div>';return;}
+    list.innerHTML=visibleEntries.map(function(entry){
       return '<div class="backup-item"><div><strong>'+escapeHtml(backupDateLabel(entry.value,entry.key))+'　'+entry.count+'着</strong><span>'+escapeHtml(backupReasonLabel(entry.value&&entry.value.reason,entry.key))+'</span></div><button class="btn btn-outline btn-sm" type="button" onclick="selectUniformBackup(\''+encodeURIComponent(entry.key)+'\')">内容を確認</button></div>';
     }).join("");
+    pruneUniformBackups(entries).then(function(removed){if(removed&&status)status.innerHTML='<strong>新しい日付順</strong>・'+retained.length+'件（古い自動保存 '+removed+'件を安全に整理済み）';}).catch(function(){if(status)status.innerHTML+='<br>古い保存の整理は次回もう一度行います。';});
   }).catch(function(){list.innerHTML='<div class="backup-empty">バックアップを読み込めませんでした。通信状態を確認してください。</div>';});
 }
 function selectUniformBackup(encodedKey){
