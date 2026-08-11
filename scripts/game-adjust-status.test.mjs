@@ -28,8 +28,12 @@ assert.match(game, /announceGameAdjustDataRendered\(meta\)/,
   "クラウドデータの初回描画後に並び替えを通知していません");
 assert.match(common, /addEventListener\("smc:game-adjust-data-rendered"[\s\S]*?pendingTeamSort = true/,
   "クラウドデータ読込後の初回並び替えがありません");
-assert.ok(game.includes("function openSelectedDateEditor()") && game.includes("✏️ 大会名・日付を変更"),
-  "選択中の大会名を分かりやすく変更する導線がありません");
+assert.ok(!game.includes("function openSelectedDateEditor()") && !game.includes("edit-selected-event-btn"),
+  "試合調整画面に重複した大会名変更ボタンを残さないでください");
+assert.ok(!game.includes('id="undo-btn"') && !game.includes('id="redo-btn"') && !game.includes("function undo()") && !game.includes("function redo()"),
+  "分かりづらい戻す・進む操作を残さないでください");
+assert.ok(!game.includes('e.key.toLowerCase()==="z"'),
+  "ブラウザ標準の入力取り消しショートカットを横取りしないでください");
 assert.ok(game.includes("大会名を変更しても、参加状況や任務分担などの保存データはそのまま引き継がれます。"),
   "大会名変更時のデータ引継ぎ案内がありません");
 

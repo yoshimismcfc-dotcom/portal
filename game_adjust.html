@@ -123,18 +123,8 @@
     /* 操作バー・凡例 */
     .ctrl-bar{display:flex;gap:8px;align-items:center;flex-wrap:wrap;margin-bottom:10px}
     .ctrl-title{width:100%;display:block;color:var(--ink-3);font-size:.72rem;font-weight:900;letter-spacing:.08em;margin-bottom:1px}
-    .edit-selected-event-btn{border-color:rgba(115,220,255,.65)!important;background:rgba(0,131,183,.2)!important;color:#d5f7ff!important;font-weight:900!important}
-    body[data-theme="light"] .edit-selected-event-btn{background:#e8f7fc!important;border-color:#1689b4!important;color:#075d84!important}
     .legend{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:12px;font-size:.76rem;align-items:center;color:#8ac8e8}
     .legend .status-btn{min-height:auto;min-width:52px;padding:4px 8px;cursor:default}
-    /* Undo/Redoボタン */
-    .undo-btn{
-      background:rgba(255,255,255,.06);border:1px solid var(--line-2);color:#8ac8e8;
-      border-radius:var(--r8);padding:7px 12px;font:inherit;font-size:.78rem;font-weight:900;
-      cursor:pointer;transition:.15s;min-height:36px;
-    }
-    .undo-btn:hover:not(:disabled){background:rgba(0,212,255,.12);color:#fff}
-    .undo-btn:disabled{opacity:.3;cursor:default}
     /* 自動保存インジケーター */
     #save-msg{font-size:.76rem;color:#00ff88;transition:opacity .3s;min-height:1.2em}
     .beginner-guide{margin:12px 0 16px;border:1px solid rgba(0,212,255,.35);border-radius:16px;background:linear-gradient(145deg,rgba(0,212,255,.10),rgba(255,107,43,.06));overflow:hidden}
@@ -174,7 +164,7 @@
     body[data-theme="light"] .ga-overview-chip{background:#fff;color:#365a72;border-color:#b8cfdd}
     body[data-theme="light"] .ga-overview-chip strong{color:#183c56}
     body[data-theme="light"] .ga-overview-note{background:#fff2cc;color:#604900}
-    @media(max-width:760px){.beginner-steps{grid-template-columns:1fr}.cycle-guide{grid-column:auto}.game-adjust-overview{display:block}.ctrl-title,#save-msg{grid-column:1/-1!important;text-align:center}}
+    @media(max-width:760px){.beginner-steps{grid-template-columns:1fr}.cycle-guide{grid-column:auto}.game-adjust-overview{display:block}.ctrl-bar{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px}.ctrl-bar button{width:100%;min-width:0}.ctrl-title,#save-msg{grid-column:1/-1!important;text-align:center}}
     /* モーダル */
     .modal-bg{position:fixed;inset:0;background:rgba(0,0,0,.82);display:none;place-items:center;z-index:200;backdrop-filter:blur(6px)}
     .modal-bg.open{display:grid}
@@ -259,11 +249,8 @@ body[data-theme="light"] .ga-overview-note{color:#72400b;background:#fff5e5}
 
   <div class="ctrl-bar" role="toolbar" aria-label="操作バー">
     <span class="ctrl-title">日程・チーム管理／共有</span>
-    <button class="btn btn-outline btn-sm edit-selected-event-btn" onclick="openSelectedDateEditor()" aria-label="選択中の大会名や日付を変更">✏️ 大会名・日付を変更</button>
     <button class="btn btn-primary btn-sm" onclick="openModal('modal-team')" aria-label="チームを追加">＋ チーム追加</button>
     <button class="btn btn-cyan btn-sm" onclick="openModal('modal-date')" aria-label="日程を追加">＋ 日程追加</button>
-    <button class="undo-btn" id="undo-btn" onclick="undo()" disabled aria-label="元に戻す" title="元に戻す">↶ 戻す</button>
-    <button class="undo-btn" id="redo-btn" onclick="redo()" disabled aria-label="やり直す" title="やり直す">↷ 進む</button>
     <button class="btn-line-copy sm" onclick="copyAdjList()" aria-label="調整状況をLINE用にコピー">📋 LINEコピー</button>
     <button class="btn btn-outline btn-sm no-print" onclick="smcPrint({orientation:'landscape',target:'game-adjust'})" aria-label="印刷">🖨 印刷</button>
     <span id="save-msg" role="status" aria-live="polite"></span>
@@ -526,45 +513,6 @@ function collectDOMChanges() {
   });
 }
 
-/* ---------- Undo / Redo（最大30手） ---------- */
-var _undoStack = [], _redoStack = [];
-function snapshot(){
-  collectDOMChanges();
-  _undoStack.push(JSON.stringify(data));
-  if(_undoStack.length > 30) _undoStack.shift();
-  _redoStack = [];
-  updateUndoButtons();
-}
-function undo(){
-  if(!_undoStack.length) return;
-  collectDOMChanges();
-  _redoStack.push(JSON.stringify(data));
-  data = JSON.parse(_undoStack.pop());
-  renderTable(); persist(false);
-  flash("↶ 元に戻しました", "#8ac8e8");
-  updateUndoButtons();
-}
-function redo(){
-  if(!_redoStack.length) return;
-  collectDOMChanges();
-  _undoStack.push(JSON.stringify(data));
-  data = JSON.parse(_redoStack.pop());
-  renderTable(); persist(false);
-  flash("↷ やり直しました", "#8ac8e8");
-  updateUndoButtons();
-}
-function updateUndoButtons(){
-  document.getElementById("undo-btn").disabled = !_undoStack.length;
-  document.getElementById("redo-btn").disabled = !_redoStack.length;
-}
-// Ctrl+Z / Ctrl+Shift+Z（PC用ショートカット）
-document.addEventListener("keydown", function(e){
-  if((e.ctrlKey||e.metaKey) && e.key.toLowerCase()==="z"){
-    e.preventDefault();
-    if(e.shiftKey) redo(); else undo();
-  }
-});
-
 /* ---------- 通知 ---------- */
 var _flashTimer = null;
 function flash(msg, col) {
@@ -583,7 +531,6 @@ function isParticipatingStatus(status){return status==="OK"||status==="要項送
 function cycleStatus(tid, did, btnEl) {
   var t = data.teams.find(function(t){ return t.id === tid; });
   if (!t) return;
-  snapshot();
   var cur = (t.statuses || {})[did] || "－";
   var next = CYCLE[(CYCLE.indexOf(cur) + 1) % CYCLE.length];
   if(!t.statuses) t.statuses = {};
@@ -633,8 +580,7 @@ function updateCounts(){
 
 /* ---------- 削除系 ---------- */
 function deleteDate(did) {
-  if (!confirm("この日程列を削除しますか？（↶戻すボタンで復帰できます）")) return;
-  snapshot();
+  if (!confirm("この日程列を削除しますか？\nこの操作は元に戻せません。")) return;
   collectDOMChanges();
   data.dates = data.dates.filter(function(d){ return d.id !== did; });
   data.teams.forEach(function(t){ if(t.statuses) delete t.statuses[did]; });
@@ -644,21 +590,19 @@ function deleteDate(did) {
 
 function deleteTeam(tid) {
   var t = data.teams.find(function(x){ return x.id === tid; });
-  if (!confirm("「" + (t ? t.name : "") + "」を削除しますか？（↶戻すボタンで復帰できます）")) return;
-  snapshot();
+  if (!confirm("「" + (t ? t.name : "") + "」を削除しますか？\nこの操作は元に戻せません。")) return;
   collectDOMChanges();
   data.teams = data.teams.filter(function(t){ return t.id !== tid; });
   persist(); renderTable();
 }
 
-/* ---------- リセット（2段階確認・Undo対応で安全化） ---------- */
+/* ---------- リセット（2段階確認で安全化） ---------- */
 function resetData() {
   if (!confirm("⚠️ 初期データに戻しますか？\n現在のデータは全端末で置き換わります。")) return;
-  if (!confirm("本当によろしいですか？\n（誤操作の場合は↶戻すボタンで復帰できます）")) return;
-  snapshot();
+  if (!confirm("本当によろしいですか？\nこの操作は元に戻せません。")) return;
   data = JSON.parse(JSON.stringify(INIT));
   persist(); renderTable();
-  flash("↩ リセットしました（↶で戻せます）", "#ffaa88");
+  flash("↩ 初期データにリセットしました", "#ffaa88");
 }
 
 /* ---------- LINEコピー（打診状況の共有） ---------- */
@@ -817,23 +761,10 @@ function openEditDate(dateId){
   document.getElementById("edit-note").value = (data.備考 || {})[dateId] || "";
   openModal("modal-edit-date");
 }
-function openSelectedDateEditor(){
-  var select=document.querySelector(".game-adjust-date-select");
-  var active=document.querySelector("#adj-table thead tr:first-child > th.ga-date-active[data-date-id]");
-  var requested=new URLSearchParams(location.search).get("dateId")||"";
-  var first=document.querySelector("#adj-table thead tr:first-child > th[data-date-id]");
-  var dateId=(select&&select.value)||(active&&active.dataset.dateId)||requested||(first&&first.dataset.dateId)||"";
-  if(!dateId||!data.dates.some(function(item){return item.id===dateId;})){
-    alert("変更する大会を「表示する日程」から選んでください。");
-    return;
-  }
-  openEditDate(dateId);
-}
 function saveEditDate(){
   if(!_editDateId) return;
   var d = data.dates.find(function(x){ return x.id===_editDateId; });
   if(!d) return;
-  snapshot();
   var dateVal = document.getElementById("edit-date").value;
   var tournamentName = document.getElementById("edit-tournament-name").value.trim();
   var cat = document.getElementById("edit-cat").value.trim() || "未設定";
@@ -856,8 +787,7 @@ function saveEditDate(){
   closeModal("modal-edit-date");
 }
 function deleteEditDate(){
-  if(!_editDateId || !confirm("この日程を削除しますか？（↶戻すボタンで復帰できます）")) return;
-  snapshot();
+  if(!_editDateId || !confirm("この日程を削除しますか？\nこの操作は元に戻せません。")) return;
   data.dates = data.dates.filter(function(x){ return x.id !== _editDateId; });
   data.teams.forEach(function(t){ if(t.statuses) delete t.statuses[_editDateId]; });
   if (data.備考) delete data.備考[_editDateId];
@@ -890,7 +820,6 @@ function addTeam() {
   var name = document.getElementById("new-team-name").value.trim();
   var tantou = document.getElementById("new-team-tantou").value.trim();
   if (!name) { alert("チーム名を入力してください"); return; }
-  snapshot();
   var id = "t" + Date.now(), statuses = {};
   data.dates.forEach(function(d){ statuses[d.id] = "－"; });
   data.teams.push({id:id, name:name, tantou:tantou, statuses:statuses});
@@ -907,7 +836,6 @@ function addDate() {
   var target = targetVal === "" ? 1 : Math.max(0, Number(targetVal)); // 0も有効値として扱う
   var note = document.getElementById("new-note").value.trim();
   if (!dateVal) { alert("日付を入力してください"); return; }
-  snapshot();
   var d = new Date(dateVal);
   var label = (d.getMonth()+1) + "/" + d.getDate() + "（" + ["日","月","火","水","木","金","土"][d.getDay()] + "）";
   var id = "d" + Date.now();

@@ -39,6 +39,14 @@ for (const required of [
 
 assert.ok(source.includes("✏️ 大会名・日付を変更") && source.includes("coach-event-edit-button"),
   "選択中の大会から大会名を変更する導線がありません");
+assert.ok(source.includes('data-coach-edit-event=') && source.includes('id="coach-event-edit-modal"'),
+  "大会名・日付をコーチ画面内で直接編集できません");
+assert.ok(source.includes('db.ref("game_adjust").transaction') && source.includes("item.tournamentName=values.name"),
+  "大会情報を最新クラウドデータへ安全に反映する処理がありません");
+assert.doesNotMatch(source, /coach-event-edit-button" href=/,
+  "大会名・日付の変更で別画面へ移動しないでください");
+assert.ok(source.includes("大会IDは変わらないため") && source.includes("参加状況・任務分担・要項・会計"),
+  "関連データが維持される案内がありません");
 assert.match(source, /function displayTournamentName\(item\)\{\s*return String\(item&&item\.tournamentName\|\|""\)\.trim\(\)\|\|"大会名未設定";\s*\}/,
   "大会名は保存された正式名称を省略せず表示してください");
 assert.doesNotMatch(source, /dotted=date\.replace|name\.slice\(prefix\.length\)|name\.slice\(category\.length\)/,
