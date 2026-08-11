@@ -1508,7 +1508,10 @@ function enhanceCalendarUpcomingAgenda() {
     var toast = getToast();
     var message = "";
     var state = "ok";
-    if(d.cloudSaved){
+    if(d.saving){
+      message = "💾 保存中…";
+      state = "saving";
+    }else if(d.cloudSaved){
       message = d.syncedAfterTimeout ? "☁️ クラウドへ再同期しました" : "✅ クラウドに保存しました";
     }else if(d.localOnly && d.localSaved){
       message = "📱 この端末に保存しました";
@@ -1524,8 +1527,121 @@ function enhanceCalendarUpcomingAgenda() {
     toast.dataset.state = state;
     toast.classList.add("show");
     window.clearTimeout(hideTimer);
-    hideTimer = window.setTimeout(function(){ toast.classList.remove("show"); }, 3600);
+    if(!d.saving)hideTimer = window.setTimeout(function(){ toast.classList.remove("show"); }, 3600);
   });
+})();
+
+/* ===== 全サブページ共通：安全な「一つ前へ戻る」 ===== */
+(function(){
+  var PREVIOUS_KEY="smc-portal-previous-url-v1";
+  var pendingPaths=new Map(),failedPaths=new Set(),pendingNavigation=null,dirtyInput=false;
+
+  function portalBasePath(){
+    var path=location.pathname||"/";return path.slice(0,path.lastIndexOf("/")+1);
+  }
+  function safePortalUrl(value){
+    if(!value)return null;
+    try{
+      var url=new URL(value,location.href),base=portalBasePath();
+      if(url.origin!==location.origin||url.pathname.indexOf(base)!==0)return null;
+      if(!/\.html$/i.test(url.pathname)&&!url.pathname.endsWith("/"))return null;
+      return url;
+    }catch(error){return null;}
+  }
+  function relativePortalUrl(url){return url.pathname+url.search+url.hash;}
+  function validEventId(value){return /^[A-Za-z0-9_-]{1,100}$/.test(String(value||""))?String(value):"";}
+  function tournamentProgressFallback(){
+    var file=(location.pathname.split("/").pop()||"").toLowerCase();
+    if(!["game_adjust.html","duty_match.html","tournament.html","accounting.html"].includes(file))return null;
+    var id=validEventId(new URLSearchParams(location.search).get("dateId"));
+    if(!id)return null;
+    var url=new URL("coach.html",location.href);url.searchParams.set("eventId",id);url.hash="coach-match";return url;
+  }
+  function storedPreviousUrl(){
+    try{
+      var url=safePortalUrl(sessionStorage.getItem(PREVIOUS_KEY));
+      if(url&&relativePortalUrl(url)!==location.pathname+location.search+location.hash)return url;
+    }catch(error){}
+    return null;
+  }
+  function internalReferrer(){
+    var url=safePortalUrl(document.referrer);
+    return url&&relativePortalUrl(url)!==location.pathname+location.search+location.hash?url:null;
+  }
+  function defaultFallback(){
+    var tournament=tournamentProgressFallback();if(tournament)return tournament;
+    return new URL("index.html",location.href);
+  }
+  function performBackNavigation(){
+    var referrer=internalReferrer();
+    if(referrer&&history.length>1){history.back();return;}
+    var previous=storedPreviousUrl();
+    if(previous){location.href=relativePortalUrl(previous);return;}
+    location.href=relativePortalUrl(defaultFallback());
+  }
+  function requestBackNavigation(button){
+    function proceed(){pendingNavigation=null;performBackNavigation();}
+    if(pendingPaths.size){
+      pendingNavigation={run:proceed,button:button};
+      if(button){button.disabled=true;button.textContent="保存完了後に戻ります…";}
+      var toast=document.getElementById("smc-save-toast");if(toast){toast.textContent="💾 保存が完了してから戻ります";toast.dataset.state="saving";toast.classList.add("show");}
+      return;
+    }
+    if(failedPaths.size||dirtyInput){
+      if(!window.confirm("保存できていない変更がある可能性があります。戻りますか？"))return;
+    }
+    proceed();
+  }
+  function normalizeExistingDestination(link){
+    if(!link)return;
+    var target=safePortalUrl(link.getAttribute("href"));if(!target)return;
+    var file=(target.pathname.split("/").pop()||"index.html").toLowerCase();
+    link.classList.add("smc-page-destination");
+    if(file==="index.html"||!file)link.textContent="⌂ ホーム";
+    else if(file==="coach.html")link.textContent="📁 コーチ専用";
+  }
+  function installBackButton(){
+    var file=(location.pathname.split("/").pop()||"index.html").toLowerCase();
+    if(file==="index.html"||file==="offline.html"||document.querySelector(".smc-page-nav"))return;
+    var main=document.querySelector("main");if(!main)return;
+    var existing=main.querySelector(".back-btn"),row=document.createElement("nav"),button=document.createElement("button");
+    row.className="smc-page-nav no-print";row.setAttribute("aria-label","ページ移動");
+    button.type="button";button.className="smc-smart-back";button.textContent="← 戻る";
+    button.addEventListener("click",function(){requestBackNavigation(button);});
+    row.appendChild(button);
+    if(existing){normalizeExistingDestination(existing);existing.before(row);row.appendChild(existing);}
+    else{
+      var home=document.createElement("a");home.className="back-btn smc-page-destination";home.href="index.html";home.textContent="⌂ ホーム";row.appendChild(home);main.insertBefore(row,main.firstChild);
+    }
+  }
+  document.addEventListener("click",function(event){
+    var link=event.target.closest&&event.target.closest("a[href]");if(!link||link.target==="_blank"||link.hasAttribute("download"))return;
+    var target=safePortalUrl(link.getAttribute("href"));if(!target)return;
+    if(target.pathname===location.pathname&&target.search===location.search)return;
+    try{sessionStorage.setItem(PREVIOUS_KEY,location.pathname+location.search+location.hash);}catch(error){}
+  },true);
+  document.addEventListener("input",function(event){
+    if(!event.isTrusted||!event.target.matches||event.target.matches('input[type="search"],[data-no-save-guard]'))return;
+    if(event.target.matches("input,textarea,[contenteditable=true]"))dirtyInput=true;
+  },true);
+  window.addEventListener("smc:save-status",function(event){
+    var detail=event.detail||{},path=String(detail.path||"unknown");
+    if(detail.saving){pendingPaths.set(path,(pendingPaths.get(path)||0)+1);failedPaths.delete(path);return;}
+    var remaining=Math.max(0,(pendingPaths.get(path)||1)-1);
+    if(remaining)pendingPaths.set(path,remaining);else pendingPaths.delete(path);
+    if(detail.ok||detail.cloudSaved||(detail.localOnly&&detail.localSaved)){failedPaths.delete(path);dirtyInput=false;}
+    else failedPaths.add(path);
+    if(pendingNavigation&&!pendingPaths.size){
+      var pending=pendingNavigation;pendingNavigation=null;
+      if(failedPaths.size&&!window.confirm("保存に失敗した変更があります。保存せず戻りますか？")){
+        if(pending.button){pending.button.disabled=false;pending.button.textContent="← 戻る";}
+        return;
+      }
+      pending.run();
+    }
+  });
+  document.addEventListener("DOMContentLoaded",installBackButton);
+  window.SMCNavigation={safePortalUrl:safePortalUrl,requestBack:requestBackNavigation};
 })();
 
 /* ===== 共通印刷（描画完了待ち・用紙方向・後片付け） ===== */

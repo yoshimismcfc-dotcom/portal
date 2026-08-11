@@ -206,6 +206,7 @@ function emitSaveStatus(detail){
 }
 
 function dbSave(path, data, localKey, onSuccess, onError){
+  emitSaveStatus({saving:true,path:path,ok:false});
   var localSaved = true;
   try{
     if(localKey) localStorage.setItem(localKey, JSON.stringify(data));
