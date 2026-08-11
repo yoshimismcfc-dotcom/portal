@@ -43,6 +43,10 @@ assert.match(source, /\.coach-event-tabs\{display:grid;[^}]*overflow:visible/,
   "大会一覧は横スクロールのない縦一覧にしてください");
 assert.match(source, /\.coach-preparation-grid\{display:grid;grid-template-columns:repeat\(2,minmax\(0,1fr\)\)/,
   "準備状況は画面内に収まる2列表示にしてください");
+assert.match(source, /\.coach-next-step\{[^}]*border:1px solid rgba\(255,82,82,[^)]+\)[^}]*background:rgba\(255,54,74,[^)]+\)/,
+  "未完了の「次に行うこと」は赤系で表示してください");
+assert.match(source, /body\[data-theme="light"\] \.coach-next-step\{background:#fff0f2;border-color:#c6283d\}/,
+  "ライトモードの「次に行うこと」も赤系で表示してください");
 assert.doesNotMatch(source, /@media\(max-width:340px\)\{[^}]*\.coach-next-actions\{grid-template-columns:1fr/,
   "320pxでも大会操作カードの2列表示を維持してください");
 assert.match(source, /status==="OK"\|\|status==="要項送付済"/,
