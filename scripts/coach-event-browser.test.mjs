@@ -25,12 +25,26 @@ for (const required of [
   "showAllCoachEvents"
 ]) assert.ok(source.includes(required), "大会管理の初心者向け表示が不足しています: " + required);
 
+for (const required of [
+  '<span class="coach-action-icon" aria-hidden="true">📊</span>',
+  '<span class="coach-action-icon" aria-hidden="true">👥</span>',
+  '<span class="coach-action-icon" aria-hidden="true">📋</span>',
+  '<span class="coach-action-icon" aria-hidden="true">💴</span>',
+  "💬 大会準備の状況をLINEで共有",
+  "coach-action-card is-adjust",
+  "coach-action-card is-duty",
+  "coach-action-card is-guideline",
+  "coach-action-card is-accounting"
+]) assert.ok(source.includes(required), "大会操作カードの絵文字または配色が不足しています: " + required);
+
 assert.doesNotMatch(source, /横にスライドできます/,
   "大会一覧に横スクロール案内を残さないでください");
 assert.match(source, /\.coach-event-tabs\{display:grid;[^}]*overflow:visible/,
   "大会一覧は横スクロールのない縦一覧にしてください");
 assert.match(source, /\.coach-preparation-grid\{display:grid;grid-template-columns:repeat\(2,minmax\(0,1fr\)\)/,
   "準備状況は画面内に収まる2列表示にしてください");
+assert.doesNotMatch(source, /@media\(max-width:340px\)\{[^}]*\.coach-next-actions\{grid-template-columns:1fr/,
+  "320pxでも大会操作カードの2列表示を維持してください");
 assert.match(source, /status==="OK"\|\|status==="要項送付済"/,
   "要項送付済みも参加確定数に含めてください");
 assert.ok(source.indexOf('id="coach-event-browser"') < source.indexOf("セクション：コーチ共有"),

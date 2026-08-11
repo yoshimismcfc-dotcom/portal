@@ -203,12 +203,14 @@
     .coach-next-step-text{margin-top:3px;color:#fff;font-size:.73rem;font-weight:800;line-height:1.45}
     .coach-next-step a{display:flex;align-items:center;justify-content:center;min-height:44px;margin-top:8px;border-radius:9px;background:#0083b7;color:#fff;text-decoration:none;font-size:.72rem;font-weight:900}
     .coach-event-actions-title{margin-top:12px;color:#fff;font-size:.72rem;font-weight:900}
-    .coach-next-actions{grid-template-columns:repeat(2,minmax(0,1fr));gap:7px;margin-top:7px}.coach-next-actions a{display:flex;align-items:flex-start;justify-content:center;flex-direction:column;min-width:0;min-height:62px;padding:8px 10px;text-align:left}.coach-action-title{color:#fff;font-size:.72rem;font-weight:900}.coach-action-desc{margin-top:2px;color:#9fc8e2;font-size:.59rem;font-weight:700}
+    .coach-next-actions{grid-template-columns:repeat(2,minmax(0,1fr));gap:8px;margin-top:7px}.coach-next-actions a.coach-action-card{position:relative;display:flex;align-items:flex-start;justify-content:flex-start;flex-direction:column;min-width:0;min-height:104px;padding:14px 11px 10px;overflow:hidden;text-align:left;background:rgba(0,34,58,.74);border-color:rgba(0,212,255,.3)}
+    .coach-action-card::before{content:"";position:absolute;inset:0 0 auto;height:3px;background:#50d8ff}.coach-action-card.is-duty::before{background:#ff9d42}.coach-action-card.is-guideline::before{background:#6bdcff}.coach-action-card.is-accounting::before{background:#45d58a}
+    .coach-action-icon{display:block;margin-bottom:8px;font-size:1.35rem;line-height:1}.coach-action-title{color:#fff;font-size:.75rem;font-weight:900;line-height:1.35}.coach-action-desc{margin-top:3px;color:#a8c9dc;font-size:.6rem;font-weight:700;line-height:1.4}
     .coach-share-button{min-height:44px;margin-top:10px}.coach-other-events{margin-top:11px;border-top:1px solid rgba(0,212,255,.18);padding-top:9px}.coach-other-events summary{min-height:44px;padding:10px 4px;color:#aeeaff;font-size:.7rem;font-weight:900;cursor:pointer}.coach-other-events .coach-event-tabs{margin-top:5px}
     .coach-empty-action{display:inline-flex;align-items:center;justify-content:center;min-height:44px;margin-top:9px;padding:8px 14px;border-radius:9px;background:#0083b7;color:#fff;text-decoration:none;font-weight:900}
     .coach-quick-nav{margin-bottom:10px}.c-section-div:first-child{margin-top:12px}
     body[data-theme="light"] .coach-event-tab-name,body[data-theme="light"] .coach-preparation-heading,body[data-theme="light"] .coach-next-step-text,body[data-theme="light"] .coach-event-actions-title,body[data-theme="light"] .coach-action-title{color:#10283d}
-    body[data-theme="light"] .coach-action-desc,body[data-theme="light"] .coach-share-note{color:#315d78}
+    body[data-theme="light"] .coach-next-actions a.coach-action-card{background:#fff;border-color:#9fc5d9}body[data-theme="light"] .coach-action-desc,body[data-theme="light"] .coach-share-note{color:#315d78}
     body[data-theme="light"] .coach-next-step{background:#fff9df;border-color:#c79800}.coach-next-step.is-ready{border-color:rgba(0,204,102,.34)}
 
     @media(max-width:640px){
@@ -222,7 +224,7 @@
       .c-card .c-desc{font-size:.68rem}
       .c-section-div{margin-top:18px}
     }
-    @media(max-width:340px){.coach-preparation-grid,.coach-next-actions{grid-template-columns:1fr}.coach-event-tab{grid-template-columns:minmax(0,1fr) 72px}.coach-event-browser{padding:10px}}
+    @media(max-width:340px){.coach-preparation-grid{grid-template-columns:1fr}.coach-event-tab{grid-template-columns:minmax(0,1fr) 72px}.coach-event-browser{padding:10px}.coach-next-actions a.coach-action-card{min-height:100px;padding-inline:9px}.coach-action-title{font-size:.7rem}.coach-action-desc{font-size:.56rem}}
     @media(max-width:370px){.c-card-grid{grid-template-columns:1fr}}
   </style>
 </head>
@@ -922,9 +924,9 @@ document.addEventListener("DOMContentLoaded", function(){
       +nextActionHtml(selected,prep,confirmed)
       +'<div class="coach-event-actions-title">大会の操作</div>'
       +'<div class="coach-next-actions">'
-      +'<a href="'+escapeHtml(SMCEventLinks.href("game_adjust.html",selected))+'"><span class="coach-action-title">試合調整</span><span class="coach-action-desc">参加チームを確認</span></a><a href="'+escapeHtml(SMCEventLinks.href("duty_match.html",selected))+'"><span class="coach-action-title">任務分担</span><span class="coach-action-desc">担当者を確認</span></a>'
-      +'<a href="'+escapeHtml(SMCEventLinks.href("tournament.html",selected))+'"><span class="coach-action-title">要項・対戦表</span><span class="coach-action-desc">作成・印刷</span></a><a href="'+escapeHtml(SMCEventLinks.href("accounting.html",selected))+'"><span class="coach-action-title">会計・決算</span><span class="coach-action-desc">収支を管理</span></a></div>'
-      +'<button type="button" class="coach-share-button" data-coach-copy-id="'+escapeHtml(String(selected.id||""))+'">大会準備の状況をLINEで共有</button><div class="coach-share-note">参加状況・任務分担・要項・対戦表の準備状況をコピーします</div><div class="coach-share-feedback" id="coach-share-feedback" role="status" aria-live="polite"></div></div>'
+      +'<a class="coach-action-card is-adjust" href="'+escapeHtml(SMCEventLinks.href("game_adjust.html",selected))+'"><span class="coach-action-icon" aria-hidden="true">📊</span><span class="coach-action-title">試合調整</span><span class="coach-action-desc">参加チームを確認</span></a><a class="coach-action-card is-duty" href="'+escapeHtml(SMCEventLinks.href("duty_match.html",selected))+'"><span class="coach-action-icon" aria-hidden="true">👥</span><span class="coach-action-title">任務分担</span><span class="coach-action-desc">担当者を確認</span></a>'
+      +'<a class="coach-action-card is-guideline" href="'+escapeHtml(SMCEventLinks.href("tournament.html",selected))+'"><span class="coach-action-icon" aria-hidden="true">📋</span><span class="coach-action-title">要項・対戦表</span><span class="coach-action-desc">作成・印刷</span></a><a class="coach-action-card is-accounting" href="'+escapeHtml(SMCEventLinks.href("accounting.html",selected))+'"><span class="coach-action-icon" aria-hidden="true">💴</span><span class="coach-action-title">会計・決算</span><span class="coach-action-desc">収支を管理</span></a></div>'
+      +'<button type="button" class="coach-share-button" data-coach-copy-id="'+escapeHtml(String(selected.id||""))+'">💬 大会準備の状況をLINEで共有</button><div class="coach-share-note">参加状況・任務分担・要項・対戦表の準備状況をコピーします</div><div class="coach-share-feedback" id="coach-share-feedback" role="status" aria-live="polite"></div></div>'
       +(otherHtml?'<details class="coach-other-events"><summary>過去・日付未設定の大会を見る（'+otherItems.length+'件）</summary><div class="coach-event-tabs" role="tablist" aria-label="その他の大会を選択">'+otherHtml+'</div></details>':'');
     root.querySelectorAll("[data-coach-event-id]").forEach(function(button){
       button.addEventListener("click",function(){
