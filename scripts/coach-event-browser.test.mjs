@@ -37,6 +37,9 @@ for (const required of [
   "coach-action-card is-accounting"
 ]) assert.ok(source.includes(required), "大会操作カードの絵文字または配色が不足しています: " + required);
 
+assert.ok(source.includes("✏️ 大会名・日付を変更") && source.includes("coach-event-edit-button"),
+  "選択中の大会から大会名を変更する導線がありません");
+
 assert.doesNotMatch(source, /横にスライドできます/,
   "大会一覧に横スクロール案内を残さないでください");
 assert.match(source, /\.coach-event-tabs\{display:grid;[^}]*overflow:visible/,

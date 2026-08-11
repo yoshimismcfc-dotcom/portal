@@ -28,5 +28,9 @@ assert.match(game, /announceGameAdjustDataRendered\(meta\)/,
   "クラウドデータの初回描画後に並び替えを通知していません");
 assert.match(common, /addEventListener\("smc:game-adjust-data-rendered"[\s\S]*?pendingTeamSort = true/,
   "クラウドデータ読込後の初回並び替えがありません");
+assert.ok(game.includes("function openSelectedDateEditor()") && game.includes("✏️ 大会名・日付を変更"),
+  "選択中の大会名を分かりやすく変更する導線がありません");
+assert.ok(game.includes("大会名を変更しても、参加状況や任務分担などの保存データはそのまま引き継がれます。"),
+  "大会名変更時のデータ引継ぎ案内がありません");
 
 console.log("game adjustment guideline-sent status tests passed");

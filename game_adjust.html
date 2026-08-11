@@ -123,6 +123,8 @@
     /* 操作バー・凡例 */
     .ctrl-bar{display:flex;gap:8px;align-items:center;flex-wrap:wrap;margin-bottom:10px}
     .ctrl-title{width:100%;display:block;color:var(--ink-3);font-size:.72rem;font-weight:900;letter-spacing:.08em;margin-bottom:1px}
+    .edit-selected-event-btn{border-color:rgba(115,220,255,.65)!important;background:rgba(0,131,183,.2)!important;color:#d5f7ff!important;font-weight:900!important}
+    body[data-theme="light"] .edit-selected-event-btn{background:#e8f7fc!important;border-color:#1689b4!important;color:#075d84!important}
     .legend{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:12px;font-size:.76rem;align-items:center;color:#8ac8e8}
     .legend .status-btn{min-height:auto;min-width:52px;padding:4px 8px;cursor:default}
     /* Undo/Redoボタン */
@@ -257,6 +259,7 @@ body[data-theme="light"] .ga-overview-note{color:#72400b;background:#fff5e5}
 
   <div class="ctrl-bar" role="toolbar" aria-label="操作バー">
     <span class="ctrl-title">日程・チーム管理／共有</span>
+    <button class="btn btn-outline btn-sm edit-selected-event-btn" onclick="openSelectedDateEditor()" aria-label="選択中の大会名や日付を変更">✏️ 大会名・日付を変更</button>
     <button class="btn btn-primary btn-sm" onclick="openModal('modal-team')" aria-label="チームを追加">＋ チーム追加</button>
     <button class="btn btn-cyan btn-sm" onclick="openModal('modal-date')" aria-label="日程を追加">＋ 日程追加</button>
     <button class="undo-btn" id="undo-btn" onclick="undo()" disabled aria-label="元に戻す" title="元に戻す">↶ 戻す</button>
@@ -277,7 +280,7 @@ body[data-theme="light"] .ga-overview-note{color:#72400b;background:#fff5e5}
   <div class="adj-wrap">
     <table class="adj-table" id="adj-table" aria-label="試合調整表"></table>
   </div>
-  <p class="desktop-scroll-help" style="font-size:.7rem;color:#6aaccc;margin-top:8px">パソコンでは横スクロールできます。備考・担当者は直接入力すると自動保存され、カテゴリー／目標欄をタップすると日程を編集できます。</p>
+  <p class="desktop-scroll-help" style="font-size:.7rem;color:#6aaccc;margin-top:8px">大会名を変える場合は、上の「✏️ 大会名・日付を変更」を押してください。備考・担当者は直接入力すると自動保存されます。</p>
 
   <details class="danger-zone">
     <summary>⚙️ データ管理（通常は使用しません）</summary>
@@ -326,7 +329,8 @@ body[data-theme="light"] .ga-overview-note{color:#72400b;background:#fff5e5}
 <!-- 日程編集モーダル -->
 <div class="modal-bg" id="modal-edit-date" role="dialog" aria-modal="true" aria-labelledby="me-title">
   <div class="modal">
-    <h3 id="me-title">📅 日程を編集</h3>
+    <h3 id="me-title">✏️ 大会名・基本情報を変更</h3>
+    <p style="margin:0 0 12px;color:var(--ink-3);font-size:.76rem;line-height:1.55">大会名を変更しても、参加状況や任務分担などの保存データはそのまま引き継がれます。</p>
     <div class="form-group"><label class="form-label" for="edit-date">日付</label>
       <input class="form-control" id="edit-date" type="date"></div>
     <div class="form-group"><label class="form-label" for="edit-tournament-name">大会名</label>
@@ -340,7 +344,7 @@ body[data-theme="light"] .ga-overview-note{color:#72400b;background:#fff5e5}
     <div class="modal-btns" style="flex-wrap:wrap">
       <button class="btn btn-outline" style="color:var(--red);border-color:rgba(255,68,102,.4)" onclick="deleteEditDate()">🗑 削除</button>
       <button class="btn btn-outline" onclick="closeModal('modal-edit-date')">キャンセル</button>
-      <button class="btn btn-cyan" onclick="saveEditDate()">💾 保存</button>
+      <button class="btn btn-cyan" onclick="saveEditDate()">💾 変更を保存</button>
     </div>
   </div>
 </div>
@@ -723,7 +727,7 @@ function renderTable() {
            "<a class='date-related-link' data-act='open-related' href='tournament.html" + esc(relatedQuery) + "'>📋 大会要項・対戦表</a>" +
            "<a class='date-related-link' data-act='open-related' href='accounting.html" + esc(relatedQuery) + "'>💴 会計・決算書</a>" +
          "</span>" +
-         "<span class='date-edit-hint'>✏️ タップして編集</span></th>";
+         "<span class='date-edit-hint'>✏️ 大会名・日付を編集</span></th>";
   });
   h += "<th class='th-cat' style='cursor:default'></th></tr></thead><tbody>";
 
@@ -812,6 +816,18 @@ function openEditDate(dateId){
   document.getElementById("edit-target").value = (d.target !== undefined ? d.target : 3);
   document.getElementById("edit-note").value = (data.備考 || {})[dateId] || "";
   openModal("modal-edit-date");
+}
+function openSelectedDateEditor(){
+  var select=document.querySelector(".game-adjust-date-select");
+  var active=document.querySelector("#adj-table thead tr:first-child > th.ga-date-active[data-date-id]");
+  var requested=new URLSearchParams(location.search).get("dateId")||"";
+  var first=document.querySelector("#adj-table thead tr:first-child > th[data-date-id]");
+  var dateId=(select&&select.value)||(active&&active.dataset.dateId)||requested||(first&&first.dataset.dateId)||"";
+  if(!dateId||!data.dates.some(function(item){return item.id===dateId;})){
+    alert("変更する大会を「表示する日程」から選んでください。");
+    return;
+  }
+  openEditDate(dateId);
 }
 function saveEditDate(){
   if(!_editDateId) return;

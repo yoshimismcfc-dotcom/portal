@@ -206,6 +206,7 @@
     .coach-next-step-text{margin-top:3px;color:#fff;font-size:.73rem;font-weight:800;line-height:1.45}
     .coach-next-step a{display:flex;align-items:center;justify-content:center;min-height:44px;margin-top:8px;border-radius:9px;background:#c6283d;color:#fff;text-decoration:none;font-size:.72rem;font-weight:900}
     .coach-event-actions-title{margin-top:12px;color:#fff;font-size:.72rem;font-weight:900}
+    .coach-event-edit-button{display:flex;align-items:center;justify-content:center;min-height:44px;margin-top:9px;padding:8px 12px;border:1px solid rgba(115,220,255,.55);border-radius:9px;background:rgba(0,131,183,.18);color:#c9f3ff;text-decoration:none;font-size:.7rem;font-weight:900}
     .coach-next-actions{grid-template-columns:repeat(2,minmax(0,1fr));gap:8px;margin-top:7px}.coach-next-actions a.coach-action-card{position:relative;display:flex;align-items:flex-start;justify-content:flex-start;flex-direction:column;min-width:0;min-height:104px;padding:14px 11px 10px;overflow:hidden;text-align:left;background:rgba(0,34,58,.74);border-color:rgba(0,212,255,.3)}
     .coach-action-card::before{content:"";position:absolute;inset:0 0 auto;height:3px;background:#50d8ff}.coach-action-card.is-duty::before{background:#ff9d42}.coach-action-card.is-guideline::before{background:#6bdcff}.coach-action-card.is-accounting::before{background:#45d58a}
     .coach-action-icon{display:block;margin-bottom:8px;font-size:1.35rem;line-height:1}.coach-action-title{color:#fff;font-size:.75rem;font-weight:900;line-height:1.35}.coach-action-desc{margin-top:3px;color:#a8c9dc;font-size:.6rem;font-weight:700;line-height:1.4}
@@ -214,6 +215,7 @@
     .coach-quick-nav{margin-bottom:10px}.c-section-div:first-child{margin-top:12px}
     body[data-theme="light"] .coach-event-tab-name,body[data-theme="light"] .coach-preparation-heading,body[data-theme="light"] .coach-next-step-text,body[data-theme="light"] .coach-event-actions-title,body[data-theme="light"] .coach-action-title{color:#10283d}
     body[data-theme="light"] .coach-next-actions a.coach-action-card{background:#fff;border-color:#9fc5d9}body[data-theme="light"] .coach-action-desc,body[data-theme="light"] .coach-share-note{color:#315d78}
+    body[data-theme="light"] .coach-event-edit-button{background:#e8f7fc;border-color:#1689b4;color:#075d84}
     body[data-theme="light"] .coach-url-copy-button{background:#e9f8ff;border-color:#1689b4;color:#075d84}body[data-theme="light"] .coach-share-link-notice{background:#e9f8ff;border-color:#1689b4;color:#075d84}body[data-theme="light"] .coach-share-link-notice.error{background:#fff0f2;border-color:#c83a55;color:#8a1931}
     body[data-theme="light"] .coach-next-step{background:#fff0f2;border-color:#c6283d}body[data-theme="light"] .coach-next-step-label{color:#9f1528}body[data-theme="light"] .coach-next-step.is-ready{background:#effbf4;border-color:#16834f}body[data-theme="light"] .coach-next-step.is-ready .coach-next-step-label{color:#12683f}
 
@@ -963,6 +965,7 @@ document.addEventListener("DOMContentLoaded", function(){
       +(upcoming.length>3?'<button type="button" class="coach-event-more" data-coach-event-more>'+(showAllCoachEvents?'直近3件だけ表示':'すべての大会を見る（'+upcoming.length+'件）')+'</button>':'')
       +'<div class="coach-event-selected" role="tabpanel"><div class="coach-selected-kicker"><span>選択中の大会</span><span class="coach-selected-badge">選択中</span></div><div class="coach-event-selected-title">'+escapeHtml(displayTournamentName(selected))+'</div>'
       +'<div class="coach-event-selected-meta">'+meta.map(function(value){return '<span>'+escapeHtml(value)+'</span>';}).join('')+'</div><span class="coach-event-countdown">'+escapeHtml(countdownFor(selected))+'</span>'
+      +'<a class="coach-event-edit-button" href="'+escapeHtml(SMCEventLinks.href("game_adjust.html",selected))+'">✏️ 大会名・日付を変更</a>'
       +preparationHtml(prep)
       +nextActionHtml(selected,prep,confirmed)
       +'<div class="coach-event-actions-title">大会の操作</div>'
