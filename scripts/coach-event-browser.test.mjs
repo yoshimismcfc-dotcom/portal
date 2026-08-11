@@ -1,0 +1,45 @@
+import assert from "node:assert/strict";
+import fs from "node:fs";
+import path from "node:path";
+import { fileURLToPath } from "node:url";
+
+const root = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "..");
+const source = fs.readFileSync(path.join(root, "coach.html"), "utf8");
+
+for (const required of [
+  "直近の大会",
+  "すべての大会を見る",
+  "選択中の大会",
+  "過去・日付未設定の大会を見る",
+  "function displayTournamentName(item)",
+  "function chronologicalCoachDates(dates)",
+  "function nextActionFor(item,prep,confirmed)",
+  "次に行うこと",
+  "大会準備は完了しています",
+  "大会準備の状況をLINEで共有",
+  "参加状況・任務分担・要項・対戦表の準備状況をコピーします",
+  "大会情報を読み込んでいます",
+  "大会がまだ登録されていません",
+  "＋ 大会を登録する",
+  "coachDataReady",
+  "showAllCoachEvents"
+]) assert.ok(source.includes(required), "大会管理の初心者向け表示が不足しています: " + required);
+
+assert.doesNotMatch(source, /横にスライドできます/,
+  "大会一覧に横スクロール案内を残さないでください");
+assert.match(source, /\.coach-event-tabs\{display:grid;[^}]*overflow:visible/,
+  "大会一覧は横スクロールのない縦一覧にしてください");
+assert.match(source, /\.coach-preparation-grid\{display:grid;grid-template-columns:repeat\(2,minmax\(0,1fr\)\)/,
+  "準備状況は画面内に収まる2列表示にしてください");
+assert.match(source, /status==="OK"\|\|status==="要項送付済"/,
+  "要項送付済みも参加確定数に含めてください");
+assert.ok(source.indexOf('id="coach-event-browser"') < source.indexOf("セクション：コーチ共有"),
+  "大会管理はコーチ共有より上へ配置してください");
+
+const matchSectionStart = source.indexOf("セクション：試合・大会");
+const sharedSectionStart = source.indexOf("セクション：コーチ共有");
+const matchSection = source.slice(matchSectionStart, sharedSectionStart);
+assert.doesNotMatch(matchSection, /class="c-card-grid"/,
+  "大会カード内と同じ機能の大きなカードを重複表示しないでください");
+
+console.log("coach event browser mobile UX tests passed");
