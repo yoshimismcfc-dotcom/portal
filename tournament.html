@@ -5,7 +5,7 @@
   <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate, max-age=0">
   <meta http-equiv="Pragma" content="no-cache">
   <meta http-equiv="Expires" content="-1">
-<meta name="app-version" content="20260811-37">
+<meta name="app-version" content="20260811-38">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <meta name="robots" content="noindex,nofollow">
   <title>大会要綱・対戦表 v5｜吉見SMC FC</title>
@@ -34,15 +34,17 @@
     /* 入力欄 視認性改善 */
     #doc-youkou .form-control,#doc-taisen .form-control{background:#1e3a5a!important;color:#fff!important;border-color:rgba(0,212,255,.4)!important;max-width:100%;box-sizing:border-box;word-break:break-word;overflow-wrap:break-word}
     /* iPhone Safariの日付入力が固有の最小幅で横にはみ出す問題を防ぐ */
-    #doc-youkou .guideline-content-input[type=date],#doc-taisen #t-date{display:block!important;width:100%!important;min-width:0!important;max-width:100%!important;inline-size:100%!important;min-inline-size:0!important;box-sizing:border-box!important;overflow:hidden!important}
+    #doc-youkou .guideline-content-input[type=date],#doc-taisen #t-date{display:block!important;width:100%!important;min-width:0!important;max-width:100%!important;inline-size:100%!important;min-inline-size:0!important;max-inline-size:100%!important;box-sizing:border-box!important;margin:0!important;overflow:hidden!important}
     #doc-youkou .guideline-content-input[type=date]::-webkit-date-and-time-value,#doc-taisen #t-date::-webkit-date-and-time-value{min-width:0!important;width:100%!important;text-align:left!important}
     #doc-youkou .guideline-content-input[type=date]::-webkit-datetime-edit,#doc-taisen #t-date::-webkit-datetime-edit{min-width:0!important;max-width:100%!important;padding:0!important}
     #doc-youkou .guideline-content-input[type=date]::-webkit-calendar-picker-indicator,#doc-taisen #t-date::-webkit-calendar-picker-indicator{flex:0 0 auto!important;margin:0 2px 0 5px!important}
     #doc-youkou textarea.form-control,#doc-taisen textarea.form-control{line-height:1.6;word-break:break-word;white-space:pre-wrap;overflow-wrap:break-word}
     #doc-youkou .panel,#doc-taisen .panel{overflow:hidden;word-break:break-word}
     #doc-youkou .form-group,#doc-taisen .form-group{min-width:0;overflow:hidden}
-    #youkou-preview,#taisen-preview{overflow-x:auto;-webkit-overflow-scrolling:touch}
-    #youkou-preview > *,#taisen-preview > *{min-width:300px}
+    #youkou-preview{overflow-x:hidden}
+    #taisen-preview{overflow-x:auto;-webkit-overflow-scrolling:touch}
+    #youkou-preview > *{min-width:0;max-width:100%}
+    #taisen-preview > *{min-width:300px}
     
     #doc-youkou .form-control::placeholder,#doc-taisen .form-control::placeholder{color:rgba(255,255,255,.3)!important}
     #doc-youkou .form-label,#doc-taisen .form-label{color:#7dd3fc!important;font-weight:900}
@@ -76,6 +78,8 @@
     .req-sheet.pdf-capture .req-title{font-size:18pt!important;letter-spacing:.08em!important;padding-bottom:9px!important;margin-bottom:15px!important;border-bottom:3px solid #e66a22!important;color:#173b66!important}
     .req-sheet.pdf-capture .req-info th{background:#173b66!important;color:#fff!important;border-color:#315a84!important}
     .req-sheet.pdf-capture .req-info td{background:#fff!important;color:#172033!important;border-color:#aab6c3!important}
+    .req-sheet.pdf-capture .req-info tr{display:table-row!important}
+    .req-sheet.pdf-capture .req-info th{width:15%!important}.req-sheet.pdf-capture .req-info td{width:35%!important}
     .req-sheet.pdf-capture .req-num{color:#173b66!important;margin-top:10px!important}
     .req-sheet.pdf-capture .req-num::before{background:#e66a22!important}
     .req-sheet.pdf-capture .req-contact{background:#f2f6fb!important;border-color:#b8c6d6!important}
@@ -138,6 +142,8 @@
       body[data-print-target="tournament-guidelines"] .req-sheet{page:smc-youkou-page}
       .req-sheet *{color:#000!important}
       .req-sheet .req-info th{background:#003087!important;color:#fff!important}
+      .req-sheet .req-info tr{display:table-row!important}
+      .req-sheet .req-info th{width:15%!important}.req-sheet .req-info td{width:35%!important}
       .req-section{break-inside:avoid;page-break-inside:avoid}
       /* 対戦表 */
       .tai-sheet{box-shadow:none!important;border-radius:0!important;margin:0!important;padding:0!important;max-width:100%!important;background:#fff!important;color:#000!important;width:100%!important}
@@ -168,9 +174,10 @@
       padding:22px 26px 18px;max-width:700px;margin:0 auto;
     }
     .req-title{text-align:center;font-size:15pt;font-weight:bold;margin-bottom:12px;letter-spacing:.06em;padding-bottom:8px;border-bottom:2px solid #003087;color:#003087}
-    .req-info{width:100%;border-collapse:collapse;margin-bottom:10px}
-    .req-info th,.req-info td{border:1px solid #999;padding:5px 9px;font-size:9.5pt}
-    .req-info th{background:#003087;color:#fff;font-weight:bold;white-space:nowrap;text-align:center;padding:5px 8px}
+    .req-info{width:100%;max-width:100%;table-layout:fixed;border-collapse:collapse;margin-bottom:10px}
+    .req-info th,.req-info td{min-width:0;border:1px solid #999;padding:5px 9px;font-size:9.5pt;vertical-align:top;white-space:pre-wrap;overflow-wrap:anywhere;word-break:break-word}
+    .req-info th{width:15%;background:#003087;color:#fff;font-weight:bold;text-align:center;padding:5px 8px}
+    .req-info td{width:35%}
     .req-num{font-size:10pt;font-weight:bold;color:#003087;margin:7px 0 2px;display:flex;align-items:center;gap:6px}
     .req-num::before{content:"";display:block;width:3px;height:14px;background:#003087;border-radius:2px}
     .req-li{margin:0;padding-left:1.4em;font-size:9.5pt;line-height:1.85;color:#111}
@@ -258,19 +265,20 @@
     .guideline-editor-hint{color:var(--ink-3);font-size:.7rem;line-height:1.5;margin-bottom:7px}
     .guideline-card-list{display:grid;gap:8px;margin-bottom:8px}
     #guideline-meta-list{grid-template-columns:repeat(2,minmax(0,1fr))}
-    .guideline-card{border:1px solid var(--line-2);border-radius:11px;background:rgba(255,255,255,.035);overflow:hidden;transition:border-color .15s,box-shadow .15s,opacity .15s}
+    .guideline-card{min-width:0;max-width:100%;border:1px solid var(--line-2);border-radius:11px;background:rgba(255,255,255,.035);overflow:hidden;transition:border-color .15s,box-shadow .15s,opacity .15s}
     .guideline-card.dragging{opacity:.72;border-color:#00d4ff;box-shadow:0 8px 24px rgba(0,0,0,.28)}
     .guideline-card.is-hidden{opacity:.72}
-    .guideline-card-summary{display:grid;grid-template-columns:38px minmax(0,1fr) auto;gap:8px;align-items:center;padding:8px 10px 5px}
+    .guideline-card-summary{display:grid;grid-template-columns:38px minmax(0,1fr) auto;gap:8px;align-items:center;min-width:0;max-width:100%;padding:8px 10px 5px}
     .guideline-drag-handle{display:grid;place-items:center;width:38px;height:42px;border:1px solid rgba(0,212,255,.3);border-radius:8px;background:rgba(0,160,220,.08);color:#8fe7ff;font-size:1.1rem;cursor:grab;touch-action:none;user-select:none;-webkit-user-select:none}
-    .guideline-card-title{font-size:.84rem;font-weight:900;color:var(--ink);overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+    .guideline-card-title{min-width:0;font-size:.84rem;font-weight:900;color:var(--ink);white-space:normal;overflow-wrap:anywhere;word-break:break-word}
     .guideline-card-badges{display:flex;align-items:center;gap:5px;margin-top:3px}
     .guideline-badge{display:inline-flex;padding:2px 6px;border-radius:99px;background:rgba(0,212,136,.13);color:#75e8ad;font-size:.6rem;font-weight:900}
     .guideline-badge.hidden{background:rgba(148,163,184,.14);color:#b7c2cf}
     .guideline-edit-toggle{min-width:70px;min-height:38px;padding:6px 9px;border:1px solid rgba(0,212,255,.35);border-radius:8px;background:rgba(0,160,220,.1);color:#8fe7ff;font:800 .72rem/1.2 inherit;cursor:pointer;white-space:nowrap}
-    .guideline-quick-input{padding:5px 10px 10px}
-    .guideline-quick-input .form-control{margin:0}
-    .guideline-quick-input textarea{min-height:78px;resize:vertical;line-height:1.5}
+    .guideline-quick-input{display:grid;grid-template-columns:minmax(0,1fr);min-width:0;max-width:100%;padding:5px 10px 10px;overflow:visible}
+    .guideline-quick-input .form-control{display:block;width:100%;min-width:0;max-width:100%;min-inline-size:0;max-inline-size:100%;margin:0;box-sizing:border-box}
+    .guideline-quick-input textarea{min-height:78px;resize:vertical;line-height:1.55;white-space:pre-wrap;overflow-wrap:anywhere;word-break:break-word;overflow-y:hidden}
+    .guideline-quick-input textarea.guideline-meta-textarea{min-height:52px;padding:10px 12px}
     .guideline-card-editor{display:none;padding:10px;border-top:1px solid var(--line-2);background:rgba(0,0,0,.08)}
     .guideline-card.open .guideline-card-editor{display:block}
     .guideline-card-editor textarea{min-height:104px;resize:vertical;line-height:1.55}
@@ -288,13 +296,14 @@
     .guideline-undo{position:fixed;left:50%;bottom:22px;z-index:450;display:none;align-items:center;gap:12px;transform:translateX(-50%);width:min(420px,calc(100% - 28px));padding:11px 13px;border:1px solid rgba(0,212,255,.5);border-radius:12px;background:#10283d;color:#fff;box-shadow:0 12px 36px rgba(0,0,0,.48);font-size:.76rem;font-weight:800}
     .guideline-undo.show{display:flex}.guideline-undo span{flex:1}.guideline-undo button{white-space:nowrap}
     .guideline-add-position{display:grid;grid-template-columns:1fr;gap:5px}
-    .guideline-content-input[type="date"]{display:block!important;width:100%!important;min-width:0!important;max-width:100%!important;inline-size:100%!important;min-inline-size:0!important;box-sizing:border-box!important;overflow:hidden!important}
+    .guideline-content-input[type="date"]{display:block!important;width:100%!important;min-width:0!important;max-width:100%!important;inline-size:100%!important;min-inline-size:0!important;max-inline-size:100%!important;box-sizing:border-box!important;margin:0!important;overflow:hidden!important}
     .guideline-content-input[type="date"]::-webkit-date-and-time-value{min-width:0!important;width:100%!important;text-align:left!important}
     body[data-theme="light"] .guideline-card{background:#f8fbff;border-color:#c7d4e2}
     body[data-theme="light"] .guideline-card-editor{background:#f1f6fb}
     body[data-theme="light"] .guideline-badge{color:#075f32;background:#dff7e9}
     body[data-theme="light"] .guideline-badge.hidden{color:#475569;background:#e2e8f0}
-    @media(max-width:560px){#guideline-meta-list{grid-template-columns:1fr}.guideline-editor-head{display:block}.guideline-editor-head .btn{width:100%;margin-bottom:8px}.guideline-card-summary{grid-template-columns:34px minmax(0,1fr) auto;padding:8px 8px 4px}.guideline-drag-handle{width:32px;height:38px}.guideline-edit-toggle{min-width:62px;padding:5px}.guideline-quick-input{padding:4px 8px 9px}.guideline-card-actions{display:grid;grid-template-columns:1fr 1fr}.guideline-card-actions .btn,.guideline-visible-toggle{width:100%;justify-content:center}.guideline-restore{grid-template-columns:1fr}.guideline-restore .btn{width:100%}}
+    @media(max-width:560px){#guideline-meta-list{grid-template-columns:minmax(0,1fr)}.guideline-editor-head{display:block}.guideline-editor-head .btn{width:100%;margin-bottom:8px}.guideline-card-summary{grid-template-columns:34px minmax(0,1fr) auto;padding:8px 8px 4px}.guideline-drag-handle{width:32px;height:38px}.guideline-edit-toggle{min-width:62px;padding:5px}.guideline-quick-input{padding:4px 8px 9px}.guideline-card-actions{display:grid;grid-template-columns:1fr 1fr}.guideline-card-actions .btn,.guideline-visible-toggle{width:100%;justify-content:center}.guideline-restore{grid-template-columns:1fr}.guideline-restore .btn{width:100%}.req-sheet{padding:16px 14px 14px}.req-info tr{display:grid;grid-template-columns:minmax(58px,24%) minmax(0,1fr)}.req-info th,.req-info td{width:auto!important;min-height:32px;padding:5px 7px}.req-info td[colspan]{grid-column:auto}}
+    @media(max-width:360px){.guideline-card-summary{grid-template-columns:34px minmax(0,1fr)}.guideline-edit-toggle{grid-column:2;width:100%}}
     .btn-group{display:flex;flex-wrap:wrap;gap:6px;margin-top:10px;width:100%;box-sizing:border-box}
     .linked-workflow{margin:0 0 14px;padding:13px;border:2px solid rgba(0,212,255,.45);border-radius:14px;background:linear-gradient(135deg,rgba(0,92,150,.18),rgba(0,212,255,.06))}
     .linked-workflow h3{font-size:.9rem;font-weight:900;color:#8fe7ff;margin-bottom:4px}
@@ -668,13 +677,19 @@ function guidelineExcerpt(value){
   var first=guidelineLines(value)[0]||"内容未入力";
   return first.length>44?first.slice(0,44)+"…":first;
 }
+function autoResizeGuidelineTextarea(field){
+  if(!field||!field.matches("textarea.guideline-content-input"))return;
+  field.style.height="auto";
+  var minimum=field.classList.contains("guideline-meta-textarea")?52:78;
+  field.style.height=Math.max(minimum,field.scrollHeight)+"px";
+}
 function renderGuidelineCard(kind,item,index,total){
   var open=!!_guidelineOpen[item.id],hidden=!item.visible;
   var input;
   if(item.inputType==="date"&&kind==="meta"){
     input='<input class="form-control guideline-content-input" aria-label="'+esc3(item.title)+'の内容" type="date" data-guideline-field="content" value="'+esc3(item.content)+'">';
   }else if(kind==="meta"){
-    input='<input class="form-control guideline-content-input" aria-label="'+esc3(item.title)+'の内容" type="text" data-guideline-field="content" value="'+esc3(item.content)+'">';
+    input='<textarea class="form-control guideline-content-input guideline-meta-textarea" aria-label="'+esc3(item.title)+'の内容" data-guideline-field="content" rows="1">'+esc3(item.content)+'</textarea>';
   }else{
     input='<textarea class="form-control guideline-content-input" aria-label="'+esc3(item.title)+'の内容" data-guideline-field="content" rows="3">'+esc3(item.content)+'</textarea>';
   }
@@ -701,6 +716,7 @@ function renderGuidelineList(kind){
   if(!wrap)return;
   wrap.innerHTML=list.map(function(item,index){return renderGuidelineCard(kind,item,index,list.length);}).join("");
   wrap.querySelectorAll(".guideline-card").forEach(function(card){bindGuidelineCard(card);});
+  wrap.querySelectorAll("textarea.guideline-content-input").forEach(function(field){window.requestAnimationFrame(function(){autoResizeGuidelineTextarea(field);});});
   renderGuidelineRestore(kind);
 }
 function renderGuidelineEditors(openId){
@@ -719,6 +735,7 @@ function bindGuidelineCard(card){
       if(title)title.textContent=item.title||"項目名未入力";
       if(excerpt)excerpt.textContent=guidelineExcerpt(item.content);
       if(field.dataset.guidelineField==="visible")renderGuidelineList(kind);
+      else autoResizeGuidelineTextarea(field);
       scheduleGuidelinePreview();
     });
   });

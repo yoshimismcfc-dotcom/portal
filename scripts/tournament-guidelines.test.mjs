@@ -1,8 +1,10 @@
 import assert from "node:assert/strict";
 import {createRequire} from "node:module";
+import fs from "node:fs";
 
 const require=createRequire(import.meta.url);
 const G=require("../tournament-guidelines.js");
+const source=fs.readFileSync(new URL("../tournament.html",import.meta.url),"utf8");
 
 const defaults=G.defaults();
 assert.equal(defaults.meta.length,4,"基本情報の標準4項目がある");
@@ -53,5 +55,16 @@ const custom={id:"custom-stable",title:"持ち物",content:"帽子\n飲み物",v
 const normalized=G.normalizeList([...defaults.sections,custom],"section");
 assert.equal(normalized.at(-1).id,"custom-stable","追加項目のIDを維持する");
 assert.equal(normalized.at(-1).order,normalized.length-1,"追加項目も順番を正規化する");
+
+assert.ok(source.includes("guideline-content-input guideline-meta-textarea") && source.includes("function autoResizeGuidelineTextarea(field)"),
+  "受付などの基本情報を折り返し、自動で高さを広げてください");
+assert.doesNotMatch(source, /kind==="meta"\)[\s\S]{0,180}type="text" data-guideline-field="content"/,
+  "基本情報の長文を1行入力欄で隠さないでください");
+assert.match(source, /\.req-info\{[^}]*table-layout:fixed/,
+  "要項プレビューの基本情報表を用紙幅内に固定してください");
+assert.match(source, /\.req-info th,\.req-info td\{[^}]*white-space:pre-wrap;overflow-wrap:anywhere/,
+  "要項プレビューの基本情報を改行・折り返し表示してください");
+assert.ok(source.includes("max-inline-size:100%!important") && source.includes("grid-template-columns:minmax(0,1fr)"),
+  "iPhoneの日付入力と基本情報カードを横幅内に収めてください");
 
 console.log("tournament-guidelines tests passed");
