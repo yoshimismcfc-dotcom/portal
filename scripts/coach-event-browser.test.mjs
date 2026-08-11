@@ -39,6 +39,10 @@ for (const required of [
 
 assert.ok(source.includes("✏️ 大会名・日付を変更") && source.includes("coach-event-edit-button"),
   "選択中の大会から大会名を変更する導線がありません");
+assert.match(source, /function displayTournamentName\(item\)\{\s*return String\(item&&item\.tournamentName\|\|""\)\.trim\(\)\|\|"大会名未設定";\s*\}/,
+  "大会名は保存された正式名称を省略せず表示してください");
+assert.doesNotMatch(source, /dotted=date\.replace|name\.slice\(prefix\.length\)|name\.slice\(category\.length\)/,
+  "正式な大会名から日付やカテゴリーを自動削除しないでください");
 
 assert.doesNotMatch(source, /横にスライドできます/,
   "大会一覧に横スクロール案内を残さないでください");

@@ -835,14 +835,7 @@ document.addEventListener("DOMContentLoaded", function(){
     catch(error){return SMCEventLinks.label(item);}
   }
   function displayTournamentName(item){
-    var name=String(item&&item.tournamentName||"").trim();if(!name)return "大会名未設定";
-    var date=String(item&&item.dateIso||""),category=String(item&&item.cat||"").trim();
-    if(date){
-      var compact=date.replace(/-/g,""),dotted=date.replace(/-/g,".");
-      [date,dotted,compact].forEach(function(prefix){if(name.indexOf(prefix)===0)name=name.slice(prefix.length).trim();});
-    }
-    if(category&&name.toLocaleUpperCase("ja").indexOf(category.toLocaleUpperCase("ja"))===0)name=name.slice(category.length).trim();
-    return name||String(item&&item.tournamentName||"大会名未設定").trim();
+    return String(item&&item.tournamentName||"").trim()||"大会名未設定";
   }
   function chronologicalCoachDates(dates){
     return (Array.isArray(dates)?dates:[]).slice().sort(function(a,b){
