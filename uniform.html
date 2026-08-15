@@ -804,21 +804,16 @@ function clearPlannedFields(item){delete item.plannedMemberId;delete item.planne
 function operationId(prefix){return prefix+"_"+Date.now()+"_"+Math.random().toString(36).slice(2,9);}
 function atomicUniformOperations(operations,reason){
   if(!ensureUniformCloudReady()||_uniformWriteInFlight)return Promise.resolve({ok:false});
-  _uniformWriteInFlight=true;var backupId="allocation_"+Date.now(),opId=operationId(reason||"uniform"),today=new Date().toISOString();
+  _uniformWriteInFlight=true;var backupId="allocation_"+Date.now(),opId=operationId(reason||"uniform"),today=new Date().toISOString(),pendingHistory=[],abortReason="";
   return readUniformCloud().then(function(cloud){
     if(!cloud.ok)throw cloud.error||new Error("最新在庫を確認できませんでした。");
-    return dbSave("uniform_backups/"+backupId,{createdAt:today,reason:reason||"allocation_change",itemCount:cloud.items.length,schemaVersion:2,items:cloneUniformItems(cloud.items)},null,null).then(function(saved){if(!saved||!saved.ok)throw new Error("安全バックアップを作成できませんでした。");});
-  }).then(function(){
-    // ルートトランザクションは、端末側キャッシュが未読込だと最初のcurrentがnullになり中止される。
-    // 最新ルートを先に一度読み込み、返却・貸出・履歴を同じトランザクションで安全に更新する。
-    return FIREBASE_DB.ref().once("value");
+    return FIREBASE_DB.ref("uniform_backups/"+backupId).set({createdAt:today,reason:reason||"allocation_change",itemCount:cloud.items.length,schemaVersion:2,items:cloneUniformItems(cloud.items)});
   }).then(function(){return new Promise(function(resolve,reject){
-    FIREBASE_DB.ref().transaction(function(root){
-      if(!root)return;var raw=Array.isArray(root.uniform)?root.uniform:[],hist=Array.isArray(root.uniform_hist)?root.uniform_hist:[];
-      if(hist.some(function(h){return h&&h.operationId===opId;}))return root;
+    FIREBASE_DB.ref("uniform").transaction(function(current){
+      if(!Array.isArray(current)){abortReason="最新在庫を読み込めませんでした。";return;}
+      var raw=current.slice();pendingHistory=[];abortReason="";
       var invalid=operations.some(function(op){var item=raw.find(function(row){return row&&String(row.id)===String(op.id);});if(!item)return true;var holder=uniformHolderName(item);if(op.type==="plan")return !!holder||(op.expectedPlannedMemberId!==undefined&&String(item.plannedMemberId||"")!==String(op.expectedPlannedMemberId||""));if(op.type==="unplan")return !!holder;if(op.type==="lend")return !!holder||(op.requirePlanned&&item.plannedMemberId!==op.memberId);if(op.type==="return")return !holder;return true;});
-      if(invalid)return;
-      var history=[];
+      if(invalid){abortReason="対象の状態が別の端末で変更されています。画面を更新して確認してください。";return;}
       operations.forEach(function(op){
         var index=raw.findIndex(function(item){return item&&String(item.id)===String(op.id);});if(index<0)return;
         var item=Object.assign({},raw[index]),holder=uniformHolderName(item);
@@ -830,16 +825,21 @@ function atomicUniformOperations(operations,reason){
         }else if(op.type==="lend"){
           if(holder)return;if(op.requirePlanned&&item.plannedMemberId!==op.memberId)return;
           item.memberId=op.memberId;item.lentTo=op.memberName;item.player=op.memberName;item.lentDate=op.date;item.storageLocation="player";clearPlannedFields(item);
-          history.push({operationId:opId+"_"+op.id,type:"貸出",date:op.date,num:item.num,cname:uniformColorLabel(item),player:op.memberName,name:op.memberName,memberId:op.memberId,uniformId:item.id,retDate:""});
+          pendingHistory.push({operationId:opId+"_"+op.id,type:"貸出",date:op.date,num:item.num,cname:uniformColorLabel(item),player:op.memberName,name:op.memberName,memberId:op.memberId,uniformId:item.id,retDate:""});
         }else if(op.type==="return"){
-          if(!holder)return;history.push({operationId:opId+"_"+op.id,type:"返却",date:op.date,num:item.num,cname:uniformColorLabel(item),player:holder,name:holder,memberId:item.memberId||"",uniformId:item.id,retDate:""});
+          if(!holder)return;pendingHistory.push({operationId:opId+"_"+op.id,type:"返却",date:op.date,num:item.num,cname:uniformColorLabel(item),player:holder,name:holder,memberId:item.memberId||"",uniformId:item.id,retDate:""});
           delete item.memberId;delete item.lentTo;delete item.lentDate;delete item.retDate;item.player="";item.storageLocation="warehouse";
         }
         item.updatedAt=today;raw[index]=item;
       });
-      root.uniform=raw;root.uniform_hist=hist.concat(history);return root;
-    },function(error,committed){if(error)reject(error);else if(!committed)reject(new Error("同時更新のため保存できませんでした。"));else resolve({ok:true});},false);
-  });}).catch(function(error){alert(error&&error.message?error.message:"保存できませんでした。");return{ok:false,error:error};}).finally(function(){_uniformWriteInFlight=false;});
+      return raw;
+    },function(error,committed){if(error)reject(error);else if(!committed)reject(new Error(abortReason||"同時更新のため保存できませんでした。"));else resolve();},false);
+  });}).then(function(){
+    if(!pendingHistory.length)return {ok:true};
+    return FIREBASE_DB.ref("uniform_hist").once("value").then(function(){return new Promise(function(resolve,reject){
+      FIREBASE_DB.ref("uniform_hist").transaction(function(current){var hist=Array.isArray(current)?current.slice():[];var existing={};hist.forEach(function(item){if(item&&item.operationId)existing[item.operationId]=true;});pendingHistory.forEach(function(item){if(!existing[item.operationId])hist.push(item);});return hist;},function(error,committed){if(error)reject(error);else if(!committed)reject(new Error("返却は完了しましたが、履歴を保存できませんでした。"));else resolve({ok:true});},false);
+    });}).catch(function(error){alert("ユニフォームの更新は完了しましたが、履歴だけ保存できませんでした。通信状態を確認してください。");return{ok:true,historyWarning:true,error:error};});
+  }).catch(function(error){alert(error&&error.message?error.message:"保存できませんでした。");return{ok:false,error:error};}).finally(function(){_uniformWriteInFlight=false;});
 }
 
 function openMemberPicker(target){_memberPickerTarget=target;document.getElementById("member-search").value="";document.getElementById("member-grade-filter").value=target.indexOf("plan:")===0?"":"";renderMemberPicker();document.getElementById("modal-member-picker").classList.add("open");}
