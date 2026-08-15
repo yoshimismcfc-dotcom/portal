@@ -24,7 +24,10 @@ for (const forbidden of [
 for (const required of [
   'id="allocation-section"',
   'id="allocation-section" open',
-  "確認して取り込むまでは、団員名簿に「貸出予定」として表示されません。",
+  "🗓 貸出予定を入力する",
+  "① ユニフォームの色を選ぶ",
+  "③ 貸出予定の団員を選ぶ",
+  "貸出予定を登録しました。",
   "貸出予定を登録",
   "function atomicUniformOperations(operations,reason)",
   'FIREBASE_DB.ref("uniform").transaction',
