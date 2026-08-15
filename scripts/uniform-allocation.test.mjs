@@ -26,6 +26,7 @@ for (const required of [
   'id="allocation-section" open',
   "確認して取り込むまでは、団員名簿に「配布予定」として表示されません。",
   "function atomicUniformOperations(operations,reason)",
+  'return FIREBASE_DB.ref().once("value")',
   'FIREBASE_DB.ref().transaction',
   'plannedSource=op.source||"manual"',
   'source:"members_v2"',

@@ -808,6 +808,10 @@ function atomicUniformOperations(operations,reason){
   return readUniformCloud().then(function(cloud){
     if(!cloud.ok)throw cloud.error||new Error("最新在庫を確認できませんでした。");
     return dbSave("uniform_backups/"+backupId,{createdAt:today,reason:reason||"allocation_change",itemCount:cloud.items.length,schemaVersion:2,items:cloneUniformItems(cloud.items)},null,null).then(function(saved){if(!saved||!saved.ok)throw new Error("安全バックアップを作成できませんでした。");});
+  }).then(function(){
+    // ルートトランザクションは、端末側キャッシュが未読込だと最初のcurrentがnullになり中止される。
+    // 最新ルートを先に一度読み込み、返却・貸出・履歴を同じトランザクションで安全に更新する。
+    return FIREBASE_DB.ref().once("value");
   }).then(function(){return new Promise(function(resolve,reject){
     FIREBASE_DB.ref().transaction(function(root){
       if(!root)return;var raw=Array.isArray(root.uniform)?root.uniform:[],hist=Array.isArray(root.uniform_hist)?root.uniform_hist:[];
