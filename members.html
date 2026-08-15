@@ -137,7 +137,6 @@
       <label class="form-label">貸出ユニフォーム</label>
       <p class="member-uniform-help">「ユニフォーム貸出管理」に登録されている色から選び、背番号を入力します。3着以上でも追加できます。</p>
       <div class="member-uniform-editor" id="member-uniform-editor"></div>
-      <datalist id="member-uniform-color-options"></datalist>
       <button type="button" class="btn btn-outline btn-sm member-uniform-add" onclick="addMemberUniform()">＋ ユニフォームを追加</button>
     </div>
     <div class="form-group">
@@ -169,9 +168,13 @@ var memberListenerStarted = false;
 var migrationAttempted = false;
 var uniformInventory = [];
 var uniformColorTemplates = [];
+var uniformFolderOrder = [];
 var DEFAULT_UNIFORM_COLORS = [
   {name:"水色 × ピンク",mainCode:"#4ab8e8",subCode:"#f06090"},
+  {name:"水色 × オレンジ",mainCode:"#4ab8e8",subCode:"#ff8c00"},
   {name:"オレンジ × 紺",mainCode:"#e85c1e",subCode:"#003087"},
+  {name:"オレンジ × 赤",mainCode:"#e85c1e",subCode:"#bc002d"},
+  {name:"オレンジ",mainCode:"#e85c1e",subCode:""},
   {name:"白 × 青",mainCode:"#f0f0f0",subCode:"#1769aa"},
   {name:"白",mainCode:"#f0f0f0",subCode:""},
   {name:"白 × 赤",mainCode:"#f0f0f0",subCode:"#bc002d"},
@@ -371,7 +374,8 @@ function uniformChoiceFromItem(item){
 }
 function memberUniformColorChoices(){
   var choices=[],seen={};
-  DEFAULT_UNIFORM_COLORS.concat(uniformColorTemplates.map(uniformChoiceFromItem),uniformInventory.map(uniformChoiceFromItem)).forEach(function(item){
+  var folderChoices=uniformFolderOrder.map(function(name){return {name:String(name||""),mainCode:"#64748b",subCode:""};});
+  DEFAULT_UNIFORM_COLORS.concat(uniformColorTemplates.map(uniformChoiceFromItem),uniformInventory.map(uniformChoiceFromItem),folderChoices).forEach(function(item){
     if(!item||!item.name) return;
     var key=item.name.replace(/[\s×・]/g,"").toLowerCase();
     if(seen[key]) return;
@@ -379,10 +383,13 @@ function memberUniformColorChoices(){
   });
   return choices;
 }
-function refreshMemberUniformColorOptions(){
-  var list=document.getElementById("member-uniform-color-options");
-  if(!list) return;
-  list.innerHTML=memberUniformColorChoices().map(function(item){return '<option value="'+escapeHtml(item.name)+'"></option>';}).join("");
+function memberUniformColorOptions(selected){
+  var current=String(selected||"").trim();
+  var choices=memberUniformColorChoices().slice();
+  if(current&&!choices.some(function(item){return item.name===current;})) choices.unshift({name:current});
+  return '<option value="">色を選択してください</option>'+choices.map(function(item){
+    return '<option value="'+escapeHtml(item.name)+'"'+(item.name===current?' selected':'')+'>'+escapeHtml(item.name)+'</option>';
+  }).join("");
 }
 function normalizeMemberUniforms(member){
   var items=member&&Array.isArray(member.uniforms)?member.uniforms:[];
@@ -414,16 +421,19 @@ function renderMemberUniformBadges(member){
 function memberUniformRowHtml(item,index){
   item=item||{};
   return '<div class="member-uniform-row" data-uniform-row>'
-    +'<label>ユニフォームの色<input class="form-control member-uniform-color" list="member-uniform-color-options" value="'+escapeHtml(item.color||"")+'" placeholder="色を選択"></label>'
+    +'<label>ユニフォームの色<select class="form-control member-uniform-color">'+memberUniformColorOptions(item.color||"")+'</select></label>'
     +'<label>背番号<input class="form-control member-uniform-number" inputmode="numeric" value="'+escapeHtml(item.num||"")+'" placeholder="例：10" maxlength="4"></label>'
     +'<button type="button" class="member-uniform-remove" aria-label="'+(index+1)+'着目を削除" onclick="removeMemberUniform(this)">🗑</button>'
     +'</div>';
 }
 function renderMemberUniformEditor(items){
-  refreshMemberUniformColorOptions();
   var editor=document.getElementById("member-uniform-editor");
   var uniforms=Array.isArray(items)?items:[];
   editor.innerHTML=uniforms.map(memberUniformRowHtml).join("");
+}
+function refreshOpenMemberUniformChoices(){
+  var modal=document.getElementById("edit-modal");
+  if(modal&&modal.classList.contains("open")) renderMemberUniformEditor(readMemberUniformEditor());
 }
 function readMemberUniformEditor(){
   return Array.from(document.querySelectorAll("#member-uniform-editor [data-uniform-row]")).map(function(row,index){
@@ -584,11 +594,15 @@ function startMemberSync(){
 function startMemberUniformColorSync(){
   dbListen("uniform",function(value){
     uniformInventory=Array.isArray(value)?value.filter(function(item){return item&&typeof item==="object";}):[];
-    refreshMemberUniformColorOptions();render();
+    refreshOpenMemberUniformChoices();render();
   },null,[]);
   dbListen("uniform_color_templates",function(value){
     uniformColorTemplates=Array.isArray(value)?value.filter(function(item){return item&&typeof item==="object";}):[];
-    refreshMemberUniformColorOptions();render();
+    refreshOpenMemberUniformChoices();render();
+  },null,[]);
+  dbListen("uniform_folder_order",function(value){
+    uniformFolderOrder=Array.isArray(value)?value.filter(function(name){return typeof name==="string"&&name.trim();}):[];
+    refreshOpenMemberUniformChoices();render();
   },null,[]);
 }
 
