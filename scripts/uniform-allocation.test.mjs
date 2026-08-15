@@ -22,10 +22,6 @@ for (const forbidden of [
 ]) if (members.includes(forbidden)) throw new Error("団員名簿に旧ユニフォーム編集UIが残っています: " + forbidden);
 
 for (const required of [
-  'id="allocation-section"',
-  'id="allocation-section" open',
-  "確認して取り込むまでは、団員名簿に「貸出予定」として表示されません。",
-  "貸出予定を登録",
   'id="modal-uniform-status"',
   "function openUniformStatus(id)",
   "貸出予定にする",
@@ -52,16 +48,22 @@ for (const required of [
   'FIREBASE_DB.ref("uniform").transaction',
   'FIREBASE_DB.ref("uniform_hist").transaction',
   'plannedSource=op.source||"manual"',
-  'source:"members_v2"',
-  "function previewLegacyAllocations()",
-  "function distributeSelectedPlans()",
-  "function unplanUniform(id)",
+  "function saveUniformEntryById(entry,expectedEntry,reason)",
+  "saveUniformEntryById(entry,expectedEntry,editing?\"uniform_edit\":\"uniform_add\")",
   'id="modal-member-picker"',
   "氏名・ふりがなで検索",
   'dbListen("members_v2"',
   'operationId:opId+"_"+op.id',
   "clearPlannedFields(item)",
 ]) if (!uniform.includes(required)) throw new Error("配布計画・貸出連携が不足しています: " + required);
+
+for (const forbidden of [
+  'id="allocation-section"',
+  "貸出予定の登録・確認",
+  'id="modal-import-allocations"',
+  "function previewLegacyAllocations()",
+  "function distributeSelectedPlans()",
+]) if (uniform.includes(forbidden)) throw new Error("重複した貸出予定UIが残っています: " + forbidden);
 
 for (const required of [
   'if(holderMatch)result.push(Object.assign({state:"lent"},base))',

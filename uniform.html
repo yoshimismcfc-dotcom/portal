@@ -361,13 +361,8 @@
       .sock-card-info{padding:8px 10px}
       .sock-edit-button{min-width:70px;padding:4px 7px;font-size:.66rem}
     }
-    .allocation-section{margin:16px 0;border:1px solid rgba(255,209,102,.35);border-radius:12px;background:rgba(255,209,102,.045);overflow:hidden}
-    .allocation-section summary{min-height:48px;padding:13px 15px;color:#fff;font-weight:900;cursor:pointer}
-    .allocation-body{padding:0 14px 14px}.allocation-controls{display:flex;gap:8px;flex-wrap:wrap;align-items:end}.allocation-controls label{display:grid;gap:4px;color:var(--ink-3);font-size:.72rem;font-weight:800;min-width:150px;flex:1}
-    .grade-checks{display:flex;gap:7px;flex-wrap:wrap;margin:10px 0}.grade-checks label{min-height:44px;display:flex;align-items:center;gap:5px;padding:0 10px;border:1px solid var(--line-2);border-radius:8px;color:var(--ink)}
-    .allocation-list{display:grid;gap:7px;margin-top:10px}.allocation-row{display:grid;grid-template-columns:70px 72px minmax(0,1fr) auto;gap:7px;align-items:center;padding:9px;border:1px solid var(--line-2);border-radius:9px;background:rgba(5,15,30,.5);font-size:.76rem}.allocation-row button{min-height:44px}.allocation-state{font-weight:900}.planned-text{color:#ffd166}.lent-text{color:#ff8899}.member-choice{min-height:44px;text-align:left;white-space:normal}
-    .member-picker-list{display:grid;gap:7px;max-height:55vh;overflow:auto}.member-option{min-height:52px;width:100%;text-align:left;padding:9px 11px;border:1px solid var(--line-2);border-radius:9px;background:rgba(255,255,255,.04);color:var(--ink);cursor:pointer}.member-option:disabled{cursor:not-allowed;opacity:.52}.member-option strong{color:#fff}.member-option small{display:block;color:var(--ink-3);margin-top:3px}.import-summary{padding:10px;border-radius:8px;background:rgba(255,255,255,.05);margin:8px 0;line-height:1.65}body[data-theme="light"] .allocation-row,body[data-theme="light"] .member-option{background:#f7faff}body[data-theme="light"] .member-option strong{color:#14243a}
-    @media(max-width:430px){.allocation-row{grid-template-columns:62px minmax(0,1fr)}.allocation-row .allocation-member,.allocation-row .allocation-actions{grid-column:1/-1}.allocation-controls label{min-width:100%}}
+    .member-choice{min-height:44px;text-align:left;white-space:normal}
+    .member-picker-list{display:grid;gap:7px;max-height:55vh;overflow:auto}.member-option{min-height:52px;width:100%;text-align:left;padding:9px 11px;border:1px solid var(--line-2);border-radius:9px;background:rgba(255,255,255,.04);color:var(--ink);cursor:pointer}.member-option:disabled{cursor:not-allowed;opacity:.52}.member-option strong{color:#fff}.member-option small{display:block;color:var(--ink-3);margin-top:3px}body[data-theme="light"] .member-option{background:#f7faff}body[data-theme="light"] .member-option strong{color:#14243a}
   </style>
 </head>
 <body>
@@ -456,18 +451,6 @@
     </div>
     <div id="color-folders"></div>
   </div>
-
-  <details class="allocation-section" id="allocation-section" open>
-    <summary>🗓 貸出予定の登録・確認</summary>
-    <div class="allocation-body">
-      <p class="custom-color-note">倉庫のユニフォームに貸出予定の団員を登録し、実際に手渡した日に「貸出中」へ変更します。各色の倉庫一覧にある「貸出予定を登録」からも登録できます。</p>
-      <p class="custom-color-note" style="color:#ffd166"><strong>現在、団員名簿に入力済みの水色ピンク割当は「既存の割当を確認」から確認できます。</strong><br>確認して取り込むまでは、団員名簿に「貸出予定」として表示されません。</p>
-      <div class="allocation-controls"><label>ユニフォームの色<select class="form-control" id="allocation-color" onchange="renderAllocationPlan()"></select></label><button class="btn btn-outline btn-sm" type="button" onclick="previewLegacyAllocations()">既存の割当を確認</button></div>
-      <div class="grade-checks" id="allocation-grades"><label><input type="checkbox" value="3年" checked onchange="renderAllocationPlan()">3年</label><label><input type="checkbox" value="2年" checked onchange="renderAllocationPlan()">2年</label><label><input type="checkbox" value="1年" checked onchange="renderAllocationPlan()">1年</label><label><input type="checkbox" value="年長" onchange="renderAllocationPlan()">年長</label></div>
-      <div style="display:flex;gap:8px;flex-wrap:wrap"><label style="color:var(--ink-3);font-size:.75rem">貸出日 <input class="form-control" id="allocation-lent-date" type="date"></label><button class="btn btn-primary btn-sm" type="button" onclick="distributeSelectedPlans()">選択した分をまとめて貸出中にする</button></div>
-      <div class="allocation-list" id="allocation-list"></div>
-    </div>
-  </details>
 
   <div style="display:flex;gap:8px;margin:18px 0 14px;flex-wrap:wrap">
     <button class="btn btn-primary" onclick="openAddWithColorPicker()">＋ メイン・サブカラーを選んで追加</button>
@@ -638,8 +621,6 @@
 
 <div class="modal-bg" id="modal-uniform-status"><div class="modal"><h3>保管状況を変更</h3><div class="status-change-current" id="status-change-current"></div><p class="custom-color-note" id="status-change-guide"></p><div class="status-change-actions" id="status-change-actions"></div><div class="modal-btns"><button class="btn btn-outline" onclick="closeM('modal-uniform-status')">キャンセル</button></div></div></div>
 
-<div class="modal-bg" id="modal-import-allocations"><div class="modal"><h3>既存の水色ピンク割当</h3><div class="import-summary" id="import-summary"></div><div class="member-picker-list" id="import-list"></div><div class="modal-btns"><button class="btn btn-outline" onclick="closeM('modal-import-allocations')">キャンセル</button><button class="btn btn-primary" id="import-confirm" onclick="confirmLegacyAllocations()">確認済みを取り込む</button></div></div></div>
-
 <!-- 履歴モーダル -->
 <div class="modal-bg" id="modal-hist">
   <div class="modal">
@@ -809,12 +790,11 @@ var _uniformView="color";
 var _pairPrimaryColor="",_pairSecondaryColor="";
 var _folderColorEditName="";
 var _templateReorderMode=false,_templateLongPressed=false,_folderReorderMode=false;
-var _memberRecords={},_memberPickerTarget="",_pendingImports=[];
+var _memberRecords={},_memberPickerTarget="";
 
 function memberList(){return Object.keys(_memberRecords).map(function(id){return Object.assign({id:id},_memberRecords[id]);}).filter(function(m){return m.name;});}
 function memberById(id){var m=_memberRecords[id];return m?Object.assign({id:id},m):null;}
 function compactMemberText(value){return String(value||"").replace(/[\s　]+/g,"").toLowerCase();}
-function selectedAllocationGrades(){return Array.from(document.querySelectorAll("#allocation-grades input:checked")).map(function(el){return el.value;});}
 function clearPlannedFields(item){delete item.plannedMemberId;delete item.plannedMemberName;delete item.plannedAt;delete item.plannedBy;delete item.plannedSource;}
 function operationId(prefix){return prefix+"_"+Date.now()+"_"+Math.random().toString(36).slice(2,9);}
 function atomicUniformOperations(operations,reason){
@@ -875,7 +855,7 @@ function statusChangePlanMember(){var id=_statusUniformId;closeM("modal-uniform-
 function statusChangeLendNow(){var id=_statusUniformId;closeM("modal-uniform-status");openLend(id);}
 function statusChangeToLent(){var id=_statusUniformId;closeM("modal-uniform-status");openLend(id);}
 function statusChangeReturnCurrent(){var id=_statusUniformId;closeM("modal-uniform-status");openLend(id);}
-function statusChangeToWarehouse(){var id=_statusUniformId,u=loadU().find(function(item){return String(item.id)===String(id);}),holder=u&&uniformHolderName(u);if(!confirm(holder?"次の貸出予定だけを解除しますか？\n現在の貸出はそのまま残ります。":"貸出予定を解除して倉庫保管に戻しますか？"))return;closeM("modal-uniform-status");atomicUniformOperations([{type:"unplan",id:id}],"uniform_unplan").then(function(r){if(r.ok){alert(holder?"次の貸出予定を解除しました。":"倉庫保管に戻しました。");renderAllocationPlan();}});}
+function statusChangeToWarehouse(){var id=_statusUniformId,u=loadU().find(function(item){return String(item.id)===String(id);}),holder=u&&uniformHolderName(u);if(!confirm(holder?"次の貸出予定だけを解除しますか？\n現在の貸出はそのまま残ります。":"貸出予定を解除して倉庫保管に戻しますか？"))return;closeM("modal-uniform-status");atomicUniformOperations([{type:"unplan",id:id}],"uniform_unplan").then(function(r){if(r.ok){alert(holder?"次の貸出予定を解除しました。":"倉庫保管に戻しました。");render();}});}
 
 function openMemberPicker(target){_memberPickerTarget=target;document.getElementById("member-search").value="";document.getElementById("member-grade-filter").value=target.indexOf("plan:")===0?"":"";renderMemberPicker();document.getElementById("modal-member-picker").classList.add("open");}
 function currentUniformsForMember(id){return loadU().filter(function(u){return u.memberId===id||u.plannedMemberId===id;});}
@@ -889,17 +869,9 @@ function selectMember(id){var m=memberById(id);if(!m)return;
   if(_memberPickerTarget==="lend"){document.getElementById("l-member-id").value=id;document.getElementById("l-member-choice").textContent=m.name+"　"+(m.grade||"");document.getElementById("l-member-warning").textContent="";}
   else if(_memberPickerTarget==="edit"){document.getElementById("u-member-id").value=id;document.getElementById("u-player").value=m.name;document.getElementById("u-member-choice").textContent=m.name+"　"+(m.grade||"");document.getElementById("u-member-warning").textContent="";}
   else if(_memberPickerTarget==="edit-plan"){document.getElementById("u-planned-member-id").value=id;document.getElementById("u-planned-member-name").value=m.name;document.getElementById("u-planned-member-choice").textContent=m.name+"　"+(m.grade||"");}
-  else if(_memberPickerTarget.indexOf("plan:")===0){var uid=_memberPickerTarget.slice(5),current=loadU().find(function(u){return String(u.id)===String(uid);});atomicUniformOperations([{type:"plan",id:uid,memberId:id,memberName:m.name,date:new Date().toISOString(),source:"manual",expectedPlannedMemberId:current&&current.plannedMemberId||""}],"uniform_plan").then(function(r){if(r.ok){alert("貸出予定に変更しました。\n"+(uniformColorLabel(current)||"色未設定")+" #"+(current.num||"—")+" → "+m.name);renderAllocationPlan();}});}
+  else if(_memberPickerTarget.indexOf("plan:")===0){var uid=_memberPickerTarget.slice(5),current=loadU().find(function(u){return String(u.id)===String(uid);});atomicUniformOperations([{type:"plan",id:uid,memberId:id,memberName:m.name,date:new Date().toISOString(),source:"manual",expectedPlannedMemberId:current&&current.plannedMemberId||""}],"uniform_plan").then(function(r){if(r.ok){alert("貸出予定に変更しました。\n"+(uniformColorLabel(current)||"色未設定")+" #"+(current.num||"—")+" → "+m.name);render();}});}
   closeM("modal-member-picker");
 }
-function canonicalWaterPink(value){return compactMemberText(value).replace(/[×x・]/g,"")==="水色ピンク";}
-function fillAllocationColors(){var select=document.getElementById("allocation-color");if(!select)return;var before=select.value,names=availableUniformColorNames();select.innerHTML='<option value="">色を選択</option>'+names.map(function(n){return '<option value="'+escapeHtml(n)+'">'+escapeHtml(n)+'</option>';}).join("");select.value=names.indexOf(before)>=0?before:(names.find(canonicalWaterPink)||"");}
-function renderAllocationPlan(){var list=document.getElementById("allocation-list"),color=document.getElementById("allocation-color").value;if(!list)return;if(!color){list.innerHTML='<div class="backup-empty">色を選択してください。</div>';return;}var items=loadU().filter(function(u){return uniformColorLabel(u)===color;}).sort(function(a,b){return String(a.size||"").localeCompare(String(b.size||""),"ja",{numeric:true})||Number(a.num)-Number(b.num)||String(a.id).localeCompare(String(b.id));});list.innerHTML=items.map(function(u){var holder=uniformHolderName(u),planned=memberById(u.plannedMemberId),plannedName=(planned&&planned.name)||u.plannedMemberName||"",state=holder?(plannedName?"👕 貸出中／🗓 次の貸出予定":"👕 貸出中"):plannedName?"🗓 貸出予定":"🏠 倉庫保管";var cls=holder?"lent-text":plannedName?"planned-text":"";var member=holder?(holder+(plannedName?"／次："+plannedName:"")):plannedName||"団員を選択";var actions=holder?'<button class="btn btn-outline btn-sm" onclick="openUniformStatus('+inlineJsArg(u.id)+')">返却・次の予定</button>':plannedName?'<label><input class="allocation-distribute" type="checkbox" value="'+escapeHtml(u.id)+'"> 貸出対象</label><button class="btn btn-primary btn-sm" onclick="distributeOnePlan('+inlineJsArg(u.id)+')">貸出中にする</button><button class="btn btn-outline btn-sm" onclick="openMemberPicker('+inlineJsArg("plan:"+u.id)+')">予定先変更</button><button class="btn btn-outline btn-sm" onclick="unplanUniform('+inlineJsArg(u.id)+')">予定解除</button>':'<button class="btn btn-outline btn-sm" onclick="openMemberPicker('+inlineJsArg("plan:"+u.id)+')">貸出予定の団員を選択</button>';return '<div class="allocation-row"><strong>'+escapeHtml(u.size||"—")+'</strong><strong>#'+escapeHtml(u.num||"—")+'</strong><div class="allocation-member"><span class="allocation-state '+cls+'">'+state+'</span><br>'+escapeHtml(member)+'</div><div class="allocation-actions">'+actions+'</div></div>';}).join("")||'<div class="backup-empty">該当するユニフォームがありません。</div>';}
-function unplanUniform(id){if(!confirm("この貸出予定を解除しますか？"))return;atomicUniformOperations([{type:"unplan",id:id}],"uniform_unplan").then(function(r){if(r.ok)renderAllocationPlan();});}
-function distributeOnePlan(id){var u=loadU().find(function(x){return x.id===id;}),m=u&&memberById(u.plannedMemberId),date=document.getElementById("allocation-lent-date").value;if(!m||!date)return;if(!confirm(m.name+"へ #"+u.num+"を貸出中にしますか？\n貸出日："+date))return;atomicUniformOperations([{type:"lend",id:id,memberId:m.id,memberName:m.name,date:date,requirePlanned:true}],"uniform_lend_planned").then(function(r){if(r.ok)renderAllocationPlan();});}
-function distributeSelectedPlans(){var ids=Array.from(document.querySelectorAll(".allocation-distribute:checked")).map(function(el){return el.value;}),date=document.getElementById("allocation-lent-date").value;if(!ids.length){alert("貸出中にするユニフォームを選択してください。");return;}var ops=ids.map(function(id){var u=loadU().find(function(x){return x.id===id;}),m=u&&memberById(u.plannedMemberId);return m?{type:"lend",id:id,memberId:m.id,memberName:m.name,date:date,requirePlanned:true}:null;}).filter(Boolean);if(!confirm(ops.length+"着を貸出中にします。貸出日："+date))return;atomicUniformOperations(ops,"uniform_batch_lend").then(function(r){if(r.ok){alert(ops.length+"着を貸出中にしました。");renderAllocationPlan();}});}
-function previewLegacyAllocations(){var grades=selectedAllocationGrades(),candidates=[],needs=[],reserved={};memberList().filter(function(m){return grades.indexOf(m.grade)>=0;}).forEach(function(m){(Array.isArray(m.uniforms)?m.uniforms:[]).forEach(function(old){if(!canonicalWaterPink(old.color)||!String(old.num||"").trim())return;var matches=loadU().filter(function(u){return canonicalWaterPink(uniformColorLabel(u))&&String(u.num)===String(old.num)&&!uniformHolderName(u)&&!u.plannedMemberId;});if(matches.length===1&&!reserved[matches[0].id]){reserved[matches[0].id]=true;candidates.push({member:m,uniform:matches[0],old:old});}else needs.push({member:m,old:old,reason:matches.length===1?"同じ実物ユニフォームが別の候補にもあります":matches.length?"同じ色・番号が複数あります":"対応する倉庫在庫がありません"});});});_pendingImports=candidates;document.getElementById("import-summary").innerHTML="自動で取り込み可能：<strong>"+candidates.length+"件</strong><br>確認が必要：<strong>"+needs.length+"件</strong>";document.getElementById("import-list").innerHTML=candidates.map(function(x){return '<label class="member-option"><input class="import-check" type="checkbox" value="'+escapeHtml(x.uniform.id)+'" checked> <strong>'+escapeHtml(x.member.name)+'　'+escapeHtml(x.member.grade)+'</strong><small>水色ピンク #'+escapeHtml(x.old.num)+'／サイズ '+escapeHtml(x.uniform.size||"未設定")+'</small></label>';}).concat(needs.map(function(x){return '<div class="member-option"><strong>⚠ '+escapeHtml(x.member.name)+'　#'+escapeHtml(x.old.num)+'</strong><small>'+escapeHtml(x.reason)+'。自動では取り込みません。</small></div>';})).join("");document.getElementById("import-confirm").disabled=!candidates.length;document.getElementById("modal-import-allocations").classList.add("open");}
-function confirmLegacyAllocations(){var ids=Array.from(document.querySelectorAll(".import-check:checked")).map(function(el){return el.value;}),ops=_pendingImports.filter(function(x){return ids.indexOf(String(x.uniform.id))>=0;}).map(function(x){return{type:"plan",id:x.uniform.id,memberId:x.member.id,memberName:x.member.name,date:new Date().toISOString(),source:"members_v2",expectedPlannedMemberId:""};});if(!ops.length)return;if(!confirm(ops.length+"件を貸出予定として取り込みますか？"))return;atomicUniformOperations(ops,"import_members_v2_allocations").then(function(r){if(r.ok){closeM("modal-import-allocations");alert(ops.length+"件を取り込みました。団員名簿の旧データは削除していません。");renderAllocationPlan();}});}
 
 function storedUniformArray(key){
   try{var value=JSON.parse(localStorage.getItem(key)||"null");return Array.isArray(value)?value.filter(function(item){return item&&typeof item==="object";}):[];}catch(error){return [];}
@@ -1137,6 +1109,64 @@ function saveU(d,reason){
   }).finally(function(){
     _uniformWriteInFlight=false;
   });
+}
+function uniformEntrySignature(item){
+  function normalize(value){
+    if(Array.isArray(value))return value.map(normalize);
+    if(value&&typeof value==="object"){var result={};Object.keys(value).sort().forEach(function(key){result[key]=normalize(value[key]);});return result;}
+    return value;
+  }
+  try{return JSON.stringify(normalize(item&&typeof item==="object"?item:null));}catch(error){return "";}
+}
+function saveUniformEntryById(entry,expectedEntry,reason){
+  if(!_uniformCloudReady){ensureUniformCloudReady();return Promise.resolve({ok:false,notReady:true});}
+  if(_uniformWriteInFlight){alert("別の在庫変更を保存中です。『クラウド同期済み』になってから、もう一度お試しください。");return Promise.resolve({ok:false,busy:true});}
+  var nextEntry=JSON.parse(JSON.stringify(entry)),expected=expectedEntry?JSON.parse(JSON.stringify(expectedEntry)):null;
+  var backupId="b"+Date.now()+"_"+(++_uniformBackupSequence),backup,targetConflict=false,conflictItems=[];
+  _uniformWriteInFlight=true;setUniformBackupHealth("安全確認とバックアップを実行中…",false);
+  return readUniformCloud().then(function(cloud){
+    if(!cloud.ok)throw cloud.error||new Error("クラウドの最新在庫を確認できませんでした。");
+    backup={createdAt:new Date().toISOString(),reason:reason||"before_entry_change",itemCount:cloud.items.length,schemaVersion:2,items:cloneUniformItems(cloud.items)};
+    return dbSave("uniform_backups/"+backupId,backup,null,null);
+  }).then(function(result){
+    if(!result||!result.ok)throw new Error("安全バックアップを作成できなかったため、在庫の変更を中止しました。通信状態を確認してください。");
+    return new Promise(function(resolve){
+      FIREBASE_DB.ref("uniform").transaction(function(current){
+        var items=Array.isArray(current)?current.slice():[],index=-1;
+        for(var i=0;i<items.length;i++){if(items[i]&&String(items[i].id)===String(nextEntry.id)){index=i;break;}}
+        if(expected){
+          if(index<0||uniformEntrySignature(items[index])!==uniformEntrySignature(expected)){targetConflict=true;conflictItems=cloneUniformItems(items);return;}
+          items[index]=nextEntry;
+        }else{
+          if(index>=0){targetConflict=true;conflictItems=cloneUniformItems(items);return;}
+          items.push(nextEntry);
+        }
+        return items;
+      },function(error,committed,snapshot){
+        if(error){resolve({ok:false,error:error});return;}
+        if(!committed){resolve({ok:false,conflict:targetConflict,items:conflictItems});return;}
+        var value=snapshot&&snapshot.val?snapshot.val():[],saved=Array.isArray(value)?value.filter(function(item){return item&&typeof item==="object";}):[];
+        resolve({ok:true,cloudSaved:true,items:cloneUniformItems(saved)});
+      },false);
+    });
+  }).then(function(result){
+    if(result&&result.ok){
+      _unifData=cloneUniformItems(result.items);_uniformPersistedSnapshot=cloneUniformItems(result.items);
+      try{localStorage.setItem(KU,JSON.stringify(result.items));}catch(cacheError){}
+      setUniformBackupHealth("バックアップ済み・対象ユニフォームを保存しました",false);render();return result;
+    }
+    if(result&&result.conflict){
+      var latest=cloneUniformItems(result.items||[]);_unifData=latest;_uniformPersistedSnapshot=latest;
+      try{localStorage.setItem(KU,JSON.stringify(latest));}catch(cacheError){}
+      render();setUniformBackupHealth("対象ユニフォームの更新競合を検知しました",true);
+      alert("このユニフォームが別の端末で更新されました。最新内容を読み直しましたので、内容を確認してもう一度操作してください。");
+    }
+    return result;
+  }).catch(function(error){
+    setUniformBackupHealth("バックアップまたは保存に失敗しました",true);
+    alert(error&&error.message?error.message:"保存に失敗しました。通信状態を確認してください。");
+    return {ok:false,error:error};
+  }).finally(function(){_uniformWriteInFlight=false;renderUniformRecovery();});
 }
 function restoreDeviceInventory(){
   if(!requireUniformAdmin()||!ensureUniformCloudReady())return;
@@ -2356,12 +2386,13 @@ function saveUni(closeAfter){
   var data=loadU(),id=editId||("u"+Date.now());
   var duplicateItems=findDuplicateUniforms(num,colorName,id);
   var exist=data.find(function(x){return x.id===id;});
+  var expectedEntry=exist?JSON.parse(JSON.stringify(exist)):null;
   var previousHolder=uniformHolderName(exist),previousPlannedMemberId=exist&&exist.plannedMemberId||"";
   var loanState=document.getElementById("u-loan-state").value,selectedName=document.getElementById("u-player").value.trim(),selectedMemberId=document.getElementById("u-member-id").value;
   var holderName=loanState==="lent"?selectedName:"",plannedMemberId=loanState==="planned"?selectedMemberId:loanState==="lent"?document.getElementById("u-planned-member-id").value:"",plannedMemberName=loanState==="planned"?selectedName:loanState==="lent"?document.getElementById("u-planned-member-name").value.trim():"";
   if(loanState!=="warehouse"&&(!selectedMemberId||!selectedName)){alert(loanState==="planned"?"貸出予定の団員を選択してください。":"現在の貸出先を団員名簿から選択してください。");return;}
   if(loanState==="lent"&&plannedMemberId&&String(plannedMemberId)===String(selectedMemberId)){alert("現在の貸出先と次の貸出予定者には、別の団員を選択してください。");return;}
-  var entry=Object.assign(exist||{},{
+  var entry=Object.assign({},exist||{},{
     id:id,num:num,
     player:holderName,
     size:document.getElementById("u-size").value,
@@ -2387,8 +2418,7 @@ function saveUni(closeAfter){
   }
   if(plannedMemberId){entry.plannedMemberId=plannedMemberId;entry.plannedMemberName=plannedMemberName;entry.plannedAt=String(plannedMemberId)===String(previousPlannedMemberId)&&entry.plannedAt?entry.plannedAt:new Date().toISOString();entry.plannedSource=entry.plannedSource||"manual";}
   else clearPlannedFields(entry);
-  if(!exist)data.push(entry);
-  saveU(data,editing?"uniform_edit":"uniform_add").then(function(result){
+  saveUniformEntryById(entry,expectedEntry,editing?"uniform_edit":"uniform_add").then(function(result){
     if(!result||!result.ok)return;
     if(previousHolder!==holderName){
       var history=loadH();
@@ -2466,10 +2496,10 @@ function showHistory(){
   document.getElementById("modal-hist").classList.add("open");
 }
 function closeM(id){document.getElementById(id).classList.remove("open");}
-["modal-add","modal-lend","modal-hist","modal-uniform-backup","modal-sock","modal-pants","modal-folder-color","modal-member-picker","modal-uniform-status","modal-import-allocations"].forEach(function(id){
+["modal-add","modal-lend","modal-hist","modal-uniform-backup","modal-sock","modal-pants","modal-folder-color","modal-member-picker","modal-uniform-status"].forEach(function(id){
   document.getElementById(id).addEventListener("click",function(e){if(e.target.id===id)closeM(id);});
 });
-function render(){renderStats();renderFolders();renderNumberOverview();renderPants();renderSocks();renderUniformRecovery();fillAllocationColors();renderAllocationPlan();}
+function render(){renderStats();renderFolders();renderNumberOverview();renderPants();renderSocks();renderUniformRecovery();}
 
 function startUniformSync(){
   // 描画に必要な色・関数の準備後に同期を開始する。
@@ -2524,9 +2554,8 @@ function startUniformSync(){
     _pantsData=Array.isArray(val)?val.filter(function(item){return item&&item.id&&typeof item==="object";}):[];
     renderPants();
   }, KP, []);
-  dbListen("members_v2",function(val){_memberRecords=val&&typeof val==="object"&&!Array.isArray(val)?val:{};renderAllocationPlan();if(document.getElementById("modal-member-picker").classList.contains("open"))renderMemberPicker();},null,{});
+  dbListen("members_v2",function(val){_memberRecords=val&&typeof val==="object"&&!Array.isArray(val)?val:{};if(document.getElementById("modal-member-picker").classList.contains("open"))renderMemberPicker();},null,{});
 }
-document.getElementById("allocation-lent-date").value=new Date().toISOString().slice(0,10);
 startUniformSync();
 
 function uniformCsvCell(value){
