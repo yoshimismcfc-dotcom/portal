@@ -69,7 +69,7 @@ for (const required of [
   "🗓 貸出予定",
   "選手に貸出中",
   "今すぐ貸し出す",
-  "返却する",
+  "現在の貸出を返却",
   'entry.storageLocation="player"',
   'entry.storageLocation="warehouse"',
   "function uniformHolderName(item)"

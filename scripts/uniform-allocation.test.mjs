@@ -32,6 +32,13 @@ for (const required of [
   "今すぐ貸し出す",
   "貸出予定を解除",
   "倉庫保管に戻す",
+  "次の貸出予定者を登録",
+  "現在の貸出はそのまま残ります",
+  'if(!holder){item.storageLocation="warehouse";delete item.lentDate;}',
+  'clearPlannedFields(item);if(!holder)item.storageLocation="warehouse"',
+  "⚠ 現在このユニフォームを貸出中です",
+  "返却後も予定は残ります",
+  'planned=d.filter(function(u){return !!u.plannedMemberId;}).length',
   "function atomicUniformOperations(operations,reason)",
   'FIREBASE_DB.ref("uniform").transaction',
   'FIREBASE_DB.ref("uniform_hist").transaction',
@@ -46,5 +53,10 @@ for (const required of [
   'operationId:opId+"_"+op.id',
   "clearPlannedFields(item)",
 ]) if (!uniform.includes(required)) throw new Error("配布計画・貸出連携が不足しています: " + required);
+
+for (const required of [
+  'if(holderMatch)result.push(Object.assign({state:"lent"},base))',
+  'if(item.plannedMemberId===id)result.push(Object.assign({state:"planned"},base))',
+]) if (!members.includes(required)) throw new Error("貸出中と次の貸出予定の同時表示が不足しています: " + required);
 
 console.log("uniform allocation tests passed");

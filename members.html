@@ -398,15 +398,14 @@ function uniformAssignmentsForMember(member){
   if(MEMBER_UNIFORM_SOURCE==="member")return normalizeMemberUniforms(member).map(function(item){return Object.assign({state:"legacy"},item);});
   var id=String(member&&member.id||"");
   var normalizedName=String(member&&member.name||"").replace(/[\s　]+/g,"");
-  return uniformInventory.filter(function(item){
-    if(!item||typeof item!=="object")return false;
-    if(item.plannedMemberId===id)return true;
-    if(item.memberId===id)return true;
-    return !item.memberId&&!!uniformHolderNameForMember(item)&&String(uniformHolderNameForMember(item)).replace(/[\s　]+/g,"")===normalizedName&&uniqueMemberName(normalizedName);
-  }).map(function(item){
-    var planned=item.plannedMemberId===id&&!uniformHolderNameForMember(item);
-    var choice=uniformChoiceFromItem(item)||{name:String(item.cname||"色未設定")};return {id:item.id,color:choice.name,num:String(item.num||""),state:planned?"planned":"lent"};
-  }).sort(function(a,b){return (a.state===b.state?0:a.state==="lent"?-1:1)||(Number(a.num)||999)-(Number(b.num)||999);});
+  return uniformInventory.reduce(function(result,item){
+    if(!item||typeof item!=="object")return result;
+    var choice=uniformChoiceFromItem(item)||{name:String(item.cname||"色未設定")},base={id:item.id,color:choice.name,num:String(item.num||"")};
+    var holderMatch=item.memberId===id||(!item.memberId&&!!uniformHolderNameForMember(item)&&String(uniformHolderNameForMember(item)).replace(/[\s　]+/g,"")===normalizedName&&uniqueMemberName(normalizedName));
+    if(holderMatch)result.push(Object.assign({state:"lent"},base));
+    if(item.plannedMemberId===id)result.push(Object.assign({state:"planned"},base));
+    return result;
+  },[]).sort(function(a,b){return (a.state===b.state?0:a.state==="lent"?-1:1)||(Number(a.num)||999)-(Number(b.num)||999);});
 }
 function uniformHolderNameForMember(item){return String(item&&(item.lentTo||item.player)||"").trim();}
 function uniqueMemberName(compact){return Object.keys(memberRecords).filter(function(id){return String(memberRecords[id]&&memberRecords[id].name||"").replace(/[\s　]+/g,"")===compact;}).length===1;}
