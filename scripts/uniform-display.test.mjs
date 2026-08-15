@@ -4,6 +4,14 @@ import path from "node:path";
 const root = path.resolve(import.meta.dirname, "..");
 const source = fs.readFileSync(path.join(root, "uniform.html"), "utf8");
 
+for (const required of [
+  ".stat-row{display:grid;grid-template-columns:repeat(4,minmax(0,1fr))",
+  ".stat-card .sl{font-size:clamp(.54rem,2.35vw,.7rem)",
+  "white-space:nowrap",
+]) {
+  if (!source.includes(required)) throw new Error("在庫集計がスマートフォンで横1段になっていません: " + required);
+}
+
 const paletteAt = source.indexOf("var PALETTE=");
 const syncAt = source.indexOf("startUniformSync();");
 const renderAt = source.indexOf("function renderFolders()");

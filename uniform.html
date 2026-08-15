@@ -13,7 +13,7 @@
   <script src="common.js"></script>
   <style>
     /* ===== 統計バー ===== */
-    .stat-row{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-bottom:16px}
+    .stat-row{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:6px;margin-bottom:16px}
     .uniform-recovery{display:none;gap:10px;align-items:center;margin:12px 0;padding:12px;border:2px solid #f2a532;border-radius:12px;background:rgba(242,165,50,.12)}
     .uniform-recovery.show{display:grid;grid-template-columns:minmax(0,1fr) auto}
     .uniform-recovery strong{display:block;color:#ffd58a;font-size:.83rem}.uniform-recovery span{display:block;margin-top:3px;color:var(--ink-2);font-size:.7rem;line-height:1.55}
@@ -38,9 +38,9 @@
     .admin-handover p{color:var(--ink-3);font-size:.68rem;line-height:1.55}.admin-request-list{display:grid;gap:7px;margin-top:10px}
     .admin-request{display:grid;grid-template-columns:minmax(0,1fr) auto;align-items:center;gap:8px;padding:9px;border:1px solid var(--line-2);border-radius:9px;font-size:.68rem}.admin-request strong{display:block;overflow-wrap:anywhere}.admin-request small{color:var(--ink-3)}
     @media(max-width:560px){.uniform-recovery.show{grid-template-columns:1fr}.uniform-recovery-actions{min-width:0}.uniform-recovery .btn{width:100%}.backup-item{grid-template-columns:1fr}.backup-item .btn{width:100%}}
-    .stat-card{background:var(--surface-lt);border-radius:var(--r8);padding:12px;text-align:center;border:1px solid var(--line)}
-    .stat-card .sv{font-size:1.6rem;font-weight:900;color:#fff}
-    .stat-card .sl{font-size:.7rem;color:var(--ink-3);margin-top:2px}
+    .stat-card{min-width:0;background:var(--surface-lt);border-radius:var(--r8);padding:10px 3px;text-align:center;border:1px solid var(--line)}
+    .stat-card .sv{font-size:clamp(1.15rem,6vw,1.6rem);font-weight:900;color:#fff;line-height:1.1}
+    .stat-card .sl{font-size:clamp(.54rem,2.35vw,.7rem);color:var(--ink-3);margin-top:4px;white-space:nowrap}
 
     /* ===== カラーフォルダ ===== */
     .color-folder{margin-bottom:14px;border-radius:var(--r12);overflow:hidden;border:1px solid var(--line-2)}
@@ -1548,7 +1548,7 @@ function renderStats(){
     '<div class="stat-card"><div class="sv">'+total+'</div><div class="sl">総在庫</div></div>'
     +'<div class="stat-card"><div class="sv" style="color:#00ff88">'+free+'</div><div class="sl">倉庫保管</div></div>'
     +'<div class="stat-card"><div class="sv" style="color:#ffd166">'+planned+'</div><div class="sl">貸出予定</div></div>'
-    +'<div class="stat-card"><div class="sv" style="color:#ff4466">'+lent+'</div><div class="sl">選手に貸出中</div></div>';
+    +'<div class="stat-card"><div class="sv" style="color:#ff4466">'+lent+'</div><div class="sl">貸出中</div></div>';
 }
 
 function setUniformView(view){
