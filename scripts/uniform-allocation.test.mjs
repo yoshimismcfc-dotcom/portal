@@ -23,6 +23,8 @@ for (const forbidden of [
 
 for (const required of [
   'id="allocation-section"',
+  'id="allocation-section" open',
+  "確認して取り込むまでは、団員名簿に「配布予定」として表示されません。",
   "function atomicUniformOperations(operations,reason)",
   'FIREBASE_DB.ref().transaction',
   'plannedSource=op.source||"manual"',

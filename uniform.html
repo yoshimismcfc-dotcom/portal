@@ -452,10 +452,11 @@
     <div id="color-folders"></div>
   </div>
 
-  <details class="allocation-section" id="allocation-section">
-    <summary>🗓 配布計画（割当・配布済み）</summary>
+  <details class="allocation-section" id="allocation-section" open>
+    <summary>🗓 配布予定・配布計画（割当を確認）</summary>
     <div class="allocation-body">
       <p class="custom-color-note">倉庫のユニフォームを団員へ「配布予定」として割り当て、手渡した日に貸出中へ変更します。</p>
+      <p class="custom-color-note" style="color:#ffd166"><strong>現在、団員名簿に入力済みの水色ピンク割当は「既存の割当を確認」から確認できます。</strong><br>確認して取り込むまでは、団員名簿に「配布予定」として表示されません。</p>
       <div class="allocation-controls"><label>ユニフォームの色<select class="form-control" id="allocation-color" onchange="renderAllocationPlan()"></select></label><button class="btn btn-outline btn-sm" type="button" onclick="previewLegacyAllocations()">既存の割当を確認</button></div>
       <div class="grade-checks" id="allocation-grades"><label><input type="checkbox" value="3年" checked onchange="renderAllocationPlan()">3年</label><label><input type="checkbox" value="2年" checked onchange="renderAllocationPlan()">2年</label><label><input type="checkbox" value="1年" checked onchange="renderAllocationPlan()">1年</label><label><input type="checkbox" value="年長" onchange="renderAllocationPlan()">年長</label></div>
       <div style="display:flex;gap:8px;flex-wrap:wrap"><label style="color:var(--ink-3);font-size:.75rem">貸出日 <input class="form-control" id="allocation-lent-date" type="date"></label><button class="btn btn-primary btn-sm" type="button" onclick="distributeSelectedPlans()">選択した分をまとめて配布済みにする</button></div>
