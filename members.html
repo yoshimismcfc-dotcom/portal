@@ -96,7 +96,7 @@
   <div class="legend-bar">
     <span><span class="legend-dot" style="background:#6aaccc"></span>男子</span>
     <span><span class="legend-dot" style="background:#ff8888"></span>女子（赤字）</span>
-    <span style="color:#ffaa66">🗓 配布予定　👕 貸出中（変更はユニフォーム貸出管理から）</span>
+    <span style="color:#ffaa66">🗓 貸出予定　👕 貸出中（変更はユニフォーム貸出管理から）</span>
   </div>
 
   <!-- グリッドビュー -->
@@ -130,7 +130,7 @@
     </div>
     <div class="form-group">
       <label class="form-label">ユニフォーム</label>
-      <p class="member-uniform-help">ユニフォーム貸出管理の「配布予定」「貸出中」を自動表示します。この画面からは変更できません。</p>
+      <p class="member-uniform-help">ユニフォーム貸出管理の「貸出予定」「貸出中」を自動表示します。この画面からは変更できません。</p>
       <div id="member-uniform-readonly"></div>
     </div>
     <div class="form-group">
@@ -426,7 +426,7 @@ function renderMemberUniformBadges(member){
   var uniforms=uniformAssignmentsForMember(member);
   if(!uniforms.length) return "<span style='color:var(--ink-3)'>—</span>";
   return "<div class='member-uniform-badges'>"+uniforms.map(function(item){
-    var state=item.state==="planned"?"🗓 配布予定":item.state==="lent"?"👕 貸出中":"旧登録";
+    var state=item.state==="planned"?"🗓 貸出予定":item.state==="lent"?"👕 貸出中":"旧登録";
     return '<span class="member-uniform-badge '+(item.state==="planned"?'planned':'')+'" style="'+memberUniformStyle(item.color)+'"><span class="member-uniform-state">'+state+'</span><span>'+escapeHtml(memberUniformText(item))+'</span></span>';
   }).join("")+"</div>";
 }
@@ -457,7 +457,7 @@ function saveEdit(){
 function deleteEntry(){
   if(!editId || !confirm("この団員を名簿から削除しますか？")) return;
   var linked=uniformAssignmentsForMember(memberRecords[editId]||{});
-  if(linked.length){alert("この団員にはユニフォームがあります。\n"+linked.map(function(item){return (item.state==="planned"?"配布予定：":"貸出中：")+memberUniformText(item);}).join("\n")+"\n先にユニフォーム貸出管理で、配布予定解除・返却・貸出先変更を行ってください。");return;}
+  if(linked.length){alert("この団員にはユニフォームがあります。\n"+linked.map(function(item){return (item.state==="planned"?"貸出予定：":"貸出中：")+memberUniformText(item);}).join("\n")+"\n先にユニフォーム貸出管理で、貸出予定解除・返却・貸出先変更を行ってください。");return;}
   setSaveMessage("☁️ 削除中…",false);
   dbSave(MEMBER_PATH+"/"+editId,null,null,function(){
     closeModal();

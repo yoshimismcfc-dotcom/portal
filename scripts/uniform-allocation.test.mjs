@@ -12,7 +12,7 @@ for (const required of [
   'item.memberId===id',
   'db.ref(MEMBER_PATH+"/"+id).update(changes)',
   "uniformAssignmentsForMember(memberRecords[editId]||{})",
-  "ユニフォーム貸出管理の「配布予定」「貸出中」を自動表示します",
+  "ユニフォーム貸出管理の「貸出予定」「貸出中」を自動表示します",
 ]) if (!members.includes(required)) throw new Error("団員名簿連携が不足しています: " + required);
 
 for (const forbidden of [
@@ -24,7 +24,8 @@ for (const forbidden of [
 for (const required of [
   'id="allocation-section"',
   'id="allocation-section" open',
-  "確認して取り込むまでは、団員名簿に「配布予定」として表示されません。",
+  "確認して取り込むまでは、団員名簿に「貸出予定」として表示されません。",
+  "貸出予定を登録",
   "function atomicUniformOperations(operations,reason)",
   'FIREBASE_DB.ref("uniform").transaction',
   'FIREBASE_DB.ref("uniform_hist").transaction',
