@@ -68,7 +68,7 @@ for (const required of [
   "🏠 倉庫保管",
   "🗓 貸出予定",
   "選手に貸出中",
-  "今すぐ貸出",
+  "今すぐ貸し出す",
   "返却する",
   'entry.storageLocation="player"',
   'entry.storageLocation="warehouse"',
@@ -426,7 +426,7 @@ for (const required of [
 if (!(source.indexOf('id="color-folders"') < source.indexOf("＋ メイン・サブカラーを選んで追加"))) {
   throw new Error("補助操作ボタンは色一覧より下に配置してください");
 }
-if (source.includes("① メインカラー") || source.includes("② サブカラー")) {
+if (source.includes("①") || source.includes("②")) {
   throw new Error("追加画面に分かりづらい手順番号を表示しないでください");
 }
 
