@@ -26,8 +26,10 @@
     .kanji{font-size:.88rem;font-weight:700;color:#fff;display:flex;align-items:center;gap:4px}
     .kanji.girl{color:#ff8888}
     .gender-dot{width:6px;height:6px;border-radius:50%;flex-shrink:0}
-    .member-uniform-badges{display:flex;flex-wrap:wrap;gap:4px;margin-top:4px}
-    .member-uniform-badge{display:inline-flex;align-items:center;min-width:0;max-width:100%;padding:3px 7px 3px 14px;border:1px solid rgba(255,255,255,.2);border-radius:99px;background:linear-gradient(90deg,var(--u-main,#64748b) 0 8px,var(--u-sub,var(--u-main,#64748b)) 8px 12px,rgba(5,15,30,.78) 12px);color:#fff;font-size:.61rem;font-weight:900;line-height:1.25;overflow-wrap:anywhere}
+    .member-uniform-badges{display:grid;gap:5px;margin-top:5px;min-width:0}
+    .member-uniform-badge{display:flex;align-items:flex-start;gap:5px;min-width:0;max-width:100%;padding:4px 7px 4px 14px;border:1px solid rgba(255,255,255,.2);border-radius:8px;background:linear-gradient(90deg,var(--u-main,#64748b) 0 8px,var(--u-sub,var(--u-main,#64748b)) 8px 12px,rgba(5,15,30,.78) 12px);color:#fff;font-size:.61rem;font-weight:900;line-height:1.35;overflow-wrap:anywhere;white-space:normal}
+    .member-uniform-state{flex:0 0 auto;color:var(--cyan)}
+    .member-uniform-badge.planned .member-uniform-state{color:#ffd166}
     .legend-bar{display:flex;gap:12px;align-items:center;font-size:.78rem;color:var(--ink-3);padding:6px 0 8px;flex-wrap:wrap}
     .legend-dot{width:8px;height:8px;border-radius:50%;display:inline-block;margin-right:3px}
     .save-bar{display:flex;align-items:center;gap:8px;flex-wrap:wrap;padding-top:6px}
@@ -46,18 +48,11 @@
     .edit-modal h3{font-size:.95rem;font-weight:900;color:#fff;margin-bottom:14px}
     .edit-modal-btns{display:flex;gap:8px;justify-content:flex-end;margin-top:14px;flex-wrap:wrap}
     .gender-radio{display:flex;gap:16px;font-size:.88rem;color:var(--ink)}
-    .member-uniform-editor{display:grid;gap:8px}
-    .member-uniform-row{display:grid;grid-template-columns:minmax(0,1fr) 94px 42px;gap:7px;align-items:end;padding:10px;border:1px solid var(--line-2);border-radius:var(--r8);background:rgba(255,255,255,.035)}
-    .member-uniform-row label{display:grid;gap:5px;min-width:0;color:var(--ink-3);font-size:.7rem;font-weight:800}
-    .member-uniform-row .form-control{width:100%;min-width:0;box-sizing:border-box}
-    .member-uniform-remove{width:42px;height:42px;padding:0;align-self:end;border:1px solid rgba(255,68,102,.38);border-radius:var(--r8);background:rgba(255,68,102,.08);color:var(--red);font-size:1rem;cursor:pointer}
     .member-uniform-help{margin:5px 0 8px;color:var(--ink-3);font-size:.72rem;line-height:1.55}
-    .member-uniform-add{width:100%;margin-top:8px;border-style:dashed}
-    body[data-theme="light"] .member-uniform-row{background:#f8fbff}
     body[data-theme="light"] .member-uniform-badge{border-color:rgba(20,36,58,.18);background:linear-gradient(90deg,var(--u-main,#64748b) 0 8px,var(--u-sub,var(--u-main,#64748b)) 8px 12px,#edf4fa 12px);color:#14243a}
     @media(max-width:430px){
       .edit-modal{padding:17px 14px}
-      .member-uniform-row{grid-template-columns:minmax(0,1fr) 78px 42px;padding:8px}
+      .member-uniform-badge{font-size:.64rem}
     }
   </style>
 </head>
@@ -101,7 +96,7 @@
   <div class="legend-bar">
     <span><span class="legend-dot" style="background:#6aaccc"></span>男子</span>
     <span><span class="legend-dot" style="background:#ff8888"></span>女子（赤字）</span>
-    <span style="color:#ffaa66">※ 色と背番号は複数登録できます</span>
+    <span style="color:#ffaa66">🗓 配布予定　👕 貸出中（変更はユニフォーム貸出管理から）</span>
   </div>
 
   <!-- グリッドビュー -->
@@ -134,10 +129,9 @@
       <input class="form-control" id="edit-kana" placeholder="例：よしみ　たろう">
     </div>
     <div class="form-group">
-      <label class="form-label">貸出ユニフォーム</label>
-      <p class="member-uniform-help">「ユニフォーム貸出管理」に登録されている色から選び、背番号を入力します。3着以上でも追加できます。</p>
-      <div class="member-uniform-editor" id="member-uniform-editor"></div>
-      <button type="button" class="btn btn-outline btn-sm member-uniform-add" onclick="addMemberUniform()">＋ ユニフォームを追加</button>
+      <label class="form-label">ユニフォーム</label>
+      <p class="member-uniform-help">ユニフォーム貸出管理の「配布予定」「貸出中」を自動表示します。この画面からは変更できません。</p>
+      <div id="member-uniform-readonly"></div>
     </div>
     <div class="form-group">
       <label class="form-label">性別</label>
@@ -158,6 +152,7 @@
 <script>
 var GRADES = ["6年","5年","4年","3年","2年","1年","年長"];
 var MEMBER_PATH = "members_v2";
+var MEMBER_UNIFORM_SOURCE = "uniform";
 var LEGACY_MEMBER_PATH = "members";
 var ROWS = 14;
 var currentSort = "none";
@@ -253,7 +248,7 @@ function renderList(){
   var all = [];
   grades.forEach(function(g){
     (data[g]||[]).forEach(function(m,r){
-      if(m&&m.name) all.push({name:m.name,kana:m.kana||"",num:m.num||"",uniforms:normalizeMemberUniforms(m),gender:m.gender,grade:g,row:r});
+      if(m&&m.name){var assigned=uniformAssignmentsForMember(m);var lent=assigned.filter(function(u){return u.state==="lent";});var planned=assigned.filter(function(u){return u.state==="planned";});all.push({id:m.id,name:m.name,kana:m.kana||"",num:String((lent[0]||planned[0]||{}).num||m.num||""),uniforms:assigned,gender:m.gender,grade:g,row:r});}
     });
   });
   if(currentSort==="kana")   all.sort(function(a,b){return a.kana.localeCompare(b.kana,"ja");});
@@ -294,7 +289,7 @@ function cycleSort(g){
   // その学年内のデータを並べ替え
   var members = (data[g]||[]).filter(function(m){return m&&m.name;});
   if(next==="kana")   members.sort(function(a,b){return (a.kana||"").localeCompare(b.kana||"","ja");});
-  if(next==="num")    members.sort(function(a,b){return (parseInt(a.num)||999)-(parseInt(b.num)||999);});
+  if(next==="num") members.sort(function(a,b){var au=uniformAssignmentsForMember(a),bu=uniformAssignmentsForMember(b);var an=au.filter(function(u){return u.state==="lent";}).concat(au.filter(function(u){return u.state==="planned";}))[0];var bn=bu.filter(function(u){return u.state==="lent";}).concat(bu.filter(function(u){return u.state==="planned";}))[0];return (parseInt(an&&an.num||a.num)||999)-(parseInt(bn&&bn.num||b.num)||999);});
   // nullで埋める
   while(members.length < ROWS) members.push(null);
   data[g] = members;
@@ -338,7 +333,7 @@ function openEdit(g,r){
   document.getElementById("edit-title").textContent = g+" "+(r+1)+"番目を編集";
   document.getElementById("edit-name").value = m.name||"";
   document.getElementById("edit-kana").value = m.kana||"";
-  renderMemberUniformEditor(normalizeMemberUniforms(m));
+  document.getElementById("member-uniform-readonly").innerHTML=renderMemberUniformBadges(m);
   document.getElementById(m.gender==="f"?"edit-g-f":"edit-g-m").checked = true;
   document.getElementById("edit-del-btn").style.display = "inline-flex";
   document.getElementById("edit-modal").classList.add("open");
@@ -348,7 +343,7 @@ function openNew(g,r){
   document.getElementById("edit-title").textContent = g+" "+(r+1)+"番に追加";
   document.getElementById("edit-name").value = "";
   document.getElementById("edit-kana").value = "";
-  renderMemberUniformEditor([]);
+  document.getElementById("member-uniform-readonly").innerHTML="<span style='color:var(--ink-3)'>登録後、ユニフォーム貸出管理から割り当てできます。</span>";
   document.getElementById("edit-g-m").checked = true;
   document.getElementById("edit-del-btn").style.display = "none";
   document.getElementById("edit-modal").classList.add("open");
@@ -399,6 +394,22 @@ function normalizeMemberUniforms(member){
   if(!items.length&&member&&member.num) items=[{id:"legacy-primary",color:"",num:String(member.num)}];
   return items;
 }
+function uniformAssignmentsForMember(member){
+  if(MEMBER_UNIFORM_SOURCE==="member")return normalizeMemberUniforms(member).map(function(item){return Object.assign({state:"legacy"},item);});
+  var id=String(member&&member.id||"");
+  var normalizedName=String(member&&member.name||"").replace(/[\s　]+/g,"");
+  return uniformInventory.filter(function(item){
+    if(!item||typeof item!=="object")return false;
+    if(item.plannedMemberId===id)return true;
+    if(item.memberId===id)return true;
+    return !item.memberId&&!!uniformHolderNameForMember(item)&&String(uniformHolderNameForMember(item)).replace(/[\s　]+/g,"")===normalizedName&&uniqueMemberName(normalizedName);
+  }).map(function(item){
+    var planned=item.plannedMemberId===id&&!uniformHolderNameForMember(item);
+    var choice=uniformChoiceFromItem(item)||{name:String(item.cname||"色未設定")};return {id:item.id,color:choice.name,num:String(item.num||""),state:planned?"planned":"lent"};
+  }).sort(function(a,b){return (a.state===b.state?0:a.state==="lent"?-1:1)||(Number(a.num)||999)-(Number(b.num)||999);});
+}
+function uniformHolderNameForMember(item){return String(item&&(item.lentTo||item.player)||"").trim();}
+function uniqueMemberName(compact){return Object.keys(memberRecords).filter(function(id){return String(memberRecords[id]&&memberRecords[id].name||"").replace(/[\s　]+/g,"")===compact;}).length===1;}
 function memberUniformStyle(colorName){
   var compact=String(colorName||"").replace(/[\s×・]/g,"").toLowerCase();
   var choice=memberUniformColorChoices().find(function(item){return item.name.replace(/[\s×・]/g,"").toLowerCase()===compact;});
@@ -412,53 +423,21 @@ function memberUniformText(item){
   return color+(number?" #"+number:"");
 }
 function renderMemberUniformBadges(member){
-  var uniforms=normalizeMemberUniforms(member);
+  var uniforms=uniformAssignmentsForMember(member);
   if(!uniforms.length) return "<span style='color:var(--ink-3)'>—</span>";
   return "<div class='member-uniform-badges'>"+uniforms.map(function(item){
-    return '<span class="member-uniform-badge" style="'+memberUniformStyle(item.color)+'">'+escapeHtml(memberUniformText(item))+'</span>';
+    var state=item.state==="planned"?"🗓 配布予定":item.state==="lent"?"👕 貸出中":"旧登録";
+    return '<span class="member-uniform-badge '+(item.state==="planned"?'planned':'')+'" style="'+memberUniformStyle(item.color)+'"><span class="member-uniform-state">'+state+'</span><span>'+escapeHtml(memberUniformText(item))+'</span></span>';
   }).join("")+"</div>";
 }
-function memberUniformRowHtml(item,index){
-  item=item||{};
-  return '<div class="member-uniform-row" data-uniform-row>'
-    +'<label>ユニフォームの色<select class="form-control member-uniform-color">'+memberUniformColorOptions(item.color||"")+'</select></label>'
-    +'<label>背番号<input class="form-control member-uniform-number" inputmode="numeric" value="'+escapeHtml(item.num||"")+'" placeholder="例：10" maxlength="4"></label>'
-    +'<button type="button" class="member-uniform-remove" aria-label="'+(index+1)+'着目を削除" onclick="removeMemberUniform(this)">🗑</button>'
-    +'</div>';
-}
-function renderMemberUniformEditor(items){
-  var editor=document.getElementById("member-uniform-editor");
-  var uniforms=Array.isArray(items)?items:[];
-  editor.innerHTML=uniforms.map(memberUniformRowHtml).join("");
-}
-function refreshOpenMemberUniformChoices(){
-  var modal=document.getElementById("edit-modal");
-  if(modal&&modal.classList.contains("open")) renderMemberUniformEditor(readMemberUniformEditor());
-}
-function readMemberUniformEditor(){
-  return Array.from(document.querySelectorAll("#member-uniform-editor [data-uniform-row]")).map(function(row,index){
-    return {id:"member-uniform-"+Date.now()+"-"+index,color:row.querySelector(".member-uniform-color").value.trim(),num:row.querySelector(".member-uniform-number").value.trim()};
-  }).filter(function(item){return item.color||item.num;});
-}
-function addMemberUniform(){
-  var items=readMemberUniformEditor();items.push({color:"",num:""});renderMemberUniformEditor(items);
-  var rows=document.querySelectorAll("#member-uniform-editor [data-uniform-row]");
-  if(rows.length) rows[rows.length-1].querySelector(".member-uniform-color").focus();
-}
-function removeMemberUniform(button){button.closest("[data-uniform-row]").remove();}
 function saveEdit(){
   var name = document.getElementById("edit-name").value.trim();
   var gEl  = document.querySelector("input[name='edit-gender']:checked");
   if(!name){ alert("氏名を入力してください。"); return; }
   var current = editId && memberRecords[editId] ? memberRecords[editId] : {};
-  var uniforms=readMemberUniformEditor();
-  var incomplete=uniforms.find(function(item){return item.color&&!item.num;});
-  if(incomplete){alert("選択したユニフォームの背番号を入力してください。");return;}
-  var record = {
+  var changes = {
     name:name,
     kana:document.getElementById("edit-kana").value.trim(),
-    num: uniforms.length?uniforms[0].num:"",
-    uniforms:uniforms,
     gender:gEl?gEl.value:"m",
     grade:editGrade,
     order:Number.isFinite(Number(current.order))?Number(current.order):editRow,
@@ -467,16 +446,18 @@ function saveEdit(){
   onFirebaseReady(function(db){
     var id=editId||db.ref(MEMBER_PATH).push().key;
     setSaveMessage("☁️ 保存中…",false);
-    dbSave(MEMBER_PATH+"/"+id,record,null,function(){
+    db.ref(MEMBER_PATH+"/"+id).update(changes).then(function(){
       closeModal();
       setSaveMessage("✅ クラウドに保存しました",false);
-    },function(){
+    }).catch(function(){
       setSaveMessage("❌ クラウドに保存できませんでした",true);
     });
   });
 }
 function deleteEntry(){
   if(!editId || !confirm("この団員を名簿から削除しますか？")) return;
+  var linked=uniformAssignmentsForMember(memberRecords[editId]||{});
+  if(linked.length){alert("この団員にはユニフォームがあります。\n"+linked.map(function(item){return (item.state==="planned"?"配布予定：":"貸出中：")+memberUniformText(item);}).join("\n")+"\n先にユニフォーム貸出管理で、配布予定解除・返却・貸出先変更を行ってください。");return;}
   setSaveMessage("☁️ 削除中…",false);
   dbSave(MEMBER_PATH+"/"+editId,null,null,function(){
     closeModal();
@@ -494,7 +475,7 @@ function exportCSV(){
   var rows=[["学年","氏名","フリガナ","貸出ユニフォーム","性別"]];
   GRADES.forEach(function(g){
     (data[g]||[]).forEach(function(m){
-      if(m&&m.name) rows.push([g,m.name,m.kana||"",normalizeMemberUniforms(m).map(memberUniformText).join(" / "),m.gender==="f"?"女":"男"]);
+      if(m&&m.name) rows.push([g,m.name,m.kana||"",uniformAssignmentsForMember(m).map(memberUniformText).join(" / "),m.gender==="f"?"女":"男"]);
     });
   });
   var csv="\uFEFF"+rows.map(function(row){return row.map(csvCell).join(",");}).join("\n");
@@ -594,15 +575,15 @@ function startMemberSync(){
 function startMemberUniformColorSync(){
   dbListen("uniform",function(value){
     uniformInventory=Array.isArray(value)?value.filter(function(item){return item&&typeof item==="object";}):[];
-    refreshOpenMemberUniformChoices();render();
+    render();
   },null,[]);
   dbListen("uniform_color_templates",function(value){
     uniformColorTemplates=Array.isArray(value)?value.filter(function(item){return item&&typeof item==="object";}):[];
-    refreshOpenMemberUniformChoices();render();
+    render();
   },null,[]);
   dbListen("uniform_folder_order",function(value){
     uniformFolderOrder=Array.isArray(value)?value.filter(function(name){return typeof name==="string"&&name.trim();}):[];
-    refreshOpenMemberUniformChoices();render();
+    render();
   },null,[]);
 }
 
@@ -621,7 +602,7 @@ function copyMemberList(){
     if(members.length){
       t += "■ "+g+"（"+members.length+"名）\n";
       members.forEach(function(m){
-        var uniforms=normalizeMemberUniforms(m).map(memberUniformText).join("／");
+        var uniforms=uniformAssignmentsForMember(m).map(memberUniformText).join("／");
         t += "  "+m.name+(m.kana?"（"+m.kana+"）":"")+(uniforms?"　"+uniforms:"")+"\n";
       });
       t += "\n";

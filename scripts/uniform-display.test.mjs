@@ -10,7 +10,7 @@ const renderAt = source.indexOf("function renderFolders()");
 if (paletteAt < 0 || renderAt < 0 || syncAt < 0 || !(paletteAt < renderAt && renderAt < syncAt)) {
   throw new Error("ユニフォーム同期は色・一覧描画の定義後に開始してください");
 }
-if (!source.includes('data-label="氏名・状態"') || !source.includes("escapeHtml(holder||'—')")) {
+if (!source.includes('data-label="氏名・状態"') || !source.includes("escapeHtml(displayName||'—')")) {
   throw new Error("貸出先の氏名を安全に一覧表示する処理がありません");
 }
 if (!source.includes('val.filter(function(item){return item&&typeof item==="object";})')) {
@@ -64,8 +64,9 @@ for (const required of [
 
 for (const required of [
   "団員名（貸出先）",
-  "名前を入力すると「選手に貸出中」、空欄にすると「倉庫保管」",
+  "新規貸出は団員名簿から選択します。",
   "🏠 倉庫保管",
+  "🗓 配布予定",
   "選手に貸出中",
   "貸出する",
   "返却する",
@@ -75,7 +76,7 @@ for (const required of [
 ]) {
   if (!source.includes(required)) throw new Error("保管状況の分かりやすい表示・自動判定が不足しています: " + required);
 }
-if (!source.includes("previousHolder!==holderName")) {
+if (!source.includes("previousHolder!==holderName") || !source.includes("memberId:selectedMemberId".replace(":selectedMemberId","=selectedMemberId"))) {
   throw new Error("登録画面から貸出先を変更した履歴が保存されません");
 }
 
