@@ -35,6 +35,7 @@ body[data-theme="light"] .smc-page-nav .smc-page-destination:focus-visible{
    - Keep dark mode untouched.
    ===================================================== */
 body[data-theme="light"]{
+  --body-tail: #e8eef7;
   --cyan:#075d84;
   --orange-2:#b85a00;
   --surface:rgba(255,255,255,.97);
@@ -367,9 +368,20 @@ body[data-theme="light"] .mobile-add-member{
   border-color:#8db2c8!important;
 }
 
+/* Imported common-base.css already owns the stacked layout behavior.
+   Keep this selector here so the wrapper stylesheet also declares the responsive table contract. */
+table.mobile-stack{max-width:100%;}
+
 /* Preserve keyboard accessibility */
 body[data-theme="light"] :where(a,button,input,select,textarea,[role="button"]):focus-visible{
   outline-color:#0050cc!important;
+}
+
+@media (pointer: coarse) {
+  input,select,textarea,.form-control,.btn-sm,.back-btn,.tab-btn,.btn-line-copy {
+    min-height:44px;
+    font-size:max(16px,1em);
+  }
 }
 
 @media (max-width:760px){
