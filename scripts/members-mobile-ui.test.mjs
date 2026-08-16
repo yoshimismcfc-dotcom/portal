@@ -11,6 +11,7 @@ for (const required of [
   'id="mobile-card-view"',
   "function renderMobileCards()",
   "function toggleMobileGrade(grade)",
+  ".mobile-grade-members[hidden]{display:none!important}",
   'aria-label="表示する学年"',
   'aria-label="団員の並び替え"',
   'el.setAttribute("aria-pressed"',
