@@ -393,3 +393,100 @@ body[data-theme="light"] :where(a,button,input,select,textarea,[role="button"]):
     line-height:1.6;
   }
 }
+
+/* =====================================================
+   Light mode: remove pale cyan text
+   Cyan is kept for borders/icons/background accents only.
+   Text uses dark navy/charcoal for reliable outdoor/mobile readability.
+   ===================================================== */
+body[data-theme="light"]{
+  --cyan:#174a6b;
+}
+
+/* Common secondary/accent text */
+body[data-theme="light"] .section-head h2,
+body[data-theme="light"] .section-head,
+body[data-theme="light"] .card-subtitle,
+body[data-theme="light"] .calendar-attendance-title,
+body[data-theme="light"] .calendar-attendance-category-label,
+body[data-theme="light"] .calendar-attendance-category-label span,
+body[data-theme="light"] .calendar-upcoming-badge,
+body[data-theme="light"] .tn-dow,
+body[data-theme="light"] .tn-label,
+body[data-theme="light"] .upcoming-head .uh-text,
+body[data-theme="light"] .sort-lbl,
+body[data-theme="light"] .mobile-member-number,
+body[data-theme="light"] .member-uniform-state,
+body[data-theme="light"] .mobile-add-member,
+body[data-theme="light"] .tc-who,
+body[data-theme="light"] .act-btn.edit{
+  color:#174a6b!important;
+}
+
+/* Pitch/setup pages contain several hard-coded pale blues. */
+body[data-theme="light"] .ptab-btn:not(.active),
+body[data-theme="light"] .dim-table td,
+body[data-theme="light"] .dim-table td:nth-child(2),
+body[data-theme="light"] .ac-desc,
+body[data-theme="light"] .step-desc,
+body[data-theme="light"] .step-tip,
+body[data-theme="light"] .tool-desc,
+body[data-theme="light"] .six-pitch-title,
+body[data-theme="light"] .six-pitch-note,
+body[data-theme="light"] .point-box.info{
+  color:#334155!important;
+}
+body[data-theme="light"] .dim-table td:first-child,
+body[data-theme="light"] .ac-name,
+body[data-theme="light"] .step-title,
+body[data-theme="light"] .tool-name,
+body[data-theme="light"] .point-box strong{
+  color:#111827!important;
+}
+body[data-theme="light"] .step-tip,
+body[data-theme="light"] .point-box.info{
+  background:#eef5fb!important;
+  border-color:#9fb8ce!important;
+}
+
+/* Tournament / dashboard / list text: use dark text, not pale cyan. */
+body[data-theme="light"] .date-label,
+body[data-theme="light"] .date-category,
+body[data-theme="light"] .date-meta,
+body[data-theme="light"] .date-note,
+body[data-theme="light"] .game-adjust-legend-intro,
+body[data-theme="light"] .game-adjust-legend-label,
+body[data-theme="light"] .ga-mobile-summary,
+body[data-theme="light"] .linked-date-summary,
+body[data-theme="light"] .linked-date-meta,
+body[data-theme="light"] .linked-date-note,
+body[data-theme="light"] .status-text,
+body[data-theme="light"] .summary-label,
+body[data-theme="light"] .summary-value{
+  color:#334155!important;
+}
+
+/* Inline legacy pale-blue text values still used by a few pages. */
+body[data-theme="light"] [style*="color:#6aaccc"],
+body[data-theme="light"] [style*="color: #6aaccc"],
+body[data-theme="light"] [style*="color:#94c4e4"],
+body[data-theme="light"] [style*="color: #94c4e4"],
+body[data-theme="light"] [style*="color:#a0d4f0"],
+body[data-theme="light"] [style*="color: #a0d4f0"],
+body[data-theme="light"] [style*="color:#7dd3fc"],
+body[data-theme="light"] [style*="color: #7dd3fc"],
+body[data-theme="light"] [style*="color:#a8d4f0"],
+body[data-theme="light"] [style*="color: #a8d4f0"],
+body[data-theme="light"] [style*="color:#72dcff"],
+body[data-theme="light"] [style*="color: #72dcff"]{
+  color:#334155!important;
+}
+
+/* Keep selected/primary controls white on solid backgrounds. */
+body[data-theme="light"] .view-tab-btn.active,
+body[data-theme="light"] .ptab-btn.active,
+body[data-theme="light"] .btn-primary,
+body[data-theme="light"] .sort-btn.on,
+body[data-theme="light"] .filter-btn.active{
+  color:#fff!important;
+}
