@@ -1,0 +1,139 @@
+/* Yoshimi SMC Portal - light mode semantic color finish
+   Meaning hierarchy:
+   - black / dark navy = content
+   - orange = important / selected
+   - blue = action / information
+   - green = complete / normal
+   Dark mode is intentionally untouched. */
+
+body[data-theme="light"]{
+  --smc-text-primary:#111827;
+  --smc-text-secondary:#334155;
+  --smc-text-muted:#52647a;
+  --smc-action:#075d84;
+  --smc-action-bg:#eef6fb;
+  --smc-action-border:#79a9bf;
+  --smc-selected:#b45309;
+  --smc-selected-strong:#c86500;
+  --smc-selected-bg:#fff7ed;
+  --smc-success:#166534;
+  --smc-success-bg:#ecfdf3;
+  --smc-success-border:#86c79f;
+}
+
+/* 1) Main content: never use pale cyan for readable text. */
+body[data-theme="light"] :where(.hero-title,.card-title,.tc-title,.ag-title,.ag-day,.rule-title,.tool-name,.step-title,.ac-name){
+  color:var(--smc-text-primary)!important;
+}
+body[data-theme="light"] :where(.hero-sub,.card-desc,.card-subtitle,.tc-note,.ag-meta,.ag-dow,.form-label,.empty-msg,.mobile-member-kana,.guide-list li,.principles-source,.source-links){
+  color:var(--smc-text-secondary)!important;
+}
+
+/* 2) Blue = operation / information. Use dark blue text, pale blue only as background. */
+body[data-theme="light"] :where(a:not(.menu-card):not(.btn-primary),.notice-label,.auto-alert-label,.calendar-attendance-title,.calendar-attendance-category-label,.calendar-upcoming-refresh,.act-btn.edit,.mobile-add-member,.member-uniform-state){
+  color:var(--smc-action)!important;
+}
+body[data-theme="light"] :where(.calendar-upcoming-refresh,.act-btn.edit,.mobile-add-member){
+  background:#fff!important;
+  border-color:var(--smc-action-border)!important;
+}
+
+/* 3) Orange = selected / important. */
+body[data-theme="light"] :where(.filter-btn.active,.sort-btn.on,.cat-btn.active,.view-tab-btn.active,.ptab-btn.active,.referee-tab-list .tab-btn.active){
+  background:linear-gradient(135deg,#c86500,#a94600)!important;
+  border-color:#9a4a00!important;
+  color:#fff!important;
+  box-shadow:0 4px 12px rgba(154,74,0,.18)!important;
+}
+body[data-theme="light"] :where(.mobile-grade-toggle,.change-year,.gesture-card::before){
+  color:#9a4a00;
+}
+
+/* 4) Green = complete / normal. */
+body[data-theme="light"] :where(.sb-done,.status-success,.is-complete,.is-saved){
+  background:var(--smc-success-bg)!important;
+  color:var(--smc-success)!important;
+  border-color:var(--smc-success-border)!important;
+}
+
+/* Referee gestures: light mode gets a true light card.
+   The illustration panel may stay dark, but every label outside it is high contrast. */
+body[data-theme="light"] .gesture-card{
+  background:#fff!important;
+  border:1.5px solid #9fb8ce!important;
+  box-shadow:0 7px 20px rgba(24,42,67,.10)!important;
+}
+body[data-theme="light"] .gesture-card svg{
+  background:radial-gradient(circle at 50% 35%,#173d67 0,#07182c 72%)!important;
+  border-color:rgba(23,74,107,.25)!important;
+}
+body[data-theme="light"] .gesture-card strong{
+  color:#111827!important;
+  text-shadow:none!important;
+}
+body[data-theme="light"] .gesture-card p{
+  background:#eef6fb!important;
+  color:#26384f!important;
+  border:1px solid #c5d6e1;
+}
+body[data-theme="light"] .gesture-card p::before{
+  color:#075d84!important;
+}
+body[data-theme="light"] .gesture-card::before{
+  background:#c86500!important;
+  color:#fff!important;
+}
+
+/* Other referee guidance: same semantic hierarchy. */
+body[data-theme="light"] .guide-section h3,
+body[data-theme="light"] .rule-title,
+body[data-theme="light"] .diagram-card h4{
+  color:#111827!important;
+}
+body[data-theme="light"] .guide-list li,
+body[data-theme="light"] .diagram-card p,
+body[data-theme="light"] .signal-step,
+body[data-theme="light"] .change-body div,
+body[data-theme="light"] .offside-lead,
+body[data-theme="light"] .quick-priority div{
+  color:#334155!important;
+}
+body[data-theme="light"] .guide-list li,
+body[data-theme="light"] .rule-card,
+body[data-theme="light"] .signal-step,
+body[data-theme="light"] .change-card,
+body[data-theme="light"] .quick-priority div{
+  background:#fff!important;
+  border-color:#cbd5e1!important;
+}
+body[data-theme="light"] .signal-step b,
+body[data-theme="light"] .change-body b,
+body[data-theme="light"] .quick-priority b,
+body[data-theme="light"] .source-links a{
+  color:#075d84!important;
+}
+body[data-theme="light"] .role-main{
+  background:#fff7ed!important;
+  color:#9a4a00!important;
+  border-color:#d39155!important;
+}
+body[data-theme="light"] .role-assist{
+  background:#eef6fb!important;
+  color:#075d84!important;
+  border-color:#83b2c7!important;
+}
+body[data-theme="light"] .role-4th{
+  background:#ecfdf3!important;
+  color:#166534!important;
+  border-color:#86c79f!important;
+}
+
+/* Avoid pale-cyan inline legacy labels that remain in old content. */
+body[data-theme="light"] [style*="color:#c8eaff"],
+body[data-theme="light"] [style*="color: #c8eaff"],
+body[data-theme="light"] [style*="color:#c8e8ff"],
+body[data-theme="light"] [style*="color: #c8e8ff"],
+body[data-theme="light"] [style*="color:#b7d7e9"],
+body[data-theme="light"] [style*="color: #b7d7e9"]{
+  color:#334155!important;
+}
