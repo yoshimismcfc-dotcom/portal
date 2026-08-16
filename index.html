@@ -3,7 +3,7 @@
 <head>
   <meta charset="utf-8">
   <meta name="robots" content="noindex,nofollow">
-  <meta name="app-version" content="20260811-39">
+  <meta name="app-version" content="20260816-40">
   <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
   <meta http-equiv="Pragma" content="no-cache">
   <meta http-equiv="Expires" content="0">
@@ -20,30 +20,117 @@
   <link rel="stylesheet" href="common.css">
   <script src="common.js"></script>
   <style>
-    .portal-hero{position:relative;overflow:hidden;background:linear-gradient(160deg,#003087 0%,#0050cc 45%,#001a4f 100%);border-radius:var(--r16);margin-bottom:20px;padding:26px 20px 22px;text-align:center;box-shadow:0 8px 32px rgba(0,48,135,.5),0 0 0 1px rgba(255,255,255,.08)}
-    .portal-hero::before{content:"";position:absolute;inset:0;pointer-events:none;background:repeating-linear-gradient(0deg,rgba(255,255,255,.04) 0,rgba(255,255,255,.04) 1px,transparent 1px,transparent 32px),repeating-linear-gradient(90deg,rgba(255,255,255,.04) 0,rgba(255,255,255,.04) 1px,transparent 1px,transparent 32px)}
-    .portal-hero::after{content:"";position:absolute;left:50%;top:50%;width:260px;height:260px;border:1px solid rgba(255,255,255,.08);border-radius:50%;transform:translate(-50%,-50%);pointer-events:none}
-    .portal-hero h1{font-size:clamp(1.05rem,4vw,1.4rem);font-weight:900;color:#fff;letter-spacing:.04em;line-height:1.25;margin-bottom:6px;text-shadow:0 2px 12px rgba(0,0,0,.4);position:relative;z-index:1}
-    .portal-hero .sub{font-size:.68rem;color:rgba(255,255,255,.6);position:relative;z-index:1}
+    :root{
+      --home-text:var(--ink);
+      --home-text-secondary:var(--ink-2);
+      --home-text-muted:#aebdd1;
+      --home-surface:rgba(13,29,64,.9);
+      --home-surface-soft:rgba(20,42,88,.9);
+      --home-border:rgba(255,255,255,.14);
+      --home-border-strong:rgba(246,139,31,.44);
+      --home-info-bg:rgba(90,167,255,.12);
+      --home-info-border:rgba(90,167,255,.42);
+      --home-step-bg:rgba(255,255,255,.055);
+      --home-help-bg:rgba(114,214,255,.07);
+      --home-help-text:#c7e7fb;
+    }
+    body[data-theme="light"]{
+      --home-text:#101827;
+      --home-text-secondary:#26384f;
+      --home-text-muted:#4d6178;
+      --home-surface:#ffffff;
+      --home-surface-soft:#f7f9fc;
+      --home-border:#c9d3df;
+      --home-border-strong:#e6a35a;
+      --home-info-bg:#eef6ff;
+      --home-info-border:#6aa9df;
+      --home-step-bg:#f2f5f8;
+      --home-help-bg:#edf7fb;
+      --home-help-text:#244a62;
+    }
+    .portal-hero{position:relative;overflow:hidden;background:linear-gradient(160deg,#003087 0%,#0050cc 45%,#001a4f 100%);border-radius:var(--r16);margin-bottom:20px;padding:26px 20px 22px;text-align:center;box-shadow:0 8px 32px rgba(0,48,135,.42),0 0 0 1px rgba(255,255,255,.08)}
+    .portal-hero::before{content:"";position:absolute;inset:0;pointer-events:none;background:repeating-linear-gradient(0deg,rgba(255,255,255,.035) 0,rgba(255,255,255,.035) 1px,transparent 1px,transparent 32px),repeating-linear-gradient(90deg,rgba(255,255,255,.035) 0,rgba(255,255,255,.035) 1px,transparent 1px,transparent 32px)}
+    .portal-hero::after{content:"";position:absolute;left:50%;top:50%;width:260px;height:260px;border:1px solid rgba(255,255,255,.07);border-radius:50%;transform:translate(-50%,-50%);pointer-events:none}
+    .portal-hero h1{font-size:clamp(1.08rem,4vw,1.42rem);font-weight:900;color:#fff;letter-spacing:.035em;line-height:1.3;margin-bottom:6px;text-shadow:0 2px 12px rgba(0,0,0,.4);position:relative;z-index:1}
+    .portal-hero .sub{font-size:.72rem;color:rgba(255,255,255,.8);position:relative;z-index:1;line-height:1.5}
     .hero-emblem{font-size:2.8rem;margin-bottom:8px;position:relative;z-index:1;filter:drop-shadow(0 0 12px rgba(255,255,255,.3));animation:ball-bounce 2s ease-in-out infinite}
-    .hero-badge{display:inline-flex;align-items:center;gap:6px;background:rgba(255,255,255,.12);border:1px solid rgba(255,255,255,.2);border-radius:99px;padding:3px 14px;font-size:.6rem;font-weight:900;color:rgba(255,255,255,.82);letter-spacing:.12em;margin-bottom:10px}
+    .hero-badge{display:inline-flex;align-items:center;gap:6px;background:rgba(255,255,255,.14);border:1px solid rgba(255,255,255,.28);border-radius:99px;padding:4px 14px;font-size:.64rem;font-weight:900;color:rgba(255,255,255,.92);letter-spacing:.11em;margin-bottom:10px}
     .hero-stripe-bottom{position:absolute;bottom:0;left:0;right:0;height:4px;background:linear-gradient(90deg,#003087 0%,#003087 50%,#bc002d 50%,#bc002d 100%)}
-    .pitch-section-divider{height:30px;margin:4px 0 14px;background:linear-gradient(90deg,#1a5c1a,#2d8c2d,#1a5c1a);border-radius:var(--r8);position:relative;overflow:hidden;display:flex;align-items:center;justify-content:center;gap:8px}
-    .pitch-section-divider::before{content:"";position:absolute;inset:0;background:repeating-linear-gradient(90deg,transparent 0,transparent 59px,rgba(255,255,255,.15) 59px,rgba(255,255,255,.15) 60px)}
-    .pitch-section-divider .psd-text{position:relative;z-index:1;font-size:.62rem;font-weight:900;color:rgba(255,255,255,.88);letter-spacing:.14em}
-    .pitch-section-divider .psd-sub{position:relative;z-index:1;font-size:.52rem;font-weight:700;color:rgba(255,255,255,.5);letter-spacing:.18em}
-    
-    .howto-section{background:rgba(255,255,255,.03);border:1px solid var(--line);border-radius:var(--r12);padding:16px 18px}
-    .howto-item{margin-bottom:12px}
+    .pitch-section-divider{height:auto;min-height:46px;margin:6px 0 14px;background:linear-gradient(135deg,rgba(16,42,96,.98),rgba(143,18,48,.94));border:1px solid rgba(255,255,255,.12);border-radius:var(--r12);position:relative;overflow:hidden;display:flex;align-items:center;justify-content:center;gap:9px;padding:9px 12px}
+    .pitch-section-divider::before{content:"";position:absolute;inset:0;background:repeating-linear-gradient(90deg,transparent 0,transparent 59px,rgba(255,255,255,.08) 59px,rgba(255,255,255,.08) 60px)}
+    .pitch-section-divider .psd-text{position:relative;z-index:1;font-size:.72rem;font-weight:900;color:#fff;letter-spacing:.1em}
+    .pitch-section-divider .psd-sub{position:relative;z-index:1;font-size:.62rem;font-weight:800;color:rgba(255,255,255,.82);letter-spacing:.13em}
+    body[data-theme="light"] .pitch-section-divider{background:linear-gradient(135deg,#eaf1f8,#f5f7fa)!important;border:1px solid #c8d2de!important;box-shadow:0 5px 16px rgba(24,42,67,.06)}
+    body[data-theme="light"] .pitch-section-divider::before{background:repeating-linear-gradient(90deg,transparent 0,transparent 59px,rgba(15,44,78,.045) 59px,rgba(15,44,78,.045) 60px)}
+    body[data-theme="light"] .pitch-section-divider .psd-text{color:#123f78!important}
+    body[data-theme="light"] .pitch-section-divider .psd-sub{color:#526b86!important}
+
+    .howto-section{background:linear-gradient(145deg,var(--home-surface-soft),var(--home-surface));border:1px solid var(--home-border);border-radius:var(--r16);padding:18px;box-shadow:0 8px 24px rgba(0,0,0,.12);margin-bottom:18px}
+    .howto-item{margin-bottom:15px}
     .howto-item:last-child{margin-bottom:0}
-    .hi-label{font-size:.8rem;font-weight:900;color:#fff;margin-bottom:5px;display:flex;align-items:center;gap:6px}
-    .os-badge{font-size:.65rem;padding:2px 7px;border-radius:4px;font-weight:700}
-    .hi-ios .os-badge{background:rgba(0,212,255,.18);color:var(--cyan)}
-    .hi-android .os-badge{background:rgba(0,255,136,.15);color:var(--green)}
-    .hi-steps{font-size:.76rem;color:#a8d4f0;line-height:2}
-    .hi-steps span{display:flex;align-items:baseline;gap:6px}
-    .step-num{background:var(--orange);color:#fff;border-radius:99px;width:16px;height:16px;display:inline-flex;align-items:center;justify-content:center;font-size:.6rem;font-weight:900;flex-shrink:0}
-    .howto-note{font-size:.7rem;color:var(--ink-3);margin-top:8px;line-height:1.7;padding-top:8px;border-top:1px solid var(--line)}
+    .hi-label{font-size:.88rem;font-weight:900;color:var(--home-text);margin-bottom:7px;display:flex;align-items:center;gap:7px;flex-wrap:wrap;line-height:1.5}
+    .os-badge{font-size:.75rem;padding:3px 9px;border-radius:6px;font-weight:800}
+    .hi-ios .os-badge{background:rgba(0,132,190,.14);color:#72d6ff}
+    .hi-android .os-badge{background:rgba(40,199,111,.14);color:#7de2aa}
+    body[data-theme="light"] .hi-ios .os-badge{background:#dff4fb;color:#126485}
+    body[data-theme="light"] .hi-android .os-badge{background:#def5e8;color:#17613a}
+    .hi-steps{font-size:.84rem;color:var(--home-text-secondary);line-height:1.75;display:grid;gap:6px}
+    .hi-steps span{display:flex;align-items:flex-start;gap:8px}
+    .step-num{background:var(--orange);color:#fff;border-radius:99px;width:22px;height:22px;display:inline-flex;align-items:center;justify-content:center;font-size:.7rem;font-weight:900;flex-shrink:0;margin-top:2px}
+    .howto-note{font-size:.78rem;color:var(--home-text-muted);margin-top:11px;line-height:1.75;padding-top:11px;border-top:1px solid var(--home-border)}
+
+    .menu-card{border-color:var(--home-border);box-shadow:0 8px 22px rgba(0,0,0,.16)}
+    .menu-card .card-label{font-size:clamp(.92rem,3.6vw,1rem);line-height:1.45}
+    .menu-card .card-desc{color:var(--home-text-muted);font-size:.78rem;line-height:1.5}
+    body[data-theme="light"] .menu-card{background:#fff!important;border-color:#c9d3df!important;box-shadow:0 7px 20px rgba(24,42,67,.09)!important}
+    body[data-theme="light"] .menu-card.accent{background:linear-gradient(145deg,#fff7ed,#fff)!important;border-color:#e2b37f!important}
+    body[data-theme="light"] .menu-card .card-label{color:#111827!important}
+    body[data-theme="light"] .menu-card .card-desc{color:#52647a!important}
+    body[data-theme="light"] .menu-card:active{background:#f5f7fa!important}
+
+    .trouble-intro{font-size:.82rem;color:var(--home-text-muted);margin-bottom:12px;text-align:center;line-height:1.6}
+    .trouble-list{display:grid;gap:10px;margin-bottom:14px}
+    .trouble-card{background:linear-gradient(145deg,var(--home-surface-soft),var(--home-surface));border:1px solid var(--home-border-strong);border-radius:var(--r12);overflow:hidden;box-shadow:0 6px 18px rgba(0,0,0,.1);transition:border-color .18s ease,box-shadow .18s ease,background .18s ease}
+    .trouble-card > button{width:100%;min-height:58px;background:transparent;border:0;padding:14px 16px;display:flex;align-items:center;gap:11px;cursor:pointer;text-align:left;color:var(--home-text);-webkit-tap-highlight-color:transparent}
+    .trouble-card > button > span:nth-child(2){font-size:.92rem!important;font-weight:900!important;color:var(--home-text)!important;line-height:1.5}
+    .trouble-card > button > span:last-child{color:#72d6ff!important;font-size:.9rem!important;transition:transform .2s ease;flex-shrink:0}
+    .trouble-card > button[aria-expanded="true"]{background:rgba(114,214,255,.08)}
+    .trouble-card:has(> button[aria-expanded="true"]){border-color:rgba(114,214,255,.62);box-shadow:0 10px 26px rgba(0,0,0,.16)}
+    .trouble-detail{padding:0 14px 14px}
+    .trouble-detail [style*="color:#94c4e4"],.trouble-detail [style*="color:#c8e4ff"],.trouble-detail [style*="color:#ffc8a0"]{color:var(--home-text-secondary)!important}
+    .trouble-detail [style*="color:#fff"]{color:var(--home-text)!important}
+    .trouble-detail [style*="background:rgba(255,255,255,.04)"]{background:var(--home-step-bg)!important}
+    .trouble-detail [style*="background:rgba(0,212,255,.06)"],.trouble-detail [style*="background:rgba(0,212,255,.08)"]{background:var(--home-help-bg)!important}
+    body[data-theme="light"] .trouble-card{background:#fff;border-color:#d5a76f;box-shadow:0 6px 18px rgba(24,42,67,.08)}
+    body[data-theme="light"] .trouble-card > button > span:last-child{color:#136d91!important}
+    body[data-theme="light"] .trouble-card > button[aria-expanded="true"]{background:#edf7fb}
+    body[data-theme="light"] .trouble-card:has(> button[aria-expanded="true"]){border-color:#2783a9;box-shadow:0 8px 22px rgba(24,42,67,.12)}
+    body[data-theme="light"] .trouble-detail [style*="color:#7dd3fc"],body[data-theme="light"] .trouble-detail [style*="color:#a0e8a0"]{color:#125d7a!important}
+    body[data-theme="light"] .trouble-detail [style*="border-bottom:1px solid rgba(255,255,255,.07)"]{border-bottom-color:#d8e0e8!important}
+
+    .dynamic-notice{color:var(--home-text-secondary);line-height:1.7}
+    body[data-theme="light"] .dynamic-notice.guidance{background:#eef6ff!important;border-color:#8bbbe5!important;border-left-color:#3f8ed0!important;color:#20354b!important}
+    body[data-theme="light"] .notice-label{color:#a75600!important}
+    body[data-theme="light"]::before{opacity:.35}
+    body[data-theme="light"] .header-action{background:#fff;border-color:#d39a56;color:#172033;box-shadow:0 3px 10px rgba(24,42,67,.08)}
+
+    @media(max-width:760px){
+      .page-wrap{padding-left:12px;padding-right:12px}
+      .portal-hero{padding:24px 16px 20px}
+      .portal-hero .sub{font-size:.75rem}
+      .pitch-section-divider{min-height:48px;gap:7px;padding:10px}
+      .pitch-section-divider .psd-text{font-size:.76rem;letter-spacing:.06em}
+      .pitch-section-divider .psd-sub{font-size:.64rem;letter-spacing:.1em}
+      .howto-section{padding:17px 16px}
+      .trouble-card > button{min-height:60px;padding:14px}
+      .trouble-card > button > span:nth-child(2){font-size:.94rem!important}
+    }
+    @media(max-width:360px){
+      .pitch-section-divider{flex-wrap:wrap;row-gap:1px}
+      .pitch-section-divider .psd-sub{width:100%;text-align:center}
+      .menu-card{padding-left:10px;padding-right:10px}
+      .menu-card .card-desc{font-size:.72rem}
+    }
   </style>
 </head>
 <body>
@@ -76,7 +163,6 @@
     <div class="hero-stripe-bottom"></div>
   </div>
 
-  <!-- ⚡ よく使う QUICK ACCESS -->
   <div class="pitch-section-divider" id="sec-quick"><span class="psd-text">⚡ よく使う</span><span class="psd-sub">QUICK ACCESS</span></div>
   <div class="card-grid" style="margin-bottom:20px">
     <a class="menu-card accent" href="calendar.html"><div class="card-icon">📅</div><div class="card-label">チームカレンダー</div><div class="card-desc">Schedule &amp; Events</div><span class="card-badge">Google</span></a>
@@ -87,7 +173,6 @@
     <a class="menu-card" href="guide.html"><div class="card-icon">📖</div><div class="card-label">説明書・ヘルプ</div><div class="card-desc">How to Use This App</div></a>
   </div>
 
-  <!-- 👨‍👩‍👦 入団・連絡 JOIN & CONTACT -->
   <div class="pitch-section-divider" id="sec-join"><span class="psd-text">👨‍👩‍👦 入団・連絡</span><span class="psd-sub">JOIN &amp; CONTACT</span></div>
   <div class="card-grid" style="margin-bottom:20px">
     <a class="menu-card" href="members.html"><div class="card-icon">📒</div><div class="card-label">団員名簿</div><div class="card-desc">Player Directory</div></a>
@@ -96,7 +181,6 @@
     <a class="menu-card" id="finance-menu-link" href="finance.html"><div class="card-icon">💴</div><div class="card-label">会計業務</div><div class="card-desc">立替・集金・月次・年度報告</div></a>
   </div>
 
-  <!-- 🏟️ 試合・大会 MATCH & TOURNAMENT -->
   <div class="pitch-section-divider" id="sec-match"><span class="psd-text">🏟️ 試合・大会</span><span class="psd-sub">MATCH &amp; TOURNAMENT</span></div>
   <div class="card-grid" style="margin-bottom:20px">
     <a class="menu-card" href="duty.html"><div class="card-icon">📋</div><div class="card-label">当番・荷物チェック</div><div class="card-desc">Duty Roster &amp; Checklist</div></a>
@@ -107,7 +191,6 @@
     <a class="menu-card" href="https://www.youtube.com/channel/UCL0HeA_TeBqALRBTp2HAXnQ" target="_blank" rel="noopener"><div class="card-icon">▶️</div><div class="card-label">YouTube</div><div class="card-desc">Team Videos</div><span class="card-badge">外部</span></a>
   </div>
 
-  <!-- 🔗 SNS・外部リンク LINKS & SOCIAL -->
   <div class="pitch-section-divider" id="sec-links"><span class="psd-text">🔗 SNS・外部リンク</span><span class="psd-sub">LINKS &amp; SOCIAL</span></div>
   <div class="card-grid" style="margin-bottom:20px">
     <a class="menu-card accent" href="https://lin.ee/RZ53mSm" target="_blank" rel="noopener"><div class="card-icon">💬</div><div class="card-label">LINEを登録</div><div class="card-desc">公式LINEに友だち追加</div><span class="card-badge">友だち追加</span></a>
@@ -117,7 +200,6 @@
     <a class="menu-card" href="orders.html"><div class="card-icon">🛒</div><div class="card-label">注文リンク集</div><div class="card-desc">Goods &amp; Trophy Order</div></a>
   </div>
 
-  <!-- 📱 アプリとして使う方法 -->
   <div class="pitch-section-divider" style="margin-bottom:14px"><span class="psd-text">📱 アプリとして使う方法</span><span class="psd-sub">HOW TO INSTALL</span></div>
   <div class="howto-section">
     <div class="howto-item hi-ios">
@@ -138,90 +220,75 @@
     <div class="howto-note">※ アイコンからアプリのように全画面で起動できます。オフライン時も一部機能が使えます。</div>
   </div>
 
-  <!-- 困ったときのトラブル対応 -->
   <div class="pitch-section-divider" style="margin-bottom:14px"><span class="psd-text">🆘 うまく表示されないとき</span><span class="psd-sub">TROUBLESHOOTING</span></div>
-  <div style="font-size:.76rem;color:var(--ink-3);margin-bottom:10px;text-align:center">▼ 項目をタップすると解決手順が表示されます</div>
-  <div style="display:grid;gap:8px;margin-bottom:12px">
+  <div class="trouble-intro">▼ 項目をタップすると解決手順が表示されます</div>
+  <div class="trouble-list">
 
-    <!-- ① ページが正しく表示されない -->
-    <div style="background:var(--surface-lt);border:1px solid var(--line-2);border-radius:var(--r12);overflow:hidden">
-      <button onclick="toggleTrouble('t1')" style="width:100%;background:none;border:none;padding:13px 16px;display:flex;align-items:center;gap:10px;cursor:pointer;text-align:left">
+    <div class="trouble-card">
+      <button type="button" onclick="toggleTrouble('t1')">
         <span style="font-size:1.1rem;flex-shrink:0">📵</span>
-        <span style="font-size:.86rem;font-weight:900;color:#fff;flex:1">ページが正しく表示されない・古い画面が出る</span>
-        <span id="t1-arrow" style="color:var(--cyan);font-size:.8rem;transition:transform .2s;flex-shrink:0">▼</span>
+        <span style="flex:1">ページが正しく表示されない・古い画面が出る</span>
+        <span id="t1-arrow">▼</span>
       </button>
-      <div id="t1" style="display:none;padding:0 14px 14px">
-        <div style="font-size:.78rem;color:#94c4e4;margin-bottom:10px;padding:8px 10px;background:rgba(0,212,255,.06);border-radius:7px;line-height:1.7">
+      <div id="t1" class="trouble-detail" style="display:none">
+        <div style="font-size:.82rem;color:#94c4e4;margin-bottom:10px;padding:9px 10px;background:rgba(0,212,255,.06);border-radius:7px;line-height:1.7">
           スマホのブラウザは一度見たページを保存（キャッシュ）しているため、更新しても古い画面が出ることがあります。以下の順で試してください。
         </div>
         <div style="display:grid;gap:7px">
-          <div style="background:rgba(255,255,255,.04);border-radius:8px;padding:10px 12px;font-size:.8rem;color:#c8e4ff;display:flex;gap:10px;align-items:flex-start">
+          <div style="background:rgba(255,255,255,.04);border-radius:8px;padding:10px 12px;font-size:.82rem;color:#c8e4ff;display:flex;gap:10px;align-items:flex-start">
             <span style="background:var(--orange);color:#fff;border-radius:50%;width:20px;height:20px;min-width:20px;display:flex;align-items:center;justify-content:center;font-size:.7rem;font-weight:900;margin-top:1px">1</span>
-            <div><strong style="color:#fff">画面を引っ張って更新する（プルリフレッシュ）</strong><br>
-            画面の一番上から下に向かってゆっくりスワイプすると更新されます。</div>
+            <div><strong style="color:#fff">画面を引っ張って更新する（プルリフレッシュ）</strong><br>画面の一番上から下に向かってゆっくりスワイプすると更新されます。</div>
           </div>
-          <div style="background:rgba(255,255,255,.04);border-radius:8px;padding:10px 12px;font-size:.8rem;color:#c8e4ff;display:flex;gap:10px;align-items:flex-start">
+          <div style="background:rgba(255,255,255,.04);border-radius:8px;padding:10px 12px;font-size:.82rem;color:#c8e4ff;display:flex;gap:10px;align-items:flex-start">
             <span style="background:var(--orange);color:#fff;border-radius:50%;width:20px;height:20px;min-width:20px;display:flex;align-items:center;justify-content:center;font-size:.7rem;font-weight:900;margin-top:1px">2</span>
-            <div><strong style="color:#fff">ブラウザを閉じて、もう一度開く</strong><br>
-            アプリは起動時に更新を確認します。ホーム画面へ戻り、ブラウザまたは追加済みアプリを開き直してください。</div>
+            <div><strong style="color:#fff">ブラウザを閉じて、もう一度開く</strong><br>アプリは起動時に更新を確認します。ホーム画面へ戻り、ブラウザまたは追加済みアプリを開き直してください。</div>
           </div>
-          <div style="background:rgba(255,255,255,.04);border-radius:8px;padding:10px 12px;font-size:.8rem;color:#c8e4ff;display:flex;gap:10px;align-items:flex-start">
+          <div style="background:rgba(255,255,255,.04);border-radius:8px;padding:10px 12px;font-size:.82rem;color:#c8e4ff;display:flex;gap:10px;align-items:flex-start">
             <span style="background:var(--orange);color:#fff;border-radius:50%;width:20px;height:20px;min-width:20px;display:flex;align-items:center;justify-content:center;font-size:.7rem;font-weight:900;margin-top:1px">3</span>
-            <div><strong style="color:#fff">URLが正しいか確認する</strong><br>
-            ブラウザのアドレスバーに以下のURLを直接入力してください：<br>
-            <span style="color:var(--cyan);font-weight:700">yoshimismcfc-dotcom.github.io/portal/</span></div>
+            <div><strong style="color:#fff">URLが正しいか確認する</strong><br>ブラウザのアドレスバーに以下のURLを直接入力してください：<br><span style="color:var(--cyan);font-weight:700">yoshimismcfc-dotcom.github.io/portal/</span></div>
           </div>
         </div>
       </div>
     </div>
 
-    <!-- ② 印刷・PDF -->
-    <div style="background:var(--surface-lt);border:1px solid var(--line-2);border-radius:var(--r12);overflow:hidden">
-      <button onclick="toggleTrouble('t2')" style="width:100%;background:none;border:none;padding:13px 16px;display:flex;align-items:center;gap:10px;cursor:pointer;text-align:left">
+    <div class="trouble-card">
+      <button type="button" onclick="toggleTrouble('t2')">
         <span style="font-size:1.1rem;flex-shrink:0">🖨️</span>
-        <span style="font-size:.86rem;font-weight:900;color:#fff;flex:1">印刷・PDFボタンを押しても何も起きない</span>
-        <span id="t2-arrow" style="color:var(--cyan);font-size:.8rem;transition:transform .2s;flex-shrink:0">▼</span>
+        <span style="flex:1">印刷・PDFボタンを押しても何も起きない</span>
+        <span id="t2-arrow">▼</span>
       </button>
-      <div id="t2" style="display:none;padding:0 14px 14px">
+      <div id="t2" class="trouble-detail" style="display:none">
         <div style="display:grid;gap:7px">
-          <div style="background:rgba(255,255,255,.04);border-radius:8px;padding:10px 12px;font-size:.8rem;color:#c8e4ff;display:flex;gap:10px;align-items:flex-start">
+          <div style="background:rgba(255,255,255,.04);border-radius:8px;padding:10px 12px;font-size:.82rem;color:#c8e4ff;display:flex;gap:10px;align-items:flex-start">
             <span style="background:var(--orange);color:#fff;border-radius:50%;width:20px;height:20px;min-width:20px;display:flex;align-items:center;justify-content:center;font-size:.7rem;font-weight:900;margin-top:1px">1</span>
-            <div><strong style="color:#fff">大会要綱・対戦表の場合</strong><br>
-            印刷ボタンの前に、まず「👁 プレビューを表示」または「📊 対戦表を生成する」ボタンを押してください。プレビューが表示されてから印刷ボタンをタップしてください。</div>
+            <div><strong style="color:#fff">大会要綱・対戦表の場合</strong><br>印刷ボタンの前に、まず「👁 プレビューを表示」または「📊 対戦表を生成する」ボタンを押してください。プレビューが表示されてから印刷ボタンをタップしてください。</div>
           </div>
-          <div style="background:rgba(255,255,255,.04);border-radius:8px;padding:10px 12px;font-size:.8rem;color:#c8e4ff;display:flex;gap:10px;align-items:flex-start">
+          <div style="background:rgba(255,255,255,.04);border-radius:8px;padding:10px 12px;font-size:.82rem;color:#c8e4ff;display:flex;gap:10px;align-items:flex-start">
             <span style="background:var(--orange);color:#fff;border-radius:50%;width:20px;height:20px;min-width:20px;display:flex;align-items:center;justify-content:center;font-size:.7rem;font-weight:900;margin-top:1px">2</span>
-            <div><strong style="color:#fff">端末の印刷画面で保存先を選ぶ</strong><br>
-            <span style="color:#7dd3fc">🍎 iPhone：</span>共有ボタン →「プリント」を選択<br>
-            <span style="color:#a0e8a0">🤖 Android：</span>印刷画面で「PDFとして保存」を選択</div>
+            <div><strong style="color:#fff">端末の印刷画面で保存先を選ぶ</strong><br><span style="color:#7dd3fc">🍎 iPhone：</span>共有ボタン →「プリント」を選択<br><span style="color:#a0e8a0">🤖 Android：</span>印刷画面で「PDFとして保存」を選択</div>
           </div>
         </div>
       </div>
     </div>
 
-    <!-- ③ 位置情報 -->
-    <div style="background:var(--surface-lt);border:1px solid var(--line-2);border-radius:var(--r12);overflow:hidden">
-      <button onclick="toggleTrouble('t3')" style="width:100%;background:none;border:none;padding:13px 16px;display:flex;align-items:center;gap:10px;cursor:pointer;text-align:left">
+    <div class="trouble-card">
+      <button type="button" onclick="toggleTrouble('t3')">
         <span style="font-size:1.1rem;flex-shrink:0">🌤️</span>
-        <span style="font-size:.86rem;font-weight:900;color:#fff;flex:1">天気・WBGTの位置情報が取得できない</span>
-        <span id="t3-arrow" style="color:var(--cyan);font-size:.8rem;transition:transform .2s;flex-shrink:0">▼</span>
+        <span style="flex:1">天気・WBGTの位置情報が取得できない</span>
+        <span id="t3-arrow">▼</span>
       </button>
-      <div id="t3" style="display:none;padding:0 14px 14px">
-        <div style="font-size:.78rem;color:#94c4e4;margin-bottom:10px;padding:8px 10px;background:rgba(0,212,255,.06);border-radius:7px;line-height:1.7">
-          天気・WBGTページでは現在地の情報を取得するため「位置情報の許可」が必要です。
-        </div>
+      <div id="t3" class="trouble-detail" style="display:none">
+        <div style="font-size:.82rem;color:#94c4e4;margin-bottom:10px;padding:9px 10px;background:rgba(0,212,255,.06);border-radius:7px;line-height:1.7">天気・WBGTページでは現在地の情報を取得するため「位置情報の許可」が必要です。</div>
         <div style="display:grid;gap:7px">
-          <div style="background:rgba(255,255,255,.04);border-radius:8px;padding:10px 12px;font-size:.8rem;color:#c8e4ff;display:flex;gap:10px;align-items:flex-start">
+          <div style="background:rgba(255,255,255,.04);border-radius:8px;padding:10px 12px;font-size:.82rem;color:#c8e4ff;display:flex;gap:10px;align-items:flex-start">
             <span style="background:#4488ff;color:#fff;border-radius:5px;width:20px;height:20px;min-width:20px;display:flex;align-items:center;justify-content:center;font-size:.7rem;font-weight:900;margin-top:1px">🍎</span>
-            <div><strong style="color:#7dd3fc">iPhone の設定手順</strong><br>
-            「設定」→「プライバシーとセキュリティ」→「位置情報サービス」→「Safari」→「このAppの使用中のみ許可」を選ぶ</div>
+            <div><strong style="color:#7dd3fc">iPhone の設定手順</strong><br>「設定」→「プライバシーとセキュリティ」→「位置情報サービス」→「Safari」→「このAppの使用中のみ許可」を選ぶ</div>
           </div>
-          <div style="background:rgba(255,255,255,.04);border-radius:8px;padding:10px 12px;font-size:.8rem;color:#c8e4ff;display:flex;gap:10px;align-items:flex-start">
+          <div style="background:rgba(255,255,255,.04);border-radius:8px;padding:10px 12px;font-size:.82rem;color:#c8e4ff;display:flex;gap:10px;align-items:flex-start">
             <span style="background:#3aaa5e;color:#fff;border-radius:5px;width:20px;height:20px;min-width:20px;display:flex;align-items:center;justify-content:center;font-size:.7rem;font-weight:900;margin-top:1px">🤖</span>
-            <div><strong style="color:#a0e8a0">Android の設定手順</strong><br>
-            「設定」→「アプリ」→「Chrome」→「権限」→「位置情報」→「アプリの使用中のみ許可」を選ぶ</div>
+            <div><strong style="color:#a0e8a0">Android の設定手順</strong><br>「設定」→「アプリ」→「Chrome」→「権限」→「位置情報」→「アプリの使用中のみ許可」を選ぶ</div>
           </div>
-          <div style="background:rgba(255,255,255,.04);border-radius:8px;padding:10px 12px;font-size:.8rem;color:#c8e4ff;display:flex;gap:10px;align-items:flex-start">
+          <div style="background:rgba(255,255,255,.04);border-radius:8px;padding:10px 12px;font-size:.82rem;color:#c8e4ff;display:flex;gap:10px;align-items:flex-start">
             <span style="background:var(--orange);color:#fff;border-radius:50%;width:20px;height:20px;min-width:20px;display:flex;align-items:center;justify-content:center;font-size:.7rem;font-weight:900;margin-top:1px">3</span>
             <div>設定変更後、天気ページを開き直して「現在地の気象を取得」ボタンをもう一度タップしてください</div>
           </div>
@@ -229,39 +296,32 @@
       </div>
     </div>
 
-    <!-- ④ データが消えた -->
-    <div style="background:var(--surface-lt);border:1px solid var(--line-2);border-radius:var(--r12);overflow:hidden">
-      <button onclick="toggleTrouble('t4')" style="width:100%;background:none;border:none;padding:13px 16px;display:flex;align-items:center;gap:10px;cursor:pointer;text-align:left">
+    <div class="trouble-card">
+      <button type="button" onclick="toggleTrouble('t4')">
         <span style="font-size:1.1rem;flex-shrink:0">💾</span>
-        <span style="font-size:.86rem;font-weight:900;color:#fff;flex:1">入力したデータが消えた・保存されていない</span>
-        <span id="t4-arrow" style="color:var(--cyan);font-size:.8rem;transition:transform .2s;flex-shrink:0">▼</span>
+        <span style="flex:1">入力したデータが消えた・保存されていない</span>
+        <span id="t4-arrow">▼</span>
       </button>
-      <div id="t4" style="display:none;padding:0 14px 14px">
-        <div style="font-size:.78rem;color:#ffc8a0;margin-bottom:10px;padding:8px 10px;background:rgba(255,107,43,.06);border-radius:7px;line-height:1.7">
-          以下の場合にデータが消えることがあります：
-        </div>
-        <div style="display:grid;gap:5px;font-size:.8rem;color:#c8e4ff;line-height:1.75;margin-bottom:10px">
+      <div id="t4" class="trouble-detail" style="display:none">
+        <div style="font-size:.82rem;color:#ffc8a0;margin-bottom:10px;padding:9px 10px;background:rgba(255,107,43,.06);border-radius:7px;line-height:1.7">以下の場合にデータが消えることがあります：</div>
+        <div style="display:grid;gap:5px;font-size:.82rem;color:#c8e4ff;line-height:1.75;margin-bottom:10px">
           <div style="padding:6px 10px;border-bottom:1px solid rgba(255,255,255,.07);display:flex;gap:8px"><span>・</span><span>ブラウザの「閲覧データを消去」を行った場合</span></div>
           <div style="padding:6px 10px;border-bottom:1px solid rgba(255,255,255,.07);display:flex;gap:8px"><span>・</span><span>スマホの機種変更・端末を変えた場合</span></div>
           <div style="padding:6px 10px;display:flex;gap:8px"><span>・</span><span>ブラウザアプリをアンインストールした場合</span></div>
         </div>
-        <div style="background:rgba(0,212,255,.08);border:1px solid rgba(0,212,255,.2);border-radius:8px;padding:10px 12px;font-size:.78rem;color:#7dd3fc;line-height:1.7">
-          ✅ 保存時に「クラウドに保存しました」と表示されたデータは、別端末でも確認できます。「端末に保存」と表示された場合は、通信復旧後にもう一度保存してください。<br><br>
-          📥 ローカル保存のデータは「CSV出力」ボタンで定期的にバックアップを取ることをおすすめします。
-        </div>
+        <div style="background:rgba(0,212,255,.08);border:1px solid rgba(0,212,255,.2);border-radius:8px;padding:10px 12px;font-size:.82rem;color:#7dd3fc;line-height:1.7">✅ 保存時に「クラウドに保存しました」と表示されたデータは、別端末でも確認できます。「端末に保存」と表示された場合は、通信復旧後にもう一度保存してください。<br><br>📥 ローカル保存のデータは「CSV出力」ボタンで定期的にバックアップを取ることをおすすめします。</div>
       </div>
     </div>
 
   </div>
 
   <div style="text-align:center;margin-bottom:8px">
-    <a href="guide.html" style="font-size:.82rem;color:var(--cyan);text-decoration:underline;display:inline-flex;align-items:center;gap:5px">📖 さらに詳しい説明書・ヘルプはこちら</a>
+    <a href="guide.html" style="font-size:.86rem;color:var(--cyan);text-decoration:underline;display:inline-flex;align-items:center;gap:5px">📖 さらに詳しい説明書・ヘルプはこちら</a>
   </div>
 
 </main>
 <footer class="site-footer"></footer>
 <script>
-// ガイダンスをFirebaseからリアルタイム取得
 dbListen("notices/guidance", function(val){
   var el=document.getElementById("home-guidance"),tx=document.getElementById("guidance-text");
   if(val){tx.textContent=val;el.style.display="flex";}else{el.style.display="none";}
@@ -270,16 +330,26 @@ dbListen("notices/warning", function(val){
   var el=document.getElementById("home-warning"),tx=document.getElementById("warning-text");
   if(val){tx.textContent=val;el.style.display="flex";}else{el.style.display="none";}
 }, "smc_warning", null);
-// フォールバック：localStorageからも表示
 var g=localStorage.getItem("smc_guidance"),w=localStorage.getItem("smc_warning");
 if(g){document.getElementById("guidance-text").textContent=g;document.getElementById("home-guidance").style.display="flex";}
 if(w){document.getElementById("warning-text").textContent=w;document.getElementById("home-warning").style.display="flex";}
+
+document.querySelectorAll('.trouble-card > button').forEach(function(btn){
+  var panel=btn.nextElementSibling;
+  if(!panel || !panel.id) return;
+  btn.setAttribute('aria-expanded','false');
+  btn.setAttribute('aria-controls',panel.id);
+});
+
 function toggleTrouble(id){
   var el=document.getElementById(id);
+  if(!el) return;
   var arrow=document.getElementById(id+"-arrow");
+  var btn=el.previousElementSibling;
   var open=el.style.display!=="none";
   el.style.display=open?"none":"block";
   if(arrow) arrow.style.transform=open?"":"rotate(180deg)";
+  if(btn) btn.setAttribute('aria-expanded',open?"false":"true");
 }
 </script>
 </body>
