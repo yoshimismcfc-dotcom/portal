@@ -38,10 +38,15 @@
     .control-scroll{display:flex;gap:6px;align-items:center;min-width:0;flex:1;flex-wrap:wrap}
     .sort-lbl{font-size:.75rem;color:var(--ink-3);white-space:nowrap}
     .sort-btn{min-height:44px;padding:7px 13px;border-radius:99px;border:1px solid var(--line-2);background:none;color:var(--ink-3);font:inherit;font-size:.74rem;font-weight:700;cursor:pointer;transition:.15s;white-space:nowrap}
-    .sort-btn.on{background:rgba(255,107,43,.15);color:var(--orange);border-color:var(--orange)}
+    .sort-btn.on{background:var(--orange);border-color:var(--orange);color:#fff}
+    .list-wrap{border-radius:var(--r8);overflow:hidden;border:1px solid var(--line-2);margin-bottom:10px}
+    .list-table{width:100%;border-collapse:collapse;font-size:.84rem}
+    .list-table th{background:#003087;color:#fff;padding:7px 9px;text-align:left;font-size:.76rem;font-weight:900}
+    .list-table td{border-bottom:1px solid rgba(255,255,255,.07);padding:9px 9px;color:#c8e8ff;vertical-align:middle;cursor:pointer}
+    .list-table tr:hover td{background:rgba(255,107,43,.08)}
     .mobile-card-view{display:none}
-    .mobile-grade-section{border:1px solid var(--line-2);border-radius:12px;overflow:hidden;background:rgba(9,24,49,.72);margin-bottom:10px}
-    .mobile-grade-heading{width:100%;min-height:52px;padding:11px 13px;border:0;background:linear-gradient(135deg,rgba(0,48,135,.76),rgba(17,47,88,.88));color:#fff;display:flex;align-items:center;justify-content:space-between;gap:10px;text-align:left;cursor:pointer}
+    .mobile-grade-section{min-width:0;border:1px solid var(--line-2);border-radius:13px;overflow:hidden;background:rgba(4,18,41,.48)}
+    .mobile-grade-heading{width:100%;min-height:52px;display:flex;align-items:center;justify-content:space-between;gap:10px;padding:10px 13px;border:0;background:rgba(0,48,135,.52);color:#fff;font:inherit;text-align:left;cursor:pointer}
     .mobile-grade-title{font-size:1rem;font-weight:900}.mobile-grade-count{margin-left:7px;color:rgba(255,255,255,.68);font-size:.78rem;font-weight:700}
     .mobile-grade-toggle{color:var(--orange);font-size:.82rem;font-weight:900}
     .mobile-grade-members{display:grid;gap:9px;padding:9px}
@@ -49,41 +54,146 @@
     .mobile-member-card{position:relative;display:block;width:100%;min-width:0;padding:12px 11px 11px 58px;border:1px solid rgba(255,255,255,.13);border-radius:11px;background:rgba(5,15,30,.76);cursor:pointer;text-align:left;color:var(--ink);box-shadow:0 5px 16px rgba(0,0,0,.14)}
     .mobile-member-card:focus-visible,.mobile-grade-heading:focus-visible{outline:3px solid var(--cyan);outline-offset:2px}
     .mobile-member-number{position:absolute;left:10px;top:12px;display:grid;place-items:center;min-width:37px;min-height:37px;padding:3px;border:1px solid rgba(0,212,255,.38);border-radius:9px;background:rgba(0,212,255,.1);color:var(--cyan);font-size:.8rem;font-weight:900}
-    .mobile-member-kana{display:block;font-size:.68rem;color:var(--ink-3);margin-bottom:2px}
-    .mobile-member-name{display:flex;align-items:center;gap:6px;font-size:1rem;font-weight:900;line-height:1.35;color:#fff}
-    .mobile-member-name.girl{color:#ff8888}.mobile-gender-text{margin-left:auto;font-size:.68rem;color:var(--ink-3);font-weight:700}
-    .mobile-add-member{width:100%;min-height:44px;border:1px dashed rgba(0,212,255,.36);border-radius:9px;background:rgba(0,212,255,.05);color:var(--cyan);font:inherit;font-size:.78rem;font-weight:900;cursor:pointer}
-    .mobile-member-empty{padding:14px;text-align:center;color:var(--ink-3);font-size:.78rem}
-    @media(max-width:760px){
-      .roster-wrap,.list-wrap{display:none!important}.mobile-card-view{display:block}.member-controls{gap:10px}.sort-bar{display:block}.sort-lbl{display:block;margin-bottom:5px}.control-scroll{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:6px}.sort-btn{width:100%;padding:8px 5px;font-size:.72rem}.legend-bar{font-size:.72rem;gap:8px}.save-bar .btn{flex:1 1 120px}.member-uniform-badge{font-size:.68rem;padding-top:5px;padding-bottom:5px}.mobile-grade-members .member-uniform-badges{margin-top:7px}
+    .mobile-member-grade{display:none;color:var(--cyan);font-size:.72rem;font-weight:900;margin-bottom:3px}
+    .mobile-member-kana{color:var(--ink-3);font-size:.76rem;line-height:1.45;overflow-wrap:anywhere}
+    .mobile-member-name{display:flex;align-items:flex-start;gap:7px;margin-top:2px;color:#fff;font-size:1.08rem;font-weight:900;line-height:1.45;overflow-wrap:anywhere}
+    .mobile-member-name.girl{color:#ff9aa9}.mobile-member-name .gender-dot{width:8px;height:8px;margin-top:.55em}.mobile-gender-text{margin-left:auto;padding:2px 6px;border:1px solid currentColor;border-radius:99px;font-size:.65rem;line-height:1.4;opacity:.82}
+    .mobile-member-card .member-uniform-badges{margin-top:9px;gap:7px}
+    .mobile-member-card .member-uniform-badge{display:grid;grid-template-columns:1fr;gap:2px;padding:8px 10px 8px 18px;font-size:.82rem;line-height:1.45}
+    .mobile-member-card .member-uniform-state{font-size:.75rem}
+    .mobile-member-empty{padding:12px;color:var(--ink-3);font-size:.84rem;text-align:center}
+    .mobile-add-member{width:100%;min-height:44px;border:1px dashed var(--line-2);border-radius:9px;background:transparent;color:var(--cyan);font:inherit;font-size:.8rem;font-weight:800;cursor:pointer}
+    body[data-theme="light"] .mobile-grade-section{background:#eef5fb}
+    body[data-theme="light"] .mobile-member-card{background:#fff;border-color:rgba(20,36,58,.15);color:#14243a}
+    body[data-theme="light"] .mobile-member-name{color:#14243a}body[data-theme="light"] .mobile-member-name.girl{color:#c92746}
+    .edit-modal-bg{position:fixed;inset:0;background:rgba(0,0,0,.82);display:none;place-items:center;z-index:200;backdrop-filter:blur(6px);padding:16px}
+    .edit-modal-bg.open{display:grid}
+    .edit-modal{background:var(--surface-lt);border:1px solid var(--line-2);border-radius:var(--r16);padding:22px;width:min(560px,100%);max-height:calc(100dvh - 32px);overflow-y:auto;box-shadow:var(--shadow-lg)}
+    .edit-modal h3{font-size:.95rem;font-weight:900;color:#fff;margin-bottom:14px}
+    .edit-modal-btns{display:flex;gap:8px;justify-content:flex-end;margin-top:14px;flex-wrap:wrap}
+    .gender-radio{display:flex;gap:16px;font-size:.88rem;color:var(--ink)}
+    .member-uniform-help{margin:5px 0 8px;color:var(--ink-3);font-size:.72rem;line-height:1.55}
+    body[data-theme="light"] .member-uniform-badge{border-color:rgba(20,36,58,.18);background:linear-gradient(90deg,var(--u-main,#64748b) 0 8px,var(--u-sub,var(--u-main,#64748b)) 8px 12px,#edf4fa 12px);color:#14243a}
+    @media(max-width:768px){
+      .member-controls{margin:0 -2px 9px;padding:9px;border:1px solid rgba(255,107,43,.2);border-radius:12px;background:rgba(5,15,30,.72)}
+      .sort-bar{display:grid;grid-template-columns:auto minmax(0,1fr);gap:7px}
+      .control-scroll{overflow-x:auto;flex-wrap:nowrap;padding:1px 1px 5px;scrollbar-width:none;-webkit-overflow-scrolling:touch}
+      .control-scroll::-webkit-scrollbar{display:none}
+      .sort-btn{flex:0 0 auto}
+      .legend-bar{font-size:.76rem;line-height:1.5}
+      #grid-view,#list-view{display:none!important}
+      .mobile-card-view{display:grid;gap:12px;min-width:0;margin-bottom:12px}
+      .page-wrap{overflow-x:hidden;overflow-x:clip}
     }
-    body[data-theme="light"] .mobile-grade-section{background:#fff;border-color:#d7a36a}
-    body[data-theme="light"] .mobile-grade-heading{background:linear-gradient(135deg,#eaf3ff,#f7fbff);color:#123f78}
-    body[data-theme="light"] .mobile-grade-title{color:#123f78}body[data-theme="light"] .mobile-grade-count{color:#52647a}
-    body[data-theme="light"] .mobile-member-card{background:#fff;border-color:#c9d3df;color:#17243a;box-shadow:0 5px 14px rgba(24,42,67,.08)}
-    body[data-theme="light"] .mobile-member-name{color:#17243a}body[data-theme="light"] .mobile-member-name.girl{color:#a52946}
-    body[data-theme="light"] .mobile-member-kana,body[data-theme="light"] .mobile-gender-text{color:#52647a}
-    body[data-theme="light"] .member-uniform-badge{background:linear-gradient(90deg,var(--u-main,#64748b) 0 8px,var(--u-sub,var(--u-main,#64748b)) 8px 12px,#f4f7fb 12px);color:#17243a;border-color:#c9d3df}
+    @media(max-width:430px){
+      .edit-modal{padding:17px 14px}
+      .member-uniform-badge{font-size:.64rem}
+      .mobile-member-card{padding-left:54px}
+      .mobile-member-card .member-uniform-badge{font-size:.8rem}
+    }
   </style>
 </head>
 <body>
 <header class="site-header"></header>
 <main class="page-wrap">
   <a class="back-btn" href="index.html">ホームに戻る</a>
-  <div class="hero-band"><div class="hero-emoji">📒</div><div><div class="hero-title">団員名簿</div><div class="hero-sub"><span id="grade-badge"></span> SMC学年別名簿。氏名をタップして編集できます。</div></div></div>
-  <div class="panel">
-    <div class="legend-bar"><span><span class="legend-dot" style="background:#6aaccc"></span>男子</span><span><span class="legend-dot" style="background:#ff8888"></span>女子（赤字）</span><span>🗓 配布予定</span><span>👕 貸出中（変更はユニフォーム貸出管理から）</span></div>
-    <div class="member-controls">
-      <div class="sort-bar"><span class="sort-lbl">表示する学年：</span><div class="control-scroll"><button class="sort-btn on" id="gf-all" onclick="setGrade('all')">全学年</button><button class="sort-btn" id="gf-6" onclick="setGrade('6年')">6年</button><button class="sort-btn" id="gf-5" onclick="setGrade('5年')">5年</button><button class="sort-btn" id="gf-4" onclick="setGrade('4年')">4年</button><button class="sort-btn" id="gf-3" onclick="setGrade('3年')">3年</button><button class="sort-btn" id="gf-2" onclick="setGrade('2年')">2年</button><button class="sort-btn" id="gf-1" onclick="setGrade('1年')">1年</button><button class="sort-btn" id="gf-nen" onclick="setGrade('年長')">年長</button></div></div>
-      <div class="sort-bar"><span class="sort-lbl">並び替え：</span><div class="control-scroll"><button class="sort-btn on" id="sb-none" onclick="setSort('none')">通常</button><button class="sort-btn" id="sb-kana" onclick="setSort('kana')">あいうえお順</button><button class="sort-btn" id="sb-num" onclick="setSort('num')">背番号順</button><button class="sort-btn" id="sb-gender" onclick="setSort('gender')">男女別</button></div></div>
+  <div class="hero-band">
+    <div class="hero-emoji">📒</div>
+    <div>
+      <div class="hero-title">団員名簿</div>
+      <div class="hero-sub">2026年度 SMC学年別名簿。氏名をタップして編集できます。</div>
     </div>
-    <div class="roster-wrap" id="grid-view"><table class="roster-table" id="roster-table"></table></div>
-    <div class="list-wrap" id="list-view" style="display:none"><table class="data-table" id="list-table"></table></div>
-    <div class="mobile-card-view" id="mobile-card-view"></div>
-    <div class="save-bar"><span class="save-msg" id="save-msg"></span><button class="btn btn-outline btn-sm" onclick="copyMemberList()">📋 LINE用コピー</button><button class="btn btn-outline btn-sm" onclick="exportCSV()">📥 CSV出力</button></div>
+  </div>
+  <div class="notice-bar">☁️ 団員ごとにFirebaseへ自動保存します。団員情報はこの端末には保存しません。</div>
+
+  <div class="member-controls" aria-label="団員名簿の表示設定">
+    <!-- 学年フィルター -->
+    <div class="sort-bar">
+      <span class="sort-lbl">学年</span>
+      <div class="control-scroll" role="toolbar" aria-label="表示する学年">
+        <button class="sort-btn on" id="gf-all" aria-pressed="true" onclick="setGrade('all')">全学年</button>
+        <button class="sort-btn" id="gf-6" aria-pressed="false" onclick="setGrade('6年')">6年</button>
+        <button class="sort-btn" id="gf-5" aria-pressed="false" onclick="setGrade('5年')">5年</button>
+        <button class="sort-btn" id="gf-4" aria-pressed="false" onclick="setGrade('4年')">4年</button>
+        <button class="sort-btn" id="gf-3" aria-pressed="false" onclick="setGrade('3年')">3年</button>
+        <button class="sort-btn" id="gf-2" aria-pressed="false" onclick="setGrade('2年')">2年</button>
+        <button class="sort-btn" id="gf-1" aria-pressed="false" onclick="setGrade('1年')">1年</button>
+        <button class="sort-btn" id="gf-nen" aria-pressed="false" onclick="setGrade('年長')">年長</button>
+        <span id="grade-badge" style="font-size:.72rem;color:var(--cyan);white-space:nowrap"></span>
+      </div>
+    </div>
+
+    <!-- ソート -->
+    <div class="sort-bar">
+      <span class="sort-lbl">並び替え</span>
+      <div class="control-scroll" role="toolbar" aria-label="団員の並び替え">
+        <button class="sort-btn on" id="sb-none" aria-pressed="true" onclick="setSort('none')">学年順</button>
+        <button class="sort-btn" id="sb-kana" aria-pressed="false" onclick="setSort('kana')">あいうえお順</button>
+        <button class="sort-btn" id="sb-num" aria-pressed="false" onclick="setSort('num')">背番号順</button>
+        <button class="sort-btn" id="sb-gender" aria-pressed="false" onclick="setSort('gender')">男女別</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- 凡例 -->
+  <div class="legend-bar">
+    <span><span class="legend-dot" style="background:#6aaccc"></span>男子</span>
+    <span><span class="legend-dot" style="background:#ff8888"></span>女子（赤字）</span>
+    <span style="color:#ffaa66">🗓 貸出予定　👕 貸出中（変更はユニフォーム貸出管理から）</span>
+  </div>
+
+  <!-- グリッドビュー -->
+  <div class="roster-wrap" id="grid-view">
+    <table class="roster-table" id="roster-table"></table>
+  </div>
+
+  <!-- リストビュー -->
+  <div class="list-wrap" id="list-view" style="display:none">
+    <table class="list-table mobile-stack" id="list-table"></table>
+  </div>
+
+  <!-- スマートフォン用・学年別カードビュー -->
+  <div class="mobile-card-view" id="mobile-card-view" aria-live="polite"></div>
+
+  <!-- 保存バー -->
+  <div class="save-bar">
+    <span style="font-size:.82rem;color:var(--green);flex:1" id="save-msg">変更は団員ごとに自動保存されます</span>
+    <button class="btn btn-outline btn-sm" onclick="exportCSV()">📥 CSV出力</button>
   </div>
 </main>
-<div class="edit-modal-bg" id="edit-modal"><div class="edit-modal"><h3 id="edit-title">団員を編集</h3><div class="form-group"><label class="form-label">氏名</label><input class="form-control" id="edit-name"></div><div class="form-group"><label class="form-label">ふりがな</label><input class="form-control" id="edit-kana"></div><div class="form-group"><label class="form-label">貸出ユニフォーム</label><div id="member-uniform-readonly"></div></div><div class="form-group"><label class="form-label">性別</label><div class="gender-radio"><label><input type="radio" name="edit-gender" value="m" id="edit-g-m" checked> 男子</label><label><input type="radio" name="edit-gender" value="f" id="edit-g-f"> 女子</label></div></div><div class="edit-modal-btns"><button class="btn btn-outline btn-sm" id="edit-del-btn" style="color:var(--red);border-color:rgba(255,68,102,.4);display:none" onclick="deleteEntry()">🗑 削除</button><button class="btn btn-outline" onclick="closeModal()">キャンセル</button><button class="btn btn-primary" onclick="saveEdit()">保存</button></div></div></div>
+
+<!-- 編集モーダル -->
+<div class="edit-modal-bg" id="edit-modal">
+  <div class="edit-modal">
+    <h3 id="edit-title">団員を編集</h3>
+    <div class="form-group">
+      <label class="form-label">氏名（漢字）</label>
+      <input class="form-control" id="edit-name" placeholder="例：吉見　太郎">
+    </div>
+    <div class="form-group">
+      <label class="form-label">ふりがな</label>
+      <input class="form-control" id="edit-kana" placeholder="例：よしみ　たろう">
+    </div>
+    <div class="form-group">
+      <label class="form-label">ユニフォーム</label>
+      <p class="member-uniform-help">ユニフォーム貸出管理の「貸出予定」「貸出中」を自動表示します。この画面からは変更できません。</p>
+      <div id="member-uniform-readonly"></div>
+    </div>
+    <div class="form-group">
+      <label class="form-label">性別</label>
+      <div class="gender-radio">
+        <label><input type="radio" name="edit-gender" value="m" id="edit-g-m" checked> 男子</label>
+        <label><input type="radio" name="edit-gender" value="f" id="edit-g-f"> 女子</label>
+      </div>
+    </div>
+    <div class="edit-modal-btns">
+      <button class="btn btn-outline btn-sm" id="edit-del-btn" style="color:var(--red);border-color:rgba(255,68,102,.4);display:none" onclick="deleteEntry()">🗑 削除</button>
+      <button class="btn btn-outline" onclick="closeModal()">キャンセル</button>
+      <button class="btn btn-primary" onclick="saveEdit()">保存</button>
+    </div>
+  </div>
+</div>
+
 <footer class="site-footer"></footer>
 <script>
 var GRADES = ["6年","5年","4年","3年","2年","1年","年長"];
@@ -100,45 +210,498 @@ var migrationAttempted = false;
 var uniformInventory = [];
 var uniformColorTemplates = [];
 var uniformFolderOrder = [];
-var DEFAULT_UNIFORM_COLORS = [{name:"水色 × ピンク",mainCode:"#4ab8e8",subCode:"#f06090"},{name:"水色 × オレンジ",mainCode:"#4ab8e8",subCode:"#ff8c00"},{name:"オレンジ × 紺",mainCode:"#e85c1e",subCode:"#003087"},{name:"オレンジ × 赤",mainCode:"#e85c1e",subCode:"#bc002d"},{name:"オレンジ",mainCode:"#e85c1e",subCode:""},{name:"白 × 青",mainCode:"#f0f0f0",subCode:"#1769aa"},{name:"白",mainCode:"#f0f0f0",subCode:""},{name:"白 × 赤",mainCode:"#f0f0f0",subCode:"#bc002d"},{name:"白 × 黒",mainCode:"#f0f0f0",subCode:"#222222"},{name:"オレンジ赤縦じま",mainCode:"#e85c1e",subCode:"#bc002d"},{name:"緑",mainCode:"#228b22",subCode:""},{name:"黄色",mainCode:"#f5d300",subCode:""}];
-var INIT = GRADES.reduce(function(result, grade){result[grade] = Array(ROWS).fill(null);return result;}, {});
+var DEFAULT_UNIFORM_COLORS = [
+  {name:"水色 × ピンク",mainCode:"#4ab8e8",subCode:"#f06090"},
+  {name:"水色 × オレンジ",mainCode:"#4ab8e8",subCode:"#ff8c00"},
+  {name:"オレンジ × 紺",mainCode:"#e85c1e",subCode:"#003087"},
+  {name:"オレンジ × 赤",mainCode:"#e85c1e",subCode:"#bc002d"},
+  {name:"オレンジ",mainCode:"#e85c1e",subCode:""},
+  {name:"白 × 青",mainCode:"#f0f0f0",subCode:"#1769aa"},
+  {name:"白",mainCode:"#f0f0f0",subCode:""},
+  {name:"白 × 赤",mainCode:"#f0f0f0",subCode:"#bc002d"},
+  {name:"白 × 黒",mainCode:"#f0f0f0",subCode:"#222222"},
+  {name:"オレンジ赤縦じま",mainCode:"#e85c1e",subCode:"#bc002d"},
+  {name:"緑",mainCode:"#228b22",subCode:""},
+  {name:"黄色",mainCode:"#f5d300",subCode:""}
+];
+
+// 個人情報を公開HTMLへ埋め込まない。現行名簿はFirebaseまたは端末保存から読み込む。
+var INIT = GRADES.reduce(function(result, grade){
+  result[grade] = Array(ROWS).fill(null);
+  return result;
+}, {});
+
 var data = JSON.parse(JSON.stringify(INIT));
-(function(){var now=new Date();var sy=now>=new Date(now.getFullYear(),3,1)?now.getFullYear():now.getFullYear()-1;var el=document.getElementById("grade-badge");if(el)el.textContent=sy+"年度";})();
-function escapeHtml(s){return String(s==null?"":s).replace(/[&<>"']/g,function(c){return {"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c];});}
-function uniformAssignmentsForMember(member){var name=String(member&&member.name||"").trim();if(!name)return[];return uniformInventory.filter(function(item){if(!item||String(item.lentTo||"").trim()!==name)return false;var state=String(item.state||"");return state==="lent"||state==="planned";});}
-function memberUniformText(item){var c=String(item.color||item.folder||"").trim(),n=String(item.num||"").trim();return [c,n?"#"+n:""].filter(Boolean).join(" ");}
-function colorTemplateFor(item){var label=String(item&&item.color||item&&item.folder||"").trim();var found=uniformColorTemplates.find(function(t){return t&&String(t.name||"").trim()===label;})||DEFAULT_UNIFORM_COLORS.find(function(t){return t.name===label;});return found||{mainCode:"#64748b",subCode:"#64748b"};}
-function renderMemberUniformBadges(member){var list=uniformAssignmentsForMember(member);if(!list.length)return"";return "<div class='member-uniform-badges'>"+list.map(function(item){var t=colorTemplateFor(item),state=item.state==="planned"?"配布予定":"貸出中";return "<div class='member-uniform-badge"+(item.state==="planned"?" planned":"")+"' style='--u-main:"+escapeHtml(t.mainCode||"#64748b")+";--u-sub:"+escapeHtml(t.subCode||t.mainCode||"#64748b")+"'><span class='member-uniform-state'>"+(item.state==="planned"?"🗓":"👕")+" "+state+"</span><span>"+escapeHtml(memberUniformText(item))+"</span></div>";}).join("")+"</div>";}
-function render(){if(currentSort==="none"){document.getElementById("grid-view").style.display="";document.getElementById("list-view").style.display="none";renderGrid();}else{document.getElementById("grid-view").style.display="none";document.getElementById("list-view").style.display="";renderList();}renderMobileCards();}
-function renderGrid(){var tbl=document.getElementById("roster-table");if(!tbl)return;var grades=currentGrade==="all"?GRADES:[currentGrade];var h="<thead><tr><th class='col-no'>#</th>";grades.forEach(function(g){var cnt=(data[g]||[]).filter(function(m){return m&&m.name;}).length;h+="<th class='grade-head' onclick=\"cycleSort('"+g+"')\">"+g+"<br><span style='font-size:.62rem;font-weight:400;color:rgba(255,255,255,.6)'>"+cnt+"名</span><span class='grade-sort-ind' id='gsi-"+g+"'></span></th>";});h+="</tr></thead><tbody>";var rowCount=grades.reduce(function(max,g){return Math.max(max,(data[g]||[]).length);},ROWS);for(var r=0;r<rowCount;r++){h+="<tr><td class='col-no'>"+(r+1)+"</td>";grades.forEach(function(g){var m=(data[g]||[])[r];if(m&&m.name){var girl=m.gender==="f",dot=girl?"#ff8888":"#6aaccc";h+="<td><div class='name-cell' onclick=\"openEdit('"+g+"',"+r+")\"><div class='kana'>"+escapeHtml(m.kana||"")+"</div><div class='kanji"+(girl?" girl":"")+"'><span class='gender-dot' style='background:"+dot+"'></span>"+escapeHtml(m.name)+"</div>"+renderMemberUniformBadges(m)+"</div></td>";}else h+="<td><div class='name-cell empty' onclick=\"openNew('"+g+"',"+r+")\"></div></td>";});h+="</tr>";}h+="</tbody>";tbl.innerHTML=h;}
-function renderList(){var grades=currentGrade==="all"?GRADES:[currentGrade],all=[];grades.forEach(function(g){(data[g]||[]).forEach(function(m,r){if(m&&m.name){var assigned=uniformAssignmentsForMember(m),lent=assigned.filter(function(u){return u.state==="lent";}),planned=assigned.filter(function(u){return u.state==="planned";});all.push({id:m.id,name:m.name,kana:m.kana||"",num:String((lent[0]||planned[0]||{}).num||m.num||""),uniforms:assigned,gender:m.gender,grade:g,row:r});}});});if(currentSort==="kana")all.sort(function(a,b){return a.kana.localeCompare(b.kana,"ja");});if(currentSort==="num")all.sort(function(a,b){return(parseInt(a.num)||999)-(parseInt(b.num)||999);});if(currentSort==="gender")all.sort(function(a,b){if(a.gender===b.gender)return a.kana.localeCompare(b.kana,"ja");return a.gender==="f"?-1:1;});var showGrade=currentGrade==="all",h="<thead><tr>"+(showGrade?"<th style='width:52px'>学年</th>":"")+"<th>氏名</th><th>ふりがな</th><th>貸出ユニフォーム</th><th style='width:40px'>性別</th></tr></thead><tbody>";if(!all.length)h+="<tr><td colspan='5' style='text-align:center;color:var(--ink-3);padding:20px'>団員がいません</td></tr>";else all.forEach(function(m){var girl=m.gender==="f";h+="<tr onclick=\"openEdit('"+m.grade+"',"+m.row+")\">"+(showGrade?"<td style='text-align:center;color:var(--cyan);font-weight:700;font-size:.76rem'>"+m.grade+"</td>":"")+"<td style='font-weight:900;"+(girl?"color:#ff8888":"color:#fff")+"'>"+escapeHtml(m.name)+"</td><td style='font-size:.76rem;color:var(--ink-3)'>"+escapeHtml(m.kana)+"</td><td>"+renderMemberUniformBadges(m)+"</td><td style='text-align:center'>"+(girl?"<span style='color:#ff8888'>女</span>":"<span style='color:#88aaff'>男</span>")+"</td></tr>";});h+="</tbody>";document.getElementById("list-table").innerHTML=h;}
-var mobileGradeOpen={};
-function memberDisplayNumber(member){var assigned=uniformAssignmentsForMember(member),lent=assigned.filter(function(item){return item.state==="lent";}),planned=assigned.filter(function(item){return item.state==="planned";});return String((lent[0]||planned[0]||{}).num||member.num||"");}
-function mobileMembersForGrade(grade){var members=[];(data[grade]||[]).forEach(function(member,row){if(member&&member.name)members.push({member:member,row:row});});if(currentSort==="kana")members.sort(function(a,b){return(a.member.kana||"").localeCompare(b.member.kana||"","ja");});if(currentSort==="num")members.sort(function(a,b){return(parseInt(memberDisplayNumber(a.member),10)||999)-(parseInt(memberDisplayNumber(b.member),10)||999)||(a.member.kana||"").localeCompare(b.member.kana||"","ja");});if(currentSort==="gender")members.sort(function(a,b){if(a.member.gender===b.member.gender)return(a.member.kana||"").localeCompare(b.member.kana||"","ja");return a.member.gender==="f"?-1:1;});return members;}
-function nextMemberRow(grade){var list=data[grade]||[];for(var index=0;index<list.length;index++)if(!list[index]||!list[index].name)return index;return list.length;}
+
+// 学年バッジ
+(function(){
+  var now = new Date();
+  var sy = now >= new Date(now.getFullYear(),3,1) ? now.getFullYear() : now.getFullYear()-1;
+  var el = document.getElementById("grade-badge");
+  if(el) el.textContent = sy+"年度";
+})();
+
+/* ===== 描画 ===== */
+function render(){
+  if(currentSort === "none"){
+    document.getElementById("grid-view").style.display = "";
+    document.getElementById("list-view").style.display = "none";
+    renderGrid();
+  } else {
+    document.getElementById("grid-view").style.display = "none";
+    document.getElementById("list-view").style.display = "";
+    renderList();
+  }
+  renderMobileCards();
+}
+
+function renderGrid(){
+  var tbl = document.getElementById("roster-table");
+  if(!tbl) return;
+  var grades = currentGrade==="all" ? GRADES : [currentGrade];
+  var h = "<thead><tr><th class='col-no'>#</th>";
+  grades.forEach(function(g){
+    var cnt = (data[g]||[]).filter(function(m){return m&&m.name;}).length;
+    h += "<th class='grade-head' onclick=\"cycleSort('"+g+"')\">"
+      +g+"<br><span style='font-size:.62rem;font-weight:400;color:rgba(255,255,255,.6)'>"+cnt+"名</span>"
+      +"<span class='grade-sort-ind' id='gsi-"+g+"'></span></th>";
+  });
+  h += "</tr></thead><tbody>";
+  var rowCount = grades.reduce(function(max,g){return Math.max(max,(data[g]||[]).length);},ROWS);
+  for(var r=0; r<rowCount; r++){
+    h += "<tr><td class='col-no'>"+(r+1)+"</td>";
+    grades.forEach(function(g){
+      var m = (data[g]||[])[r];
+      if(m && m.name){
+        var girl = m.gender==="f";
+        var dot  = girl ? "#ff8888" : "#6aaccc";
+        h += "<td><div class='name-cell' onclick=\"openEdit('"+g+"',"+r+")\">"
+          +"<div class='kana'>"+escapeHtml(m.kana||"")+"</div>"
+          +"<div class='kanji"+(girl?" girl":"")+"'><span class='gender-dot' style='background:"+dot+"'></span>"+escapeHtml(m.name)+"</div>"
+          +renderMemberUniformBadges(m)
+          +"</div></td>";
+      } else {
+        h += "<td><div class='name-cell empty' onclick=\"openNew('"+g+"',"+r+")\"></div></td>";
+      }
+    });
+    h += "</tr>";
+  }
+  h += "</tbody>";
+  tbl.innerHTML = h;
+}
+
+function renderList(){
+  var grades = currentGrade==="all" ? GRADES : [currentGrade];
+  var all = [];
+  grades.forEach(function(g){
+    (data[g]||[]).forEach(function(m,r){
+      if(m&&m.name){var assigned=uniformAssignmentsForMember(m);var lent=assigned.filter(function(u){return u.state==="lent";});var planned=assigned.filter(function(u){return u.state==="planned";});all.push({id:m.id,name:m.name,kana:m.kana||"",num:String((lent[0]||planned[0]||{}).num||m.num||""),uniforms:assigned,gender:m.gender,grade:g,row:r});}
+    });
+  });
+  if(currentSort==="kana")   all.sort(function(a,b){return a.kana.localeCompare(b.kana,"ja");});
+  if(currentSort==="num")    all.sort(function(a,b){return (parseInt(a.num)||999)-(parseInt(b.num)||999);});
+  if(currentSort==="gender") all.sort(function(a,b){
+    if(a.gender===b.gender) return a.kana.localeCompare(b.kana,"ja");
+    return a.gender==="f"?-1:1;
+  });
+  var showGrade = currentGrade==="all";
+  var h = "<thead><tr>"+(showGrade?"<th style='width:52px'>学年</th>":"")
+    +"<th>氏名</th><th>ふりがな</th><th>貸出ユニフォーム</th><th style='width:40px'>性別</th>"
+    +"</tr></thead><tbody>";
+  if(!all.length){
+    h += "<tr><td colspan='5' style='text-align:center;color:var(--ink-3);padding:20px'>団員がいません</td></tr>";
+  } else {
+    all.forEach(function(m){
+      var girl = m.gender==="f";
+      h += "<tr onclick=\"openEdit('"+m.grade+"',"+m.row+")\">";
+      if(showGrade) h += "<td style='text-align:center;color:var(--cyan);font-weight:700;font-size:.76rem'>"+m.grade+"</td>";
+      h += "<td style='font-weight:900;"+(girl?"color:#ff8888":"color:#fff")+"'>"+escapeHtml(m.name)+"</td>"
+        +"<td style='font-size:.76rem;color:var(--ink-3)'>"+escapeHtml(m.kana)+"</td>"
+        +"<td>"+renderMemberUniformBadges(m)+"</td>"
+        +"<td style='text-align:center'>"+(girl?"<span style='color:#ff8888'>女</span>":"<span style='color:#88aaff'>男</span>")+"</td>"
+        +"</tr>";
+    });
+  }
+  h += "</tbody>";
+  document.getElementById("list-table").innerHTML = h;
+}
+
+var mobileGradeOpen = {};
+function memberDisplayNumber(member){
+  var assigned=uniformAssignmentsForMember(member),lent=assigned.filter(function(item){return item.state==="lent";}),planned=assigned.filter(function(item){return item.state==="planned";});
+  return String((lent[0]||planned[0]||{}).num||member.num||"");
+}
+function mobileMembersForGrade(grade){
+  var members=[];
+  (data[grade]||[]).forEach(function(member,row){if(member&&member.name)members.push({member:member,row:row});});
+  if(currentSort==="kana")members.sort(function(a,b){return (a.member.kana||"").localeCompare(b.member.kana||"","ja");});
+  if(currentSort==="num")members.sort(function(a,b){return (parseInt(memberDisplayNumber(a.member),10)||999)-(parseInt(memberDisplayNumber(b.member),10)||999)||(a.member.kana||"").localeCompare(b.member.kana||"","ja");});
+  if(currentSort==="gender")members.sort(function(a,b){if(a.member.gender===b.member.gender)return (a.member.kana||"").localeCompare(b.member.kana||"","ja");return a.member.gender==="f"?-1:1;});
+  return members;
+}
+function nextMemberRow(grade){
+  var list=data[grade]||[];
+  for(var index=0;index<list.length;index++)if(!list[index]||!list[index].name)return index;
+  return list.length;
+}
 function toggleMobileGrade(grade){mobileGradeOpen[grade]=mobileGradeOpen[grade]===false;renderMobileCards();}
 function openMemberCardFromKey(event,grade,row){if(event.key!=="Enter"&&event.key!==" ")return;event.preventDefault();openEdit(grade,row);}
-function renderMobileCards(){var root=document.getElementById("mobile-card-view");if(!root)return;var grades=currentGrade==="all"?GRADES:[currentGrade],sections=[];grades.forEach(function(grade,gradeIndex){var members=mobileMembersForGrade(grade);if(!members.length&&currentGrade==="all")return;var open=mobileGradeOpen[grade]!==false,panelId="mobile-grade-panel-"+gradeIndex;var cards=members.map(function(entry){var member=entry.member,girl=member.gender==="f",genderLabel=girl?"女子":"男子",dot=girl?"#ff8888":"#6aaccc",number=memberDisplayNumber(member)||"—";return "<article class=\"mobile-member-card\" role=\"button\" tabindex=\"0\" onclick='openEdit("+inlineArg(grade)+","+entry.row+")' onkeydown='openMemberCardFromKey(event,"+inlineArg(grade)+","+entry.row+")' aria-label=\""+escapeHtml(member.name)+"、"+genderLabel+"を編集\"><span class=\"mobile-member-number\">#"+escapeHtml(number)+"</span><span class=\"mobile-member-kana\">"+escapeHtml(member.kana||"ふりがな未登録")+"</span><span class=\"mobile-member-name"+(girl?" girl":"")+"\"><span class=\"gender-dot\" aria-hidden=\"true\" style=\"background:"+dot+"\"></span><span>"+escapeHtml(member.name)+"</span><span class=\"mobile-gender-text\">"+genderLabel+"</span></span>"+renderMemberUniformBadges(member)+"</article>";}).join("")||'<div class="mobile-member-empty">この学年には団員がいません。</div>';sections.push("<section class=\"mobile-grade-section\"><button type=\"button\" class=\"mobile-grade-heading\" aria-expanded=\""+(open?"true":"false")+"\" aria-controls=\""+panelId+"\" onclick='toggleMobileGrade("+inlineArg(grade)+")'><span><span class=\"mobile-grade-title\">"+escapeHtml(grade)+"</span><span class=\"mobile-grade-count\">"+members.length+"名</span></span><span class=\"mobile-grade-toggle\">"+(open?"閉じる ▲":"開く ▼")+"</span></button><div class=\"mobile-grade-members\" id=\""+panelId+"\""+(open?"":" hidden")+">"+cards+"<button type=\"button\" class=\"mobile-add-member\" onclick='openNew("+inlineArg(grade)+","+nextMemberRow(grade)+")' aria-label=\""+escapeHtml(grade)+"に団員を追加\">＋ "+escapeHtml(grade)+"に団員を追加</button></div></section>");});root.innerHTML=sections.join("")||'<div class="mobile-member-empty">該当する団員がいません。</div>';}
+function renderMobileCards(){
+  var root=document.getElementById("mobile-card-view");if(!root)return;
+  var grades=currentGrade==="all"?GRADES:[currentGrade],sections=[];
+  grades.forEach(function(grade,gradeIndex){
+    var members=mobileMembersForGrade(grade);if(!members.length&&currentGrade==="all")return;
+    var open=mobileGradeOpen[grade]!==false,panelId="mobile-grade-panel-"+gradeIndex;
+    var cards=members.map(function(entry){
+      var member=entry.member,girl=member.gender==="f",genderLabel=girl?"女子":"男子",dot=girl?"#ff8888":"#6aaccc",number=memberDisplayNumber(member)||"—";
+      return "<article class=\"mobile-member-card\" role=\"button\" tabindex=\"0\" onclick='openEdit("+inlineArg(grade)+","+entry.row+")' onkeydown='openMemberCardFromKey(event,"+inlineArg(grade)+","+entry.row+")' aria-label=\""+escapeHtml(member.name)+"、"+genderLabel+"を編集\">"
+        +"<span class=\"mobile-member-number\">#"+escapeHtml(number)+"</span>"
+        +"<span class=\"mobile-member-kana\">"+escapeHtml(member.kana||"ふりがな未登録")+"</span>"
+        +"<span class=\"mobile-member-name"+(girl?" girl":"")+"\"><span class=\"gender-dot\" aria-hidden=\"true\" style=\"background:"+dot+"\"></span><span>"+escapeHtml(member.name)+"</span><span class=\"mobile-gender-text\">"+genderLabel+"</span></span>"
+        +renderMemberUniformBadges(member)+"</article>";
+    }).join("")||'<div class="mobile-member-empty">この学年には団員がいません。</div>';
+    sections.push("<section class=\"mobile-grade-section\"><button type=\"button\" class=\"mobile-grade-heading\" aria-expanded=\""+(open?"true":"false")+"\" aria-controls=\""+panelId+"\" onclick='toggleMobileGrade("+inlineArg(grade)+")'><span><span class=\"mobile-grade-title\">"+escapeHtml(grade)+"</span><span class=\"mobile-grade-count\">"+members.length+"名</span></span><span class=\"mobile-grade-toggle\">"+(open?"閉じる ▲":"開く ▼")+"</span></button><div class=\"mobile-grade-members\" id=\""+panelId+"\""+(open?"":" hidden")+">"+cards+"<button type=\"button\" class=\"mobile-add-member\" onclick='openNew("+inlineArg(grade)+","+nextMemberRow(grade)+")' aria-label=\""+escapeHtml(grade)+"に団員を追加\">＋ "+escapeHtml(grade)+"に団員を追加</button></div></section>");
+  });
+  root.innerHTML=sections.join("")||'<div class="mobile-member-empty">該当する団員がいません。</div>';
+}
 function inlineArg(value){return JSON.stringify(String(value)).replace(/</g,"\\u003c");}
-var gradeSortState={};
-function cycleSort(g){var cur=gradeSortState[g]||"none",next=cur==="none"?"kana":cur==="kana"?"num":"none";gradeSortState[g]=next;var members=(data[g]||[]).filter(function(m){return m&&m.name;});if(next==="kana")members.sort(function(a,b){return(a.kana||"").localeCompare(b.kana||"","ja");});if(next==="num")members.sort(function(a,b){return(parseInt(memberDisplayNumber(a))||999)-(parseInt(memberDisplayNumber(b))||999);});while(members.length<ROWS)members.push(null);data[g]=members;render();var label={"none":"","kana":"あいうえお順 ▲","num":"背番号順 ▲"},el=document.getElementById("gsi-"+g);if(el)el.textContent=label[next]||"";}
-function setSort(s){currentSort=s;["none","kana","num","gender"].forEach(function(k){var el=document.getElementById("sb-"+k);if(el)el.className="sort-btn"+(k===s?" on":"");});render();}
-function setGrade(g){currentGrade=g;var map={"all":"gf-all","6年":"gf-6","5年":"gf-5","4年":"gf-4","3年":"gf-3","2年":"gf-2","1年":"gf-1","年長":"gf-nen"};Object.keys(map).forEach(function(k){var el=document.getElementById(map[k]);if(el)el.className="sort-btn"+(k===g?" on":"");});render();}
-function openEdit(g,r){var m=(data[g]||[])[r];if(!m||!m.name){openNew(g,r);return;}editGrade=g;editRow=r;editId=m.id||null;document.getElementById("edit-title").textContent=g+" "+(r+1)+"番目を編集";document.getElementById("edit-name").value=m.name||"";document.getElementById("edit-kana").value=m.kana||"";document.getElementById(m.gender==="f"?"edit-g-f":"edit-g-m").checked=true;document.getElementById("edit-del-btn").style.display="inline-flex";document.getElementById("member-uniform-readonly").innerHTML=renderMemberUniformBadges(m)||"<div style='color:var(--ink-3);font-size:.8rem'>貸出中・配布予定のユニフォームはありません。</div>";document.getElementById("edit-modal").classList.add("open");}
-function openNew(g,r){editGrade=g;editRow=r;editId=null;document.getElementById("edit-title").textContent=g+"に団員を追加";document.getElementById("edit-name").value="";document.getElementById("edit-kana").value="";document.getElementById("edit-g-m").checked=true;document.getElementById("edit-del-btn").style.display="none";document.getElementById("member-uniform-readonly").innerHTML="<div style='color:var(--ink-3);font-size:.8rem'>登録後、ユニフォーム貸出管理から貸出できます。</div>";document.getElementById("edit-modal").classList.add("open");}
-function closeModal(){document.getElementById("edit-modal").classList.remove("open");}
-function setSaveMessage(message,isError){var el=document.getElementById("save-msg");if(!el)return;el.textContent=message;el.style.color=isError?"var(--red)":"var(--green)";}
-function saveEdit(){var name=document.getElementById("edit-name").value.trim(),gEl=document.querySelector("input[name='edit-gender']:checked");if(!name){alert("氏名を入力してください。");return;}var current=editId&&memberRecords[editId]?memberRecords[editId]:{},changes={name:name,kana:document.getElementById("edit-kana").value.trim(),gender:gEl?gEl.value:"m",grade:editGrade,order:Number.isFinite(Number(current.order))?Number(current.order):editRow,updatedAt:Date.now()};onFirebaseReady(function(db){var id=editId||db.ref(MEMBER_PATH).push().key;setSaveMessage("☁️ 保存中…",false);db.ref(MEMBER_PATH+"/"+id).update(changes).then(function(){closeModal();setSaveMessage("✅ クラウドに保存しました",false);}).catch(function(){setSaveMessage("❌ クラウドに保存できませんでした",true);});});}
-function deleteEntry(){if(!editId||!confirm("この団員を名簿から削除しますか？"))return;var linked=uniformAssignmentsForMember(memberRecords[editId]||{});if(linked.length){alert("この団員にはユニフォームがあります。\n"+linked.map(function(item){return(item.state==="planned"?"貸出予定：":"貸出中：")+memberUniformText(item);}).join("\n")+"\n先にユニフォーム貸出管理で、貸出予定解除・返却・貸出先変更を行ってください。");return;}setSaveMessage("☁️ 削除中…",false);dbSave(MEMBER_PATH+"/"+editId,null,null,function(){closeModal();setSaveMessage("✅ クラウドから削除しました",false);},function(){setSaveMessage("❌ 削除できませんでした",true);});}
-function exportCSV(){function csvCell(value){var text=String(value==null?"":value);if(/^[=+\-@]/.test(text))text="'"+text;return '"'+text.replace(/"/g,'""')+'"';}var rows=[["学年","氏名","フリガナ","貸出ユニフォーム","性別"]];GRADES.forEach(function(g){(data[g]||[]).forEach(function(m){if(m&&m.name)rows.push([g,m.name,m.kana||"",uniformAssignmentsForMember(m).map(memberUniformText).join(" / "),m.gender==="f"?"女":"男"]);});});var csv="\uFEFF"+rows.map(function(row){return row.map(csvCell).join(",");}).join("\n"),a=document.createElement("a"),url=URL.createObjectURL(new Blob([csv],{type:"text/csv"}));a.href=url;a.download="smc_members.csv";a.click();setTimeout(function(){URL.revokeObjectURL(url);},0);}
-document.getElementById("edit-modal").addEventListener("click",function(e){if(e.target.id==="edit-modal")closeModal();});
-function recordsToGrid(records){var next=JSON.parse(JSON.stringify(INIT));Object.keys(records||{}).forEach(function(id){var source=records[id];if(!source||!source.name||GRADES.indexOf(source.grade)<0)return;next[source.grade].push(Object.assign({id:id},source));});GRADES.forEach(function(grade){next[grade]=next[grade].filter(function(member){return member&&member.name;});next[grade].sort(function(a,b){var ao=Number.isFinite(Number(a.order))?Number(a.order):999,bo=Number.isFinite(Number(b.order))?Number(b.order):999;return ao-bo||(a.kana||a.name).localeCompare(b.kana||b.name,"ja");});});return next;}
-function convertLegacyMembers(legacy){var converted={};GRADES.forEach(function(grade,gradeIndex){var group=legacy&&legacy[grade];if(!group||typeof group!=="object")return;Object.keys(group).forEach(function(position){var member=group[position];if(!member||!member.name)return;var id="legacy_"+gradeIndex+"_"+String(position).replace(/[^0-9A-Za-z_-]/g,"");converted[id]={name:String(member.name||""),kana:String(member.kana||""),num:String(member.num||""),gender:member.gender==="f"?"f":"m",grade:grade,order:Number(position)||0,updatedAt:Date.now()};});});return converted;}
-function migrateLegacyMembers(db){if(migrationAttempted)return;migrationAttempted=true;setSaveMessage("既存名簿を確認しています…",false);db.ref(LEGACY_MEMBER_PATH).once("value").then(function(snapshot){var converted=convertLegacyMembers(snapshot.val());if(!Object.keys(converted).length){memberRecords={};data=JSON.parse(JSON.stringify(INIT));render();setSaveMessage("名簿は空です。空欄をタップして登録できます",false);return;}setSaveMessage("既存名簿を新しい保存形式へ移行中…",false);dbSave(MEMBER_PATH,converted,null,function(){setSaveMessage("✅ 既存名簿をFirebaseへ移行しました",false);},function(){memberRecords=converted;data=recordsToGrid(converted);render();setSaveMessage("❌ 既存名簿を表示しましたが、移行保存に失敗しました",true);});}).catch(function(){setSaveMessage("❌ 既存名簿を確認できませんでした",true);});}
-function startMemberSync(){if(memberListenerStarted)return;memberListenerStarted=true;try{localStorage.removeItem("smc_members_v4");}catch(e){}onFirebaseReady(function(db){db.ref(MEMBER_PATH).on("value",function(snapshot){var value=snapshot.val();if(value&&typeof value==="object"&&Object.keys(value).length){memberRecords=value;data=recordsToGrid(value);render();setSaveMessage("☁️ Firebaseと同期済み",false);}else migrateLegacyMembers(db);},function(){setSaveMessage("❌ 名簿を読み込めません。通信状態とFirebase設定をご確認ください",true);});});}
-function startMemberUniformColorSync(){dbListen("uniform",function(value){uniformInventory=Array.isArray(value)?value.filter(function(item){return item&&typeof item==="object";}):[];render();},null,[]);dbListen("uniform_color_templates",function(value){uniformColorTemplates=Array.isArray(value)?value.filter(function(item){return item&&typeof item==="object";}):[];render();},null,[]);dbListen("uniform_folder_order",function(value){uniformFolderOrder=Array.isArray(value)?value.filter(function(name){return typeof name==="string"&&name.trim();}):[];render();},null,[]);}
-window.addEventListener("DOMContentLoaded",function(){render();startMemberSync();startMemberUniformColorSync();});
-function copyMemberList(){var grades=["6年","5年","4年","3年","2年","1年","年長"],t="【団員名簿】\n\n";grades.forEach(function(g){var members=(data[g]||[]).filter(function(m){return m&&m.name;});if(members.length){t+="■ "+g+"（"+members.length+"名）\n";members.forEach(function(m){var uniforms=uniformAssignmentsForMember(m).map(memberUniformText).join("／");t+="  "+m.name+(m.kana?"（"+m.kana+"）":"")+(uniforms?"　"+uniforms:"")+"\n";});t+="\n";}});if(!navigator.clipboard||!navigator.clipboard.writeText){alert("このブラウザではコピー機能を利用できません。");return;}navigator.clipboard.writeText(t.trim()).then(function(){alert("名簿をコピーしました！LINEに貼り付けてください。");}).catch(function(){alert("コピーできませんでした。ブラウザの権限をご確認ください。");});}
+
+/* ===== 学年ヘッダータップでその学年内ソート ===== */
+var gradeSortState = {}; // {g: "none"|"kana"|"num"}
+function cycleSort(g){
+  var cur = gradeSortState[g]||"none";
+  var next = cur==="none"?"kana" : cur==="kana"?"num" : "none";
+  gradeSortState[g] = next;
+
+  // その学年内のデータを並べ替え
+  var members = (data[g]||[]).filter(function(m){return m&&m.name;});
+  if(next==="kana")   members.sort(function(a,b){return (a.kana||"").localeCompare(b.kana||"","ja");});
+  if(next==="num") members.sort(function(a,b){var au=uniformAssignmentsForMember(a),bu=uniformAssignmentsForMember(b);var an=au.filter(function(u){return u.state==="lent";}).concat(au.filter(function(u){return u.state==="planned";}))[0];var bn=bu.filter(function(u){return u.state==="lent";}).concat(bu.filter(function(u){return u.state==="planned";}))[0];return (parseInt(an&&an.num||a.num)||999)-(parseInt(bn&&bn.num||b.num)||999);});
+  // nullで埋める
+  while(members.length < ROWS) members.push(null);
+  data[g] = members;
+
+  render();
+
+  // インジケーター更新
+  var label = {"none":"","kana":"あいうえお順 ▲","num":"背番号順 ▲"};
+  var el = document.getElementById("gsi-"+g);
+  if(el) el.textContent = label[next]||"";
+
+  // 表示順だけを変更する。団員データ自体は書き換えない。
+}
+
+/* ===== ソートボタン ===== */
+function setSort(s){
+  currentSort = s;
+  ["none","kana","num","gender"].forEach(function(k){
+    var el = document.getElementById("sb-"+k);
+    if(el){el.className = "sort-btn"+(k===s?" on":"");el.setAttribute("aria-pressed",k===s?"true":"false");}
+  });
+  render();
+}
+
+/* ===== 学年フィルター ===== */
+function setGrade(g){
+  currentGrade = g;
+  var map = {"all":"gf-all","6年":"gf-6","5年":"gf-5","4年":"gf-4","3年":"gf-3","2年":"gf-2","1年":"gf-1","年長":"gf-nen"};
+  Object.keys(map).forEach(function(k){
+    var el = document.getElementById(map[k]);
+    if(el){el.className = "sort-btn"+(k===g?" on":"");el.setAttribute("aria-pressed",k===g?"true":"false");}
+  });
+  render();
+}
+
+/* ===== 編集モーダル ===== */
+function openEdit(g,r){
+  var m = (data[g]||[])[r];
+  if(!m||!m.name){ openNew(g,r); return; }
+  editGrade=g; editRow=r; editId=m.id||null;
+  document.getElementById("edit-title").textContent = g+" "+(r+1)+"番目を編集";
+  document.getElementById("edit-name").value = m.name||"";
+  document.getElementById("edit-kana").value = m.kana||"";
+  document.getElementById("member-uniform-readonly").innerHTML=renderMemberUniformBadges(m);
+  document.getElementById(m.gender==="f"?"edit-g-f":"edit-g-m").checked = true;
+  document.getElementById("edit-del-btn").style.display = "inline-flex";
+  document.getElementById("edit-modal").classList.add("open");
+}
+function openNew(g,r){
+  editGrade=g; editRow=r; editId=null;
+  document.getElementById("edit-title").textContent = g+" "+(r+1)+"番に追加";
+  document.getElementById("edit-name").value = "";
+  document.getElementById("edit-kana").value = "";
+  document.getElementById("member-uniform-readonly").innerHTML="<span style='color:var(--ink-3)'>登録後、ユニフォーム貸出管理から割り当てできます。</span>";
+  document.getElementById("edit-g-m").checked = true;
+  document.getElementById("edit-del-btn").style.display = "none";
+  document.getElementById("edit-modal").classList.add("open");
+}
+function closeModal(){ document.getElementById("edit-modal").classList.remove("open"); }
+function setSaveMessage(message,isError){
+  var el=document.getElementById("save-msg");
+  if(!el) return;
+  el.textContent=message;
+  el.style.color=isError?"var(--red)":"var(--green)";
+}
+function safeMemberColor(value,fallback){
+  var color=String(value||"").trim();
+  return /^#[0-9a-f]{6}$/i.test(color)?color:fallback;
+}
+function uniformChoiceFromItem(item){
+  if(!item||typeof item!=="object") return null;
+  var main=String(item.mainColorName||item.cname||"").trim();
+  var sub=String(item.subColorName||"").trim();
+  var name=String(item.name||"").trim()||(main+(sub?" × "+sub:""));
+  if(!name) return null;
+  return {name:name,mainCode:safeMemberColor(item.mainColorCode||item.mainCode||item.ccode,"#64748b"),subCode:sub?safeMemberColor(item.subColorCode||item.subCode,"#64748b"):""};
+}
+function memberUniformColorChoices(){
+  var choices=[],seen={};
+  var folderChoices=uniformFolderOrder.map(function(name){return {name:String(name||""),mainCode:"#64748b",subCode:""};});
+  DEFAULT_UNIFORM_COLORS.concat(uniformColorTemplates.map(uniformChoiceFromItem),uniformInventory.map(uniformChoiceFromItem),folderChoices).forEach(function(item){
+    if(!item||!item.name) return;
+    var key=item.name.replace(/[\s×・]/g,"").toLowerCase();
+    if(seen[key]) return;
+    seen[key]=true;choices.push(item);
+  });
+  return choices;
+}
+function memberUniformColorOptions(selected){
+  var current=String(selected||"").trim();
+  var choices=memberUniformColorChoices().slice();
+  if(current&&!choices.some(function(item){return item.name===current;})) choices.unshift({name:current});
+  return '<option value="">色を選択してください</option>'+choices.map(function(item){
+    return '<option value="'+escapeHtml(item.name)+'"'+(item.name===current?' selected':'')+'>'+escapeHtml(item.name)+'</option>';
+  }).join("");
+}
+function normalizeMemberUniforms(member){
+  var items=member&&Array.isArray(member.uniforms)?member.uniforms:[];
+  items=items.filter(function(item){return item&&(item.color||item.num);}).map(function(item,index){
+    return {id:String(item.id||("uniform-"+index)),color:String(item.color||""),num:String(item.num||"")};
+  });
+  if(!items.length&&member&&member.num) items=[{id:"legacy-primary",color:"",num:String(member.num)}];
+  return items;
+}
+function uniformAssignmentsForMember(member){
+  if(MEMBER_UNIFORM_SOURCE==="member")return normalizeMemberUniforms(member).map(function(item){return Object.assign({state:"legacy"},item);});
+  var id=String(member&&member.id||"");
+  var normalizedName=String(member&&member.name||"").replace(/[\s　]+/g,"");
+  return uniformInventory.reduce(function(result,item){
+    if(!item||typeof item!=="object")return result;
+    var choice=uniformChoiceFromItem(item)||{name:String(item.cname||"色未設定")},base={id:item.id,color:choice.name,num:String(item.num||"")};
+    var holderMatch=item.memberId===id||(!item.memberId&&!!uniformHolderNameForMember(item)&&String(uniformHolderNameForMember(item)).replace(/[\s　]+/g,"")===normalizedName&&uniqueMemberName(normalizedName));
+    if(holderMatch)result.push(Object.assign({state:"lent"},base));
+    if(item.plannedMemberId===id)result.push(Object.assign({state:"planned"},base));
+    return result;
+  },[]).sort(function(a,b){return (a.state===b.state?0:a.state==="lent"?-1:1)||(Number(a.num)||999)-(Number(b.num)||999);});
+}
+function uniformHolderNameForMember(item){return String(item&&(item.lentTo||item.player)||"").trim();}
+function uniqueMemberName(compact){return Object.keys(memberRecords).filter(function(id){return String(memberRecords[id]&&memberRecords[id].name||"").replace(/[\s　]+/g,"")===compact;}).length===1;}
+function memberUniformStyle(colorName){
+  var compact=String(colorName||"").replace(/[\s×・]/g,"").toLowerCase();
+  var choice=memberUniformColorChoices().find(function(item){return item.name.replace(/[\s×・]/g,"").toLowerCase()===compact;});
+  var main=safeMemberColor(choice&&choice.mainCode,"#64748b");
+  var sub=safeMemberColor(choice&&choice.subCode,main);
+  return "--u-main:"+main+";--u-sub:"+sub;
+}
+function memberUniformText(item){
+  var color=String(item&&item.color||"").trim()||"色未設定";
+  var number=String(item&&item.num||"").trim();
+  return color+(number?" #"+number:"");
+}
+function renderMemberUniformBadges(member){
+  var uniforms=uniformAssignmentsForMember(member);
+  if(!uniforms.length) return "<span style='color:var(--ink-3)'>—</span>";
+  return "<div class='member-uniform-badges'>"+uniforms.map(function(item){
+    var state=item.state==="planned"?"🗓 貸出予定":item.state==="lent"?"👕 貸出中":"旧登録";
+    return '<span class="member-uniform-badge '+(item.state==="planned"?'planned':'')+'" style="'+memberUniformStyle(item.color)+'"><span class="member-uniform-state">'+state+'</span><span>'+escapeHtml(memberUniformText(item))+'</span></span>';
+  }).join("")+"</div>";
+}
+function saveEdit(){
+  var name = document.getElementById("edit-name").value.trim();
+  var gEl  = document.querySelector("input[name='edit-gender']:checked");
+  if(!name){ alert("氏名を入力してください。"); return; }
+  var current = editId && memberRecords[editId] ? memberRecords[editId] : {};
+  var changes = {
+    name:name,
+    kana:document.getElementById("edit-kana").value.trim(),
+    gender:gEl?gEl.value:"m",
+    grade:editGrade,
+    order:Number.isFinite(Number(current.order))?Number(current.order):editRow,
+    updatedAt:Date.now()
+  };
+  onFirebaseReady(function(db){
+    var id=editId||db.ref(MEMBER_PATH).push().key;
+    setSaveMessage("☁️ 保存中…",false);
+    db.ref(MEMBER_PATH+"/"+id).update(changes).then(function(){
+      closeModal();
+      setSaveMessage("✅ クラウドに保存しました",false);
+    }).catch(function(){
+      setSaveMessage("❌ クラウドに保存できませんでした",true);
+    });
+  });
+}
+function deleteEntry(){
+  if(!editId || !confirm("この団員を名簿から削除しますか？")) return;
+  var linked=uniformAssignmentsForMember(memberRecords[editId]||{});
+  if(linked.length){alert("この団員にはユニフォームがあります。\n"+linked.map(function(item){return (item.state==="planned"?"貸出予定：":"貸出中：")+memberUniformText(item);}).join("\n")+"\n先にユニフォーム貸出管理で、貸出予定解除・返却・貸出先変更を行ってください。");return;}
+  setSaveMessage("☁️ 削除中…",false);
+  dbSave(MEMBER_PATH+"/"+editId,null,null,function(){
+    closeModal();
+    setSaveMessage("✅ クラウドから削除しました",false);
+  },function(){
+    setSaveMessage("❌ 削除できませんでした",true);
+  });
+}
+function exportCSV(){
+  function csvCell(value){
+    var text=String(value==null?"":value);
+    if(/^[=+\-@]/.test(text)) text="'"+text;
+    return '"'+text.replace(/"/g,'""')+'"';
+  }
+  var rows=[["学年","氏名","フリガナ","貸出ユニフォーム","性別"]];
+  GRADES.forEach(function(g){
+    (data[g]||[]).forEach(function(m){
+      if(m&&m.name) rows.push([g,m.name,m.kana||"",uniformAssignmentsForMember(m).map(memberUniformText).join(" / "),m.gender==="f"?"女":"男"]);
+    });
+  });
+  var csv="\uFEFF"+rows.map(function(row){return row.map(csvCell).join(",");}).join("\n");
+  var a=document.createElement("a");
+  var url=URL.createObjectURL(new Blob([csv],{type:"text/csv"}));
+  a.href=url;a.download="smc_members.csv";a.click();
+  setTimeout(function(){URL.revokeObjectURL(url);},0);
+}
+document.getElementById("edit-modal").addEventListener("click",function(e){
+  if(e.target.id==="edit-modal") closeModal();
+});
+
+function recordsToGrid(records){
+  var next=JSON.parse(JSON.stringify(INIT));
+  Object.keys(records||{}).forEach(function(id){
+    var source=records[id];
+    if(!source||!source.name||GRADES.indexOf(source.grade)<0) return;
+    next[source.grade].push(Object.assign({id:id},source));
+  });
+  GRADES.forEach(function(grade){
+    next[grade]=next[grade].filter(function(member){return member&&member.name;});
+    next[grade].sort(function(a,b){
+      var ao=Number.isFinite(Number(a.order))?Number(a.order):999;
+      var bo=Number.isFinite(Number(b.order))?Number(b.order):999;
+      return ao-bo||(a.kana||a.name).localeCompare(b.kana||b.name,"ja");
+    });
+  });
+  return next;
+}
+
+function convertLegacyMembers(legacy){
+  var converted={};
+  GRADES.forEach(function(grade,gradeIndex){
+    var group=legacy&&legacy[grade];
+    if(!group||typeof group!=="object") return;
+    Object.keys(group).forEach(function(position){
+      var member=group[position];
+      if(!member||!member.name) return;
+      var id="legacy_"+gradeIndex+"_"+String(position).replace(/[^0-9A-Za-z_-]/g,"");
+      converted[id]={
+        name:String(member.name||""),
+        kana:String(member.kana||""),
+        num:String(member.num||""),
+        gender:member.gender==="f"?"f":"m",
+        grade:grade,
+        order:Number(position)||0,
+        updatedAt:Date.now()
+      };
+    });
+  });
+  return converted;
+}
+
+function migrateLegacyMembers(db){
+  if(migrationAttempted) return;
+  migrationAttempted=true;
+  setSaveMessage("既存名簿を確認しています…",false);
+  db.ref(LEGACY_MEMBER_PATH).once("value").then(function(snapshot){
+    var converted=convertLegacyMembers(snapshot.val());
+    if(!Object.keys(converted).length){
+      memberRecords={};data=JSON.parse(JSON.stringify(INIT));render();
+      setSaveMessage("名簿は空です。空欄をタップして登録できます",false);
+      return;
+    }
+    setSaveMessage("既存名簿を新しい保存形式へ移行中…",false);
+    dbSave(MEMBER_PATH,converted,null,function(){
+      setSaveMessage("✅ 既存名簿をFirebaseへ移行しました",false);
+    },function(){
+      memberRecords=converted;data=recordsToGrid(converted);render();
+      setSaveMessage("❌ 既存名簿を表示しましたが、移行保存に失敗しました",true);
+    });
+  }).catch(function(){
+    setSaveMessage("❌ 既存名簿を確認できませんでした",true);
+  });
+}
+
+function startMemberSync(){
+  if(memberListenerStarted) return;
+  memberListenerStarted=true;
+  try{localStorage.removeItem("smc_members_v4");}catch(e){}
+  onFirebaseReady(function(db){
+    db.ref(MEMBER_PATH).on("value",function(snapshot){
+      var value=snapshot.val();
+      if(value&&typeof value==="object"&&Object.keys(value).length){
+        memberRecords=value;
+        data=recordsToGrid(value);
+        render();
+        setSaveMessage("☁️ Firebaseと同期済み",false);
+      }else{
+        migrateLegacyMembers(db);
+      }
+    },function(){
+      setSaveMessage("❌ 名簿を読み込めません。通信状態とFirebase設定をご確認ください",true);
+    });
+  });
+}
+function startMemberUniformColorSync(){
+  dbListen("uniform",function(value){
+    uniformInventory=Array.isArray(value)?value.filter(function(item){return item&&typeof item==="object";}):[];
+    render();
+  },null,[]);
+  dbListen("uniform_color_templates",function(value){
+    uniformColorTemplates=Array.isArray(value)?value.filter(function(item){return item&&typeof item==="object";}):[];
+    render();
+  },null,[]);
+  dbListen("uniform_folder_order",function(value){
+    uniformFolderOrder=Array.isArray(value)?value.filter(function(name){return typeof name==="string"&&name.trim();}):[];
+    render();
+  },null,[]);
+}
+
+/* ===== 起動 ===== */
+window.addEventListener("DOMContentLoaded", function(){
+  render();
+  startMemberSync();
+  startMemberUniformColorSync();
+});
+
+function copyMemberList(){
+  var grades = ["6年","5年","4年","3年","2年","1年","年長"];
+  var t = "【団員名簿】\n\n";
+  grades.forEach(function(g){
+    var members = (data[g]||[]).filter(function(m){ return m && m.name; });
+    if(members.length){
+      t += "■ "+g+"（"+members.length+"名）\n";
+      members.forEach(function(m){
+        var uniforms=uniformAssignmentsForMember(m).map(memberUniformText).join("／");
+        t += "  "+m.name+(m.kana?"（"+m.kana+"）":"")+(uniforms?"　"+uniforms:"")+"\n";
+      });
+      t += "\n";
+    }
+  });
+  if(!navigator.clipboard || !navigator.clipboard.writeText){
+    alert("このブラウザではコピー機能を利用できません。");
+    return;
+  }
+  navigator.clipboard.writeText(t.trim())
+    .then(function(){ alert("名簿をコピーしました！LINEに貼り付けてください。"); })
+    .catch(function(){ alert("コピーできませんでした。ブラウザの権限をご確認ください。"); });
+}
 </script>
 </body>
 </html>
