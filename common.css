@@ -28,3 +28,356 @@ body[data-theme="light"] .smc-page-nav .smc-page-destination:focus-visible{
   background:#ffedd5!important;
   border-color:#9a4a00!important;
 }
+
+/* =====================================================
+   Light mode readability layer
+   - Visual-only overrides: no data / Firebase / JS changes.
+   - Keep dark mode untouched.
+   ===================================================== */
+body[data-theme="light"]{
+  --cyan:#075d84;
+  --orange-2:#b85a00;
+  --surface:rgba(255,255,255,.97);
+  --surface-lt:#ffffff;
+  --surface-bd:rgba(27,49,77,.18);
+  --line:rgba(27,49,77,.16);
+  --line-2:rgba(154,74,0,.34);
+  --ink:#111827;
+  --ink-2:#26384f;
+  --ink-3:#52647a;
+}
+
+/* General text hierarchy and surfaces */
+body[data-theme="light"] .hero-band,
+body[data-theme="light"] .panel,
+body[data-theme="light"] .menu-card,
+body[data-theme="light"] .auto-alert,
+body[data-theme="light"] .notice-bar,
+body[data-theme="light"] .dynamic-notice,
+body[data-theme="light"] .calendar-attendance,
+body[data-theme="light"] .legend-bar,
+body[data-theme="light"] .stat-card,
+body[data-theme="light"] .todo-card,
+body[data-theme="light"] .mobile-grade-section,
+body[data-theme="light"] .mobile-member-card{
+  border-color:#cbd5e1!important;
+  box-shadow:0 6px 18px rgba(24,42,67,.08)!important;
+}
+body[data-theme="light"] .hero-band,
+body[data-theme="light"] .panel,
+body[data-theme="light"] .auto-alert,
+body[data-theme="light"] .notice-bar,
+body[data-theme="light"] .dynamic-notice,
+body[data-theme="light"] .calendar-attendance,
+body[data-theme="light"] .legend-bar,
+body[data-theme="light"] .stat-card,
+body[data-theme="light"] .todo-card{
+  background:rgba(255,255,255,.96)!important;
+}
+body[data-theme="light"] .hero-sub,
+body[data-theme="light"] .card-desc,
+body[data-theme="light"] .calendar-attendance-help,
+body[data-theme="light"] .calendar-attendance-selection-summary,
+body[data-theme="light"] .calendar-attendance-status,
+body[data-theme="light"] .calendar-upcoming-state,
+body[data-theme="light"] .empty-msg,
+body[data-theme="light"] .form-label,
+body[data-theme="light"] .tc-note,
+body[data-theme="light"] .tc-due,
+body[data-theme="light"] .sl{
+  color:#52647a!important;
+}
+body[data-theme="light"] .notice-bar,
+body[data-theme="light"] .dynamic-notice,
+body[data-theme="light"] .alert-body{
+  color:#26384f!important;
+}
+body[data-theme="light"] .notice-label,
+body[data-theme="light"] .auto-alert-label,
+body[data-theme="light"] .calendar-attendance-title,
+body[data-theme="light"] .calendar-attendance-category-label,
+body[data-theme="light"] .calendar-attendance-category-label span{
+  color:#075d84!important;
+}
+
+/* Buttons and form controls */
+body[data-theme="light"] .btn-outline,
+body[data-theme="light"] .filter-btn,
+body[data-theme="light"] .sort-btn,
+body[data-theme="light"] .cat-btn,
+body[data-theme="light"] .calendar-attendance-tool-button,
+body[data-theme="light"] .calendar-upcoming-refresh{
+  background:#fff!important;
+  color:#24405f!important;
+  border-color:#9fb0c3!important;
+}
+body[data-theme="light"] .filter-btn:hover,
+body[data-theme="light"] .sort-btn:hover,
+body[data-theme="light"] .cat-btn:hover,
+body[data-theme="light"] .calendar-attendance-tool-button:hover,
+body[data-theme="light"] .calendar-upcoming-refresh:hover{
+  background:#eef5fb!important;
+  border-color:#63829e!important;
+}
+body[data-theme="light"] .filter-btn.active,
+body[data-theme="light"] .sort-btn.on{
+  background:#c86500!important;
+  border-color:#c86500!important;
+  color:#fff!important;
+}
+body[data-theme="light"] .form-control,
+body[data-theme="light"] select,
+body[data-theme="light"] input,
+body[data-theme="light"] textarea{
+  background:#fff!important;
+  color:#111827!important;
+  border-color:#9fb0c3!important;
+}
+body[data-theme="light"] .form-control::placeholder,
+body[data-theme="light"] input::placeholder,
+body[data-theme="light"] textarea::placeholder{
+  color:#6b7c91!important;
+  opacity:1;
+}
+
+/* Footer: light mode must stay readable */
+body[data-theme="light"] .site-footer{
+  background:#f8fafc!important;
+  color:#14243a!important;
+  border-top-color:#cbd5e1!important;
+}
+body[data-theme="light"] .site-footer .footer-brand,
+body[data-theme="light"] .site-footer .footer-brand span{
+  color:#14243a!important;
+}
+body[data-theme="light"] .site-footer .footer-sub{
+  color:#52647a!important;
+}
+
+/* Attendance page */
+body[data-theme="light"] .attend-card{
+  background:#fff!important;
+  border-color:#d5a76f!important;
+  box-shadow:0 7px 20px rgba(24,42,67,.10)!important;
+}
+body[data-theme="light"] .attend-card.coach-card{
+  border-color:#6abbd3!important;
+}
+body[data-theme="light"] .attend-card .card-title{
+  color:#111827!important;
+  text-shadow:none!important;
+}
+body[data-theme="light"] .attend-card .card-subtitle{
+  color:#52647a!important;
+}
+body[data-theme="light"] .attendance-page-panel{
+  background:#f8fbff!important;
+  border-color:#8db2c8!important;
+}
+body[data-theme="light"] .calendar-attendance-category-label select{
+  background:#fff!important;
+  color:#111827!important;
+  border-color:#8da8bd!important;
+}
+body[data-theme="light"] .calendar-upcoming-badge{
+  background:#e9f5fb!important;
+  color:#075d84!important;
+  border-color:#7fb4ca!important;
+}
+
+/* Calendar page */
+body[data-theme="light"] .today-notice{
+  background:#eef5fb!important;
+  border-color:#9fb8ce!important;
+}
+body[data-theme="light"] .tn-date{
+  color:#111827!important;
+}
+body[data-theme="light"] .tn-dow,
+body[data-theme="light"] .tn-label{
+  color:#075d84!important;
+}
+body[data-theme="light"] .tn-evt{
+  color:#26384f!important;
+}
+body[data-theme="light"] .view-tab-bar{
+  border-color:#cbd5e1!important;
+  box-shadow:0 4px 14px rgba(24,42,67,.06);
+}
+body[data-theme="light"] .view-tab-btn{
+  background:#fff!important;
+  color:#2d506e!important;
+}
+body[data-theme="light"] .view-tab-btn:not(:last-child){
+  border-right-color:#cbd5e1!important;
+}
+body[data-theme="light"] .view-tab-btn.active{
+  background:linear-gradient(135deg,#003087,#0050cc)!important;
+  color:#fff!important;
+}
+body[data-theme="light"] .legend-bar .leg,
+body[data-theme="light"] .legend-bar{
+  color:#3c5068!important;
+}
+body[data-theme="light"] .tip-bar{
+  background:#fff8df!important;
+  border-color:#d7b860!important;
+  color:#5d4800!important;
+}
+body[data-theme="light"] .upcoming-head .uh-text{
+  color:#075d84!important;
+}
+body[data-theme="light"] .ag-item{
+  background:#fff!important;
+  border-color:#cbd5e1!important;
+}
+body[data-theme="light"] .ag-day,
+body[data-theme="light"] .ag-title{
+  color:#111827!important;
+}
+body[data-theme="light"] .ag-dow,
+body[data-theme="light"] .ag-meta{
+  color:#52647a!important;
+}
+
+/* To-do page */
+body[data-theme="light"] .todo-card{
+  background:#fff!important;
+  border-color:#d6dde7!important;
+}
+body[data-theme="light"] .tc-title{
+  color:#111827!important;
+}
+body[data-theme="light"] .tc-who{
+  background:#e8f7fb!important;
+  color:#075d84!important;
+  border-color:#77b9cf!important;
+}
+body[data-theme="light"] .tc-note{
+  border-top-color:#d8e0e8!important;
+  color:#52647a!important;
+}
+body[data-theme="light"] .act-btn.edit{
+  color:#075d84!important;
+  border-color:#6abbd3!important;
+}
+body[data-theme="light"] .act-btn.del{
+  color:#a61b3d!important;
+  border-color:#d98ca0!important;
+}
+body[data-theme="light"] .sb-todo{
+  background:#fff0e6!important;
+  color:#9a4300!important;
+  border-color:#e6ad81!important;
+}
+body[data-theme="light"] .sb-wip{
+  background:#e9f6fb!important;
+  color:#075d84!important;
+  border-color:#78b8ce!important;
+}
+body[data-theme="light"] .sb-done{
+  background:#eaf7ef!important;
+  color:#17613a!important;
+  border-color:#8fc9a8!important;
+}
+body[data-theme="light"] .sb-hold{
+  background:#eef1f4!important;
+  color:#475569!important;
+  border-color:#b7c0ca!important;
+}
+body[data-theme="light"] .stat-card .sv{
+  color:#111827!important;
+}
+body[data-theme="light"] .stat-card .sl{
+  color:#52647a!important;
+}
+
+/* Members page: visual-only. Do not alter roster structure or data logic. */
+body[data-theme="light"] .member-controls{
+  background:#f4f7fb!important;
+  border-color:#cbd5e1!important;
+}
+body[data-theme="light"] .sort-lbl,
+body[data-theme="light"] .legend-bar{
+  color:#52647a!important;
+}
+body[data-theme="light"] .sort-btn{
+  background:#fff!important;
+  color:#24405f!important;
+  border-color:#9fb0c3!important;
+}
+body[data-theme="light"] .sort-btn.on{
+  background:#0050cc!important;
+  border-color:#0050cc!important;
+  color:#fff!important;
+  box-shadow:0 3px 10px rgba(0,80,204,.18);
+}
+body[data-theme="light"] .mobile-grade-section{
+  background:#f5f8fc!important;
+  border-color:#c4d0dc!important;
+}
+body[data-theme="light"] .mobile-grade-heading{
+  background:#e4eef8!important;
+  color:#123f78!important;
+  border-bottom:1px solid #c4d0dc!important;
+}
+body[data-theme="light"] .mobile-grade-count{
+  color:#52647a!important;
+}
+body[data-theme="light"] .mobile-grade-toggle{
+  color:#9a4a00!important;
+}
+body[data-theme="light"] .mobile-member-card{
+  background:#fff!important;
+  color:#14243a!important;
+  border-color:#cbd5e1!important;
+  box-shadow:0 5px 14px rgba(24,42,67,.08)!important;
+}
+body[data-theme="light"] .mobile-member-number{
+  background:#eef9fc!important;
+  color:#075d84!important;
+  border-color:#78bdd1!important;
+}
+body[data-theme="light"] .mobile-member-kana{
+  color:#52647a!important;
+}
+body[data-theme="light"] .mobile-member-name{
+  color:#14243a!important;
+}
+body[data-theme="light"] .mobile-member-name.girl{
+  color:#c92746!important;
+}
+body[data-theme="light"] .mobile-gender-text{
+  background:#fff!important;
+  opacity:1!important;
+}
+body[data-theme="light"] .member-uniform-badge{
+  background:linear-gradient(90deg,var(--u-main,#64748b) 0 8px,var(--u-sub,var(--u-main,#64748b)) 8px 12px,#f2f6fa 12px)!important;
+  color:#14243a!important;
+  border-color:#b8c6d4!important;
+}
+body[data-theme="light"] .member-uniform-state{
+  color:#075d84!important;
+}
+body[data-theme="light"] .member-uniform-badge.planned .member-uniform-state{
+  color:#8a5a00!important;
+}
+body[data-theme="light"] .mobile-add-member{
+  color:#075d84!important;
+  border-color:#8db2c8!important;
+}
+
+/* Preserve keyboard accessibility */
+body[data-theme="light"] :where(a,button,input,select,textarea,[role="button"]):focus-visible{
+  outline-color:#0050cc!important;
+}
+
+@media (max-width:760px){
+  body[data-theme="light"] .hero-sub,
+  body[data-theme="light"] .card-subtitle,
+  body[data-theme="light"] .calendar-attendance-help,
+  body[data-theme="light"] .tn-evt,
+  body[data-theme="light"] .tc-note{
+    line-height:1.6;
+  }
+}
