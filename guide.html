@@ -39,6 +39,46 @@
     .badge-new{display:inline-block;background:var(--orange);color:#fff;font-size:.62rem;font-weight:900;padding:1px 6px;border-radius:99px;margin-left:6px;vertical-align:middle}
     .badge-upd{display:inline-block;background:#0050cc;color:#fff;font-size:.62rem;font-weight:900;padding:1px 6px;border-radius:99px;margin-left:6px;vertical-align:middle}
     p.desc{font-size:.84rem;color:#c8e4ff;line-height:1.75;margin:6px 0}
+
+    /* Light mode: keep the guide readable without changing the dark theme. */
+    body[data-theme="light"] .g-tab-bar{border-color:#c9d3df;box-shadow:0 5px 16px rgba(24,42,67,.06)}
+    body[data-theme="light"] .g-tab-btn{background:#fff;color:#184a7a;border-right-color:#c9d3df}
+    body[data-theme="light"] .g-tab-btn.active{background:linear-gradient(135deg,#003087,#0050cc);color:#fff}
+    body[data-theme="light"] .acc-section{background:#fff;border-color:#d5a76f;box-shadow:0 6px 18px rgba(24,42,67,.08)}
+    body[data-theme="light"] .acc-hdr{background:#fff}
+    body[data-theme="light"] .acc-hdr:hover{background:#f3f8fc}
+    body[data-theme="light"] .acc-title{color:#111827}
+    body[data-theme="light"] .acc-arrow{color:#52647a}
+    body[data-theme="light"] .acc-body{background:#fff;border-top-color:#d8e0e8}
+    body[data-theme="light"] p.desc,
+    body[data-theme="light"] .step-list,
+    body[data-theme="light"] .ft td{color:#26384f}
+    body[data-theme="light"] .step-list strong,
+    body[data-theme="light"] p.desc strong,
+    body[data-theme="light"] .acc-body strong[style*="color:#fff"]{color:#111827!important}
+    body[data-theme="light"] .sec-title{color:#075d84}
+    body[data-theme="light"] .sec-title-g{color:#17613a}
+    body[data-theme="light"] .ft th{background:#eaf1f8;color:#123f78;border-color:#c9d3df}
+    body[data-theme="light"] .ft td{border-color:#d8e0e8;background:#fff}
+    body[data-theme="light"] .ft tr:nth-child(even) td{background:#f7f9fc}
+    body[data-theme="light"] .tip{background:#eef6ff;border-color:#8bbbe5;color:#20354b}
+    body[data-theme="light"] .tip-o{background:#fff4e8;border-color:#e5b477;color:#6d3a00}
+    body[data-theme="light"] .tip-g{background:#edf8f1;border-color:#8fc9a8;color:#205b3a}
+    body[data-theme="light"] .tip-r{background:#fff0f2;border-color:#e6a3ad;color:#7d2635}
+    body[data-theme="light"] .tip strong,
+    body[data-theme="light"] .tip-o strong,
+    body[data-theme="light"] .tip-g strong,
+    body[data-theme="light"] .tip-r strong{color:inherit!important}
+    body[data-theme="light"] .tip strong[style*="color:#60c0ff"]{color:#075d84!important}
+    body[data-theme="light"] .tip strong[style*="color:#ff8080"]{color:#8a2637!important}
+    body[data-theme="light"] .hero-sub{color:#52647a!important}
+    body[data-theme="light"] code{color:#123f78;background:#f2f5f8;border-radius:4px;padding:1px 3px}
+    @media(max-width:760px){
+      .g-tab-btn{min-height:54px;font-size:.78rem}
+      .acc-hdr{min-height:56px;padding:13px 14px}
+      .acc-title{font-size:.92rem;line-height:1.45}
+      .step-list,p.desc{font-size:.86rem}
+    }
   </style>
 </head>
 <body>
