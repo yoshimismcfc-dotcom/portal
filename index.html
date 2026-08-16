@@ -3,7 +3,7 @@
 <head>
   <meta charset="utf-8">
   <meta name="robots" content="noindex,nofollow">
-  <meta name="app-version" content="20260816-40">
+  <meta name="app-version" content="20260816-41">
   <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
   <meta http-equiv="Pragma" content="no-cache">
   <meta http-equiv="Expires" content="0">
@@ -114,6 +114,12 @@
     body[data-theme="light"]::before{opacity:.35}
     body[data-theme="light"] .header-action{background:#fff;border-color:#d39a56;color:#172033;box-shadow:0 3px 10px rgba(24,42,67,.08)}
 
+    .home-help-link{font-size:.86rem;color:#72d6ff!important;text-decoration:underline;text-underline-offset:3px;display:inline-flex;align-items:center;gap:5px;font-weight:800;line-height:1.6}
+    body[data-theme="light"] .home-help-link{color:#075d84!important;text-decoration-thickness:1.5px}
+    body[data-theme="light"] .site-footer{background:#f7f9fc!important;border-top-color:#cbd5e1!important;color:#52647a!important}
+    body[data-theme="light"] .site-footer .footer-brand{color:#152238!important}
+    body[data-theme="light"] .site-footer .footer-sub{color:#52647a!important}
+
     @media(max-width:760px){
       .page-wrap{padding-left:12px;padding-right:12px}
       .portal-hero{padding:24px 16px 20px}
@@ -124,12 +130,21 @@
       .howto-section{padding:17px 16px}
       .trouble-card > button{min-height:60px;padding:14px}
       .trouble-card > button > span:nth-child(2){font-size:.94rem!important}
+      .site-header .header-inner{gap:9px;padding-left:10px;padding-right:10px}
+      .site-header .header-logo{flex:1 1 auto;gap:8px}
+      .site-header .logo-mark{width:42px;height:42px}
+      .site-header .logo-name{max-width:none;font-size:.82rem;letter-spacing:-.015em}
+      .site-header .logo-sub{font-size:.61rem;white-space:nowrap}
+      .site-header .header-spacer{display:none}
+      .site-header .header-action{flex:0 0 44px;min-width:44px;min-height:44px}
     }
     @media(max-width:360px){
       .pitch-section-divider{flex-wrap:wrap;row-gap:1px}
       .pitch-section-divider .psd-sub{width:100%;text-align:center}
       .menu-card{padding-left:10px;padding-right:10px}
       .menu-card .card-desc{font-size:.72rem}
+      .site-header .logo-name{font-size:.76rem}
+      .site-header .logo-sub{font-size:.56rem}
     }
   </style>
 </head>
@@ -316,7 +331,7 @@
   </div>
 
   <div style="text-align:center;margin-bottom:8px">
-    <a href="guide.html" style="font-size:.86rem;color:var(--cyan);text-decoration:underline;display:inline-flex;align-items:center;gap:5px">📖 さらに詳しい説明書・ヘルプはこちら</a>
+    <a class="home-help-link" href="guide.html">📖 さらに詳しい説明書・ヘルプはこちら</a>
   </div>
 
 </main>
