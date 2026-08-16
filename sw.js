@@ -1,5 +1,5 @@
 // Yoshimi SMC FC Portal Service Worker
-const APP_VERSION = "20260811-39";
+const APP_VERSION = "20260816-41";
 const CACHE_PREFIX = "smc-portal-";
 const CACHE_NAME = CACHE_PREFIX + APP_VERSION;
 
@@ -9,6 +9,8 @@ const PRECACHE_URLS = [
   "./index.html",
   "./offline.html",
   "./common.css",
+  "./common-current.css",
+  "./semantic-light.css",
   "./common.js",
   "./usage-counter.js",
   "./event-links.js",
