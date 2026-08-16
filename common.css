@@ -4,6 +4,8 @@
 /* Audit-visible compatibility contracts. Actual rules are imported above. */
 body[data-theme="light"]{--body-tail: #e8eef7;}
 table.mobile-stack{max-width:100%;}
+.smc-smart-back{min-height:44px;}
+@media print{.smc-page-nav{display:none!important}}
 @media (pointer: coarse) {
   input,select,textarea,.form-control,.btn-sm,.back-btn,.tab-btn,.btn-line-copy {
     min-height:44px;
