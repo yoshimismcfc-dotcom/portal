@@ -137,3 +137,153 @@ body[data-theme="light"] [style*="color:#b7d7e9"],
 body[data-theme="light"] [style*="color: #b7d7e9"]{
   color:#334155!important;
 }
+
+/* Match & tournament hub: final light-mode contrast pass.
+   Pale cyan/yellow stay decorative only; readable text uses dark semantic colors. */
+body[data-theme="light"] .coach-event-browser{
+  background:#f8fbfe!important;
+  border-color:#2a88ad!important;
+}
+body[data-theme="light"] .coach-event-browser-title,
+body[data-theme="light"] .coach-event-selected-title,
+body[data-theme="light"] .coach-preparation-heading,
+body[data-theme="light"] .coach-event-actions-title,
+body[data-theme="light"] .coach-action-title{
+  color:#17263c!important;
+}
+body[data-theme="light"] .coach-event-browser-help,
+body[data-theme="light"] .coach-event-selected-meta,
+body[data-theme="light"] .coach-action-desc,
+body[data-theme="light"] .coach-share-note{
+  color:#42546b!important;
+}
+
+/* Upcoming event cards: dark blue text instead of pale cyan. */
+body[data-theme="light"] .coach-event-tab{
+  background:#fff!important;
+  border-color:#9fbfd0!important;
+  color:#17263c!important;
+}
+body[data-theme="light"] .coach-event-tab-date,
+body[data-theme="light"] .coach-selected-kicker{
+  color:#14507f!important;
+}
+body[data-theme="light"] .coach-event-tab-name{
+  color:#17263c!important;
+}
+body[data-theme="light"] .coach-event-tab[aria-selected="true"]{
+  background:#fff7ed!important;
+  border-color:#c86500!important;
+  color:#17263c!important;
+  box-shadow:0 0 0 1px rgba(200,101,0,.14)!important;
+}
+
+/* Progress/status on the right: yellow is background only, text is dark ochre. */
+body[data-theme="light"] .coach-event-tab-progress{
+  background:#fff8df!important;
+  border:1px solid #e2b447!important;
+  color:#765000!important;
+  font-weight:900!important;
+}
+body[data-theme="light"] .coach-event-tab[aria-selected="true"] .coach-event-tab-progress{
+  background:#fff3cf!important;
+  color:#6a4300!important;
+  border-color:#d5961e!important;
+}
+body[data-theme="light"] .coach-event-more{
+  background:#fff!important;
+  border-color:#2a88ad!important;
+  color:#14507f!important;
+}
+
+/* Selected-event labels and countdown. */
+body[data-theme="light"] .coach-selected-badge{
+  background:#fff7ed!important;
+  border-color:#d39155!important;
+  color:#9a4a00!important;
+}
+body[data-theme="light"] .coach-event-countdown{
+  background:#eef6fb!important;
+  border-color:#79a9bf!important;
+  color:#14507f!important;
+}
+body[data-theme="light"] .coach-event-edit-button{
+  background:#eef6fb!important;
+  border-color:#2a88ad!important;
+  color:#14507f!important;
+}
+
+/* Preparation: status must be readable without relying on color alone. */
+body[data-theme="light"] .coach-preparation-item{
+  background:#fff8df!important;
+  border-color:#d5a11f!important;
+  color:#5f4300!important;
+}
+body[data-theme="light"] .coach-preparation-item strong,
+body[data-theme="light"] .coach-preparation-item span{
+  color:#5f4300!important;
+}
+body[data-theme="light"] .coach-preparation-item.is-ready{
+  background:#ecfdf3!important;
+  border-color:#3ca06d!important;
+  color:#166534!important;
+}
+body[data-theme="light"] .coach-preparation-item.is-ready strong,
+body[data-theme="light"] .coach-preparation-item.is-ready span{
+  color:#166534!important;
+}
+
+/* Next action: clear high-contrast warning CTA. */
+body[data-theme="light"] .coach-next-step{
+  background:#fff1f3!important;
+  border-color:#c6283d!important;
+}
+body[data-theme="light"] .coach-next-step-label{
+  color:#981b2d!important;
+}
+body[data-theme="light"] .coach-next-step-text{
+  color:#17263c!important;
+}
+body[data-theme="light"] .coach-next-step a{
+  background:#b42338!important;
+  color:#fff!important;
+  border:1px solid #8f1728!important;
+  box-shadow:0 4px 12px rgba(180,35,56,.18)!important;
+}
+body[data-theme="light"] .coach-next-step a:hover,
+body[data-theme="light"] .coach-next-step a:focus-visible{
+  background:#941b2e!important;
+  color:#fff!important;
+}
+body[data-theme="light"] .coach-next-step.is-ready{
+  background:#ecfdf3!important;
+  border-color:#3ca06d!important;
+}
+body[data-theme="light"] .coach-next-step.is-ready .coach-next-step-label{
+  color:#166534!important;
+}
+
+/* Action cards: navy titles + darker descriptions, colored top line remains the category cue. */
+body[data-theme="light"] .coach-next-actions a.coach-action-card{
+  background:#fff!important;
+  border-color:#9fbfd0!important;
+}
+body[data-theme="light"] .coach-action-title{
+  color:#17263c!important;
+}
+body[data-theme="light"] .coach-action-desc{
+  color:#42546b!important;
+}
+
+/* Share/copy controls: semantic green = share/success, blue = copy/info. */
+body[data-theme="light"] .coach-share-button{
+  background:#ecfdf3!important;
+  border-color:#3ca06d!important;
+  color:#166534!important;
+}
+body[data-theme="light"] .coach-url-copy-button,
+body[data-theme="light"] .coach-share-link-notice{
+  background:#eef6fb!important;
+  border-color:#2a88ad!important;
+  color:#14507f!important;
+}
