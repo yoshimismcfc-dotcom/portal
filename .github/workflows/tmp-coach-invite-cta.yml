@@ -1,0 +1,46 @@
+name: tmp-coach-invite-cta
+
+on:
+  push:
+    branches:
+      - fix/coach-invite-cta-20260819
+
+permissions:
+  contents: write
+
+jobs:
+  update:
+    if: github.actor != 'github-actions[bot]'
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: fix/coach-invite-cta-20260819
+      - name: Add direct opponent invite CTA
+        run: |
+          python - <<'PY'
+          from pathlib import Path
+          p=Path('coach.html')
+          s=p.read_text(encoding='utf-8')
+          css_marker='    .coach-event-edit-button{display:flex;align-items:center;justify-content:center;width:100%;min-height:44px;margin-top:9px;padding:8px 12px;border:1px solid rgba(115,220,255,.55);border-radius:9px;background:rgba(0,131,183,.18);color:#c9f3ff;text-decoration:none;font:inherit;font-size:.7rem;font-weight:900;cursor:pointer}\n'
+          css_add='''    .coach-invite-cta{display:flex;align-items:center;justify-content:center;gap:9px;width:100%;min-height:52px;margin-top:10px;padding:10px 14px;border:1px solid #e78019;border-radius:11px;background:linear-gradient(135deg,#f08a1a,#c86500);color:#fff!important;text-decoration:none;font-size:.8rem;font-weight:900;box-shadow:0 5px 14px rgba(200,101,0,.22)}\n    .coach-invite-cta:hover,.coach-invite-cta:focus-visible{filter:brightness(1.06);outline:3px solid rgba(240,138,26,.28);outline-offset:2px}\n    .coach-invite-cta small{display:block;font-size:.62rem;font-weight:700;opacity:.92}\n    body[data-theme="light"] .coach-invite-cta{background:linear-gradient(135deg,#d97706,#b45309);border-color:#9a4a00;color:#fff!important;box-shadow:0 5px 14px rgba(154,74,0,.18)}\n'''
+          if css_add.strip() not in s:
+              if css_marker not in s:
+                  raise SystemExit('CSS marker not found')
+              s=s.replace(css_marker,css_marker+css_add,1)
+          html_marker="      +'<button type=\"button\" class=\"coach-event-edit-button\" data-coach-edit-event=\"'+escapeHtml(String(selected.id||\"\"))+'\">✏️ 大会名・日付を変更</button>'\n"
+          html_add="      +'<a class=\"coach-invite-cta\" href=\"'+escapeHtml(SMCEventLinks.href(\"game_adjust.html\",selected))+'\"><span aria-hidden=\"true\">📨</span><span>対戦チームを誘う<small>お誘い文・参加状況の確認へ</small></span></a>'\n"
+          if html_add.strip() not in s:
+              if html_marker not in s:
+                  raise SystemExit('HTML marker not found')
+              s=s.replace(html_marker,html_marker+html_add,1)
+          p.write_text(s,encoding='utf-8')
+          PY
+      - name: Commit change
+        run: |
+          if git diff --quiet; then exit 0; fi
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add coach.html
+          git commit -m "対戦チームを誘う導線を追加"
+          git push origin HEAD:fix/coach-invite-cta-20260819
