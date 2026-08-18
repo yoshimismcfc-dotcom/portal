@@ -207,6 +207,10 @@
     .coach-next-step a{display:flex;align-items:center;justify-content:center;min-height:44px;margin-top:8px;border-radius:9px;background:#c6283d;color:#fff;text-decoration:none;font-size:.72rem;font-weight:900}
     .coach-event-actions-title{margin-top:12px;color:#fff;font-size:.72rem;font-weight:900}
     .coach-event-edit-button{display:flex;align-items:center;justify-content:center;width:100%;min-height:44px;margin-top:9px;padding:8px 12px;border:1px solid rgba(115,220,255,.55);border-radius:9px;background:rgba(0,131,183,.18);color:#c9f3ff;text-decoration:none;font:inherit;font-size:.7rem;font-weight:900;cursor:pointer}
+    .coach-invite-cta{display:flex;align-items:center;justify-content:center;gap:9px;width:100%;min-height:52px;margin-top:10px;padding:10px 14px;border:1px solid #e78019;border-radius:11px;background:linear-gradient(135deg,#f08a1a,#c86500);color:#fff!important;text-decoration:none;font-size:.8rem;font-weight:900;box-shadow:0 5px 14px rgba(200,101,0,.22)}
+    .coach-invite-cta:hover,.coach-invite-cta:focus-visible{filter:brightness(1.06);outline:3px solid rgba(240,138,26,.28);outline-offset:2px}
+    .coach-invite-cta small{display:block;font-size:.62rem;font-weight:700;opacity:.92}
+    body[data-theme="light"] .coach-invite-cta{background:linear-gradient(135deg,#d97706,#b45309);border-color:#9a4a00;color:#fff!important;box-shadow:0 5px 14px rgba(154,74,0,.18)}
     .coach-event-edit-modal-card{width:min(94vw,520px)}
     .coach-event-edit-intro{margin:-2px 0 14px;color:#a8c9dc;font-size:.72rem;line-height:1.6}
     .coach-event-edit-grid{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:0 10px}
@@ -1105,6 +1109,7 @@ document.addEventListener("DOMContentLoaded", function(){
       +'<div class="coach-event-selected" role="tabpanel"><div class="coach-selected-kicker"><span>選択中の大会</span><span class="coach-selected-badge">選択中</span></div><div class="coach-event-selected-title">'+escapeHtml(displayTournamentName(selected))+'</div>'
       +'<div class="coach-event-selected-meta">'+meta.map(function(value){return '<span>'+escapeHtml(value)+'</span>';}).join('')+'</div><span class="coach-event-countdown">'+escapeHtml(countdownFor(selected))+'</span>'
       +'<button type="button" class="coach-event-edit-button" data-coach-edit-event="'+escapeHtml(String(selected.id||""))+'">✏️ 大会名・日付を変更</button>'
+      +'<a class="coach-invite-cta" href="'+escapeHtml(SMCEventLinks.href("game_adjust.html",selected))+'"><span aria-hidden="true">📨</span><span>対戦チームを誘う<small>お誘い文・参加状況の確認へ</small></span></a>'
       +preparationHtml(prep)
       +nextActionHtml(selected,prep,confirmed)
       +'<div class="coach-event-actions-title">大会の操作</div>'
