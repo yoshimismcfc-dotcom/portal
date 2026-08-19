@@ -12,3 +12,39 @@ table.mobile-stack{max-width:100%;}
     font-size:max(16px,1em);
   }
 }
+
+/* 大会要綱・対戦表：既存の対戦チーム向けLINE案内機能を見つけやすくする */
+.schedule-actions button[onclick="openLineInvite()"]{
+  grid-column:1/-1;
+  min-height:60px;
+  padding:10px 14px;
+  border:2px solid #ff8a24;
+  background:linear-gradient(135deg,rgba(255,138,36,.18),rgba(255,107,43,.08));
+  color:#fff;
+  box-shadow:0 6px 18px rgba(0,0,0,.16);
+  font-size:.9rem;
+}
+.schedule-actions button[onclick="openLineInvite()"]::after{
+  content:"大会情報から対戦依頼文を自動作成 → LINEコピー";
+  display:block;
+  margin-top:4px;
+  font-size:.66rem;
+  font-weight:700;
+  line-height:1.35;
+  color:#ffd6b0;
+}
+.schedule-actions button[onclick="openLineInvite()"]:hover,
+.schedule-actions button[onclick="openLineInvite()"]:focus-visible{
+  border-color:#ff6b2b;
+  background:linear-gradient(135deg,rgba(255,138,36,.28),rgba(255,107,43,.14));
+  outline:none;
+}
+body[data-theme="light"] .schedule-actions button[onclick="openLineInvite()"]{
+  background:#fff3e8;
+  border-color:#d96812;
+  color:#7b2f00;
+  box-shadow:0 5px 14px rgba(123,47,0,.12);
+}
+body[data-theme="light"] .schedule-actions button[onclick="openLineInvite()"]::after{
+  color:#8a430d;
+}
