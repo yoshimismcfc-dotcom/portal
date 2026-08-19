@@ -16,21 +16,43 @@ table.mobile-stack{max-width:100%;}
 /* 大会要綱・対戦表：既存の対戦チーム向けLINE案内機能を見つけやすくする */
 .schedule-actions button[onclick="openLineInvite()"]{
   grid-column:1/-1;
-  min-height:60px;
-  padding:10px 14px;
+  width:100%;
+  max-width:100%;
+  min-width:0;
+  box-sizing:border-box;
+  min-height:72px;
+  padding:12px 14px;
   border:2px solid #ff8a24;
+  border-radius:16px;
   background:linear-gradient(135deg,rgba(255,138,36,.18),rgba(255,107,43,.08));
   color:#fff;
   box-shadow:0 6px 18px rgba(0,0,0,.16);
-  font-size:.9rem;
+  font-size:.92rem;
+  font-weight:800;
+  line-height:1.4;
+  white-space:normal;
+  overflow-wrap:anywhere;
+  word-break:break-word;
+  text-align:left;
+  display:flex;
+  flex-direction:column;
+  align-items:flex-start;
+  justify-content:center;
+  gap:4px;
+  overflow:hidden;
 }
 .schedule-actions button[onclick="openLineInvite()"]::after{
   content:"大会情報から対戦依頼文を自動作成 → LINEコピー";
   display:block;
-  margin-top:4px;
-  font-size:.66rem;
+  width:100%;
+  max-width:100%;
+  margin-top:0;
+  font-size:.72rem;
   font-weight:700;
-  line-height:1.35;
+  line-height:1.45;
+  white-space:normal;
+  overflow-wrap:anywhere;
+  word-break:break-word;
   color:#ffd6b0;
 }
 .schedule-actions button[onclick="openLineInvite()"]:hover,
@@ -47,4 +69,99 @@ body[data-theme="light"] .schedule-actions button[onclick="openLineInvite()"]{
 }
 body[data-theme="light"] .schedule-actions button[onclick="openLineInvite()"]::after{
   color:#8a430d;
+}
+
+/* 大会対戦表：スマホで全操作を画面幅内に収める */
+#doc-taisen,
+#doc-taisen .panel,
+#doc-taisen .schedule-assist,
+#doc-taisen .schedule-actions,
+#doc-taisen .btn-group,
+#doc-taisen .pdf-guide{
+  max-width:100%;
+  min-width:0;
+  box-sizing:border-box;
+}
+#doc-taisen .schedule-actions > *,
+#doc-taisen .btn-group > *{
+  min-width:0;
+  max-width:100%;
+  box-sizing:border-box;
+}
+#doc-taisen .schedule-actions button,
+#doc-taisen .btn-group button,
+#doc-taisen .btn-group a{
+  white-space:normal;
+  overflow-wrap:anywhere;
+  word-break:break-word;
+  line-height:1.35;
+}
+
+@media (max-width:520px){
+  #doc-taisen .schedule-assist{
+    padding:10px;
+    overflow:hidden;
+  }
+  #doc-taisen .schedule-actions{
+    grid-template-columns:minmax(0,1fr)!important;
+    gap:8px!important;
+  }
+  #doc-taisen .schedule-actions button{
+    width:100%!important;
+    min-height:52px;
+    padding:10px 12px;
+    font-size:.82rem;
+  }
+  #doc-taisen .schedule-actions button[onclick="openLineInvite()"]{
+    min-height:76px;
+    padding:11px 12px;
+    font-size:.86rem;
+  }
+  #doc-taisen .schedule-actions button[onclick="openLineInvite()"]::after{
+    content:"大会情報から自動作成 → LINEコピー";
+    font-size:.68rem;
+    line-height:1.4;
+  }
+  #doc-taisen .btn-group{
+    display:grid!important;
+    grid-template-columns:repeat(2,minmax(0,1fr))!important;
+    gap:8px!important;
+    width:100%;
+  }
+  #doc-taisen .btn-group > *{
+    width:100%!important;
+    margin:0!important;
+  }
+  #doc-taisen .btn-group button,
+  #doc-taisen .btn-group a{
+    min-height:50px;
+    padding:9px 8px;
+    font-size:.76rem;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    text-align:center;
+  }
+  #doc-taisen .btn-group .btn-primary,
+  #doc-taisen #tai-print-btn,
+  #doc-taisen .btn-group .btn-line-copy{
+    grid-column:1/-1;
+  }
+  #doc-taisen #tai-print-btn{
+    min-height:56px;
+    font-size:.78rem;
+  }
+  #doc-taisen .btn-group .btn-line-copy{
+    min-height:50px;
+    justify-self:stretch;
+  }
+}
+
+@media (max-width:380px){
+  #doc-taisen .btn-group{
+    grid-template-columns:minmax(0,1fr)!important;
+  }
+  #doc-taisen .btn-group > *{
+    grid-column:1!important;
+  }
 }
