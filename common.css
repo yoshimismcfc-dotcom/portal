@@ -13,6 +13,238 @@ table.mobile-stack{max-width:100%;}
   }
 }
 
+/* =====================================================
+   Global mobile form containment
+   - Prevent form controls, flex/grid children and action rows from
+     exceeding their parent width on iPhone / Android.
+   - Visual/layout only. No data/Firebase/JS behavior changes.
+   ===================================================== */
+.form-group,
+.form-control,
+.panel,
+.modal,
+.edit-modal,
+.save-modal,
+.tab-content,
+.fg1,
+.fg2,
+.fg3,
+.btn-group,
+.modal-btns,
+.actions,
+.editor,
+.settings,
+.sortable {
+  min-width:0;
+  max-width:100%;
+  box-sizing:border-box;
+}
+
+.form-group > *,
+.fg1 > *,
+.fg2 > *,
+.fg3 > *,
+.btn-group > *,
+.modal-btns > * {
+  min-width:0;
+  max-width:100%;
+  box-sizing:border-box;
+}
+
+.form-control,
+input:not([type="checkbox"]):not([type="radio"]):not([type="range"]):not([type="color"]),
+select,
+textarea {
+  min-width:0;
+  max-width:100%;
+  box-sizing:border-box;
+}
+
+.form-control {
+  width:100%;
+  inline-size:100%;
+  max-inline-size:100%;
+}
+
+input[type="date"],
+input[type="time"],
+input[type="datetime-local"],
+input[type="month"],
+input[type="week"] {
+  min-inline-size:0;
+  max-inline-size:100%;
+}
+
+input[type="date"]::-webkit-date-and-time-value,
+input[type="time"]::-webkit-date-and-time-value,
+input[type="datetime-local"]::-webkit-date-and-time-value {
+  min-width:0;
+  max-width:100%;
+  text-align:left;
+}
+
+/* Long labels / entered values must wrap inside cards instead of widening them. */
+.form-label,
+.panel-title,
+.card-label,
+.card-desc,
+.modal h3,
+.edit-modal h3,
+.save-modal h3 {
+  max-width:100%;
+  overflow-wrap:anywhere;
+  word-break:break-word;
+}
+
+/* Explicit grid/flex safety for common portal layouts. */
+.card-grid > *,
+.coach-btn-grid > *,
+.c-card-grid > *,
+.url-form > *,
+.guideline-card-list > *,
+.guideline-card-summary > *,
+.guideline-card-actions > *,
+.guideline-restore > *,
+.linked-workflow-head > *,
+.linked-date-item > *,
+.schedule-assist-head > *,
+.schedule-actions > *,
+.ceremony-detail > *,
+.line-type-tabs > * {
+  min-width:0;
+  max-width:100%;
+  box-sizing:border-box;
+}
+
+/* Tournament guideline cards: contain dynamic inputs and iOS date controls. */
+#doc-youkou,
+#doc-youkou .panel,
+#doc-youkou .guideline-card-list,
+#doc-youkou .guideline-card,
+#doc-youkou .guideline-card-summary,
+#doc-youkou .guideline-quick-input,
+#doc-youkou .guideline-card-editor,
+#doc-youkou .guideline-card-actions,
+#doc-youkou .guideline-restore,
+#doc-youkou .guideline-editor-head {
+  min-width:0;
+  max-width:100%;
+  box-sizing:border-box;
+}
+
+#doc-youkou .guideline-quick-input {
+  width:100%;
+  overflow:hidden;
+}
+
+#doc-youkou .guideline-quick-input .form-control,
+#doc-youkou .guideline-card-editor .form-control,
+#doc-youkou .guideline-content-input,
+#doc-youkou select,
+#doc-youkou textarea {
+  display:block;
+  width:100%!important;
+  min-width:0!important;
+  max-width:100%!important;
+  inline-size:100%!important;
+  min-inline-size:0!important;
+  max-inline-size:100%!important;
+  box-sizing:border-box!important;
+  margin-left:0!important;
+  margin-right:0!important;
+}
+
+#doc-taisen .form-group,
+#doc-taisen .fg1,
+#doc-taisen .fg2,
+#doc-taisen .fg3,
+#doc-taisen .ceremony-row,
+#doc-taisen .ceremony-detail,
+#doc-taisen .line-modal,
+#doc-taisen .save-modal {
+  min-width:0;
+  max-width:100%;
+  box-sizing:border-box;
+}
+
+#doc-taisen .form-control,
+#doc-taisen select,
+#doc-taisen textarea {
+  max-width:100%!important;
+  min-width:0!important;
+  box-sizing:border-box!important;
+}
+
+/* Mobile action labels can wrap; full-width controls never force page overflow. */
+@media (max-width:520px){
+  .page-wrap,
+  .panel,
+  .modal,
+  .edit-modal,
+  .save-modal,
+  .form-group,
+  .tab-content {
+    min-width:0!important;
+    max-width:100%!important;
+    box-sizing:border-box!important;
+  }
+
+  .btn,
+  .btn-sm,
+  .btn-line-copy,
+  .back-btn {
+    max-width:100%;
+    white-space:normal;
+    overflow-wrap:anywhere;
+    word-break:break-word;
+    line-height:1.35;
+    text-align:center;
+  }
+
+  .fg2,
+  .fg3 {
+    grid-template-columns:minmax(0,1fr)!important;
+  }
+
+  #doc-youkou .guideline-card-summary {
+    grid-template-columns:34px minmax(0,1fr);
+    gap:8px;
+  }
+  #doc-youkou .guideline-edit-toggle {
+    grid-column:2;
+    width:100%;
+    min-width:0;
+    max-width:100%;
+    white-space:normal;
+  }
+  #doc-youkou .guideline-card-badges {
+    flex-wrap:wrap;
+  }
+  #doc-youkou .guideline-card-actions {
+    grid-template-columns:repeat(2,minmax(0,1fr))!important;
+  }
+  #doc-youkou .guideline-card-actions .btn,
+  #doc-youkou .guideline-visible-toggle,
+  #doc-youkou .guideline-restore .btn {
+    width:100%;
+    min-width:0;
+    max-width:100%;
+  }
+
+  .linked-date-item {
+    grid-template-columns:minmax(0,1fr)!important;
+  }
+  .linked-date-status {
+    text-align:left!important;
+  }
+}
+
+@media (max-width:360px){
+  #doc-youkou .guideline-card-actions {
+    grid-template-columns:minmax(0,1fr)!important;
+  }
+}
+
 /* 大会要綱・対戦表：既存の対戦チーム向けLINE案内機能を見つけやすくする */
 .schedule-actions button[onclick="openLineInvite()"]{
   grid-column:1/-1;
