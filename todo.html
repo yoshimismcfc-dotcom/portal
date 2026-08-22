@@ -22,6 +22,17 @@
     .filter-btn.active{background:var(--orange);border-color:var(--orange);color:#fff}
     .filter-btn.f-done.active{background:#00aa55;border-color:#00aa55}
 
+    /* ===== 主要操作 ===== */
+    .todo-actions{
+      display:grid;grid-template-columns:minmax(0,1.15fr) minmax(0,1fr) minmax(0,.82fr);
+      gap:8px;margin-bottom:14px;
+    }
+    .todo-actions button{
+      width:100%;min-width:0;min-height:48px;padding:8px 12px;border-radius:12px;
+      font-size:.82rem;line-height:1.35;text-align:center;white-space:normal;
+    }
+    .todo-actions .todo-add-btn{font-size:.9rem}
+
     /* ===== 体育館利用チェックへの定期導線 ===== */
     .facility-shortcut{
       display:grid;grid-template-columns:52px minmax(0,1fr) auto;gap:12px;align-items:center;
@@ -106,6 +117,27 @@
     .stat-card{background:var(--surface-lt);border-radius:var(--r8);padding:10px;text-align:center;border:1px solid var(--line)}
     .stat-card .sv{font-size:1.4rem;font-weight:900;color:#fff}
     .stat-card .sl{font-size:.65rem;color:var(--ink-3);margin-top:1px}
+
+    /* スマホでは主要操作を上段に独立させ、文字を無理に改行させない。 */
+    @media(max-width:520px){
+      .todo-actions{grid-template-columns:repeat(2,minmax(0,1fr));gap:10px}
+      .todo-actions .todo-add-btn{
+        grid-column:1/-1;min-height:54px;font-size:1rem;white-space:nowrap;
+      }
+      .todo-actions button:not(.todo-add-btn){min-height:50px;font-size:.86rem}
+      .facility-shortcut-title{font-size:1rem}
+      .facility-shortcut-desc{font-size:.78rem;line-height:1.6}
+      .stat-card{padding:11px 6px}
+      .stat-card .sv{font-size:1.5rem}
+      .stat-card .sl{font-size:.76rem}
+      .filter-bar{gap:8px}
+      .filter-btn{min-height:42px;padding:7px 14px;font-size:.82rem}
+      .tc-title{font-size:1rem;line-height:1.45}
+      .tc-who,.tc-due{font-size:.78rem}
+      .tc-note{font-size:.86rem;line-height:1.7}
+      .status-badge{font-size:.72rem;padding:3px 8px}
+      .act-btn{min-height:42px;font-size:.78rem;padding:7px 12px}
+    }
   </style>
 </head>
 <body>
@@ -131,8 +163,8 @@
   <div class="stat-row" id="stat-row"></div>
 
   <!-- 操作ボタン -->
-  <div style="display:flex;gap:8px;margin-bottom:12px;flex-wrap:wrap">
-    <button class="btn btn-primary" onclick="openNew()" style="flex:1">＋ タスクを追加</button>
+  <div class="todo-actions" aria-label="タスクの操作">
+    <button class="btn btn-primary todo-add-btn" onclick="openNew()">＋ タスクを追加</button>
     <button class="btn btn-outline btn-sm" onclick="clearDone()">✅ 完了済みを削除</button>
     <button class="btn-line-copy sm" onclick="copyTodoList()">📋 LINEコピー</button>
   </div>
