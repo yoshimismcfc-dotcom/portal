@@ -22,6 +22,21 @@
     .filter-btn.active{background:var(--orange);border-color:var(--orange);color:#fff}
     .filter-btn.f-done.active{background:#00aa55;border-color:#00aa55}
 
+    /* ===== 体育館利用チェックへの定期導線 ===== */
+    .facility-shortcut{
+      display:grid;grid-template-columns:52px minmax(0,1fr) auto;gap:12px;align-items:center;
+      margin:0 0 16px;padding:13px 14px;border:2px solid rgba(40,199,111,.42);border-radius:14px;
+      background:linear-gradient(135deg,rgba(40,199,111,.12),rgba(90,167,255,.08));
+      color:var(--ink);box-shadow:0 8px 22px rgba(0,0,0,.12);
+    }
+    .facility-shortcut-icon{display:grid;place-items:center;width:52px;height:52px;border-radius:13px;background:rgba(40,199,111,.17);font-size:1.6rem}
+    .facility-shortcut-title{font-size:.92rem;font-weight:900;line-height:1.35}
+    .facility-shortcut-desc{margin-top:2px;color:var(--ink-3);font-size:.7rem;line-height:1.45}
+    .facility-shortcut-badge{padding:5px 9px;border-radius:999px;background:rgba(90,167,255,.15);border:1px solid rgba(90,167,255,.32);color:#b8d9ff;font-size:.68rem;font-weight:900;white-space:nowrap}
+    body[data-theme="light"] .facility-shortcut{background:linear-gradient(135deg,#e9f9f0,#eef7ff);border-color:#49a879}
+    body[data-theme="light"] .facility-shortcut-badge{background:#deecff;border-color:#79a9d3;color:#135b9f}
+    @media(max-width:520px){.facility-shortcut{grid-template-columns:46px minmax(0,1fr);gap:10px}.facility-shortcut-icon{width:46px;height:46px}.facility-shortcut-badge{grid-column:2;justify-self:start;white-space:normal}}
+
     /* ===== カード ===== */
     .todo-list{display:grid;gap:10px}
     .todo-card{
@@ -105,6 +120,12 @@
     </div>
   </div>
   <div class="notice-bar">☁️ データはFirebase（クラウド）で保存・共有されます。</div>
+
+  <a class="facility-shortcut" href="facility_check.html" aria-label="体育館利用チェックを開く">
+    <span class="facility-shortcut-icon" aria-hidden="true">🏫</span>
+    <span><span class="facility-shortcut-title">体育館利用チェック</span><span class="facility-shortcut-desc">毎週 水・木の利用後チェック。カレンダーで完了確認・半面チェック表のPDF/印刷ができます。</span></span>
+    <span class="facility-shortcut-badge">水・木 定期</span>
+  </a>
 
   <!-- 統計 -->
   <div class="stat-row" id="stat-row"></div>
