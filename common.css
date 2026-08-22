@@ -1,5 +1,6 @@
 @import url("common-current.css");
 @import url("semantic-light.css");
+@import url("facility-print-fix.css");
 
 /* Audit-visible compatibility contracts. Actual rules are imported above. */
 body[data-theme="light"]{--body-tail: #e8eef7;}
