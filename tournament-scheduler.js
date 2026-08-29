@@ -185,16 +185,24 @@
       });
     });
     rows.sort(function(a,b){
-      return b.points-a.points||b.goalDifference-a.goalDifference||b.goalsFor-a.goalsFor||
+      return (b.played>0?1:0)-(a.played>0?1:0)||b.points-a.points||b.goalDifference-a.goalDifference||b.goalsFor-a.goalsFor||
         b.headToHead-a.headToHead||a.originalIndex-b.originalIndex;
     });
     rows.forEach(function(row,index){
+      if(row.played===0){row.rank=0;return;}
       var previous=rows[index-1];
-      var tied=previous&&row.points===previous.points&&row.goalDifference===previous.goalDifference&&
+      var tied=previous&&previous.played>0&&row.points===previous.points&&row.goalDifference===previous.goalDifference&&
         row.goalsFor===previous.goalsFor&&row.headToHead===previous.headToHead;
       row.rank=tied?previous.rank:index+1;
     });
     return rows;
+  }
+
+  function standingDisplay(row){
+    var keys=["rank","played","wins","draws","losses","goalsFor","goalsAgainst","goalDifference","points"],display={};
+    if(!row||row.played===0){keys.forEach(function(key){display[key]="";});return display;}
+    keys.forEach(function(key){display[key]=row[key];});
+    return display;
   }
 
   return {
@@ -202,6 +210,7 @@
     optimize:optimize,
     evaluate:evaluate,
     validate:validate,
-    calculateStandings:calculateStandings
+    calculateStandings:calculateStandings,
+    standingDisplay:standingDisplay
   };
 });

@@ -5,10 +5,10 @@
   <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate, max-age=0">
   <meta http-equiv="Pragma" content="no-cache">
   <meta http-equiv="Expires" content="-1">
-<meta name="app-version" content="20260822-1">
+<meta name="app-version" content="20260829-1">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <meta name="robots" content="noindex,nofollow">
-  <title>大会要綱・対戦表 v5｜吉見SMC FC</title>
+  <title>大会要綱・対戦表｜吉見SMC FC</title>
   <script src="firebase-config.js"></script>
   <link rel="stylesheet" href="common.css">
   <script src="common.js"></script>
@@ -19,14 +19,17 @@
   <script defer src="https://cdn.jsdelivr.net/npm/jspdf@2.5.2/dist/jspdf.umd.min.js"></script>
   <style>
     @page smc-youkou-page{size:A4 portrait;margin:6mm}
-    @page smc-taisen-page{size:A4 landscape;margin:5mm}
+    @page smc-taisen-page{size:A4 portrait;margin:5mm}
     @page smc-taisen-one-page{size:A4 portrait;margin:5mm}
     /* ====== タブ ====== */
     .doc-tab-bar{display:flex;gap:0;margin-bottom:20px;border-radius:var(--r8);overflow:hidden;border:1px solid var(--line-2)}
-    .doc-tab-btn{flex:1;padding:12px 8px;font:inherit;font-size:.88rem;font-weight:900;background:var(--surface-lt);color:#6aaccc;border:none;cursor:pointer;transition:.15s;display:flex;align-items:center;justify-content:center;gap:6px}
+    .doc-tab-btn{flex:1;min-height:48px;padding:12px 8px;font:inherit;font-size:.88rem;font-weight:900;background:var(--surface-lt);color:#6aaccc;border:none;cursor:pointer;transition:.15s;display:flex;align-items:center;justify-content:center;gap:6px}
     .doc-tab-btn:not(:last-child){border-right:1px solid var(--line-2)}
     .doc-tab-btn.active{background:linear-gradient(135deg,#003087,#0050cc);color:#fff}
     .doc-section{display:none}.doc-section.active{display:block}
+    .tournament-purpose{display:grid;grid-template-columns:auto minmax(0,1fr);gap:10px;align-items:start;margin:0 0 12px;padding:12px 13px;border:1px solid rgba(0,212,255,.34);border-radius:12px;background:rgba(0,130,190,.08)}
+    .tournament-purpose-icon{font-size:1.3rem}.tournament-purpose-title{color:var(--ink);font-size:.84rem;font-weight:1000}.tournament-purpose-text{margin-top:3px;color:var(--ink-3);font-size:.7rem;line-height:1.55}.tournament-context-line{display:block;margin-top:6px;color:var(--cyan);font-size:.7rem;font-weight:900;overflow-wrap:anywhere}
+    body[data-theme="light"] .tournament-purpose{background:#eef6fb;border-color:#79a9bf}body[data-theme="light"] .tournament-purpose-title{color:#17263c}body[data-theme="light"] .tournament-purpose-text{color:#42546b}body[data-theme="light"] .tournament-context-line{color:#075d84}
     .fg2{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,240px),1fr));gap:10px}
     .fg3{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,180px),1fr));gap:10px}
     .fg1{display:flex;flex-direction:column;gap:10px}
@@ -70,7 +73,7 @@
     .pdf-capture{box-shadow:none!important;border-radius:0!important;overflow:visible!important;background:#fff!important;margin:0!important}
     .pdf-capture .no-print{display:none!important}
     .req-sheet.pdf-capture{width:794px!important;max-width:none!important;padding:22px 26px 18px!important}
-    .tai-sheet.pdf-capture{width:1123px!important;max-width:none!important;padding:16px 20px 14px!important;font-size:9pt!important;line-height:1.4!important}
+    .tai-sheet.pdf-capture{width:794px!important;max-width:none!important;padding:14px 16px 10px!important;font-size:7.4pt!important;line-height:1.25!important}
     .tai-sheet.pdf-capture .courts-row{grid-template-columns:repeat(2,minmax(0,1fr))!important}
     .tai-sheet.pdf-capture.pdf-one-court{width:794px!important;max-width:none!important;padding:22px 26px 18px!important;font-size:9pt!important}
     /* PDF専用：入力画面とは分離した、配布資料向けの仕上げ */
@@ -126,6 +129,21 @@
     .tai-sheet.pdf-capture .rct .td-self{background:#d9dee5!important;color:#475569!important}
     .tai-sheet.pdf-capture .ceremony-banner{margin:7px 0 4px!important;padding:5px 10px!important;border-width:1px 1px 1px 5px!important;border-radius:2px!important}
     .tai-sheet.pdf-capture .pdf-footnote{margin-top:4px!important;padding-top:4px!important;border-top:1px solid #d6dee7!important;color:#64748b!important;font-size:7pt!important;text-align:right!important}
+    /* 対戦表PDFはコート数にかかわらずA4縦1枚へ収める */
+    .tai-sheet.pdf-capture .courts-row{gap:8px!important}
+    .tai-sheet.pdf-capture .tai-title{font-size:14pt!important;margin-bottom:2px!important;padding-bottom:4px!important}
+    .tai-sheet.pdf-capture .tai-sub{font-size:8pt!important;margin-bottom:5px!important}
+    .tai-sheet.pdf-capture .block-hd{margin:5px 0 3px!important;padding:3px 6px!important;border-left-width:4px!important;font-size:7.2pt!important}
+    .tai-sheet.pdf-capture .st{margin-bottom:4px!important}
+    .tai-sheet.pdf-capture .st .sched-th{padding:2px!important;font-size:5.8pt!important}
+    .tai-sheet.pdf-capture .st td{height:18px!important;padding:2px!important;font-size:6.2pt!important;line-height:1.1!important}
+    .tai-sheet.pdf-capture .score-input{width:24px!important;height:17px!important;font-size:8pt!important;line-height:15px!important}
+    .tai-sheet.pdf-capture .rt{margin-bottom:3px!important}.tai-sheet.pdf-capture .rt .rank-th,.tai-sheet.pdf-capture .rt td{padding:2px!important;font-size:5.9pt!important}
+    .tai-sheet.pdf-capture .round-title{margin:3px 0 2px!important;font-size:6.6pt!important}
+    .tai-sheet.pdf-capture .rct{margin-bottom:4px!important}.tai-sheet.pdf-capture .rct th,.tai-sheet.pdf-capture .rct td{height:16px!important;padding:2px!important;font-size:5.7pt!important}
+    .tai-sheet.pdf-capture .ceremony-banner{margin:3px 0 2px!important;padding:3px 6px!important;font-size:6.2pt!important}
+    .tai-sheet.pdf-capture .pdf-footnote{margin-top:2px!important;padding-top:2px!important;font-size:5.8pt!important}
+    .tai-sheet.pdf-capture .ranking-scroll,.tai-sheet.pdf-capture .round-scroll{overflow:visible!important}
 
     /* ====== 印刷共通 ====== */
     @media print{
@@ -210,6 +228,10 @@
     .score-input:focus{outline:3px solid rgba(0,110,220,.22);border-color:#1769aa}
     .score-input::-webkit-inner-spin-button,.score-input::-webkit-outer-spin-button{-webkit-appearance:none;margin:0}
     .result-entry-help{display:flex;align-items:center;justify-content:space-between;gap:8px;flex-wrap:wrap;margin:7px 0;padding:8px 10px;border:1px solid #b7d6eb;border-radius:8px;background:#eef8ff;color:#16415f;font-size:.74rem;font-weight:800}
+    .result-entry-copy{flex:1 1 260px;min-width:0}.result-entry-title{display:block;color:#0f3653;font-size:.9rem;font-weight:1000}.result-entry-text{display:block;margin-top:3px;font-weight:700;line-height:1.5}.result-example{display:inline-flex;margin-top:5px;padding:3px 8px;border-radius:99px;background:#fff;border:1px solid #8cb6d0;color:#173b66;font-weight:1000}
+    .result-entry-actions{display:flex;align-items:center;justify-content:flex-end;gap:7px;flex-wrap:wrap}.rank-jump-button{min-height:44px;padding:8px 11px;border:1px solid #1769aa;border-radius:8px;background:#fff;color:#155486;font:inherit;font-size:.7rem;font-weight:1000;cursor:pointer}.rank-jump-button:focus-visible{outline:3px solid rgba(23,105,170,.3);outline-offset:2px}
+    .rank-update-feedback{display:inline-flex;align-items:center;min-height:28px;color:#075f32;font-size:.68rem;font-weight:1000;opacity:0;transition:opacity .18s}.rank-update-feedback.show{opacity:1}
+    .result-rank-note{flex:1 1 100%;padding-top:5px;border-top:1px solid #c7ddeb;color:#315d78;font-size:.68rem;text-align:center}
     .result-save-status{display:inline-flex;align-items:center;min-height:26px;padding:3px 8px;border-radius:99px;background:#e2e8f0;color:#334155;font-size:.68rem;font-weight:900;white-space:nowrap}
     .result-save-status.saving{background:#fff3c4;color:#704b00}.result-save-status.saved{background:#dff7e9;color:#075f32}.result-save-status.error{background:#ffe2e2;color:#8a1c1c}
     .st .td-vs{background:#f0f0f0;color:#888;font-size:7.5pt}
@@ -224,6 +246,7 @@
     .rt td{border:1px solid #ccc;padding:4px 5px;text-align:center;font-size:8pt}
     .rt .td-name{text-align:left;padding-left:6px;font-weight:500}
     .rt .rank-alt{background:#f6fff6}
+    .ranking-heading{display:flex;align-items:center;justify-content:space-between;gap:8px;width:100%;box-sizing:border-box}.ranking-help{font-size:.68rem;font-weight:700;opacity:.92}.ranking-empty{display:inline-flex;padding:2px 6px;border-radius:99px;background:#fff3c4;color:#704b00;font-size:.62rem;font-weight:1000}.ranking-empty[hidden]{display:none}.ranking-scroll,.round-scroll{max-width:100%;overflow-x:auto;-webkit-overflow-scrolling:touch}
     /* 総当り票 */
     .rct{border-collapse:collapse;margin-bottom:12px;font-size:8pt}
     .rct th,.rct td{border:1px solid #ccc;padding:3px 4px;text-align:center;min-width:36px;font-size:7.5pt;word-break:break-all}
@@ -365,8 +388,22 @@
       .pdf-steps{grid-template-columns:1fr}
       .line-type-tabs{grid-template-columns:1fr}
       .line-modal{padding:16px}
-      .tai-sheet{padding:10px 8px}.st td{padding:4px 2px}.score-input{width:38px;min-height:38px}
+      .tai-sheet{padding:10px 8px}.score-input{width:50px;min-height:48px;font-size:1.05rem}.result-entry-actions{width:100%;justify-content:flex-start}.rank-jump-button{flex:1}.result-save-status{min-height:32px}
     }
+    @media(max-width:600px){
+      #taisen-preview{overflow-x:hidden}#taisen-preview>*{min-width:0}.tai-sheet{overflow:visible}.courts-row{grid-template-columns:1fr;gap:10px}
+      .st{display:block;table-layout:auto}.st thead{display:none}.st tbody{display:grid;gap:9px}.st tr.taisen-game-row{display:grid;grid-template-columns:minmax(0,1fr) 52px 16px 52px minmax(0,1fr);grid-template-rows:auto auto auto;gap:5px 4px;padding:9px 7px;border:1px solid #b9c9d7;border-radius:10px;background:#fff;box-shadow:0 3px 9px rgba(15,39,64,.08)}
+      .st .taisen-game-row td{display:block;min-width:0;height:auto!important;padding:0!important;border:0!important;background:transparent!important;text-align:center;font-size:.73rem;overflow-wrap:anywhere}.st .taisen-game-row .game-no{grid-column:1;grid-row:1;text-align:left;color:#52647a;font-size:.66rem}.st .taisen-game-row .game-time{grid-column:2/5;grid-row:1;color:#173b66;font-size:.72rem;font-weight:900}.st .taisen-game-row .game-kind{grid-column:5;grid-row:1;color:#52647a;font-size:.63rem}.st .taisen-game-row .td-home{grid-column:1;grid-row:2;text-align:right}.st .taisen-game-row .home-score{grid-column:2;grid-row:2}.st .taisen-game-row .td-vs{grid-column:3;grid-row:2;align-self:center;font-size:1rem}.st .taisen-game-row .away-score{grid-column:4;grid-row:2}.st .taisen-game-row .td-away{grid-column:5;grid-row:2;text-align:left}.st .taisen-game-row .game-note{grid-column:1/-1;grid-row:3;color:#52647a;font-size:.62rem}
+      .st .td-home::before,.st .td-away::before,.st .score-cell::before{display:block;margin-bottom:3px;color:#52647a;font-size:.55rem;font-weight:900}.st .td-home::before{content:"ホーム"}.st .td-away::before{content:"アウェイ"}.st .score-cell::before{content:"得点"}.st .score-input{margin:auto}.st tr:not(.taisen-game-row){display:block}.st tr:not(.taisen-game-row) td{display:block;width:100%;box-sizing:border-box;border-radius:8px}
+      .ranking-heading{align-items:flex-start;flex-direction:column}.ranking-scroll,.round-scroll{border:1px solid #d5dee7;border-radius:8px}.ranking-scroll .rt,.round-scroll .rct{min-width:410px;margin-bottom:0}
+    }
+    body[data-theme="light"] .result-entry-help{background:#eef6fb;border-color:#79a9bf;color:#26384f}body[data-theme="light"] .result-entry-title{color:#17263c}body[data-theme="light"] .result-entry-text,body[data-theme="light"] .result-rank-note{color:#42546b}body[data-theme="light"] .rank-jump-button{background:#fff;color:#14507f;border-color:#2a88ad}
+    body[data-theme="light"] #doc-youkou .form-control,body[data-theme="light"] #doc-taisen .form-control{background:#fff!important;color:#111827!important;border-color:#7f9db4!important}
+    body[data-theme="light"] #doc-youkou .form-label,body[data-theme="light"] #doc-taisen .form-label{color:#075d84!important}
+    body[data-theme="light"] #doc-youkou .form-control::placeholder,body[data-theme="light"] #doc-taisen .form-control::placeholder{color:#6b7c91!important;opacity:1}
+    body[data-theme="light"] #doc-youkou .form-control:focus,body[data-theme="light"] #doc-taisen .form-control:focus{background:#fff!important;border-color:#c86500!important}
+    body[data-theme="light"] .doc-tab-btn:not(.active){background:#fff!important;color:#24405f!important}
+    body[data-theme="light"] .schedule-assist-title,body[data-theme="light"] .linked-date-status{color:#166534!important}
   </style>
 </head>
 <body>
@@ -377,6 +414,11 @@
     <div class="hero-emoji">📋</div>
     <div><div class="hero-title">大会要綱・対戦表</div>
       <div class="hero-sub">入力するとプレビューが表示され、A4でPDF保存・印刷できます。</div></div>
+  </div>
+
+  <div class="tournament-purpose no-print">
+    <span class="tournament-purpose-icon" aria-hidden="true">🧭</span>
+    <div><div class="tournament-purpose-title">この画面ですること</div><div class="tournament-purpose-text">大会要綱と試合順を作り、当日は対戦表へ得点を入力します。入力結果は順位表へ自動反映され、そのままPDFにできます。</div><span class="tournament-context-line" id="tournament-context-line">大会情報を確認しています…</span></div>
   </div>
 
   <details class="linked-workflow linked-date-disclosure no-print">
@@ -393,7 +435,7 @@
 
   <div class="doc-tab-bar no-print">
     <button class="doc-tab-btn active" id="tbtn-y" onclick="switchDoc('youkou',this)">📄 大会要綱</button>
-    <button class="doc-tab-btn"        id="tbtn-t" onclick="switchDoc('taisen',this)">📊 対戦表</button>
+    <button class="doc-tab-btn"        id="tbtn-t" onclick="switchDoc('taisen',this)">⚽ 対戦表・試合結果</button>
   </div>
 
   <!-- ===== 大会要綱 ===== -->
@@ -516,23 +558,23 @@
         </div>
         <div class="schedule-actions">
           <button class="btn btn-outline btn-sm" type="button" onclick="undoSchedule()" id="schedule-undo" disabled>↩ 元に戻す</button>
-          <button class="btn btn-outline btn-sm" type="button" onclick="openLineInvite()">💬 LINE案内を作成</button>
+          <button class="btn btn-outline btn-sm" type="button" onclick="openLineInvite()">💬 対戦チームへ送る案内文を作る</button>
         </div>
         <div class="schedule-report" id="schedule-report" role="status" aria-live="polite"></div>
       </div>
       <div class="btn-group">
         <button class="btn btn-outline btn-sm" onclick="copyTournamentTemplate('taisen')">📑 テンプレートをコピー</button>
-        <button class="btn btn-primary" onclick="buildTaisen(true)" style="flex:1 1 140px">📊 対戦表を生成</button>
-        <button class="btn btn-outline btn-sm" onclick="openSaveModal('taisen')">💾 保存</button>
-        <button class="btn btn-outline btn-sm" onclick="openLoadModal('taisen')">📂 読込</button>
-        <button class="btn btn-cyan no-print pdf-primary" onclick="exportA4Pdf('taisen')" id="tai-print-btn">📄 対戦表をA4横PDFで作成</button>
+        <button class="btn btn-primary" onclick="buildTaisen(true)" style="flex:1 1 140px">📊 対戦表を自動作成</button>
+        <button class="btn btn-outline btn-sm" onclick="openSaveModal('taisen')">💾 対戦表を保存</button>
+        <button class="btn btn-outline btn-sm" onclick="openLoadModal('taisen')">📂 保存済み対戦表を開く</button>
+        <button class="btn btn-cyan no-print pdf-primary" onclick="exportA4Pdf('taisen')" id="tai-print-btn">📄 対戦表をA4縦1枚PDFで作成</button>
         <button class="btn-line-copy sm" onclick="copyTaisen()">📋 LINEコピー</button>
       </div>
     </div>
     <div class="pdf-guide no-print" id="t-guide">
       <span class="pdf-guide-title">📄 対戦表をPDFにする方法</span>
-      <div class="pdf-guide-note" id="t-pdf-orientation-note">2面はA4横、1面はA4縦で自動作成します。</div>
-      <div class="pdf-steps"><div class="pdf-step"><span class="pdf-step-no">1</span><span>上の<strong id="t-pdf-guide-button">「対戦表をA4横PDFで作成」</strong>をタップ</span></div><div class="pdf-step"><span class="pdf-step-no">2</span><span>「PDFができました」と表示されるまで待つ</span></div><div class="pdf-step"><span class="pdf-step-no">3</span><span>「共有・印刷」または「PDFを開く」を選ぶ</span></div></div>
+      <div class="pdf-guide-note" id="t-pdf-orientation-note">コート数にかかわらず、A4縦1枚へ自動で収めます。</div>
+      <div class="pdf-steps"><div class="pdf-step"><span class="pdf-step-no">1</span><span>上の<strong id="t-pdf-guide-button">「対戦表をA4縦1枚PDFで作成」</strong>をタップ</span></div><div class="pdf-step"><span class="pdf-step-no">2</span><span>「PDFができました」と表示されるまで待つ</span></div><div class="pdf-step"><span class="pdf-step-no">3</span><span>「共有・印刷」または「PDFを開く」を選ぶ</span></div></div>
       <div class="pdf-device-help">🍎 <strong>iPhone・iPad：</strong>「共有・印刷」から「プリント」「ファイルに保存」「LINE」を選べます。<br>🤖 <strong>Android：</strong>「PDFを開く」から共有・印刷できます。<br>💻 <strong>パソコン：</strong>「PDFを開く」から保存・印刷できます。</div>
     </div>
     <div id="taisen-preview" style="margin-top:12px"></div>
@@ -865,6 +907,7 @@ var _matchResults={};
 var _allTournamentResults={};
 var _resultContextKey="";
 var _resultSaveTimer=null;
+var _rankingFeedbackTimer=null;
 
 function matchResultKey(blockIndex,home,away){
   var teams=[String(home||""),String(away||"")].sort(function(a,b){return a.localeCompare(b,"ja");});
@@ -887,7 +930,7 @@ function storedMatchResult(key,home,away){
   return result;
 }
 function scoreInputHtml(key,side,team,value){
-  return '<input class="score-input no-print-border" type="number" inputmode="numeric" min="0" max="99" step="1" value="'+escapeHtml(value)+'" data-side="'+side+'" aria-label="'+escapeHtml(team)+'の得点">';
+  return '<input class="score-input no-print-border" type="number" inputmode="numeric" pattern="[0-9]*" min="0" max="99" step="1" autocomplete="off" value="'+escapeHtml(value)+'" data-side="'+side+'" aria-label="'+escapeHtml(team)+'の得点">';
 }
 function setResultSaveStatus(state,text){
   document.querySelectorAll(".result-save-status").forEach(function(status){status.className="result-save-status "+state;status.textContent=text;});
@@ -900,6 +943,17 @@ function scheduleTournamentResultsSave(){
     dbSave("tournament_match_results",_allTournamentResults,RESULTS_KEY,function(){setResultSaveStatus("saved","クラウド保存済み");},function(){setResultSaveStatus("error","保存失敗・再入力不要");});
   },500);
 }
+function showRankingUpdateFeedback(){
+  window.clearTimeout(_rankingFeedbackTimer);
+  document.querySelectorAll(".rank-update-feedback").forEach(function(feedback){feedback.textContent="✅ 順位表を更新しました";feedback.classList.add("show");});
+  _rankingFeedbackTimer=window.setTimeout(function(){document.querySelectorAll(".rank-update-feedback").forEach(function(feedback){feedback.classList.remove("show");});},1700);
+}
+function scrollToTournamentRankings(){
+  var heading=document.querySelector("#taisen-preview .ranking-heading");
+  if(!heading)return;
+  heading.scrollIntoView({behavior:"smooth",block:"start"});
+  heading.setAttribute("tabindex","-1");heading.focus({preventScroll:true});
+}
 function handleScoreInput(input){
   var row=input.closest(".taisen-game-row"),homeInput=row.querySelector('[data-side="home"]'),awayInput=row.querySelector('[data-side="away"]');
   [homeInput,awayInput].forEach(function(field){
@@ -908,7 +962,7 @@ function handleScoreInput(input){
   var key=row.dataset.resultKey,home=row.dataset.home,away=row.dataset.away;
   if(homeInput.value===""&&awayInput.value==="")delete _matchResults[key];
   else _matchResults[key]={home:home,away:away,homeScore:homeInput.value,awayScore:awayInput.value};
-  updateTournamentResults();scheduleTournamentResultsSave();
+  updateTournamentResults();showRankingUpdateFeedback();scheduleTournamentResultsSave();
 }
 function resultsForBlock(blockIndex,block){
   var results={};
@@ -928,12 +982,14 @@ function updateTournamentResults(){
     standings.forEach(function(stat,index){
       var row=rows[stat.team];if(!row)return;
       row.classList.toggle("rank-alt",index%2===1);body.appendChild(row);
-      [["rank",hasPlayedMatch?stat.rank:"－"],["played",stat.played],["wins",stat.wins],["draws",stat.draws],["losses",stat.losses],["gf",stat.goalsFor],["ga",stat.goalsAgainst],["gd",stat.goalDifference],["points",stat.points]].forEach(function(pair){var cell=row.querySelector('[data-stat="'+pair[0]+'"]');if(cell)cell.textContent=pair[1];});
+      var display=SMCTournamentScheduler.standingDisplay?SMCTournamentScheduler.standingDisplay(stat):stat;
+      [["rank",display.rank],["played",display.played],["wins",display.wins],["draws",display.draws],["losses",display.losses],["gf",display.goalsFor],["ga",display.goalsAgainst],["gd",display.goalDifference],["points",display.points]].forEach(function(pair){var cell=row.querySelector('[data-stat="'+pair[0]+'"]');if(cell)cell.textContent=pair[1];});
     });
+    document.querySelectorAll('.ranking-empty[data-block-index="'+blockIndex+'"]').forEach(function(badge){badge.hidden=hasPlayedMatch;});
   });
   document.querySelectorAll(".round-result").forEach(function(cell){
     var result=storedMatchResult(cell.dataset.resultKey,cell.dataset.rowTeam,cell.dataset.opponent);
-    var complete=result&&result.homeScore!==""&&result.awayScore!=="";
+    var complete=result&&result.homeScore!==""&&result.homeScore!==null&&result.homeScore!==undefined&&result.awayScore!==""&&result.awayScore!==null&&result.awayScore!==undefined;
     cell.textContent=complete?(String(result.homeScore)+"－"+String(result.awayScore)):"";
   });
 }
@@ -1107,7 +1163,7 @@ function buildTaisen(forceNew){
   h+='<div class="tai-title">'+escapeHtml(title)+'　対戦表</div>';
   h+='<div class="tai-sub">'+escapeHtml((dateStr?dateStr+"　":"")+place)+'</div>';
   if(openingEnabled)h+=ceremonyBanner("opening","🎤 開会式",openingStart,openingMin,false);
-  h+='<div class="result-entry-help no-print"><span>⚽ 得点を入力すると、順位表と総当たり表へ自動反映されます。</span><span class="result-save-status">得点未入力</span></div>';
+  h+='<div class="result-entry-help no-print" id="score-entry" tabindex="-1"><div class="result-entry-copy"><strong class="result-entry-title">⚽ 試合結果の入力</strong><span class="result-entry-text">試合終了後、各試合の「得点」欄へ数字を入力してください。順位表・総当たり表へ自動反映されます。</span><span class="result-example">入力例：2 － 1</span></div><div class="result-entry-actions"><span class="rank-update-feedback" role="status" aria-live="polite"></span><span class="result-save-status">得点未入力</span><button class="rank-jump-button" type="button" onclick="scrollToTournamentRankings()">順位表を見る ↓</button></div><div class="result-rank-note">↓ 入力結果は下の順位表へ自動反映されます</div></div>';
 
   if(courts===2){
     /* 2コート：A面・B面を横に並べてスケジュール表示 */
@@ -1119,9 +1175,9 @@ function buildTaisen(forceNew){
       h+='<th class="sched-th" style="width:24px">No</th>';
       h+='<th class="sched-th" style="width:48px">開始</th>';
       h+='<th class="sched-th">ホーム</th>';
-      h+='<th class="sched-th" style="width:40px">得</th>';
+      h+='<th class="sched-th" style="width:40px">得点</th>';
       h+='<th class="sched-th" style="width:18px">-</th>';
-      h+='<th class="sched-th" style="width:40px">得</th>';
+      h+='<th class="sched-th" style="width:40px">得点</th>';
       h+='<th class="sched-th">アウェイ</th>';
       h+='</tr></thead><tbody>';
       var no=1;
@@ -1135,9 +1191,9 @@ if(slot.isBreak){
           if(g.blkIdx===blk.idx){
             var resultKey=matchResultKey(g.blkIdx,g.home,g.away),stored=storedMatchResult(resultKey,g.home,g.away)||{};
             h+='<tr class="taisen-game-row'+(si%2===1?' tr-alt-bg':'')+'" data-match-id="'+esc3(g.id)+'" data-result-key="'+esc3(resultKey)+'" data-home="'+esc3(g.home)+'" data-away="'+esc3(g.away)+'">';
-            h+='<td>'+no+'</td><td>'+slot.time+'</td>';
+            h+='<td class="game-no">第'+no+'試合</td><td class="game-time">'+slot.time+'開始</td>';
             h+='<td class="td-home">'+escapeHtml(g.home)+'</td>';
-            h+='<td class="td-score">'+scoreInputHtml(resultKey,"home",g.home,stored.homeScore===undefined?"":stored.homeScore)+'</td><td class="td-vs">－</td><td class="td-score">'+scoreInputHtml(resultKey,"away",g.away,stored.awayScore===undefined?"":stored.awayScore)+'</td>';
+            h+='<td class="td-score score-cell home-score">'+scoreInputHtml(resultKey,"home",g.home,stored.homeScore===undefined?"":stored.homeScore)+'</td><td class="td-vs">－</td><td class="td-score score-cell away-score">'+scoreInputHtml(resultKey,"away",g.away,stored.awayScore===undefined?"":stored.awayScore)+'</td>';
             h+='<td class="td-away">'+escapeHtml(g.away)+'<label class="game-fixed no-print"><input class="game-fixed-input" type="checkbox" data-block-index="'+blk.idx+'" data-match-id="'+esc3(g.id)+'" '+(g.fixed?'checked ':'')+'>固定</label></td>';
             h+='</tr>';
             no++;
@@ -1147,22 +1203,22 @@ if(slot.isBreak){
       h+='</tbody></table>';
 
       /* 順位表 */
-      h+='<div class="block-hd">'+blk.blkLabel+' 順位表</div>';
-      h+='<table class="rt"><thead><tr>';
+      h+='<div class="block-hd ranking-heading" data-block-index="'+blk.idx+'"><span>'+blk.blkLabel+' 順位表</span><span class="ranking-help no-print">試合結果を入力すると自動更新 <span class="ranking-empty" data-block-index="'+blk.idx+'">試合結果未入力</span></span></div>';
+      h+='<div class="ranking-scroll"><table class="rt"><thead><tr>';
       h+='<th class="rank-th">#</th><th class="rank-th">チーム名</th>';
       h+='<th class="rank-th">試</th><th class="rank-th">勝</th><th class="rank-th">分</th><th class="rank-th">負</th>';
       h+='<th class="rank-th">得</th><th class="rank-th">失</th><th class="rank-th">差</th><th class="rank-th">点</th>';
       h+='</tr></thead><tbody class="rank-body" data-block-index="'+blk.idx+'">';
       blk.teams.forEach(function(t,i){
         h+='<tr class="rank-row'+(i%2===1?' rank-alt':'')+'" data-team="'+esc3(t)+'">';
-        h+='<td data-stat="rank">－</td><td class="td-name">'+escapeHtml(t)+'</td>';
-        h+='<td data-stat="played">0</td><td data-stat="wins">0</td><td data-stat="draws">0</td><td data-stat="losses">0</td><td data-stat="gf">0</td><td data-stat="ga">0</td><td data-stat="gd">0</td><td data-stat="points">0</td></tr>';
+        h+='<td data-stat="rank"></td><td class="td-name">'+escapeHtml(t)+'</td>';
+        h+='<td data-stat="played"></td><td data-stat="wins"></td><td data-stat="draws"></td><td data-stat="losses"></td><td data-stat="gf"></td><td data-stat="ga"></td><td data-stat="gd"></td><td data-stat="points"></td></tr>';
       });
-      h+='</tbody></table>';
+      h+='</tbody></table></div>';
 
       /* 総当り票 */
       h+='<div class="round-title">'+blk.blkLabel+' 総当り票</div>';
-      h+='<table class="rct"><thead><tr><th class="round-th-h"></th>';
+      h+='<div class="round-scroll"><table class="rct"><thead><tr><th class="round-th-h"></th>';
       blk.teams.forEach(function(t){h+='<th class="round-th-t">'+escapeHtml(t)+'</th>';});
       h+='</tr></thead><tbody>';
       blk.teams.forEach(function(t1,i){
@@ -1173,7 +1229,7 @@ if(slot.isBreak){
         });
         h+='</tr>';
       });
-      h+='</tbody></table>';
+      h+='</tbody></table></div>';
       h+='</div>';
     });
     h+='</div>';
@@ -1184,7 +1240,7 @@ if(slot.isBreak){
     h+='<th class="sched-th" style="width:24px">No</th><th class="sched-th" style="width:48px">開始</th>';
     h+='<th class="sched-th" style="width:60px">区分</th>';
     h+='<th class="sched-th">ホーム</th>';
-    h+='<th class="sched-th" style="width:40px">得</th><th class="sched-th" style="width:18px">-</th><th class="sched-th" style="width:40px">得</th>';
+    h+='<th class="sched-th" style="width:40px">得点</th><th class="sched-th" style="width:18px">-</th><th class="sched-th" style="width:40px">得点</th>';
     h+='<th class="sched-th">アウェイ</th><th class="sched-th" style="width:55px">備考</th>';
     h+='</tr></thead><tbody>';
     var fn=1;
@@ -1192,10 +1248,10 @@ if(slot.isBreak){
      [sf,"A2位","B2位","2位同士"],[sf,"A1位","B1位","1位同士"]].forEach(function(f,i){
       var finalKey=matchResultKey("final",f[1],f[2]),finalStored=storedMatchResult(finalKey,f[1],f[2])||{};
       h+='<tr class="taisen-game-row final-game-row'+(i>=2?' tr-final':'')+'" data-result-key="'+esc3(finalKey)+'" data-home="'+esc3(f[1])+'" data-away="'+esc3(f[2])+'">';
-      h+='<td>'+fn+'</td><td>'+f[0]+'</td><td>順位戦</td>';
+      h+='<td class="game-no">第'+fn+'試合</td><td class="game-time">'+f[0]+'開始</td><td class="game-kind">順位戦</td>';
       h+='<td class="td-home">'+f[1]+'</td>';
-      h+='<td class="td-score">'+scoreInputHtml(finalKey,"home",f[1],finalStored.homeScore===undefined?"":finalStored.homeScore)+'</td><td class="td-vs">－</td><td class="td-score">'+scoreInputHtml(finalKey,"away",f[2],finalStored.awayScore===undefined?"":finalStored.awayScore)+'</td>';
-      h+='<td class="td-away">'+f[2]+'</td><td>'+f[3]+'</td></tr>';
+      h+='<td class="td-score score-cell home-score">'+scoreInputHtml(finalKey,"home",f[1],finalStored.homeScore===undefined?"":finalStored.homeScore)+'</td><td class="td-vs">－</td><td class="td-score score-cell away-score">'+scoreInputHtml(finalKey,"away",f[2],finalStored.awayScore===undefined?"":finalStored.awayScore)+'</td>';
+      h+='<td class="td-away">'+f[2]+'</td><td class="game-note">'+f[3]+'</td></tr>';
       fn++;
     });
     h+='</tbody></table>';
@@ -1208,7 +1264,7 @@ if(slot.isBreak){
     h+='<table class="st"><thead><tr>';
     h+='<th class="sched-th" style="width:28px">No</th><th class="sched-th" style="width:52px">開始</th>';
     h+='<th class="sched-th">ホーム</th>';
-    h+='<th class="sched-th" style="width:42px">得</th><th class="sched-th" style="width:20px">-</th><th class="sched-th" style="width:42px">得</th>';
+    h+='<th class="sched-th" style="width:42px">得点</th><th class="sched-th" style="width:20px">-</th><th class="sched-th" style="width:42px">得点</th>';
     h+='<th class="sched-th">アウェイ</th><th class="sched-th" style="width:60px">備考</th>';
     h+='</tr></thead><tbody>';
     schedsByTime.forEach(function(slot,si){
@@ -1220,29 +1276,29 @@ if(slot.isBreak){
       slot.games.forEach(function(g,gi){
         var resultKey=matchResultKey(g.blkIdx,g.home,g.away),stored=storedMatchResult(resultKey,g.home,g.away)||{};
         h+='<tr class="taisen-game-row'+(si%2===1?' tr-alt-bg':'')+'" data-match-id="'+esc3(g.id)+'" data-result-key="'+esc3(resultKey)+'" data-home="'+esc3(g.home)+'" data-away="'+esc3(g.away)+'">';
-        h+='<td>'+(si+1)+'</td><td>'+slot.time+'</td>';
+        h+='<td class="game-no">第'+(si+1)+'試合</td><td class="game-time">'+slot.time+'開始</td>';
         h+='<td class="td-home">'+escapeHtml(g.home)+'</td>';
-        h+='<td class="td-score">'+scoreInputHtml(resultKey,"home",g.home,stored.homeScore===undefined?"":stored.homeScore)+'</td><td class="td-vs">－</td><td class="td-score">'+scoreInputHtml(resultKey,"away",g.away,stored.awayScore===undefined?"":stored.awayScore)+'</td>';
-        h+='<td class="td-away">'+escapeHtml(g.away)+'<label class="game-fixed no-print"><input class="game-fixed-input" type="checkbox" data-block-index="0" data-match-id="'+esc3(g.id)+'" '+(g.fixed?'checked ':'')+'>固定</label></td><td></td></tr>';
+        h+='<td class="td-score score-cell home-score">'+scoreInputHtml(resultKey,"home",g.home,stored.homeScore===undefined?"":stored.homeScore)+'</td><td class="td-vs">－</td><td class="td-score score-cell away-score">'+scoreInputHtml(resultKey,"away",g.away,stored.awayScore===undefined?"":stored.awayScore)+'</td>';
+        h+='<td class="td-away">'+escapeHtml(g.away)+'<label class="game-fixed no-print"><input class="game-fixed-input" type="checkbox" data-block-index="0" data-match-id="'+esc3(g.id)+'" '+(g.fixed?'checked ':'')+'>固定</label></td><td class="game-note"></td></tr>';
       });
     });
     h+='</tbody></table>';
     if(closingEnabled)h+=ceremonyBanner("closing","🏆 閉会式",displayedClosingTime,closingMin,!requestedClosingStart);
 
-    h+='<div class="block-hd">順位表</div>';
-    h+='<table class="rt"><thead><tr>';
+    h+='<div class="block-hd ranking-heading" data-block-index="0"><span>順位表</span><span class="ranking-help no-print">試合結果を入力すると自動更新 <span class="ranking-empty" data-block-index="0">試合結果未入力</span></span></div>';
+    h+='<div class="ranking-scroll"><table class="rt"><thead><tr>';
     h+='<th class="rank-th">#</th><th class="rank-th">チーム名</th>';
     h+='<th class="rank-th">試</th><th class="rank-th">勝</th><th class="rank-th">分</th><th class="rank-th">負</th>';
     h+='<th class="rank-th">得</th><th class="rank-th">失</th><th class="rank-th">差</th><th class="rank-th">点</th>';
     h+='</tr></thead><tbody class="rank-body" data-block-index="0">';
     blk.teams.forEach(function(t,i){
-      h+='<tr class="rank-row'+(i%2===1?' rank-alt':'')+'" data-team="'+esc3(t)+'"><td data-stat="rank">－</td><td class="td-name">'+escapeHtml(t)+'</td>';
-      h+='<td data-stat="played">0</td><td data-stat="wins">0</td><td data-stat="draws">0</td><td data-stat="losses">0</td><td data-stat="gf">0</td><td data-stat="ga">0</td><td data-stat="gd">0</td><td data-stat="points">0</td></tr>';
+      h+='<tr class="rank-row'+(i%2===1?' rank-alt':'')+'" data-team="'+esc3(t)+'"><td data-stat="rank"></td><td class="td-name">'+escapeHtml(t)+'</td>';
+      h+='<td data-stat="played"></td><td data-stat="wins"></td><td data-stat="draws"></td><td data-stat="losses"></td><td data-stat="gf"></td><td data-stat="ga"></td><td data-stat="gd"></td><td data-stat="points"></td></tr>';
     });
-    h+='</tbody></table>';
+    h+='</tbody></table></div>';
 
     h+='<div class="round-title">総当り票</div>';
-    h+='<table class="rct"><thead><tr><th class="round-th-h" style="min-width:80px"></th>';
+    h+='<div class="round-scroll"><table class="rct"><thead><tr><th class="round-th-h" style="min-width:80px"></th>';
     blk.teams.forEach(function(t){h+='<th class="round-th-t">'+escapeHtml(t)+'</th>';});
     h+='</tr></thead><tbody>';
     blk.teams.forEach(function(t1,i){
@@ -1250,7 +1306,7 @@ if(slot.isBreak){
       blk.teams.forEach(function(t2,j){var roundKey=matchResultKey(0,t1,t2);h+=i===j?'<td class="td-self">－</td>':'<td class="td-score round-result" data-result-key="'+esc3(roundKey)+'" data-row-team="'+esc3(t1)+'" data-opponent="'+esc3(t2)+'"></td>';});
       h+='</tr>';
     });
-    h+='</tbody></table>';
+    h+='</tbody></table></div>';
   }
 
   h+='<div class="pdf-footnote">※ 得点はアプリで入力すると、順位表と総当たり表へ自動反映されます。</div>';
@@ -1457,9 +1513,8 @@ function buildAndPrintPortrait(){
   smcPrint({orientation:"portrait",target:"tournament-guidelines",margin:"6mm"});
 }
 function buildAndPrintLandscape(){
-  var orientation=selectedScheduleOrientation();
-  document.body.dataset.courtLayout=orientation==="portrait"?"one":"two";
-  if(buildTaisen()!==false)smcPrint({orientation:orientation,target:"tournament-schedule",margin:"5mm"});
+  document.body.dataset.courtLayout="one";
+  if(buildTaisen()!==false)smcPrint({orientation:"portrait",target:"tournament-schedule",margin:"5mm"});
 }
 
 var _pdfReadyUrl="";
@@ -1469,16 +1524,14 @@ function safePdfFilename(value){
   return String(value||"SMC大会").replace(/[\\/:*?"<>|]/g,"_").replace(/\s+/g," ").trim();
 }
 function selectedScheduleOrientation(){
-  return Number(gv("t-courts"))===1?"portrait":"landscape";
+  return "portrait";
 }
 function updatePdfOrientationLabel(){
-  var portrait=selectedScheduleOrientation()==="portrait";
-  var label=portrait?"A4縦":"A4横";
   var button=document.getElementById("tai-print-btn");
   var guideButton=document.getElementById("t-pdf-guide-button");
-  if(button)button.textContent="📄 対戦表を"+label+"PDFで作成";
-  if(guideButton)guideButton.textContent="「対戦表を"+label+"PDFで作成」";
-  document.body.dataset.courtLayout=portrait?"one":"two";
+  if(button)button.textContent="📄 対戦表をA4縦1枚PDFで作成";
+  if(guideButton)guideButton.textContent="「対戦表をA4縦1枚PDFで作成」";
+  document.body.dataset.courtLayout="one";
 }
 function updateVenueMapOption(){
   var checkbox=document.getElementById("include-venue-map");
@@ -1561,8 +1614,8 @@ async function exportA4Pdf(kind){
   var isSchedule=kind==="taisen";
   var includeVenueMap=!isSchedule&&!!(document.getElementById("include-venue-map")||{}).checked;
   var scheduleOrientation=isSchedule?selectedScheduleOrientation():"portrait";
-  var scheduleLandscape=isSchedule&&scheduleOrientation==="landscape";
-  var pageLabel=isSchedule?(scheduleLandscape?"A4横":"A4縦"):"A4縦";
+  var scheduleLandscape=false;
+  var pageLabel=isSchedule?"A4縦・1枚":"A4縦";
   var button=document.getElementById(isSchedule?"tai-print-btn":"you-print-btn");
   var originalLabel=button?button.textContent:"";
   try{
@@ -1579,7 +1632,7 @@ async function exportA4Pdf(kind){
     if(!sheet)throw new Error("プレビューを作成できませんでした。");
     sheet.classList.add("pdf-capture");
     if(!isSchedule)fitGuidelineCaptureToA4(sheet);
-    if(isSchedule&&!scheduleLandscape)sheet.classList.add("pdf-one-court");
+    if(isSchedule)sheet.classList.add("pdf-one-court");
     if(document.fonts&&document.fonts.ready)await document.fonts.ready;
     await new Promise(function(resolve){requestAnimationFrame(function(){requestAnimationFrame(resolve);});});
     var canvas,safePageBreaks=[];
@@ -1613,7 +1666,7 @@ async function exportA4Pdf(kind){
     var widthRatio=maxWidth/canvas.width;
     var heightAtReadableWidth=canvas.height*widthRatio;
     var splitThreshold=isSchedule?1.08:1.24;
-    if(!scheduleLandscape&&heightAtReadableWidth>maxHeight*splitThreshold){
+    if(!isSchedule&&!scheduleLandscape&&heightAtReadableWidth>maxHeight*splitThreshold){
       var sliceHeight=Math.max(1,Math.floor(maxHeight/widthRatio));
       var offset=0,pageIndex=0;
       while(offset<canvas.height){
@@ -1640,7 +1693,7 @@ async function exportA4Pdf(kind){
       pdf.addImage(canvas.toDataURL("image/jpeg",.94),"JPEG",x,margin,drawWidth,drawHeight,undefined,"FAST");
     }
     if(includeVenueMap)await addVenueMapPage(pdf);
-    var filename=safePdfFilename(isSchedule?gv("t-title"):gv("y-title"))+(isSchedule?(scheduleLandscape?"_対戦表_A4横.pdf":"_対戦表_A4縦.pdf"):(includeVenueMap?"_大会要項・会場案内_A4縦.pdf":"_大会要項_A4縦.pdf"));
+    var filename=safePdfFilename(isSchedule?gv("t-title"):gv("y-title"))+(isSchedule?"_対戦表_A4縦1枚.pdf":(includeVenueMap?"_大会要項・会場案内_A4縦.pdf":"_大会要項_A4縦.pdf"));
     var finalPageLabel=includeVenueMap?"A4縦・全"+pdf.getNumberOfPages()+"ページ":pageLabel;
     showPdfReadyModal(pdf.output("blob"),filename,finalPageLabel);
   }catch(error){
@@ -1678,7 +1731,8 @@ var TOURNAMENT_CONTEXT = (function(){
     dateIso: params.get("dateIso") || "",
     dateLabel: params.get("date") || "",
     name: params.get("name") || "",
-    category: params.get("category") || ""
+    category: params.get("category") || "",
+    view: params.get("view") || ""
   };
 })();
 var _activeGameAdjustDateId = TOURNAMENT_CONTEXT.dateId;
@@ -1691,12 +1745,30 @@ var _activeDateMeta = {
 };
 var _contextHydrated = false;
 
+function updateTournamentContextLine(){
+  var line=document.getElementById("tournament-context-line");if(!line)return;
+  if(!_activeGameAdjustDateId){line.textContent="大会未選択：上の「試合調整と連動する日程一覧」から選べます。";return;}
+  var parts=[_activeDateMeta.name||gv("t-title")||gv("y-title"),_activeDateMeta.dateIso||gv("t-date"),_activeDateMeta.category].filter(Boolean);
+  line.textContent="選択中："+parts.join(" ｜ ");
+}
+function focusRequestedTournamentView(){
+  if(TOURNAMENT_CONTEXT.view!=="results")return false;
+  switchDoc("taisen",document.getElementById("tbtn-t"));
+  window.setTimeout(function(){
+    var target=document.getElementById("score-entry");
+    if(target){target.scrollIntoView({behavior:"smooth",block:"start"});target.focus({preventScroll:true});}
+  },220);
+  return true;
+}
+updateTournamentContextLine();
+
 // Firebase読込
 dbListen("tournament_saves", function(val){
   _allSaves = (val && typeof val==="object") ? val : {};
   // 端末キャッシュが同期読込されても、テンプレート初期化後に連動処理を行う。
   window.setTimeout(function(){
     renderLinkedTournamentDates();
+    updateTournamentContextLine();
     if(_activeGameAdjustDateId && !_contextHydrated){
       _contextHydrated = true;
       hydrateLinkedDate(_activeGameAdjustDateId, _activeDateMeta);
@@ -1905,6 +1977,7 @@ function clearLinkedDate(){
   _activeGameAdjustDateId="";
   _activeDateMeta={dateIso:"",dateLabel:"",name:"",category:""};
   renderLinkedTournamentDates();
+  updateTournamentContextLine();
 }
 function hydrateLinkedDate(dateId, meta){
   _activeGameAdjustDateId=dateId||"";
@@ -1936,7 +2009,9 @@ function hydrateLinkedDate(dateId, meta){
   buildYoukou();
   buildTaisen();
   renderLinkedTournamentDates();
+  updateTournamentContextLine();
   if(_activeGameAdjustDateId){
+    if(focusRequestedTournamentView())return;
     switchDoc("youkou",document.getElementById("tbtn-y"));
     window.setTimeout(function(){
       var editor=document.querySelector("#doc-youkou .panel");

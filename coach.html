@@ -243,6 +243,38 @@
     }
     @media(max-width:340px){.coach-preparation-grid{grid-template-columns:1fr}.coach-event-tab{grid-template-columns:minmax(0,1fr) 72px}.coach-event-browser{padding:10px}.coach-next-actions a.coach-action-card{min-height:100px;padding-inline:9px}.coach-action-title{font-size:.7rem}.coach-action-desc{font-size:.56rem}}
     @media(max-width:370px){.c-card-grid{grid-template-columns:1fr}}
+    /* 大会管理ダッシュボード：選択中→進行→次の操作の順で読む */
+    .coach-dashboard-head{display:flex;align-items:flex-start;justify-content:space-between;gap:12px;margin-bottom:10px}
+    .coach-dashboard-title{color:#fff;font-size:.96rem;font-weight:1000;line-height:1.35}
+    .coach-dashboard-copy{margin-top:3px;color:#9fc8e2;font-size:.67rem;line-height:1.5}
+    .coach-event-picker{margin-top:12px;border:1px solid rgba(0,212,255,.25);border-radius:11px;background:rgba(0,18,34,.38);overflow:hidden}
+    .coach-event-picker>summary{display:flex;align-items:center;justify-content:space-between;gap:10px;min-height:48px;padding:10px 12px;color:#bfefff;font-size:.72rem;font-weight:900;cursor:pointer;list-style:none}
+    .coach-event-picker>summary::-webkit-details-marker{display:none}
+    .coach-event-picker>summary::after{content:"＋";display:grid;place-items:center;width:26px;height:26px;border-radius:50%;background:rgba(0,212,255,.12);color:#8de6ff;font-size:1rem}
+    .coach-event-picker[open]>summary::after{content:"－"}
+    .coach-event-picker-body{padding:0 10px 10px}
+    .coach-flow{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:7px;margin-top:8px}
+    .coach-flow-step{position:relative;min-width:0;min-height:76px;padding:9px;border:1px solid rgba(148,163,184,.28);border-radius:10px;background:rgba(148,163,184,.07)}
+    .coach-flow-step.is-current{border-color:#ff9d42;box-shadow:0 0 0 1px rgba(255,157,66,.18)}
+    .coach-flow-step.is-complete{border-color:rgba(0,204,102,.42);background:rgba(0,204,102,.08)}
+    .coach-flow-no{color:#8ca5b8;font-size:.58rem;font-weight:1000;letter-spacing:.05em}
+    .coach-flow-step.is-current .coach-flow-no{color:#ffc278}.coach-flow-step.is-complete .coach-flow-no{color:#72f0ad}
+    .coach-flow-name{display:block;margin-top:3px;color:#fff;font-size:.68rem;font-weight:900;line-height:1.35;overflow-wrap:anywhere}
+    .coach-flow-status{display:inline-flex;margin-top:6px;padding:2px 6px;border-radius:99px;background:rgba(148,163,184,.14);color:#c5d0da;font-size:.56rem;font-weight:1000}
+    .coach-flow-step.is-current .coach-flow-status{background:rgba(255,157,66,.15);color:#ffc278}.coach-flow-step.is-complete .coach-flow-status{background:rgba(0,204,102,.14);color:#72f0ad}
+    .coach-action-card.is-results::before{background:#2ab56f}
+    body[data-theme="light"] .coach-dashboard-title,body[data-theme="light"] .coach-flow-name{color:#17263c}
+    body[data-theme="light"] .coach-dashboard-copy{color:#42546b}
+    body[data-theme="light"] .coach-event-picker{background:#f8fbfe;border-color:#79a9bf}
+    body[data-theme="light"] .coach-event-picker>summary{color:#14507f}
+    body[data-theme="light"] .coach-flow-step{background:#f4f6f8;border-color:#b8c3cf}
+    body[data-theme="light"] .coach-flow-step.is-current{background:#fff7ed;border-color:#c86500}
+    body[data-theme="light"] .coach-flow-step.is-complete{background:#ecfdf3;border-color:#3ca06d}
+    body[data-theme="light"] .coach-flow-no{color:#52647a}body[data-theme="light"] .coach-flow-status{background:#e2e8f0;color:#334155}
+    body[data-theme="light"] .coach-flow-step.is-current .coach-flow-no,body[data-theme="light"] .coach-flow-step.is-current .coach-flow-status{color:#8f4200}
+    body[data-theme="light"] .coach-flow-step.is-complete .coach-flow-no,body[data-theme="light"] .coach-flow-step.is-complete .coach-flow-status{color:#166534}
+    @media(max-width:520px){.coach-flow{grid-template-columns:repeat(2,minmax(0,1fr))}.coach-dashboard-head{display:block}}
+    @media(max-width:340px){.coach-flow-step{padding:8px 7px}.coach-flow-name{font-size:.64rem}}
   </style>
 </head>
 <body>
@@ -268,9 +300,8 @@
     <!-- ===== セクション：試合・大会 ===== -->
     <div class="c-section-div" id="coach-match"><div class="csd-icon">🏟️</div><div class="csd-text">試合・大会</div><div class="csd-sub">MATCH & TOURNAMENT</div></div>
     <div class="coach-event-browser" id="coach-event-browser" aria-live="polite">
-      <div class="coach-event-browser-head">
-        <div class="coach-event-browser-title">🏆 大会一覧</div>
-        <div class="coach-event-browser-help">大会をタップして選択</div>
+      <div class="coach-dashboard-head">
+        <div><div class="coach-dashboard-title">🏆 大会管理ダッシュボード</div><div class="coach-dashboard-copy">大会を選び、準備・当日入力・PDF・会計まで順番に進めます。</div></div>
       </div>
       <div class="coach-event-empty">大会情報を読み込んでいます…</div>
     </div>
@@ -818,8 +849,8 @@ document.addEventListener("DOMContentLoaded", function(){
   var requestedCoachEventId=validCoachEventId(requestedCoachEventRaw);
   var requestedCoachEventPending=!!requestedCoachEventRaw;
   var selectedCoachEventId=requestedCoachEventId||(function(){try{return sessionStorage.getItem(COACH_EVENT_KEY)||"";}catch(e){return "";}})();
-  var coachState={gameAdjust:null,duties:[],tournamentSaves:{},accounting:{tournaments:[]}};
-  var coachDataReady={gameAdjust:false,duties:false,tournamentSaves:false,accounting:false};
+  var coachState={gameAdjust:null,duties:[],tournamentSaves:{},tournamentResults:{},accounting:{tournaments:[]}};
+  var coachDataReady={gameAdjust:false,duties:false,tournamentSaves:false,tournamentResults:false,accounting:false};
   var showAllCoachEvents=false;
   var activeCoachEditId="",coachEditBaseline="",coachEventEditSaving=false;
   if(requestedCoachEventPending){var initialMessage=document.querySelector("#coach-event-browser .coach-event-empty");if(initialMessage)initialMessage.textContent="共有された大会情報を読み込んでいます…";}
@@ -947,6 +978,46 @@ document.addEventListener("DOMContentLoaded", function(){
       });
     });
   }
+  function tournamentEntries(dateId,type){
+    return Object.values(coachState.tournamentSaves&&typeof coachState.tournamentSaves==="object"?coachState.tournamentSaves:{})
+      .filter(function(entry){return entry&&String(entry.gameAdjustDateId||"")===String(dateId||"")&&(!type||entry.type===type);})
+      .sort(function(a,b){return String(b.savedAt||"").localeCompare(String(a.savedAt||""));});
+  }
+  function selectedEventVenue(item){
+    var entries=tournamentEntries(item&&item.id);
+    for(var i=0;i<entries.length;i++){
+      var entry=entries[i],data=entry.data||{};
+      if(String(data["t-place"]||"").trim())return String(data["t-place"]).trim();
+      var meta=Array.isArray(entry.guidelineMeta)?entry.guidelineMeta:entry.guidelineState&&Array.isArray(entry.guidelineState.meta)?entry.guidelineState.meta:[];
+      var place=meta.find(function(field){return field&&field.standardKey==="place"&&field.visible!==false;});
+      if(place&&String(place.content||"").trim())return String(place.content).trim();
+    }
+    return "会場未設定";
+  }
+  function validCompletedScore(value){
+    if(value===""||value===null||value===undefined)return false;
+    var number=Number(value);return Number.isInteger(number)&&number>=0;
+  }
+  function coachResultKey(blockIndex,home,away){
+    var teams=[String(home||""),String(away||"")].sort(function(a,b){return a.localeCompare(b,"ja");});
+    return "b"+blockIndex+"|"+encodeURIComponent(teams[0])+"|"+encodeURIComponent(teams[1]);
+  }
+  function resultProgressFor(item){
+    var key="date_"+encodeURIComponent(String(item&&item.id||"")).replace(/\./g,"%2E");
+    var set=coachState.tournamentResults&&coachState.tournamentResults[key];
+    var results=set&&set.results&&typeof set.results==="object"?set.results:{};
+    var latest=tournamentEntries(item&&item.id,"taisen")[0],expectedKeys=[];
+    try{
+      var schedule=latest&&latest.data&&latest.data.optimizedSchedule?JSON.parse(latest.data.optimizedSchedule):null;
+      if(schedule&&Array.isArray(schedule.blocks))schedule.blocks.forEach(function(block,blockIndex){
+        (Array.isArray(block.matches)?block.matches:[]).forEach(function(match){expectedKeys.push(coachResultKey(blockIndex,match.home,match.away));});
+      });
+    }catch(error){expectedKeys=[];}
+    var resultKeys=expectedKeys.length?expectedKeys:Object.keys(results);
+    var completed=resultKeys.filter(function(resultKey){var result=results[resultKey];return result&&validCompletedScore(result.homeScore)&&validCompletedScore(result.awayScore);}).length;
+    var total=expectedKeys.length;
+    return {completed:completed,total:total,complete:total>0&&completed>=total,started:completed>0};
+  }
   function preparationFor(item){
     var duty=linkedDuty(item.id);
     var duties=duty&&Array.isArray(duty.duties)?duty.duties:[];
@@ -957,13 +1028,17 @@ document.addEventListener("DOMContentLoaded", function(){
     var taisen=saves.some(function(entry){return entry&&String(entry.gameAdjustDateId||"")===String(item.id)&&entry.type==="taisen";});
     var accounting=linkedAccounting(item.id);
     var accountingReady=hasAccountingInput(accounting);
-    var completeCount=(dutyTotal>0&&dutyDone>=dutyTotal?1:0)+(youkou?1:0)+(taisen?1:0)+(accountingReady?1:0);
+    var results=resultProgressFor(item);
+    var participantTarget=Number(item&&item.target)||0,confirmed=confirmedTeamCount(item);
+    var participantReady=participantTarget>0?confirmed>=participantTarget:confirmed>0;
+    var documentsReady=youkou&&taisen;
+    var completeCount=(participantReady?1:0)+(dutyTotal>0&&dutyDone>=dutyTotal?1:0)+(documentsReady?1:0)+(results.complete?2:0)+(accountingReady?1:0);
     var issues=[];
     if(!(dutyTotal>0&&dutyDone>=dutyTotal))issues.push("任務 "+dutyDone+"/"+dutyTotal);
     if(!youkou)issues.push("要綱");
     if(!taisen)issues.push("対戦表");
     if(!accountingReady)issues.push(accounting?"会計入力":"会計作成");
-    return {dutyDone:dutyDone,dutyTotal:dutyTotal,youkou:youkou,taisen:taisen,accountingExists:!!accounting,accountingReady:accountingReady,completeCount:completeCount,issues:issues};
+    return {dutyDone:dutyDone,dutyTotal:dutyTotal,youkou:youkou,taisen:taisen,documentsReady:documentsReady,results:results,accountingExists:!!accounting,accountingReady:accountingReady,completeCount:completeCount,issues:issues};
   }
   function confirmedTeamCount(item){
     var dateId=String(item&&item.id||"");
@@ -979,6 +1054,11 @@ document.addEventListener("DOMContentLoaded", function(){
     var date=coachEventDate(item);if(!date)return SMCEventLinks.label(item);
     try{return new Intl.DateTimeFormat("ja-JP",{month:"numeric",day:"numeric",weekday:"short"}).format(date);}
     catch(error){return SMCEventLinks.label(item);}
+  }
+  function coachEventLongDate(item){
+    var date=coachEventDate(item);if(!date)return "日付未設定";
+    try{return new Intl.DateTimeFormat("ja-JP",{year:"numeric",month:"long",day:"numeric",weekday:"short"}).format(date);}
+    catch(error){return String(item&&item.dateIso||"日付未設定");}
   }
   function displayTournamentName(item){
     return String(item&&item.tournamentName||"").trim()||"大会名未設定";
@@ -999,34 +1079,52 @@ document.addEventListener("DOMContentLoaded", function(){
     if(days>0)return "大会まであと"+days+"日";
     return "終了（"+Math.abs(days)+"日前）";
   }
-  function preparationHtml(prep){
-    var dutyReady=prep.dutyTotal>0&&prep.dutyDone>=prep.dutyTotal;
-    return '<div class="coach-preparation-heading">準備状況</div><div class="coach-preparation-grid" aria-label="大会準備状況">'
-      +'<div class="coach-preparation-item'+(dutyReady?' is-ready':'')+'"><span>担当者・任務</span><strong>'+prep.dutyDone+'／'+prep.dutyTotal+'件完了</strong></div>'
-      +'<div class="coach-preparation-item'+(prep.youkou?' is-ready':'')+'"><span>大会要項</span><strong>'+(prep.youkou?'保存済み':'未作成')+'</strong></div>'
-      +'<div class="coach-preparation-item'+(prep.taisen?' is-ready':'')+'"><span>対戦表</span><strong>'+(prep.taisen?'保存済み':'未作成')+'</strong></div>'
-      +'<div class="coach-preparation-item'+(prep.accountingReady?' is-ready':'')+'"><span>会計・決算</span><strong>'+(prep.accountingReady?'完了':prep.accountingExists?'作成中':'未作成')+'</strong></div>'
-      +'</div>';
+  function flowState(done,started){return done?"complete":started?"working":"todo";}
+  function flowStepHtml(index,name,state,current){
+    var label=state==="complete"?"完了":state==="working"?"作業中":"未着手";
+    return '<div class="coach-flow-step is-'+state+(current?' is-current':'')+'"><span class="coach-flow-no">STEP '+index+'</span><strong class="coach-flow-name">'+escapeHtml(name)+'</strong><span class="coach-flow-status">'+label+'</span></div>';
+  }
+  function preparationHtml(item,prep,confirmed){
+    var target=Number(item&&item.target)||0;
+    var states=[
+      flowState(target>0?confirmed>=target:confirmed>0,confirmed>0),
+      flowState(prep.dutyTotal>0&&prep.dutyDone>=prep.dutyTotal,prep.dutyDone>0),
+      flowState(prep.documentsReady,prep.youkou||prep.taisen),
+      flowState(prep.results.complete,prep.results.started),
+      flowState(prep.results.complete,prep.results.started||prep.taisen),
+      flowState(prep.accountingReady,prep.accountingExists)
+    ];
+    var current=states.findIndex(function(state){return state!=="complete";});
+    var names=["参加チームを集める","担当・任務を決める","要綱・対戦表を作る","試合結果を入力する","順位表・PDFを完成する","会計・決算"];
+    return '<div class="coach-preparation-heading">大会の流れ</div><div class="coach-flow" aria-label="大会の進行状況">'+names.map(function(name,index){return flowStepHtml(index+1,name,states[index],index===current);}).join("")+'</div>';
   }
   function nextActionFor(item,prep,confirmed){
     var target=Number(item&&item.target)||0;
     if(target>confirmed)return {text:"参加確定が目標まであと "+(target-confirmed)+"チームです",label:"参加チームを確認する",page:"game_adjust.html"};
+    if(!target&&!confirmed)return {text:"参加チームがまだ登録されていません",label:"参加チームを確認する",page:"game_adjust.html"};
     if(!(prep.dutyTotal>0&&prep.dutyDone>=prep.dutyTotal))return {text:"任務分担が "+Math.max(0,prep.dutyTotal-prep.dutyDone)+"件未完了です",label:"任務分担を入力する",page:"duty_match.html"};
     if(!prep.youkou)return {text:"大会要項がまだ保存されていません",label:"大会要項を作成する",page:"tournament.html"};
     if(!prep.taisen)return {text:"対戦表がまだ保存されていません",label:"対戦表を作成する",page:"tournament.html"};
+    if(!prep.results.complete){
+      var resultText=prep.results.started?("試合結果は "+prep.results.completed+(prep.results.total?"／"+prep.results.total:"")+"試合入力済みです"):"試合結果がまだ入力されていません";
+      return {text:resultText,label:"試合結果を入力する",page:"tournament.html",view:"results"};
+    }
     if(!prep.accountingReady)return {text:prep.accountingExists?"会計・決算の入力が途中です":"会計・決算がまだ作成されていません",label:"会計・決算を入力する",page:"accounting.html"};
     return null;
   }
+  function eventActionHref(page,item,view){
+    var href=SMCEventLinks.href(page,item);return view?href+(href.indexOf("?")>=0?"&":"?")+"view="+encodeURIComponent(view):href;
+  }
   function nextActionHtml(item,prep,confirmed){
     var action=nextActionFor(item,prep,confirmed);
-    if(!action)return '<div class="coach-next-step is-ready"><div class="coach-next-step-label">次に行うこと</div><div class="coach-next-step-text">大会準備は完了しています</div></div>';
-    return '<div class="coach-next-step"><div class="coach-next-step-label">次に行うこと</div><div class="coach-next-step-text">'+escapeHtml(action.text)+'</div><a href="'+escapeHtml(SMCEventLinks.href(action.page,item))+'">'+escapeHtml(action.label)+'</a></div>';
+    if(!action)return '<div class="coach-next-step is-ready"><div class="coach-next-step-label">次にやること</div><div class="coach-next-step-text">大会の全工程が完了しています</div></div>';
+    return '<div class="coach-next-step"><div class="coach-next-step-label">次にやること</div><div class="coach-next-step-text">'+escapeHtml(action.text)+'</div><a href="'+escapeHtml(eventActionHref(action.page,item,action.view))+'">'+escapeHtml(action.label)+'</a></div>';
   }
   function coachEventButtonHtml(item,selected){
     var prep=preparationFor(item),confirmed=confirmedTeamCount(item),target=Number(item&&item.target)||0;
     return '<button type="button" class="coach-event-tab" role="tab" aria-selected="'+(selected?'true':'false')+'" tabindex="'+(selected?'0':'-1')+'" data-coach-event-id="'+escapeHtml(String(item.id||""))+'">'
       +'<span class="coach-event-tab-date">'+escapeHtml(coachDateLabel(item)+(item.cat?' ・ '+item.cat:''))+'</span><span class="coach-event-tab-name">'+escapeHtml(displayTournamentName(item))+'</span>'
-      +'<span class="coach-event-tab-progress">準備 '+prep.completeCount+'／4<br>参加確定 '+confirmed+(target?'／'+target:'')+'</span></button>';
+      +'<span class="coach-event-tab-progress">進行 '+prep.completeCount+'／6<br>参加確定 '+confirmed+(target?'／'+target:'')+'</span></button>';
   }
   function copyText(textValue){
     if(navigator.clipboard&&window.isSecureContext)return navigator.clipboard.writeText(textValue);
@@ -1048,12 +1146,14 @@ document.addEventListener("DOMContentLoaded", function(){
     if(prep.dutyDone<prep.dutyTotal)unfinished.push("任務分担が"+(prep.dutyTotal-prep.dutyDone)+"件未完了です");
     if(!prep.youkou)unfinished.push("大会要項が未作成です");
     if(!prep.taisen)unfinished.push("対戦表が未作成です");
+    if(!prep.results.complete)unfinished.push(prep.results.started?"試合結果が入力途中です":"試合結果が未入力です");
     if(!prep.accountingReady)unfinished.push(prep.accountingExists?"会計・決算の入力が途中です":"会計・決算が未作成です");
     var lines=["【大会準備の確認をお願いします】","","■"+displayTournamentName(item),[coachDateLabel(item),item.cat].filter(Boolean).join("／"),"",
       "参加確定："+confirmed+(target?"／"+target:"")+"チーム",
       "担当者・任務："+prep.dutyDone+"／"+prep.dutyTotal+"件完了",
       "大会要項："+(prep.youkou?"保存済み":"未作成"),
       "対戦表："+(prep.taisen?"保存済み":"未作成"),
+      "試合結果："+(prep.results.complete?"入力完了":prep.results.started?(prep.results.completed+(prep.results.total?"／"+prep.results.total:"")+"試合入力済み"):"未入力"),
       "会計・決算："+(prep.accountingReady?"完了":prep.accountingExists?"作成中":"未作成"),""];
     if(unfinished.length){lines.push("未完了：");unfinished.forEach(function(text){lines.push("・"+text);});lines.push("");}
     else lines.push("準備項目はすべて完了しています。","");
@@ -1097,22 +1197,24 @@ document.addEventListener("DOMContentLoaded", function(){
     var tabs=shownUpcoming.map(function(item){return coachEventButtonHtml(item,String(item.id)===String(selected.id));}).join("");
     var prep=preparationFor(selected);
     var confirmed=confirmedTeamCount(selected);
-    var meta=[coachDateLabel(selected),selected.cat,selected.target!=null?"目標 "+selected.target+"チーム":"", "決定 "+confirmed+"チーム"].filter(Boolean);
+    var meta=["日付："+coachEventLongDate(selected),"カテゴリー："+(selected.cat||"未設定"),"会場："+selectedEventVenue(selected),selected.target!=null?"参加："+confirmed+"／"+selected.target+"チーム":"参加確定："+confirmed+"チーム"].filter(Boolean);
     var otherItems=past.concat(undated),otherHtml=otherItems.map(function(item){return coachEventButtonHtml(item,String(item.id)===String(selected.id));}).join("");
-    root.innerHTML=shareNotice+'<div class="coach-event-browser-head"><div class="coach-event-browser-title">直近の大会</div><div class="coach-event-browser-help">今後 '+upcoming.length+'件</div></div>'
-      +(tabs?'<div class="coach-event-tabs" role="tablist" aria-label="直近の大会を選択">'+tabs+'</div>':'<div class="coach-event-empty">今後の大会はありません</div>')
-      +(upcoming.length>3?'<button type="button" class="coach-event-more" data-coach-event-more>'+(showAllCoachEvents?'直近3件だけ表示':'すべての大会を見る（'+upcoming.length+'件）')+'</button>':'')
+    root.innerHTML=shareNotice+'<div class="coach-dashboard-head"><div><div class="coach-dashboard-title">🏆 大会管理ダッシュボード</div><div class="coach-dashboard-copy">選択中の大会を確認し、下の「次にやること」から進めてください。</div></div></div>'
       +'<div class="coach-event-selected" role="tabpanel"><div class="coach-selected-kicker"><span>選択中の大会</span><span class="coach-selected-badge">選択中</span></div><div class="coach-event-selected-title">'+escapeHtml(displayTournamentName(selected))+'</div>'
       +'<div class="coach-event-selected-meta">'+meta.map(function(value){return '<span>'+escapeHtml(value)+'</span>';}).join('')+'</div><span class="coach-event-countdown">'+escapeHtml(countdownFor(selected))+'</span>'
-      +'<button type="button" class="coach-event-edit-button" data-coach-edit-event="'+escapeHtml(String(selected.id||""))+'">✏️ 大会名・日付を変更</button>'
-      +preparationHtml(prep)
+      +'<button type="button" class="coach-event-edit-button" data-coach-edit-event="'+escapeHtml(String(selected.id||""))+'">✏️ 大会名・日付などを変更</button>'
+      +preparationHtml(selected,prep,confirmed)
       +nextActionHtml(selected,prep,confirmed)
       +'<div class="coach-event-actions-title">大会の操作</div>'
       +'<div class="coach-next-actions">'
-      +'<a class="coach-action-card is-adjust" href="'+escapeHtml(SMCEventLinks.href("game_adjust.html",selected))+'"><span class="coach-action-icon" aria-hidden="true">📊</span><span class="coach-action-title">試合調整</span><span class="coach-action-desc">参加チームを確認</span></a><a class="coach-action-card is-duty" href="'+escapeHtml(SMCEventLinks.href("duty_match.html",selected))+'"><span class="coach-action-icon" aria-hidden="true">👥</span><span class="coach-action-title">任務分担</span><span class="coach-action-desc">担当者を確認</span></a>'
-      +'<a class="coach-action-card is-guideline" href="'+escapeHtml(SMCEventLinks.href("tournament.html",selected))+'"><span class="coach-action-icon" aria-hidden="true">📋</span><span class="coach-action-title">要項・対戦表</span><span class="coach-action-desc">作成・印刷</span></a><a class="coach-action-card is-accounting" href="'+escapeHtml(SMCEventLinks.href("accounting.html",selected))+'"><span class="coach-action-icon" aria-hidden="true">💴</span><span class="coach-action-title">会計・決算</span><span class="coach-action-desc">収支を管理</span></a></div>'
-      +'<button type="button" class="coach-share-button" data-coach-copy-id="'+escapeHtml(String(selected.id||""))+'">💬 大会準備の状況をLINEで共有</button><button type="button" class="coach-url-copy-button" data-coach-copy-url="'+escapeHtml(String(selected.id||""))+'">🔗 大会URLだけコピー</button><div class="coach-share-note">参加状況・任務分担・要項・対戦表の準備状況と、この大会を直接開くURLを共有します</div><div class="coach-share-feedback" id="coach-share-feedback" role="status" aria-live="polite"></div></div>'
-      +(otherHtml?'<details class="coach-other-events"><summary>過去・日付未設定の大会を見る（'+otherItems.length+'件）</summary><div class="coach-event-tabs" role="tablist" aria-label="その他の大会を選択">'+otherHtml+'</div></details>':'');
+      +'<a class="coach-action-card is-adjust" href="'+escapeHtml(SMCEventLinks.href("game_adjust.html",selected))+'"><span class="coach-action-icon" aria-hidden="true">🤝</span><span class="coach-action-title">参加チーム</span><span class="coach-action-desc">対戦相手へのお誘い・参加状況</span></a><a class="coach-action-card is-duty" href="'+escapeHtml(SMCEventLinks.href("duty_match.html",selected))+'"><span class="coach-action-icon" aria-hidden="true">👥</span><span class="coach-action-title">担当・任務</span><span class="coach-action-desc">本部・審判・会場係などを確認</span></a>'
+      +'<a class="coach-action-card is-guideline" href="'+escapeHtml(SMCEventLinks.href("tournament.html",selected))+'"><span class="coach-action-icon" aria-hidden="true">📋</span><span class="coach-action-title">大会要綱・対戦表</span><span class="coach-action-desc">大会資料・試合順を作成</span></a><a class="coach-action-card is-results" href="'+escapeHtml(eventActionHref("tournament.html",selected,"results"))+'"><span class="coach-action-icon" aria-hidden="true">⚽</span><span class="coach-action-title">試合結果</span><span class="coach-action-desc">得点を入力して順位表を更新</span></a>'
+      +'<a class="coach-action-card is-accounting" href="'+escapeHtml(SMCEventLinks.href("accounting.html",selected))+'"><span class="coach-action-icon" aria-hidden="true">💰</span><span class="coach-action-title">会計・決算</span><span class="coach-action-desc">大会の収支を確認</span></a></div>'
+      +'<button type="button" class="coach-share-button" data-coach-copy-id="'+escapeHtml(String(selected.id||""))+'">💬 大会準備の状況をLINEで共有</button><button type="button" class="coach-url-copy-button" data-coach-copy-url="'+escapeHtml(String(selected.id||""))+'">🔗 大会URLだけコピー</button><div class="coach-share-note">参加状況・任務分担・要項・対戦表・試合結果の進行状況と、この大会を直接開くURLを共有します</div><div class="coach-share-feedback" id="coach-share-feedback" role="status" aria-live="polite"></div></div>'
+      +'<details class="coach-event-picker"><summary>別の大会を選ぶ</summary><div class="coach-event-picker-body"><div class="coach-event-browser-head"><div class="coach-event-browser-title">直近の大会</div><div class="coach-event-browser-help">今後 '+upcoming.length+'件</div></div>'
+      +(tabs?'<div class="coach-event-tabs" role="tablist" aria-label="直近の大会を選択">'+tabs+'</div>':'<div class="coach-event-empty">今後の大会はありません</div>')
+      +(upcoming.length>3?'<button type="button" class="coach-event-more" data-coach-event-more>'+(showAllCoachEvents?'直近3件だけ表示':'すべての大会を見る（'+upcoming.length+'件）')+'</button>':'')
+      +(otherHtml?'<details class="coach-other-events"><summary>過去・日付未設定の大会を見る（'+otherItems.length+'件）</summary><div class="coach-event-tabs" role="tablist" aria-label="その他の大会を選択">'+otherHtml+'</div></details>':'')+'</div></details>';
     root.querySelectorAll("[data-coach-event-id]").forEach(function(button){
       button.addEventListener("click",function(){
         rememberCoachEvent(button.getAttribute("data-coach-event-id"));
@@ -1155,6 +1257,7 @@ document.addEventListener("DOMContentLoaded", function(){
   dbListen("game_adjust",function(value){coachState.gameAdjust=value;coachDataReady.gameAdjust=true;refreshCoachHub();},"smc_game_adj_v1",null);
   dbListen("duty_match",function(value){coachState.duties=Array.isArray(value)?value:[];coachDataReady.duties=true;refreshCoachHub();},"smc_duty_match_v3",[]);
   dbListen("tournament_saves",function(value){coachState.tournamentSaves=value&&typeof value==="object"?value:{};coachDataReady.tournamentSaves=true;refreshCoachHub();},"tournament_saves",{});
+  dbListen("tournament_match_results",function(value){coachState.tournamentResults=value&&typeof value==="object"?value:{};coachDataReady.tournamentResults=true;refreshCoachHub();},"tournament_match_results_v1",{});
   dbListen("accounting",function(value){coachState.accounting=value&&typeof value==="object"?value:{tournaments:[]};coachDataReady.accounting=true;refreshCoachHub();},"smc_accounting_v1",{tournaments:[]});
 })();
 </script>

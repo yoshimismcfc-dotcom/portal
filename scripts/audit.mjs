@@ -402,14 +402,14 @@ if (!guideSource.includes("固定10分休憩はありません")) {
 if (!commonSource.includes('data-print-target="tournament-schedule"') || !commonSource.includes("tournament-print-enhanced-style")) {
   fail("common.js", "対戦表の印刷専用デザインがありません");
 }
-if (!tournamentSource.includes("要項をA4縦PDFで作成") || !tournamentSource.includes("対戦表をA4横PDFで作成") || !tournamentSource.includes("exportA4Pdf") || !tournamentSource.includes("showPdfReadyModal") || !tournamentSource.includes("shareGeneratedPdf") || !tournamentSource.includes("pdf-device-help")) {
+if (!tournamentSource.includes("要項をA4縦PDFで作成") || !tournamentSource.includes("対戦表をA4縦1枚PDFで作成") || !tournamentSource.includes("exportA4Pdf") || !tournamentSource.includes("showPdfReadyModal") || !tournamentSource.includes("shareGeneratedPdf") || !tournamentSource.includes("pdf-device-help")) {
   fail("tournament.html", "要項・対戦表のPDF保存手順が分かりやすく表示されていません");
 }
-if (!tournamentSource.includes(".tai-sheet.pdf-capture .score-input") || !tournamentSource.includes(".tai-sheet.pdf-capture .rct") || !tournamentSource.includes("hasPlayedMatch?stat.rank:\"－\"") || !tournamentSource.includes("pdf-footnote")) {
+if (!tournamentSource.includes(".tai-sheet.pdf-capture .score-input") || !tournamentSource.includes(".tai-sheet.pdf-capture .rct") || !tournamentSource.includes("SMCTournamentScheduler.standingDisplay(stat)") || !tournamentSource.includes("pdf-footnote")) {
   fail("tournament.html", "対戦表PDFの配布用デザイン、得点欄、未実施順位の表示が整っていません");
 }
-if (!tournamentSource.includes("selectedScheduleOrientation") || !tournamentSource.includes("pdf-one-court") || !tournamentSource.includes("smc-taisen-one-page") || !tournamentSource.includes("_対戦表_A4縦.pdf") || !tournamentSource.includes("scheduleLandscape?\"landscape\":\"portrait\"")) {
-  fail("tournament.html", "対戦表PDFが2面=A4横、1面=A4縦へ自動切替されていません");
+if (!tournamentSource.includes("selectedScheduleOrientation") || !tournamentSource.includes("pdf-one-court") || !tournamentSource.includes("smc-taisen-one-page") || !tournamentSource.includes("_対戦表_A4縦1枚.pdf") || !tournamentSource.includes("if(!isSchedule&&!scheduleLandscape&&heightAtReadableWidth>maxHeight*splitThreshold)")) {
+  fail("tournament.html", "対戦表PDFがコート数にかかわらずA4縦1枚へ収まる設定になっていません");
 }
 if (!tournamentSource.includes("#doc-youkou .guideline-content-input[type=date],#doc-taisen #t-date") || !tournamentSource.includes(".guideline-content-input[type=date]::-webkit-date-and-time-value") || !tournamentSource.includes("min-inline-size:0!important")) {
   fail("tournament.html", "iPhoneで大会要綱の期日入力欄が横にはみ出す対策がありません");
@@ -429,7 +429,7 @@ for (const feature of ["fitGuidelineCaptureToA4","pdf-guideline-compact","pdf-gu
 for (const feature of ["DEFAULT_META","DEFAULT_SECTIONS","migrateLegacy","activeItems","missingStandards","restoreStandard"]) {
   if (!tournamentGuidelinesSource.includes(feature)) fail("tournament-guidelines.js", `大会要項データモデルが不足しています: ${feature}`);
 }
-if (!commonSource.includes('data-print-target="tournament-guidelines"') || !tournamentSource.includes("@page smc-taisen-page") || !tournamentSource.includes("size:A4 landscape")) {
+if (!commonSource.includes('data-print-target="tournament-guidelines"') || !tournamentSource.includes("@page smc-taisen-page") || !tournamentSource.includes("size:A4 portrait")) {
   fail("common.js", "要項・対戦表をA4一枚へ収める印刷調整がありません");
 }
 for (const resultFeature of ["score-input", "handleScoreInput", "updateTournamentResults", "tournament_match_results", "result-save-status", "matchResults"]) {
@@ -490,7 +490,7 @@ if (!dutyMatchSource.includes('dbListen("duty_match"') || !tournamentSource.incl
 if (!coachSource.includes("coach-event-browser") || !coachSource.includes("coach-menu-search") || !coachSource.includes('dbListen("game_adjust"')) {
   fail("coach.html", "大会一覧またはメニュー検索がありません");
 }
-if (!coachSource.includes("confirmedTeamCount") || !coachSource.includes('"決定 "+confirmed+"チーム"')) {
+if (!coachSource.includes("confirmedTeamCount") || !coachSource.includes("参加確定 '+confirmed")) {
   fail("coach.html", "大会一覧に現在決定している参加チーム数が表示されません");
 }
 if (coachSource.includes('id="coach-next-event"') || coachSource.includes("function renderNextEvent")) {

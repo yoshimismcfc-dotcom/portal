@@ -14,10 +14,10 @@ for (const required of [
   "function displayTournamentName(item)",
   "function chronologicalCoachDates(dates)",
   "function nextActionFor(item,prep,confirmed)",
-  "次に行うこと",
-  "大会準備は完了しています",
+  "次にやること",
+  "大会の全工程が完了しています",
   "大会準備の状況をLINEで共有",
-  "参加状況・任務分担・要項・対戦表の準備状況と、この大会を直接開くURLを共有します",
+  "参加状況・任務分担・要項・対戦表・試合結果の進行状況と、この大会を直接開くURLを共有します",
   "大会情報を読み込んでいます",
   "大会がまだ登録されていません",
   "＋ 大会を登録する",
@@ -26,18 +26,37 @@ for (const required of [
 ]) assert.ok(source.includes(required), "大会管理の初心者向け表示が不足しています: " + required);
 
 for (const required of [
-  '<span class="coach-action-icon" aria-hidden="true">📊</span>',
+  '<span class="coach-action-icon" aria-hidden="true">🤝</span>',
   '<span class="coach-action-icon" aria-hidden="true">👥</span>',
   '<span class="coach-action-icon" aria-hidden="true">📋</span>',
-  '<span class="coach-action-icon" aria-hidden="true">💴</span>',
+  '<span class="coach-action-icon" aria-hidden="true">⚽</span>',
+  '<span class="coach-action-icon" aria-hidden="true">💰</span>',
   "💬 大会準備の状況をLINEで共有",
   "coach-action-card is-adjust",
   "coach-action-card is-duty",
   "coach-action-card is-guideline",
+  "coach-action-card is-results",
   "coach-action-card is-accounting"
 ]) assert.ok(source.includes(required), "大会操作カードの絵文字または配色が不足しています: " + required);
 
-assert.ok(source.includes("✏️ 大会名・日付を変更") && source.includes("coach-event-edit-button"),
+for (const required of [
+  "大会管理ダッシュボード",
+  "別の大会を選ぶ",
+  "大会の流れ",
+  "STEP ",
+  "完了",
+  "作業中",
+  "未着手",
+  "参加チームを集める",
+  "担当・任務を決める",
+  "要綱・対戦表を作る",
+  "試合結果を入力する",
+  "順位表・PDFを完成する",
+  "会計・決算",
+  "tournament_match_results"
+]) assert.ok(source.includes(required), "6段階の大会進行UIが不足しています: " + required);
+
+assert.ok(source.includes("✏️ 大会名・日付などを変更") && source.includes("coach-event-edit-button"),
   "選択中の大会から大会名を変更する導線がありません");
 assert.ok(source.includes('data-coach-edit-event=') && source.includes('id="coach-event-edit-modal"'),
   "大会名・日付をコーチ画面内で直接編集できません");
