@@ -7,7 +7,6 @@ const root=path.resolve(path.dirname(fileURLToPath(import.meta.url)),"..");
 const html=fs.readFileSync(path.join(root,"tournament.html"),"utf8");
 
 for(const required of [
-  "⚽ 試合結果の入力",
   "入力例：2 － 1",
   "順位表・総当たり表へ自動反映されます",
   "✅ 順位表を更新しました",
@@ -35,6 +34,14 @@ for(const required of [
   "PDFを作成して保存先を選ぶ",
   "match-editor",
   "＋ 追加試合を入れる",
+  "⚽ 試合を追加・削除する",
+  "🔗 スコア入力URLを作る",
+  "LINE用の案内文＋URLをコピー",
+  "ここに試合結果を入力してください",
+  "function prepareScoreEntryUrl(copyAfterCreate)",
+  "function copyScoreEntryLineMessage()",
+  'url.searchParams.set("saveId",saveId)',
+  'url.searchParams.set("view","results")',
   "function addManualMatch()",
   "function deleteScheduledMatch(blockIndex,matchId)",
   "function deleteFinalMatch(index)",
@@ -48,3 +55,6 @@ assert.match(html,/\.st tr\.taisen-game-row\{display:grid/,"スマホでは試�
 assert.match(html,/\.score-input\{width:50px;min-height:48px/,"スマホの得点欄は十分なタップサイズにしてください");
 
 console.log("tournament result UI tests passed");
+
+assert.match(html,/<details class="match-editor-details" id="match-editor-details" open>/,"試合追加・削除一覧は初期状態で開いて表示してください");
+assert.ok(html.includes('body.score-entry-mode #doc-taisen>.panel'),"共有URLでは設定画面を隠し、得点入力に集中できるようにしてください");
