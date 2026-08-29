@@ -30,7 +30,7 @@ for (const required of [
   '{icon:"👥",name:"担当・任務"',
   '{icon:"📋",name:"大会要綱・対戦表"',
   '{icon:"⚽",name:"試合結果"',
-  '{icon:"🏆",name:"順位表・PDF"',
+  '{icon:"🏆",name:"順位表・PDF出力"',
   '{icon:"💰",name:"会計・決算"',
   "💬 大会準備の状況をLINEで共有",
   "function flowStepHtml(index,action,state,current,item)",
@@ -55,7 +55,7 @@ for (const required of [
   "担当・任務",
   "大会要綱・対戦表",
   "試合結果",
-  "順位表・PDF",
+  "順位表・PDF出力",
   "会計・決算",
   "tournament_match_results"
 ]) assert.ok(source.includes(required), "6段階の大会進行UIが不足しています: " + required);

@@ -1110,7 +1110,7 @@ document.addEventListener("DOMContentLoaded", function(){
       {icon:"👥",name:"担当・任務",desc:"本部・審判・会場係を決める",page:"duty_match.html"},
       {icon:"📋",name:"大会要綱・対戦表",desc:"大会資料と試合順を作る",page:"tournament.html"},
       {icon:"⚽",name:"試合結果",desc:"試合後に得点を入力",page:"tournament.html",view:"results"},
-      {icon:"🏆",name:"順位表・PDF",desc:"順位を確認してPDFにする",page:"tournament.html",view:"rankings"},
+      {icon:"🏆",name:"順位表・PDF出力",desc:"順位を確認し、保存先を選ぶ",page:"tournament.html",view:"rankings"},
       {icon:"💰",name:"会計・決算",desc:"大会の収支を入力・確認",page:"accounting.html"}
     ];
     return '<div class="coach-preparation-heading"><span>大会の流れ・操作</span><span class="coach-preparation-help">タップすると各画面を開きます</span></div><div class="coach-flow" aria-label="大会の進行状況と操作">'+actions.map(function(action,index){return flowStepHtml(index+1,action,states[index],index===current,item);}).join("")+'</div>';

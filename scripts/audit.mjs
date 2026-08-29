@@ -402,13 +402,13 @@ if (!guideSource.includes("固定10分休憩はありません")) {
 if (!commonSource.includes('data-print-target="tournament-schedule"') || !commonSource.includes("tournament-print-enhanced-style")) {
   fail("common.js", "対戦表の印刷専用デザインがありません");
 }
-if (!tournamentSource.includes("要項をA4縦PDFで作成") || !tournamentSource.includes("対戦表をA4縦1枚PDFで作成") || !tournamentSource.includes("exportA4Pdf") || !tournamentSource.includes("showPdfReadyModal") || !tournamentSource.includes("shareGeneratedPdf") || !tournamentSource.includes("pdf-device-help")) {
+if (!tournamentSource.includes("要項をA4縦PDFで作成") || !tournamentSource.includes("順位表を含む対戦表PDFを作成") || !tournamentSource.includes("exportA4Pdf") || !tournamentSource.includes("showPdfReadyModal") || !tournamentSource.includes("shareGeneratedPdf") || !tournamentSource.includes("pdf-device-help") || !tournamentSource.includes("PDFはまだ端末へ自動保存されていません")) {
   fail("tournament.html", "要項・対戦表のPDF保存手順が分かりやすく表示されていません");
 }
 if (!tournamentSource.includes(".tai-sheet.pdf-capture .score-input") || !tournamentSource.includes(".tai-sheet.pdf-capture .rct") || !tournamentSource.includes("SMCTournamentScheduler.standingDisplay(stat)") || !tournamentSource.includes("pdf-footnote")) {
   fail("tournament.html", "対戦表PDFの配布用デザイン、得点欄、未実施順位の表示が整っていません");
 }
-if (!tournamentSource.includes("selectedScheduleOrientation") || !tournamentSource.includes("pdf-one-court") || !tournamentSource.includes("smc-taisen-one-page") || !tournamentSource.includes("_対戦表_A4縦1枚.pdf") || !tournamentSource.includes("if(!isSchedule&&!scheduleLandscape&&heightAtReadableWidth>maxHeight*splitThreshold)")) {
+if (!tournamentSource.includes("selectedScheduleOrientation") || !tournamentSource.includes("pdf-one-court") || !tournamentSource.includes("smc-taisen-one-page") || !tournamentSource.includes("_対戦表・順位表_A4縦1枚.pdf") || !tournamentSource.includes("if(!isSchedule&&!scheduleLandscape&&heightAtReadableWidth>maxHeight*splitThreshold)")) {
   fail("tournament.html", "対戦表PDFがコート数にかかわらずA4縦1枚へ収まる設定になっていません");
 }
 if (!tournamentSource.includes("#doc-youkou .guideline-content-input[type=date],#doc-taisen #t-date") || !tournamentSource.includes(".guideline-content-input[type=date]::-webkit-date-and-time-value") || !tournamentSource.includes("min-inline-size:0!important")) {

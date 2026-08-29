@@ -26,7 +26,24 @@ for(const required of [
 assert.match(html,/data-stat="played"><\/td>/,"未入力の試合数は初期表示から空欄にしてください");
 assert.doesNotMatch(html,/data-stat="played">0<\/td>/,"未入力順位表に0を入れないでください");
 assert.match(html,/if\(!isSchedule&&!scheduleLandscape&&heightAtReadableWidth>maxHeight\*splitThreshold\)/,"対戦表PDFを複数ページへ分割しないでください");
-assert.ok(html.includes("対戦表をA4縦1枚PDFで作成")&&html.includes("_対戦表_A4縦1枚.pdf"),"対戦表PDFはA4縦1枚にしてください");
+assert.ok(html.includes("順位表を含む対戦表PDFを作成")&&html.includes("_対戦表・順位表_A4縦1枚.pdf"),"順位表を含む対戦表PDFはA4縦1枚にしてください");
+for(const required of [
+  "PDFはまだ端末へ自動保存されていません",
+  "保存先・LINE・印刷を選ぶ",
+  "PDFを端末へダウンロード",
+  "ranking-pdf-actions",
+  "PDFを作成して保存先を選ぶ",
+  "match-editor",
+  "＋ 追加試合を入れる",
+  "function addManualMatch()",
+  "function deleteScheduledMatch(blockIndex,matchId)",
+  "function deleteFinalMatch(index)",
+  "function deleteManualMatch(id)",
+  "追加試合は順位計算に含みません"
+]) assert.ok(html.includes(required),"PDFまたは試合追加・削除UIが不足しています: "+required);
+const resultsForBlockSource=html.match(/function resultsForBlock\(blockIndex,block\)\{[\s\S]*?\n\}/)?.[0]||"";
+assert.ok(resultsForBlockSource.includes("block.matches.forEach")&&!resultsForBlockSource.includes("manualMatches()"),
+  "順位計算は自動作成したブロック試合だけを対象にしてください");
 assert.match(html,/\.st tr\.taisen-game-row\{display:grid/,"スマホでは試合行を得点入力カードとして表示してください");
 assert.match(html,/\.score-input\{width:50px;min-height:48px/,"スマホの得点欄は十分なタップサイズにしてください");
 
