@@ -5,7 +5,7 @@
   <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate, max-age=0">
   <meta http-equiv="Pragma" content="no-cache">
   <meta http-equiv="Expires" content="-1">
-<meta name="app-version" content="20260830-2">
+<meta name="app-version" content="20260830-3">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <meta name="robots" content="noindex,nofollow">
   <title>大会要綱・対戦表｜吉見SMC FC</title>
@@ -543,21 +543,6 @@
   <div class="doc-section" id="doc-taisen">
     <div class="score-entry-mode-banner no-print"><strong>📲 試合結果入力専用画面</strong><span>各試合の黄色い「得点」欄へ数字を入力してください。入力内容は自動保存され、順位表へ反映されます。入力が終わったら画面を閉じて大丈夫です。</span></div>
     <div class="panel no-print">
-      <div class="match-day-actions" id="match-day-actions">
-        <span class="match-day-kicker">試合当日の入力用</span>
-        <div class="match-day-title">📲 スコア入力URL</div>
-        <div class="match-day-copy">試合結果の入力を別のコーチなどにお願いするときだけ使います。「スコア入力URLを作る」を押して、表示されたURLをLINEで送ってください。</div>
-        <div class="match-day-buttons" style="grid-template-columns:1fr">
-          <button class="match-day-button share" type="button" onclick="prepareScoreEntryUrl(true)">🔗 スコア入力URLを作る</button>
-        </div>
-        <div class="score-share-panel">
-          <label class="score-share-label" for="score-share-url">📲 入力担当者へ送るURL</label>
-          <div class="score-share-row"><input class="score-share-url" id="score-share-url" readonly placeholder="「スコア入力URLを作る」を押すと、ここにURLが表示されます"><button class="score-share-copy" type="button" onclick="copyScoreEntryUrl()">URLをコピー</button></div>
-          <div class="match-day-buttons" style="margin-top:7px"><button class="score-share-copy" type="button" onclick="copyScoreEntryLineMessage()">📋 LINE用の案内文＋URLをコピー</button><button class="score-share-copy" type="button" onclick="openScoreEntryPreview()">👁 入力画面を確認</button></div>
-          <span class="score-share-note">URL作成時に現在の対戦表をクラウドへ保存します。送られた人はURLを開くだけで、試合結果の入力欄へ直接移動できます。</span>
-          <div class="score-share-feedback" id="score-share-feedback" role="status" aria-live="polite"></div>
-        </div>
-      </div>
       <div class="sec">📌 大会基本情報</div>
       <div class="fg1">
         <div class="form-group"><label class="form-label">大会名</label><input class="form-control" id="t-title" value="U9 吉見SMC大会"></div>

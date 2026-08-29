@@ -35,8 +35,6 @@ for(const required of [
   "match-editor",
   "＋ 追加試合を入れる",
   "⚽ 試合を追加・削除",
-  "🔗 スコア入力URLを作る",
-  "LINE用の案内文＋URLをコピー",
   "ここに試合結果を入力してください",
   "function prepareScoreEntryUrl(copyAfterCreate)",
   "function copyScoreEntryLineMessage()",
@@ -58,3 +56,5 @@ console.log("tournament result UI tests passed");
 
 assert.match(html,/<details class="match-editor-details" id="match-editor-details">/,"試合追加・削除一覧は必要なときに開ける折りたたみ表示にしてください");
 assert.ok(html.includes('body.score-entry-mode #doc-taisen>.panel'),"共有URLでは設定画面を隠し、得点入力に集中できるようにしてください");
+
+assert.ok(!html.includes('id="match-day-actions"'),"対戦表上部に重複したスコア入力URLパネルを表示しないでください");
