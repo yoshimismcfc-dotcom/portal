@@ -1,0 +1,41 @@
+name: one-time tournament score share patch
+
+on:
+  push:
+    paths:
+      - ".github/workflows/one-time-tournament-score-share.yml"
+
+permissions:
+  contents: write
+
+jobs:
+  patch-test-commit:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+      - name: Apply patch
+        run: python scripts/one-time-tournament-score-share.py
+      - name: Update superseded result-title assertion
+        run: |
+          python - <<'PY'
+          from pathlib import Path
+          p=Path('scripts/tournament-result-ui.test.mjs')
+          s=p.read_text(encoding='utf-8')
+          s=s.replace('  "⚽ 試合結果の入力",\n','')
+          p.write_text(s,encoding='utf-8')
+          PY
+      - name: Run all tests
+        run: npm test
+      - name: Commit production changes and remove one-time files
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git rm scripts/one-time-tournament-score-share.py .github/workflows/one-time-tournament-score-share.yml
+          git add tournament.html sw.js package.json scripts/tournament-result-ui.test.mjs
+          git commit -m "feat: simplify match editing and add score-entry share URL"
+          git push origin HEAD:main
