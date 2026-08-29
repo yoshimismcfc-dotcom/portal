@@ -1597,7 +1597,9 @@ function enhanceCalendarUpcomingAgenda() {
     var target=safePortalUrl(link.getAttribute("href"));if(!target)return;
     var file=(target.pathname.split("/").pop()||"index.html").toLowerCase();
     link.classList.add("smc-page-destination");
-    if(file==="index.html"||!file)link.textContent="⌂ ホーム";
+    var customLabel=String(link.getAttribute("data-nav-label")||"").trim();
+    if(customLabel)link.textContent=customLabel;
+    else if(file==="index.html"||!file)link.textContent="⌂ ホーム";
     else if(file==="coach.html")link.textContent="📁 コーチ専用";
   }
   function installBackButton(){
@@ -1606,7 +1608,7 @@ function enhanceCalendarUpcomingAgenda() {
     var main=document.querySelector("main");if(!main)return;
     var existing=main.querySelector(".back-btn"),row=document.createElement("nav"),button=document.createElement("button");
     row.className="smc-page-nav no-print";row.setAttribute("aria-label","ページ移動");
-    button.type="button";button.className="smc-smart-back";button.textContent="← 戻る";
+    button.type="button";button.className="smc-smart-back";button.textContent="← 前の画面";
     button.addEventListener("click",function(){requestBackNavigation(button);});
     row.appendChild(button);
     if(existing){normalizeExistingDestination(existing);existing.before(row);row.appendChild(existing);}
@@ -1634,7 +1636,7 @@ function enhanceCalendarUpcomingAgenda() {
     if(pendingNavigation&&!pendingPaths.size){
       var pending=pendingNavigation;pendingNavigation=null;
       if(failedPaths.size&&!window.confirm("保存に失敗した変更があります。保存せず戻りますか？")){
-        if(pending.button){pending.button.disabled=false;pending.button.textContent="← 戻る";}
+        if(pending.button){pending.button.disabled=false;pending.button.textContent="← 前の画面";}
         return;
       }
       pending.run();

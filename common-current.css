@@ -29,6 +29,29 @@ body[data-theme="light"] .smc-page-nav .smc-page-destination:focus-visible{
   border-color:#9a4a00!important;
 }
 
+/* Modal navigation: always keep an obvious way back near the top on mobile. */
+.modal-top-return{
+  display:inline-flex;
+  align-items:center;
+  justify-content:center;
+  min-height:44px;
+  margin:0 0 14px;
+  padding:8px 13px;
+  border:1px solid rgba(114,214,255,.48);
+  border-radius:999px;
+  background:rgba(0,145,195,.13);
+  color:#b9efff;
+  font:inherit;
+  font-size:.76rem;
+  font-weight:900;
+  line-height:1.35;
+  cursor:pointer;
+}
+.modal-top-return:hover,.modal-top-return:focus-visible{border-color:#00d4ff;background:rgba(0,180,225,.2)}
+body[data-theme="light"] .modal-top-return{background:#e9f8ff;border-color:#1689b4;color:#075d84}
+body[data-theme="light"] .modal-top-return:hover,body[data-theme="light"] .modal-top-return:focus-visible{background:#d9f3ff;border-color:#075d84}
+@media(max-width:520px){.modal-top-return{position:sticky;top:0;z-index:2;width:100%;border-radius:9px;box-shadow:0 4px 14px rgba(0,0,0,.18)}}
+
 /* =====================================================
    Light mode readability layer
    - Visual-only overrides: no data / Firebase / JS changes.

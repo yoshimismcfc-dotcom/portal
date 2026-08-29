@@ -9,6 +9,7 @@
   <script src="firebase-config.js"></script>
   <link rel="stylesheet" href="common.css">
   <script src="common.js"></script>
+  <script src="event-links.js"></script>
   <style>
     /* ============================================================
        試合調整 2026年最高品質版
@@ -228,7 +229,7 @@ body[data-theme="light"] .ga-overview-note{color:#72400b;background:#fff5e5}
 <body>
 <header class="site-header"></header>
 <main class="page-wrap">
-  <a class="back-btn" href="coach.html">運営メニューに戻る</a>
+  <a class="back-btn" href="coach.html#coach-match" data-tournament-back data-nav-label="🏆 大会管理へ戻る">← 大会管理へ戻る</a>
   <div class="hero-band">
     <div class="hero-emoji">📊</div>
     <div>
@@ -280,13 +281,14 @@ body[data-theme="light"] .ga-overview-note{color:#72400b;background:#fff5e5}
 <!-- チーム追加モーダル -->
 <div class="modal-bg" id="modal-team" role="dialog" aria-modal="true" aria-labelledby="mt-title">
   <div class="modal">
+    <button class="modal-top-return" type="button" onclick="closeModal('modal-team')">← 試合調整へ戻る</button>
     <h3 id="mt-title">⚽ チームを追加</h3>
     <div class="form-group"><label class="form-label" for="new-team-name">チーム名</label>
       <input class="form-control" id="new-team-name" placeholder="例：川越FC" autocomplete="off"></div>
     <div class="form-group"><label class="form-label" for="new-team-tantou">担当者</label>
       <input class="form-control" id="new-team-tantou" placeholder="例：武部" autocomplete="off"></div>
     <div class="modal-btns">
-      <button class="btn btn-outline" onclick="closeModal('modal-team')">キャンセル</button>
+      <button class="btn btn-outline" onclick="closeModal('modal-team')">← 試合調整へ戻る</button>
       <button class="btn btn-primary" onclick="addTeam()">追加</button>
     </div>
   </div>
@@ -295,6 +297,7 @@ body[data-theme="light"] .ga-overview-note{color:#72400b;background:#fff5e5}
 <!-- 日程追加モーダル -->
 <div class="modal-bg" id="modal-date" role="dialog" aria-modal="true" aria-labelledby="md-title">
   <div class="modal">
+    <button class="modal-top-return" type="button" onclick="closeModal('modal-date')">← 試合調整へ戻る</button>
     <h3 id="md-title">📅 日程を追加</h3>
     <div class="form-group"><label class="form-label" for="new-date">日付</label>
       <input class="form-control" id="new-date" type="date"></div>
@@ -307,7 +310,7 @@ body[data-theme="light"] .ga-overview-note{color:#72400b;background:#fff5e5}
     <div class="form-group"><label class="form-label" for="new-note">備考</label>
       <textarea class="form-control" id="new-note" rows="3" maxlength="500" placeholder="例：会場、集合時間、連絡事項など"></textarea></div>
     <div class="modal-btns">
-      <button class="btn btn-outline" onclick="closeModal('modal-date')">キャンセル</button>
+      <button class="btn btn-outline" onclick="closeModal('modal-date')">← 試合調整へ戻る</button>
       <button class="btn btn-cyan" onclick="addDate()">追加</button>
     </div>
   </div>
@@ -316,6 +319,7 @@ body[data-theme="light"] .ga-overview-note{color:#72400b;background:#fff5e5}
 <!-- 日程編集モーダル -->
 <div class="modal-bg" id="modal-edit-date" role="dialog" aria-modal="true" aria-labelledby="me-title">
   <div class="modal">
+    <button class="modal-top-return" type="button" onclick="closeModal('modal-edit-date')">← 試合調整へ戻る</button>
     <h3 id="me-title">✏️ 大会名・基本情報を変更</h3>
     <p style="margin:0 0 12px;color:var(--ink-3);font-size:.76rem;line-height:1.55">大会名を変更しても、参加状況や任務分担などの保存データはそのまま引き継がれます。</p>
     <div class="form-group"><label class="form-label" for="edit-date">日付</label>
@@ -330,7 +334,7 @@ body[data-theme="light"] .ga-overview-note{color:#72400b;background:#fff5e5}
       <textarea class="form-control" id="edit-note" rows="3" maxlength="500" placeholder="例：会場、集合時間、連絡事項など"></textarea></div>
     <div class="modal-btns" style="flex-wrap:wrap">
       <button class="btn btn-outline" style="color:var(--red);border-color:rgba(255,68,102,.4)" onclick="deleteEditDate()">🗑 削除</button>
-      <button class="btn btn-outline" onclick="closeModal('modal-edit-date')">キャンセル</button>
+      <button class="btn btn-outline" onclick="closeModal('modal-edit-date')">← 試合調整へ戻る</button>
       <button class="btn btn-cyan" onclick="saveEditDate()">💾 変更を保存</button>
     </div>
   </div>

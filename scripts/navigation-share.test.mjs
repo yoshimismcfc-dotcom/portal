@@ -8,6 +8,10 @@ const common = fs.readFileSync(path.join(root, "common.js"), "utf8");
 const css = fs.readFileSync(path.join(root, "common.css"), "utf8");
 const firebase = fs.readFileSync(path.join(root, "firebase-config.js"), "utf8");
 const coach = fs.readFileSync(path.join(root, "coach.html"), "utf8");
+const eventLinks = fs.readFileSync(path.join(root, "event-links.js"), "utf8");
+const currentCss = fs.readFileSync(path.join(root, "common-current.css"), "utf8");
+const tournamentPages = ["game_adjust.html", "duty_match.html", "tournament.html", "accounting.html"]
+  .map((file) => [file, fs.readFileSync(path.join(root, file), "utf8")]);
 
 for (const required of [
   'var PREVIOUS_KEY="smc-portal-previous-url-v1"',
@@ -18,11 +22,35 @@ for (const required of [
   'url.searchParams.set("eventId",id)',
   'url.hash="coach-match"',
   "function requestBackNavigation(button)",
+  'button.textContent="← 前の画面"',
+  'link.getAttribute("data-nav-label")',
   "保存が完了してから戻ります",
   "保存できていない変更がある可能性があります",
   "document.addEventListener(\"DOMContentLoaded\",installBackButton)",
   "window.SMCNavigation="
 ]) assert.ok(common.includes(required), "共通の安全な戻る処理が不足しています: " + required);
+
+for (const required of [
+  "function dashboardHref(dateOrId)",
+  'document.querySelectorAll("[data-tournament-back]")',
+  '"coach.html?eventId="+encodeURIComponent(id)+"#coach-match"'
+]) assert.ok(eventLinks.includes(required), "選択中大会へ戻るURLの処理が不足しています: " + required);
+
+for (const [file, source] of tournamentPages) {
+  assert.ok(source.includes("data-tournament-back") && source.includes('data-nav-label="🏆 大会管理へ戻る"'),
+    `${file} に大会管理へ戻るボタンがありません`);
+}
+
+assert.match(currentCss, /\.modal-top-return\{[\s\S]*?min-height:44px/,
+  "モーダル上部の戻るボタンは44px以上必要です");
+const modalReturnCounts = {
+  "coach.html": (coach.match(/class="modal-top-return"/g) || []).length,
+  "game_adjust.html": (tournamentPages.find(([file]) => file === "game_adjust.html")[1].match(/class="modal-top-return"/g) || []).length,
+  "duty_match.html": (tournamentPages.find(([file]) => file === "duty_match.html")[1].match(/class="modal-top-return"/g) || []).length,
+  "tournament.html": (tournamentPages.find(([file]) => file === "tournament.html")[1].match(/class="modal-top-return"/g) || []).length
+};
+assert.deepEqual(modalReturnCounts, {"coach.html":1,"game_adjust.html":3,"duty_match.html":2,"tournament.html":5},
+  "試合・大会内の全モーダル上部に戻るボタンを配置してください");
 
 assert.ok(common.indexOf("internalReferrer()") < common.indexOf("storedPreviousUrl()", common.indexOf("function performBackNavigation")),
   "戻る処理はアプリ内履歴を端末保存履歴より優先してください");

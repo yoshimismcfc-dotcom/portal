@@ -5,7 +5,7 @@
   <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate, max-age=0">
   <meta http-equiv="Pragma" content="no-cache">
   <meta http-equiv="Expires" content="-1">
-<meta name="app-version" content="20260829-2">
+<meta name="app-version" content="20260829-3">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <meta name="robots" content="noindex,nofollow">
   <title>大会要綱・対戦表｜吉見SMC FC</title>
@@ -409,7 +409,7 @@
 <body>
 <header class="site-header"></header>
 <main class="page-wrap">
-  <a class="back-btn" href="coach.html">コーチ専用に戻る</a>
+  <a class="back-btn" href="coach.html#coach-match" data-tournament-back data-nav-label="🏆 大会管理へ戻る">← 大会管理へ戻る</a>
   <div class="hero-band">
     <div class="hero-emoji">📋</div>
     <div><div class="hero-title">大会要綱・対戦表</div>
@@ -422,7 +422,7 @@
   </div>
 
   <details class="linked-workflow linked-date-disclosure no-print">
-    <summary class="linked-date-summary"><span>📅 試合調整と連動する日程一覧</span><span class="linked-date-summary-hint">タップして開く</span></summary>
+    <summary class="linked-date-summary"><span>🏆 大会を選ぶ・切り替える</span><span class="linked-date-summary-hint">タップして選ぶ</span></summary>
     <div class="linked-date-disclosure-body">
       <div class="linked-workflow-head">
         <div><div class="linked-workflow-help">未保存の日程も自動表示します。日程を選ぶと、その試合専用の大会要綱・対戦表を開きます。</div></div>
@@ -584,14 +584,15 @@
 
 <!-- 保存モーダル -->
 <div class="save-modal-bg" id="modal-save" onclick="if(event.target.id==='modal-save')closeSaveModal()">
-  <div class="save-modal">
+  <div class="save-modal" role="dialog" aria-modal="true" aria-labelledby="save-modal-title">
+    <button class="modal-top-return" type="button" onclick="closeSaveModal()">← 大会要綱・対戦表へ戻る</button>
     <h3 id="save-modal-title">💾 保存</h3>
     <div class="form-group">
       <label class="form-label">保存名 <span style="color:var(--red)">*</span></label>
       <input class="form-control" id="save-name-input" placeholder="例：北彩リーグ第1節 U10">
     </div>
     <div style="display:flex;gap:8px;justify-content:flex-end;margin-top:12px;flex-wrap:wrap">
-      <button class="btn btn-outline btn-sm" onclick="closeSaveModal()">キャンセル</button>
+      <button class="btn btn-outline btn-sm" onclick="closeSaveModal()">← 大会要綱・対戦表へ戻る</button>
       <button class="btn btn-primary btn-sm" onclick="execSave()">💾 クラウドに保存</button>
     </div>
   </div>
@@ -599,13 +600,14 @@
 
 <!-- 読込モーダル -->
 <div class="save-modal-bg" id="modal-load" onclick="if(event.target.id==='modal-load')closeLoadModal()">
-  <div class="save-modal">
+  <div class="save-modal" role="dialog" aria-modal="true" aria-labelledby="load-modal-title">
+    <button class="modal-top-return" type="button" onclick="closeLoadModal()">← 大会要綱・対戦表へ戻る</button>
     <h3 id="load-modal-title">📂 保存済みデータを読み込む</h3>
     <div id="saved-list">
       <p style="color:var(--ink-3);text-align:center;padding:20px;font-size:.84rem">保存されたデータがありません。</p>
     </div>
     <div style="display:flex;justify-content:flex-end;margin-top:10px">
-      <button class="btn btn-outline btn-sm" onclick="closeLoadModal()">閉じる</button>
+      <button class="btn btn-outline btn-sm" onclick="closeLoadModal()">← 大会要綱・対戦表へ戻る</button>
     </div>
   </div>
 </div>
@@ -613,6 +615,7 @@
 <!-- 対戦チーム向けLINE案内文 -->
 <div class="save-modal-bg" id="modal-line" onclick="if(event.target.id==='modal-line')closeLineInvite()">
   <div class="save-modal line-modal" role="dialog" aria-modal="true" aria-labelledby="line-modal-title">
+    <button class="modal-top-return" type="button" onclick="closeLineInvite()">← 大会要綱・対戦表へ戻る</button>
     <h3 id="line-modal-title">💬 対戦チームへのLINE案内</h3>
     <div class="line-type-tabs" role="tablist" aria-label="文章の種類">
       <button class="line-type-btn active" type="button" data-line-type="request">対戦依頼</button>
@@ -633,7 +636,7 @@
     <div class="btn-group">
       <button class="btn btn-outline btn-sm" type="button" onclick="generateLineInvite()">🔄 作り直す</button>
       <button class="btn-line-copy sm" type="button" onclick="copyLineInvite()">📋 LINEコピー</button>
-      <button class="btn btn-outline btn-sm" type="button" onclick="closeLineInvite()">閉じる</button>
+      <button class="btn btn-outline btn-sm" type="button" onclick="closeLineInvite()">← 大会要綱・対戦表へ戻る</button>
     </div>
   </div>
 </div>
@@ -641,12 +644,13 @@
 <!-- 要項項目追加モーダル -->
 <div class="save-modal-bg" id="modal-guideline-add" onclick="if(event.target.id==='modal-guideline-add')closeGuidelineAddModal()">
   <div class="save-modal" role="dialog" aria-modal="true" aria-labelledby="guideline-add-title">
+    <button class="modal-top-return" type="button" onclick="closeGuidelineAddModal()">← 大会要綱・対戦表へ戻る</button>
     <h3 id="guideline-add-title">＋ 要項に項目を追加</h3>
     <div class="form-group"><label class="form-label" for="guideline-add-name">項目名</label><input class="form-control" id="guideline-add-name" placeholder="例：かき氷の案内"></div>
     <div class="form-group"><label class="form-label" for="guideline-add-content">内容</label><textarea class="form-control" id="guideline-add-content" rows="5" placeholder="1行ごとに箇条書きとして表示されます"></textarea></div>
     <div class="form-group guideline-add-position"><label class="form-label" for="guideline-add-position">追加する位置</label><select class="form-control" id="guideline-add-position"></select></div>
     <div class="btn-group">
-      <button class="btn btn-outline btn-sm" type="button" onclick="closeGuidelineAddModal()">キャンセル</button>
+      <button class="btn btn-outline btn-sm" type="button" onclick="closeGuidelineAddModal()">← 大会要綱・対戦表へ戻る</button>
       <button class="btn btn-primary" type="button" onclick="confirmGuidelineAdd()">追加して編集する</button>
     </div>
   </div>
@@ -657,6 +661,7 @@
 <!-- PDF完成モーダル：iPhoneのポップアップ制限を避け、完成後の操作を明確にする -->
 <div class="save-modal-bg" id="modal-pdf-ready" onclick="if(event.target.id==='modal-pdf-ready')closePdfReadyModal()">
   <div class="save-modal pdf-ready-card" role="dialog" aria-modal="true" aria-labelledby="pdf-ready-title">
+    <button class="modal-top-return" type="button" onclick="closePdfReadyModal()">← 大会要綱・対戦表へ戻る</button>
     <div class="pdf-ready-icon" aria-hidden="true">✓</div>
     <h3 class="pdf-ready-title" id="pdf-ready-title">PDFができました</h3>
     <p class="pdf-ready-note" id="pdf-ready-note">用紙サイズを設定したPDFです。下のボタンから共有または印刷してください。</p>
@@ -664,7 +669,7 @@
       <button class="btn btn-cyan" type="button" id="pdf-share-btn" onclick="shareGeneratedPdf()">共有・印刷する</button>
       <a class="btn btn-primary" id="pdf-open-link" href="#">PDFを開く</a>
       <a class="btn btn-outline btn-sm" id="pdf-download-link" href="#" download>PDFを保存する</a>
-      <button class="btn btn-outline btn-sm" type="button" onclick="closePdfReadyModal()">閉じる</button>
+      <button class="btn btn-outline btn-sm" type="button" onclick="closePdfReadyModal()">← 大会要綱・対戦表へ戻る</button>
     </div>
   </div>
 </div>
@@ -1747,16 +1752,16 @@ var _contextHydrated = false;
 
 function updateTournamentContextLine(){
   var line=document.getElementById("tournament-context-line");if(!line)return;
-  if(!_activeGameAdjustDateId){line.textContent="大会未選択：上の「試合調整と連動する日程一覧」から選べます。";return;}
+  if(!_activeGameAdjustDateId){line.textContent="大会未選択：上の「大会を選ぶ・切り替える」から選べます。";return;}
   var parts=[_activeDateMeta.name||gv("t-title")||gv("y-title"),_activeDateMeta.dateIso||gv("t-date"),_activeDateMeta.category].filter(Boolean);
   line.textContent="選択中："+parts.join(" ｜ ");
 }
 function focusRequestedTournamentView(){
-  if(TOURNAMENT_CONTEXT.view!=="results")return false;
+  if(TOURNAMENT_CONTEXT.view!=="results"&&TOURNAMENT_CONTEXT.view!=="rankings")return false;
   switchDoc("taisen",document.getElementById("tbtn-t"));
   window.setTimeout(function(){
-    var target=document.getElementById("score-entry");
-    if(target){target.scrollIntoView({behavior:"smooth",block:"start"});target.focus({preventScroll:true});}
+    var target=TOURNAMENT_CONTEXT.view==="rankings"?document.querySelector("#taisen-preview .ranking-heading"):document.getElementById("score-entry");
+    if(target){target.setAttribute("tabindex","-1");target.scrollIntoView({behavior:"smooth",block:"start"});target.focus({preventScroll:true});}
   },220);
   return true;
 }

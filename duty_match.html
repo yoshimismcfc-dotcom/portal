@@ -151,7 +151,7 @@
 <body>
 <header class="site-header"></header>
 <main class="page-wrap">
-  <a class="back-btn" href="coach.html">← コーチ専用に戻る</a>
+  <a class="back-btn" href="coach.html#coach-match" data-tournament-back data-nav-label="🏆 大会管理へ戻る">← 大会管理へ戻る</a>
   <div class="hero-band">
     <div class="hero-emoji">📋</div>
     <div>
@@ -161,7 +161,7 @@
   </div>
   <div class="notice-bar">☁️ Firebaseでクラウド保存・全員と共有されます。</div>
   <details class="linked-date-index linked-date-disclosure">
-    <summary class="linked-date-summary"><span>📅 試合調整と連動する日程一覧</span><span class="linked-date-summary-hint">タップして開く</span></summary>
+    <summary class="linked-date-summary"><span>🏆 大会を選ぶ・切り替える</span><span class="linked-date-summary-hint">タップして選ぶ</span></summary>
     <div class="linked-date-disclosure-body">
       <div class="linked-date-index-head">
         <div><p>日程を選ぶと、その試合専用の任務分担を開きます。未作成の日程は標準テンプレートから始まります。</p></div>
@@ -188,8 +188,9 @@
 </main>
 
 <!-- 大会追加/編集モーダル -->
-<div class="modal-bg" id="modal-match">
+<div class="modal-bg" id="modal-match" role="dialog" aria-modal="true" aria-labelledby="mm-title">
   <div class="modal">
+    <button class="modal-top-return" type="button" onclick="closeM('modal-match')">← 任務分担へ戻る</button>
     <h3 id="mm-title">大会を追加</h3>
     <div class="form-group">
       <label class="form-label">大会名 <span style="color:var(--red)">*</span></label>
@@ -208,15 +209,16 @@
     </div>
     <div class="modal-btns">
       <button class="btn btn-outline btn-sm" id="mm-del" style="color:var(--red);border-color:rgba(255,68,102,.4);display:none" onclick="deleteMatch()">🗑 削除</button>
-      <button class="btn btn-outline" onclick="closeM('modal-match')">キャンセル</button>
+      <button class="btn btn-outline" onclick="closeM('modal-match')">← 任務分担へ戻る</button>
       <button class="btn btn-primary" onclick="saveMatch()">保存</button>
     </div>
   </div>
 </div>
 
 <!-- 任務編集モーダル -->
-<div class="modal-bg" id="modal-duty">
+<div class="modal-bg" id="modal-duty" role="dialog" aria-modal="true" aria-labelledby="md-title">
   <div class="modal">
+    <button class="modal-top-return" type="button" onclick="closeM('modal-duty')">← 任務分担へ戻る</button>
     <h3 id="md-title">任務を編集</h3>
     <div class="form-group">
       <label class="form-label">任務名 <span style="color:var(--red)">*</span></label>
@@ -252,7 +254,7 @@
     </div>
     <div class="modal-btns">
       <button class="btn btn-outline btn-sm" id="md-del" style="color:var(--red);border-color:rgba(255,68,102,.4);display:none" onclick="deleteDuty()">🗑 任務を削除</button>
-      <button class="btn btn-outline" onclick="closeM('modal-duty')">キャンセル</button>
+      <button class="btn btn-outline" onclick="closeM('modal-duty')">← 任務分担へ戻る</button>
       <button class="btn btn-primary" onclick="saveDuty()">保存</button>
     </div>
   </div>

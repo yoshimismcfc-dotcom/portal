@@ -490,14 +490,14 @@ if (!dutyMatchSource.includes('dbListen("duty_match"') || !tournamentSource.incl
 if (!coachSource.includes("coach-event-browser") || !coachSource.includes("coach-menu-search") || !coachSource.includes('dbListen("game_adjust"')) {
   fail("coach.html", "大会一覧またはメニュー検索がありません");
 }
-if (!coachSource.includes("confirmedTeamCount") || !coachSource.includes("参加確定 '+confirmed")) {
+if (!coachSource.includes("confirmedTeamCount") || !coachSource.includes('"参加確定："+confirmed')) {
   fail("coach.html", "大会一覧に現在決定している参加チーム数が表示されません");
 }
 if (coachSource.includes('id="coach-next-event"') || coachSource.includes("function renderNextEvent")) {
   fail("coach.html", "削除した「次に予定している試合」の表示処理が残っています");
 }
-if (!coachSource.includes("coach-event-browser") || !coachSource.includes("renderTournamentBrowser") || !coachSource.includes("data-coach-event-id") || !coachSource.includes('role="tablist"')) {
-  fail("coach.html", "次の大会直下に日程連動の大会選択タブがありません");
+if (!coachSource.includes("coach-event-browser") || !coachSource.includes("renderTournamentBrowser") || !coachSource.includes("data-coach-event-select") || !coachSource.includes('aria-label="操作する大会を選ぶ"')) {
+  fail("coach.html", "選択中の大会を上部で切り替える選択欄がありません");
 }
 if (!coachSource.includes("preparationFor") || !coachSource.includes("copyCoachPreparationSummary") || !coachSource.includes('dbListen("duty_match"') || !coachSource.includes('dbListen("tournament_saves"') || !coachSource.includes('dbListen("accounting"')) {
   fail("coach.html", "大会準備状況・LINEコピーが共通データに連動していません");

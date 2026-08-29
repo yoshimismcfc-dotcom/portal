@@ -38,6 +38,15 @@
     var query=queryFor(date);
     return page+(query?"?"+query:"");
   }
+  function validEventId(value){return /^[A-Za-z0-9_-]{1,100}$/.test(text(value))?text(value):"";}
+  function dashboardHref(dateOrId){
+    var id=validEventId(typeof dateOrId==="string"?dateOrId:dateOrId&&dateOrId.id||dateOrId&&dateOrId.dateId);
+    return id?"coach.html?eventId="+encodeURIComponent(id)+"#coach-match":"coach.html#coach-match";
+  }
+  function installTournamentBackLinks(){
+    var params=new URLSearchParams(location.search),dateId=validEventId(params.get("dateId"));
+    document.querySelectorAll("[data-tournament-back]").forEach(function(link){link.setAttribute("href",dashboardHref(dateId));});
+  }
   function nearest(dates,now){
     var list=sortDates(dates).filter(function(item){return parseIso(item&&item.dateIso);});
     if(!list.length) return null;
@@ -56,7 +65,9 @@
     fromGameAdjust:fromGameAdjust,
     queryFor:queryFor,
     href:href,
+    dashboardHref:dashboardHref,
     nearest:nearest,
     label:label
   };
+  document.addEventListener("DOMContentLoaded",installTournamentBackLinks);
 })(window);
