@@ -5,7 +5,7 @@
   <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate, max-age=0">
   <meta http-equiv="Pragma" content="no-cache">
   <meta http-equiv="Expires" content="-1">
-<meta name="app-version" content="20260830-6">
+<meta name="app-version" content="20260830-7">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <meta name="robots" content="noindex,nofollow">
   <title>大会要綱・対戦表｜吉見SMC FC</title>
@@ -435,10 +435,12 @@
     .game-adjust-team-sync-note.show{display:block}
     @media(max-width:520px){
       #doc-taisen,#doc-taisen>.panel,#team-inputs,#team-inputs>div,.ceremony-settings,.ceremony-row,.ceremony-detail,.form-group{min-width:0;max-width:100%;box-sizing:border-box}
-      #doc-taisen .form-control,#team-inputs input,#team-inputs select,.ceremony-row input,.ceremony-row select{width:100%;max-width:100%;min-width:0;box-sizing:border-box}
+      #doc-taisen .form-control,#team-inputs input,#team-inputs select,.ceremony-row input:not([type="checkbox"]),.ceremony-row select{width:100%;max-width:100%;min-width:0;box-sizing:border-box}
       #team-inputs [id^="names-"]{grid-template-columns:minmax(0,1fr)!important;gap:9px!important}
       .ceremony-detail{grid-template-columns:minmax(0,1fr)!important}
-      .ceremony-row{overflow:hidden}
+      .ceremony-row{overflow:hidden;min-width:0}
+      .ceremony-toggle{width:100%;min-width:0;max-width:100%;white-space:normal;overflow-wrap:anywhere}
+      .ceremony-toggle input[type="checkbox"]{width:22px!important;min-width:22px!important;max-width:22px!important;height:22px!important;min-height:22px!important;flex:0 0 22px!important;margin:0!important}
       .panel{overflow-x:hidden}
       .schedule-actions{grid-template-columns:1fr}
       .ceremony-detail{grid-template-columns:1fr}
@@ -1407,7 +1409,12 @@ function buildTaisen(forceNew){
     var n=+document.getElementById("cnt-"+c).value,teams=[];
     for(var i=0;i<n;i++){
       var el=document.getElementById("t-"+c+"-"+i);
-      teams.push(el&&el.value.trim()?el.value.trim():"チーム"+(i+1));
+      var teamName=el?el.value.trim():"";
+      if(teamName)teams.push(teamName);
+    }
+    if(teams.length<2){
+      alert((courts===1?"チーム一覧":(["Aブロック","Bブロック"][c]))+"に、チーム名が2チーム以上決まってから対戦表を作成してください。");
+      return false;
     }
     var matches=window.SMCTournamentScheduler
       ? SMCTournamentScheduler.createRoundRobin(teams)
@@ -2239,12 +2246,10 @@ function confirmedGameAdjustTeamNames(dateId){
 function gameAdjustTournamentBlocks(dateId){
   var confirmed=confirmedGameAdjustTeamNames(dateId);
   var all=["吉見SMC"].concat(confirmed).slice(0,16);
-  if(all.length<2)return null;
-  var selectedDate=resolveGameAdjustDate(dateId);
-  var target=Number(selectedDate&&selectedDate.target)||0;
-  var expectedTotal=target>0?target+1:all.length;
+  var opponentCount=confirmed.length;
   var currentCourts=Number(gv("t-courts"))||1;
-  var useTwoCourts=all.length>8||(currentCourts===2&&expectedTotal>=5);
+  // 吉見SMC以外が3チーム以下は1面、5チーム以上は2面。4チームだけは現在の面数設定を尊重する。
+  var useTwoCourts=opponentCount>=5||(opponentCount===4&&currentCourts===2);
   if(!useTwoCourts)return [all];
   var firstSize=Math.ceil(all.length/2);
   var first=all.slice(0,firstSize),second=all.slice(firstSize);
@@ -2266,7 +2271,9 @@ function syncGameAdjustTeamsToTournament(dateId,options){
   applyTeamValues(blocks);
   setGameAdjustTeamSyncNote(blocks);
   _lastTournamentSchedule=null;_scheduleUndo=null;
-  if(options.build!==false)buildTaisen(true);
+  var namedCount=[].concat.apply([],blocks).filter(function(name){return String(name||"").trim();}).length;
+  if(options.build!==false&&namedCount>=2)buildTaisen(true);
+  else if(namedCount<2){var preview=document.getElementById("taisen-preview");if(preview)preview.innerHTML="";}
   return true;
 }
 
@@ -2283,10 +2290,14 @@ function applyTeamValues(teams){
     if(countEl){
       countEl.value=String(Math.min(Math.max(block.length,2),8));
       updateNames(c);
+      for(var clearIndex=0;clearIndex<Number(countEl.value);clearIndex++){
+        var clearEl=document.getElementById("t-"+c+"-"+clearIndex);
+        if(clearEl)clearEl.value="";
+      }
     }
     block.forEach(function(value,index){
       var el=document.getElementById("t-"+c+"-"+index);
-      if(el)el.value=value;
+      if(el)el.value=String(value||"").trim();
     });
   });
 }

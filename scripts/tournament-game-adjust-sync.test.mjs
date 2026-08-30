@@ -12,4 +12,14 @@ const must=[
   'TOURNAMENT_CONTEXT.saveId&&TOURNAMENT_CONTEXT.view==="results"'
 ];
 for(const text of must){if(!html.includes(text)){throw new Error(`missing: ${text}`)}}
+
+for(const text of [
+  'opponentCount>=5||(opponentCount===4&&currentCourts===2)',
+  'if(!useTwoCourts)return [all]',
+  'if(teamName)teams.push(teamName)',
+  'if(clearEl)clearEl.value=""',
+  'namedCount>=2',
+  '.ceremony-toggle input[type="checkbox"]'
+]){if(!html.includes(text)){throw new Error(`missing new sync/mobile rule: ${text}`)}}
+
 console.log("tournament game-adjust sync: OK");
