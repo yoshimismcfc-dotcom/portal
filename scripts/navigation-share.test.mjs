@@ -49,7 +49,7 @@ const modalReturnCounts = {
   "duty_match.html": (tournamentPages.find(([file]) => file === "duty_match.html")[1].match(/class="modal-top-return"/g) || []).length,
   "tournament.html": (tournamentPages.find(([file]) => file === "tournament.html")[1].match(/class="modal-top-return"/g) || []).length
 };
-assert.deepEqual(modalReturnCounts, {"coach.html":1,"game_adjust.html":3,"duty_match.html":2,"tournament.html":6},
+assert.deepEqual(modalReturnCounts, {"coach.html":4,"game_adjust.html":3,"duty_match.html":2,"tournament.html":6},
   "試合・大会内の全モーダル上部に戻るボタンを配置してください");
 
 assert.ok(common.indexOf("internalReferrer()") < common.indexOf("storedPreviousUrl()", common.indexOf("function performBackNavigation")),

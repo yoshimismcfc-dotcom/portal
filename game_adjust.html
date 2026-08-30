@@ -426,7 +426,8 @@ function normalizeData(d){
     t.statuses = (t.statuses && typeof t.statuses === "object") ? t.statuses : {};
     return t;
   });
-  if(!dates.length || !teams.length) return null;
+  // 大会が0件でも参加候補チームは保持する。大会管理画面から最後の大会を削除できるようにする。
+  if(!dates.length && !teams.length) return null;
   return { dates: dates, teams: teams, 備考: (d["備考"] && typeof d["備考"]==="object") ? d["備考"] : {} };
 }
 

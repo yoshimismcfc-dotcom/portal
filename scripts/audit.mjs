@@ -77,7 +77,7 @@ for (const file of htmlFiles) {
   }
 }
 
-for (const file of ["common.js", "firebase-config.js", "sw.js", "tournament-guidelines.js"]) {
+for (const file of ["common.js", "firebase-config.js", "sw.js", "tournament-guidelines.js", "tournament-management.js"]) {
   const source = fs.readFileSync(path.join(root, file), "utf8");
   try {
     new Function(source);
