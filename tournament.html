@@ -5,7 +5,7 @@
   <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate, max-age=0">
   <meta http-equiv="Pragma" content="no-cache">
   <meta http-equiv="Expires" content="-1">
-<meta name="app-version" content="20260830-5">
+<meta name="app-version" content="20260830-6">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <meta name="robots" content="noindex,nofollow">
   <title>大会要綱・対戦表｜吉見SMC FC</title>
@@ -431,7 +431,15 @@
     body[data-theme="light"] .match-editor-feedback{color:#075f32}
     body[data-theme="light"] .pdf-ready-warning{background:#fff7ed;color:#7a3500;border-color:#c86500}
     body[data-theme="light"] .pdf-ready-filename{background:#eef4f8;color:#17263c}
+    .game-adjust-team-sync-note{display:none;margin:0 0 10px;padding:9px 11px;border:1px solid rgba(0,212,255,.36);border-radius:10px;background:rgba(0,160,220,.08);color:#9cecff;font-size:.72rem;font-weight:800;line-height:1.55}
+    .game-adjust-team-sync-note.show{display:block}
     @media(max-width:520px){
+      #doc-taisen,#doc-taisen>.panel,#team-inputs,#team-inputs>div,.ceremony-settings,.ceremony-row,.ceremony-detail,.form-group{min-width:0;max-width:100%;box-sizing:border-box}
+      #doc-taisen .form-control,#team-inputs input,#team-inputs select,.ceremony-row input,.ceremony-row select{width:100%;max-width:100%;min-width:0;box-sizing:border-box}
+      #team-inputs [id^="names-"]{grid-template-columns:minmax(0,1fr)!important;gap:9px!important}
+      .ceremony-detail{grid-template-columns:minmax(0,1fr)!important}
+      .ceremony-row{overflow:hidden}
+      .panel{overflow-x:hidden}
       .schedule-actions{grid-template-columns:1fr}
       .ceremony-detail{grid-template-columns:1fr}
       .pdf-steps{grid-template-columns:1fr}
@@ -630,6 +638,7 @@
         </div>
       </div>
       <div class="sec">⚽ チーム設定</div>
+      <div class="game-adjust-team-sync-note" id="game-adjust-team-sync-note" role="status" aria-live="polite"></div>
       <div id="team-inputs"></div>
       <div class="schedule-assist">
         <div class="schedule-assist-head">
@@ -2192,13 +2201,35 @@ function isYoshimiSmcTeam(name){
   return normalizedTournamentTeamName(name)==="吉見SMC";
 }
 function isConfirmedGameAdjustStatus(status){
-  return status==="OK"||status==="要項送付済";
+  var normalized=String(status||"").normalize("NFKC").replace(/[\s　]+/g,"");
+  return normalized==="OK"||normalized==="要項送付済"||normalized==="要綱送付済";
+}
+function resolveGameAdjustDate(dateId){
+  var dates=gameAdjustArray(_gameAdjustRaw&&_gameAdjustRaw.dates);
+  if(!dates.length)return null;
+  var exact=dates.find(function(date){return String(date&&date.id||"")===String(dateId||"");});
+  if(exact)return exact;
+  var targetIso=String(_activeDateMeta.dateIso||TOURNAMENT_CONTEXT.dateIso||gv("t-date")||"").trim();
+  var targetLabel=String(_activeDateMeta.dateLabel||TOURNAMENT_CONTEXT.dateLabel||"").trim();
+  var targetName=normalizedTournamentTeamName(_activeDateMeta.name||TOURNAMENT_CONTEXT.name||gv("t-title")||"");
+  var targetCategory=normalizedTournamentTeamName(_activeDateMeta.category||TOURNAMENT_CONTEXT.category||"");
+  return dates.find(function(date){
+    if(!date)return false;
+    if(targetIso&&String(date.dateIso||"").trim()===targetIso)return true;
+    if(targetLabel&&String(date.label||"").trim()===targetLabel)return true;
+    var sameName=targetName&&normalizedTournamentTeamName(date.tournamentName||"")===targetName;
+    var sameCategory=!targetCategory||normalizedTournamentTeamName(date.cat||"")===targetCategory;
+    return !!(sameName&&sameCategory);
+  })||null;
 }
 function confirmedGameAdjustTeamNames(dateId){
-  if(!_gameAdjustRaw||!dateId)return [];
+  if(!_gameAdjustRaw)return [];
+  var resolvedDate=resolveGameAdjustDate(dateId);
+  var statusDateId=String(resolvedDate&&resolvedDate.id||dateId||"");
+  if(!statusDateId)return [];
   var teams=gameAdjustArray(_gameAdjustRaw.teams),seen={};
   return teams.filter(function(team){
-    return team&&isConfirmedGameAdjustStatus(((team.statuses||{})[dateId])||"－");
+    return team&&isConfirmedGameAdjustStatus(((team.statuses||{})[statusDateId])||"－");
   }).map(function(team){return String(team.name||"").trim();}).filter(function(name){
     var key=normalizedTournamentTeamName(name);
     if(!key||isYoshimiSmcTeam(name)||seen[key])return false;
@@ -2207,20 +2238,33 @@ function confirmedGameAdjustTeamNames(dateId){
 }
 function gameAdjustTournamentBlocks(dateId){
   var confirmed=confirmedGameAdjustTeamNames(dateId);
-  if(!confirmed.length)return null;
   var all=["吉見SMC"].concat(confirmed).slice(0,16);
-  var currentCourts=Number(gv("t-courts"))||2;
-  var useTwoCourts=all.length>8||(currentCourts===2&&all.length>=4);
+  if(all.length<2)return null;
+  var selectedDate=resolveGameAdjustDate(dateId);
+  var target=Number(selectedDate&&selectedDate.target)||0;
+  var expectedTotal=target>0?target+1:all.length;
+  var currentCourts=Number(gv("t-courts"))||1;
+  var useTwoCourts=all.length>8||(currentCourts===2&&expectedTotal>=5);
   if(!useTwoCourts)return [all];
   var firstSize=Math.ceil(all.length/2);
-  return [all.slice(0,firstSize),all.slice(firstSize)];
+  var first=all.slice(0,firstSize),second=all.slice(firstSize);
+  if(second.length<2)return [all];
+  return [first,second];
+}
+function setGameAdjustTeamSyncNote(blocks){
+  var note=document.getElementById("game-adjust-team-sync-note");if(!note)return;
+  if(!blocks||!blocks.length){note.classList.remove("show");note.textContent="";return;}
+  var count=[].concat.apply([],blocks).length;
+  note.textContent="🔗 試合調整から参加確定チームを自動反映しました（吉見SMCを含む "+count+"チーム）";
+  note.classList.add("show");
 }
 function syncGameAdjustTeamsToTournament(dateId,options){
   options=options||{};
   if(TOURNAMENT_CONTEXT.saveId&&TOURNAMENT_CONTEXT.view==="results")return false;
   var blocks=gameAdjustTournamentBlocks(dateId);
-  if(!blocks)return false;
+  if(!blocks){setGameAdjustTeamSyncNote(null);return false;}
   applyTeamValues(blocks);
+  setGameAdjustTeamSyncNote(blocks);
   _lastTournamentSchedule=null;_scheduleUndo=null;
   if(options.build!==false)buildTaisen(true);
   return true;
@@ -2608,7 +2652,8 @@ function deleteSave(id){
   if(filter)filter.addEventListener("change",renderLinkedTournamentDates);
   dbListen("game_adjust",function(value){
     _gameAdjustRaw=value&&typeof value==="object"?value:null;
-    _gameAdjustDates=SMCEventLinks.fromGameAdjust(value);
+    var normalizedGameAdjust=value&&typeof value==="object"?Object.assign({},value,{dates:gameAdjustArray(value.dates),teams:gameAdjustArray(value.teams)}):value;
+    _gameAdjustDates=SMCEventLinks.fromGameAdjust(normalizedGameAdjust);
     updateTournamentCategories();
     renderLinkedTournamentDates();
     if(_activeGameAdjustDateId)syncGameAdjustTeamsToTournament(_activeGameAdjustDateId,{build:true});

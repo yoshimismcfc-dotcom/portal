@@ -58,3 +58,13 @@ assert.match(html,/<details class="match-editor-details" id="match-editor-detail
 assert.ok(html.includes('body.score-entry-mode #doc-taisen>.panel'),"共有URLでは設定画面を隠し、得点入力に集中できるようにしてください");
 
 assert.ok(!html.includes('id="match-day-actions"'),"対戦表上部に重複したスコア入力URLパネルを表示しないでください");
+
+for(const required of [
+  "function resolveGameAdjustDate(dateId)",
+  'normalized==="要綱送付済"',
+  'normalized==="要項送付済"',
+  'var all=["吉見SMC"].concat(confirmed)',
+  "game-adjust-team-sync-note",
+  '#team-inputs [id^="names-"]{grid-template-columns:minmax(0,1fr)!important',
+  '.ceremony-detail{grid-template-columns:minmax(0,1fr)!important'
+]) assert.ok(html.includes(required),"試合調整連携またはスマホ幅対策が不足しています: "+required);
