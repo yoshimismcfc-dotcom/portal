@@ -196,6 +196,9 @@ if (!todoSource.includes('dbListen("todo"') || !todoSource.includes('dbSave("tod
 if (/dbListen\("todo"[\s\S]*?Array\.isArray\(val\)\s*&&\s*val\.length\s*>\s*0/.test(todoSource)) {
   fail("todo.html", "Firebaseの空配列を受け入れず、全件削除後に古いタスクが残る可能性があります");
 }
+for (const text of ["重要｜毎週 水・木","体育館を使ったら必ず確認","体育館利用チェックを開く →"]) {
+  if (!todoSource.includes(text)) fail("todo.html", `体育館利用チェックの目立つ導線が不足しています: ${text}`);
+}
 const readmeSource = fs.readFileSync(path.join(root, "README.md"), "utf8");
 if (!readmeSource.includes("AI・Codexへ修正を依頼する共通プロンプト") || !readmeSource.includes("空配列や空データ")) {
   fail("README.md", "再利用可能な修正プロンプトまたは空データ同期の注意事項がありません");

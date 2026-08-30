@@ -35,18 +35,22 @@
 
     /* ===== 体育館利用チェックへの定期導線 ===== */
     .facility-shortcut{
-      display:grid;grid-template-columns:52px minmax(0,1fr) auto;gap:12px;align-items:center;
-      margin:0 0 16px;padding:13px 14px;border:2px solid rgba(40,199,111,.42);border-radius:14px;
-      background:linear-gradient(135deg,rgba(40,199,111,.12),rgba(90,167,255,.08));
-      color:var(--ink);box-shadow:0 8px 22px rgba(0,0,0,.12);
+      position:relative;display:grid;grid-template-columns:64px minmax(0,1fr);gap:13px;align-items:center;
+      margin:0 0 18px;padding:16px;border:3px solid #ff9d42;border-radius:17px;
+      background:linear-gradient(135deg,#7a2f00,#c64f12 56%,#9d2337);
+      color:#fff;text-decoration:none;box-shadow:0 12px 30px rgba(198,79,18,.34),0 0 0 4px rgba(255,157,66,.09);
+      overflow:hidden;transition:transform .16s,box-shadow .16s;
     }
-    .facility-shortcut-icon{display:grid;place-items:center;width:52px;height:52px;border-radius:13px;background:rgba(40,199,111,.17);font-size:1.6rem}
-    .facility-shortcut-title{font-size:.92rem;font-weight:900;line-height:1.35}
-    .facility-shortcut-desc{margin-top:2px;color:var(--ink-3);font-size:.7rem;line-height:1.45}
-    .facility-shortcut-badge{padding:5px 9px;border-radius:999px;background:rgba(90,167,255,.15);border:1px solid rgba(90,167,255,.32);color:#b8d9ff;font-size:.68rem;font-weight:900;white-space:nowrap}
-    body[data-theme="light"] .facility-shortcut{background:linear-gradient(135deg,#e9f9f0,#eef7ff);border-color:#49a879}
-    body[data-theme="light"] .facility-shortcut-badge{background:#deecff;border-color:#79a9d3;color:#135b9f}
-    @media(max-width:520px){.facility-shortcut{grid-template-columns:46px minmax(0,1fr);gap:10px}.facility-shortcut-icon{width:46px;height:46px}.facility-shortcut-badge{grid-column:2;justify-self:start;white-space:normal}}
+    .facility-shortcut::after{content:"";position:absolute;right:-38px;top:-58px;width:150px;height:150px;border-radius:50%;background:rgba(255,255,255,.08);pointer-events:none}
+    .facility-shortcut:hover,.facility-shortcut:focus-visible{transform:translateY(-2px);box-shadow:0 16px 34px rgba(198,79,18,.42),0 0 0 4px rgba(255,157,66,.18);outline:none}
+    .facility-shortcut-icon{display:grid;place-items:center;width:64px;height:64px;border:1px solid rgba(255,255,255,.34);border-radius:16px;background:rgba(255,255,255,.15);font-size:2rem}
+    .facility-shortcut-main{min-width:0}.facility-shortcut-kicker{display:inline-flex;margin-bottom:5px;padding:3px 8px;border-radius:999px;background:#fff;color:#8f3200;font-size:.64rem;font-weight:1000;letter-spacing:.04em}
+    .facility-shortcut-title{display:block;color:#fff;font-size:1.08rem;font-weight:1000;line-height:1.35}
+    .facility-shortcut-desc{display:block;margin-top:3px;color:#fff4e9;font-size:.74rem;font-weight:700;line-height:1.5}
+    .facility-shortcut-action{grid-column:1/-1;display:flex;align-items:center;justify-content:center;min-height:48px;padding:9px 12px;border:2px solid #fff;border-radius:11px;background:#fff;color:#8f3200;font-size:.82rem;font-weight:1000;box-shadow:0 7px 18px rgba(79,21,0,.24)}
+    body[data-theme="light"] .facility-shortcut{background:linear-gradient(135deg,#b84200,#e25d17 56%,#b52a40);border-color:#9c3500;color:#fff}
+    body[data-theme="light"] .facility-shortcut-desc{color:#fff}
+    @media(max-width:520px){.facility-shortcut{grid-template-columns:54px minmax(0,1fr);gap:11px;padding:14px}.facility-shortcut-icon{width:54px;height:54px;font-size:1.7rem}.facility-shortcut-title{font-size:1.02rem}.facility-shortcut-desc{font-size:.76rem}.facility-shortcut-action{font-size:.86rem}}
 
     /* ===== カード ===== */
     .todo-list{display:grid;gap:10px}
@@ -155,8 +159,8 @@
 
   <a class="facility-shortcut" href="facility_check.html" aria-label="体育館利用チェックを開く">
     <span class="facility-shortcut-icon" aria-hidden="true">🏫</span>
-    <span><span class="facility-shortcut-title">体育館利用チェック</span><span class="facility-shortcut-desc">毎週 水・木の利用後チェック。カレンダーで完了確認・半面チェック表のPDF/印刷ができます。</span></span>
-    <span class="facility-shortcut-badge">水・木 定期</span>
+    <span class="facility-shortcut-main"><span class="facility-shortcut-kicker">重要｜毎週 水・木</span><span class="facility-shortcut-title">体育館を使ったら必ず確認</span><span class="facility-shortcut-desc">利用後に忘れ物・設備・モップ・ごみ・電気・鍵をチェックします。</span></span>
+    <span class="facility-shortcut-action">体育館利用チェックを開く →</span>
   </a>
 
   <!-- 統計 -->
