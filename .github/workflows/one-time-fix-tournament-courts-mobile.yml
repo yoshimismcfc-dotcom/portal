@@ -1,0 +1,28 @@
+name: one-time fix tournament courts mobile
+on:
+  push:
+    paths:
+      - '.github/workflows/one-time-fix-tournament-courts-mobile.yml'
+      - 'scripts/one-time-fix-tournament-courts-mobile.py'
+permissions:
+  contents: write
+jobs:
+  patch-test-commit:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+      - name: Apply patch
+        run: python3 scripts/one-time-fix-tournament-courts-mobile.py
+      - name: Run tests
+        run: npm test
+      - name: Commit production changes and remove one-time files
+        run: |
+          rm -f scripts/one-time-fix-tournament-courts-mobile.py .github/workflows/one-time-fix-tournament-courts-mobile.yml
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git add -A
+          git commit -m 'fix: tournament court rules and mobile ceremony layout'
+          git push
