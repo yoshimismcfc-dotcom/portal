@@ -15,33 +15,55 @@
       };
     }
 
+    function compact(el,width){
+      if(!el) return;
+      el.style.setProperty("display","block","important");
+      el.style.setProperty("width",width,"important");
+      el.style.setProperty("inline-size",width,"important");
+      el.style.setProperty("min-width","0","important");
+      el.style.setProperty("min-inline-size","0","important");
+      el.style.setProperty("max-width","100%","important");
+      el.style.setProperty("max-inline-size","100%","important");
+      el.style.setProperty("box-sizing","border-box","important");
+      el.style.setProperty("margin-left","0","important");
+      el.style.setProperty("margin-right","0","important");
+      el.style.setProperty("justify-self","start","important");
+    }
+
+    function compactGuidelineFields(){
+      document.querySelectorAll("#guideline-meta-list .guideline-card").forEach(function(card){
+        var titleEl=card.querySelector(".guideline-card-title");
+        var field=card.querySelector(".guideline-content-input");
+        if(!titleEl||!field) return;
+        var title=String(titleEl.textContent||"").replace(/\s+/g,"");
+        if(title==="期日") compact(field,"200px");
+        if(title.indexOf("開始時刻")===0) compact(field,"140px");
+      });
+    }
+
     function compactTournamentFields(){
-      var dateInput=document.getElementById("t-date");
-      var startInput=document.getElementById("t-start");
+      compact(document.getElementById("t-date"),"200px");
+      compact(document.getElementById("t-start"),"140px");
+      compactGuidelineFields();
 
-      function compact(el,width){
-        if(!el) return;
-        el.style.setProperty("display","block","important");
-        el.style.setProperty("width",width,"important");
-        el.style.setProperty("inline-size",width,"important");
-        el.style.setProperty("min-width","0","important");
-        el.style.setProperty("min-inline-size","0","important");
-        el.style.setProperty("max-width","100%","important");
-        el.style.setProperty("max-inline-size","100%","important");
-        el.style.setProperty("box-sizing","border-box","important");
-        el.style.setProperty("margin-left","0","important");
-        el.style.setProperty("margin-right","0","important");
+      var metaList=document.getElementById("guideline-meta-list");
+      if(metaList&&!metaList.dataset.compactObserver){
+        metaList.dataset.compactObserver="1";
+        new MutationObserver(function(){compactGuidelineFields();}).observe(metaList,{childList:true,subtree:true});
       }
+    }
 
-      /* 実機iPhoneでも明確に短く見えるサイズに固定。 */
-      compact(dateInput,"200px");
-      compact(startInput,"140px");
+    function startCompactWatcher(){
+      compactTournamentFields();
+      global.setTimeout(compactTournamentFields,100);
+      global.setTimeout(compactTournamentFields,500);
+      global.setTimeout(compactTournamentFields,1200);
     }
 
     if(document.readyState==="loading"){
-      document.addEventListener("DOMContentLoaded",compactTournamentFields,{once:true});
+      document.addEventListener("DOMContentLoaded",startCompactWatcher,{once:true});
     }else{
-      compactTournamentFields();
+      startCompactWatcher();
     }
   }
 
