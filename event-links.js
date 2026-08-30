@@ -1,5 +1,32 @@
 (function(global){
   "use strict";
+
+  function installTournamentUiFixes(){
+    var path=String(global.location&&global.location.pathname||"");
+    if(!/(?:^|\/)tournament\.html$/.test(path)) return;
+
+    /* 1面時、チーム自動反映の途中で出る不要なネイティブ警告だけを抑止する。 */
+    var nativeAlert=global.alert;
+    if(typeof nativeAlert==="function"){
+      global.alert=function(message){
+        var value=String(message==null?"":message);
+        if(value==="チーム一覧に、チーム名が2チーム以上決まってから対戦表を作成してください。") return;
+        return nativeAlert.apply(global,arguments);
+      };
+    }
+
+    /* iPhoneでも「期日」「開始時刻」を必要以上に横長にしない。 */
+    var style=document.createElement("style");
+    style.id="tournament-compact-date-time";
+    style.textContent=[
+      "html body #doc-taisen #t-date{display:block!important;width:220px!important;inline-size:220px!important;min-width:0!important;min-inline-size:0!important;max-width:100%!important;max-inline-size:100%!important;margin-left:0!important;margin-right:0!important;box-sizing:border-box!important;}",
+      "html body #doc-taisen #t-start{display:block!important;width:170px!important;inline-size:170px!important;min-width:0!important;min-inline-size:0!important;max-width:100%!important;max-inline-size:100%!important;box-sizing:border-box!important;}"
+    ].join("");
+    document.head.appendChild(style);
+  }
+
+  installTournamentUiFixes();
+
   function text(value){ return String(value == null ? "" : value).trim(); }
   function parseIso(value){
     var match=text(value).match(/^(\d{4})-(\d{2})-(\d{2})$/);
