@@ -9,7 +9,9 @@ const must=[
   '_gameAdjustRaw=value&&typeof value==="object"?value:null',
   'normalizedGameAdjust=value&&typeof value==="object"',
   'if(_activeGameAdjustDateId)syncGameAdjustTeamsToTournament(_activeGameAdjustDateId,{build:true})',
-  'TOURNAMENT_CONTEXT.saveId&&TOURNAMENT_CONTEXT.view==="results"'
+  'TOURNAMENT_CONTEXT.saveId&&TOURNAMENT_CONTEXT.view==="results"',
+  'String(item&&item.id||"")===String(dateId||"")',
+  'String(entry[1].gameAdjustDateId||"")===String(dateId||"")'
 ];
 for(const text of must){if(!html.includes(text)){throw new Error(`missing: ${text}`)}}
 

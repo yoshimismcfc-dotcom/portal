@@ -5,7 +5,7 @@
   <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate, max-age=0">
   <meta http-equiv="Pragma" content="no-cache">
   <meta http-equiv="Expires" content="-1">
-<meta name="app-version" content="20260830-8">
+<meta name="app-version" content="20260830-9">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <meta name="robots" content="noindex,nofollow">
   <title>大会要綱・対戦表｜吉見SMC FC</title>
@@ -2340,7 +2340,7 @@ function copyTournamentTemplate(type, silent){
 function linkedEntries(dateId, type){
   return Object.entries(_allSaves)
     .filter(function(entry){
-      return entry[1] && entry[1].gameAdjustDateId===dateId && (!type || entry[1].type===type);
+      return entry[1] && String(entry[1].gameAdjustDateId||"")===String(dateId||"") && (!type || entry[1].type===type);
     })
     .sort(function(a,b){ return (b[1].savedAt||"").localeCompare(a[1].savedAt||""); });
 }
@@ -2407,7 +2407,7 @@ function renderLinkedTournamentDates(){
   } else {
     wrap.innerHTML=list.map(function(group){
       var title=group.meta.name||group.meta.dateLabel||group.meta.dateIso||"名称未設定";
-      return '<button type="button" class="linked-date-item'+(group.id===_activeGameAdjustDateId?' active':'')+'" data-linked-date="'+esc3(group.id)+'">'
+      return '<button type="button" class="linked-date-item'+(String(group.id)===String(_activeGameAdjustDateId)?' active':'')+'" data-linked-date="'+esc3(group.id)+'">'
         +'<span><span class="linked-date-name">'+esc3(title)+'</span><span class="linked-date-meta">'+esc3(group.meta.dateIso||group.meta.dateLabel||"日付未設定")+(group.meta.category?'｜'+esc3(group.meta.category):'')+'</span></span>'
         +'<span class="linked-date-status">要綱 '+(group.youkou?'✅':'未保存')+'<br>対戦表 '+(group.taisen?'✅':'未保存')+'</span></button>';
     }).join("");
@@ -2418,7 +2418,7 @@ function renderLinkedTournamentDates(){
 }
 function selectLinkedDate(dateId){
   var entries = linkedEntries(dateId);
-  var date = _gameAdjustDates.find(function(item){return item.id===dateId;});
+  var date = _gameAdjustDates.find(function(item){return String(item&&item.id||"")===String(dateId||"");});
   var meta = entries.length ? linkedMetaFromEntry(entries[0][1]) : {};
   if(date){
     meta=Object.assign({},meta,{
