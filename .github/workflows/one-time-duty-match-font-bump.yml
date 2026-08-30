@@ -1,0 +1,32 @@
+name: one-time duty match mobile typography
+
+on:
+  push:
+    paths:
+      - ".github/workflows/one-time-duty-match-font-bump.yml"
+
+permissions:
+  contents: write
+
+jobs:
+  patch-test-commit:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+      - name: Apply typography update
+        run: python scripts/one-time-duty-match-font-bump.py
+      - name: Run all tests
+        run: npm test
+      - name: Commit production changes and remove one-time files
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git rm scripts/one-time-duty-match-font-bump.py .github/workflows/one-time-duty-match-font-bump.yml
+          git add duty_match.html
+          git commit -m "fix: enlarge duty match text on mobile"
+          git push origin HEAD:main
