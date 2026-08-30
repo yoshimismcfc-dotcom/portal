@@ -1,0 +1,29 @@
+name: one-time game adjust tournament sync
+on:
+  push:
+    paths:
+      - '.github/workflows/one-time-game-adjust-tournament-sync.yml'
+permissions:
+  contents: write
+jobs:
+  patch-test-commit:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+      - name: Apply sync patch
+        run: python scripts/one-time-game-adjust-tournament-sync.py
+      - name: Run all tests
+        run: npm test
+      - name: Commit production changes and remove one-time files
+        run: |
+          rm -f scripts/one-time-game-adjust-tournament-sync.py .github/workflows/one-time-game-adjust-tournament-sync.yml
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git add -A
+          git commit -m 'feat: sync confirmed teams into tournament setup'
+          git push origin main
