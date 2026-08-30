@@ -52,6 +52,10 @@ assert.ok(resultsForBlockSource.includes("block.matches.forEach")&&!resultsForBl
 assert.match(html,/\.st tr\.taisen-game-row\{display:grid/,"スマホでは試合行を得点入力カードとして表示してください");
 assert.match(html,/\.score-input\{width:50px;min-height:48px/,"スマホの得点欄は十分なタップサイズにしてください");
 
+
+assert.ok(html.includes('.ceremony-row{display:block!important;width:100%!important;max-width:100%!important;min-width:0!important;height:auto!important;min-height:0!important;max-height:none!important'),"スマホの開会式・閉会式カードは巨大化しない高さにしてください");
+assert.ok(html.includes('.ceremony-toggle input[type="checkbox"]{display:block!important;width:22px!important'),"開会式・閉会式のチェックボックスは通常サイズにしてください");
+assert.ok(html.includes('.ceremony-detail .form-group{width:100%!important;max-width:100%!important;min-width:0!important;height:auto!important'),"開会式・閉会式の入力欄はスマホ幅内へ収めてください");
 console.log("tournament result UI tests passed");
 
 assert.match(html,/<details class="match-editor-details" id="match-editor-details">/,"試合追加・削除一覧は必要なときに開ける折りたたみ表示にしてください");
