@@ -12,7 +12,12 @@
   <link rel="stylesheet" href="common.css">
   <script src="common.js"></script>
   <style>
-    .duty-row{display:grid;grid-template-columns:1fr 1fr 1fr 1fr auto;gap:8px;align-items:end}
+    .duty-row{display:grid;grid-template-columns:repeat(4,minmax(0,1fr)) auto;gap:8px;align-items:end}
+    .duty-row>*{min-width:0}
+    .duty-row .form-control{display:block;width:100%;min-width:0;max-width:100%;box-sizing:border-box}
+    #duty-date{inline-size:100%;min-inline-size:0;max-inline-size:100%;overflow:hidden}
+    #duty-date::-webkit-date-and-time-value{min-width:0;width:100%;text-align:left}
+    #duty-date::-webkit-datetime-edit{min-width:0;max-width:100%;padding:0}
     .duty-table-wrap{overflow-x:auto}
     .duty-table{width:100%;border-collapse:collapse;font-size:.86rem;min-width:460px}
     .duty-table th,.duty-table td{padding:9px 10px;border-bottom:1px solid var(--line);text-align:left;vertical-align:middle}
@@ -22,7 +27,7 @@
     .del-btn:hover{color:#ff4466;background:rgba(255,68,102,.18)}
     .grade-badge{display:inline-block;padding:2px 8px;border-radius:99px;font-size:.72rem;font-weight:900;background:rgba(255,107,43,.2);color:#ffaa66;border:1px solid rgba(255,107,43,.3)}
     .empty-msg{text-align:center;color:#6aaccc;padding:28px;font-size:.85rem}
-    @media(max-width:600px){.duty-row{grid-template-columns:1fr 1fr}.duty-row .btn{grid-column:1/-1}}
+    @media(max-width:600px){.duty-row{grid-template-columns:minmax(0,1fr)}.duty-row .btn{grid-column:auto;width:100%;min-height:48px;height:auto!important}}
     /* チェックリスト */
     .check-list{display:grid;gap:8px}
     .check-item{

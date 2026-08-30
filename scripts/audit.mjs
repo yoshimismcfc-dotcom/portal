@@ -166,6 +166,10 @@ for (const responsiveFile of ["accounts.html", "members.html", "duty.html", "acc
   const responsiveSource = fs.readFileSync(path.join(root, responsiveFile), "utf8");
   if (!responsiveSource.includes("mobile-stack")) fail(responsiveFile, "スマホ向け表レイアウトが適用されていません");
 }
+const dutySource = fs.readFileSync(path.join(root, "duty.html"), "utf8");
+if (!dutySource.includes(".duty-row>*{min-width:0}") || !dutySource.includes("grid-template-columns:minmax(0,1fr)") || !dutySource.includes("#duty-date::-webkit-date-and-time-value")) {
+  fail("duty.html", "スマホで日付と学年の入力欄が重ならない設定が不足しています");
+}
 const guideSource = fs.readFileSync(path.join(root, "guide.html"), "utf8");
 if (!guideSource.includes("次の屋外練習を8日先まで") || !guideSource.includes("設定基準に達したときだけ")) {
   fail("guide.html", "自動アラートの8日先検索と状態表示が説明されていません");
