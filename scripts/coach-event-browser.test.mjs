@@ -22,11 +22,11 @@ for (const required of [
   "大会情報を読み込んでいます",
   "大会がまだ登録されていません",
   "＋ 大会を登録する",
-  "coachDataReady",
-  'href="members.html"',
-  "団員名簿・データ管理",
-  "全学年の団員を確認・追加・修正"
+  "coachDataReady"
 ]) assert.ok(source.includes(required), "大会管理の初心者向け表示が不足しています: " + required);
+
+assert.doesNotMatch(source, /href="members\.html"/,
+  "団員名簿は入団・連絡にのみ表示し、コーチ専用メニューへ重複表示しないでください");
 
 for (const required of [
   '{icon:"🤝",name:"参加チーム"',
