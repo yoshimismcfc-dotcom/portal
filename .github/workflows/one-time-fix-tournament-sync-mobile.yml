@@ -26,3 +26,4 @@ jobs:
           git add -A
           git commit -m 'fix: make tournament team sync reliable on mobile'
           git push
+# rerun after sync test update
