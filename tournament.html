@@ -5,7 +5,7 @@
   <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate, max-age=0">
   <meta http-equiv="Pragma" content="no-cache">
   <meta http-equiv="Expires" content="-1">
-<meta name="app-version" content="20260830-4">
+<meta name="app-version" content="20260830-5">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <meta name="robots" content="noindex,nofollow">
   <title>大会要綱・対戦表｜吉見SMC FC</title>
@@ -2072,6 +2072,7 @@ var TOURNAMENT_CONTEXT = (function(){
 })();
 var _activeGameAdjustDateId = TOURNAMENT_CONTEXT.dateId;
 var _gameAdjustDates = [];
+var _gameAdjustRaw = null;
 var _activeDateMeta = {
   dateIso:TOURNAMENT_CONTEXT.dateIso,
   dateLabel:TOURNAMENT_CONTEXT.dateLabel,
@@ -2179,6 +2180,52 @@ function captureTeamValues(){
   }
   return teams;
 }
+function gameAdjustArray(value){
+  if(Array.isArray(value))return value.filter(Boolean);
+  if(value&&typeof value==="object")return Object.keys(value).sort().map(function(key){return value[key];}).filter(Boolean);
+  return [];
+}
+function normalizedTournamentTeamName(name){
+  return String(name||"").normalize("NFKC").replace(/[\s　]+/g,"").toUpperCase();
+}
+function isYoshimiSmcTeam(name){
+  return normalizedTournamentTeamName(name)==="吉見SMC";
+}
+function isConfirmedGameAdjustStatus(status){
+  return status==="OK"||status==="要項送付済";
+}
+function confirmedGameAdjustTeamNames(dateId){
+  if(!_gameAdjustRaw||!dateId)return [];
+  var teams=gameAdjustArray(_gameAdjustRaw.teams),seen={};
+  return teams.filter(function(team){
+    return team&&isConfirmedGameAdjustStatus(((team.statuses||{})[dateId])||"－");
+  }).map(function(team){return String(team.name||"").trim();}).filter(function(name){
+    var key=normalizedTournamentTeamName(name);
+    if(!key||isYoshimiSmcTeam(name)||seen[key])return false;
+    seen[key]=true;return true;
+  });
+}
+function gameAdjustTournamentBlocks(dateId){
+  var confirmed=confirmedGameAdjustTeamNames(dateId);
+  if(!confirmed.length)return null;
+  var all=["吉見SMC"].concat(confirmed).slice(0,16);
+  var currentCourts=Number(gv("t-courts"))||2;
+  var useTwoCourts=all.length>8||(currentCourts===2&&all.length>=4);
+  if(!useTwoCourts)return [all];
+  var firstSize=Math.ceil(all.length/2);
+  return [all.slice(0,firstSize),all.slice(firstSize)];
+}
+function syncGameAdjustTeamsToTournament(dateId,options){
+  options=options||{};
+  if(TOURNAMENT_CONTEXT.saveId&&TOURNAMENT_CONTEXT.view==="results")return false;
+  var blocks=gameAdjustTournamentBlocks(dateId);
+  if(!blocks)return false;
+  applyTeamValues(blocks);
+  _lastTournamentSchedule=null;_scheduleUndo=null;
+  if(options.build!==false)buildTaisen(true);
+  return true;
+}
+
 function applyTeamValues(teams){
   if(!Array.isArray(teams)||!teams.length)return;
   // 旧形式（一次元配列）も読み込めるようにする。
@@ -2355,6 +2402,7 @@ function hydrateLinkedDate(dateId, meta){
   }
   renderGuidelineEditors();
   buildYoukou();
+  syncGameAdjustTeamsToTournament(_activeGameAdjustDateId,{build:false});
   buildTaisen();
   renderLinkedTournamentDates();
   updateTournamentContextLine();
@@ -2559,9 +2607,11 @@ function deleteSave(id){
   var filter=document.getElementById("tournament-category-filter");
   if(filter)filter.addEventListener("change",renderLinkedTournamentDates);
   dbListen("game_adjust",function(value){
+    _gameAdjustRaw=value&&typeof value==="object"?value:null;
     _gameAdjustDates=SMCEventLinks.fromGameAdjust(value);
     updateTournamentCategories();
     renderLinkedTournamentDates();
+    if(_activeGameAdjustDateId)syncGameAdjustTeamsToTournament(_activeGameAdjustDateId,{build:true});
   },"smc_game_adj_v1",null);
 })();
 </script>
