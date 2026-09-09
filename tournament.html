@@ -5,7 +5,7 @@
   <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate, max-age=0">
   <meta http-equiv="Pragma" content="no-cache">
   <meta http-equiv="Expires" content="-1">
-  <meta name="app-version" content="20260909-18">
+  <meta name="app-version" content="20260909-19">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <meta name="robots" content="noindex,nofollow">
   <title>大会要綱・対戦表｜吉見SMC FC</title>
@@ -72,6 +72,9 @@
     @media(max-width:560px){.venue-map-preview.show{grid-template-columns:72px minmax(0,1fr)}.venue-map-preview img{width:72px}.venue-map-preview .btn{grid-column:1/-1;width:100%}}
     .pdf-capture{box-shadow:none!important;border-radius:0!important;overflow:visible!important;background:#fff!important;margin:0!important}
     .pdf-capture .no-print{display:none!important}
+    .pdf-compact-text{display:none}
+    .pdf-capture .pdf-screen-text{display:none!important}
+    .pdf-capture .pdf-compact-text{display:inline!important}
     .req-sheet.pdf-capture{width:794px!important;max-width:none!important;padding:22px 26px 18px!important}
     .tai-sheet.pdf-capture{width:794px!important;max-width:none!important;padding:14px 16px 10px!important;font-size:7.4pt!important;line-height:1.25!important}
     .tai-sheet.pdf-capture .courts-row{grid-template-columns:repeat(2,minmax(0,1fr))!important}
@@ -1175,9 +1178,9 @@ function renderMatchEditor(){
 }
 function manualMatchesTableHtml(){
   var extras=manualMatches();if(!extras.length)return "";
-  var h='<div class="block-hd manual-match-heading">➕ 追加試合（順位計算対象外）</div><table class="st manual-match-table"><thead><tr><th class="sched-th" style="width:28px">No</th><th class="sched-th" style="width:52px">開始</th><th class="sched-th" style="width:58px">コート</th><th class="sched-th">ホーム</th><th class="sched-th" style="width:56px">得点</th><th class="sched-th" style="width:18px">-</th><th class="sched-th" style="width:56px">得点</th><th class="sched-th">アウェイ</th><th class="sched-th" style="width:64px">備考</th></tr></thead><tbody>';
+  var h='<div class="block-hd manual-match-heading">➕ 追加試合（順位計算対象外）</div><table class="st manual-match-table"><thead><tr><th class="sched-th" style="width:28px">No</th><th class="sched-th" style="width:52px">開始</th><th class="sched-th" style="width:58px">コート</th><th class="sched-th">ホーム</th><th class="sched-th" style="width:42px"><span class="pdf-screen-text">得点</span><span class="pdf-compact-text">得</span></th><th class="sched-th" style="width:18px">-</th><th class="sched-th" style="width:42px"><span class="pdf-screen-text">得点</span><span class="pdf-compact-text">得</span></th><th class="sched-th">アウェイ</th><th class="sched-th" style="width:64px">備考</th></tr></thead><tbody>';
   extras.forEach(function(match,index){var key=manualMatchResultKey(match.id),stored=storedMatchResult(key,match.home,match.away)||{};
-    h+='<tr class="taisen-game-row manual-game-row" data-result-key="'+esc3(key)+'" data-home="'+esc3(match.home)+'" data-away="'+esc3(match.away)+'"><td class="game-no">追加'+(index+1)+'</td><td class="game-time">'+escapeHtml(match.time)+'開始</td><td class="game-kind">'+escapeHtml(match.court||"")+'</td><td class="td-home">'+escapeHtml(match.home)+'</td><td class="td-score score-cell home-score">'+scoreInputHtml(key,"home",match.home,stored.homeScore===undefined?"":stored.homeScore)+'</td><td class="td-vs">－</td><td class="td-score score-cell away-score">'+scoreInputHtml(key,"away",match.away,stored.awayScore===undefined?"":stored.awayScore)+'</td><td class="td-away">'+escapeHtml(match.away)+'</td><td class="game-note">'+escapeHtml(match.note||"追加試合")+'</td></tr>';
+    h+='<tr class="taisen-game-row manual-game-row" data-result-key="'+esc3(key)+'" data-home="'+esc3(match.home)+'" data-away="'+esc3(match.away)+'"><td class="game-no">追加'+(index+1)+'</td><td class="game-time"><span class="pdf-screen-text">'+escapeHtml(match.time)+'開始</span><span class="pdf-compact-text">'+escapeHtml(match.time)+'</span></td><td class="game-kind">'+escapeHtml(match.court||"")+'</td><td class="td-home">'+escapeHtml(match.home)+'</td><td class="td-score score-cell home-score">'+scoreInputHtml(key,"home",match.home,stored.homeScore===undefined?"":stored.homeScore)+'</td><td class="td-vs">－</td><td class="td-score score-cell away-score">'+scoreInputHtml(key,"away",match.away,stored.awayScore===undefined?"":stored.awayScore)+'</td><td class="td-away">'+escapeHtml(match.away)+'</td><td class="game-note">'+escapeHtml(match.note||"追加試合")+'</td></tr>';
   });
   return h+'</tbody></table>';
 }
@@ -1539,9 +1542,9 @@ function buildTaisen(forceNew){
       h+='<th class="sched-th" style="width:24px">No</th>';
       h+='<th class="sched-th" style="width:48px">開始</th>';
       h+='<th class="sched-th">ホーム</th>';
-      h+='<th class="sched-th" style="width:56px">得点</th>';
+      h+='<th class="sched-th" style="width:40px"><span class="pdf-screen-text">得点</span><span class="pdf-compact-text">得</span></th>';
       h+='<th class="sched-th" style="width:18px">-</th>';
-      h+='<th class="sched-th" style="width:56px">得点</th>';
+      h+='<th class="sched-th" style="width:40px"><span class="pdf-screen-text">得点</span><span class="pdf-compact-text">得</span></th>';
       h+='<th class="sched-th">アウェイ</th>';
       h+='</tr></thead><tbody>';
       var no=1;
@@ -1555,7 +1558,7 @@ if(slot.isBreak){
           if(g.blkIdx===blk.idx){
             var resultKey=matchResultKey(g.blkIdx,g.home,g.away),stored=storedMatchResult(resultKey,g.home,g.away)||{};
             h+='<tr class="taisen-game-row'+(si%2===1?' tr-alt-bg':'')+'" data-match-id="'+esc3(g.id)+'" data-result-key="'+esc3(resultKey)+'" data-home="'+esc3(g.home)+'" data-away="'+esc3(g.away)+'">';
-            h+='<td class="game-no">第'+no+'試合</td><td class="game-time">'+slot.time+'開始</td>';
+            h+='<td class="game-no"><span class="pdf-screen-text">第'+no+'試合</span><span class="pdf-compact-text">'+no+'</span></td><td class="game-time"><span class="pdf-screen-text">'+slot.time+'開始</span><span class="pdf-compact-text">'+slot.time+'</span></td>';
             h+='<td class="td-home">'+escapeHtml(g.home)+'</td>';
             h+='<td class="td-score score-cell home-score">'+scoreInputHtml(resultKey,"home",g.home,stored.homeScore===undefined?"":stored.homeScore)+'</td><td class="td-vs">－</td><td class="td-score score-cell away-score">'+scoreInputHtml(resultKey,"away",g.away,stored.awayScore===undefined?"":stored.awayScore)+'</td>';
             h+='<td class="td-away">'+escapeHtml(g.away)+'<label class="game-fixed no-print"><input class="game-fixed-input" type="checkbox" data-block-index="'+blk.idx+'" data-match-id="'+esc3(g.id)+'" '+(g.fixed?'checked ':'')+'>固定</label></td>';
@@ -1605,7 +1608,7 @@ if(slot.isBreak){
     h+='<th class="sched-th" style="width:24px">No</th><th class="sched-th" style="width:48px">開始</th>';
     h+='<th class="sched-th" style="width:60px">区分</th>';
     h+='<th class="sched-th">ホーム</th>';
-    h+='<th class="sched-th" style="width:56px">得点</th><th class="sched-th" style="width:18px">-</th><th class="sched-th" style="width:56px">得点</th>';
+    h+='<th class="sched-th" style="width:40px"><span class="pdf-screen-text">得点</span><span class="pdf-compact-text">得</span></th><th class="sched-th" style="width:18px">-</th><th class="sched-th" style="width:40px"><span class="pdf-screen-text">得点</span><span class="pdf-compact-text">得</span></th>';
     h+='<th class="sched-th">アウェイ</th><th class="sched-th" style="width:55px">備考</th>';
     h+='</tr></thead><tbody>';
     var fn=1;
@@ -1614,7 +1617,7 @@ if(slot.isBreak){
       if(disabledFinalMatches().indexOf(i)>=0)return;
       var finalKey=matchResultKey("final",f[1],f[2]),finalStored=storedMatchResult(finalKey,f[1],f[2])||{};
       h+='<tr class="taisen-game-row final-game-row'+(i>=2?' tr-final':'')+'" data-result-key="'+esc3(finalKey)+'" data-home="'+esc3(f[1])+'" data-away="'+esc3(f[2])+'">';
-      h+='<td class="game-no">第'+fn+'試合</td><td class="game-time">'+f[0]+'開始</td><td class="game-kind">順位戦</td>';
+      h+='<td class="game-no"><span class="pdf-screen-text">第'+fn+'試合</span><span class="pdf-compact-text">'+fn+'</span></td><td class="game-time"><span class="pdf-screen-text">'+f[0]+'開始</span><span class="pdf-compact-text">'+f[0]+'</span></td><td class="game-kind">順位戦</td>';
       h+='<td class="td-home">'+f[1]+'</td>';
       h+='<td class="td-score score-cell home-score">'+scoreInputHtml(finalKey,"home",f[1],finalStored.homeScore===undefined?"":finalStored.homeScore)+'</td><td class="td-vs">－</td><td class="td-score score-cell away-score">'+scoreInputHtml(finalKey,"away",f[2],finalStored.awayScore===undefined?"":finalStored.awayScore)+'</td>';
       h+='<td class="td-away">'+f[2]+'</td><td class="game-note">'+f[3]+'</td></tr>';
@@ -1631,7 +1634,7 @@ if(slot.isBreak){
     h+='<table class="st"><thead><tr>';
     h+='<th class="sched-th" style="width:28px">No</th><th class="sched-th" style="width:52px">開始</th>';
     h+='<th class="sched-th">ホーム</th>';
-    h+='<th class="sched-th" style="width:56px">得点</th><th class="sched-th" style="width:20px">-</th><th class="sched-th" style="width:56px">得点</th>';
+    h+='<th class="sched-th" style="width:42px"><span class="pdf-screen-text">得点</span><span class="pdf-compact-text">得</span></th><th class="sched-th" style="width:20px">-</th><th class="sched-th" style="width:42px"><span class="pdf-screen-text">得点</span><span class="pdf-compact-text">得</span></th>';
     h+='<th class="sched-th">アウェイ</th><th class="sched-th" style="width:60px">備考</th>';
     h+='</tr></thead><tbody>';
     schedsByTime.forEach(function(slot,si){
@@ -1643,7 +1646,7 @@ if(slot.isBreak){
       slot.games.forEach(function(g,gi){
         var resultKey=matchResultKey(g.blkIdx,g.home,g.away),stored=storedMatchResult(resultKey,g.home,g.away)||{};
         h+='<tr class="taisen-game-row'+(si%2===1?' tr-alt-bg':'')+'" data-match-id="'+esc3(g.id)+'" data-result-key="'+esc3(resultKey)+'" data-home="'+esc3(g.home)+'" data-away="'+esc3(g.away)+'">';
-        h+='<td class="game-no">第'+(si+1)+'試合</td><td class="game-time">'+slot.time+'開始</td>';
+        h+='<td class="game-no"><span class="pdf-screen-text">第'+(si+1)+'試合</span><span class="pdf-compact-text">'+(si+1)+'</span></td><td class="game-time"><span class="pdf-screen-text">'+slot.time+'開始</span><span class="pdf-compact-text">'+slot.time+'</span></td>';
         h+='<td class="td-home">'+escapeHtml(g.home)+'</td>';
         h+='<td class="td-score score-cell home-score">'+scoreInputHtml(resultKey,"home",g.home,stored.homeScore===undefined?"":stored.homeScore)+'</td><td class="td-vs">－</td><td class="td-score score-cell away-score">'+scoreInputHtml(resultKey,"away",g.away,stored.awayScore===undefined?"":stored.awayScore)+'</td>';
         h+='<td class="td-away">'+escapeHtml(g.away)+'<label class="game-fixed no-print"><input class="game-fixed-input" type="checkbox" data-block-index="0" data-match-id="'+esc3(g.id)+'" '+(g.fixed?'checked ':'')+'>固定</label></td><td class="game-note"></td></tr>';

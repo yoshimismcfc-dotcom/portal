@@ -28,6 +28,7 @@ assert.match(html,/if\(!isSchedule&&!scheduleLandscape&&heightAtReadableWidth>ma
 assert.ok(html.includes("順位表を含む対戦表PDFを作成")&&html.includes("_対戦表・順位表_A4縦1枚.pdf"),"順位表を含む対戦表PDFはA4縦1枚にしてください");
 assert.ok(html.includes('.tai-sheet.pdf-capture{width:794px!important')&&html.includes('.tai-sheet:not(.pdf-capture) .st{display:block'),"スマホ画面はカード表示、PDFは横一列の表形式に分離してください");
 assert.ok(html.includes('#taisen-preview>.tai-sheet:not(.pdf-capture){width:100%!important'),"スマホ用の横幅制限をPDFへ適用しないでください");
+assert.ok(html.includes('.pdf-capture .pdf-screen-text{display:none!important}')&&html.includes('.pdf-capture .pdf-compact-text{display:inline!important}'),"PDFでは試合番号と開始時刻を以前の短い表記にしてください");
 for(const required of [
   "PDFはまだ端末へ自動保存されていません",
   "保存先・LINE・印刷を選ぶ",
@@ -39,6 +40,8 @@ for(const required of [
   "shareButton.style.display=canShare&&!isLineBrowser",
   ".tai-sheet:not(.pdf-capture) .st{display:block",
   "#taisen-preview>.tai-sheet:not(.pdf-capture)",
+  "pdf-screen-text",
+  "pdf-compact-text",
   "ranking-pdf-actions",
   "PDFを作成して保存先を選ぶ",
   "match-editor",
