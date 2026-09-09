@@ -5,7 +5,7 @@
   <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate, max-age=0">
   <meta http-equiv="Pragma" content="no-cache">
   <meta http-equiv="Expires" content="-1">
-  <meta name="app-version" content="20260909-19">
+  <meta name="app-version" content="20260909-20">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <meta name="robots" content="noindex,nofollow">
   <title>大会要綱・対戦表｜吉見SMC FC</title>
@@ -30,6 +30,15 @@
     .tournament-purpose{display:grid;grid-template-columns:auto minmax(0,1fr);gap:10px;align-items:start;margin:0 0 12px;padding:12px 13px;border:1px solid rgba(0,212,255,.34);border-radius:12px;background:rgba(0,130,190,.08)}
     .tournament-purpose-icon{font-size:1.3rem}.tournament-purpose-title{color:var(--ink);font-size:.84rem;font-weight:1000}.tournament-purpose-text{margin-top:3px;color:var(--ink-3);font-size:.7rem;line-height:1.55}.tournament-context-line{display:block;margin-top:6px;color:var(--cyan);font-size:.7rem;font-weight:900;overflow-wrap:anywhere}
     body[data-theme="light"] .tournament-purpose{background:#eef6fb;border-color:#79a9bf}body[data-theme="light"] .tournament-purpose-title{color:#17263c}body[data-theme="light"] .tournament-purpose-text{color:#42546b}body[data-theme="light"] .tournament-context-line{color:#075d84}
+    .cloud-save-summary{display:grid;grid-template-columns:auto minmax(0,1fr);gap:3px 9px;align-items:center;margin:0 0 14px;padding:12px 13px;border:1px solid rgba(0,212,255,.38);border-radius:12px;background:rgba(0,120,190,.1);color:var(--ink)}
+    .cloud-save-summary strong{font-size:.8rem}.cloud-save-summary span{font-size:.72rem;line-height:1.5;color:var(--ink-3)}
+    .cloud-save-summary[data-state="saved"]{border-color:rgba(0,212,136,.55);background:rgba(0,150,95,.12)}
+    .cloud-save-summary[data-state="dirty"]{border-color:rgba(255,153,51,.62);background:rgba(210,105,0,.13)}
+    .cloud-save-summary[data-state="error"],.cloud-save-summary[data-state="conflict"]{border-color:rgba(255,82,105,.62);background:rgba(180,35,55,.13)}
+    .cloud-save-summary .btn{grid-column:1/-1;width:100%;margin-top:6px}
+    .save-modal-explain{margin:0 0 12px;padding:10px 11px;border-radius:9px;background:rgba(0,180,120,.12);color:var(--ink);font-size:.76rem;line-height:1.55}
+    .save-modal-status{min-height:1.5em;margin-top:8px;color:var(--ink-3);font-size:.72rem;font-weight:800}
+    body[data-theme="light"] .cloud-save-summary{background:#eef7fb;border-color:#6f9fb7}body[data-theme="light"] .cloud-save-summary span{color:#34495e}
     .fg2{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,240px),1fr));gap:10px}
     .fg3{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,180px),1fr));gap:10px}
     .fg1{display:flex;flex-direction:column;gap:10px}
@@ -530,6 +539,12 @@
     <div><div class="tournament-purpose-title">この画面ですること</div><div class="tournament-purpose-text">大会要綱と試合順を作り、当日は対戦表へ得点を入力します。入力結果は順位表へ自動反映され、そのままPDFにできます。</div><span class="tournament-context-line" id="tournament-context-line">大会情報を確認しています…</span></div>
   </div>
 
+  <div class="cloud-save-summary no-print" id="cloud-save-summary" data-state="loading" role="status" aria-live="polite">
+    <strong>☁️ クラウド保存</strong>
+    <span id="cloud-save-status">保存済みデータを確認しています…</span>
+    <button class="btn btn-outline btn-sm" id="cloud-reload-btn" type="button" onclick="reloadLatestCloudSave()" hidden>最新の保存内容を読み込み直す</button>
+  </div>
+
   <details class="linked-workflow linked-date-disclosure no-print">
     <summary class="linked-date-summary"><span>🏆 大会を選ぶ・切り替える</span><span class="linked-date-summary-hint">タップして選ぶ</span></summary>
     <div class="linked-date-disclosure-body">
@@ -582,8 +597,8 @@
       </div>
       <div class="btn-group">
         <button class="btn btn-primary" onclick="buildYoukou()" style="flex:1 1 140px">👁 プレビュー</button>
-        <button class="btn btn-outline btn-sm" onclick="openSaveModal('youkou')">💾 保存</button>
-        <button class="btn btn-outline btn-sm" onclick="openLoadModal('youkou')">📂 読込</button>
+        <button class="btn btn-primary btn-sm" onclick="openSaveModal('youkou')">☁️ 要項を保存・共有</button>
+        <button class="btn btn-outline btn-sm" onclick="openLoadModal('youkou')">📂 過去の保存データ</button>
         <button class="btn btn-cyan no-print pdf-primary" onclick="exportA4Pdf('youkou')" id="you-print-btn">📄 要項をA4縦PDFで作成</button>
         <button class="btn-line-copy sm" onclick="copyYoukou()">📋 LINEコピー</button>
       </div>
@@ -664,8 +679,8 @@
           <label class="schedule-toggle"><input type="checkbox" id="schedule-optimize" checked>自動調整する</label>
         </div>
         <div class="schedule-actions">
-          <button class="btn btn-primary btn-sm" type="button" onclick="buildTaisen(true)">対戦表を自動作成</button>
-          <button class="btn btn-outline btn-sm" type="button" onclick="optimizeCurrentSchedule()">現在の順番を最適化</button>
+          <button class="btn btn-primary btn-sm" type="button" onclick="markTournamentDirty('taisen');buildTaisen(true)">対戦表を自動作成</button>
+          <button class="btn btn-outline btn-sm" type="button" onclick="markTournamentDirty('taisen');optimizeCurrentSchedule()">現在の順番を最適化</button>
         </div>
         <div class="schedule-actions">
           <button class="btn btn-outline btn-sm" type="button" onclick="undoSchedule()" id="schedule-undo" disabled>↩ 元に戻す</button>
@@ -676,7 +691,7 @@
       <div class="match-editor" id="match-editor">
         <div class="match-editor-head">
           <div><div class="match-editor-title">⚽ 試合を追加・削除</div><div class="match-editor-help">自動作成した試合を削除できます。交流戦・順位決定戦などの追加試合は順位計算に含めません。変更後は保存してください。</div></div>
-          <div class="match-editor-head-actions"><button class="match-editor-add" type="button" onclick="openManualMatchModal()">＋ 追加試合を入れる</button><button class="match-editor-save" type="button" onclick="openSaveModal('taisen')">💾 変更を保存</button></div>
+          <div class="match-editor-head-actions"><button class="match-editor-add" type="button" onclick="openManualMatchModal()">＋ 追加試合を入れる</button><button class="match-editor-save" type="button" onclick="openSaveModal('taisen')">☁️ 変更を保存・共有</button></div>
         </div>
         <details class="match-editor-details" id="match-editor-details">
           <summary><span>現在の試合一覧・削除</span><span id="match-editor-count">0試合</span></summary>
@@ -685,10 +700,10 @@
         <div class="match-editor-feedback" id="match-editor-feedback" role="status" aria-live="polite"></div>
       </div>
       <div class="btn-group">
-        <button class="btn btn-outline btn-sm" onclick="copyTournamentTemplate('taisen')">📑 テンプレートをコピー</button>
-        <button class="btn btn-primary" onclick="buildTaisen(true)" style="flex:1 1 140px">📊 対戦表を自動作成</button>
-        <button class="btn btn-outline btn-sm" onclick="openSaveModal('taisen')">💾 対戦表を保存</button>
-        <button class="btn btn-outline btn-sm" onclick="openLoadModal('taisen')">📂 保存済み対戦表を開く</button>
+        <button class="btn btn-outline btn-sm" onclick="markTournamentDirty('taisen');copyTournamentTemplate('taisen')">📑 テンプレートをコピー</button>
+        <button class="btn btn-primary" onclick="markTournamentDirty('taisen');buildTaisen(true)" style="flex:1 1 140px">📊 対戦表を自動作成</button>
+        <button class="btn btn-primary btn-sm" onclick="openSaveModal('taisen')">☁️ 対戦表を保存・共有</button>
+        <button class="btn btn-outline btn-sm" onclick="openLoadModal('taisen')">📂 過去の保存データ</button>
         <button class="btn btn-cyan no-print pdf-primary" onclick="exportA4Pdf('taisen')" id="tai-print-btn">📄 順位表を含む対戦表PDFを作成</button>
         <button class="btn-line-copy sm" onclick="copyTaisen()">📋 LINEコピー</button>
       </div>
@@ -728,15 +743,17 @@
 <div class="save-modal-bg" id="modal-save" onclick="if(event.target.id==='modal-save')closeSaveModal()">
   <div class="save-modal" role="dialog" aria-modal="true" aria-labelledby="save-modal-title">
     <button class="modal-top-return" type="button" onclick="closeSaveModal()">← 大会要綱・対戦表へ戻る</button>
-    <h3 id="save-modal-title">💾 保存</h3>
+    <h3 id="save-modal-title">☁️ クラウドに保存</h3>
+    <p class="save-modal-explain">保存すると、同じ大会を開いた他のコーチのスマートフォンやパソコンにも最新内容が表示されます。</p>
     <div class="form-group">
       <label class="form-label">保存名 <span style="color:var(--red)">*</span></label>
       <input class="form-control" id="save-name-input" placeholder="例：北彩リーグ第1節 U10">
     </div>
     <div style="display:flex;gap:8px;justify-content:flex-end;margin-top:12px;flex-wrap:wrap">
       <button class="btn btn-outline btn-sm" onclick="closeSaveModal()">← 大会要綱・対戦表へ戻る</button>
-      <button class="btn btn-primary btn-sm" onclick="execSave()">💾 クラウドに保存</button>
+      <button class="btn btn-primary btn-sm" id="cloud-save-confirm" onclick="execSave()">☁️ 保存して他の端末にも反映</button>
     </div>
+    <div class="save-modal-status" id="cloud-save-modal-status" role="status" aria-live="polite"></div>
   </div>
 </div>
 
@@ -2131,7 +2148,42 @@ var _activeDateMeta = {
   category:TOURNAMENT_CONTEXT.category
 };
 var _contextHydrated = false;
+var _loadedSaveVersions = {youkou:"",taisen:""};
+var _tournamentDirty = {youkou:false,taisen:false};
+var _applyingSavedData = false;
 if(TOURNAMENT_CONTEXT.saveId && TOURNAMENT_CONTEXT.view==="results")document.body.classList.add("score-entry-mode");
+
+function saveVersion(pair){
+  return pair&&pair[1] ? String(pair[0])+"|"+String(pair[1].savedAt||"") : "";
+}
+function latestLinkedPair(type){
+  return _activeGameAdjustDateId ? (linkedEntries(_activeGameAdjustDateId,type)[0]||null) : null;
+}
+function setCloudSaveStatus(state,message,showReload){
+  var box=document.getElementById("cloud-save-summary"),text=document.getElementById("cloud-save-status"),reload=document.getElementById("cloud-reload-btn");
+  if(box)box.dataset.state=state||"loading";
+  if(text)text.textContent=message||"";
+  if(reload)reload.hidden=!showReload;
+}
+function refreshCloudSaveStatus(){
+  if(!_activeGameAdjustDateId){setCloudSaveStatus("loading","大会を選ぶと、要項と対戦表の保存状態を確認できます。",false);return;}
+  if(_tournamentDirty.youkou||_tournamentDirty.taisen){
+    var dirtyNames=[];if(_tournamentDirty.youkou)dirtyNames.push("要項");if(_tournamentDirty.taisen)dirtyNames.push("対戦表");
+    setCloudSaveStatus("dirty",dirtyNames.join("・")+"に未保存の変更があります。保存すると他の端末にも反映されます。",false);return;
+  }
+  var hasYoukou=!!latestLinkedPair("youkou"),hasTaisen=!!latestLinkedPair("taisen");
+  if(hasYoukou||hasTaisen){setCloudSaveStatus("saved","クラウドに保存された最新内容を表示しています（要項 "+(hasYoukou?"保存済み":"未保存")+"／対戦表 "+(hasTaisen?"保存済み":"未保存")+"）。",false);}
+  else setCloudSaveStatus("loading","この大会はまだ要項・対戦表がクラウドに保存されていません。",false);
+}
+function markTournamentDirty(type){
+  if(!_applyingSavedData&&_activeGameAdjustDateId&&Object.prototype.hasOwnProperty.call(_tournamentDirty,type))_tournamentDirty[type]=true;
+  refreshCloudSaveStatus();
+}
+function reloadLatestCloudSave(){
+  if(!_activeGameAdjustDateId)return;
+  if((_tournamentDirty.youkou||_tournamentDirty.taisen)&&!confirm("未保存の変更を破棄して、クラウドの最新内容を読み込みますか？"))return;
+  hydrateLinkedDate(_activeGameAdjustDateId,_activeDateMeta);
+}
 
 function updateTournamentContextLine(){
   var line=document.getElementById("tournament-context-line");if(!line)return;
@@ -2151,19 +2203,26 @@ function focusRequestedTournamentView(){
 updateTournamentContextLine();
 
 // Firebase読込
-dbListen("tournament_saves", function(val){
+dbListen("tournament_saves", function(val,sourceMeta){
   _allSaves = (val && typeof val==="object") ? val : {};
   // 端末キャッシュが同期読込されても、テンプレート初期化後に連動処理を行う。
   window.setTimeout(function(){
     renderLinkedTournamentDates();
     updateTournamentContextLine();
-    if(TOURNAMENT_CONTEXT.saveId && !_contextHydrated){
+    if(TOURNAMENT_CONTEXT.saveId && (!_contextHydrated||(sourceMeta&&sourceMeta.authoritative))){
       var directSave=_allSaves[TOURNAMENT_CONTEXT.saveId];
       if(directSave&&directSave.type==="taisen"){
+        var directVersion=String(TOURNAMENT_CONTEXT.saveId)+"|"+String(directSave.savedAt||"");
+        if(_contextHydrated&&directVersion===_loadedSaveVersions.taisen)return;
         _contextHydrated=true;
+        _applyingSavedData=true;
         applySaveEntry(directSave);
+        _applyingSavedData=false;
+        _loadedSaveVersions.taisen=directVersion;
+        _tournamentDirty.taisen=false;
         renderLinkedTournamentDates();
         updateTournamentContextLine();
+        refreshCloudSaveStatus();
         focusRequestedTournamentView();
         return;
       }
@@ -2171,6 +2230,16 @@ dbListen("tournament_saves", function(val){
     if(_activeGameAdjustDateId && !_contextHydrated){
       _contextHydrated = true;
       hydrateLinkedDate(_activeGameAdjustDateId, _activeDateMeta);
+      return;
+    }
+    if(_activeGameAdjustDateId && sourceMeta && sourceMeta.authoritative){
+      var cloudYoukou=saveVersion(latestLinkedPair("youkou")),cloudTaisen=saveVersion(latestLinkedPair("taisen"));
+      var cloudChanged=cloudYoukou!==_loadedSaveVersions.youkou||cloudTaisen!==_loadedSaveVersions.taisen;
+      if(cloudChanged&&(_tournamentDirty.youkou||_tournamentDirty.taisen)){
+        setCloudSaveStatus("conflict","別の端末で新しい内容が保存されています。編集中の内容を守るため、自動では上書きしていません。",true);
+      }else if(cloudChanged){
+        hydrateLinkedDate(_activeGameAdjustDateId,_activeDateMeta);
+      }else refreshCloudSaveStatus();
     }
   }, 0);
 }, SAVE_KEY, {});
@@ -2461,16 +2530,21 @@ function selectLinkedDate(dateId){
 function clearLinkedDate(){
   _activeGameAdjustDateId="";
   _activeDateMeta={dateIso:"",dateLabel:"",name:"",category:""};
+  _loadedSaveVersions={youkou:"",taisen:""};
+  _tournamentDirty={youkou:false,taisen:false};
   renderLinkedTournamentDates();
   updateTournamentContextLine();
+  refreshCloudSaveStatus();
 }
 function hydrateLinkedDate(dateId, meta){
   _activeGameAdjustDateId=dateId||"";
   var requestedMeta=Object.assign({dateIso:"",dateLabel:"",name:"",category:""},meta||{});
   _activeDateMeta=Object.assign({},requestedMeta);
+  var loadedPairs={youkou:null,taisen:null};
+  _applyingSavedData=true;
   ["youkou","taisen"].forEach(function(type){
     var entries=linkedEntries(_activeGameAdjustDateId,type);
-    if(entries.length) applySaveEntry(entries[0][1]);
+    if(entries.length){loadedPairs[type]=entries[0];applySaveEntry(entries[0][1]);}
     else copyTournamentTemplate(type,true);
   });
   // 試合調整から開いた場合は、親日程の最新名称・日付・カテゴリーを優先する。
@@ -2492,10 +2566,16 @@ function hydrateLinkedDate(dateId, meta){
   }
   renderGuidelineEditors();
   buildYoukou();
-  syncGameAdjustTeamsToTournament(_activeGameAdjustDateId,{build:false});
+  // 保存済み対戦表がある場合は、保存したチーム・試合順を試合調整の初期値で上書きしない。
+  if(!loadedPairs.taisen)syncGameAdjustTeamsToTournament(_activeGameAdjustDateId,{build:false});
   buildTaisen();
+  _loadedSaveVersions.youkou=saveVersion(loadedPairs.youkou);
+  _loadedSaveVersions.taisen=saveVersion(loadedPairs.taisen);
+  _tournamentDirty={youkou:false,taisen:false};
+  _applyingSavedData=false;
   renderLinkedTournamentDates();
   updateTournamentContextLine();
+  refreshCloudSaveStatus();
   if(_activeGameAdjustDateId){
     if(focusRequestedTournamentView())return;
     switchDoc("youkou",document.getElementById("tbtn-y"));
@@ -2509,9 +2589,11 @@ function hydrateLinkedDate(dateId, meta){
 // 保存モーダルを開く
 function openSaveModal(type){
   _saveType = type;
-  document.getElementById("save-modal-title").textContent = type==="youkou"?"💾 要綱を保存":"💾 対戦表を保存";
+  document.getElementById("save-modal-title").textContent = type==="youkou"?"☁️ 大会要項をクラウドに保存":"☁️ 対戦表をクラウドに保存";
   var titleField = type==="youkou" ? document.getElementById("y-title") : document.getElementById("t-title");
   document.getElementById("save-name-input").value = (titleField ? titleField.value : "") || "";
+  document.getElementById("cloud-save-modal-status").textContent="";
+  var saveButton=document.getElementById("cloud-save-confirm");if(saveButton){saveButton.disabled=false;saveButton.textContent="☁️ 保存して他の端末にも反映";}
   document.getElementById("modal-save").classList.add("open");
   setTimeout(function(){ document.getElementById("save-name-input").focus(); }, 100);
 }
@@ -2521,6 +2603,11 @@ function closeSaveModal(){ document.getElementById("modal-save").classList.remov
 function execSave(){
   var name = document.getElementById("save-name-input").value.trim();
   if(!name){ alert("保存名を入力してください"); return; }
+  var saveButton=document.getElementById("cloud-save-confirm"),modalStatus=document.getElementById("cloud-save-modal-status");
+  if(saveButton&&saveButton.disabled)return;
+  if(saveButton){saveButton.disabled=true;saveButton.textContent="保存しています…";}
+  if(modalStatus)modalStatus.textContent="クラウドへ保存しています。画面を閉じずにお待ちください。";
+  setCloudSaveStatus("loading","クラウドへ保存しています…",false);
   var savedAt=new Date().toISOString();
   if(_saveType==="youkou"){
     ["meta","sections"].forEach(function(key){
@@ -2557,10 +2644,16 @@ function execSave(){
   var id = linkedExisting ? linkedExisting[0] : "sv_" + Date.now();
   _allSaves[id] = entry;
   localStorage.setItem(SAVE_KEY, JSON.stringify(_allSaves));
-  dbSave("tournament_saves", _allSaves, SAVE_KEY, function(){
+  dbSave("tournament_saves", _allSaves, SAVE_KEY, function(result){
+    _loadedSaveVersions[_saveType]=String(id)+"|"+String(entry.savedAt||"");
+    _tournamentDirty[_saveType]=false;
     closeSaveModal();
     renderLinkedTournamentDates();
-    alert("「"+name+"」を保存しました！");
+    setCloudSaveStatus("saved","クラウドに保存しました。他の端末にも最新内容が反映されます。",false);
+  },function(error){
+    if(saveButton){saveButton.disabled=false;saveButton.textContent="もう一度保存する";}
+    if(modalStatus)modalStatus.textContent="クラウドに保存できませんでした。通信状況を確認して、もう一度お試しください。端末内には一時保存されています。";
+    setCloudSaveStatus("error","クラウドに保存できませんでした。通信状況を確認して、もう一度保存してください。",false);
   });
 }
 
@@ -2617,6 +2710,16 @@ document.getElementById("saved-list").addEventListener("keydown",function(event)
   if(!target)return;
   event.preventDefault();
   loadSave(target.dataset.id);
+});
+
+["doc-youkou","doc-taisen"].forEach(function(sectionId){
+  var section=document.getElementById(sectionId);if(!section)return;
+  ["input","change"].forEach(function(eventName){
+    section.addEventListener(eventName,function(event){
+      if(event.target&&event.target.classList&&event.target.classList.contains("score-input"))return;
+      markTournamentDirty(sectionId==="doc-youkou"?"youkou":"taisen");
+    });
+  });
 });
 
 // データ読込
@@ -2702,7 +2805,8 @@ function deleteSave(id){
     _gameAdjustDates=SMCEventLinks.fromGameAdjust(normalizedGameAdjust);
     updateTournamentCategories();
     renderLinkedTournamentDates();
-    if(_activeGameAdjustDateId)syncGameAdjustTeamsToTournament(_activeGameAdjustDateId,{build:true});
+    // 保存済み対戦表は別端末でもそのまま表示し、試合調整の初期値で上書きしない。
+    if(_activeGameAdjustDateId&&!latestLinkedPair("taisen"))syncGameAdjustTeamsToTournament(_activeGameAdjustDateId,{build:true});
   },"smc_game_adj_v1",null);
 })();
 </script>
