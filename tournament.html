@@ -5,7 +5,7 @@
   <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate, max-age=0">
   <meta http-equiv="Pragma" content="no-cache">
   <meta http-equiv="Expires" content="-1">
-  <meta name="app-version" content="20260830-16">
+  <meta name="app-version" content="20260909-17">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <meta name="robots" content="noindex,nofollow">
   <title>大会要綱・対戦表｜吉見SMC FC</title>
@@ -272,6 +272,10 @@
     .pdf-ready-note{margin:0 0 15px;color:var(--ink-3);font-size:.8rem;line-height:1.65}
     .pdf-ready-warning{margin:0 0 10px;padding:10px;border:1px solid rgba(255,157,66,.55);border-radius:9px;background:rgba(255,157,66,.1);color:#ffc278;font-size:.78rem;font-weight:900;line-height:1.55}
     .pdf-ready-filename{display:block;margin:0 0 12px;padding:8px;border-radius:8px;background:rgba(255,255,255,.06);color:var(--ink);font-size:.7rem;font-weight:800;overflow-wrap:anywhere}
+    .pdf-line-help{margin:0 0 14px;padding:12px 14px;border:1px solid rgba(0,212,255,.5);border-radius:10px;background:rgba(0,160,220,.1);color:#dff8ff;text-align:left}
+    .pdf-line-help strong{display:block;margin-bottom:7px;color:#73e3ff;font-size:.82rem}
+    .pdf-line-help ol{margin:0;padding-left:1.35rem;color:var(--ink);font-size:.76rem;font-weight:800;line-height:1.75}
+    .pdf-line-help li::marker{color:#ff9d42;font-weight:950}
     .pdf-ready-device{margin:11px 0 0;color:var(--ink-3);font-size:.68rem;line-height:1.6;text-align:left}
     .pdf-ready-actions{display:grid;gap:9px}
     .pdf-ready-actions .btn{width:100%;min-height:48px;justify-content:center}
@@ -431,6 +435,8 @@
     body[data-theme="light"] .match-editor-feedback{color:#075f32}
     body[data-theme="light"] .pdf-ready-warning{background:#fff7ed;color:#7a3500;border-color:#c86500}
     body[data-theme="light"] .pdf-ready-filename{background:#eef4f8;color:#17263c}
+    body[data-theme="light"] .pdf-line-help{background:#eefaff;color:#17263c;border-color:#1689b4}
+    body[data-theme="light"] .pdf-line-help strong{color:#075d84}
     .game-adjust-team-sync-note{display:none;margin:0 0 10px;padding:9px 11px;border:1px solid rgba(0,212,255,.36);border-radius:10px;background:rgba(0,160,220,.08);color:#9cecff;font-size:.72rem;font-weight:800;line-height:1.55}
     .game-adjust-team-sync-note.show{display:block}
     @media(max-width:520px){
@@ -797,12 +803,20 @@
     <button class="modal-top-return" type="button" onclick="closePdfReadyModal()">← 大会要綱・対戦表へ戻る</button>
     <div class="pdf-ready-icon" aria-hidden="true">✓</div>
     <h3 class="pdf-ready-title" id="pdf-ready-title">PDFができました</h3>
-    <div class="pdf-ready-warning">PDFはまだ端末へ自動保存されていません。下のボタンを押して保存先を選んでください。</div>
+    <div class="pdf-ready-warning" id="pdf-ready-warning" role="status">PDFはまだ端末へ自動保存されていません。下のボタンを押して保存先を選んでください。</div>
     <span class="pdf-ready-filename" id="pdf-ready-filename"></span>
     <p class="pdf-ready-note" id="pdf-ready-note">用紙サイズを設定したPDFです。</p>
+    <div class="pdf-line-help" id="pdf-line-help" hidden>
+      <strong>LINEから開いている方</strong>
+      <ol>
+        <li>下の「PDFを開いてLINEで共有」を押す</li>
+        <li>PDF画面の下にある共有ボタン「↑」を押す</li>
+        <li>送信先のLINEを選ぶ</li>
+      </ol>
+    </div>
     <div class="pdf-ready-actions">
       <button class="btn btn-cyan" type="button" id="pdf-share-btn" onclick="shareGeneratedPdf()">保存先・LINE・印刷を選ぶ</button>
-      <a class="btn btn-primary" id="pdf-open-link" href="#">PDFを画面で確認する</a>
+      <a class="btn btn-primary" id="pdf-open-link" href="#" target="_blank" rel="noopener">PDFを画面で確認する</a>
       <a class="btn btn-outline btn-sm" id="pdf-download-link" href="#" download>PDFを端末へダウンロード</a>
       <button class="btn btn-outline btn-sm" type="button" onclick="closePdfReadyModal()">← 大会要綱・対戦表へ戻る</button>
     </div>
@@ -1928,9 +1942,17 @@ function showPdfReadyModal(blob,filename,pageLabel){
   catch(error){_pdfReadyFile=null;}
   var openLink=document.getElementById("pdf-open-link");
   var downloadLink=document.getElementById("pdf-download-link");
+  var isLineBrowser=/(?:^|\s)(?:Line|LIFF)\//i.test(navigator.userAgent||"")||/\bLine\b/i.test(navigator.userAgent||"");
   openLink.href=_pdfReadyUrl;
   downloadLink.href=_pdfReadyUrl;
   downloadLink.download=filename;
+  openLink.textContent=isLineBrowser?"PDFを開いてLINEで共有":"PDFを画面で確認する";
+  downloadLink.hidden=isLineBrowser;
+  document.getElementById("pdf-line-help").hidden=!isLineBrowser;
+  document.getElementById("pdf-ready-title").textContent=isLineBrowser?"PDFができました（LINE用）":"PDFができました";
+  document.getElementById("pdf-ready-warning").textContent=isLineBrowser
+    ?"LINE内ではファイルを直接ダウンロードできません。下の「PDFを開いてLINEで共有」ボタンを押してください。"
+    :"PDFはまだ端末へ自動保存されていません。下のボタンを押して保存先を選んでください。";
   document.getElementById("pdf-ready-filename").textContent="作成したPDF："+filename;
   document.getElementById("pdf-ready-note").textContent=pageLabel+"で作成しました。次に保存先・LINE・印刷方法を選んでください。";
   var shareButton=document.getElementById("pdf-share-btn");
@@ -1938,7 +1960,10 @@ function showPdfReadyModal(blob,filename,pageLabel){
   if(canShare&&navigator.canShare){
     try{canShare=navigator.canShare({files:[_pdfReadyFile]});}catch(error2){canShare=false;}
   }
-  shareButton.style.display=canShare?"inline-flex":"none";
+  shareButton.style.display=canShare&&!isLineBrowser?"inline-flex":"none";
+  document.querySelector(".pdf-ready-device").textContent=isLineBrowser
+    ?"うまく開けない場合は、LINE画面右上のメニューから「デフォルトのブラウザで開く」を選び、もう一度PDFを作成してください。"
+    :"iPhone・iPadは「保存先・LINE・印刷を選ぶ」→「ファイルに保存」で保存できます。Android・パソコンは「PDFを端末へダウンロード」も利用できます。";
   document.getElementById("modal-pdf-ready").classList.add("open");
 }
 function closePdfReadyModal(){
