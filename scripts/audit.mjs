@@ -409,7 +409,7 @@ if (!guideSource.includes("固定10分休憩はありません")) {
 if (!commonSource.includes('data-print-target="tournament-schedule"') || !commonSource.includes("tournament-print-enhanced-style")) {
   fail("common.js", "対戦表の印刷専用デザインがありません");
 }
-if (!tournamentSource.includes("要項をA4縦PDFで作成") || !tournamentSource.includes("順位表を含む対戦表PDFを作成") || !tournamentSource.includes("exportA4Pdf") || !tournamentSource.includes("showPdfReadyModal") || !tournamentSource.includes("shareGeneratedPdf") || !tournamentSource.includes("pdf-device-help") || !tournamentSource.includes("PDFはまだ端末へ自動保存されていません")) {
+if (!tournamentSource.includes("要項をA4縦PDFで作成") || !tournamentSource.includes("対戦表・順位表をPDFで保存／共有") || !tournamentSource.includes("exportA4Pdf") || !tournamentSource.includes("showPdfReadyModal") || !tournamentSource.includes("shareGeneratedPdf") || !tournamentSource.includes("pdf-device-help") || !tournamentSource.includes("PDFはまだ端末へ自動保存されていません")) {
   fail("tournament.html", "要項・対戦表のPDF保存手順が分かりやすく表示されていません");
 }
 if (!tournamentSource.includes(".tai-sheet.pdf-capture .score-input") || !tournamentSource.includes(".tai-sheet.pdf-capture .rct") || !tournamentSource.includes("SMCTournamentScheduler.standingDisplay(stat)") || !tournamentSource.includes("pdf-footnote")) {

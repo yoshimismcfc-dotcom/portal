@@ -5,7 +5,7 @@
   <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate, max-age=0">
   <meta http-equiv="Pragma" content="no-cache">
   <meta http-equiv="Expires" content="-1">
-  <meta name="app-version" content="20260909-20">
+  <meta name="app-version" content="20260909-21">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <meta name="robots" content="noindex,nofollow">
   <title>大会要綱・対戦表｜吉見SMC FC</title>
@@ -70,6 +70,15 @@
     .pdf-step-no{display:grid;place-items:center;flex:0 0 23px;width:23px;height:23px;border-radius:50%;background:#00d488;color:#052b20;font-size:.72rem;font-weight:1000}
     .pdf-device-help{margin-top:9px;padding-top:8px;border-top:1px solid rgba(127,255,192,.24);font-size:.71rem;line-height:1.65}
     .pdf-primary{flex:1 1 100%!important;min-height:48px;font-size:.9rem!important;font-weight:1000!important}
+    .schedule-create-note{margin:6px 2px 0;color:var(--ink-3);font-size:.68rem;line-height:1.45}
+    .taisen-output-actions{display:grid;gap:9px;margin-top:16px}
+    .taisen-output-actions .btn{width:100%;min-height:50px;justify-content:center}
+    .taisen-pdf-cta{min-height:56px!important;background:linear-gradient(135deg,#f57c00,#d92c58)!important;border:1px solid rgba(255,188,105,.75)!important;color:#fff!important;box-shadow:0 8px 22px rgba(217,44,88,.22);font-size:.92rem!important;font-weight:1000!important}
+    .pdf-action-note{margin:0;padding:0 4px;color:var(--ink-3);font-size:.7rem;line-height:1.5;text-align:center}
+    .secondary-actions{margin-top:10px;border:1px solid var(--line-2);border-radius:11px;background:rgba(255,255,255,.035)}
+    .secondary-actions>summary{display:flex;align-items:center;justify-content:space-between;min-height:48px;padding:10px 13px;color:var(--ink);font-size:.78rem;font-weight:900;cursor:pointer;list-style:none}.secondary-actions>summary::-webkit-details-marker{display:none}.secondary-actions>summary::after{content:"＋";font-size:1.1rem;color:var(--cyan)}.secondary-actions[open]>summary::after{content:"－"}
+    .secondary-actions-body{display:grid;gap:8px;padding:0 10px 10px}.secondary-actions-body .btn{width:100%;justify-content:center}
+    .compact-pdf-guide>summary{display:flex;align-items:center;justify-content:space-between;min-height:44px;color:#7fffc0;font-size:.8rem;font-weight:900;cursor:pointer;list-style:none}.compact-pdf-guide>summary::-webkit-details-marker{display:none}.compact-pdf-guide>summary::after{content:"＋"}.compact-pdf-guide[open]>summary::after{content:"－"}
     .venue-map-option{display:grid;grid-template-columns:auto minmax(0,1fr);gap:10px;align-items:start;margin:14px 0 10px;padding:12px;border:1px solid rgba(0,212,255,.38);border-radius:11px;background:rgba(0,160,220,.08);cursor:pointer}
     .venue-map-option input{width:22px;height:22px;margin:2px 0 0;accent-color:#00d488}
     .venue-map-option-title{display:block;color:var(--ink);font-size:.84rem;font-weight:1000}
@@ -679,9 +688,10 @@
           <label class="schedule-toggle"><input type="checkbox" id="schedule-optimize" checked>自動調整する</label>
         </div>
         <div class="schedule-actions">
-          <button class="btn btn-primary btn-sm" type="button" onclick="markTournamentDirty('taisen');buildTaisen(true)">対戦表を自動作成</button>
+          <button class="btn btn-primary btn-sm" type="button" onclick="markTournamentDirty('taisen');buildTaisen(true)">⚽ 対戦表を自動作成</button>
           <button class="btn btn-outline btn-sm" type="button" onclick="markTournamentDirty('taisen');optimizeCurrentSchedule()">現在の順番を最適化</button>
         </div>
+        <div class="schedule-create-note">参加チームから試合順を自動で作ります。</div>
         <div class="schedule-actions">
           <button class="btn btn-outline btn-sm" type="button" onclick="undoSchedule()" id="schedule-undo" disabled>↩ 元に戻す</button>
           <button class="btn btn-outline btn-sm" type="button" onclick="openLineInvite()">💬 対戦チームへ送る案内文を作る</button>
@@ -691,7 +701,7 @@
       <div class="match-editor" id="match-editor">
         <div class="match-editor-head">
           <div><div class="match-editor-title">⚽ 試合を追加・削除</div><div class="match-editor-help">自動作成した試合を削除できます。交流戦・順位決定戦などの追加試合は順位計算に含めません。変更後は保存してください。</div></div>
-          <div class="match-editor-head-actions"><button class="match-editor-add" type="button" onclick="openManualMatchModal()">＋ 追加試合を入れる</button><button class="match-editor-save" type="button" onclick="openSaveModal('taisen')">☁️ 変更を保存・共有</button></div>
+          <div class="match-editor-head-actions"><button class="match-editor-add" type="button" onclick="openManualMatchModal()">＋ 追加試合を入れる</button><button class="match-editor-save" type="button" onclick="openSaveModal('taisen')">☁️ 変更を保存</button></div>
         </div>
         <details class="match-editor-details" id="match-editor-details">
           <summary><span>現在の試合一覧・削除</span><span id="match-editor-count">0試合</span></summary>
@@ -699,21 +709,26 @@
         </details>
         <div class="match-editor-feedback" id="match-editor-feedback" role="status" aria-live="polite"></div>
       </div>
-      <div class="btn-group">
-        <button class="btn btn-outline btn-sm" onclick="markTournamentDirty('taisen');copyTournamentTemplate('taisen')">📑 テンプレートをコピー</button>
-        <button class="btn btn-primary" onclick="markTournamentDirty('taisen');buildTaisen(true)" style="flex:1 1 140px">📊 対戦表を自動作成</button>
-        <button class="btn btn-primary btn-sm" onclick="openSaveModal('taisen')">☁️ 対戦表を保存・共有</button>
-        <button class="btn btn-outline btn-sm" onclick="openLoadModal('taisen')">📂 過去の保存データ</button>
-        <button class="btn btn-cyan no-print pdf-primary" onclick="exportA4Pdf('taisen')" id="tai-print-btn">📄 順位表を含む対戦表PDFを作成</button>
-        <button class="btn-line-copy sm" onclick="copyTaisen()">📋 LINEコピー</button>
+      <div class="taisen-output-actions">
+        <button class="btn btn-cyan" onclick="openSaveModal('taisen')">☁️ 対戦表を保存</button>
+        <button class="btn taisen-pdf-cta no-print" onclick="exportA4Pdf('taisen')" id="tai-print-btn" aria-label="対戦表と順位表をPDFで保存または共有する">📄 対戦表・順位表をPDFで保存／共有</button>
+        <p class="pdf-action-note">試合日程・得点・順位表をA4縦1枚のPDFにします。作成後にLINE共有・端末保存・印刷を選べます。</p>
       </div>
+      <details class="secondary-actions no-print">
+        <summary>その他の操作</summary>
+        <div class="secondary-actions-body">
+          <button class="btn btn-outline btn-sm" onclick="openLoadModal('taisen')">📂 過去の保存データ</button>
+          <button class="btn btn-outline btn-sm" onclick="markTournamentDirty('taisen');copyTournamentTemplate('taisen')">📑 テンプレートをコピー</button>
+          <button class="btn-line-copy sm" onclick="copyTaisen()">📋 LINEコピー</button>
+        </div>
+      </details>
     </div>
-    <div class="pdf-guide no-print" id="t-guide">
-      <span class="pdf-guide-title">📄 順位表を含むPDFを保存・共有する方法</span>
+    <details class="pdf-guide compact-pdf-guide no-print" id="t-guide">
+      <summary>PDFの保存・共有方法を見る</summary>
       <div class="pdf-guide-note" id="t-pdf-orientation-note">試合日程・得点・順位表・総当たり表を、A4縦1枚へまとめます。</div>
-      <div class="pdf-steps"><div class="pdf-step"><span class="pdf-step-no">1</span><span>上または順位表前の<strong id="t-pdf-guide-button">「順位表を含む対戦表PDFを作成」</strong>をタップ</span></div><div class="pdf-step"><span class="pdf-step-no">2</span><span>「PDFができました」と表示されるまで待つ</span></div><div class="pdf-step"><span class="pdf-step-no">3</span><span>「保存先・LINE・印刷を選ぶ」をタップ</span></div></div>
+      <div class="pdf-steps"><div class="pdf-step"><span class="pdf-step-no">1</span><span>上の<strong id="t-pdf-guide-button">「対戦表・順位表をPDFで保存／共有」</strong>をタップ</span></div><div class="pdf-step"><span class="pdf-step-no">2</span><span>「PDFができました」と表示されるまで待つ</span></div><div class="pdf-step"><span class="pdf-step-no">3</span><span>LINE共有・端末保存・印刷から選ぶ</span></div></div>
       <div class="pdf-device-help">🍎 <strong>iPhone・iPad：</strong>「共有・印刷」から「プリント」「ファイルに保存」「LINE」を選べます。<br>🤖 <strong>Android：</strong>「PDFを開く」から共有・印刷できます。<br>💻 <strong>パソコン：</strong>「PDFを開く」から保存・印刷できます。</div>
-    </div>
+    </details>
     <div id="taisen-preview" style="margin-top:12px"></div>
   </div>
 
@@ -751,7 +766,7 @@
     </div>
     <div style="display:flex;gap:8px;justify-content:flex-end;margin-top:12px;flex-wrap:wrap">
       <button class="btn btn-outline btn-sm" onclick="closeSaveModal()">← 大会要綱・対戦表へ戻る</button>
-      <button class="btn btn-primary btn-sm" id="cloud-save-confirm" onclick="execSave()">☁️ 保存して他の端末にも反映</button>
+      <button class="btn btn-primary btn-sm" id="cloud-save-confirm" onclick="execSave()">☁️ 保存する</button>
     </div>
     <div class="save-modal-status" id="cloud-save-modal-status" role="status" aria-live="polite"></div>
   </div>
@@ -835,7 +850,7 @@
       </ol>
     </div>
     <div class="pdf-ready-actions">
-      <button class="btn btn-cyan" type="button" id="pdf-share-btn" onclick="shareGeneratedPdf()">保存先・LINE・印刷を選ぶ</button>
+      <button class="btn btn-cyan" type="button" id="pdf-share-btn" onclick="shareGeneratedPdf()">LINEなどで共有・保存する</button>
       <a class="btn btn-primary" id="pdf-open-link" href="#" target="_blank" rel="noopener">PDFを画面で確認する</a>
       <a class="btn btn-outline btn-sm" id="pdf-download-link" href="#" download>PDFを端末へダウンロード</a>
       <button class="btn btn-outline btn-sm" type="button" onclick="closePdfReadyModal()">← 大会要綱・対戦表へ戻る</button>
@@ -1919,8 +1934,8 @@ function selectedScheduleOrientation(){
 function updatePdfOrientationLabel(){
   var button=document.getElementById("tai-print-btn");
   var guideButton=document.getElementById("t-pdf-guide-button");
-  if(button)button.textContent="📄 順位表を含む対戦表PDFを作成";
-  if(guideButton)guideButton.textContent="「順位表を含む対戦表PDFを作成」";
+  if(button)button.textContent="📄 対戦表・順位表をPDFで保存／共有";
+  if(guideButton)guideButton.textContent="「対戦表・順位表をPDFで保存／共有」";
   document.body.dataset.courtLayout="one";
 }
 function updateVenueMapOption(){
@@ -2593,7 +2608,7 @@ function openSaveModal(type){
   var titleField = type==="youkou" ? document.getElementById("y-title") : document.getElementById("t-title");
   document.getElementById("save-name-input").value = (titleField ? titleField.value : "") || "";
   document.getElementById("cloud-save-modal-status").textContent="";
-  var saveButton=document.getElementById("cloud-save-confirm");if(saveButton){saveButton.disabled=false;saveButton.textContent="☁️ 保存して他の端末にも反映";}
+  var saveButton=document.getElementById("cloud-save-confirm");if(saveButton){saveButton.disabled=false;saveButton.textContent="☁️ 保存する";}
   document.getElementById("modal-save").classList.add("open");
   setTimeout(function(){ document.getElementById("save-name-input").focus(); }, 100);
 }
