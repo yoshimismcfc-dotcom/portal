@@ -26,6 +26,8 @@ assert.match(html,/data-stat="played"><\/td>/,"未入力の試合数は初期表
 assert.doesNotMatch(html,/data-stat="played">0<\/td>/,"未入力順位表に0を入れないでください");
 assert.match(html,/if\(!isSchedule&&!scheduleLandscape&&heightAtReadableWidth>maxHeight\*splitThreshold\)/,"対戦表PDFを複数ページへ分割しないでください");
 assert.ok(html.includes("順位表を含む対戦表PDFを作成")&&html.includes("_対戦表・順位表_A4縦1枚.pdf"),"順位表を含む対戦表PDFはA4縦1枚にしてください");
+assert.ok(html.includes('.tai-sheet.pdf-capture{width:794px!important')&&html.includes('.tai-sheet:not(.pdf-capture) .st{display:block'),"スマホ画面はカード表示、PDFは横一列の表形式に分離してください");
+assert.ok(html.includes('#taisen-preview>.tai-sheet:not(.pdf-capture){width:100%!important'),"スマホ用の横幅制限をPDFへ適用しないでください");
 for(const required of [
   "PDFはまだ端末へ自動保存されていません",
   "保存先・LINE・印刷を選ぶ",
@@ -35,6 +37,8 @@ for(const required of [
   "pdf-line-help",
   "downloadLink.hidden=isLineBrowser",
   "shareButton.style.display=canShare&&!isLineBrowser",
+  ".tai-sheet:not(.pdf-capture) .st{display:block",
+  "#taisen-preview>.tai-sheet:not(.pdf-capture)",
   "ranking-pdf-actions",
   "PDFを作成して保存先を選ぶ",
   "match-editor",
