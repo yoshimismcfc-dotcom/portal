@@ -9,6 +9,12 @@ const map = fs.readFileSync(path.join(root, "assets", "yoshimi-fureai-venue-guid
 const printMap = fs.readFileSync(path.join(root, "assets", "yoshimi-fureai-venue-guide.png"));
 
 assert.match(html, /id="include-venue-map"/);
+assert.match(html, /PDFに会場案内図を付けますか？/);
+assert.match(html, /1ページ目：大会要項/);
+assert.match(html, /2ページ目：会場案内図/);
+assert.match(html, /id="venue-map-choice-state"/);
+assert.match(html, /選択中：会場案内図つき（2ページ）/);
+assert.match(html, /classList\.toggle\("selected",enabled\)/);
 assert.match(html, /YOUKOU_FIELDS\s*=\s*\["y-title","include-venue-map"\]/);
 assert.match(html, /async function addVenueMapPage\(pdf\)/);
 assert.match(html, /pdf\.addPage\("a4","portrait"\)/);

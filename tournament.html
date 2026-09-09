@@ -5,7 +5,7 @@
   <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate, max-age=0">
   <meta http-equiv="Pragma" content="no-cache">
   <meta http-equiv="Expires" content="-1">
-  <meta name="app-version" content="20260909-21">
+  <meta name="app-version" content="20260909-22">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <meta name="robots" content="noindex,nofollow">
   <title>大会要綱・対戦表｜吉見SMC FC</title>
@@ -79,10 +79,18 @@
     .secondary-actions>summary{display:flex;align-items:center;justify-content:space-between;min-height:48px;padding:10px 13px;color:var(--ink);font-size:.78rem;font-weight:900;cursor:pointer;list-style:none}.secondary-actions>summary::-webkit-details-marker{display:none}.secondary-actions>summary::after{content:"＋";font-size:1.1rem;color:var(--cyan)}.secondary-actions[open]>summary::after{content:"－"}
     .secondary-actions-body{display:grid;gap:8px;padding:0 10px 10px}.secondary-actions-body .btn{width:100%;justify-content:center}
     .compact-pdf-guide>summary{display:flex;align-items:center;justify-content:space-between;min-height:44px;color:#7fffc0;font-size:.8rem;font-weight:900;cursor:pointer;list-style:none}.compact-pdf-guide>summary::-webkit-details-marker{display:none}.compact-pdf-guide>summary::after{content:"＋"}.compact-pdf-guide[open]>summary::after{content:"－"}
-    .venue-map-option{display:grid;grid-template-columns:auto minmax(0,1fr);gap:10px;align-items:start;margin:14px 0 10px;padding:12px;border:1px solid rgba(0,212,255,.38);border-radius:11px;background:rgba(0,160,220,.08);cursor:pointer}
-    .venue-map-option input{width:22px;height:22px;margin:2px 0 0;accent-color:#00d488}
-    .venue-map-option-title{display:block;color:var(--ink);font-size:.84rem;font-weight:1000}
-    .venue-map-option-note{display:block;margin-top:3px;color:var(--ink-3);font-size:.69rem;line-height:1.5}
+    .venue-map-choice-heading{margin:16px 0 7px;color:var(--ink);font-size:.86rem;font-weight:1000}
+    .venue-map-option{display:grid;grid-template-columns:auto minmax(0,1fr);gap:10px 11px;align-items:center;margin:0 0 10px;padding:14px;border:2px solid rgba(255,153,51,.58);border-radius:13px;background:linear-gradient(135deg,rgba(255,133,27,.12),rgba(0,160,220,.08));cursor:pointer;transition:.16s}
+    .venue-map-option:hover{border-color:var(--orange)}.venue-map-option:focus-within{outline:3px solid rgba(0,212,255,.45);outline-offset:2px}
+    .venue-map-option.selected{border-color:#00d488;background:linear-gradient(135deg,rgba(0,180,115,.17),rgba(0,125,205,.1));box-shadow:0 0 0 1px rgba(0,212,136,.18)}
+    .venue-map-option-icon{display:grid;place-items:center;width:48px;height:48px;border-radius:11px;background:rgba(255,145,35,.18);font-size:1.65rem}
+    .venue-map-option-title{display:block;color:var(--ink);font-size:.9rem;font-weight:1000}
+    .venue-map-option-note{display:block;margin-top:3px;color:var(--ink-3);font-size:.7rem;line-height:1.5}
+    .venue-map-pages{display:flex;align-items:center;gap:7px;margin-top:7px;color:var(--ink);font-size:.67rem;font-weight:900;flex-wrap:wrap}.venue-map-pages-arrow{color:var(--orange);font-size:1rem}
+    .venue-map-toggle-row{grid-column:1/-1;display:grid;grid-template-columns:auto minmax(0,1fr);gap:9px;align-items:center;min-height:48px;padding:8px 10px;border-radius:10px;background:rgba(0,0,0,.18)}
+    .venue-map-option input{width:28px;height:28px;margin:0;accent-color:#00d488;cursor:pointer}
+    .venue-map-choice-state{display:block;color:#ffbd75;font-size:.78rem;font-weight:1000}.venue-map-option.selected .venue-map-choice-state{color:#72f5ba}
+    body[data-theme="light"] .venue-map-option{background:linear-gradient(135deg,#fff5e8,#eef8fc);border-color:#b65b00}body[data-theme="light"] .venue-map-option.selected{background:linear-gradient(135deg,#e9fff5,#eef8fc);border-color:#087d55}body[data-theme="light"] .venue-map-choice-state{color:#7a3500}body[data-theme="light"] .venue-map-option.selected .venue-map-choice-state{color:#075f43}
     .venue-map-preview{display:none;margin:0 0 12px;padding:9px;border:1px solid var(--line-2);border-radius:10px;background:rgba(255,255,255,.04)}
     .venue-map-preview.show{display:grid;grid-template-columns:84px minmax(0,1fr) auto;gap:10px;align-items:center}
     .venue-map-preview img{display:block;width:84px;aspect-ratio:210/297;object-fit:cover;border:1px solid #cbd5e1;background:#fff}
@@ -595,9 +603,11 @@
         <button class="btn btn-outline btn-sm" type="button" onclick="resetGuidelineTemplate()">↺ 標準テンプレートに戻す</button>
         <span>現在の要項を初期状態へ戻します。実行前に確認画面が表示されます。</span>
       </div>
-      <label class="venue-map-option" for="include-venue-map">
-        <input id="include-venue-map" type="checkbox" onchange="updateVenueMapOption()">
-        <span><span class="venue-map-option-title">会場案内図を2ページ目に追加</span><span class="venue-map-option-note">チェックすると、1ページ目に大会要項、2ページ目に吉見町ふれあい広場の案内図を入れた1つのPDFを作成します。</span></span>
+      <div class="venue-map-choice-heading">🗺️ PDFに会場案内図を付けますか？</div>
+      <label class="venue-map-option" id="venue-map-option" for="include-venue-map">
+        <span class="venue-map-option-icon" aria-hidden="true">🗺️</span>
+        <span><span class="venue-map-option-title">会場案内図つきのPDFにする</span><span class="venue-map-option-note">吉見町ふれあい広場の案内図を、PDFの2ページ目に追加します。</span><span class="venue-map-pages"><span>1ページ目：大会要項</span><span class="venue-map-pages-arrow">→</span><span>2ページ目：会場案内図</span></span></span>
+        <span class="venue-map-toggle-row"><input id="include-venue-map" type="checkbox" onchange="updateVenueMapOption()" aria-describedby="venue-map-choice-state"><span class="venue-map-choice-state" id="venue-map-choice-state">現在：大会要項のみ（1ページ）</span></span>
       </label>
       <div class="venue-map-preview" id="venue-map-preview">
         <img src="assets/yoshimi-fureai-venue-guide.png" alt="吉見町ふれあい広場会場案内図のプレビュー">
@@ -1942,9 +1952,13 @@ function updateVenueMapOption(){
   var checkbox=document.getElementById("include-venue-map");
   var preview=document.getElementById("venue-map-preview");
   var button=document.getElementById("you-print-btn");
+  var option=document.getElementById("venue-map-option");
+  var state=document.getElementById("venue-map-choice-state");
   var enabled=!!(checkbox&&checkbox.checked);
   if(preview)preview.classList.toggle("show",enabled);
-  if(button)button.textContent=enabled?"📄 要項＋案内図を2ページPDFで作成":"📄 要項をA4縦PDFで作成";
+  if(option)option.classList.toggle("selected",enabled);
+  if(state)state.textContent=enabled?"選択中：会場案内図つき（2ページ）":"現在：大会要項のみ（1ページ）";
+  if(button)button.textContent=enabled?"📄 要項＋会場案内図をPDFで作成（2ページ）":"📄 要項をA4縦PDFで作成";
 }
 function loadVenueMapImage(){
   return new Promise(function(resolve,reject){
