@@ -95,6 +95,21 @@
     body[data-theme="light"] .accounting-date-index p,body[data-theme="light"] .accounting-date-meta{color:#315d78}
     body[data-theme="light"] .accounting-date-filter,body[data-theme="light"] .accounting-date-item{background:#fff;color:#10283d;border-color:#9fc5d9}
     @media(max-width:620px){.accounting-date-head{display:block}.accounting-date-filter{width:100%;margin-top:9px}.accounting-date-list{grid-template-columns:1fr}.accounting-date-item{min-height:52px}}
+    .acct-card{min-width:0}.acct-card .value{overflow-wrap:anywhere}
+    #view-edit input,.acct-tab,.section-head .btn{min-height:44px;box-sizing:border-box;max-width:100%;min-width:0}
+    #view-edit input:focus-visible,.acct-tab:focus-visible{outline:3px solid #ed8b23;outline-offset:2px}
+    #view-edit input[aria-invalid="true"]{border:2px solid #dc3545!important}
+    body[data-theme="light"] .acct-table .form-control{background:#fff!important;color:#10283d!important;border-color:#67849a!important}
+    body[data-theme="light"] #view-edit input[aria-invalid="true"]{border-color:#b42318!important}
+    .acct-table tbody button{min-height:44px}
+    #accounting-reload[hidden]{display:none}
+    @media screen and (max-width:720px){
+      .acct-table{min-width:0;display:block}.acct-table thead{display:none}.acct-table tbody{display:grid;gap:12px}.acct-table tr{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);padding:12px;border:1px solid #55738c;border-radius:12px;background:var(--surface-lt)}
+      .acct-table td{display:block;min-width:0;padding:6px;border:0}.acct-table td:first-child,.acct-table td:nth-child(n+4){grid-column:1/-1}.acct-table td::before{display:block;text-align:left;color:var(--ink);font-weight:700;font-size:.8rem;margin-bottom:5px}
+      .acct-table tbody td:nth-child(1)::before{content:"項目名"}.acct-table tbody td:nth-child(2)::before{content:"単価・金額（円）"}.acct-table tbody td:nth-child(3)::before{content:"数量"}.acct-table tbody td:nth-child(4)::before{content:"計算金額"}.acct-table tbody td:nth-child(5)::before{content:"備考"}
+      .acct-table .form-control{width:100%;font-size:16px;min-height:46px}.acct-table .amount-cell{font-size:1.2rem}.acct-table tfoot{display:block}.acct-table-wrap{overflow:visible;border:0}.summary-table{min-width:0}.summary-table thead{display:none}.summary-table tbody,.summary-table tr,.summary-table td{display:block;min-width:0}.summary-table tr{margin-bottom:12px;border:1px solid #55738c;border-radius:10px;padding:10px}.summary-table td::before{content:attr(data-label);float:left;font-weight:700}
+      .print-sheet{padding:10px;min-width:0;overflow-wrap:anywhere}.print-sheet table{table-layout:fixed;font-size:.7rem}.print-sheet th,.print-sheet td{padding:4px;overflow-wrap:anywhere}.section-head{flex-wrap:wrap}#f-date{width:100%;min-width:0}
+    }
   </style>
 </head>
 <body>
@@ -109,7 +124,8 @@
     </div>
   </div>
 
-  <div class="input-note no-print">黄色セルの代わりに、この画面では青い入力欄を編集します。金額は「単価 × 数量」で自動計算します。1件の金額だけ入れる場合は、単価に金額、数量に 1 を入力してください。</div>
+  <div class="input-note no-print"><strong>収入・支出を入力する</strong><br>入力すると、合計と決算書を更新します。例：3,000円 × 4チーム＝12,000円。金額だけの入力は数量1を補います。</div>
+  <div class="panel no-print"><div id="accounting-save-status" role="status" aria-live="polite">クラウドの会計データを確認しています…</div><button id="accounting-reload" class="btn btn-outline" hidden onclick="reloadAccounting()">最新の保存内容を読み込み直す</button></div>
 
   <details class="accounting-date-index linked-date-disclosure no-print">
     <summary class="linked-date-summary"><span>🏆 大会を選ぶ・切り替える</span><span class="linked-date-summary-hint">タップして選ぶ</span></summary>
@@ -137,7 +153,7 @@
         <h2>大会を選択</h2>
         <div style="display:flex;gap:8px;flex-wrap:wrap">
           <button class="btn btn-outline btn-sm" onclick="addTournament()">＋ 大会追加</button>
-          <button class="btn btn-primary btn-sm" onclick="saveData()">💾 保存</button>
+          <button class="btn btn-primary btn-sm" data-accounting-save onclick="saveData()">☁️ 会計データを保存</button>
         </div>
       </div>
       <select class="form-control" id="tournament-select" onchange="selectTournament(this.value)"></select>
@@ -162,7 +178,7 @@
 
     <div class="section-head no-print">
       <h2>収入</h2>
-      <button class="btn btn-outline btn-sm" onclick="addLine('income')">＋ 収入行</button>
+      <button class="btn btn-outline btn-sm" onclick="addLine('income')">＋ 収入項目を追加</button>
     </div>
     <div class="acct-table-wrap no-print">
       <table class="acct-table">
@@ -174,7 +190,7 @@
 
     <div class="section-head no-print">
       <h2>支出</h2>
-      <button class="btn btn-outline btn-sm" onclick="addLine('expense')">＋ 支出行</button>
+      <button class="btn btn-outline btn-sm" onclick="addLine('expense')">＋ 支出項目を追加</button>
     </div>
     <div class="acct-table-wrap no-print">
       <table class="acct-table">
@@ -182,6 +198,10 @@
         <tbody id="expense-rows"></tbody>
         <tfoot><tr><th colspan="3">支出合計</th><td class="line-total" id="expense-line-total">0円</td><td colspan="2"></td></tr></tfoot>
       </table>
+    </div>
+    <div class="panel no-print" style="margin-top:16px">
+      <button class="btn btn-primary" data-accounting-save onclick="saveData()">☁️ 会計データを保存</button>
+      <p>入力後は保存してください。クラウドに保存すると、他の端末でも読み込めます。</p>
     </div>
   </section>
 
@@ -239,6 +259,15 @@
 <script>
 var KEY="smc_accounting_v1";
 var current=0;
+var accountingDirty=false,accountingSaving=false,accountingPending=null,accountingBaseline=null,accountingSaveSnapshot=null;
+function accountingStatus(message){var el=document.getElementById("accounting-save-status");if(el)el.textContent=message;}
+window.addEventListener("beforeunload",function(event){if(accountingDirty||accountingSaving){event.preventDefault();event.returnValue="";}});
+function reloadAccounting(){
+  if(!accountingPending)return;
+  if(accountingDirty&&!confirm("未保存の変更を破棄し、最新の保存内容を読み込みますか？"))return;
+  data=accountingPending;accountingPending=null;accountingDirty=false;
+  document.getElementById("accounting-reload").hidden=true;normalize();ensureLinkedAccounting(false);renderAll();accountingStatus("保存済みのデータを表示しています");
+}
 var data={tournaments:[]};
 var _gameAdjustDates=[];
 var _accountingCloudReady=false;
@@ -287,8 +316,23 @@ function closingAt(idx){return carryAt(idx)+balanceAt(idx);}
 function esc(s){return String(s==null?"":s).replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;").replace(/"/g,"&quot;");}
 
 function saveData(silent){
+  if(document.querySelector('[aria-invalid="true"]')){accountingStatus("数字の入力を確認してください。赤枠の項目は保存されていません。");return;}
+  if(accountingSaving)return;
+  if(!_accountingCloudReady){accountingStatus("クラウドの読込完了を待ってから保存してください。");return;}
+  if(accountingPending){accountingStatus("別端末の更新があります。最新内容を確認してから保存してください。");return;}
   normalize();
-  dbSave("accounting",data,KEY,function(){if(!silent)flash("会計データを保存しました");});
+  accountingSaving=true;accountingStatus("クラウドへ保存しています…");
+  var snapshot=JSON.stringify(data);
+  accountingSaveSnapshot=snapshot;
+  document.querySelectorAll("[data-accounting-save]").forEach(function(b){b.disabled=true;});
+  function finish(){accountingSaving=false;document.querySelectorAll("[data-accounting-save]").forEach(function(b){b.disabled=false;});}
+  dbSave("accounting",JSON.parse(snapshot),KEY,function(result){
+    finish();
+    if(!result||!result.cloudSaved){accountingStatus("端末内のみ保存済みです。クラウドには保存されていません。");return;}
+    accountingDirty=JSON.stringify(data)!==snapshot;
+    accountingStatus(accountingPending?"別端末の更新があります。最新の保存内容を確認してください。":accountingDirty?"保存後に未保存の変更があります":"クラウドに保存しました");
+    if(!silent)flash("会計データを保存しました");
+  },function(result){finish();accountingStatus("保存できませんでした。通信状況を確認してください。"+(result&&result.localSaved?"端末内には一時保存されています。":""));});
 }
 function flash(msg){
   var el=document.createElement("div");
@@ -346,11 +390,11 @@ function renderRows(kind){
   var rows=data.tournaments[current][kind]||[];
   document.getElementById(kind+"-rows").innerHTML=rows.map(function(x,i){
     return '<tr>'+
-      '<td><input class="form-control" value="'+esc(x.name)+'" oninput="editLine(\''+kind+'\','+i+',\'name\',this.value)"></td>'+
-      '<td><input class="form-control" type="number" inputmode="numeric" value="'+esc(x.unit)+'" oninput="editLine(\''+kind+'\','+i+',\'unit\',this.value)"></td>'+
-      '<td><input class="form-control" type="number" inputmode="decimal" value="'+esc(x.qty)+'" oninput="editLine(\''+kind+'\','+i+',\'qty\',this.value)"></td>'+
+      '<td><input aria-label="項目名 '+(i+1)+'" class="form-control" value="'+esc(x.name)+'" oninput="editLine(\''+kind+'\','+i+',\'name\',this.value)"></td>'+
+      '<td><input aria-label="単価・金額（円） '+(i+1)+'" class="form-control" type="text" inputmode="decimal" value="'+esc(x.unit)+'" oninput="editLine(\''+kind+'\','+i+',\'unit\',this.value)"></td>'+
+      '<td><input aria-label="数量 '+(i+1)+'" class="form-control" type="text" inputmode="decimal" value="'+esc(x.qty)+'" oninput="editLine(\''+kind+'\','+i+',\'qty\',this.value)"></td>'+
       '<td class="amount-cell" id="'+kind+'-amt-'+i+'">'+yen(lineAmount(x))+'</td>'+
-      '<td><input class="form-control" value="'+esc(x.memo)+'" oninput="editLine(\''+kind+'\','+i+',\'memo\',this.value)"></td>'+
+      '<td><input aria-label="備考 '+(i+1)+'" class="form-control" value="'+esc(x.memo)+'" oninput="editLine(\''+kind+'\','+i+',\'memo\',this.value)"></td>'+
       '<td style="text-align:center"><button class="btn btn-outline btn-sm" style="color:var(--red);border-color:rgba(255,68,102,.4)" onclick="deleteLine(\''+kind+'\','+i+')">削除</button></td>'+
     '</tr>';
   }).join("");
@@ -365,9 +409,9 @@ function renderSummary(){
     var inc=total(t,"income"),exp=total(t,"expense"),bal=inc-exp,car=carryAt(i),closing=car+bal;
     var linked=t.gameAdjustDateId?'<span class="linked-badge">試合調整連動</span>':"";
     return '<tr onclick="current='+i+';switchView(\'edit\',document.querySelector(\'.acct-tab\'))" style="cursor:pointer">'+
-      '<td class="name">'+esc(t.name)+linked+'</td><td>'+esc(t.date||"")+'</td>'+
-      '<td>'+yen(car)+'</td><td>'+yen(inc)+'</td><td>'+yen(exp)+'</td>'+
-      '<td style="color:'+(bal>=0?'#00aa55':'#cc2244')+';font-weight:900">'+yen(bal)+'</td><td>'+yen(closing)+'</td></tr>';
+      '<td class="name" data-label="大会">'+esc(t.name)+linked+'</td><td data-label="開催日">'+esc(t.date||"")+'</td>'+
+      '<td data-label="前大会繰越">'+yen(car)+'</td><td data-label="収入">'+yen(inc)+'</td><td data-label="支出">'+yen(exp)+'</td>'+
+      '<td data-label="収支" style="font-weight:900">'+yen(bal)+'</td><td data-label="次大会繰越">'+yen(closing)+'</td></tr>';
   }).join("");
 }
 function renderReport(){
@@ -419,22 +463,40 @@ function focusLinkedAccountingEditor(){
   },180);
 }
 function editInfo(field,value){
+  accountingDirty=true;accountingStatus("未保存の変更があります");
   data.tournaments[current][field]=field==="carry"?num(value):value;
   renderOptions();renderTotals();renderSummary();renderReport();
 }
 function editLine(kind,idx,field,value){
+  if(field==="unit"||field==="qty"){
+    var input=document.getElementById(kind+"-amt-"+idx).parentElement.querySelectorAll("input")[field==="unit"?1:2];
+    value=String(value).normalize("NFKC").replace(/[,￥¥\s]/g,"");
+    var valid=value===""||(/^-?\d+(\.\d+)?$/.test(value)&&Number.isFinite(Number(value)));
+    input.setAttribute("aria-invalid",String(!valid));
+    if(!valid){accountingDirty=true;accountingStatus("数字で入力してください。例：3000、1.5。この入力はまだ計算に反映されていません。");return;}
+  }
   data.tournaments[current][kind][idx][field]=(field==="unit"||field==="qty")?value:value;
+  if(field==="unit"&&value!==""&&data.tournaments[current][kind][idx].qty===""){
+    data.tournaments[current][kind][idx].qty=1;
+    var row=document.getElementById(kind+"-amt-"+idx).parentElement;
+    row.querySelectorAll("input")[2].value="1";
+  }
+  accountingDirty=true;accountingStatus("未保存の変更があります。金額は画面・決算書に反映しました。");
   var amount=document.getElementById(kind+"-amt-"+idx);
   if(amount)amount.textContent=yen(lineAmount(data.tournaments[current][kind][idx]));
   renderLineTotal(kind);
   renderTotals();renderSummary();renderReport();
 }
 function addLine(kind){
-  data.tournaments[current][kind].push({name:"",unit:"",qty:"",memo:""});
+  accountingDirty=true;accountingStatus("未保存の変更があります");
+  data.tournaments[current][kind].push({name:"",unit:"",qty:1,memo:""});
   renderRows(kind);
+  var row=document.getElementById(kind+"-rows").lastElementChild;if(row){row.scrollIntoView({block:"center",behavior:"smooth"});row.querySelector("input").focus({preventScroll:true});}
 }
 function deleteLine(kind,idx){
-  if(!confirm("この行を削除しますか？"))return;
+  var item=data.tournaments[current][kind][idx];
+  if(!confirm("「"+(item.name||"未命名の項目")+" "+yen(lineAmount(item))+"」を削除しますか？"))return;
+  accountingDirty=true;accountingStatus("未保存の変更があります");
   data.tournaments[current][kind].splice(idx,1);
   renderAll();
 }
@@ -512,8 +574,25 @@ function downloadCsv(){
 }
 
 dbListen("accounting",function(val,meta){
+  var incoming=JSON.stringify(val);
+  var changed=incoming!==accountingBaseline;
+  if(meta&&meta.authoritative){accountingBaseline=incoming;_accountingCloudReady=true;}
+  if(accountingSaving){
+    if(meta&&meta.authoritative&&changed&&incoming!==accountingSaveSnapshot){
+      accountingPending=val;document.getElementById("accounting-reload").hidden=false;
+    }
+    return;
+  }
+  if(accountingDirty){
+    if(meta&&meta.authoritative&&changed&&incoming!==JSON.stringify(data)){
+      accountingPending=val;_accountingCloudReady=true;
+      accountingStatus("別の端末の保存データを受信しました。入力中の内容は上書きしていません。");document.getElementById("accounting-reload").hidden=false;
+    }
+    return;
+  }
   data=val&&Array.isArray(val.tournaments)?val:{tournaments:clone(DEFAULT_TOURNAMENTS)};
   _accountingCloudReady=!!(meta&&meta.authoritative);
+  accountingStatus(_accountingCloudReady?"保存済みのデータを表示しています":"クラウドの会計データを確認しています…");
   normalize();
   ensureLinkedAccounting(_accountingCloudReady);
   if(_accountingCloudReady&&_gameAdjustCloudReady&&typeof syncAccountingWithGameAdjust==="function"){
@@ -716,6 +795,7 @@ dbListen("accounting_annual", function(val){
     return String(date.tournamentName||"").trim()||[date.dateIso,date.cat].filter(Boolean).join(" ")||date.label||"試合調整の大会";
   }
   window.syncAccountingWithGameAdjust=function(){
+    if(accountingDirty||accountingSaving)return false;
     if(!_accountingCloudReady||!_gameAdjustCloudReady||!_gameAdjustDates.length)return false;
     var selectedDateId=LINK_CONTEXT.dateId||(data.tournaments[current]&&data.tournaments[current].gameAdjustDateId)||"";
     var changed=false;
