@@ -103,12 +103,34 @@
     body[data-theme="light"] #view-edit input[aria-invalid="true"]{border-color:#b42318!important}
     .acct-table tbody button{min-height:44px}
     #accounting-reload[hidden]{display:none}
+    .acct-memo summary{cursor:pointer;min-height:44px;box-sizing:border-box;padding:10px 0;font-size:14px;color:var(--ink)}
+    .acct-memo summary:focus-visible{outline:3px solid #ed8b23;outline-offset:2px}
     @media screen and (max-width:720px){
       .acct-table{min-width:0;display:block}.acct-table thead{display:none}.acct-table tbody{display:grid;gap:12px}.acct-table tr{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);padding:12px;border:1px solid #55738c;border-radius:12px;background:var(--surface-lt)}
       .acct-table td{display:block;min-width:0;padding:6px;border:0}.acct-table td:first-child,.acct-table td:nth-child(n+4){grid-column:1/-1}.acct-table td::before{display:block;text-align:left;color:var(--ink);font-weight:700;font-size:.8rem;margin-bottom:5px}
       .acct-table tbody td:nth-child(1)::before{content:"項目名"}.acct-table tbody td:nth-child(2)::before{content:"単価・金額（円）"}.acct-table tbody td:nth-child(3)::before{content:"数量"}.acct-table tbody td:nth-child(4)::before{content:"計算金額"}.acct-table tbody td:nth-child(5)::before{content:"備考"}
       .acct-table .form-control{width:100%;font-size:16px;min-height:46px}.acct-table .amount-cell{font-size:1.2rem}.acct-table tfoot{display:block}.acct-table-wrap{overflow:visible;border:0}.summary-table{min-width:0}.summary-table thead{display:none}.summary-table tbody,.summary-table tr,.summary-table td{display:block;min-width:0}.summary-table tr{margin-bottom:12px;border:1px solid #55738c;border-radius:10px;padding:10px}.summary-table td::before{content:attr(data-label);float:left;font-weight:700}
       .print-sheet{padding:10px;min-width:0;overflow-wrap:anywhere}.print-sheet table{table-layout:fixed;font-size:.7rem}.print-sheet th,.print-sheet td{padding:4px;overflow-wrap:anywhere}.section-head{flex-wrap:wrap}#f-date{width:100%;min-width:0}
+      .acct-table tbody{gap:8px}
+      .acct-table tbody tr{grid-template-columns:minmax(0,1fr) minmax(48px,.55fr) minmax(0,1fr);gap:6px;padding:8px;border-radius:8px}
+      .acct-table tbody td{padding:0}
+      .acct-table tbody td:first-child{grid-column:1/3;grid-row:1}
+      .acct-table tbody td:first-child::before,.acct-table tbody td:nth-child(5)::before{display:none}
+      .acct-table tbody td:nth-child(2){grid-column:1;grid-row:2}
+      .acct-table tbody td:nth-child(3){grid-column:2;grid-row:2}
+      .acct-table tbody td:nth-child(4){grid-column:3;grid-row:2;align-self:stretch;font-size:16px;display:flex;flex-direction:column;justify-content:space-between;padding-bottom:10px;overflow-wrap:anywhere}
+      .acct-table tbody td:nth-child(5){grid-column:1/-1;grid-row:3}
+      .acct-table tbody td:nth-child(6){grid-column:3;grid-row:1;text-align:right!important}
+      .acct-table tbody td:nth-child(2)::before{content:"単価（円）"}
+      .acct-table tbody td:nth-child(4)::before{content:"金額（円）"}
+      .acct-table tbody td::before{font-size:13px;line-height:1.3;margin-bottom:4px}
+      .acct-table .form-control{min-height:44px;height:44px;padding:6px;font-size:16px;border-radius:7px}
+      .acct-table input[inputmode]{text-align:right}
+      .acct-table tbody button{padding:6px 12px;margin:0}
+      .acct-memo summary{padding:10px 2px;line-height:24px}
+      .acct-table tfoot tr{display:flex;justify-content:space-between;align-items:center;padding:8px;margin-top:6px;border:0;border-radius:0;background:transparent}
+      .acct-table tfoot th,.acct-table tfoot td{border:0;background:transparent;padding:4px}
+      .acct-table tfoot td:empty{display:none}
     }
   </style>
 </head>
@@ -394,7 +416,7 @@ function renderRows(kind){
       '<td><input aria-label="単価・金額（円） '+(i+1)+'" class="form-control" type="text" inputmode="decimal" value="'+esc(x.unit)+'" oninput="editLine(\''+kind+'\','+i+',\'unit\',this.value)"></td>'+
       '<td><input aria-label="数量 '+(i+1)+'" class="form-control" type="text" inputmode="decimal" value="'+esc(x.qty)+'" oninput="editLine(\''+kind+'\','+i+',\'qty\',this.value)"></td>'+
       '<td class="amount-cell" id="'+kind+'-amt-'+i+'">'+yen(lineAmount(x))+'</td>'+
-      '<td><input aria-label="備考 '+(i+1)+'" class="form-control" value="'+esc(x.memo)+'" oninput="editLine(\''+kind+'\','+i+',\'memo\',this.value)"></td>'+
+      '<td><details class="acct-memo"><summary>備考'+(x.memo?'（入力あり）':'を追加')+'</summary><input aria-label="備考 '+(i+1)+'" class="form-control" value="'+esc(x.memo)+'" oninput="editLine(\''+kind+'\','+i+',\'memo\',this.value);this.previousElementSibling.textContent=this.value?\'備考（入力あり）\':\'備考を追加\'"></details></td>'+
       '<td style="text-align:center"><button class="btn btn-outline btn-sm" style="color:var(--red);border-color:rgba(255,68,102,.4)" onclick="deleteLine(\''+kind+'\','+i+')">削除</button></td>'+
     '</tr>';
   }).join("");
