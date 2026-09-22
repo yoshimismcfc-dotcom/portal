@@ -67,10 +67,13 @@
     .six-pitch-card{border:1px solid rgba(0,212,255,.3);border-radius:var(--r12);padding:14px;margin:0 0 18px;background:rgba(0,212,255,.06)}
     .six-pitch-title{font-size:1rem;font-weight:900;color:var(--cyan);margin-bottom:5px}
     .six-pitch-note{font-size:.76rem;color:var(--ink-2);line-height:1.65;margin-bottom:12px}
-    .six-pitch-visual{position:relative;width:min(100%,500px);aspect-ratio:50/32;margin:0 auto 12px;background:#247a36;border:3px solid #fff;box-sizing:border-box}
+    .six-pitch-visual{position:relative;width:min(100%,500px);aspect-ratio:40/30;margin:0 auto 12px;background:#247a36;border:3px solid #fff;box-sizing:border-box}
     .six-pitch-visual::before{content:"";position:absolute;top:0;bottom:0;left:50%;border-left:2px solid rgba(255,255,255,.9)}
     .six-penalty-line{position:absolute;top:0;bottom:0;border-left:2px dashed rgba(255,255,255,.82)}
-    .six-penalty-line.left{left:20%}.six-penalty-line.right{right:20%}
+    .six-penalty-line.left{left:10%}.six-penalty-line.right{right:10%}
+    .six-center-circle{position:absolute;left:50%;top:50%;width:20%;height:26.6667%;transform:translate(-50%,-50%);border:2px solid #fff;border-radius:50%;box-sizing:border-box}
+    .six-pk-spot{position:absolute;top:50%;width:6px;height:6px;background:#fff;border-radius:50%;transform:translate(-50%,-50%)}
+    .six-pk-spot.left{left:17.5%}.six-pk-spot.right{left:82.5%}
     .six-goal{position:absolute;top:40%;height:20%;width:8px;border:2px solid #fff;background:rgba(255,255,255,.15)}
     .six-goal.left{left:-11px}.six-goal.right{right:-11px}
     .six-length-label{position:absolute;left:50%;top:6px;transform:translateX(-50%);background:rgba(0,0,0,.55);color:#fff;border-radius:99px;padding:2px 8px;font-size:.7rem;font-weight:900}
@@ -151,20 +154,25 @@
       <div class="six-pitch-title" id="six-pitch-heading">⚽ 低学年6人制ピッチ（設営目安）</div>
       <div class="six-pitch-note">
         低学年の6人制では大会ごとに寸法が異なるため、<strong>大会要項の指定を最優先</strong>してください。
-        指定がない場合の実用的な目安として、縦50m×横32mを使用できます。
+        吉見SMCの低学年用設定：縦40m×横30m。破線はペナルティの位置の目安です。
       </div>
-      <div class="six-pitch-visual" role="img" aria-label="縦50メートル、横32メートルの低学年6人制ピッチ図">
+      <div class="six-pitch-visual" role="img" aria-label="縦40メートル、横30メートルの低学年6人制ピッチ図。PKはゴールラインから7メートル、ペナルティは4メートル、センターサークルは半径4メートル">
+        <span class="six-center-circle"></span>
+        <span class="six-pk-spot left"></span>
+        <span class="six-pk-spot right"></span>
         <span class="six-penalty-line left"></span>
         <span class="six-penalty-line right"></span>
         <span class="six-goal left"></span>
         <span class="six-goal right"></span>
-        <span class="six-length-label">縦 50m</span>
-        <span class="six-width-label">横 32m</span>
+        <span class="six-length-label">縦 40m</span>
+        <span class="six-width-label">横 30m</span>
       </div>
       <div class="six-dim-grid">
-        <div class="six-dim-item"><strong>コート全体</strong><span>縦50m × 横32m</span></div>
-        <div class="six-dim-item"><strong>対角線</strong><span>約59.4m（長方形確認用）</span></div>
-        <div class="six-dim-item"><strong>ペナルティーエリアの目安</strong><span>各ゴールラインから10m</span></div>
+        <div class="six-dim-item"><strong>コート全体</strong><span>縦40m × 横30m</span></div>
+        <div class="six-dim-item"><strong>対角線</strong><span>50m（長方形確認用）</span></div>
+        <div class="six-dim-item"><strong>PK（ペナルティスポット）</strong><span>ゴールラインから7m</span></div>
+        <div class="six-dim-item"><strong>ペナルティ</strong><span>各ゴールラインから4m</span></div>
+        <div class="six-dim-item"><strong>センターサークル</strong><span>半径4m</span></div>
         <div class="six-dim-item"><strong>ゴール・その他の寸法</strong><span>主催大会の要項・使用ゴールに合わせる</span></div>
       </div>
     </section>
