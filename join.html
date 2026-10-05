@@ -7,10 +7,22 @@
   <meta http-equiv="Pragma" content="no-cache">
   <meta http-equiv="Expires" content="0">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>入会申込書｜吉見SMC FC</title>
+  <title>体験・入団申し込み｜吉見SMC FC</title>
   <link rel="stylesheet" href="common.css">
   <script src="common.js"></script>
   <style>
+    .recruitment{padding:16px;margin-bottom:18px;border:1px solid var(--line-2);border-radius:var(--r8);background:var(--surface-lt);color:var(--ink);font-size:15px;line-height:1.65;overflow-wrap:anywhere}
+    .recruitment h2{font-size:1.15rem;margin:0 0 12px;color:var(--ink)}
+    .recruitment h3{font-size:1rem;margin:14px 0 5px;color:var(--ink)}
+    .recruitment p{margin:4px 0}
+    .recruitment dl{display:grid;grid-template-columns:5em minmax(0,1fr);gap:6px 10px;margin:6px 0}
+    .recruitment dt{font-weight:700}.recruitment dd{margin:0;min-width:0}
+    .recruitment table{width:100%;table-layout:fixed;border-collapse:collapse;margin:6px 0}
+    .recruitment th,.recruitment td{padding:7px 4px;border-bottom:1px solid var(--line-2);text-align:left;vertical-align:top;font-size:14px}
+    .recruitment th:first-child{width:22%}.recruitment th:nth-child(2){width:40%}
+    .recruitment .recruit-apply{display:inline-flex;align-items:center;min-height:44px;padding:6px 12px;box-sizing:border-box;margin-top:12px;border:1px solid currentColor;border-radius:8px;font-weight:700;color:var(--ink)}
+    .recruit-apply:focus-visible{outline:3px solid #ed8b23;outline-offset:3px}
+    #application-form{scroll-margin-top:110px}
     .tab-bar{display:flex;gap:0;margin-bottom:20px;border-radius:var(--r8);overflow:hidden;border:1px solid var(--line-2)}
     .tab-btn{flex:1;padding:12px 8px;font:inherit;font-size:.85rem;font-weight:900;background:var(--surface-lt);color:#6aaccc;border:none;cursor:pointer;transition:.15s;display:flex;align-items:center;justify-content:center;gap:5px}
     .tab-btn:not(:last-child){border-right:1px solid var(--line-2)}
@@ -88,8 +100,42 @@
 <main class="page-wrap">
   <a class="back-btn" href="index.html">ホームに戻る</a>
   <div class="hero-band"><div class="hero-emoji">📄</div>
-    <div><div class="hero-title">入会申込書</div>
-      <div class="hero-sub">入力→プレビュー→印刷 / PDF保存で送信できます。</div></div></div>
+    <div><div class="hero-title">体験・入団申し込み</div>
+      <div class="hero-sub">活動日・費用をご確認ください。入団申込書は下から作成できます。</div></div></div>
+
+  <section class="recruitment no-print" aria-labelledby="recruitment-title">
+    <h2 id="recruitment-title">吉見SMC FC 団員募集要項</h2>
+    <h3>対象</h3>
+    <p>吉見町または近隣の小学校に通う<strong>小学1年生以上</strong>のお子さま。</p>
+    <p>幼稚園・保育園の<strong>年長のお子さまもご相談ください。</strong></p>
+    <h3>活動場所</h3>
+    <dl>
+      <dt>土・日</dt><dd>吉見町立北小学校のグラウンド<br>※南小学校・西小学校の場合もあります。</dd>
+      <dt>夜練習</dt><dd>吉見北小学校の体育館</dd>
+    </dl>
+    <h3>活動日・時間</h3>
+    <table aria-label="毎週の練習日と対象学年">
+      <thead><tr><th scope="col">曜日</th><th scope="col">時間</th><th scope="col">対象</th></tr></thead>
+      <tbody>
+        <tr><th scope="row">土・日</th><td>8:00〜10:30</td><td>全学年</td></tr>
+        <tr><th scope="row">水</th><td>19:00〜21:00</td><td>4年生以上</td></tr>
+        <tr><th scope="row">木</th><td>18:30〜20:00</td><td>3年生以下</td></tr>
+      </tbody>
+    </table>
+    <h3>登録料・保険料</h3>
+    <p><strong>1,000円</strong></p>
+    <h3>会費（半年ごと）</h3>
+    <dl>
+      <dt>3年生以下</dt><dd><strong>7,000円</strong></dd>
+      <dt>4年生以上</dt><dd><strong>8,000円</strong></dd>
+    </dl>
+    <p>兄弟割引：<strong>2人目以降は1,000円引き</strong></p>
+    <h3>ユニフォーム・用具</h3>
+    <p>ユニフォームは貸し出します。<br>スパイク・練習着・ボールは各自でご購入ください。</p>
+    <a class="recruit-apply" href="#application-form">↓ 入団申込書の入力へ</a>
+  </section>
+
+  <h2 id="application-form" class="no-print" style="font-size:1.1rem">入団申込書の作成</h2>
 
   <div class="tab-bar no-print">
     <button class="tab-btn active" id="btn-form"    onclick="showTab('form')">✏️ 入力</button>
