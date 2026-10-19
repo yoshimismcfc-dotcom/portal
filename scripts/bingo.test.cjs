@@ -1,0 +1,10 @@
+const assert=require('node:assert/strict');
+const {test}=require('node:test');
+const B=require('../Activities/BINGO/core.js');
+test('75球を重複なく抽選し、76回目は停止する（100ゲーム）',()=>{for(let j=0;j<100;j++){const game=new B.Game();for(let i=0;i<75;i++){assert.equal(game.begin(),true);game.finish();assert.equal(new Set(game.state.history).size,i+1);assert.equal(B.remaining(game.state.history).length,74-i);}assert.equal(game.begin(),false);assert.equal(game.finish(),null);assert.deepEqual([...game.state.history].sort((a,b)=>a-b),Array.from({length:75},(_,i)=>i+1));}});
+test('BINGO列の全75番号と境界が正しい',()=>{for(let n=1;n<=75;n++)assert.equal(B.column(n),'BINGO'[Math.floor((n-1)/15)]);for(const n of [0,76,1.1,NaN])assert.throws(()=>B.column(n));});
+test('抽選中の連打・取り消し・リセットを防ぐ',()=>{const game=new B.Game();assert.equal(game.begin(),true);for(let i=0;i<20;i++)assert.equal(game.begin(),false);assert.equal(game.undo(),null);assert.equal(game.reset(),false);game.finish(()=>0);assert.deepEqual(game.state.history,[1]);assert.equal(game.finish(),null);});
+test('取り消した番号が候補に戻り、再び75球まで抽選できる',()=>{const g=new B.Game();for(let i=0;i<75;i++){g.begin();g.finish(()=>0);}assert.equal(g.undo(),75);assert.deepEqual(B.remaining(g.state.history),[75]);g.begin();assert.equal(g.finish(),75);assert.equal(g.state.history.length,75);});
+test('保存と復元で履歴・設定が保持される',()=>{const g=new B.Game();g.begin();g.finish(()=>12);g.state.settings.sound=false;g.state.settings.mode='venue';assert.deepEqual(B.validate(JSON.parse(JSON.stringify(g.state))),g.state);});
+test('壊れた履歴は拒否し、不正設定は安全な初期値に戻す',()=>{for(const history of [[1,1],[0],[76],['1'],[1.5]])assert.throws(()=>B.validate({...B.defaults(),history}));assert.throws(()=>B.validate(null));assert.throws(()=>B.validate({version:2,history:[]}));const s=B.validate({...B.defaults(),settings:{rate:300,mode:'<script>',sound:'true'}});assert.deepEqual(s.settings,B.defaults().settings);});
+test('新しいゲームは設定を引き継ぐ',()=>{const g=new B.Game();g.begin();g.finish();g.state.settings.sound=false;g.reset();assert.deepEqual(g.state.history,[]);assert.equal(g.state.settings.sound,false);});
