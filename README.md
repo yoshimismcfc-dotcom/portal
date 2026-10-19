@@ -35,7 +35,7 @@
 
 ## Activities / BINGO
 
-コーチ専用フォルダの「Activities」カードから、Activities/index.html → Activities/BINGO/index.html と開きます。BINGOは無料・広告なしの75球抽選で、紙のカードを使う行事向けです。抽選履歴と音声・表示設定はsmc-bingo-v1という専用のlocalStorageキーへ保存します。既存のFirebaseパス・会計・名簿データは変更せず、BINGOからFirebaseや利用カウンターへ通信しません。
+コーチ専用フォルダの一番下にある「行事・レクリエーション」の「BINGO」カードから、Activities/BINGO/index.html を直接開きます。BINGOは無料・広告なしの75球抽選で、紙のカードを使う行事向けです。抽選履歴と音声・表示設定はsmc-bingo-v1という専用のlocalStorageキーへ保存します。既存のFirebaseパス・会計・名簿データは変更せず、BINGOからFirebaseや利用カウンターへ通信しません。
 
 BINGOのService WorkerはActivities/BINGO/内だけを担当し、キャッシュもsmc-bingo-に分離しています。既存ポータルのService Workerやキャッシュを削除・解除しません。通信できる時にBINGOを開き、「オフラインの準備ができました」を確認してください。オフライン再開はBINGOのURLから行えます。端末内に日本語音声がない場合も抽選は続けられます。
 
