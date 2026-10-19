@@ -50,14 +50,14 @@ async function offline(){if(location.protocol==='file:'){$('offlineStatus').text
 // game's cache, rather than navigator.serviceWorker.ready (which can be the parent).
 const cacheDeadline=Date.now()+20000;
 while(true){
- const cache=await caches.open('smc-bingo-v1');
+ const cache=await caches.open('smc-bingo-v2');
  const files=['./','./index.html','./style.css','./core.js','./app.js'];
  const ready=await Promise.all(files.map(file=>cache.match(new URL(file,location.href).href)));
  if(ready.every(Boolean))break;
  if(Date.now()>cacheDeadline)throw new Error('offline preparation timed out');
  await new Promise(resolve=>setTimeout(resolve,200));
 }
-const check=async()=>{const cached=await caches.has('smc-bingo-v1');$('offlineStatus').textContent=cached?'✓ オフラインの準備ができました。このURLで通信なしでも再開できます。':'オフラインの準備中です。接続したままお待ちください。';};await check();}catch(e){$('offlineStatus').textContent='オフラインの準備ができませんでした。接続中に再読み込みしてください。今開いている画面では抽選を続けられます。';}}
+const check=async()=>{const cached=await caches.has('smc-bingo-v2');$('offlineStatus').textContent=cached?'✓ オフラインの準備ができました。このURLで通信なしでも再開できます。':'オフラインの準備中です。接続したままお待ちください。';};await check();}catch(e){$('offlineStatus').textContent='オフラインの準備ができませんでした。接続中に再読み込みしてください。今開いている画面では抽選を続けられます。';}}
 voiceStatus();render();if(loadNote)notice(loadNote);save();offline();
 // Keep the main action visible on first visit. The optional guide is always available.
 })();

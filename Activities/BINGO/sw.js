@@ -1,5 +1,5 @@
 /* Bump CACHE when shipping a new release. Only this app's scope is cached. */
-const CACHE='smc-bingo-v1';
+const CACHE='smc-bingo-v2';
 const FILES=['./','./index.html','./style.css','./core.js','./app.js'];
 self.addEventListener('install',event=>{event.waitUntil(caches.open(CACHE).then(cache=>cache.addAll(FILES)));});
 self.addEventListener('activate',event=>{event.waitUntil(Promise.all([caches.keys().then(keys=>Promise.all(keys.filter(k=>k.startsWith('smc-bingo-')&&k!==CACHE).map(k=>caches.delete(k)))),self.clients.claim()]));});
