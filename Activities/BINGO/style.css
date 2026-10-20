@@ -2,3 +2,5 @@
 :root #help{flex-shrink:0;white-space:nowrap}.brand{min-width:0}@media(max-width:600px){.brand small{display:none}.header{gap:8px}.brand{gap:10px}.header .quiet{padding:10px 8px}}
 
 .folder-return{margin:0 0 12px}.folder-return a{display:inline-flex;align-items:center;min-height:56px;color:#1255a6;font-size:18px;font-weight:700;text-underline-offset:5px}
+
+.shared-status{display:flex;align-items:center;gap:12px;flex-wrap:wrap;margin-bottom:12px}.shared-status p{flex:1;min-width:200px;margin:0}.usage-guide{border:1px solid var(--line);border-radius:16px;background:white;padding:10px 20px;margin:0 0 24px}.usage-guide h2{font-size:22px}.usage-guide p,.usage-guide li{font-size:18px}.usage-guide li{margin-bottom:10px}body.controls-hidden .usage-guide{display:none}
