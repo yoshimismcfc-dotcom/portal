@@ -1,0 +1,33 @@
+// ローカルエミュレーター限定。本番Firebaseには接続しない。
+import {createRequire} from 'node:module';import {readFileSync} from 'node:fs';import assert from 'node:assert/strict';
+import {createService} from '../camp/free-service.mjs';
+const require=createRequire(process.env.CAMP_QA_PACKAGE||new URL('../../qa/package.json',import.meta.url));
+const {initializeTestEnvironment,assertFails}=require('@firebase/rules-unit-testing');
+const firebase=require('firebase/compat/app');require('firebase/compat/firestore');globalThis.firebase=firebase;
+const env=await initializeTestEnvironment({projectId:'demo-smc-camp',firestore:{host:'127.0.0.1',port:8085,rules:readFileSync(new URL('../firebase-free/firestore.rules',import.meta.url),'utf8')}});
+const ok=[];const pass=s=>{ok.push(s);console.log('PASS '+s);};
+try{
+ await env.clearFirestore();
+ const admin=env.unauthenticatedContext().firestore(),parent=env.unauthenticatedContext().firestore();
+ const s=createService(admin,'device-a',true),pa=createService(parent,'device-b',true),acc=pa;
+ const meta={name:'架空合宿',start:'2027-03-13',end:'2027-03-14',place:'検証会場',meeting:'9時集合',fee:10000,status:'準備中',notes:'テスト',archived:false};
+ await s.create(meta,'11111111-1111-4111-8111-111111111111');assert.equal((await s.list(['11111111-1111-4111-8111-111111111111'])).length,1);pass('未ログインで合宿作成・既知リンクの一覧');
+ await assertFails(admin.collection('campShared').get());await assertFails(admin.doc('campShared/guess').get());await assertFails(admin.doc('members_v2/private').get());pass('全合宿の列挙・短いID・別領域のアクセス拒否');
+ await s.save('11111111-1111-4111-8111-111111111111','participants',{id:'p1',name:'選手あお',grade:'4年',kind:'player',familyUid:'parent',response:'pending',overnight:true,revision:0});
+ await s.save('11111111-1111-4111-8111-111111111111','participants',{id:'p2',name:'選手そら',grade:'5年',kind:'player',familyUid:'other',response:'yes',overnight:true,revision:0});
+ let p=(await pa.load('11111111-1111-4111-8111-111111111111')).participants.find(x=>x.id==='p1');await pa.respond('11111111-1111-4111-8111-111111111111',p,'yes',true);assert.equal((await pa.load('11111111-1111-4111-8111-111111111111')).participants.find(x=>x.id==='p1').response,'yes');
+ await parent.doc('campShared/11111111-1111-4111-8111-111111111111/participants/p2').update({response:'no',revision:2,updatedAt:firebase.firestore.FieldValue.serverTimestamp()});
+ await assertFails(admin.doc('campShared/11111111-1111-4111-8111-111111111111/participants/p1').update({care:'禁止情報',revision:3,updatedAt:firebase.firestore.FieldValue.serverTimestamp()}));pass('別端末も回答を編集可能・健康情報フィールド拒否');
+ await s.save('11111111-1111-4111-8111-111111111111','routes',{id:'r1',date:'2027-03-13',time:'09:00',title:'集合',address:'伊香保',mapLink:'https://www.google.com/maps',notes:'停車中に確認',archived:false,revision:0});
+ await assertFails(s.save('11111111-1111-4111-8111-111111111111','routes',{id:'bad',date:'2027-03-13',time:'09:00',title:'不正',address:'',mapLink:'javascript:alert(1)',notes:'',archived:false,revision:0}));
+ await acc.save('11111111-1111-4111-8111-111111111111','budgets',{id:'b1',title:'宿泊費',unit:5000,quantity:30,notes:'見積',archived:false,revision:0});pass('ルート・予算の保存と危険リンク拒否');
+ let op={id:'charge1',type:'charge',revision:0,participantId:'p1',name:'選手あお',household:'parent',amount:10000,due:'2027-03-01'};await acc.finance('11111111-1111-4111-8111-111111111111',op);await acc.finance('11111111-1111-4111-8111-111111111111',op);assert.equal((await s.load('11111111-1111-4111-8111-111111111111')).ledger.revision,1);
+ await acc.finance('11111111-1111-4111-8111-111111111111',{id:'pay1',type:'entry',revision:1,kind:'payment',participantId:'p1',amount:3000,reference:'pay1',date:'2027-03-01'});
+ const report=(await pa.load('11111111-1111-4111-8111-111111111111')).report;assert.equal(report.due,7000);assert.deepEqual(report.unpaid,[{names:['選手あお'],due:7000}]);
+ assert.equal((await parent.doc('campShared/11111111-1111-4111-8111-111111111111/private/ledger').get()).data().revision,2);await assertFails(parent.doc('campShared/11111111-1111-4111-8111-111111111111/public/finance').update({due:0}));pass('ログインなしの会計編集・二重入金防止・集計の原子更新');
+ await assert.rejects(acc.finance('11111111-1111-4111-8111-111111111111',{id:'old',type:'charge',revision:0,participantId:'p1',name:'a',amount:1}),/別の担当/);
+ const ledger=(await admin.doc('campShared/11111111-1111-4111-8111-111111111111/private/ledger').get()).data();await assertFails(admin.doc('campShared/11111111-1111-4111-8111-111111111111/private/ledger').set({...ledger,revision:3,updatedAt:firebase.firestore.FieldValue.serverTimestamp()}));pass('競合と公開集計を伴わない台帳更新を拒否');
+ await s.create({...meta,name:'別合宿'},'22222222-2222-4222-8222-222222222222');assert.equal((await pa.load('22222222-2222-4222-8222-222222222222')).participants.length,0);assert.equal((await pa.load('11111111-1111-4111-8111-111111111111')).participants.length,2);pass('合宿別の参加・会計データ分離');
+ await assertFails(parent.doc('campShared/11111111-1111-4111-8111-111111111111/links/current').set({url:'https://example.com'}));await assertFails(parent.doc('campShared/11111111-1111-4111-8111-111111111111').delete());pass('位置情報の登録と合宿の物理削除を拒否');
+ console.log('Rules checks: '+ok.length+' passed');
+}finally{await env.cleanup();}
