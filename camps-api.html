@@ -1,0 +1,37 @@
+<!doctype html>
+<html lang="ja" class="camp-document">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="robots" content="noindex,nofollow">
+  <meta name="theme-color" content="#003087">
+  <title>合宿管理 | 吉見SMC FC</title>
+  <link rel="stylesheet" href="common.css">
+  <link rel="stylesheet" href="camp/style.css">
+  <script src="common.js"></script>
+  <script src="firebase-config.js"></script>
+  <script src="camp/config.js" defer></script>
+  <script src="camp/app.js" defer></script>
+</head>
+<body class="camp-page">
+<header class="site-header"></header>
+<main class="camp-shell">
+  <div class="camp-heading"><div><p class="eyebrow">吉見SMC FC ／ 合宿運営</p><h1>合宿管理</h1></div><a href="index.html">ホームへ</a></div>
+  <p id="camp-message" class="notice" role="status" aria-live="polite">接続設定を確認しています…</p>
+  <section id="camp-login" class="panel" hidden>
+    <h2>合宿にログイン</h2>
+    <p>登録済みのメールアドレスでログインしてください。合宿ごとの担当権限に応じて表示します。</p>
+    <form id="login-form"><label>メールアドレス<input name="email" type="email" autocomplete="username" required></label><label>パスワード<input name="password" type="password" autocomplete="current-password" required></label><button>ログイン</button></form>
+    <button id="reset-password" class="secondary" type="button">パスワード再設定メール</button>
+  </section>
+  <div id="camp-app" hidden>
+    <div class="toolbar"><button id="camp-list-button" class="secondary">合宿一覧</button><button id="camp-refresh" class="secondary">最新情報を取得</button><button id="camp-logout" class="secondary">ログアウト</button><span id="camp-identity"></span></div>
+    <div id="camp-content"></div>
+  </div>
+  <p class="small">保存はオンライン時のみ可能です。通信が戻ったら最新情報を取得してください。運転者は停車中に操作するか、同乗する成人へ操作を依頼してください。</p>
+  <a href="camp-guide.html">保護者・コーチ向け 使い方ガイド</a>
+</main>
+<dialog id="camp-dialog"><form id="camp-form"><div class="dialog-head"><h2 id="camp-dialog-title">編集</h2><button type="button" id="camp-dialog-close" class="secondary" aria-label="閉じる">閉じる</button></div><div id="camp-fields"></div><p id="camp-form-error" role="alert"></p><button id="camp-submit" type="submit">保存する</button></form></dialog>
+<footer class="site-footer"></footer>
+</body>
+</html>

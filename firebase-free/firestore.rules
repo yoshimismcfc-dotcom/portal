@@ -1,0 +1,67 @@
+rules_version = '2';
+service cloud.firestore {
+ match /databases/{database}/documents {
+  function validId(c) { return c.matches('[0-9a-f]{8}-[0-9a-f]{4}-4[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}'); }
+  function camp(c) { return get(/databases/$(database)/documents/campShared/$(c)).data; }
+  function member(c) { return validId(c) && exists(/databases/$(database)/documents/campShared/$(c)); }
+  function leader(c) { return member(c); }
+  function finance(c) { return member(c); }
+  function str(v,n) { return v is string && v.size() <= n; }
+  function money(v) { return v is int && v >= 0 && v <= 100000000; }
+  function revision() { return request.resource.data.updatedAt == request.time && request.resource.data.revision == (resource == null ? 1 : resource.data.revision+1); }
+  match /campShared/{c} {
+   function meta() { let d=request.resource.data;
+    return d.keys().hasOnly(['name','start','end','place','meeting','fee','status','notes','archived','revision','updatedAt'])
+     && str(d.name,150) && d.name.size()>0 && str(d.start,10) && str(d.end,10) && d.start<=d.end
+     && str(d.place,500) && str(d.meeting,500) && money(d.fee) && str(d.notes,5000)
+     && d.status in ['準備中','募集中','実施中','終了','精算完了'] && d.archived is bool
+     && d.updatedAt==request.time;
+   }
+   allow get: if validId(c);
+   allow list: if false;
+   allow create: if validId(c) && meta() && request.resource.data.revision==0;
+   allow update: if leader(c) && meta() && request.resource.data.revision==resource.data.revision+1;
+   allow delete: if false;
+   match /participants/{p} {
+    function valid() { let d=request.resource.data;
+     return d.keys().hasOnly(['name','grade','kind','familyUid','response','overnight','revision','updatedAt'])
+      && str(d.name,100) && d.name.size()>0 && str(d.grade,100) && str(d.familyUid,128)
+      && d.kind in ['player','coach','parent','other'] && d.response in ['pending','yes','no'] && d.overnight is bool && revision();
+    }
+    allow read: if member(c);
+    allow create: if leader(c) && valid();
+    allow update: if valid() && member(c);
+    allow delete: if false;
+   }
+   match /routes/{r} {
+    allow read: if member(c);
+    allow create,update: if leader(c) && revision() && request.resource.data.keys().hasOnly(['date','time','title','address','mapLink','notes','archived','revision','updatedAt'])
+     && str(request.resource.data.date,10) && request.resource.data.date>=camp(c).start && request.resource.data.date<=camp(c).end
+     && str(request.resource.data.time,5) && str(request.resource.data.title,150) && str(request.resource.data.address,500)
+     && str(request.resource.data.mapLink,2000) && (request.resource.data.mapLink=='' || request.resource.data.mapLink.matches('https://.*'))
+     && str(request.resource.data.notes,3000) && request.resource.data.archived is bool;
+   }
+   match /budgets/{b} {
+    allow read: if member(c);
+    allow create,update: if finance(c) && revision() && request.resource.data.keys().hasOnly(['title','unit','quantity','notes','archived','revision','updatedAt'])
+     && str(request.resource.data.title,150) && money(request.resource.data.unit) && request.resource.data.quantity is int
+     && request.resource.data.quantity>=0 && request.resource.data.quantity<=10000 && str(request.resource.data.notes,1000) && request.resource.data.archived is bool;
+   }
+   match /private/ledger {
+    allow read: if finance(c);
+    allow create,update: if finance(c) && revision() && request.resource.data.keys().hasOnly(['revision','charges','entries','history','updatedAt'])
+     && request.resource.data.charges is map && request.resource.data.charges.size()<=1000 && request.resource.data.entries is map && request.resource.data.entries.size()<=1000
+     && request.resource.data.history is map && request.resource.data.history.size()<=2000
+     && (resource==null || (request.resource.data.history.diff(resource.data.history).removedKeys().size()==0 && request.resource.data.history.diff(resource.data.history).changedKeys().size()==0))
+     && getAfter(/databases/$(database)/documents/campShared/$(c)/public/finance).data.revision==request.resource.data.revision;
+   }
+   match /public/finance {
+    allow read: if member(c);
+    allow create,update: if finance(c) && request.resource.data.updatedAt==request.time
+     && request.resource.data.keys().hasOnly(['billed','received','due','credit','rate','income','expense','balance','advances','revision','unpaid','categories','updatedAt'])
+     && request.resource.data.unpaid is list && request.resource.data.categories is map
+     && getAfter(/databases/$(database)/documents/campShared/$(c)/private/ledger).data.revision==request.resource.data.revision;
+   }
+  }
+ }
+}
