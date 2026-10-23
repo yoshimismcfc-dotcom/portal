@@ -94,3 +94,12 @@ body[data-theme=light] .budget-alert{color:#854300}body[data-theme=light] .budge
 @media print{html.camp-document{color-scheme:light!important}@page{background:#fff}}
 html.camp-document{scroll-padding-top:90px}
 .camp-page #fields{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:0 12px}.camp-page #fields>label{grid-column:1/-1;min-width:0}.camp-page #fields>label:is([data-field=unit],[data-field=quantity],[data-field=start],[data-field=end]){grid-column:auto}
+/* 編集内容だけをスクロール。見出しと保存ボタンは重ねずに常時表示。 */
+.camp-page #editor{overflow:hidden;padding:16px;max-height:88dvh}
+.camp-page #editor-form{display:flex;flex-direction:column;max-height:calc(88dvh - 34px);min-height:0;gap:8px}
+.camp-page #editor .dialog-head{position:static;padding:0;flex-shrink:0;gap:8px}
+.camp-page #editor #fields{overflow-y:auto;overscroll-behavior:contain;min-height:0;padding:4px 6px 8px;margin:0 -6px;scroll-padding-block:10px}
+.camp-page #editor #error{flex-shrink:0;max-height:20dvh;overflow-y:auto;margin:0;line-height:1.5;font-size:.9rem}
+.camp-page #editor #error button{display:block;margin:8px 0 4px}
+.camp-page #editor #save{align-self:flex-start;flex-shrink:0;margin-top:0}
+.camp-titlebar{display:flex;justify-content:space-between;align-items:center;gap:10px;flex-wrap:wrap;margin-top:16px}.camp-titlebar h2{margin:0!important;min-width:0;flex:1 1 180px}.camp-page .camp-titlebar button{font-size:.9rem;padding:10px 14px}
