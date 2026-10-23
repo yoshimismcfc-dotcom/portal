@@ -82,3 +82,7 @@ node scripts/camp-free-browser.test.mjs  # 無料版のブラウザ検査（両�
 - 共有リンクの無効化・再発行はFirebaseコンソールでの手作業
 - 自動バックアップとワンクリック復元は未実装（設定画面からのJSON保存のみ）
 - API版の本番サーバー配置先は未定。配置しない限り`camps-api.html`は動作しない
+
+## 合宿会計の簡素化（2026-10-23）
+
+「会計」の中に「予算を立てる」「お金を記録する」「決算を見る」を配置します。通常予算と特別収支は表示だけを統合し、保存先は変えません。合計額入力は既存の単価×数量で保持し、`accounting-model.mjs`で変換します。参加費の役割・部屋数・泊数などは詳細設定に残します。`special-entry-ui.mjs`は共有可能な金融項目だけを編集し、非公開記録は扱いません。Firestoreルール変更は不要です。検査は既存モデル・ルールに加え `camp-simple-accounting.test.mjs` と `camp-simple-accounting-browser.test.mjs` を使います。
