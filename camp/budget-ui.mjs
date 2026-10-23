@@ -43,7 +43,7 @@ export function createBudgetUI(ctx){
   if(!c.budgetBook?.available){renderSpecial(p,c,button,yen);p.append(el('div','新しい予算書は準備中です。管理担当に設定の確認を依頼してください。従来の予算は下から利用できます。','notice'));return false;}
   const rows=allLines(c).filter(r=>!r.archived),s=budgetSummary(effectiveBudgetLines(c),c.participants,c.budgetBook.settings.rounding);
   const heading=el('div',undefined,'budget-heading');heading.append(el('h2','合宿予算書'),button('予算書をPDFにする',()=>printBook('budget')));p.append(heading,el('p','必要な費用と、参加費・補助の予定を入力します。','small'));
-  const summary=el('div',undefined,'stats budget-totals');for(const [title,v] of [['集まる予定',s.income],['使う予定',s.expense],['差引予定',s.balance]]){const stat=el('div',undefined,'stat');stat.append(el('span',title),el('strong',yen(v)));summary.append(stat);}p.append(summary);
+  const summary=el('div',undefined,'stats budget-totals');for(const [title,v] of [['集まる予定',s.income],['使う予定',s.expense],['差引予定',s.balance]]){const stat=el('div',undefined,'stat');stat.append(el('span',title),el('strong',yen(v)));summary.append(stat);}p.append(summary);const specialStatus=specialPlan(c.specialBook,baseBudgetLines(c));if(specialStatus.unverified)p.append(el('p','補助・臨時支出には確認中の予定額を含みます。','budget-alert'));for(const issue of specialStatus.issues)p.append(el('p',issue,'budget-alert'));
   if(!c.budgetBook.ratesAvailable)p.append(el('p','参加者別の料金・部屋数／泊数計算は準備中です。現在の予算はそのまま編集できます。','notice'));
   if(rows.some(r=>r.kind==='feeAdult')&&rows.some(r=>['feeParent','feeCoach','feeOther'].includes(r.kind)))p.append(el('p','大人一括と役割別の参加費が両方あります。同じ人の参加費を二重に見込んでいないか確認してください。','budget-alert'));
   if(s.pending)p.append(el('p',s.pending+'項目が未入力です。合計は入力済み分の仮計算です。','budget-alert'));
