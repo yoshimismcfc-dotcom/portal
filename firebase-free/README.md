@@ -18,7 +18,7 @@ GitHub Pages + Cloud Firestoreを使用します。課金プランへの変更�
 
 `npm test` は既存機能、`npm run test:camp:free` は無料版の計算テストです。ルールとブラウザの結合テストは本番データを使わず、プロジェクトID `demo-smc-camp` のFirestoreエミュレーター（127.0.0.1:8085）で実行します。
 
-開発時のQA依存はリポジトリ隣の `../qa` に `firebase`, `@firebase/rules-unit-testing`, `playwright` をインストールします。Java21とFirebase Firestoreエミュレーターを起動し、`node scripts/camp-free-rules.test.mjs`、続いて `node scripts/camp-free-browser.test.mjs` を実行します。ブラウザテストは前者が作成するテストデータを利用します。匿名・未ログイン状態の読み書きを検証します。本番疎通は別途確認してください。
+開発時のQA依存はリポジトリ隣の `../qa` に `firebase`, `@firebase/rules-unit-testing`, `playwright` をインストールします。Java21とFirebase Firestoreエミュレーターを起動し、`node scripts/camp-free-rules.test.mjs`、続いて `node scripts/camp-free-browser.test.mjs` を実行します。QA依存を別の場所へ入れた場合は、`CAMP_QA_PACKAGE` にその `package.json` の絶対パスを指定します。`firebase-*-compat.js` は同じフォルダへ置いてください。Playwrightだけ別の場所にある場合は `PLAYWRIGHT_MODULE` を、画像・PDFの出力先を変える場合は `CAMP_QA_OUTPUT` を指定します。ブラウザテストは前者が作成するテストデータを利用します。匿名・未ログイン状態の読み書きを検証します。本番疎通は別途確認してください。
 
 ## バックアップ・復旧
 

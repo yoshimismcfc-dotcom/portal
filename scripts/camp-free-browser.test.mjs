@@ -1,7 +1,11 @@
 // 実際のFirestoreエミュレーターを用いた無料版ブラウザテスト。認証のみ架空UID。
-import {createRequire} from 'node:module';import {readFileSync,writeFileSync,mkdirSync} from 'node:fs';import http from 'node:http';import {resolve,extname} from 'node:path';import assert from 'node:assert/strict';
-const require=createRequire(new URL('../../qa/package.json',import.meta.url));const {chromium}=require('playwright');
-const sdk=name=>readFileSync(new URL('../../qa/firebase-'+name+'-compat.js',import.meta.url),'utf8');const root=resolve('.'),out=resolve('../camp-free-qa');mkdirSync(out,{recursive:true});
+import {createRequire} from 'node:module';import {readFileSync,writeFileSync,mkdirSync} from 'node:fs';import http from 'node:http';import {resolve,extname,dirname} from 'node:path';import {fileURLToPath} from 'node:url';import assert from 'node:assert/strict';
+// QA依存の場所は環境ごとに異なるため、camp-free-rules / camp-browser と同じ環境変数で差し替える。
+const qaPackage=process.env.CAMP_QA_PACKAGE||fileURLToPath(new URL('../../qa/package.json',import.meta.url));
+const require=createRequire(qaPackage);const {chromium}=require(process.env.PLAYWRIGHT_MODULE||'playwright');
+// FirebaseのcompatファイルはQAのpackage.jsonと同じフォルダに置く。
+const sdk=name=>readFileSync(resolve(dirname(qaPackage),'firebase-'+name+'-compat.js'),'utf8');
+const root=resolve('.'),out=resolve(process.env.CAMP_QA_OUTPUT||'work/camp-free-qa');mkdirSync(out,{recursive:true});
 const staticServer=http.createServer((req,res)=>{try{const p=resolve(root,'.'+new URL(req.url,'http://local').pathname);if(!p.startsWith(root))throw Error();const data=readFileSync(p);res.setHeader('Content-Type',({'.mjs':'text/javascript','.js':'text/javascript','.css':'text/css','.html':'text/html'})[extname(p)]||'application/octet-stream');res.end(data);}catch{res.statusCode=404;res.end();}});await new Promise(r=>staticServer.listen(0,'127.0.0.1',r));
 const browser=await chromium.launch({channel:'chrome',headless:true});let uid='admin';const errors=[],passed=[];const pass=s=>{passed.push(s);console.log('PASS '+s);};
 try{const context=await browser.newContext({viewport:{width:390,height:844},locale:'ja-JP',timezoneId:'Asia/Tokyo',serviceWorkers:'block'});await context.route('**/*',async route=>{const u=new URL(route.request().url());if(u.pathname==='/firebase-config.js')return route.fulfill({contentType:'text/javascript',body:sdk('app')+'\n'+sdk('auth')+'\n'+sdk('firestore')+`\nfirebase.initializeApp({projectId:'demo-smc-camp',apiKey:'test-key'});firebase.firestore().useEmulator('127.0.0.1',8085);window.FIREBASE_AUTH={setPersistence:async()=>{},onAuthStateChanged:fn=>fn({uid:'${uid}',emailVerified:true}),signOut:async()=>{}};window.FIREBASE_DB={ref:()=>({once:async()=>({val:()=>({m1:{name:'名簿テスト',grade:'3年'}})})})};window.onFirebaseReady=fn=>fn();`});if(u.hostname==='www.gstatic.com')return route.fulfill({contentType:'text/javascript',body:''});if(u.hostname!=='127.0.0.1')return route.abort();return route.continue();});
