@@ -51,14 +51,15 @@ function createCamp(initial={},title='新しい合宿を作成'){
 }
 async function list(){camp=null;tab='overview';const serial=++loadSerial;const all=await service.list(known);if(serial!==loadSerial)return;const p=$('content');p.replaceChildren(el('h2','合宿一覧'));
  if(isAdmin){const actions=el('div',undefined,'toolbar');p.append(actions);
- const matches=all.filter(c=>sameCamp(c,{name:springName,start:springStart}));
+ const matches=all.filter(c=>!c.archived&&sameCamp(c,{name:springName,start:springStart}));
  actions.append(button('＋ 新しい合宿を作成',()=>createCamp()),button(matches.length?'春合宿2027を編集':'春合宿2027の候補から新規作成',async()=>{
   if(matches.length===1)return editCamp(matches[0].id);
   if(matches.length>1){message('同じ名前・日程の合宿が複数あります。下の一覧から編集する合宿を選んでください。',true);return;}
   createCamp({name:springName,start:springStart,end:'2027-03-14',place:'伊東園ホテルとどろき（群馬県伊香保）',notes:'未確定：参加30〜40人想定、8部屋予約予定。行程・配車・費用は調整中。'},'新しい合宿を作成（未確定の候補）');
  }));}
  if(!all.length)p.append(el('p','この端末で開いた合宿はまだありません。共有リンクを開くか、新しい合宿を作成してください。'));
- for(const c of all.sort((a,b)=>b.start.localeCompare(a.start)))row(p,c.name,[c.start+'〜'+c.end,c.place,c.archived?'アーカイブ':c.status],[button('合宿を開く',()=>open(c.id)),button('この合宿を編集',()=>editCamp(c.id))]);
+ for(const c of all.filter(c=>!c.archived).sort((a,b)=>b.start.localeCompare(a.start)))row(p,c.name,[c.start+'〜'+c.end,c.place,c.status],[button('合宿を開く',()=>open(c.id)),button('この合宿を編集',()=>editCamp(c.id))]);
+ const hidden=all.filter(c=>c.archived);if(hidden.length){const box=el('details');box.append(el('summary','非表示にした合宿（'+hidden.length+'件・復元できます）'));for(const c of hidden)row(box,c.name,[c.start+'〜'+c.end,c.place],[button('合宿を確認・復元',()=>editCamp(c.id))]);p.append(box);}
 }
 async function open(id){const serial=++loadSerial;message('読み込んでいます…');const result=await service.load(id);if(serial!==loadSerial)return;camp=result;remember(id);history.replaceState(null,'','#'+id);render();message('最新情報を取得しました。更新は「最新情報を取得」を押してください。');}
 async function reload(){if(camp)await open(camp.id);else await list();}
