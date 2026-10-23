@@ -15,7 +15,7 @@ export function renderSpecial(parent,c,button,yen,actual=false){
   if(!actual&&plan.variances)box.append(node('p','予定額と確定額が異なる明細があります。予算には予定額を使用します。','budget-alert'));if(!actual&&plan.pending)box.append(node('p',plan.pending+'項目は金額未定です。','small'));
   for(const issue of s.issues)box.append(node('p',issue,'budget-alert'));
   if(actual){box.append(node('p','未入力は実績0円とは区別します。支払・入金は台帳の実記録から集計します。値引きは入金にせず、宿泊費が値引き前で記録されている場合だけ追加反映します。','small'));
-   for(const r of s.rows){const p=node('p');p.append(node('strong',r.title+'：'),node('span',(r.actual===null?'実績未入力':yen(r.actual))+' ／ '+specialStates[r.status]));box.append(p);}
+   for(const r of s.rows){const p=node('p');p.append(node('strong',r.title+'：'),node('span',(r.actual===null?'実績未入力':yen(r.actual))+' ／ '+(r.status==='settled'&&r.actual===null?'台帳変更：実績を再確認してください':specialStates[r.status])));box.append(p);}
   }
   const a=book.allocation||{},alloc=node('p','配分：'+(a.confirmed?'確定':'未確定')+' ／ 団員参加費 '+yen(a.members||0)+'・団費 '+yen(a.team||0)+'・観光 '+yen(a.leisure||0)+'・予備費 '+yen(a.reserve||0),'small');box.append(alloc,node('p','配分だけで請求額や入出金は変更しません。参加費は管理者が別途確認して設定します。','small'));
   const sim=node('details',undefined,'special-simulation');sim.append(node('summary','宿泊先を比較・試算する'));
@@ -30,7 +30,7 @@ export function renderSpecial(parent,c,button,yen,actual=false){
  return {plan,actual:s};
 }
 export function appendSpecialPrint(paper,c,yen,actual=false){const s=actual?specialActual(c.specialBook,c.ledger):specialPlan(c.specialBook,baseBudgetLines(c));if(!c.specialBook?.available)return;
- paper.append(node('h2','特別収支'+(actual?'（実績）':'（予算）')),node('p','特別補助 '+yen(s.aid)+' ／ 特別支出 '+yen(s.expense)+' ／ 差引 '+(s.net>0?'+':'')+yen(s.net)));
+ const value=(kind,n)=>actual&&!s.rows.some(r=>r.actual!==null&&(!kind||r.kind===kind))?'未入力':(kind===null&&n>0?'+':'')+yen(n);paper.append(node('h2','特別収支'+(actual?'（実績）':'（予算）')),node('p','特別補助 '+value('aid',s.aid)+' ／ 特別支出 '+value('expense',s.expense)+' ／ 差引 '+value(null,s.net)));
  if(!actual&&s.discount)paper.append(node('p','宿泊費の値引き '+yen(s.discount)+' は支出予定から1回だけ差し引いています。'));
  if(!actual&&s.unverified)paper.append(node('p','確認中の試算を含みます。'));
  if(!actual&&s.aid-s.cashAid>s.discount)paper.append(node('p','値引き後の宿泊費は追加控除していません。値引きは現金入金に含めません。'));if(actual&&s.applied)paper.append(node('p','適用された宿泊費値引き '+yen(s.applied)+' は現金入金に含めません。'));if(actual&&s.discount)paper.append(node('p','宿泊費（値引き前の記録）から値引き '+yen(s.discount)+' を反映。現金入金には含めません。'));

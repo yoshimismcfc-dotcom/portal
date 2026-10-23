@@ -34,7 +34,7 @@ export function createSpecialService(db,actor){
   });},
   async linkCash(id,row,entryId,operationId){return this.mutate(id,row.id,row.revision,{id:operationId,type:'link',entryId},async({tx,old,book})=>{
    const p=old.public;check(p.status!=='cancelled'&&p.flow==='cash'&&p.owner!=='unknown'&&p.ownershipVerified&&p.eligibilityVerified&&(p.owner!=='personal'||p.kind==='aid'&&p.consentVerified)&&(p.kind!=='expense'||p.funding!=='unknown'),'資格・帰属・了承を確認してください');
-   const snap=await tx.get(db.doc('campShared/'+id+'/private/ledger')),entry=snap.data()?.entries?.[entryId];check(entry&&!entry.void&&entry.kind===(p.kind==='expense'?'expense':'income'),'対応する入出金記録を選択してください');
+   const snap=await tx.get(db.doc('campShared/'+id+'/private/ledger')),entry=snap.data()?.entries?.[entryId];check(entry&&!entry.void&&!entry.budgetId&&entry.kind===(p.kind==='expense'?'expense':'income'),'通常予算や別の明細に未対応の入出金記録を選択してください');
    check(!Object.values(book.items).some(x=>x.entryIds.includes(entryId)),'この入出金は既に特別収支へ対応づけられています');
    return {public:{...p,entryIds:[...p.entryIds,entryId],status:'settled'},details:old.details};
   });},
@@ -59,7 +59,8 @@ export function createSpecialService(db,actor){
   });},
   async clearDiscount(id,row,evidence,operationId){check(typeof evidence==='string'&&evidence.trim(),'値引き実績を取り消す理由を入力してください');return this.mutate(id,row.id,row.revision,{id:operationId,type:'clearDiscount',evidence},async({old})=>{check(old.public.discountActual,'値引き実績がありません');return {public:{...old.public,discountActual:null,status:old.public.status==='cancelled'?'cancelled':'confirmed'},details:{...old.details,verification:'値引き実績取消：'+evidence}};});},
   async seedSpring(id,camp){const actual=await read(db.doc('campShared/'+id));check(actual&&actual.name===camp.name&&actual.start===camp.start&&actual.end===camp.end,'合宿の基本情報が更新されています。最新情報を取得してください');check(camp.start==='2027-03-13'&&camp.end==='2027-03-14'&&camp.name.includes('春'),'春合宿の日程・名称を確認してください');
-   for(const r of springDefaults){const existing=await read(privateRoot(id).collection('items').doc(r.id));if(existing)continue;await this.save(id,r.id,0,r,{verification:'初期試算。資格・帰属・支払者・受給者は要確認。'},null,'seed-'+r.id);}
+   const normal=await Promise.all(['budgets','budgetLines'].map(name=>db.collection('campShared').doc(id).collection(name).get({source:'server'})));const ordinary=normal.flatMap(s=>s.docs.map(d=>d.data()));
+   const present=await Promise.all(springDefaults.map(r=>read(privateRoot(id).collection('items').doc(r.id))));const missing=springDefaults.filter((r,index)=>!present[index]);for(const r of missing)check(!ordinary.some(x=>!x.archived&&x.title===r.title&&x.unit*x.quantity*(x.multiplier??1)===plannedAmount(r)),'通常予算に同名・同額の明細があります。重複登録を避けるため、既存明細を確認してください');for(const r of missing)await this.save(id,r.id,0,r,{verification:'初期試算。資格・帰属・支払者・受給者は要確認。'},null,'seed-'+r.id);
   },
   async allocate(id,data,base,operationId){await db.runTransaction(async tx=>{const ref=shared(id),s=await tx.get(ref);check(s.exists,'特別明細を先に登録してください');const book=s.data(),net=specialPlan(book,base).net,allocation=validateAllocation(data,net);check(data.basisRevision===book.revision,'特別収支が更新されました。配分を確認し直してください');const history=privateRoot(id).collection('history').doc('allocation__'+operationId),previous=await tx.get(history);if(previous.exists)return;tx.set(history,{itemId:'allocation',before:book.allocation,after:allocation,actor,updatedAt:stamp()});tx.set(ref,{...book,allocation,revision:book.revision+1,lastItemId:'',historyId:'allocation__'+operationId,updatedAt:stamp()});});}
  };return api;
