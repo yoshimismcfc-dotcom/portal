@@ -1,12 +1,45 @@
 import test from 'node:test';import assert from 'node:assert/strict';
-import {validateLine,lineTotal,peopleCounts,budgetSummary,snapshot,draftPreview,comparison,legacyLine} from '../camp/budget-model.mjs';
+import {validateLine,lineTotal,peopleCounts,budgetSummary,snapshot,draftPreview,comparison,legacyLine,matchesFee} from '../camp/budget-model.mjs';
 import {applyLedger,totals} from '../camp/free-model.mjs';
 const row=(extra={})=>({id:'one',source:'budgetLines',revision:1,title:'宿泊',kind:'expense',category:'hotel',target:'players',quantityMode:'playersOvernight',unit:8000,quantity:20,notes:'食事込み',archived:false,...extra});
 const people=[...Array.from({length:20},(_,i)=>({id:'p'+i,kind:'player',response:'yes',overnight:true})),...Array.from({length:10},()=>({kind:'coach',response:'yes',overnight:true})),{kind:'player',response:'pending',overnight:true},{kind:'player',response:'no',overnight:true}];
-test('人数は参加確定・子ども大人・宿泊を区別し未回答を含めない',()=>{assert.deepEqual(peopleCounts(people),{players:20,adults:10,playersOvernight:20,adultsOvernight:10,all:30});assert.equal(peopleCounts([{kind:'player',response:'yes',overnight:false}]).playersOvernight,0);});
+test('人数は参加確定・子ども大人・宿泊を区別し未回答を含めない',()=>{assert.deepEqual(peopleCounts(people),{players:20,adults:10,playersOvernight:20,adultsOvernight:10,all:30,parents:0,parentsOvernight:0,coaches:10,coachesOvernight:10,others:0,othersOvernight:0});assert.equal(peopleCounts([{kind:'player',response:'yes',overnight:false}]).playersOvernight,0);});
 test('単価・数量の未入力と0円を区別し、不正値と金額上限を拒否',()=>{assert.equal(lineTotal(validateLine(row({unit:null}))),null);assert.equal(lineTotal(validateLine(row({unit:0}))),0);for(const data of [{unit:-1},{unit:1.1},{quantity:10001},{unit:100000000,quantity:2},{title:''},{kind:'income',category:'participation'}])assert.throws(()=>validateLine(row(data)));});
 test('宿泊・昼食・レジャー・交通・補助・参加費の予算計算',()=>{const rows=[row(),row({id:'adult',target:'adults',unit:12000,quantity:10}),row({id:'meal',category:'meal',target:'all',unit:1000,quantity:30}),row({id:'transport',category:'transport',target:'all',unit:20000,quantity:1}),row({id:'aid',kind:'income',category:'support',target:'players',unit:40000,quantity:1}),row({id:'pool',kind:'income',category:'support',target:'transport',unit:20000,quantity:1}),row({id:'feeC',kind:'feeChild',category:'participation',target:'players',unit:7000,quantity:20}),row({id:'feeA',kind:'feeAdult',category:'participation',target:'adults',unit:13000,quantity:10})];const s=budgetSummary(rows,people,100);assert.equal(s.expense,330000);assert.equal(s.income,330000);assert.equal(s.balance,0);assert.equal(s.required,270000);assert.equal(s.suggested.players.per,7000);assert.equal(s.suggested.adults.per,13000);});
 test('使途指定援助は対象外へ流さず、人数0と端数・未定を扱う',()=>{const s=budgetSummary([row({unit:100,quantity:1,target:'all'}),row({unit:null}),row({kind:'income',category:'support',target:'transport',unit:1000,quantity:1})],people,100);assert.equal(s.pending,1);assert.equal(s.restrictedSurplus,1000);assert.equal(s.suggested.players.per,100);assert.equal(s.suggested.adults.per,100);assert.equal(s.surplus,900);assert.equal(budgetSummary([row({target:'all'})],[]).suggested.players.per,null);assert.equal(budgetSummary([row({target:'all'})],[]).unallocated,160000);});
 test('旧予算は従来の支出として読み込み、コピーは実績を作らない',()=>{const old=legacyLine({id:'old',title:'費用',unit:1000,quantity:2,notes:'',revision:1});assert.equal(old.kind,'expense');const d={...snapshot(old),id:'legacy_old',revision:1};assert.equal(comparison([d],{} )[0].actual,null);assert.equal(totals().expense,0);assert.equal(draftPreview([old],[d])[0].state,'same');assert.equal(draftPreview([{...old,revision:2}],[d])[0].state,'changed');});
 test('予定・確認済み0円・部分実績・取消・既存取引の紐づけを区別',()=>{const d={...snapshot(row()),id:'line_one',revision:1};let l=applyLedger(null,{id:'a',type:'entry',revision:0,kind:'expense',amount:100,category:'宿泊費',reference:'a'},'a','now');const before=totals(l);l=applyLedger(l,{id:'link',type:'linkBudget',entryId:'a',budgetId:d.id,revision:1},'a','now');assert.deepEqual(totals(l),before);assert.equal(comparison([d],l)[0].actual,100);assert.equal(comparison([d],l)[0].difference,-159900);assert.equal(comparison([{...d,zeroConfirmed:true}],{})[0].actual,0);assert.throws(()=>applyLedger(l,{id:'l2',type:'linkBudget',entryId:'a',budgetId:d.id,revision:2},'a','now'),/紐づけ/);l=applyLedger(l,{id:'v',type:'void',entryId:'a',revision:2},'a','now');assert.equal(comparison([d],l)[0].actual,null);});
 test('参加費は請求でなく実入金から集計し、返金も反映',()=>{const d={...snapshot(row({kind:'feeChild',category:'participation',target:'players'})),id:'line_fee'};let l=applyLedger(null,{id:'c',type:'charge',revision:0,participantId:'p',name:'選手',amount:8000,budgetId:d.id},'a','now');assert.equal(comparison([d],l)[0].actual,null);l=applyLedger(l,{id:'p',type:'entry',revision:1,kind:'payment',participantId:'p',amount:5000,reference:'p'},'a','now');l=applyLedger(l,{id:'r',type:'entry',revision:2,kind:'refund',participantId:'p',amount:1000,reference:'r'},'a','now');assert.equal(comparison([d],l)[0].actual,4000);l=applyLedger(l,{id:'c2',type:'charge',revision:3,participantId:'p',name:'選手',amount:9000},'a','now');assert.equal(l.charges.p.budgetId,d.id);assert.equal(totals(l).income,4000);});
+
+test('参加費は団員・保護者・コーチを区別し、宿泊する人数だけを参照',()=>{
+ const ps=[{kind:'player',response:'yes',overnight:true},{kind:'parent',response:'yes',overnight:false},{kind:'coach',response:'yes',overnight:true},{kind:'other',response:'no',overnight:true}];
+ const c=peopleCounts(ps);assert.equal(c.parents,1);assert.equal(c.parentsOvernight,0);assert.equal(c.coachesOvernight,1);assert.equal(c.others,0);
+ assert.equal(matchesFee(ps[1],'feeParent'),true);assert.equal(matchesFee(ps[2],'feeParent'),false);assert.equal(matchesFee(ps[2],'feeAdult'),true);
+ for(const [kind,target] of [['feeParent','parents'],['feeCoach','coaches'],['feeOther','others']]){assert.equal(validateLine(row({kind,target,category:'participation'})).kind,kind);assert.throws(()=>validateLine(row({kind,target:'players',category:'participation'})));}
+});
+test('部屋別単価×部屋数×泊数、1人単価×人数×泊数を保存・コピーし旧行は1泊扱い',()=>{
+ const room=validateLine(row({basis:'room',multiplier:2,quantityMode:'manual',unit:18000,quantity:3}));assert.equal(lineTotal(room),108000);assert.equal(snapshot({...room,id:'room',revision:1}).multiplier,2);
+ assert.equal(lineTotal(validateLine(row({basis:'person',multiplier:2,unit:8000,quantity:20}))),320000);assert.equal(lineTotal(row()),160000);
+ for(const data of [{basis:'room'},{basis:'room',quantityMode:'parents'},{multiplier:0},{multiplier:1.5},{multiplier:101},{unit:100000000,quantity:1,multiplier:2},{kind:'feeCoach',target:'coaches',category:'participation',multiplier:2}])assert.throws(()=>validateLine(row(data)));
+});
+test('複数の補助と役割別参加費・異なる宿泊料金を予算書全体で計算',()=>{
+ const ps=[...Array.from({length:20},()=>({kind:'player',response:'yes'})),...Array.from({length:8},()=>({kind:'parent',response:'yes'})),...Array.from({length:2},()=>({kind:'coach',response:'yes'}))];
+ const make=(title,kind,target,unit,quantity,category='other')=>row({title,kind,target,unit,quantity,category,quantityMode:'manual'});
+ const rs=[make('団員宿泊','expense','players',8000,20,'hotel'),make('保護者部屋A','expense','parents',12000,8,'hotel'),make('コーチ部屋B','expense','coaches',15000,2,'hotel'),make('昼食','expense','all',1000,30,'meal'),make('子ども入場','expense','players',1000,20,'leisure'),make('大人入場','expense','adults',1500,10,'leisure'),make('交通','expense','all',30000,1,'transport'),make('団費','income','players',40000,1,'support'),make('プール金','income','transport',30000,1,'support'),make('寄付','income','all',10000,1,'support'),make('団員費','feeChild','players',7000,20,'participation'),make('保護者費','feeParent','parents',15000,8,'participation'),make('コーチ費','feeCoach','coaches',10000,2,'participation')];
+ const s=budgetSummary(rs,ps);assert.equal(s.expense,381000);assert.equal(s.other,80000);assert.equal(s.fees,280000);assert.equal(s.income,360000);assert.equal(s.balance,-21000);assert.equal(s.required,301000);
+});
+test('役割限定補助を他の参加者に充当せず、対象者0人の費用を未配分と表示',()=>{
+ const ps=[{kind:'player',response:'yes'},{kind:'parent',response:'yes'}];
+ const s=budgetSummary([row({target:'all',unit:1000,quantity:1}),row({kind:'income',category:'support',target:'coaches',unit:5000,quantity:1})],ps);
+ assert.equal(s.suggested.players.per,500);assert.equal(s.suggested.parents.per,500);assert.equal(s.required,1000);assert.equal(s.restrictedSurplus,5000);
+ const noCoach=budgetSummary([row({target:'coaches',unit:3000,quantity:1})],ps);assert.equal(noCoach.required,3000);assert.equal(noCoach.unallocated,3000);assert.equal(noCoach.suggested.coaches.per,null);
+});
+test('コーチ参加費は請求額でなく入金・返金を実績へ反映',()=>{
+ const d={...snapshot(row({kind:'feeCoach',category:'participation',target:'coaches'})),id:'line_coach'};
+ const l={charges:{coach:{budgetId:d.id}},entries:{a:{kind:'payment',participantId:'coach',amount:10000},b:{kind:'refund',participantId:'coach',amount:1000}}};assert.equal(comparison([d],l)[0].actual,9000);
+});
+
+test('参加者未登録でも全体補助を大人向け未配分費用に充当し、負の0や端数誤差を出さない',()=>{
+ const rs=[row({target:'adults',unit:100,quantity:1}),row({kind:'income',category:'support',target:'all',unit:100,quantity:1})];const s=budgetSummary(rs,[]);assert.equal(s.required,0);assert.equal(s.unallocated,0);
+ for(const n of [3,7,29,31]){const ps=Array.from({length:n},(_,i)=>({kind:i%3===0?'coach':i%3===1?'parent':'player',response:'yes'}));assert.equal(budgetSummary([row({target:'all',unit:1000,quantity:1})],ps,1).required,1000);}
+});
