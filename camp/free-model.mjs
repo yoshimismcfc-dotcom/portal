@@ -2,6 +2,7 @@
 export const entries = x => Object.entries(x || {});
 export function check(ok, message) { if (!ok) throw new Error(message); }
 export function amount(v) { const n=Number(v); check(Number.isSafeInteger(n)&&n>=0&&n<=100000000,'金額は0〜1億円の整数で入力してください'); return n; }
+export function deadline(v=''){if(v==='')return '';check(typeof v==='string'&&/^\d{4}-\d{2}-\d{2}$/.test(v),'支払期限の日付を確認してください');const d=new Date(v+'T00:00:00Z');check(Number.isFinite(d.getTime())&&d.toISOString().slice(0,10)===v,'支払期限の日付を確認してください');return v;}
 export function totals(ledger={}) {
   const charges=ledger.charges||{}, payments={}, active=entries(ledger.entries).map(([,x])=>x).filter(x=>!x.void);
   for(const x of active.filter(x=>['payment','refund'].includes(x.kind))) payments[x.participantId]=(payments[x.participantId]||0)+(x.kind==='refund'?-x.amount:x.amount);
@@ -18,10 +19,22 @@ export function applyLedger(current, op, actor, at) {
   check(ledger.revision===op.revision,'別の担当者が更新しました。最新情報を取得してから入力し直してください');
   ledger.charges ||= {}; ledger.entries ||= {}; ledger.history ||= {};
   if(op.budgetId)check(typeof op.budgetId==='string'&&/^(line_|legacy_)[^/]{1,150}$/.test(op.budgetId),'予算項目の識別子を確認してください');
-  if(op.type==='charge') {
-    check(typeof op.participantId==='string'&&op.participantId,'参加者を選択してください');
-    check(!ledger.charges[op.participantId]?.budgetId||!op.budgetId||ledger.charges[op.participantId].budgetId===op.budgetId,'この請求は別の予算項目に紐づいています');
-    ledger.charges[op.participantId]={amount:amount(op.amount),name:op.name,household:op.household||op.participantId,due:op.due||'',...((op.budgetId||ledger.charges[op.participantId]?.budgetId)?{budgetId:op.budgetId||ledger.charges[op.participantId].budgetId}:{})};
+  const chargeChanges=[];
+  const setCharge=c=>{
+    check(typeof c.participantId==='string'&&c.participantId,'参加者を選択してください');
+    const old=ledger.charges[c.participantId]||null;
+    check(!old?.budgetId||!c.budgetId||old.budgetId===c.budgetId,'この請求は別の予算項目に紐づいています');
+    check(c.amount!==null&&c.amount!==undefined&&(typeof c.amount!=='string'||c.amount.trim()!==''),'参加費を入力してください（無料の場合は0）。');
+    const next={amount:amount(c.amount),name:c.name,household:c.household||c.participantId,due:deadline(c.due||''),...((c.budgetId||old?.budgetId)?{budgetId:c.budgetId||old.budgetId}:{})};
+    const note=c.note??old?.note;if(note!==undefined){check(typeof note==='string'&&note.length<=1000,'変更理由は1000文字以内で入力してください');next.note=note;}
+    ledger.charges[c.participantId]=next;chargeChanges.push({participantId:c.participantId,before:old,after:next});
+  };
+  if(op.type==='charges') {
+    check(Array.isArray(op.changes)&&op.changes.length>0&&op.changes.length<=100,'一括設定は1〜100人を選んでください');
+    check(new Set(op.changes.map(c=>c.participantId)).size===op.changes.length,'同じ参加者を重複して設定できません');
+    for(const c of op.changes)setCharge(c);
+  } else if(op.type==='charge') {
+    setCharge(op);
   } else if(op.type==='entry') {
     check(['payment','refund','income','expense'].includes(op.kind),'取引区分が不正です');
     const n=amount(op.amount);check(n>0,'取引金額は1円以上で入力してください');
@@ -38,7 +51,7 @@ export function applyLedger(current, op, actor, at) {
     else {check(ledger.entries[op.entryId].kind==='expense','支出だけ精算できます');ledger.entries[op.entryId].settled=true;}
   }
   const t=totals(ledger);check(Object.values(t.balances).every(x=>x.received>=0),'返金が入金額を超えています。返金または取消の順序を確認してください');
-  ledger.revision++;ledger.history[op.id]={actor,at,signature};
+  ledger.revision++;ledger.history[op.id]={actor,at,signature,...(chargeChanges.length?{changes:chargeChanges}:{})};
   check(JSON.stringify(ledger).length<500000,'台帳の上限に近づきました。新しい合宿として分けてください');
   return ledger;
 }

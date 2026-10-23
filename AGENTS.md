@@ -90,3 +90,7 @@ node scripts/camp-free-browser.test.mjs  # 無料版のブラウザ検査（両�
 ## 合宿参加者のコンパクト表示（2026-10-24）
 
 「参加集約」は氏名ボタンから出欠・参加費・入金を開きます。参加者の既存IDで紐づけ、`participant-accounting.mjs` は台帳から状態を導出するだけです。請求未設定と明示0円を区別し、徴収済みフラグは追加しません。参加情報・請求・入金は独立して保存し、入金は既存台帳の取引として追記します。出欠変更で金額を更新しません。Firestore構造・ルール・権限は変更不要です。追加検査は `scripts/camp-participant-accounting.test.mjs` と `scripts/camp-compact-participants-browser.test.mjs`。
+
+## 参加費・期限の一括設定（2026-10-24）
+
+`bulk-fees-model.mjs`で対象者と変更前後を確認し、`bulk-fees-ui.mjs`から既存台帳へ `charges` 操作として保存します。初期対象は参加・請求未設定のみ。既存額の変更、未回答・不参加の追加は明示選択です。期限だけは設定済み請求を対象とします。最大100人を1つのFirestoreトランザクションで保存し、台帳・公開集計のrevisionを1だけ更新します。対象者revisionも同じトランザクションで読み、競合なら全件中止します。既存の台帳historyに請求変更前後と操作署名を保持し、入出金は作りません。請求の任意noteだけを同じcharges内に追加します。保存先・Firestoreルール・権限の変更はありません。検査は `camp-bulk-fees.test.mjs` / `camp-bulk-fees-browser.test.mjs`。
