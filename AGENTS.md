@@ -35,6 +35,8 @@
 
 無料版はログイン不要の共有リンク方式です。これは利用者の決定事項で、Firebase Authenticationの設定・Googleログイン・管理者UID登録はいずれも不要です。URLのフラグメントにUUIDを置き、リンクを知る人が閲覧・編集できます。本人認証ではないため、**緊急連絡先と健康情報は入力させない設計**です。この制約は`firestore.rules`でも拒否しています。緩める変更をしないでください。
 
+特別収支の管理者記録は例外として `camp-special-admin.html` からGoogle認証と合宿別ACLを使います。一般向けフローにログインは追加しません。公開用投影は `campShared/{id}/specialBook/current`、正式制度名・対象者などは `campSpecialPrivate/{id}` 配下だけに保存します。`campSpecialAdmins/{uid}` はFirebase管理者のみが設定します。画面の `isAdmin=true` や共有リンクIDで非公開記録を許可しないでください。設定・検査手順は `firebase-free/README.md` を参照してください。
+
 機能はタブ構成で、参加集約・費用の見立て・ルート・集金決算などを持ちます。金額は円の整数で扱い、未納は参加者ごとに0以上で計算します（他人の過入金と相殺しない）。
 
 ### 無料版を実際に動かすために必要な手作業

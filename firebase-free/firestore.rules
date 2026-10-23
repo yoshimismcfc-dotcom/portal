@@ -9,6 +9,44 @@ service cloud.firestore {
   function str(v,n) { return v is string && v.size() <= n; }
   function money(v) { return v is int && v >= 0 && v <= 100000000; }
   function revision() { return request.resource.data.updatedAt == request.time && request.resource.data.revision == (resource == null ? 1 : resource.data.revision+1); }
+  // 管理者権限はFirebase管理者だけが設定。共有リンクの識別子や画面のフラグを認証に使わない。
+  function specialAdmin(c) { return request.auth!=null && request.auth.token.email_verified==true && member(c)
+   && get(/databases/$(database)/documents/campSpecialAdmins/$(request.auth.uid)).data.enabled==true
+   && get(/databases/$(database)/documents/campSpecialAdmins/$(request.auth.uid)).data.camps.get(c,false)==true; }
+  function specialPublic(d) { return d.keys().hasOnly(['id','revision','kind','title','amountMode','unit','quantity','amount','confirmedAmount','due','status','funding','owner','flow','use','includeBudget','eligibilityVerified','ownershipVerified','consentVerified','budgetAnchor','entryIds','discountActual'])
+   && str(d.id,80) && d.id.matches('[A-Za-z0-9_-]{1,80}') && d.revision is int && d.revision>=1
+   && d.kind in ['expense','aid'] && str(d.title,80) && d.title.size()>0 && d.amountMode in ['unit','total']
+   && (d.unit==null || money(d.unit)) && (d.quantity==null || (d.quantity is int && d.quantity>=0 && d.quantity<=10000)) && (d.amount==null || money(d.amount))
+   && (d.confirmedAmount==null || money(d.confirmedAmount)) && (d.unit==null || d.quantity==null || d.unit*d.quantity<=100000000)
+   && str(d.due,10) && d.status in ['planned','checking','confirmed','settled','cancelled'] && d.funding in ['unknown','team','pool','individual','other']
+   && d.owner in ['unknown','camp','personal'] && d.flow in ['cash','discount'] && (d.kind!='expense' || d.flow=='cash')
+   && d.use in ['all','players','hotel','transport','leisure','reserve'] && d.includeBudget is bool && d.eligibilityVerified is bool && d.ownershipVerified is bool && d.consentVerified is bool
+   && (!d.includeBudget || (d.owner=='camp' || (d.owner=='personal' && d.kind=='aid' && d.consentVerified && d.flow=='cash')))
+   && d.entryIds is list && d.entryIds.size()<=100 && d.entryIds.toSet().size()==d.entryIds.size()
+   && (d.budgetAnchor==null || (d.budgetAnchor is map && d.budgetAnchor.keys().hasOnly(['source','id','revision','total','basis']) && d.budgetAnchor.source in ['budgets','budgetLines'] && str(d.budgetAnchor.id,150) && d.budgetAnchor.revision is int && (d.budgetAnchor.total==null || money(d.budgetAnchor.total)) && d.budgetAnchor.basis in ['gross','net']))
+   && (d.discountActual==null || (d.discountActual is map && d.discountActual.keys().hasOnly(['amount','entryId','entryAmount','basis','referenceKey']) && money(d.discountActual.amount) && str(d.discountActual.entryId,100) && money(d.discountActual.entryAmount) && d.discountActual.basis in ['gross','net'] && d.discountActual.referenceKey.matches('[a-f0-9]{64}'))); }
+  function specialAllocation(d) { return d is map && d.keys().hasOnly(['members','team','leisure','reserve','confirmed']) && money(d.members) && money(d.team) && money(d.leisure) && money(d.reserve) && d.confirmed is bool; }
+  function specialDetails(d) { return d is map && d.keys().hasOnly(['schemeName','applicationBasis','beneficiaries','payer','recipient','ownershipEvidence','consentEvidence','verification','discountReference','note'])
+   && str(d.schemeName,3000) && str(d.applicationBasis,3000) && str(d.beneficiaries,3000) && str(d.payer,3000) && str(d.recipient,3000) && str(d.ownershipEvidence,3000) && str(d.consentEvidence,3000) && str(d.verification,3000) && str(d.discountReference,3000) && str(d.note,3000); }
+  match /campSpecialAdmins/{u} { allow get: if request.auth!=null && request.auth.uid==u; allow list,write: if false; }
+  match /campSpecialPrivate/{c}/items/{i} {
+   allow read: if specialAdmin(c);
+   allow create,update: if specialAdmin(c) && revision() && request.resource.data.keys().hasOnly(['public','details','revision','actor','lastOperation','signature','updatedAt'])
+    && request.resource.data.actor==request.auth.uid && str(request.resource.data.lastOperation,100) && str(request.resource.data.signature,60000)
+    && specialPublic(request.resource.data.public) && request.resource.data.public.id==i && request.resource.data.public.revision==request.resource.data.revision
+    && specialDetails(request.resource.data.details)
+    && (resource==null || request.resource.data.public.kind==resource.data.public.kind)
+    && getAfter(/databases/$(database)/documents/campSpecialPrivate/$(c)/history/$(i+'__'+string(request.resource.data.revision))).data.after==request.resource.data
+    && getAfter(/databases/$(database)/documents/campSpecialPrivate/$(c)/history/$(i+'__'+string(request.resource.data.revision))).data.before==(resource==null?null:resource.data)
+    && getAfter(/databases/$(database)/documents/campShared/$(c)/specialBook/current).data.items[i]==request.resource.data.public;
+   allow delete: if false;
+  }
+  match /campSpecialPrivate/{c}/history/{h} {
+   allow read: if specialAdmin(c);
+   allow create: if specialAdmin(c) && request.resource.data.keys().hasOnly(['itemId','before','after','actor','updatedAt']) && request.resource.data.actor==request.auth.uid && request.resource.data.updatedAt==request.time
+    && str(request.resource.data.itemId,80) && (request.resource.data.itemId=='allocation' || request.resource.data.after.public.id==request.resource.data.itemId);
+   allow update,delete: if false;
+  }
   match /campShared/{c} {
    function meta() { let d=request.resource.data;
     return d.keys().hasOnly(['name','start','end','place','meeting','fee','status','notes','archived','revision','updatedAt'])
@@ -22,6 +60,16 @@ service cloud.firestore {
    allow create: if validId(c) && meta() && request.resource.data.revision==0;
    allow update: if leader(c) && meta() && request.resource.data.revision==resource.data.revision+1;
    allow delete: if false;
+   match /specialBook/current {
+    function validBook() { let d=request.resource.data;let previous=resource==null?{}:resource.data.items;
+     return d.keys().hasOnly(['items','allocation','revision','lastItemId','historyId','updatedAt']) && d.items is map && d.items.size()<=100 && specialAllocation(d.allocation) && str(d.lastItemId,80) && str(d.historyId,150)
+      && (d.lastItemId=='' ? d.items==previous : (d.items.diff(previous).affectedKeys().hasOnly([d.lastItemId]) && specialPublic(d.items[d.lastItemId]) && getAfter(/databases/$(database)/documents/campSpecialPrivate/$(c)/items/$(d.lastItemId)).data.public==d.items[d.lastItemId]))
+      && getAfter(/databases/$(database)/documents/campSpecialPrivate/$(c)/history/$(d.historyId)).data.updatedAt==request.time
+      && (d.lastItemId=='' ? (getAfter(/databases/$(database)/documents/campSpecialPrivate/$(c)/history/$(d.historyId)).data.itemId=='allocation' && getAfter(/databases/$(database)/documents/campSpecialPrivate/$(c)/history/$(d.historyId)).data.before==resource.data.allocation && getAfter(/databases/$(database)/documents/campSpecialPrivate/$(c)/history/$(d.historyId)).data.after==d.allocation) : getAfter(/databases/$(database)/documents/campSpecialPrivate/$(c)/history/$(d.historyId)).data.after.public==d.items[d.lastItemId]);
+    }
+    allow get: if member(c);allow list: if false;
+    allow create,update: if specialAdmin(c) && revision() && validBook();allow delete: if false;
+   }
    match /participants/{p} {
     function valid() { let d=request.resource.data;
      return d.keys().hasOnly(['name','grade','kind','familyUid','response','overnight','revision','updatedAt'])

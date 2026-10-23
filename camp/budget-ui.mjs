@@ -1,3 +1,5 @@
+import {renderSpecial,appendSpecialPrint,baseBudgetLines,effectiveBudgetLines} from './special-ui.mjs';
+import {specialReport} from './special-model.mjs';
 import {kinds,targets,quantityModes,rateBases,feeTargets,matchesFee,categories,peopleCounts,validateLine,legacyLine,lineTotal,budgetSummary,draftPreview,comparison,templates} from './budget-model.mjs';
 const el=(tag,text,cls)=>{const n=document.createElement(tag);if(text!==undefined)n.textContent=text;if(cls)n.className=cls;return n;};
 const fields=(key,title,type='text',options)=>({key,title,type,options});
@@ -43,10 +45,10 @@ export function createBudgetUI(ctx){
   else await service.saveBudget(getCamp().id,{...row,archived:true});await reload();message('予算項目を非表示にしました。決算実績は変更していません。');
  }
  function plan(p){const c=getCamp();
-  if(!c.budgetBook?.available){p.append(el('div','新しい予算書は準備中です。管理担当に設定の確認を依頼してください。従来の予算は下から利用できます。','notice'));return false;}
-  const rows=allLines(c).filter(r=>!r.archived),s=budgetSummary(rows,c.participants,c.budgetBook.settings.rounding);
+  if(!c.budgetBook?.available){renderSpecial(p,c,button,yen);p.append(el('div','新しい予算書は準備中です。管理担当に設定の確認を依頼してください。従来の予算は下から利用できます。','notice'));return false;}
+  const rows=allLines(c).filter(r=>!r.archived),s=budgetSummary(effectiveBudgetLines(c),c.participants,c.budgetBook.settings.rounding);
   const heading=el('div',undefined,'budget-heading');heading.append(el('h2','合宿予算書'),button('予算書を印刷・PDF',()=>printBook('budget')));p.append(heading,el('p','宿泊・昼食・レジャー・参加費・補助を登録し、決算へコピーできます。予定額は実際の入出金と区別します。','small'));
-  const summary=el('div',undefined,'stats budget-totals');for(const [title,v] of [['収入予定',s.income],['支出予定',s.expense],['差引予定',s.balance],['参加者から集める必要額',s.required]]){const stat=el('div',undefined,'stat');stat.append(el('span',title),el('strong',yen(v)));summary.append(stat);}p.append(summary);
+  const summary=el('div',undefined,'stats budget-totals');for(const [title,v] of [['収入予定',s.income],['支出予定',s.expense],['差引予定',s.balance],['参加者から集める必要額',s.required]]){const stat=el('div',undefined,'stat');stat.append(el('span',title),el('strong',yen(v)));summary.append(stat);}p.append(summary);renderSpecial(p,c,button,yen);
   if(!c.budgetBook.ratesAvailable)p.append(el('p','参加者別の料金・部屋数／泊数計算はFirebase設定後に利用できます。現在の予算はそのまま編集できます。','notice'));
   if(rows.some(r=>r.kind==='feeAdult')&&rows.some(r=>['feeParent','feeCoach','feeOther'].includes(r.kind)))p.append(el('p','大人一括と役割別の参加費が両方あります。同じ人の参加費を二重に見込んでいないか確認してください。','budget-alert'));
   if(s.pending)p.append(el('p',s.pending+'項目が未入力です。合計は入力済み分の仮計算です。','budget-alert'));
@@ -65,14 +67,14 @@ export function createBudgetUI(ctx){
   const fees=el('details',undefined,'budget-section');fees.append(el('summary','人数・参加費の参考計算'));const counts=s.counts;fees.append(el('p','参加確定：団員'+counts.players+'人・保護者'+counts.parents+'人・コーチ'+counts.coaches+'人・その他'+counts.others+'人','small'));
   fees.append(el('p','共通費は参加確定人数で配分します。対象・交通費を指定した補助は他へ流用しません。参加費の参考額から請求は自動作成しません。','small'));
   const select=el('select');select.setAttribute('aria-label','参考参加費の切り上げ単位');for(const v of [1,10,100,500,1000]){const o=el('option',v+'円単位で切り上げ');o.value=v;o.selected=v===s.rounding;select.append(o);}const label=el('label','端数処理');label.append(select);fees.append(label,button('端数単位を保存',async()=>{await service.saveBudgetSettings(c.id,Number(select.value),c.budgetBook.settings.revision);await reload();message('端数単位を保存しました。');}));
-  for(const [key,title] of [['players','団員'],['parents','保護者'],['coaches','コーチ'],['others','その他']]){const v=s.suggested[key];fees.append(el('p',title+' 1人の参考額：'+(v.per===null?'人数未定':yen(v.per))+' ／ 丸めによる余り '+yen(Math.ceil(v.surplus))));}
+  const feeReference=budgetSummary(baseBudgetLines(c),c.participants,s.rounding),a=c.specialBook?.allocation;fees.append(el('p','参考参加費は通常予算が基準です。特別収支は確定した団員配分のみ反映します。請求額は変更しません。','small'));if(a?.confirmed&&counts.players){const v=feeReference.suggested.players;v.required=Math.max(0,v.required-a.members);v.per=Math.ceil(v.required/counts.players/s.rounding)*s.rounding;v.surplus=v.per*counts.players-v.required;}for(const [key,title] of [['players','団員'],['parents','保護者'],['coaches','コーチ'],['others','その他']]){const v=feeReference.suggested[key];fees.append(el('p',title+' 1人の参考額：'+(v.per===null?'人数未定':yen(v.per))+' ／ 丸めによる余り '+yen(Math.ceil(v.surplus))));}
   if(s.unallocated)fees.append(el('p','対象者が未登録の費用 '+yen(Math.ceil(s.unallocated))+'があります。人数・対象を確認してください。','budget-alert'));p.append(fees);return true;
  }
  function copyDialog(){const c=getCamp(),preview=draftPreview(allLines(c),c.budgetBook.drafts),candidates=preview.filter(x=>x.state!=='same');
   if(!candidates.length){message('すべての予算が決算下書きへコピー済みです。重複作成しません。');return;}
   edit('決算下書きへコピー（入出金は登録しません）',candidates.map(x=>fields(x.id,(x.state==='new'?'新規：':'基準予算を更新：')+x.row.title+' '+amountText(x.row,yen),'checkbox')),Object.fromEntries(candidates.map(x=>[x.id,x.state==='new'])),async d=>{const selected=candidates.filter(x=>d[x.id]);if(!selected.length)throw new Error('コピーする項目を選んでください');await service.copyBudget(c.id,selected);});
  }
- function settlement(p){const c=getCamp();if(!c.budgetBook?.available)return;const rows=comparison(c.budgetBook.drafts,c.ledger);const box=section(p,'予算と実績の比較');box.classList.add('settlement-comparison');
+ function settlement(p){const c=getCamp();renderSpecial(p,c,button,yen,true);if(!c.budgetBook?.available)return;const rows=comparison(c.budgetBook.drafts,c.ledger);const box=section(p,'予算と実績の比較');box.classList.add('settlement-comparison');
   box.append(el('p','予算はコピー時点の基準額です。実績は台帳の入金・支出から集計します。','small'),actions(button('予算から下書きを追加・更新',copyDialog),button('決算比較を印刷・PDF',()=>printBook('settlement'))));
   if(!rows.length)box.append(el('p','予算画面から「決算の下書きを作る」を押してください。','small'));
   for(const r of rows){const a=el('article',undefined,'budget-row');a.append(el('strong',r.title));const nums=el('div',undefined,'budget-compare-numbers');for(const [label,value] of [['予算',r.planned],['実績',r.actual],['差額',r.difference]]){const item=el('div');item.append(el('span',label),el('strong',value===null?'未入力':yen(value)));nums.append(item);}a.append(nums);
@@ -92,16 +94,16 @@ export function createBudgetUI(ctx){
   edit('既存の請求と参加費予算を紐づける',[fields('person','対象者','text',people.map(p=>[p.id,p.name])),fields('amount','請求総額（円・必須）','number')],{amount:draft.unit??''},async d=>{const person=people.find(p=>p.id===d.person);const old=c.ledger.charges?.[person.id];if(old?.budgetId&&old.budgetId!==draft.id)throw new Error('この請求は別の参加費予算に紐づいています。重複登録せず、元の参加費予算を確認してください。請求・入金は変更していません。');if(old&&old.amount!==d.amount&&!confirm(person.name+'さんの請求総額を'+yen(old.amount)+'から'+yen(d.amount)+'へ変更しますか？入金額は変わりません。'))throw new Error('請求は変更していません。');await service.finance(c.id,{id:operationId,type:'charge',revision:c.ledger.revision,participantId:person.id,name:person.name,household:person.familyUid||person.id,amount:d.amount,due:old?.due||'',budgetId:draft.id});});
  }
  function linkExisting(draft){const operationId=crypto.randomUUID(),c=getCamp();if(draft.kind.startsWith('fee')){linkCharges(draft);return;}
-  const xs=Object.entries(c.ledger.entries||{}).filter(([,x])=>!x.void&&x.kind===draft.kind&&!x.budgetId);if(!xs.length){message('紐づけ可能な未設定の記録がありません。新しい入出金は「実績を記録」から登録できます。');return;}
+  const specialEntries=new Set(Object.values(c.specialBook?.items||{}).flatMap(r=>r.entryIds||[]));const xs=Object.entries(c.ledger.entries||{}).filter(([id,x])=>!x.void&&x.kind===draft.kind&&!x.budgetId&&!specialEntries.has(id));if(!xs.length){message('紐づけ可能な未設定の記録がありません。新しい入出金は「実績を記録」から登録できます。');return;}
   edit('台帳の金額を変えずに予算と紐づける',[fields('entryId','既存の記録','text',xs.map(([id,x])=>[id,(x.date||'')+' '+x.category+' '+yen(x.amount)]))],{},d=>service.finance(c.id,{id:operationId,type:'linkBudget',revision:c.ledger.revision,entryId:d.entryId,budgetId:draft.id}));
  }
  function printBook(type){const c=getCamp(),paper=el('section',undefined,'budget-print');paper.append(el('h1',c.name+' '+(type==='budget'?'予算書':'決算比較書')),el('p',c.start+'〜'+c.end+' ／ '+c.place));
   const table=el('table'),head=el('tr');for(const h of type==='budget'?['区分','費目','単価','数量','予定額']:['区分','費目','予算額','実績額','差額'])head.append(el('th',h));const thead=el('thead');thead.append(head);table.append(thead);const tbody=el('tbody');
   const rows=type==='budget'?allLines(c).filter(r=>!r.archived):comparison(c.budgetBook.drafts,c.ledger);
-  for(const r of rows){const tr=el('tr');const values=type==='budget'?[kinds[r.kind],r.title,r.unit===null?'':yen(r.unit),rateText(r),lineTotal(r)===null?'':yen(lineTotal(r))]:[kinds[r.kind],r.title,r.planned===null?'':yen(r.planned),r.actual===null?'':yen(r.actual),r.difference===null?'':yen(r.difference)];for(const v of values)tr.append(el('td',String(v)));tbody.append(tr);}table.append(tbody);paper.append(table);
-  const s=budgetSummary(allLines(c),c.participants,c.budgetBook.settings.rounding);paper.append(el('p','参加確定：子ども'+s.counts.players+'人・大人'+s.counts.adults+'人 ／ 収入予定 '+yen(s.income)+' ／ 支出予定 '+yen(s.expense)+' ／ 差引予定 '+yen(s.balance)));
+  for(const r of rows){const tr=el('tr');const values=type==='budget'?[kinds[r.kind],r.title,r.unit===null?'':yen(r.unit),rateText(r),lineTotal(r)===null?'':yen(lineTotal(r))]:[kinds[r.kind],r.title,r.planned===null?'':yen(r.planned),r.actual===null?'':yen(r.actual),r.difference===null?'':yen(r.difference)];for(const v of values)tr.append(el('td',String(v)));tbody.append(tr);}table.append(tbody);if(rows.length)paper.append(table);else paper.append(el('p',type==='budget'?'通常予算の明細は未登録です。':'通常費目の決算比較は未登録です。'));
+  const s=budgetSummary(effectiveBudgetLines(c),c.participants,c.budgetBook.settings.rounding);paper.append(el('p','参加確定：子ども'+s.counts.players+'人・大人'+s.counts.adults+'人 ／ 収入予定 '+yen(s.income)+' ／ 支出予定 '+yen(s.expense)+' ／ 差引予定 '+yen(s.balance)));
   if(type==='budget'&&s.pending)paper.append(el('p','未入力 '+s.pending+'項目。合計は入力済み分の仮計算です。'));
-  if(type==='settlement'){const report=c.report||{};paper.append(el('p','実績総額：収入 '+yen(report.income)+' ／ 支出 '+yen(report.expense)+' ／ 差引 '+yen(report.balance)),el('p','空欄は実績未入力。比較対象外・未紐づけの取引も実績総額に含みます。記録途中の費目は台帳を確認してください。'));}
+  appendSpecialPrint(paper,c,yen,type==='settlement');if(type==='settlement'){const report=specialReport(c.report,c.specialBook,c.ledger)||{};paper.append(el('p','実績総額：収入 '+yen(report.income)+' ／ 支出 '+yen(report.expense)+' ／ 差引 '+yen(report.balance)),el('p','空欄は実績未入力。比較対象外・未紐づけの取引も実績総額に含みます。記録途中の費目は台帳を確認してください。'));}
   document.querySelectorAll('.budget-print').forEach(n=>n.remove());document.body.append(paper);document.body.classList.add('budget-printing');const cleanup=()=>{paper.remove();document.body.classList.remove('budget-printing');};window.addEventListener('afterprint',cleanup,{once:true});try{window.print();}catch(e){cleanup();throw e;}
  }
  return {plan,settlement};
