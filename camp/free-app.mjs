@@ -1,8 +1,8 @@
 import {specialReport,specialPlan,specialBudgetRows} from './special-model.mjs';
-import {baseBudgetLines} from './special-ui.mjs';
-import {createBudgetUI} from './budget-ui.mjs';
+import {baseBudgetLines} from './special-ui.mjs?v=20261023-9';
+import {createBudgetUI} from './budget-ui.mjs?v=20261023-9';
 import {entries,totals,estimate,mapURL,amount,check} from './free-model.mjs';
-import {createService} from './free-service.mjs';
+import {createService} from './free-service.mjs?v=20261023-9';
 const $=id=>document.getElementById(id), yen=n=>new Intl.NumberFormat('ja-JP',{style:'currency',currency:'JPY'}).format(n||0), date=()=>new Date().toLocaleDateString('sv-SE',{timeZone:'Asia/Tokyo'});
 const labels={yes:'参加',no:'不参加',pending:'未回答',player:'選手',coach:'コーチ',parent:'保護者',other:'その他',payment:'入金',refund:'返金',income:'その他収入',expense:'支出'};
 let editorDirty=false;
