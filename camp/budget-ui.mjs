@@ -1,4 +1,4 @@
-import {renderSpecial,appendSpecialPrint,baseBudgetLines,effectiveBudgetLines} from './special-ui.mjs';
+import {renderSpecial,appendSpecialPrint,baseBudgetLines,effectiveBudgetLines} from './special-ui.mjs?v=20261023-9';
 import {specialReport} from './special-model.mjs';
 import {kinds,targets,quantityModes,rateBases,feeTargets,matchesFee,categories,peopleCounts,validateLine,legacyLine,lineTotal,budgetSummary,draftPreview,comparison,templates} from './budget-model.mjs';
 const el=(tag,text,cls)=>{const n=document.createElement(tag);if(text!==undefined)n.textContent=text;if(cls)n.className=cls;return n;};

@@ -1,7 +1,7 @@
-import {createSpecialService} from './special-service.mjs';
-import {createService} from './free-service.mjs';
+import {createSpecialService} from './special-service.mjs?v=20261023-9';
+import {createService} from './free-service.mjs?v=20261023-9';
 import {specialStates,fundingSources,owners,uses,detailFields,validateSpecial,plannedAmount,specialPlan,specialActual,publicItems,budgetAnchor} from './special-model.mjs';
-import {baseBudgetLines,renderSpecial} from './special-ui.mjs';
+import {baseBudgetLines,renderSpecial} from './special-ui.mjs?v=20261023-9';
 const sharedMode=document.body.dataset.shared==='true';
 const $=id=>document.getElementById(id),el=(tag,text)=>{const n=document.createElement(tag);if(text!==undefined)n.textContent=text;return n;},yen=n=>new Intl.NumberFormat('ja-JP',{style:'currency',currency:'JPY'}).format(n||0);
 const id=location.hash.slice(1),valid=/^[\da-f]{8}-[\da-f]{4}-4[\da-f]{3}-[89ab][\da-f]{3}-[\da-f]{12}$/.test(id);if(valid)$('back').href='camps.html#'+id;
