@@ -50,22 +50,33 @@ service cloud.firestore {
    // 旧budgetsと台帳をそのまま残す、予算書の追加領域。
    function budgetFields(d) {
     return str(d.title,150) && d.title.size()>0 && str(d.notes,1000)
-     && d.kind in ['expense','income','feeChild','feeAdult']
+     && d.kind in ['expense','income','feeChild','feeAdult','feeParent','feeCoach','feeOther']
      && d.category in ['hotel','meal','leisure','transport','insurance','supplies','reserve','support','other','participation']
-     && d.target in ['all','players','adults','transport']
-     && d.quantityMode in ['manual','players','adults','playersOvernight','adultsOvernight','all']
+     && d.target in ['all','players','adults','parents','coaches','others','transport']
+     && d.quantityMode in ['manual','players','adults','parents','coaches','others','playersOvernight','adultsOvernight','parentsOvernight','coachesOvernight','othersOvernight','all']
      && (d.unit==null || money(d.unit)) && (d.quantity==null || (d.quantity is int && d.quantity>=0 && d.quantity<=10000))
-     && (d.unit==null || d.quantity==null || d.unit*d.quantity<=100000000) && d.archived is bool
+     && d.get('basis','person') in ['person','room','fixed'] && d.get('multiplier',1) is int && d.get('multiplier',1)>=1 && d.get('multiplier',1)<=100
+     && (d.get('basis','person')=='person' || d.quantityMode=='manual')
+     && (d.unit==null || d.quantity==null || d.unit*d.quantity*d.get('multiplier',1)<=100000000) && d.archived is bool
      && (d.kind!='expense' || d.target!='transport')
      && (d.kind!='feeChild' || (d.target=='players' && d.category=='participation'))
      && (d.kind!='feeAdult' || (d.target=='adults' && d.category=='participation'))
-     && (d.kind in ['feeChild','feeAdult'] || d.category!='participation');
+     && (d.kind!='feeParent' || (d.target=='parents' && d.category=='participation'))
+     && (d.kind!='feeCoach' || (d.target=='coaches' && d.category=='participation'))
+     && (d.kind!='feeOther' || (d.target=='others' && d.category=='participation'))
+     && (!(d.kind in ['feeChild','feeAdult','feeParent','feeCoach','feeOther']) || (d.get('basis','person')=='person' && d.get('multiplier',1)==1))
+     && (d.kind in ['feeChild','feeAdult','feeParent','feeCoach','feeOther'] || d.category!='participation');
    }
    match /budgetLines/{b} {
     allow read: if member(c);
     allow create,update: if finance(c) && revision() && budgetFields(request.resource.data)
-     && request.resource.data.keys().hasOnly(['title','kind','category','target','quantityMode','unit','quantity','notes','archived','revision','updatedAt']);
+     && request.resource.data.keys().hasOnly(['title','kind','category','target','quantityMode','unit','quantity','notes','archived','basis','multiplier','revision','updatedAt']);
     allow delete: if false;
+   }
+   // 読み取り可否だけで料金拡張ルールを検知する予約領域。書込みは許可しない。
+   match /private/budgetRates {
+    allow get: if member(c);
+    allow list,create,update,delete: if false;
    }
    match /private/budgetSettings {
     allow read: if member(c);
@@ -77,13 +88,13 @@ service cloud.firestore {
    match /settlementDrafts/{b} {
     function originMatches(d) {
      let src=get(/databases/$(database)/documents/campShared/$(c)/$(d.sourceCollection)/$(d.sourceId)).data;
-     return src.revision==d.sourceRevision && src.archived==false && src.title==d.title && src.unit==d.unit && src.quantity==d.quantity && src.notes==d.notes
+     return src.revision==d.sourceRevision && src.archived==false && src.title==d.title && src.unit==d.unit && src.quantity==d.quantity && src.notes==d.notes && src.get('basis','person')==d.get('basis','person') && src.get('multiplier',1)==d.get('multiplier',1)
       && ((d.sourceCollection=='budgets' && d.kind=='expense' && d.category=='other' && d.target=='all' && d.quantityMode=='manual')
        || (d.sourceCollection=='budgetLines' && src.kind==d.kind && src.category==d.category && src.target==d.target && src.quantityMode==d.quantityMode));
     }
     allow read: if member(c);
     allow create,update: if finance(c) && revision() && budgetFields(request.resource.data)
-     && request.resource.data.keys().hasOnly(['title','kind','category','target','quantityMode','unit','quantity','notes','archived','sourceId','sourceCollection','sourceRevision','zeroConfirmed','confirmedLedgerRevision','revision','updatedAt'])
+     && request.resource.data.keys().hasOnly(['title','kind','category','target','quantityMode','unit','quantity','notes','archived','sourceId','sourceCollection','sourceRevision','zeroConfirmed','confirmedLedgerRevision','basis','multiplier','revision','updatedAt'])
      && request.resource.data.sourceCollection in ['budgets','budgetLines'] && str(request.resource.data.sourceId,150)
      && b==((request.resource.data.sourceCollection=='budgets'?'legacy_':'line_')+request.resource.data.sourceId)
      && request.resource.data.get('confirmedLedgerRevision',-1) is int && request.resource.data.get('confirmedLedgerRevision',-1)>=-1

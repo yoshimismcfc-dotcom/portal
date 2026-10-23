@@ -1,4 +1,4 @@
-import {snapshot, sourceKey, validateLine} from './budget-model.mjs';
+import {snapshot, sourceKey, validateLine, feeTargets, matchesFee} from './budget-model.mjs';
 import {applyLedger, publicReport} from './free-model.mjs';
 export function createService(db,uid,isAdmin) {
  const root=db.collection('campShared'), stamp=()=>firebase.firestore.FieldValue.serverTimestamp();
@@ -16,7 +16,9 @@ export function createService(db,uid,isAdmin) {
   async loadBudget(id){
    try{const settings=await read(ref(id).collection('private').doc('budgetSettings'));
     const [lines,drafts]=await Promise.all([rows(ref(id).collection('budgetLines')),rows(ref(id).collection('settlementDrafts'))]);
-    return {available:true,settings:settings||{revision:0,rounding:100},lines,drafts};
+    let ratesAvailable=false;
+    try{await read(ref(id).collection('private').doc('budgetRates'));ratesAvailable=true;}catch(e){if(e.code!=='permission-denied')throw e;}
+    return {available:true,ratesAvailable,settings:settings||{revision:0,rounding:100},lines,drafts};
    }catch(e){if(e.code==='permission-denied')return {available:false,lines:[],drafts:[],settings:{revision:0,rounding:100}};throw e;}
   },
   async saveBudget(id,data){const clean=validateLine(data);await this.save(id,'budgetLines',{...clean,id:data.id,revision:data.revision||0});},
@@ -46,11 +48,12 @@ export function createService(db,uid,isAdmin) {
    await db.runTransaction(async tx=>{const s=await tx.get(r),revision=s.exists?s.data().revision:0;if(revision!==(body.revision||0))throw new Error('別の担当者が更新しました。最新情報を取得してください');tx.set(r,{...body,revision:revision+1,updatedAt:stamp()});});
   },
   async respond(id,p,response,overnight){await db.runTransaction(async tx=>{const r=ref(id).collection('participants').doc(p.id),s=await tx.get(r);if(!s.exists||s.data().revision!==p.revision)throw new Error('参加情報が更新されました。最新情報を取得してください');tx.update(r,{response,overnight,revision:p.revision+1,updatedAt:stamp()});});},
-  async finance(id,op){await db.runTransaction(async tx=>{const r=ref(id).collection('private').doc('ledger'),s=await tx.get(r);const old=s.exists?s.data():null;
+  async finance(id,op){await db.runTransaction(async tx=>{const r=ref(id).collection('private').doc('ledger'),s=await tx.get(r);const old=s.exists?s.data():null;if(old?.history?.[op.id]){applyLedger(old,op,uid,new Date().toISOString());return;}
    if(op.budgetId){const d=await tx.get(ref(id).collection('settlementDrafts').doc(op.budgetId));
     if(!d.exists)throw new Error('決算下書きがありません。予算からコピーしてください');const draft=d.data();
     const kind=op.type==='linkBudget'?old?.entries?.[op.entryId]?.kind:op.kind;
-    if(op.type==='charge'?!['feeChild','feeAdult'].includes(draft.kind):draft.kind!==kind)throw new Error('予算と実績の収支区分が一致しません');
+    if(op.type==='charge'?!Object.hasOwn(feeTargets,draft.kind):draft.kind!==kind)throw new Error('予算と実績の収支区分が一致しません');
+    if(op.type==='charge'){const person=await tx.get(ref(id).collection('participants').doc(op.participantId));if(!person.exists||person.data().response!=='yes'||!matchesFee(person.data(),draft.kind))throw new Error('参加費の対象者・参加区分が変更されました。最新情報を確認してください');}
    }
    const next=applyLedger(old,op,uid,new Date().toISOString());if(old?.history?.[op.id])return;
    tx.set(r,{...next,updatedAt:stamp()});tx.set(ref(id).collection('public').doc('finance'),{...publicReport(next),updatedAt:stamp()});

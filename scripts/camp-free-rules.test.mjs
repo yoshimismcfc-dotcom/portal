@@ -46,5 +46,22 @@ try{
  await s.saveBudgetSettings(cid,100,0);await assert.rejects(pa.saveBudgetSettings(cid,500,0),/別の担当/);assert.equal((await pa.load(cid)).budgetBook.settings.rounding,100);
  const current=(await s.load(cid)).ledger;await s.finance(cid,{id:'hotelActual',type:'entry',kind:'expense',amount:1000,reference:'actual-hotel',date:'2027-03-13',budgetId:'line_hotelChild',revision:current.revision,category:'宿泊費'});
  loaded=await pa.load(cid);assert.equal(loaded.report.expense,1000);assert.equal(loaded.budgetBook.drafts.length,1);assert.equal((await s.load('22222222-2222-4222-8222-222222222222')).budgetBook.lines.length,0);pass('端数設定の競合と合宿別分離・実支出だけ台帳へ集計');
+ // 役割別参加費・部屋料金・泊数の保存と別端末読込。
+ assert.equal(loaded.budgetBook.ratesAvailable,true);
+ const room={...line,id:'adultRoom',title:'大人部屋A',unit:18000,quantity:2,quantityMode:'manual',target:'adults',basis:'room',multiplier:2};await s.saveBudget(cid,room);
+ const coachFee={...line,id:'coachFee',title:'コーチ参加費',unit:10000,quantity:1,quantityMode:'coaches',target:'coaches',kind:'feeCoach',category:'participation',basis:'person',multiplier:1};await s.saveBudget(cid,coachFee);
+ loaded=await pa.load(cid);const roomSaved={...loaded.budgetBook.lines.find(r=>r.id==='adultRoom'),source:'budgetLines'},feeSaved={...loaded.budgetBook.lines.find(r=>r.id==='coachFee'),source:'budgetLines'};assert.equal(roomSaved.multiplier,2);assert.equal(roomSaved.basis,'room');await s.copyBudget(cid,[{row:roomSaved,old:null},{row:feeSaved,old:null}]);
+ loaded=await pa.load(cid);assert.equal(loaded.budgetBook.drafts.find(r=>r.id==='line_adultRoom').multiplier,2);await s.copyBudget(cid,[{row:roomSaved,old:null},{row:feeSaved,old:null}]);
+ const raw={...Object.fromEntries(Object.entries(room).filter(([k])=>k!=='id')),revision:1,updatedAt:firebase.firestore.FieldValue.serverTimestamp()};
+ for(const bad of [{multiplier:0},{multiplier:101},{multiplier:1.5},{quantityMode:'adults'},{unit:100000000}])await assertFails(admin.doc('campShared/'+cid+'/budgetLines/badRate').set({...raw,...bad}));
+ await assertFails(admin.doc('campShared/'+cid+'/private/budgetRates').set({enabled:true}));
+ await s.save(cid,'participants',{id:'coachRate',name:'検証コーチ',grade:'',kind:'coach',familyUid:'',response:'yes',overnight:true,revision:0});
+ const rev=(await s.load(cid)).ledger.revision;
+ await assert.rejects(s.finance(cid,{id:'wrongRole',type:'charge',revision:rev,participantId:'p1',name:'選手',amount:10000,budgetId:'line_coachFee'}),/対象者/);
+ const coachOp={id:'coachCharge',type:'charge',revision:rev,participantId:'coachRate',name:'検証コーチ',amount:10000,budgetId:'line_coachFee'};await s.finance(cid,coachOp);await assert.rejects(s.finance(cid,{...coachOp,amount:10001}),/同じ操作番号/);
+ assert.equal((await pa.load(cid)).ledger.charges.coachRate.amount,10000);
+ // 後続の既存ブラウザ検査は元の2人で行う。
+ await pa.respond(cid,(await pa.load(cid)).participants.find(p=>p.id==='coachRate'),'no',true);await s.finance(cid,coachOp);assert.equal((await pa.load(cid)).ledger.revision,rev+1);
+ pass('役割別料金・部屋数と泊数の別端末保存・下書きコピー・不正料金と対象外請求を拒否');
  console.log('Rules checks: '+ok.length+' passed');
 }finally{await env.cleanup();}
