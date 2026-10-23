@@ -47,6 +47,24 @@ service cloud.firestore {
     && str(request.resource.data.itemId,80) && (request.resource.data.itemId=='allocation' || request.resource.data.after.public.id==request.resource.data.itemId);
    allow update,delete: if false;
   }
+  match /campShared/{c}/specialItems/{i} {
+   allow read: if member(c);
+   allow create,update: if member(c) && revision() && request.resource.data.keys().hasOnly(['public','details','revision','actor','lastOperation','signature','updatedAt'])
+    && str(request.resource.data.actor,128) && str(request.resource.data.lastOperation,100) && str(request.resource.data.signature,60000)
+    && (resource!=null || !exists(/databases/$(database)/documents/campShared/$(c)/specialBook/current) || !(i in get(/databases/$(database)/documents/campShared/$(c)/specialBook/current).data.get('items',{}))) && specialPublic(request.resource.data.public) && request.resource.data.public.id==i && request.resource.data.public.revision==request.resource.data.revision
+    && specialDetails(request.resource.data.details) && request.resource.data.details.values().toSet()==[''].toSet()
+    && (resource==null || request.resource.data.public.kind==resource.data.public.kind)
+    && getAfter(/databases/$(database)/documents/campShared/$(c)/specialHistory/$(i+'__'+string(request.resource.data.revision))).data.after==request.resource.data
+    && getAfter(/databases/$(database)/documents/campShared/$(c)/specialHistory/$(i+'__'+string(request.resource.data.revision))).data.before==(resource==null?null:resource.data)
+    && getAfter(/databases/$(database)/documents/campShared/$(c)/specialBook/current).data.items[i]==request.resource.data.public;
+   allow delete: if false;
+  }
+  match /campShared/{c}/specialHistory/{h} {
+   allow read: if member(c);
+   allow create: if member(c) && request.resource.data.keys().hasOnly(['itemId','before','after','actor','updatedAt']) && str(request.resource.data.actor,128) && request.resource.data.updatedAt==request.time
+    && str(request.resource.data.itemId,80) && (request.resource.data.itemId=='allocation' ? (getAfter(/databases/$(database)/documents/campShared/$(c)/specialBook/current).data.historyId==h && request.resource.data.after==getAfter(/databases/$(database)/documents/campShared/$(c)/specialBook/current).data.allocation && request.resource.data.before==get(/databases/$(database)/documents/campShared/$(c)/specialBook/current).data.allocation) : (request.resource.data.after==getAfter(/databases/$(database)/documents/campShared/$(c)/specialItems/$(request.resource.data.itemId)).data && request.resource.data.before==(exists(/databases/$(database)/documents/campShared/$(c)/specialItems/$(request.resource.data.itemId))?get(/databases/$(database)/documents/campShared/$(c)/specialItems/$(request.resource.data.itemId)).data:null)));
+   allow update,delete: if false;
+  }
   match /campShared/{c} {
    function meta() { let d=request.resource.data;
     return d.keys().hasOnly(['name','start','end','place','meeting','fee','status','notes','archived','revision','updatedAt'])
@@ -67,8 +85,14 @@ service cloud.firestore {
       && getAfter(/databases/$(database)/documents/campSpecialPrivate/$(c)/history/$(d.historyId)).data.updatedAt==request.time
       && (d.lastItemId=='' ? (getAfter(/databases/$(database)/documents/campSpecialPrivate/$(c)/history/$(d.historyId)).data.itemId=='allocation' && getAfter(/databases/$(database)/documents/campSpecialPrivate/$(c)/history/$(d.historyId)).data.before==resource.data.allocation && getAfter(/databases/$(database)/documents/campSpecialPrivate/$(c)/history/$(d.historyId)).data.after==d.allocation) : getAfter(/databases/$(database)/documents/campSpecialPrivate/$(c)/history/$(d.historyId)).data.after.public==d.items[d.lastItemId]);
     }
+    function validSharedBook() { let d=request.resource.data;let previous=resource==null?{}:resource.data.items;
+     return d.keys().hasOnly(['items','allocation','revision','lastItemId','historyId','updatedAt']) && d.items is map && d.items.size()<=100 && specialAllocation(d.allocation) && str(d.lastItemId,80) && str(d.historyId,150)
+      && (d.lastItemId=='' ? d.items==previous : (d.items.diff(previous).affectedKeys().hasOnly([d.lastItemId]) && specialPublic(d.items[d.lastItemId]) && getAfter(/databases/$(database)/documents/campShared/$(c)/specialItems/$(d.lastItemId)).data.public==d.items[d.lastItemId]))
+      && getAfter(/databases/$(database)/documents/campShared/$(c)/specialHistory/$(d.historyId)).data.updatedAt==request.time
+      && (d.lastItemId=='' ? (getAfter(/databases/$(database)/documents/campShared/$(c)/specialHistory/$(d.historyId)).data.itemId=='allocation' && getAfter(/databases/$(database)/documents/campShared/$(c)/specialHistory/$(d.historyId)).data.before==resource.data.allocation && getAfter(/databases/$(database)/documents/campShared/$(c)/specialHistory/$(d.historyId)).data.after==d.allocation) : getAfter(/databases/$(database)/documents/campShared/$(c)/specialHistory/$(d.historyId)).data.after.public==d.items[d.lastItemId]);
+    }
     allow get: if member(c);allow list: if false;
-    allow create,update: if specialAdmin(c) && revision() && validBook();allow delete: if false;
+    allow create,update: if revision() && ((specialAdmin(c) && validBook()) || (member(c) && validSharedBook()));allow delete: if false;
    }
    match /participants/{p} {
     function valid() { let d=request.resource.data;

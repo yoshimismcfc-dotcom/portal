@@ -1,28 +1,29 @@
 import {validateSpecial,validateDetails,plannedAmount,specialPlan,validateAllocation,budgetAnchor,springDefaults} from './special-model.mjs';
 import {applyLedger,publicReport,check} from './free-model.mjs';
-export function createSpecialService(db,actor){
- const shared=id=>db.doc('campShared/'+id+'/specialBook/current'),privateRoot=id=>db.collection('campSpecialPrivate').doc(id),stamp=()=>firebase.firestore.FieldValue.serverTimestamp();
+export function createSpecialService(db,actor,{shared:sharedMode=false}={}){
+ const shared=id=>db.doc('campShared/'+id+'/specialBook/current'),privateRoot=id=>db.collection(sharedMode?'campShared':'campSpecialPrivate').doc(id),stamp=()=>firebase.firestore.FieldValue.serverTimestamp();
  const read=async ref=>{const s=await ref.get({source:'server'});return s.exists?{id:s.id,...s.data()}:null;};
  const api={
   async load(id){try{return {available:true,...(await read(shared(id))||{revision:0,items:{},allocation:{members:0,team:0,leisure:0,reserve:0,confirmed:false}})};}catch(e){if(e.code==='permission-denied')return {available:false,items:{},revision:0};throw e;}},
-  async canManage(id){if(!actor)return false;try{const s=await read(db.doc('campSpecialAdmins/'+actor));return s?.enabled===true&&s.camps?.[id]===true;}catch(e){if(e.code==='permission-denied')return false;throw e;}},
-  async details(id){return (await privateRoot(id).collection('items').get({source:'server'})).docs.map(s=>({id:s.id,...s.data()}));},
-  async history(id){return (await privateRoot(id).collection('history').orderBy('updatedAt','desc').limit(100).get({source:'server'})).docs.map(s=>({id:s.id,...s.data()}));},
+  async canManage(id){if(sharedMode)return !!(await read(db.doc('campShared/'+id)));if(!actor)return false;try{const s=await read(db.doc('campSpecialAdmins/'+actor));return s?.enabled===true&&s.camps?.[id]===true;}catch(e){if(e.code==='permission-denied')return false;throw e;}},
+  async details(id){return (await privateRoot(id).collection(sharedMode?'specialItems':'items').get({source:'server'})).docs.map(s=>({id:s.id,...s.data()}));},
+  async history(id){return (await privateRoot(id).collection(sharedMode?'specialHistory':'history').orderBy('updatedAt','desc').limit(100).get({source:'server'})).docs.map(s=>({id:s.id,...s.data()}));},
   async mutate(id,itemId,revision,operation,change){
    check(/^[\w-]{1,80}$/.test(itemId),'明細の識別子を確認してください');
-   const signature=JSON.stringify(operation);
+   const rawSignature=JSON.stringify(operation);const signature=sharedMode?Array.from(new Uint8Array(await crypto.subtle.digest('SHA-256',new TextEncoder().encode(rawSignature))),n=>n.toString(16).padStart(2,'0')).join(''):rawSignature;
    await db.runTransaction(async tx=>{
-    const itemRef=privateRoot(id).collection('items').doc(itemId),itemSnap=await tx.get(itemRef),summarySnap=await tx.get(shared(id));const old=itemSnap.exists?itemSnap.data():null,book=summarySnap.exists?summarySnap.data():{revision:0,items:{},allocation:{members:0,team:0,leisure:0,reserve:0,confirmed:false}};
+    const itemRef=privateRoot(id).collection(sharedMode?'specialItems':'items').doc(itemId),itemSnap=await tx.get(itemRef),summarySnap=await tx.get(shared(id));const old=itemSnap.exists?itemSnap.data():null,book=summarySnap.exists?summarySnap.data():{revision:0,items:{},allocation:{members:0,team:0,leisure:0,reserve:0,confirmed:false}};
+    if(sharedMode)check(old||!book.items[itemId],'この明細は非公開記録に紐づくため共有画面では編集できません');
     if(old?.lastOperation===operation.id){check(old.signature===signature,'再試行時の内容が異なります');return;}
     check((old?.revision||0)===revision,'別の担当者が明細を変更しました。最新情報を取得してください');
     const next=await change({tx,old,book}),clean=validateSpecial(next.public),version=revision+1;check(!old||old.public.kind===clean.kind,'登録後の収支区分は変更できません');
-    const pub={...clean,id:itemId,revision:version};const body={public:pub,details:validateDetails(next.details),revision:version,actor,lastOperation:operation.id,signature,updatedAt:stamp()};
+    const pub={...clean,id:itemId,revision:version};const body={public:pub,details:validateDetails(sharedMode?{}:next.details),revision:version,actor,lastOperation:operation.id,signature,updatedAt:stamp()};
     const items={...book.items,[itemId]:pub};check(Object.keys(items).length<=100,'特別明細は100件以内にしてください');
-    tx.set(itemRef,body);tx.set(privateRoot(id).collection('history').doc(itemId+'__'+version),{itemId,before:old,after:body,actor,updatedAt:stamp()});
+    tx.set(itemRef,body);tx.set(privateRoot(id).collection(sharedMode?'specialHistory':'history').doc(itemId+'__'+version),{itemId,before:old,after:body,actor,updatedAt:stamp()});
     tx.set(shared(id),{items,allocation:{...book.allocation,confirmed:false},revision:book.revision+1,lastItemId:itemId,historyId:itemId+'__'+version,updatedAt:stamp()});
    });
   },
-  async save(id,itemId,revision,data,details,anchor,operationId){const clean=validateSpecial(data);return this.mutate(id,itemId,revision,{id:operationId,type:'save',clean,details,anchor:anchor||null},async({tx,old,book})=>{
+  async save(id,itemId,revision,data,details,anchor,operationId){if(sharedMode)check(Object.values(details||{}).every(v=>!v),'共有画面には制度名・対象者・個人情報を保存できません');const clean=validateSpecial(data);return this.mutate(id,itemId,revision,{id:operationId,type:'save',clean,details,anchor:anchor||null},async({tx,old,book})=>{
    // 実績の参照・適用額は編集フォームでは変更しない。
    clean.entryIds=old?.public.entryIds||[];clean.discountActual=old?.public.discountActual||null;
    if(clean.flow==='discount'&&clean.includeBudget&&clean.status!=='cancelled'){
@@ -42,7 +43,7 @@ export function createSpecialService(db,actor){
    const p=old.public;check(p.status!=='cancelled'&&p.flow==='cash'&&p.owner!=='unknown'&&p.ownershipVerified&&p.eligibilityVerified&&(p.owner!=='personal'||p.kind==='aid'&&p.consentVerified)&&(p.kind!=='expense'||p.funding!=='unknown'),'資格・団体会計への帰属・了承を確認してください');
    check(Number.isSafeInteger(amount)&&amount>0&&amount<=100000000,'実績金額は1円〜1億円で入力してください');check(/^\d{4}-\d{2}-\d{2}$/.test(date)&&Number.isFinite(Date.parse(date+'T00:00:00Z'))&&new Date(date+'T00:00:00Z').toISOString().slice(0,10)===date,'実際の日付を入力してください');
    const ledgerRef=db.doc('campShared/'+id+'/private/ledger'),s=await tx.get(ledgerRef),ledger=s.exists?s.data():null;
-   const op={id:operationId,type:'entry',revision:ledger?.revision||0,kind:p.kind==='expense'?'expense':'income',amount,date,category:p.kind==='expense'?'特別支出':'特別補助',reference:operationId,note:'特別収支から記録',payer:p.kind==='expense'&&p.funding==='individual'?'個人立替（詳細は管理者記録）':'',settled:false};
+   const op={id:operationId,type:'entry',revision:ledger?.revision||0,kind:p.kind==='expense'?'expense':'income',amount,date,category:p.kind==='expense'?'特別支出':'特別補助',reference:operationId,note:'特別収支から記録',payer:p.kind==='expense'&&p.funding==='individual'?'個人立替':'',settled:false};
    const next=applyLedger(ledger,op,'special-admin',new Date().toISOString());
    // すべての読み取りを終えてから書く。
    tx.set(ledgerRef,{...next,updatedAt:stamp()});tx.set(db.doc('campShared/'+id+'/public/finance'),{...publicReport(next),updatedAt:stamp()});
@@ -60,8 +61,8 @@ export function createSpecialService(db,actor){
   async clearDiscount(id,row,evidence,operationId){check(typeof evidence==='string'&&evidence.trim(),'値引き実績を取り消す理由を入力してください');return this.mutate(id,row.id,row.revision,{id:operationId,type:'clearDiscount',evidence},async({old})=>{check(old.public.discountActual,'値引き実績がありません');return {public:{...old.public,discountActual:null,status:old.public.status==='cancelled'?'cancelled':'confirmed'},details:{...old.details,verification:'値引き実績取消：'+evidence}};});},
   async seedSpring(id,camp){const actual=await read(db.doc('campShared/'+id));check(actual&&actual.name===camp.name&&actual.start===camp.start&&actual.end===camp.end,'合宿の基本情報が更新されています。最新情報を取得してください');check(camp.start==='2027-03-13'&&camp.end==='2027-03-14'&&camp.name.includes('春'),'春合宿の日程・名称を確認してください');
    const normal=await Promise.all(['budgets','budgetLines'].map(name=>db.collection('campShared').doc(id).collection(name).get({source:'server'})));const ordinary=normal.flatMap(s=>s.docs.map(d=>d.data()));
-   const present=await Promise.all(springDefaults.map(r=>read(privateRoot(id).collection('items').doc(r.id))));const missing=springDefaults.filter((r,index)=>!present[index]);for(const r of missing)check(!ordinary.some(x=>!x.archived&&x.title===r.title&&x.unit*x.quantity*(x.multiplier??1)===plannedAmount(r)),'通常予算に同名・同額の明細があります。重複登録を避けるため、既存明細を確認してください');for(const r of missing)await this.save(id,r.id,0,r,{verification:'初期試算。資格・帰属・支払者・受給者は要確認。'},null,'seed-'+r.id);
+   const present=await Promise.all(springDefaults.map(r=>read(privateRoot(id).collection(sharedMode?'specialItems':'items').doc(r.id))));const missing=springDefaults.filter((r,index)=>!present[index]);for(const r of missing)check(!ordinary.some(x=>!x.archived&&x.title===r.title&&x.unit*x.quantity*(x.multiplier??1)===plannedAmount(r)),'通常予算に同名・同額の明細があります。重複登録を避けるため、既存明細を確認してください');for(const r of missing)await this.save(id,r.id,0,r,sharedMode?{}:{verification:'初期試算。資格・帰属・支払者・受給者は要確認。'},null,'seed-'+r.id);
   },
-  async allocate(id,data,base,operationId){await db.runTransaction(async tx=>{const ref=shared(id),s=await tx.get(ref);check(s.exists,'特別明細を先に登録してください');const book=s.data(),net=specialPlan(book,base).net,allocation=validateAllocation(data,net);check(data.basisRevision===book.revision,'特別収支が更新されました。配分を確認し直してください');const history=privateRoot(id).collection('history').doc('allocation__'+operationId),previous=await tx.get(history);if(previous.exists)return;tx.set(history,{itemId:'allocation',before:book.allocation,after:allocation,actor,updatedAt:stamp()});tx.set(ref,{...book,allocation,revision:book.revision+1,lastItemId:'',historyId:'allocation__'+operationId,updatedAt:stamp()});});}
+  async allocate(id,data,base,operationId){await db.runTransaction(async tx=>{const ref=shared(id),s=await tx.get(ref);check(s.exists,'特別明細を先に登録してください');const book=s.data(),net=specialPlan(book,base).net,allocation=validateAllocation(data,net);check(data.basisRevision===book.revision,'特別収支が更新されました。配分を確認し直してください');const history=privateRoot(id).collection(sharedMode?'specialHistory':'history').doc('allocation__'+operationId),previous=await tx.get(history);if(previous.exists)return;tx.set(history,{itemId:'allocation',before:book.allocation,after:allocation,actor,updatedAt:stamp()});tx.set(ref,{...book,allocation,revision:book.revision+1,lastItemId:'',historyId:'allocation__'+operationId,updatedAt:stamp()});});}
  };return api;
 }

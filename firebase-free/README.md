@@ -97,3 +97,13 @@ GitHub Pages + Cloud Firestoreを使用します。課金プランへの変更�
 公開用投影は金融フィールドの許可リストをサーバールールで検証します。一般向け読込・JSONバックアップ・CSV・PDFに非公開記録を含めません。管理者の変更履歴は一般向け印刷からも除外します。Google認証はセッション内とし、Firestoreの永続オフラインキャッシュは有効化しません。複雑な金額計算は既存会計同様クライアントで行い、権限・原本／公開投影／履歴の同時保存はサーバールールで検証します。
 
 検査：`node --test scripts/camp-special.test.mjs`（CIに含む）、`node scripts/camp-special-rules.test.mjs`、`node scripts/camp-special-browser.test.mjs`。後二つは既存QA依存とFirestoreエミュレーターが必要です。
+
+## 運用変更：特別収支も共有リンクで編集（2026-10-23）
+
+利用者の最新指定により、通常の特別収支編集は `camp-special.html#合宿UUID` です。Google認証・管理者権限付与は不要です。上記の管理者設定手順は旧互換ページだけに該当し、新規にACLを付与しないでください。
+
+共有保存先は `campShared/{id}/specialItems/{itemId}` と追記専用 `specialHistory/{historyId}`、集計は既存 `specialBook/current` です。原本・集計・履歴を同一トランザクションで保存します。端末識別子は本人認証ではありません。操作署名はSHA-256だけを保存し、非公開detailsは空欄のみをルールで許可します。個人名・制度名・対象者などを共有項目名へ入力しないでください。既存 `campSpecialPrivate` は公開せず、そこに紐づく明細の上書きも拒否します。
+
+合宿のアーカイブは通常一覧から外し、「非表示にした合宿」から編集して解除できます。物理削除はせず関連データを保全します。
+
+追加検査：`scripts/camp-shared-special-rules.test.mjs`、`scripts/camp-shared-special-browser.test.mjs`。未認証2端末の編集・再読込・競合・非公開領域拒否・履歴保護・配分・PDF・5幅と両テーマ・非表示と復元導線を検査します。
