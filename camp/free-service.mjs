@@ -1,3 +1,4 @@
+import {createSpecialService} from './special-service.mjs';
 import {snapshot, sourceKey, validateLine, feeTargets, matchesFee} from './budget-model.mjs';
 import {applyLedger, publicReport} from './free-model.mjs';
 export function createService(db,uid,isAdmin) {
@@ -9,9 +10,9 @@ export function createService(db,uid,isAdmin) {
   async list(ids=[]){return (await Promise.all(ids.slice(0,50).map(id=>read(ref(id))))).filter(Boolean);},
   async load(id){const camp=await read(ref(id));if(!camp)throw new Error('合宿がありません');const role='leader';
    const [participants,routes,budgets,report,ledger]=await Promise.all([rows(ref(id).collection('participants')),rows(ref(id).collection('routes')),rows(ref(id).collection('budgets')),read(ref(id).collection('public').doc('finance')),read(ref(id).collection('private').doc('ledger'))]);
-   const budgetBook=await this.loadBudget(id);
+   const [budgetBook,specialBook]=await Promise.all([this.loadBudget(id),createSpecialService(db,uid).load(id)]);
    const link=null;
-   return {...camp,role,participants,routes,budgets,report,link,budgetBook,ledger:ledger||{revision:0,charges:{},entries:{},history:{}}};
+   return {...camp,role,participants,routes,budgets,report,link,budgetBook,specialBook,ledger:ledger||{revision:0,charges:{},entries:{},history:{}}};
   },
   async loadBudget(id){
    try{const settings=await read(ref(id).collection('private').doc('budgetSettings'));

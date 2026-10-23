@@ -6,6 +6,8 @@
 
 合宿管理は `camps.html` から利用します。無料のFirestore保存を使い、共有リンクを知る人がログインなしで参加回答・行程・見積・集金・決算を閲覧・編集できます。使い方は [camp-free-guide.html](camp-free-guide.html)、導入手順は [firebase-free/README.md](firebase-free/README.md) です。既存の名簿・会計の保存先は変更しません。
 
+特別支出・特別補助の集計を追加しています。非公開の制度名・対象者・確認記録は `camp-special-admin.html` からGoogle認証＋合宿別ACLで扱い、一般向けの共有リンク・PDFへ含めません。設定は `firebase-free/README.md` を参照してください。
+
 無料版の計算テストは `npm run test:camp:free`。ログイン不要の保存ルールとブラウザー操作はFirestoreエミュレーターで検証します。位置追跡、配車、点呼、部屋割り、写真・資料添付は無料版には含みません。旧API版は `camps-api.html` と `camp-server` に別途保持しており、本番の無料版では使用しません。
 
 - `index.html` — ホーム
