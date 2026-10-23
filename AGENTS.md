@@ -86,3 +86,7 @@ node scripts/camp-free-browser.test.mjs  # 無料版のブラウザ検査（両�
 ## 合宿会計の簡素化（2026-10-23）
 
 「会計」の中に「予算を立てる」「お金を記録する」「決算を見る」を配置します。通常予算と特別収支は表示だけを統合し、保存先は変えません。合計額入力は既存の単価×数量で保持し、`accounting-model.mjs`で変換します。参加費の役割・部屋数・泊数などは詳細設定に残します。`special-entry-ui.mjs`は共有可能な金融項目だけを編集し、非公開記録は扱いません。Firestoreルール変更は不要です。検査は既存モデル・ルールに加え `camp-simple-accounting.test.mjs` と `camp-simple-accounting-browser.test.mjs` を使います。
+
+## 合宿参加者のコンパクト表示（2026-10-24）
+
+「参加集約」は氏名ボタンから出欠・参加費・入金を開きます。参加者の既存IDで紐づけ、`participant-accounting.mjs` は台帳から状態を導出するだけです。請求未設定と明示0円を区別し、徴収済みフラグは追加しません。参加情報・請求・入金は独立して保存し、入金は既存台帳の取引として追記します。出欠変更で金額を更新しません。Firestore構造・ルール・権限は変更不要です。追加検査は `scripts/camp-participant-accounting.test.mjs` と `scripts/camp-compact-participants-browser.test.mjs`。
