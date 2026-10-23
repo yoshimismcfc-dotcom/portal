@@ -41,3 +41,30 @@ body[data-theme=light] .tabs{background:#f3f6fa}body[data-theme=light] .warning{
 }
 
 @media print { html.camp-document {background:white!important} #message,.no-print {display:none!important} }
+
+/* ポータル共通の紺・オレンジ・ワインレッドとテーマ変数に統一。 */
+.camp-page .camp-shell{color:var(--ink);max-width:1120px;margin:20px auto;padding-bottom:40px}
+.camp-page .hero-band{margin-bottom:18px}.camp-page .hero-title{margin:0;font-size:1.25rem}.camp-page .hero-sub{margin-top:4px}
+.camp-page .camp-shell .panel,.camp-page .camp-shell .camp-card,.camp-page .camp-shell .stat,.camp-page #content>.record{background:var(--surface);border:1px solid var(--surface-bd);border-radius:16px;box-shadow:var(--shadow)}
+.camp-page #content>.record{padding:16px;margin:12px 0;align-items:center}
+.camp-page .camp-shell h2{font-size:1.15rem;margin:18px 0 12px}.camp-page .camp-shell h3{color:var(--ink)}
+.camp-page .camp-shell button,.camp-page dialog button{min-height:44px;border-radius:999px;padding:10px 18px;background:linear-gradient(135deg,var(--orange),var(--wine-2));color:#fff;border:1px solid transparent;line-height:1.4}
+.camp-page .camp-shell button.secondary,.camp-page dialog button.secondary{background:var(--surface-lt);border-color:var(--surface-bd);color:var(--ink-2)}
+.camp-page .camp-shell button:hover:enabled,.camp-page dialog button:hover:enabled{filter:brightness(1.12)}
+.camp-page .camp-shell .notice{background:var(--surface);border:1px solid var(--cyan);border-left:4px solid var(--cyan);color:var(--ink-2);padding:12px 16px;line-height:1.65}
+.camp-page .camp-shell .notice.error{border-color:var(--red);color:var(--ink)}
+.camp-page .camp-shell .stat{padding:12px}.camp-page .stat span{color:var(--ink-2)}.camp-page .stat strong{color:var(--ink);font-size:1.4rem;margin-top:3px}
+.camp-page .tabs{position:static;display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:6px;background:var(--surface);padding:8px;border:1px solid var(--surface-bd);border-radius:16px;overflow:visible}
+.camp-page .tabs button{background:transparent;color:var(--ink-2);border:1px solid var(--surface-bd);border-radius:10px;padding:9px 6px;font-size:.9rem;white-space:normal}
+.camp-page .tabs button[aria-selected=true]{background:var(--orange);color:#071126;border-color:var(--orange);font-weight:900}
+.camp-page .camp-shell input,.camp-page .camp-shell select,.camp-page dialog input,.camp-page dialog select,.camp-page dialog textarea{background:var(--surface-lt);color:var(--ink);border-color:var(--surface-bd);min-width:0;max-width:100%;border-radius:10px}
+.camp-page dialog{background:var(--navy-820);color:var(--ink);border-color:var(--surface-bd);box-shadow:var(--shadow-lg)}
+.camp-page .small{color:var(--ink-2);opacity:1;margin-top:12px}.camp-page .camp-shell>a{display:inline-flex;align-items:center;min-height:44px;color:var(--cyan)}
+.camp-page .record{border-color:var(--line)}.camp-page .warning{color:var(--orange-2);border-color:var(--orange)}
+.camp-page #error{color:var(--red)}
+body.camp-page[data-theme=light]{background:linear-gradient(155deg,var(--navy-950),var(--navy-900),var(--body-tail))}
+body.camp-page[data-theme=light] .camp-shell>a{color:#075d84}body.camp-page[data-theme=light] #error{color:#a02020}
+@media(min-width:760px){.camp-page .tabs{grid-template-columns:repeat(6,minmax(0,1fr))}}
+@media(max-width:640px){.camp-page .camp-shell{padding-inline:12px}.camp-page .toolbar{gap:8px}.camp-page .toolbar button{flex:1;min-width:0;padding:10px 12px;font-size:.9rem}.camp-page .record{gap:10px;padding:12px 0}.camp-page .record-actions{gap:8px}.camp-page .stats{gap:8px}.camp-page .camp-shell .panel{padding:12px}.camp-page .camp-shell h2{overflow-wrap:anywhere}.camp-page #content>.record .record-actions{width:auto;align-self:stretch}.camp-page #content>.record .record-actions button{width:100%}}
+@media print{.camp-page .hero-band{display:none}.camp-page .camp-shell .panel,.camp-page .camp-shell .stat,.camp-page #content>.record{background:white!important;box-shadow:none;border:0}}
+.camp-page .panel>button{margin:0 6px 8px 0;max-width:100%;white-space:normal}.camp-page .camp-shell .toolbar{gap:8px}.camp-page .record-content p{color:var(--ink-2)}
