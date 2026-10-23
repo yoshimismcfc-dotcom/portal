@@ -26,12 +26,38 @@ function closeEditor(e){if(saving){e?.preventDefault();return;}if(editorDirty&&!
 $('close-editor').onclick=closeEditor;$('editor').addEventListener('cancel',e=>{e.preventDefault();closeEditor(e);});
 window.addEventListener('beforeunload',e=>{if(editorDirty||saving){e.preventDefault();e.returnValue='';}});
 $('editor-form').onsubmit=async e=>{e.preventDefault();if(saving)return;if(!navigator.onLine){$('error').textContent='通信が切れています。再接続して保存してください。';return;}saving=true;$('save').disabled=true;$('save').textContent='保存しています…';
- try{const data=Object.fromEntries([...$('fields').querySelectorAll('input,select,textarea')].map(n=>[n.name,n.type==='checkbox'?n.checked:n.type==='number'?(n.dataset.optionalNumber&&n.value===''?null:Number(n.value)):n.value.trim()]));await pendingSave(data);editorDirty=false;$('editor').close();await reload();message('保存しました。'+new Date().toLocaleTimeString('ja-JP'));}catch(error){$('error').textContent=friendly(error);}finally{saving=false;$('save').disabled=false;$('save').textContent='保存する';}};
+ try{const data=Object.fromEntries([...$('fields').querySelectorAll('input,select,textarea')].map(n=>[n.name,n.type==='checkbox'?n.checked:n.type==='number'?(n.dataset.optionalNumber&&n.value===''?null:Number(n.value)):n.value.trim()]));await pendingSave(data);editorDirty=false;$('editor').close();await reload();message('保存しました。'+new Date().toLocaleTimeString('ja-JP'));}catch(error){$('error').textContent=friendly(error);if(error.existingCampIds?.length===1){$('error').append(button('登録済みの合宿を編集',async()=>{if(editorDirty&&!confirm('新規作成の入力をやめ、登録済みの合宿を編集しますか？'))return;editorDirty=false;$('editor').close();await editCamp(error.existingCampIds[0]);}));}}finally{saving=false;$('save').disabled=false;$('save').textContent='保存する';}};
 const metaFields=[field('name','合宿名'),field('start','開始日','date'),field('end','終了日','date'),field('place','行き先'),field('meeting','集合場所・時間'),field('fee','標準参加費（円）','number'),field('status','状況','text',['準備中','募集中','実施中','終了','精算完了'].map(x=>[x,x])),field('notes','案内・未確定事項','textarea'),field('archived','アーカイブ','checkbox')];
 function metaData(d){check(d.name&&d.start&&d.end&&d.start<=d.end,'合宿名と開催日を確認してください');amount(d.fee);return d;}
-async function list(){camp=null;tab='overview';const serial=++loadSerial;const all=await service.list(known);if(serial!==loadSerial)return;const p=$('content');p.replaceChildren(el('h2','合宿一覧'));if(isAdmin){const actions=el('div',undefined,'toolbar');p.append(actions);actions.append(button('＋ 合宿を作成',()=>{const id=crypto.randomUUID();edit('合宿を作成',metaFields,{fee:0,status:'準備中'},async d=>{const cid=await service.create(metaData(d),id);remember(cid);camp={id:cid};});}),button('春合宿2027の候補を入力',()=>{const id=crypto.randomUUID();edit('未確定の候補',metaFields,{name:'吉見SMC 春合宿2027',start:'2027-03-13',end:'2027-03-14',place:'伊東園ホテルとどろき（群馬県伊香保）',fee:0,status:'準備中',notes:'未確定：参加30〜40人想定、8部屋予約予定。行程・配車・費用は調整中。'},async d=>{check(!all.some(c=>c.name===d.name&&c.start===d.start),'同じ名前・日程の合宿があります');camp={id:await service.create(metaData(d),id)};remember(id);});}));}
+const springName='吉見SMC 春合宿2027',springStart='2027-03-13';
+function sameCamp(a,b){return a.name.trim()===b.name.trim()&&a.start===b.start;}
+async function editCamp(id){
+ message('編集する合宿を読み込んでいます…');const serial=++loadSerial,selected=await service.load(id);if(serial!==loadSerial)return;
+ edit('合宿情報を編集',metaFields,selected,d=>service.meta(selected.id,metaData(d),selected.revision));
+ // 一覧から編集して保存した場合も、同じIDの合宿を開く。
+ const save=pendingSave;pendingSave=async d=>{await save(d);camp={id:selected.id};remember(selected.id);};
+ message('合宿情報を編集できます。変更後は「保存する」を押してください。');
+}
+function createCamp(initial={},title='新しい合宿を作成'){
+ const id=crypto.randomUUID();edit(title,metaFields,{fee:0,status:'準備中',...initial},async d=>{
+  const data=metaData(d),all=await service.list(known),matches=all.filter(c=>sameCamp(c,data));
+  if(matches.length){
+   const error=new Error('同じ名前・日程の合宿が登録済みです。下の「登録済みの合宿を編集」から変更してください。');error.existingCampIds=matches.map(c=>c.id);throw error;
+  }
+  const cid=await service.create(data,id);remember(cid);camp={id:cid};
+ });
+}
+async function list(){camp=null;tab='overview';const serial=++loadSerial;const all=await service.list(known);if(serial!==loadSerial)return;const p=$('content');p.replaceChildren(el('h2','合宿一覧'));
+ if(isAdmin){const actions=el('div',undefined,'toolbar');p.append(actions);
+ const matches=all.filter(c=>sameCamp(c,{name:springName,start:springStart}));
+ actions.append(button('＋ 新しい合宿を作成',()=>createCamp()),button(matches.length?'春合宿2027を編集':'春合宿2027の候補から新規作成',async()=>{
+  if(matches.length===1)return editCamp(matches[0].id);
+  if(matches.length>1){message('同じ名前・日程の合宿が複数あります。下の一覧から編集する合宿を選んでください。',true);return;}
+  createCamp({name:springName,start:springStart,end:'2027-03-14',place:'伊東園ホテルとどろき（群馬県伊香保）',notes:'未確定：参加30〜40人想定、8部屋予約予定。行程・配車・費用は調整中。'},'新しい合宿を作成（未確定の候補）');
+ }));}
  if(!all.length)p.append(el('p','この端末で開いた合宿はまだありません。共有リンクを開くか、新しい合宿を作成してください。'));
- for(const c of all.sort((a,b)=>b.start.localeCompare(a.start)))row(p,c.name,[c.start+'〜'+c.end,c.place,c.archived?'アーカイブ':c.status],[button('合宿を開く',()=>open(c.id))]);}
+ for(const c of all.sort((a,b)=>b.start.localeCompare(a.start)))row(p,c.name,[c.start+'〜'+c.end,c.place,c.archived?'アーカイブ':c.status],[button('合宿を開く',()=>open(c.id)),button('この合宿を編集',()=>editCamp(c.id))]);
+}
 async function open(id){const serial=++loadSerial;message('読み込んでいます…');const result=await service.load(id);if(serial!==loadSerial)return;camp=result;remember(id);history.replaceState(null,'','#'+id);render();message('最新情報を取得しました。更新は「最新情報を取得」を押してください。');}
 async function reload(){if(camp)await open(camp.id);else await list();}
 function saveRecord(collection,title,fields,record={}){const id=record.id||crypto.randomUUID();edit(title,fields,record,d=>service.save(camp.id,collection,{...d,id,revision:record.revision||0}));}
@@ -39,7 +65,7 @@ function participant(record={}){saveRecord('participants','参加者',[
  field('name','氏名'),field('grade','学年・カテゴリー'),field('kind','区分','text',Object.entries(labels).filter(([k])=>['player','coach','parent','other'].includes(k))),field('familyUid','家庭の呼び名（兄弟をまとめる場合は同じ呼び名）'),field('response','出欠','text',[['pending','未回答'],['yes','参加'],['no','不参加']]),field('overnight','宿泊','checkbox')],{kind:'player',response:'pending',overnight:true,familyUid:'',...record});}
 const people=()=>camp.participants.map(p=>[p.id,p.name]);
 function ledgerEdit(title,fields,initial,type){const id=crypto.randomUUID(),revision=camp.ledger.revision;let frozen=null;edit(title,fields,initial,async data=>{const p=camp.participants.find(p=>p.id===data.participantId);const next={...data,id,type,revision,...(type==='charge'?{name:p?.name||'',household:p?.familyUid||p?.id||''}:{})};if(frozen&&JSON.stringify(frozen)!==JSON.stringify(next))throw new Error('再試行時は入力を変えずに保存してください。変更する場合はいったん閉じて最新情報を取得してください。');frozen=next;await service.finance(camp.id,next);});}
-function render(){const p=$('content');p.replaceChildren(el('h2',camp.name),el('p',camp.start+'〜'+camp.end+' ／ '+camp.place+' ／ '+camp.status));const nav=el('nav',undefined,'tabs');const tabs={overview:'概要',participants:'参加集約',routes:'ルート',budget:'予算',finance:'集金・決算',...(manager()?{settings:'設定'}:{})};for(const [k,t] of Object.entries(tabs)){const b=button(t,()=>{tab=k;render();});b.setAttribute('aria-selected',String(k===tab));nav.append(b);}p.append(nav);const panel=el('section',undefined,'panel');p.append(panel);views[tab in tabs?tab:'overview'](panel);}
+function render(){const p=$('content');const heading=el('div',undefined,'camp-titlebar');heading.append(el('h2',camp.name));if(tab!=='settings')heading.append(button('合宿情報を編集',()=>editCamp(camp.id)));p.replaceChildren(heading,el('p',camp.start+'〜'+camp.end+' ／ '+camp.place+' ／ '+camp.status));const nav=el('nav',undefined,'tabs');const tabs={overview:'概要',participants:'参加集約',routes:'ルート',budget:'予算',finance:'集金・決算',...(manager()?{settings:'設定'}:{})};for(const [k,t] of Object.entries(tabs)){const b=button(t,()=>{tab=k;render();});b.setAttribute('aria-selected',String(k===tab));nav.append(b);}p.append(nav);const panel=el('section',undefined,'panel');p.append(panel);views[tab in tabs?tab:'overview'](panel);}
 const budgetUI=createBudgetUI({getCamp:()=>camp,service:new Proxy({},{get:(_,key)=>(...args)=>service[key](...args)}),edit,button,message,reload,yen});
 const views={
  overview(p){const yes=camp.participants.filter(x=>x.response==='yes');stats(p,[['参加人数',yes.length+'人'],['未回答',camp.participants.filter(x=>x.response==='pending').length+'人'],['未納合計',yen(camp.report?.due)],['会計収支',yen(camp.report?.balance)]]);p.append(el('p',camp.meeting||'集合場所・時間は未設定です'),el('p',camp.notes));for(const r of camp.routes.filter(r=>!r.archived).sort((a,b)=>(a.date+a.time).localeCompare(b.date+b.time)).slice(0,3))row(p,r.date+' '+r.time+' '+r.title,[r.address,r.notes],[link('地図で確認',mapURL(r.address||r.title))]);p.append(el('p','個人の緊急連絡先・健康情報は登録しません。リンクを知る人が氏名・金額を閲覧・編集できます。','small'));},
@@ -53,7 +79,7 @@ const views={
  for(const [id,c] of entries(camp.ledger.charges)){const b=totals(camp.ledger).balances[id];row(p,c.name,['請求 '+yen(b.billed)+' ／ 入金 '+yen(b.received)+' ／ 未納 '+yen(b.due),'期限 '+c.due]);}
  for(const [id,x] of entries(camp.ledger.entries).reverse()){const act=[];if(!x.void){act.push(button('取消',async()=>{if(confirm('取引を取消します。履歴は残ります。')){await service.finance(camp.id,{id:crypto.randomUUID(),type:'void',entryId:id,revision:camp.ledger.revision});await reload();}}));if(x.kind==='expense'&&x.payer&&!x.settled)act.push(button('立替精算済み',async()=>{await service.finance(camp.id,{id:crypto.randomUUID(),type:'settle',entryId:id,revision:camp.ledger.revision});await reload();}));}row(p,labels[x.kind]+' '+yen(x.amount)+(x.void?'（取消）':''),[x.date+' ／ '+x.category,x.reference,x.note,x.payer?'立替：'+x.payer+' ／ '+(x.settled?'精算済み':'未精算'):''],act);}
  },
- settings(p){p.classList.add('camp-settings');p.append(button('合宿情報を編集',()=>edit('合宿情報',metaFields,camp,d=>service.meta(camp.id,metaData(d),camp.revision))),button('記録をバックアップ',()=>download(camp.name+'-backup.json',JSON.stringify(camp,null,2),'application/json')));const input=el('input');input.readOnly=true;input.value=location.origin+location.pathname+'#'+camp.id;input.id='camp-share-url';const shareLabel=el('label','この合宿の共有リンク');shareLabel.htmlFor=input.id;input.setAttribute('aria-label','共有リンク');p.append(shareLabel,input,button('リンクをコピー',async()=>{await navigator.clipboard.writeText(input.value);message('共有リンクをコピーしました。');}),el('p','リンクを知る人は参加者・金額を含めて編集できます。必要なメンバーにリンクを共有してください。履歴の操作元は端末の識別子であり、本人確認を表しません。','small'));}
+ settings(p){p.classList.add('camp-settings');p.append(button('合宿情報を編集',()=>editCamp(camp.id)),button('記録をバックアップ',()=>download(camp.name+'-backup.json',JSON.stringify(camp,null,2),'application/json')));const input=el('input');input.readOnly=true;input.value=location.origin+location.pathname+'#'+camp.id;input.id='camp-share-url';const shareLabel=el('label','この合宿の共有リンク');shareLabel.htmlFor=input.id;input.setAttribute('aria-label','共有リンク');p.append(shareLabel,input,button('リンクをコピー',async()=>{await navigator.clipboard.writeText(input.value);message('共有リンクをコピーしました。');}),el('p','リンクを知る人は参加者・金額を含めて編集できます。必要なメンバーにリンクを共有してください。履歴の操作元は端末の識別子であり、本人確認を表しません。','small'));}
 
 };
 function route(r={}){saveRecord('routes','行程・ルート',[field('date','日付','date'),field('time','時刻','time'),field('title','行程名'),field('address','場所・住所'),field('mapLink','Googleマップ等の経路リンク（任意）'),field('notes','注意・持ち物','textarea'),field('archived','非表示','checkbox')],{date:camp.start,time:'09:00',address:'',mapLink:'',notes:'',archived:false,...r});}
