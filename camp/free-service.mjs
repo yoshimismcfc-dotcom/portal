@@ -1,6 +1,6 @@
 import {createSpecialService} from './special-service.mjs?v=20261023-10';
 import {snapshot, sourceKey, validateLine, feeTargets, matchesFee} from './budget-model.mjs';
-import {applyLedger, publicReport} from './free-model.mjs';
+import {applyLedger, publicReport} from './free-model.mjs?v=20261024-2';
 export function createService(db,uid,isAdmin) {
  const root=db.collection('campShared'), stamp=()=>firebase.firestore.FieldValue.serverTimestamp();
  const read=async ref=>{const s=await ref.get({source:'server'});return s.exists?{id:s.id,...s.data()}:null;};
@@ -50,6 +50,10 @@ export function createService(db,uid,isAdmin) {
   },
   async respond(id,p,response,overnight){await db.runTransaction(async tx=>{const r=ref(id).collection('participants').doc(p.id),s=await tx.get(r);if(!s.exists||s.data().revision!==p.revision)throw new Error('参加情報が更新されました。最新情報を取得してください');tx.update(r,{response,overnight,revision:p.revision+1,updatedAt:stamp()});});},
   async finance(id,op){await db.runTransaction(async tx=>{const r=ref(id).collection('private').doc('ledger'),s=await tx.get(r);const old=s.exists?s.data():null;if(old?.history?.[op.id]){applyLedger(old,op,uid,new Date().toISOString());return;}
+   // Read every confirmed participant in the same transaction before any writes.
+   const people=op.type==='charges'?op.changes:op.type==='charge'&&op.participantRevision!==undefined?[op]:[];
+   if(!Array.isArray(people)||people.length>100)throw new Error('一括設定は100人までです。保存していません。');
+   for(const person of people){const p=await tx.get(ref(id).collection('participants').doc(person.participantId));if(!p.exists||p.data().revision!==person.participantRevision)throw new Error('参加者の情報が更新されました。最新情報で確認し直してください');}
    if(op.budgetId){const d=await tx.get(ref(id).collection('settlementDrafts').doc(op.budgetId));
     if(!d.exists)throw new Error('決算下書きがありません。予算からコピーしてください');const draft=d.data();
     const kind=op.type==='linkBudget'?old?.entries?.[op.entryId]?.kind:op.kind;
