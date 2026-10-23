@@ -29,5 +29,22 @@ try{
  const ledger=(await admin.doc('campShared/11111111-1111-4111-8111-111111111111/private/ledger').get()).data();await assertFails(admin.doc('campShared/11111111-1111-4111-8111-111111111111/private/ledger').set({...ledger,revision:3,updatedAt:firebase.firestore.FieldValue.serverTimestamp()}));pass('競合と公開集計を伴わない台帳更新を拒否');
  await s.create({...meta,name:'別合宿'},'22222222-2222-4222-8222-222222222222');assert.equal((await pa.load('22222222-2222-4222-8222-222222222222')).participants.length,0);assert.equal((await pa.load('11111111-1111-4111-8111-111111111111')).participants.length,2);pass('合宿別の参加・会計データ分離');
  await assertFails(parent.doc('campShared/11111111-1111-4111-8111-111111111111/links/current').set({url:'https://example.com'}));await assertFails(parent.doc('campShared/11111111-1111-4111-8111-111111111111').delete());pass('位置情報の登録と合宿の物理削除を拒否');
+ // 予算書：予定の保存・スナップショット・実績台帳を分離する。
+ const cid='11111111-1111-4111-8111-111111111111';
+ let loaded=await s.load(cid);assert.equal(loaded.budgetBook.available,true);
+ const line={id:'hotelChild',title:'子ども宿泊費',kind:'expense',category:'hotel',target:'players',quantityMode:'playersOvernight',unit:null,quantity:20,notes:'未確定',archived:false,revision:0};
+ await s.saveBudget(cid,line);loaded=await pa.load(cid);assert.equal(loaded.budgetBook.lines[0].unit,null);
+ await assertFails(admin.doc('campShared/'+cid+'/budgetLines/bad').set({...Object.fromEntries(Object.entries(line).filter(([k])=>k!=='id')),unit:-1,updatedAt:firebase.firestore.FieldValue.serverTimestamp(),revision:1}).catch(e=>{throw e;}));
+ const source={...loaded.budgetBook.lines[0],source:'budgetLines'};let selected=[{row:source,old:null}];
+ const before=(await s.load(cid)).ledger;await s.copyBudget(cid,selected);await pa.copyBudget(cid,selected);loaded=await s.load(cid);assert.equal(loaded.budgetBook.drafts.length,1);assert.equal(loaded.ledger.revision,before.revision);assert.equal(loaded.report.expense,0);pass('予算は別端末で読める・未定を保存・再コピーしても実績と下書きを重複作成しない');
+ let draft=loaded.budgetBook.drafts[0];await s.confirmBudgetZero(cid,draft,true);loaded=await s.load(cid);assert.equal(loaded.budgetBook.drafts[0].zeroConfirmed,true);assert.equal(loaded.ledger.revision,before.revision);
+ await s.saveBudget(cid,{...source,unit:8085});await assert.rejects(s.copyBudget(cid,selected),/予算が更新/);
+ loaded=await s.load(cid);const changed={...loaded.budgetBook.lines[0],source:'budgetLines'};draft=loaded.budgetBook.drafts[0];await s.copyBudget(cid,[{row:changed,old:draft}]);loaded=await s.load(cid);assert.equal(loaded.budgetBook.drafts[0].unit,8085);assert.equal(loaded.budgetBook.drafts[0].zeroConfirmed,true);
+ await assertFails(admin.doc('campShared/'+cid+'/budgetLines/invalid').set({...Object.fromEntries(Object.entries(line).filter(([k])=>k!=='id')),unit:1,quantity:10001,revision:1,updatedAt:firebase.firestore.FieldValue.serverTimestamp()}));
+ await assertFails(admin.doc('campShared/'+cid+'/settlementDrafts/line_fake').set({...Object.fromEntries(Object.entries(loaded.budgetBook.drafts[0]).filter(([k])=>k!=='id')),sourceId:'fake',revision:1,updatedAt:firebase.firestore.FieldValue.serverTimestamp()}).catch(e=>{throw e;}));
+ pass('0円確認で入出金を作らない・元予算競合を拒否・明示的な基準更新・不正な数量と元IDを拒否');
+ await s.saveBudgetSettings(cid,100,0);await assert.rejects(pa.saveBudgetSettings(cid,500,0),/別の担当/);assert.equal((await pa.load(cid)).budgetBook.settings.rounding,100);
+ const current=(await s.load(cid)).ledger;await s.finance(cid,{id:'hotelActual',type:'entry',kind:'expense',amount:1000,reference:'actual-hotel',date:'2027-03-13',budgetId:'line_hotelChild',revision:current.revision,category:'宿泊費'});
+ loaded=await pa.load(cid);assert.equal(loaded.report.expense,1000);assert.equal(loaded.budgetBook.drafts.length,1);assert.equal((await s.load('22222222-2222-4222-8222-222222222222')).budgetBook.lines.length,0);pass('端数設定の競合と合宿別分離・実支出だけ台帳へ集計');
  console.log('Rules checks: '+ok.length+' passed');
 }finally{await env.cleanup();}

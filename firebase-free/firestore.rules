@@ -47,6 +47,51 @@ service cloud.firestore {
      && str(request.resource.data.title,150) && money(request.resource.data.unit) && request.resource.data.quantity is int
      && request.resource.data.quantity>=0 && request.resource.data.quantity<=10000 && str(request.resource.data.notes,1000) && request.resource.data.archived is bool;
    }
+   // 旧budgetsと台帳をそのまま残す、予算書の追加領域。
+   function budgetFields(d) {
+    return str(d.title,150) && d.title.size()>0 && str(d.notes,1000)
+     && d.kind in ['expense','income','feeChild','feeAdult']
+     && d.category in ['hotel','meal','leisure','transport','insurance','supplies','reserve','support','other','participation']
+     && d.target in ['all','players','adults','transport']
+     && d.quantityMode in ['manual','players','adults','playersOvernight','adultsOvernight','all']
+     && (d.unit==null || money(d.unit)) && (d.quantity==null || (d.quantity is int && d.quantity>=0 && d.quantity<=10000))
+     && (d.unit==null || d.quantity==null || d.unit*d.quantity<=100000000) && d.archived is bool
+     && (d.kind!='expense' || d.target!='transport')
+     && (d.kind!='feeChild' || (d.target=='players' && d.category=='participation'))
+     && (d.kind!='feeAdult' || (d.target=='adults' && d.category=='participation'))
+     && (d.kind in ['feeChild','feeAdult'] || d.category!='participation');
+   }
+   match /budgetLines/{b} {
+    allow read: if member(c);
+    allow create,update: if finance(c) && revision() && budgetFields(request.resource.data)
+     && request.resource.data.keys().hasOnly(['title','kind','category','target','quantityMode','unit','quantity','notes','archived','revision','updatedAt']);
+    allow delete: if false;
+   }
+   match /private/budgetSettings {
+    allow read: if member(c);
+    allow create,update: if finance(c) && revision()
+     && request.resource.data.keys().hasOnly(['rounding','revision','updatedAt'])
+     && request.resource.data.rounding in [1,10,100,500,1000];
+    allow delete: if false;
+   }
+   match /settlementDrafts/{b} {
+    function originMatches(d) {
+     let src=get(/databases/$(database)/documents/campShared/$(c)/$(d.sourceCollection)/$(d.sourceId)).data;
+     return src.revision==d.sourceRevision && src.archived==false && src.title==d.title && src.unit==d.unit && src.quantity==d.quantity && src.notes==d.notes
+      && ((d.sourceCollection=='budgets' && d.kind=='expense' && d.category=='other' && d.target=='all' && d.quantityMode=='manual')
+       || (d.sourceCollection=='budgetLines' && src.kind==d.kind && src.category==d.category && src.target==d.target && src.quantityMode==d.quantityMode));
+    }
+    allow read: if member(c);
+    allow create,update: if finance(c) && revision() && budgetFields(request.resource.data)
+     && request.resource.data.keys().hasOnly(['title','kind','category','target','quantityMode','unit','quantity','notes','archived','sourceId','sourceCollection','sourceRevision','zeroConfirmed','confirmedLedgerRevision','revision','updatedAt'])
+     && request.resource.data.sourceCollection in ['budgets','budgetLines'] && str(request.resource.data.sourceId,150)
+     && b==((request.resource.data.sourceCollection=='budgets'?'legacy_':'line_')+request.resource.data.sourceId)
+     && request.resource.data.get('confirmedLedgerRevision',-1) is int && request.resource.data.get('confirmedLedgerRevision',-1)>=-1
+     && request.resource.data.sourceRevision is int && request.resource.data.sourceRevision>=1 && request.resource.data.zeroConfirmed is bool
+     && ((resource!=null && request.resource.data.diff(resource.data).affectedKeys().hasOnly(['zeroConfirmed','confirmedLedgerRevision','revision','updatedAt']))
+      || (originMatches(request.resource.data) && (resource==null || request.resource.data.kind==resource.data.kind)));
+    allow delete: if false;
+   }
    match /private/ledger {
     allow read: if finance(c);
     allow create,update: if finance(c) && revision() && request.resource.data.keys().hasOnly(['revision','charges','entries','history','updatedAt'])

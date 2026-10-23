@@ -17,9 +17,11 @@ export function applyLedger(current, op, actor, at) {
   if(ledger.history?.[op.id]) { check(ledger.history[op.id].signature===signature,'同じ操作番号の内容が異なります'); return ledger; }
   check(ledger.revision===op.revision,'別の担当者が更新しました。最新情報を取得してから入力し直してください');
   ledger.charges ||= {}; ledger.entries ||= {}; ledger.history ||= {};
+  if(op.budgetId)check(typeof op.budgetId==='string'&&/^(line_|legacy_)[^/]{1,150}$/.test(op.budgetId),'予算項目の識別子を確認してください');
   if(op.type==='charge') {
     check(typeof op.participantId==='string'&&op.participantId,'参加者を選択してください');
-    ledger.charges[op.participantId]={amount:amount(op.amount),name:op.name,household:op.household||op.participantId,due:op.due||''};
+    check(!ledger.charges[op.participantId]?.budgetId||!op.budgetId||ledger.charges[op.participantId].budgetId===op.budgetId,'この請求は別の予算項目に紐づいています');
+    ledger.charges[op.participantId]={amount:amount(op.amount),name:op.name,household:op.household||op.participantId,due:op.due||'',...((op.budgetId||ledger.charges[op.participantId]?.budgetId)?{budgetId:op.budgetId||ledger.charges[op.participantId].budgetId}:{})};
   } else if(op.type==='entry') {
     check(['payment','refund','income','expense'].includes(op.kind),'取引区分が不正です');
     const n=amount(op.amount);check(n>0,'取引金額は1円以上で入力してください');
@@ -27,7 +29,9 @@ export function applyLedger(current, op, actor, at) {
     if(['payment','refund'].includes(op.kind))check(ledger.charges[op.participantId],'請求を先に登録してください');
     check(!entries(ledger.entries).some(([,x])=>!x.void&&x.reference===op.reference),'同じ入金・取引識別番号が登録済みです');
     check(typeof op.reference==='string'&&op.reference.trim(),'取引識別番号を入力してください');
-    ledger.entries[op.id]={kind:op.kind,amount:n,participantId:op.participantId||'',category:op.category||'',date:op.date,reference:op.reference,note:op.note||'',payer:op.payer||'',settled:op.settled===true,void:false,actor,at};
+    ledger.entries[op.id]={kind:op.kind,amount:n,participantId:op.participantId||'',category:op.category||'',date:op.date,reference:op.reference,note:op.note||'',payer:op.payer||'',settled:op.settled===true,void:false,actor,at,...(op.budgetId?{budgetId:op.budgetId}:{})};
+  } else if(op.type==='linkBudget'){
+    const x=ledger.entries[op.entryId];check(x&&!x.void&&['income','expense'].includes(x.kind),'対象の入出金記録がありません');check(op.budgetId&&!x.budgetId,'既に紐づけ済み、または予算項目が未指定です');x.budgetId=op.budgetId;
   } else {
     check(['void','settle'].includes(op.type)&&ledger.entries[op.entryId],'対象の取引がありません');
     if(op.type==='void')ledger.entries[op.entryId].void=true;

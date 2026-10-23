@@ -1,3 +1,6 @@
 # ブラウザ検査の出力先（camp-browser / camp-free-browser の CAMP_QA_OUTPUT 既定値）
 work/
 node_modules/
+# Emulator diagnostics generated during local checks
+firebase-debug.log
+firestore-debug.log

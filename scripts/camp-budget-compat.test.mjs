@@ -1,0 +1,10 @@
+// 追加ルール未反映でも旧予算・台帳を利用できることをエミュレーターで検証。
+import {createRequire} from 'node:module';import {readFileSync} from 'node:fs';import assert from 'node:assert/strict';import {createService} from '../camp/free-service.mjs';
+const require=createRequire(process.env.CAMP_QA_PACKAGE||new URL('../../qa/package.json',import.meta.url));
+const {initializeTestEnvironment}=require('@firebase/rules-unit-testing'),firebase=require('firebase/compat/app');require('firebase/compat/firestore');globalThis.firebase=firebase;
+const current=readFileSync(new URL('../firebase-free/firestore.rules',import.meta.url),'utf8'),start=current.indexOf('   // 旧budgets'),end=current.indexOf('   match /private/ledger');assert.ok(start>0&&end>start);const old=current.slice(0,start)+current.slice(end);
+let env;const config=rules=>({projectId:'demo-smc-camp',firestore:{host:'127.0.0.1',port:8085,rules}});
+try{env=await initializeTestEnvironment(config(old));const db=env.unauthenticatedContext().firestore(),s=createService(db,'compat-device',true),id='33333333-3333-4333-8333-333333333333';await s.create({name:'互換検証',start:'2027-03-13',end:'2027-03-14',place:'会場',meeting:'',fee:0,status:'準備中',notes:'',archived:false},id);
+ await s.save(id,'budgets',{id:'legacy',title:'旧予算',unit:1000,quantity:2,notes:'',archived:false,revision:0});let c=await s.load(id);assert.equal(c.budgetBook.available,false);assert.equal(c.budgets.length,1);assert.equal(c.budgetBook.lines.length,0);
+ await s.finance(id,{id:'expense',type:'entry',kind:'expense',amount:500,reference:'compat-expense',revision:0,date:'2027-03-13',category:'宿泊費'});c=await s.load(id);assert.equal(c.report.expense,500);assert.equal(c.budgetBook.available,false);console.log('PASS 追加ルール未反映では新機能を無効にし、旧予算・実績台帳を保護');
+}finally{if(env)await env.cleanup();const restored=await initializeTestEnvironment(config(current));await restored.cleanup();}
