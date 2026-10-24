@@ -98,3 +98,5 @@ node scripts/camp-free-browser.test.mjs  # 無料版のブラウザ検査（両�
 ## FIFA 11＋資料（2026-10-24）
 
 練習メニュー `coach_menu.html` に固定カードを追加し、`fifa11plus.html` でKids（7〜13歳）と通常版（14歳以上）を分ける。既存URL保存の `practice_menu` と `smc_menu_urls_v1` に固定カードを書き込まない。静的HTML・native detailsとごく短いDOM操作だけを使用し、Firebase・実施記録は追加しない。公式写真/動画の転載はせず、原本へのリンクを使用する。照合資料・ページ対応は `docs/fifa11plus-sources.md`。検査: `scripts/fifa11plus.test.mjs`、`scripts/fifa11plus-browser.test.mjs`。
+
+FIFA資料の主導線は日本語のアプリ内要約。Kids英語原本は明示して折りたたみ、通常版JFA日本語資料と混同しない（2026-10-24）。
