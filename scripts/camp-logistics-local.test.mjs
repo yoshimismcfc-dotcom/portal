@@ -66,6 +66,20 @@ test('不正値・過大定員・存在しない車両・未成年運転者は�
  assert.throws(()=>changeOperations(seed(),{kind:'vehicle',item:{id:id(50),label:'新車',capacity:4,driver:id(1),active:true}},people),/運転者/);
  assert.throws(()=>changeOperations(seed(),{kind:'assign',id:id(1),vehicle:id(55)},people),/使用中の車両/);
 });
+test('参加状況の変更で定員超過になっても記録を開いて修正できる',()=>{
+ const former=people.map(p=>p.id===id(4)?{...p,response:'no'}:p);
+ let state=seed();
+ state=changeOperations(state,{kind:'assign',id:id(1),vehicle:id(30)},former);
+ state=changeOperations(state,{kind:'assign',id:id(2),vehicle:id(30)},former);
+ state.allocation[id(4)]={vehicle:id(30),room:''}; // 前回参加時の割当が残る想定
+ const store=new Map(),api={getItem:k=>store.get(k)||null,setItem:(k,v)=>store.set(k,v)};
+ writeOperations(api,id(88),state,former);
+ const restored=readOperations(api,id(88),people);
+ assert.equal(usedSeats(restored,people,restored.vehicles[0]),4);
+ assert.throws(()=>verifyOperations(restored,people),/乗車定員/);
+ const repaired=changeOperations(restored,{kind:'assign',id:id(4),vehicle:''},people);
+ assert.equal(usedSeats(repaired,people,repaired.vehicles[0]),3);
+});
 test('端末保存に失敗しても成功を装わない',()=>{
  const store={setItem:()=>{throw new Error('quota');}};
  assert.throws(()=>writeOperations(store,id(99),seed(),people),/quota/);
