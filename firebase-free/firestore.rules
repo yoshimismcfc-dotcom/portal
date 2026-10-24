@@ -6,8 +6,8 @@ service cloud.firestore {
   function member(c) { return validId(c) && exists(/databases/$(database)/documents/campShared/$(c)); }
   function leader(c) { return member(c); }
   function finance(c) { return member(c); }
-  // Only manually approved Google accounts may enumerate camp IDs.
-  function directoryReader() { return request.auth != null && request.auth.token.email_verified == true
+  // Anonymous device IDs only become readers after explicit administrator approval.
+  function directoryReader() { return request.auth != null
    && exists(/databases/$(database)/documents/campDirectoryReaders/$(request.auth.uid))
    && get(/databases/$(database)/documents/campDirectoryReaders/$(request.auth.uid)).data.enabled == true; }
   function str(v,n) { return v is string && v.size() <= n; }
@@ -36,6 +36,16 @@ service cloud.firestore {
   match /campDirectoryReaders/{uid} {
    allow get: if request.auth != null && request.auth.uid == uid;
    allow list, create, update, delete: if false;
+  }
+  // Device approval requests are not approvals. Only the creator may read a request.
+  match /campDirectoryRequests/{uid} {
+   allow get: if request.auth != null && request.auth.uid == uid;
+   allow list, update, delete: if false;
+   allow create: if request.auth != null && request.auth.uid == uid
+    && request.resource.data.keys().hasOnly(['label','createdAt'])
+    && request.resource.data.label is string
+    && request.resource.data.label.size() > 0 && request.resource.data.label.size() <= 40
+    && request.resource.data.createdAt == request.time;
   }
   match /campSpecialAdmins/{u} { allow get: if request.auth!=null && request.auth.uid==u; allow list,write: if false; }
   match /campSpecialPrivate/{c}/items/{i} {
