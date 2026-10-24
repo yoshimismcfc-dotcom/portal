@@ -8,7 +8,6 @@ service cloud.firestore {
   function finance(c) { return member(c); }
   // Only manually approved Google accounts may enumerate camp IDs.
   function directoryReader() { return request.auth != null && request.auth.token.email_verified == true
-   && request.auth.token.firebase.sign_in_provider == 'google.com'
    && exists(/databases/$(database)/documents/campDirectoryReaders/$(request.auth.uid))
    && get(/databases/$(database)/documents/campDirectoryReaders/$(request.auth.uid)).data.enabled == true; }
   function str(v,n) { return v is string && v.size() <= n; }
