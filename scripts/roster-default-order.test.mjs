@@ -6,7 +6,7 @@ import {gradeRank,compareGradeAndName,orderedParticipants} from '../camp/partici
 
 function rosterContext(){
  const source=readFileSync(new URL('../members.html',import.meta.url),'utf8');
- const context={console,Intl,Number,Date,JSON,document:{getElementById(){return {style:{},innerHTML:'',classList:{add(){},remove(){}}};},addEventListener(){}},window:{addEventListener(){}},alert(){},onFirebaseReady(){}};
+ const context={console,Intl,Number,Date,JSON,document:{getElementById(){return {style:{},innerHTML:'',classList:{add(){},remove(){}},addEventListener(){}};},addEventListener(){}},window:{addEventListener(){}},alert(){},onFirebaseReady(){}};
  vm.createContext(context);
  const script=[...source.matchAll(/<script>([\s\S]*?)<\/script>/g)].at(-1)?.[1];
  assert.ok(script,'団員名簿のJavaScriptが見つかりません');
@@ -54,8 +54,8 @@ test('ふりがな未登録は氏名で並べ、同じ名前の並びはIDで安
 test('合宿名簿は6年から年長・不明の順、同学年内は日本語の名前順、元データは不変',()=>{
  const rows=[
   {id:'p4',name:'山田',grade:'4年'},
-  {id:'p6b',name:'上田',grade:'小学校６年生'},
-  {id:'p6a',name:'青木',grade:'6年'},
+  {id:'p6b',name:'上田',kana:'うえだ',grade:'小学校６年生'},
+  {id:'p6a',name:'青木',kana:'あおき',grade:'6年'},
   {id:'p1',name:'池田',grade:'1年生'},
   {id:'pc',name:'コーチ',grade:''},
   {id:'pk',name:'年長児',grade:'年長'},
@@ -73,8 +73,9 @@ test('合宿画面の直接一覧は説明ボックスを除去、障害時だ�
  const source=readFileSync(new URL('../camp/free-app.mjs',import.meta.url),'utf8');
  assert.doesNotMatch(source,/☁️ クラウドの合宿一覧|クラウドから合宿.*件を取得しました。ログイン/);
  assert.match(source,/if\(error\)\{const state=el\('section'/);
- assert.match(source,/all=orderedParticipants\(camp.participants\)/);
- assert.match(source,/\.sort\(compareGradeAndName\)/);
- assert.match(source,/const people=\(\)=>orderedParticipants\(camp.participants\)/);
+ assert.match(source,/all=sortedCampParticipants\(camp.participants\)/);
+ assert.match(source,/\.sort\(compareCampParticipants\)/);
+ assert.match(source,/const people=\(\)=>sortedCampParticipants\(camp.participants\)/);
  assert.match(source,/rows=entries\(snap.val\(\)\).*\.sort\(\(a,b\)=>compareGradeAndName/);
+ assert.match(source,/rosterReadingsById=byId;rosterReadingsByName=byName/);
 });
