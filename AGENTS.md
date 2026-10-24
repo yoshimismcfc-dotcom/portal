@@ -76,6 +76,10 @@ node scripts/camp-free-browser.test.mjs  # 無料版のブラウザ検査（両�
 - 強制リロードや全キャッシュ削除を入れない（入力中の内容が消えるため）
 - 利用者はITが苦手な保護者とスマートフォン中心のコーチです。入力欄の文字は16px以上、タップ領域は44px以上を保ってください（`common.css`の`@media (pointer: coarse)`）
 
+## 配車・部屋割り・点呼（2026-10-24）
+
+現行の共有URLは本人認証がないため、参加者の車両・部屋・点呼をFirestoreの共有領域に保存しない。合宿の「配車・点呼」は `camp/logistics-local-model.mjs` / `camp/logistics-local-ui.mjs` で、合宿ID別の端末内 `localStorage` だけに記録する。参加者の既存IDを画面上で参照するが、氏名・GPS・健康・連絡先を複製しない。定員超過を拒否し、出発／到着は手動確認。外部位置共有は従来の「ルート」案内だけ。端末間同期と認証は未実装。テスト `scripts/camp-logistics-local.test.mjs`。
+
 ## 残っている課題
 
 - 無料版のFirestoreルール反映が本番で完了しているか未確認（リポジトリ外のため検証不可）

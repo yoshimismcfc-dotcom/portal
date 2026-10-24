@@ -126,3 +126,29 @@ html.camp-document{scroll-padding-top:90px}
 .camp-page .participants-panel>.bulk-fee-open{width:100%;margin:8px 0 0;padding:9px 12px;min-height:44px;font-size:.9rem}.camp-page #fields.bulk-fee-form>.bulk-fee-hint,.camp-page #fields.bulk-fee-form>button{grid-column:1/-1}.camp-page #fields.bulk-fee-form>label[data-field^=fee_]{display:grid;grid-template-columns:90px minmax(0,1fr);align-items:center;gap:8px;margin:5px 0}.bulk-fee-hint{font-size:.85rem;line-height:1.6;color:var(--ink-2);margin:6px 0}.camp-page #fields.bulk-fee-confirm{display:block}.bulk-fee-group{font-size:.9rem;margin:5px 0}.bulk-fee-confirm>.participant-balances{padding-block:8px;border-block:1px solid var(--line)}.bulk-fee-confirm>.participant-balances>div{display:grid;gap:2px}.bulk-fee-people>summary{min-height:44px;align-content:center;cursor:pointer;font-size:.9rem}.bulk-fee-person{border-top:1px solid var(--line);padding:6px 0;display:flex;flex-wrap:wrap;gap:3px 12px;font-size:.85rem}.bulk-fee-person>strong{min-width:85px}.bulk-fee-person>span{overflow-wrap:anywhere}.camp-page #fields label[hidden]{display:none!important}.bulk-fee-confirm>button{margin-top:8px;font-size:.85rem}
 
 .camp-page #fields.bulk-fee-form>p{grid-column:1/-1}.bulk-fee-hint:empty{display:none}
+
+
+/* 配車・部屋割り・点呼：運営担当端末だけに残るローカル一覧 */
+.camp-page .tabs{grid-template-columns:repeat(3,minmax(0,1fr))}
+@media(min-width:760px){.camp-page .tabs{grid-template-columns:repeat(6,minmax(0,1fr))}}
+.operations-panel .operations-summary{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px;margin:12px 0}
+.operations-panel .operation-stat{border:1px solid var(--line);border-radius:12px;padding:10px;display:grid;gap:4px;min-width:0;background:var(--surface-lt)}
+.operations-panel .operation-stat span{color:var(--ink-2);font-size:.8rem}
+.operations-panel .operation-stat strong{font-size:1.05rem;overflow-wrap:anywhere}
+.operations-config{display:grid;grid-template-columns:minmax(0,1fr);gap:8px;margin:16px 0}
+.operations-section{border:1px solid var(--line);border-radius:12px;padding:12px;min-width:0}
+.operations-section>summary{font-weight:800;cursor:pointer;min-height:44px;display:flex;align-items:center}
+.operations-section>button,.operations-helper button{margin:8px 4px 8px 0}
+.operation-row{padding:10px 0;border-bottom:1px solid var(--line);display:flex;justify-content:space-between;gap:8px;align-items:center;min-width:0;flex-wrap:wrap}
+.operation-row:last-child{border:0}
+.operation-row-head{display:flex;flex-direction:column;gap:3px;min-width:0;overflow-wrap:anywhere}
+.operation-row-head strong{font-size:1rem}
+.operation-row-head .small{margin:0}
+.operation-row-actions{display:flex;gap:6px;align-items:center;flex-wrap:wrap}
+.camp-page .operation-row-actions button{min-height:44px;min-width:44px;padding:9px 12px;font-size:.86rem}
+.camp-page .operation-row-actions .operation-check[aria-pressed=true]{background:#176d4b;color:white;border-color:#36b37e}
+.operations-people{display:grid;gap:0}
+.operations-helper{display:flex;gap:6px;flex-wrap:wrap}
+@media(min-width:900px){.operations-config{grid-template-columns:repeat(2,minmax(0,1fr))}.operations-panel .operations-summary{grid-template-columns:repeat(5,minmax(0,1fr))}}
+@media(max-width:480px){.operation-row-actions{width:100%}.operation-row-actions button{flex:1 1 auto}.operations-panel .operation-stat strong{font-size:.97rem}}
+@media print{.operations-panel .operations-helper,.operations-panel .operations-config>details>button,.operations-panel .operation-row-actions{display:none!important}}
