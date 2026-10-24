@@ -6,11 +6,11 @@ import {baseBudgetLines} from './special-ui.mjs?v=20261023-10';
 import {createBudgetUI} from './budget-ui.mjs?v=20261023-10';
 import {entries,totals,estimate,mapURL,amount,check} from './free-model.mjs?v=20261024-2';
 import {createService} from './free-service.mjs?v=20261024-2';
-import {createCampDirectory} from './directory.mjs?v=20261024-9';
+import {createCampDirectory} from './directory.mjs?v=20261024-10';
 const $=id=>document.getElementById(id), yen=n=>new Intl.NumberFormat('ja-JP',{style:'currency',currency:'JPY'}).format(n||0), date=()=>new Date().toLocaleDateString('sv-SE',{timeZone:'Asia/Tokyo'});
 const labels={yes:'参加',no:'不参加',pending:'未回答',player:'選手',coach:'コーチ',parent:'保護者',other:'その他',payment:'参加費の入金',refund:'返金',income:'その他収入',expense:'支出'};
 let editorDirty=false,editorOptions={};
-let service,user,directory=null,directoryIssue='',camp=null,isAdmin=true,tab='overview',pendingSave=null,saving=false,loadSerial=0;
+let service,user,directory=null,camp=null,isAdmin=true,tab='overview',pendingSave=null,saving=false,loadSerial=0;
 const manager=()=>true,finance=()=>true;
 const validId=id=>/^[0-9a-f]{8}-[0-9a-f]{4}-4[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/.test(id);
 let known=[];try{known=JSON.parse(localStorage.getItem('smc-camp-links')||'[]').filter(validId);}catch{}
@@ -55,66 +55,36 @@ function createCamp(initial={},title='新しい合宿を作成'){
 }
 async function list(){
  document.body.classList.remove('camp-accounting-view','camp-participants-view');camp=null;tab='overview';
- const serial=++loadSerial,device=directory?.currentUser();
- let cloud=[],listingDenied=false,cloudNotice='',application=null;
- // 全件検索は承認済み端末だけ。拒否されたら匿名公開の検索を再試行しない。
- if(device){
-  try{cloud=await directory.browse();cloudNotice='☁️ クラウドの合宿を '+cloud.length+'件取得しました。';}
-  catch(e){listingDenied=true;cloudNotice=e.code==='permission-denied'?'この端末はまだ合宿一覧の利用を承認されていません。承認後に「最新情報を取得」を押してください。':'合宿一覧を取得できません：'+friendly(e);}
-  if(listingDenied){try{application=await directory.application();}catch(e){console.warn('Camp directory request status unavailable',e);}}
- }
+ const serial=++loadSerial;
+ let cloud=[],error='';
+ try{cloud=await directory.browse();}
+ catch(e){error=e.code==='permission-denied'?'クラウド一覧を表示するためのFirestore公開設定が未反映です。管理者はFirestoreルールを確認してください。':friendly(e);}
  const cached=await service.list(known);
  if(serial!==loadSerial)return;
- const all=[...new Map([...cached,...cloud].map(x=>[x.id,x])).values()];
+ const all=[...new Map([...cached,...cloud].map(c=>[c.id,c])).values()];
  const p=$('content');p.replaceChildren(el('h2','合宿一覧'));
- const access=el('section',undefined,'camp-directory-access');
- access.append(el('h3','☁️ クラウドの合宿一覧'));
- if(!directory){
-  access.append(el('p','端末の自動識別を開始できませんでした。'+(directoryIssue||'通信環境とFirebaseの匿名認証設定を確認してください。'),'budget-alert'));
- }else if(!device){
-  access.append(el('p','端末を確認しています。「最新情報を取得」を押してください。','small'));
- }else if(!listingDenied){
-  access.append(el('p',cloudNotice,'small'),el('p','この端末は承認済みです。次回以降もログイン・合言葉なしで合宿一覧を確認できます。','small'));
- }else{
-  access.append(el('p',cloudNotice,'budget-alert'));
-  const idLine=el('p','この端末の識別番号：'+device.uid,'small');idLine.classList.add('camp-device-id');access.append(idLine);
-  if(application){
-   access.append(el('p','利用申請済み：'+application.label+'。管理者が内容を確認し、端末を承認すると一覧を表示できます。','small'));
-  }else{
-   const lbl=el('label','利用申請（初回のみ）：コーチ・担当者の呼び名'),nameInput=el('input');
-   nameInput.type='text';nameInput.maxLength=40;nameInput.placeholder='例：担当コーチ';nameInput.autocomplete='off';nameInput.setAttribute('aria-label','利用申請の担当者名');
-   lbl.append(nameInput);access.append(lbl);
-   access.append(button('この端末の利用を申請する',async()=>{
-    if(!nameInput.value.trim()){message('担当者の呼び名を入力してください。',true);nameInput.focus();return;}
-    await directory.requestApproval(nameInput.value);
-    await list();
-    message('☁️ 申請を受け付けました。管理担当者による確認・承認後に一覧を利用できます。');
-   }));
-  }
-  access.append(button('端末の識別番号をコピー',async()=>{
-   if(navigator.clipboard?.writeText)await navigator.clipboard.writeText(device.uid);
-   else window.prompt('端末の識別番号をコピーしてください。',device.uid);
-   message('端末の識別番号を確認できました。管理担当者へ安全な方法で伝えてください。');
-  }));
-  access.append(el('p','管理担当者は申請内容と本人を別途確認し、Firebaseで端末を承認します。アプリの認証操作やパスワード入力は不要です。','small'));
- }
- access.append(el('p','SafariとLINE内ブラウザなどでは端末識別が別になる場合があります。ブラウザのサイトデータを消すと再申請が必要です。個別の共有リンクは従来どおり利用できます。','small'));
- p.append(access);
- if(isAdmin){const actions=el('div',undefined,'toolbar');p.append(actions);
+ const state=el('section',undefined,'camp-directory-access');
+ state.append(el('h3','☁️ クラウドの合宿一覧'));
+ if(error)state.append(el('p',error,'budget-alert'));
+ else state.append(el('p','クラウドから合宿 '+cloud.length+'件を取得しました。ログイン・合言葉・申請は不要です。','small'));
+ state.append(el('p','公開設定のため、サイトにアクセスした誰でも合宿や参加状況・会計情報を確認・編集できます。氏名以外の個人情報、連絡先、健康情報、個人別の金銭情報などは登録しないでください。','small'));
+ p.append(state);
+ if(isAdmin){
+  const actions=el('div',undefined,'toolbar');p.append(actions);
   const matches=all.filter(c=>!c.archived&&sameCamp(c,{name:springName,start:springStart}));
   actions.append(button('＋ 新しい合宿を作成',()=>createCamp()),button(matches.length?'春合宿2027を編集':'春合宿2027の候補から新規作成',async()=>{
    if(matches.length===1)return editCamp(matches[0].id);
    if(matches.length>1){message('同じ名前・日程の合宿が複数あります。下の一覧から編集する合宿を選んでください。',true);return;}
-   if(!device||listingDenied){if(!confirm('ほかの端末に既に同じ合宿がある可能性があります。承認済み端末で一覧を確認すると重複を防げます。新規作成しますか？'))return;}
-   createCamp({name:springName,start:springStart,end:'2027-03-14',place:'未定',notes:'合宿の行程・費用は調整中。'},'新しい合宿を作成（未確定の候補）');
+   if(error&&!confirm('クラウドの全合宿一覧を確認できていません。既存の合宿と重複する可能性があります。新規作成しますか？'))return;
+   createCamp({name:springName,start:springStart,end:'2027-03-14',place:'未定',notes:'行程・費用は調整中。'},'新しい合宿を作成（未確定の候補）');
   }));
  }
- if(!all.length)p.append(el('p',device&&!listingDenied?'クラウドにはまだ合宿が登録されていません。新しい合宿を作成してください。':'この端末で開いた合宿はまだありません。上の欄から一度だけ利用申請してください。'));
+ if(!all.length)p.append(el('p',error?'一覧取得に失敗しました。Firestoreの設定を確認し、最新情報を取得してください。':'登録済みの合宿はありません。新しい合宿を作成してください。'));
  for(const c of all.filter(c=>!c.archived).sort((a,b)=>(b.start||'').localeCompare(a.start||'')))
   row(p,c.name,[c.start+'〜'+c.end,c.place,c.status],[button('合宿を開く',()=>open(c.id)),button('この合宿を編集',()=>editCamp(c.id))]);
  const hidden=all.filter(c=>c.archived);
  if(hidden.length){const box=el('details');box.append(el('summary','非表示にした合宿（'+hidden.length+'件・復元できます）'));for(const c of hidden)row(box,c.name,[c.start+'〜'+c.end,c.place],[button('合宿を確認・復元',()=>editCamp(c.id))]);p.append(box);}
- if(device&&!listingDenied&&cloud.length===100)p.append(el('p','合宿一覧は新しい開催日順で100件まで表示しています。','small'));
+ if(!error&&cloud.length===100)p.append(el('p','直近の開催日順で100件まで表示しています。','small'));
 }
 async function open(id){const serial=++loadSerial;message('読み込んでいます…');const result=await service.load(id);if(serial!==loadSerial)return;camp=result;remember(id);history.replaceState(null,'','#'+id);render();message('☁️ クラウドから最新情報を取得しました。更新は「最新情報を取得」を押してください。');}
 async function reload(){if(camp)await open(camp.id);else await list();}
@@ -170,4 +140,4 @@ async function importRoster(){const snap=await window.FIREBASE_DB.ref('members_v
 function download(name,text,type){const u=URL.createObjectURL(new Blob([text],{type})),a=el('a');a.href=u;a.download=name;a.click();setTimeout(()=>URL.revokeObjectURL(u),1000);}
 function csv(){const r=specialReport(camp.report,camp.specialBook,camp.ledger);if(!r)throw new Error('決算データがありません');const rows=[['合宿名',camp.name],['開催日',camp.start+'〜'+camp.end],['参加人数',camp.participants.filter(x=>x.response==='yes').length],['収入',r.income],['支出',r.expense],['差引',r.balance],...(r.special?[['内訳（総額へ再加算しない）_特別補助',r.special.aid],['内訳_特別支出',r.special.expense],['内訳_特別収支差引',r.special.net],['内訳_宿泊費値引き適用額',r.special.applied]]:[]),...entries(r.categories)];download(camp.name+'-決算.csv','\uFEFF'+rows.map(row=>row.map(x=>'"'+String(x).replace(/^[=+@-]/,"'$&").replaceAll('"','""')+'"').join(',')).join('\r\n'),'text/csv;charset=utf-8');}
 $('list').onclick=run(async()=>{history.replaceState(null,'',location.pathname);await list();});$('refresh').onclick=run(reload);
-window.onFirebaseReady(async()=>{try{await new Promise((resolve,reject)=>{const s=document.createElement('script');s.src='https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore-compat.js';s.onload=resolve;s.onerror=()=>reject(new Error('保存機能を読み込めません。再接続してください。'));document.head.append(s);});let actor;try{actor=sessionStorage.getItem('smc-camp-actor');if(!actor){actor=crypto.randomUUID();sessionStorage.setItem('smc-camp-actor',actor);}}catch{actor=crypto.randomUUID();}user={uid:actor};service=createService(firebase.firestore(),actor,true);try{if(typeof firebase.auth==='function'){directory=createCampDirectory(firebase,FIREBASE_CONFIG);await directory.ready();}else directoryIssue='Firebase認証SDKを取得できません。';}catch(error){directoryIssue=error?.code==='auth/operation-not-allowed'?'Firebaseコンソールで匿名認証を有効にしてください。':friendly(error);directory=null;console.warn('Camp anonymous identity unavailable',error);} $('application').hidden=false;const id=location.hash.slice(1);if(validId(id))await open(id);else {await list();message(directory?.currentUser()?'☁️ 合宿一覧を確認しました。':'合宿一覧を表示しました。端末識別を確認してください。');}}catch(e){message(friendly(e),true);}});
+window.onFirebaseReady(async()=>{try{await new Promise((resolve,reject)=>{const s=document.createElement('script');s.src='https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore-compat.js';s.onload=resolve;s.onerror=()=>reject(new Error('保存機能を読み込めません。再接続してください。'));document.head.append(s);});let actor;try{actor=sessionStorage.getItem('smc-camp-actor');if(!actor){actor=crypto.randomUUID();sessionStorage.setItem('smc-camp-actor',actor);}}catch{actor=crypto.randomUUID();}user={uid:actor};service=createService(firebase.firestore(),actor,true);directory=createCampDirectory(firebase.firestore()); $('application').hidden=false;const id=location.hash.slice(1);if(validId(id))await open(id);else {await list();message('☁️ 合宿一覧を表示しました。最新情報は「最新情報を取得」から確認できます。');}}catch(e){message(friendly(e),true);}});
