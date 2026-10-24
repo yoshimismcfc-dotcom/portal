@@ -42,13 +42,13 @@ test('団員名簿は高学年から・学年内はふりがな優先の名前�
 test('ふりがな未登録は氏名で並べ、同じ名前の並びはIDで安定化',()=>{
  const {context}=rosterContext();
  const rows=context.recordsToGrid({
-  zz:{name:'山田',grade:'4年'},
-  ab:{name:'青木',grade:'4年'},
-  c2:{name:'加藤',grade:'4年'},
-  c1:{name:'加藤',grade:'4年'}
+  zz:{name:'やまだ',grade:'4年'},
+  ab:{name:'あおき',grade:'4年'},
+  c2:{name:'かとう',grade:'4年'},
+  c1:{name:'かとう',grade:'4年'}
  });
- assert.deepEqual(Array.from(rows['4年'],m=>m.name),['青木','加藤','加藤','山田']);
- assert.deepEqual(Array.from(rows['4年'].filter(m=>m.name==='加藤'),m=>m.id),['c1','c2']);
+ assert.deepEqual(Array.from(rows['4年'],m=>m.name),['あおき','かとう','かとう','やまだ']);
+ assert.deepEqual(Array.from(rows['4年'].filter(m=>m.name==='かとう'),m=>m.id),['c1','c2']);
 });
 
 test('合宿名簿は6年から年長・不明の順、同学年内は日本語の名前順、元データは不変',()=>{
