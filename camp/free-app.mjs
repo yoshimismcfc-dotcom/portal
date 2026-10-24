@@ -33,7 +33,7 @@ $('close-editor').onclick=closeEditor;$('editor').addEventListener('cancel',e=>{
 window.addEventListener('beforeunload',e=>{if(editorDirty||saving){e.preventDefault();e.returnValue='';}});
 $('editor-form').onsubmit=async e=>{e.preventDefault();if(saving)return;if(!navigator.onLine){$('error').textContent='通信が切れています。再接続して保存してください。';return;}saving=true;$('save').disabled=true;$('save').textContent=editorOptions.savingLabel||'保存しています…';
  try{const afterSave=editorOptions.afterSave,successText=editorOptions.successText;const data=Object.fromEntries([...$('fields').querySelectorAll('input,select,textarea')].map(n=>[n.name,n.type==='checkbox'?n.checked:n.type==='number'?(n.dataset.optionalNumber&&n.value===''?null:Number(n.value)):n.value.trim()]));const next=await pendingSave(data);editorDirty=false;$('editor').close();if(typeof next==='function'){next();return;}await reload();afterSave?.();message((successText||'☁️ クラウドに保存しました。')+new Date().toLocaleTimeString('ja-JP'));}catch(error){$('error').textContent=friendly(error);if(error.existingCampIds?.length===1){$('error').append(button('登録済みの合宿を編集',async()=>{if(editorDirty&&!confirm('新規作成の入力をやめ、登録済みの合宿を編集しますか？'))return;editorDirty=false;$('editor').close();await editCamp(error.existingCampIds[0]);}));}}finally{saving=false;$('save').disabled=false;$('save').textContent=editorOptions.saveLabel||'保存する';}};
-const metaFields=[field('name','合宿名'),field('start','開始日','date'),field('end','終了日','date'),field('place','行き先'),field('meeting','集合場所・時間'),field('fee','標準参加費（円）','number'),field('status','状況','text',['準備中','募集中','実施中','終了','精算完了'].map(x=>[x,x])),field('notes','案内・未確定事項','textarea'),field('archived','アーカイブ','checkbox')];
+const metaFields=[field('name','合宿名'),field('start','開始日','date'),field('end','終了日','date'),field('place','行き先'),field('meeting','集合場所・時間'),field('fee','標準参加費（円）','number'),field('status','状況','text',['準備中','募集中','実施中','終了','精算完了'].map(x=>[x,x])),field('notes','案内・未確定事項','textarea'),field('archived','合宿を一覧から非表示（再表示は共有リンクから）','checkbox')];
 function metaData(d){check(d.name&&d.start&&d.end&&d.start<=d.end,'合宿名と開催日を確認してください');amount(d.fee);return d;}
 const springName='吉見SMC 春合宿2027',springStart='2027-03-13';
 function sameCamp(a,b){return a.name.trim()===b.name.trim()&&a.start===b.start;}
@@ -81,8 +81,6 @@ async function list(){
  if(!all.length)p.append(el('p',error?'一覧取得に失敗しました。Firestoreの設定を確認し、最新情報を取得してください。':'登録済みの合宿はありません。新しい合宿を作成してください。'));
  for(const c of all.filter(c=>!c.archived).sort((a,b)=>(b.start||'').localeCompare(a.start||'')))
   row(p,c.name,[c.start+'〜'+c.end,c.place,c.status],[button('合宿を開く',()=>open(c.id)),button('この合宿を編集',()=>editCamp(c.id))]);
- const hidden=all.filter(c=>c.archived);
- if(hidden.length){const box=el('details');box.append(el('summary','非表示にした合宿（'+hidden.length+'件・復元できます）'));for(const c of hidden)row(box,c.name,[c.start+'〜'+c.end,c.place],[button('合宿を確認・復元',()=>editCamp(c.id))]);p.append(box);}
  if(!error&&cloud.length===100)p.append(el('p','直近の開催日順で100件まで表示しています。','small'));
 }
 async function open(id){const serial=++loadSerial;message('読み込んでいます…');const result=await service.load(id);if(serial!==loadSerial)return;camp=result;remember(id);history.replaceState(null,'','#'+id);render();message('☁️ クラウドから最新情報を取得しました。更新は「最新情報を取得」を押してください。');}
