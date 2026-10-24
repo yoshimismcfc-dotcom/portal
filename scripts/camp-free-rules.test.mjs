@@ -13,19 +13,25 @@ try{
  const meta={name:'架空合宿',start:'2027-03-13',end:'2027-03-14',place:'検証会場',meeting:'9時集合',fee:10000,status:'準備中',notes:'テスト',archived:false};
  await s.create(meta,'11111111-1111-4111-8111-111111111111');assert.equal((await s.list(['11111111-1111-4111-8111-111111111111'])).length,1);pass('未ログインで合宿作成・既知リンクの一覧');
  await assertFails(admin.collection('campShared').get());await assertFails(admin.doc('campShared/guess').get());await assertFails(admin.doc('members_v2/private').get());pass('未ログインの合宿列挙・短いID・別領域のアクセス拒否');
- // Cloud directory is available only to a manually approved verified account.
- const approvedId='test-approved-coach';
+ // An anonymous identity does not grant directory access without staff approval.
+ const approvedId='test-approved-device',requestId='test-pending-device';
  await env.withSecurityRulesDisabled(async context=>context.firestore().doc('campDirectoryReaders/'+approvedId).set({enabled:true}));
- const approved=env.authenticatedContext(approvedId,{email:'coach@example.jp',email_verified:true}).firestore();
- const denied=env.authenticatedContext('test-unapproved',{email:'other@example.jp',email_verified:true}).firestore();
- const unverified=env.authenticatedContext(approvedId,{email:'coach@example.jp',email_verified:false}).firestore();
+ const approved=env.authenticatedContext(approvedId).firestore();
+ const denied=env.authenticatedContext('test-unapproved').firestore();
+ const applicant=env.authenticatedContext(requestId).firestore();
  assert.equal((await approved.collection('campShared').orderBy('start','desc').limit(100).get()).docs.length,1);
  await assertFails(denied.collection('campShared').get());
- await assertFails(unverified.collection('campShared').get());
  await assertFails(approved.collection('campDirectoryReaders').get());
  await assertFails(approved.doc('campDirectoryReaders/test-unapproved').get());
  await assertFails(approved.doc('campDirectoryReaders/'+approvedId).set({enabled:false}));
- pass('登録されたGoogleアカウントだけが全合宿一覧を閲覧でき、閲覧者自身は権限を変更できない');
+ await applicant.doc('campDirectoryRequests/'+requestId).set({label:'検証コーチ',createdAt:firebase.firestore.FieldValue.serverTimestamp()});
+ assert.equal((await applicant.doc('campDirectoryRequests/'+requestId).get()).data().label,'検証コーチ');
+ await assertFails(denied.doc('campDirectoryRequests/'+requestId).get());
+ await assertFails(applicant.collection('campDirectoryRequests').get());
+ await assertFails(applicant.doc('campDirectoryRequests/'+requestId).set({label:'上書き',createdAt:firebase.firestore.FieldValue.serverTimestamp()}));
+ await assertFails(applicant.doc('campDirectoryRequests/test-unapproved').set({label:'なりすまし',createdAt:firebase.firestore.FieldValue.serverTimestamp()}));
+ await assertFails(applicant.doc('campDirectoryReaders/'+requestId).set({enabled:true}));
+ pass('承認済み匿名UIDのみ全合宿一覧を閲覧。利用申請では自己承認できない');
  await s.save('11111111-1111-4111-8111-111111111111','participants',{id:'p1',name:'選手あお',grade:'4年',kind:'player',familyUid:'parent',response:'pending',overnight:true,revision:0});
  await s.save('11111111-1111-4111-8111-111111111111','participants',{id:'p2',name:'選手そら',grade:'5年',kind:'player',familyUid:'other',response:'yes',overnight:true,revision:0});
  let p=(await pa.load('11111111-1111-4111-8111-111111111111')).participants.find(x=>x.id==='p1');await pa.respond('11111111-1111-4111-8111-111111111111',p,'yes',true);assert.equal((await pa.load('11111111-1111-4111-8111-111111111111')).participants.find(x=>x.id==='p1').response,'yes');

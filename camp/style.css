@@ -127,10 +127,12 @@ html.camp-document{scroll-padding-top:90px}
 
 .camp-page #fields.bulk-fee-form>p{grid-column:1/-1}.bulk-fee-hint:empty{display:none}
 
-/* 合宿クラウド一覧：登録コーチのみGoogle認証して閲覧可能 */
+/* 合宿クラウド一覧：承認された匿名端末だけが閲覧可能 */
 .camp-directory-access{border:1px solid var(--surface-bd,#7183a066);border-radius:16px;background:var(--surface,#17233c);padding:14px;margin:12px 0 18px}
 .camp-directory-access h3{font-size:1rem;margin:0 0 8px}
 .camp-directory-access p{line-height:1.55;margin:7px 0}
 .camp-page .camp-directory-access button{min-height:44px;margin:6px 8px 4px 0;padding:11px 14px}
-.camp-page .camp-directory-access .camp-directory-login{background:var(--orange,#ff9b36);color:#101725;font-weight:800;max-width:100%;white-space:normal}
-@media(max-width:480px){.camp-page .camp-directory-access .camp-directory-login{width:100%}}
+.camp-page .camp-directory-access label{display:grid;gap:6px;margin:12px 0 6px;font-size:.9rem}
+.camp-page .camp-directory-access input{font-size:16px;max-width:100%;min-height:44px;border-radius:10px}
+.camp-page .camp-directory-access .camp-device-id{word-break:break-all;font-size:.78rem}
+@media(max-width:480px){.camp-page .camp-directory-access button{width:100%;margin-right:0}}
