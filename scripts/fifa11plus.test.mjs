@@ -5,3 +5,5 @@ const kids='https://nepeanfootball.com.au/wp-content/uploads/2020/04/11__kids_ma
 for(const p of [4,6,8,10,12,14,16,18,20])assert.ok(html.includes('https://www.jfa.jp/medical/pdf/11plus_a4.pdf#page='+p));
 assert.ok(html.includes('初級は3〜5回'));assert.ok(html.includes('週2回以上'));assert.ok(!/firebase|dbSave|localStorage|autoplay|<iframe/i.test(html));assert.ok(menu.includes('id="fifa11plus"'));assert.ok(menu.includes('href="fifa11plus.html"'));assert.ok(menu.includes('dbListen("practice_menu"'));assert.ok(menu.includes('dbSave("practice_menu"'));
 console.log('FIFA 11+ content/age/reference regression checks passed');
+
+assert.ok(html.includes('href="#kids-1">日本語で7種目を見る'));assert.equal((html.match(/class="warm-original"/g)||[]).length,7);assert.ok(!html.includes('Kids公式マニュアルを開く'));assert.ok(html.includes('日本語PDFで手順を見る'));
