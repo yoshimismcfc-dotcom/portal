@@ -78,8 +78,9 @@ async function list(){
    createCamp({name:springName,start:springStart,end:'2027-03-14',place:'未定',notes:'行程・費用は調整中。'},'新しい合宿を作成（未確定の候補）');
   }));
  }
- if(!all.length)p.append(el('p',error?'一覧取得に失敗しました。Firestoreの設定を確認し、最新情報を取得してください。':'登録済みの合宿はありません。新しい合宿を作成してください。'));
- for(const c of all.filter(c=>!c.archived).sort((a,b)=>(b.start||'').localeCompare(a.start||'')))
+ const active=all.filter(c=>!c.archived);
+ if(!active.length)p.append(el('p',error?'一覧取得に失敗しました。Firestoreの設定を確認し、最新情報を取得してください。':'表示する合宿はありません。新しい合宿を作成してください。'));
+ for(const c of active.sort((a,b)=>(b.start||'').localeCompare(a.start||'')))
   row(p,c.name,[c.start+'〜'+c.end,c.place,c.status],[button('合宿を開く',()=>open(c.id)),button('この合宿を編集',()=>editCamp(c.id))]);
  if(!error&&cloud.length===100)p.append(el('p','直近の開催日順で100件まで表示しています。','small'));
 }
