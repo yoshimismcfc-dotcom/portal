@@ -2,12 +2,12 @@
 
 GitHub Pages + Cloud Firestoreを使用します。課金プランへの変更、外部APIキー、オンライン決済は不要です。既存Realtime Databaseの会計・名簿は変更しません。Firestoreの無料枠を超えると利用が停止するため、運営前にコンソールで使用量を確認してください。
 
-## 本番設定（ログイン不要の共有リンク方式）
+## 本番設定（個別共有リンクはログイン不要／一覧検索は登録コーチのみ）
 
-ユーザー指定により、専用リンクを知る人全員が参加情報・会計・合宿設定を閲覧・編集できます。Firebase Authenticationの追加設定、Googleログイン、管理者UID登録は不要です。
+専用リンクを知る人全員が参加情報・会計・合宿設定を閲覧・編集する従来方式は維持します。**共有リンクなしでクラウドの合宿一覧を見るコーチだけ**Googleログインと登録済みUIDの閲覧権限が必要です。Firebase Authenticationを有効にしていない環境でも、既知の合宿共有リンクによる操作は従来どおり利用できます。
 
 1. SparkのFirestore Standardを本番モードで作成します。本プロジェクトは東京リージョンに作成済みです。
-2. `firestore.rules`をFirestoreのルール画面へ反映します。`campShared`だけを許可し、全合宿の列挙・健康情報フィールド・位置情報・物理削除は禁止します。既存Realtime Databaseのルールは変更しません。
+2. 現行の本番ルールを保存・比較し、`firestore.rules`の必要な変更をFirestoreルール画面へ反映して公開します。`campShared`の全件列挙は管理者が許可したGoogleアカウントだけに限定し、未認証・未登録の列挙、健康情報フィールド・位置情報・物理削除は引き続き禁止します。既存Realtime Databaseのルールは変更しません。
 3. `camps.html`などを既存GitHub Pagesへ公開します。合宿を作成し、設定画面で共有リンクをコピーします。
 
 専用リンクはランダムUUIDを含み、URLのフラグメントで渡します。これは本人認証ではありません。リンクを受け取った人による再共有・全情報の閲覧・変更が可能です。リンクを知る人による悪意ある改変まで防ぐ方式ではありません。重要情報を保存しない運用を前提とします。現状、共有リンクの無効化・再発行は管理コンソールでの対応が必要です。無料枠の濫用を完全に防ぐものではありません。
@@ -20,9 +20,19 @@ GitHub Pages + Cloud Firestoreを使用します。課金プランへの変更�
 
 開発時のQA依存はリポジトリ隣の `../qa` に `firebase`, `@firebase/rules-unit-testing`, `playwright` をインストールします。Java21とFirebase Firestoreエミュレーターを起動し、`node scripts/camp-free-rules.test.mjs`、続いて `node scripts/camp-free-browser.test.mjs` を実行します。QA依存を別の場所へ入れた場合は、`CAMP_QA_PACKAGE` にその `package.json` の絶対パスを指定します。`firebase-*-compat.js` は同じフォルダへ置いてください。Playwrightだけ別の場所にある場合は `PLAYWRIGHT_MODULE` を、画像・PDFの出力先を変える場合は `CAMP_QA_OUTPUT` を指定します。ブラウザテストは前者が作成するテストデータを利用します。匿名・未ログイン状態の読み書きを検証します。本番疎通は別途確認してください。
 
+## 共有リンクなしで合宿を直接選択する設定（コーチ用）
+
+1. Firebase Console → Authentication → Sign-in method で**Google**を有効化。Authentication → Settings → Authorized domainsで `yoshimismcfc-dotcom.github.io` が承認済みか確認します。設定とFirebase Auth利用開始はプロジェクト管理者が行います。
+2. コーチが `camps.html` で「Googleでログインして一覧を表示」を押します。LINE内ブラウザで認証できなければSafari・Chromeで開きます。未登録なら画面の「登録依頼用のユーザーIDをコピー」でFirebase AuthenticationのGoogle UIDを管理者に伝えます。
+3. Firebase Console → Firestore Database → Data で **`campDirectoryReaders/{そのUID}`** のドキュメントを作り、Boolean型 `enabled: true` を登録します。退任者は`enabled: false`として無効にできます。コーチ本人にFirebase Consoleの管理権限を渡す必要はありません。
+4. Firebase Console → Firestore Database → Rulesで現行本番ルールを控え、`firebase-free/firestore.rules`の新しい`campDirectoryReaders`照合と`campShared/{c}`の`allow list`条件を**既存ルールと比較して**反映・公開します。未承認者の`list`を許可する書き方、`allow read: if true`、`allow list: if true`は使わないでください。
+5. コーチが再び「合宿一覧」を開き、保存済みの合宿が直接表示されることを確認します。**コードをGitHub Pagesに公開しただけでは管理画面側の設定は完了しません。** 本番ルール・認証状態はこのリポジトリから検査できません。
+
+Googleログインは合宿一覧の発見だけに適用され、既存の共有URLからの個別読み書きは従来方式です。登録コーチには全合宿のUUIDが見えるため、登録は必要最小限とし、端末の紛失時は適切に利用停止してください。
+
 ## 合宿のクラウド保存（運用対象）
 
-`camps.html`の合宿情報・参加者・行程・会計は既存のCloud Firestore `campShared`に保存します。保存成功メッセージはサーバーへの書込みと再読込が終わってから表示します。端末の合宿一覧は以前開いた合宿IDからクラウド照会するため、別端末では合宿の共有リンクを開いてください。配車・点呼・部屋割り機能は利用者の指定で削除し、クラウドへの新しい保存領域は増やしません。以前の端末内配車データは意図しないデータ消去を避けるため自動削除しません。
+`camps.html`の合宿情報・参加者・行程・会計は既存のCloud Firestore `campShared`に保存します。保存成功メッセージはサーバーへの書込みと再読込が終わってから表示します。端末の合宿一覧は未ログイン時には以前開いた合宿IDから照会します。登録コーチはGoogleログイン後にCloud Firestoreの合宿一覧を直接表示でき、別端末でも共有リンクなしで選べます。配車・点呼・部屋割り機能は利用者の指定で削除し、クラウドへの新しい保存領域は増やしません。以前の端末内配車データは意図しないデータ消去を避けるため自動削除しません。
 
 ## バックアップ・復旧
 

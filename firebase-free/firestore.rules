@@ -6,6 +6,10 @@ service cloud.firestore {
   function member(c) { return validId(c) && exists(/databases/$(database)/documents/campShared/$(c)); }
   function leader(c) { return member(c); }
   function finance(c) { return member(c); }
+  // Only manually approved Google accounts may enumerate camp IDs.
+  function directoryReader() { return request.auth != null && request.auth.token.email_verified == true
+   && exists(/databases/$(database)/documents/campDirectoryReaders/$(request.auth.uid))
+   && get(/databases/$(database)/documents/campDirectoryReaders/$(request.auth.uid)).data.enabled == true; }
   function str(v,n) { return v is string && v.size() <= n; }
   function money(v) { return v is int && v >= 0 && v <= 100000000; }
   function revision() { return request.resource.data.updatedAt == request.time && request.resource.data.revision == (resource == null ? 1 : resource.data.revision+1); }
@@ -28,6 +32,11 @@ service cloud.firestore {
   function specialAllocation(d) { return d is map && d.keys().hasOnly(['members','team','leisure','reserve','confirmed']) && money(d.members) && money(d.team) && money(d.leisure) && money(d.reserve) && d.confirmed is bool; }
   function specialDetails(d) { return d is map && d.keys().hasOnly(['schemeName','applicationBasis','beneficiaries','payer','recipient','ownershipEvidence','consentEvidence','verification','discountReference','note'])
    && str(d.schemeName,3000) && str(d.applicationBasis,3000) && str(d.beneficiaries,3000) && str(d.payer,3000) && str(d.recipient,3000) && str(d.ownershipEvidence,3000) && str(d.consentEvidence,3000) && str(d.verification,3000) && str(d.discountReference,3000) && str(d.note,3000); }
+  // Firebase Console administrators create/revoke these approvals; clients cannot write them.
+  match /campDirectoryReaders/{uid} {
+   allow get: if request.auth != null && request.auth.uid == uid;
+   allow list, create, update, delete: if false;
+  }
   match /campSpecialAdmins/{u} { allow get: if request.auth!=null && request.auth.uid==u; allow list,write: if false; }
   match /campSpecialPrivate/{c}/items/{i} {
    allow read: if specialAdmin(c);
@@ -74,7 +83,7 @@ service cloud.firestore {
      && d.updatedAt==request.time;
    }
    allow get: if validId(c);
-   allow list: if false;
+   allow list: if directoryReader();
    allow create: if validId(c) && meta() && request.resource.data.revision==0;
    allow update: if leader(c) && meta() && request.resource.data.revision==resource.data.revision+1;
    allow delete: if false;
