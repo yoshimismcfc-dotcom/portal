@@ -7,7 +7,7 @@ import {createBudgetUI} from './budget-ui.mjs?v=20261023-10';
 import {entries,totals,estimate,mapURL,amount,check} from './free-model.mjs?v=20261024-2';
 import {createService} from './free-service.mjs?v=20261024-2';
 import {createCampDirectory} from './directory.mjs?v=20261024-10';
-import {compareGradeAndName,orderedParticipants} from './participant-order.mjs?v=20261025-1';
+import {compareGradeAndName} from './participant-order.mjs?v=20261025-1';
 const $=id=>document.getElementById(id), yen=n=>new Intl.NumberFormat('ja-JP',{style:'currency',currency:'JPY'}).format(n||0), date=()=>new Date().toLocaleDateString('sv-SE',{timeZone:'Asia/Tokyo'});
 const labels={yes:'参加',no:'不参加',pending:'未回答',player:'選手',coach:'コーチ',parent:'保護者',other:'その他',payment:'参加費の入金',refund:'返金',income:'その他収入',expense:'支出'};
 let editorDirty=false,editorOptions={};
