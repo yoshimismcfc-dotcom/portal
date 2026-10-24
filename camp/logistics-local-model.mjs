@@ -5,7 +5,7 @@ const exists=(a,id)=>a.some(x=>x.id===id&&x.active!==false);
 export const participantsForOperations=people=>people.filter(p=>p.response==='yes');
 export function usedSeats(state,people,v){
  const assigned=participantsForOperations(people).filter(p=>state.allocation[p.id]?.vehicle===v.id);
- const extra=v.driver&&!assigned.some(p=>p.id===v.driver)?1:0;
+ const extra=v.driver && !assigned.some(p=>p.id===v.driver) ? 1 : 0;
  return assigned.length+extra;
 }
 export function usedBeds(state,people,room){
@@ -24,7 +24,7 @@ export function verifyOperations(state,people){
   }
  }
  for(const v of state.vehicles){
-  if(typeof v.driver!=='string'||v.driver&&!people.some(p=>p.id===v.driver&&p.response==='yes'&&['coach','parent','other'].includes(p.kind)))bad('運転者は参加する大人から選んでください。');
+  if(typeof v.driver!=='string'||v.driver&&!people.some(p=>p.id===v.driver&&['coach','parent','other'].includes(p.kind)))bad('運転者は参加する大人から選んでください。');
   if(v.active&&usedSeats(state,people,v)>v.capacity)bad(v.label+'の乗車定員を超えています。運転者も定員に含みます。');
   if(v.driver&&state.allocation[v.driver]?.vehicle&&state.allocation[v.driver].vehicle!==v.id)bad('運転者が別の車に割り当てられています。');
  }
