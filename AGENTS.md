@@ -94,3 +94,7 @@ node scripts/camp-free-browser.test.mjs  # 無料版のブラウザ検査（両�
 ## 参加費・期限の一括設定（2026-10-24）
 
 `bulk-fees-model.mjs`で対象者と変更前後を確認し、`bulk-fees-ui.mjs`から既存台帳へ `charges` 操作として保存します。初期対象は参加・請求未設定のみ。既存額の変更、未回答・不参加の追加は明示選択です。期限だけは設定済み請求を対象とします。最大100人を1つのFirestoreトランザクションで保存し、台帳・公開集計のrevisionを1だけ更新します。対象者revisionも同じトランザクションで読み、競合なら全件中止します。既存の台帳historyに請求変更前後と操作署名を保持し、入出金は作りません。請求の任意noteだけを同じcharges内に追加します。保存先・Firestoreルール・権限の変更はありません。検査は `camp-bulk-fees.test.mjs` / `camp-bulk-fees-browser.test.mjs`。
+
+## FIFA 11＋資料（2026-10-24）
+
+練習メニュー `coach_menu.html` に固定カードを追加し、`fifa11plus.html` でKids（7〜13歳）と通常版（14歳以上）を分ける。既存URL保存の `practice_menu` と `smc_menu_urls_v1` に固定カードを書き込まない。静的HTML・native detailsとごく短いDOM操作だけを使用し、Firebase・実施記録は追加しない。公式写真/動画の転載はせず、原本へのリンクを使用する。照合資料・ページ対応は `docs/fifa11plus-sources.md`。検査: `scripts/fifa11plus.test.mjs`、`scripts/fifa11plus-browser.test.mjs`。

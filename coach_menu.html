@@ -9,9 +9,10 @@
   <script src="firebase-config.js"></script>
   <link rel="stylesheet" href="common.css">
   <script src="common.js"></script>
+  <link rel="stylesheet" href="fifa11plus.css?v=20261024-3">
   <style>
     .url-item{background:rgba(255,255,255,.04);border:1px solid var(--line);border-radius:var(--r8);padding:11px 13px;display:flex;align-items:center;gap:10px;margin-bottom:8px}
-    .url-label{font-size:.88rem;font-weight:700;color:#fff;flex:1;min-width:0}
+    .url-label{font-size:.88rem;font-weight:700;color:var(--ink);flex:1;min-width:0}
     .url-link{font-size:.72rem;color:var(--ink-3);overflow:hidden;text-overflow:ellipsis;white-space:nowrap;max-width:140px}
     .url-actions{display:flex;gap:6px;flex-shrink:0}
     .fg2{display:grid;grid-template-columns:1fr 1fr;gap:10px}
@@ -25,18 +26,20 @@
   <div class="hero-band">
     <div class="hero-emoji">🔗</div>
     <div><div class="hero-title">練習メニュー</div>
-      <div class="hero-sub">URLを登録してワンタップで開けます。</div></div>
+      <div class="hero-sub">ウォーミングアップ資料と、登録した練習URLを確認できます。</div></div>
   </div>
+
+  <section id="fifa11plus" class="training-reference" aria-labelledby="fifa-entry-title"><div><span class="training-reference-tag">ウォーミングアップ</span><h2 id="fifa-entry-title">FIFA 11＋・Kids</h2><p>対象年齢・動き・公式動画を確認できます。</p></div><a href="fifa11plus.html">内容を見る <span aria-hidden="true">→</span></a></section>
 
   <div class="panel">
     <div class="panel-title">＋ URLを追加</div>
     <div class="fg2">
       <div class="form-group" style="margin:0">
-        <label class="form-label">ラベル</label>
+        <label class="form-label" for="url-label">ラベル</label>
         <input class="form-control" id="url-label" placeholder="例: 4年生 パス練習">
       </div>
       <div class="form-group" style="margin:0">
-        <label class="form-label">URL</label>
+        <label class="form-label" for="url-href">URL</label>
         <input class="form-control" id="url-href" type="url" placeholder="https://...">
       </div>
     </div>
