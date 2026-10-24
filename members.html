@@ -69,7 +69,9 @@
     .edit-modal-bg{position:fixed;inset:0;background:rgba(0,0,0,.82);display:none;place-items:center;z-index:200;backdrop-filter:blur(6px);padding:16px}
     .edit-modal-bg.open{display:grid}
     .edit-modal{background:var(--surface-lt);border:1px solid var(--line-2);border-radius:var(--r16);padding:22px;width:min(560px,100%);max-height:calc(100dvh - 32px);overflow-y:auto;box-shadow:var(--shadow-lg)}
-    .edit-modal h3{font-size:.95rem;font-weight:900;color:#fff;margin-bottom:14px}
+    .member-school{display:block;margin-top:3px;font-size:.8rem;line-height:1.45;color:var(--ink-2);overflow-wrap:anywhere}
+    .edit-modal .form-control{font-size:16px;min-height:44px;min-width:0;max-width:100%;box-sizing:border-box}
+    .edit-modal h3{font-size:.95rem;font-weight:900;color:var(--ink);margin-bottom:14px}
     .edit-modal-btns{display:flex;gap:8px;justify-content:flex-end;margin-top:14px;flex-wrap:wrap}
     .gender-radio{display:flex;gap:16px;font-size:.88rem;color:var(--ink)}
     .member-uniform-help{margin:5px 0 8px;color:var(--ink-3);font-size:.72rem;line-height:1.55}
@@ -175,6 +177,11 @@
       <input class="form-control" id="edit-kana" placeholder="例：よしみ　たろう">
     </div>
     <div class="form-group">
+      <label class="form-label" for="edit-school">小学校（任意）</label>
+      <input class="form-control" id="edit-school" type="text" maxlength="80" placeholder="例：吉見北小学校" aria-describedby="school-help">
+      <p class="member-uniform-help" id="school-help">年長の方は空欄のままで構いません。</p>
+    </div>
+    <div class="form-group">
       <label class="form-label">ユニフォーム</label>
       <p class="member-uniform-help">ユニフォーム貸出管理の「貸出予定」「貸出中」を自動表示します。この画面からは変更できません。</p>
       <div id="member-uniform-readonly"></div>
@@ -255,6 +262,10 @@ function render(){
   renderMobileCards();
 }
 
+function renderMemberSchool(member){
+  return member&&member.school ? "<span class=\"member-school\">"+escapeHtml(member.school)+"</span>" : "";
+}
+
 function renderGrid(){
   var tbl = document.getElementById("roster-table");
   if(!tbl) return;
@@ -278,7 +289,7 @@ function renderGrid(){
         h += "<td><div class='name-cell' onclick=\"openEdit('"+g+"',"+r+")\">"
           +"<div class='kana'>"+escapeHtml(m.kana||"")+"</div>"
           +"<div class='kanji"+(girl?" girl":"")+"'><span class='gender-dot' style='background:"+dot+"'></span>"+escapeHtml(m.name)+"</div>"
-          +renderMemberUniformBadges(m)
+          +renderMemberSchool(m)+renderMemberUniformBadges(m)
           +"</div></td>";
       } else {
         h += "<td><div class='name-cell empty' onclick=\"openNew('"+g+"',"+r+")\"></div></td>";
@@ -295,7 +306,7 @@ function renderList(){
   var all = [];
   grades.forEach(function(g){
     (data[g]||[]).forEach(function(m,r){
-      if(m&&m.name){var assigned=uniformAssignmentsForMember(m);var lent=assigned.filter(function(u){return u.state==="lent";});var planned=assigned.filter(function(u){return u.state==="planned";});all.push({id:m.id,name:m.name,kana:m.kana||"",num:String((lent[0]||planned[0]||{}).num||m.num||""),uniforms:assigned,gender:m.gender,grade:g,row:r});}
+      if(m&&m.name){var assigned=uniformAssignmentsForMember(m);var lent=assigned.filter(function(u){return u.state==="lent";});var planned=assigned.filter(function(u){return u.state==="planned";});all.push({id:m.id,name:m.name,kana:m.kana||"",school:m.school||"",num:String((lent[0]||planned[0]||{}).num||m.num||""),uniforms:assigned,gender:m.gender,grade:g,row:r});}
     });
   });
   if(currentSort==="kana")   all.sort(function(a,b){return a.kana.localeCompare(b.kana,"ja");});
@@ -315,7 +326,7 @@ function renderList(){
       var girl = m.gender==="f";
       h += "<tr onclick=\"openEdit('"+m.grade+"',"+m.row+")\">";
       if(showGrade) h += "<td style='text-align:center;color:var(--cyan);font-weight:700;font-size:.76rem'>"+m.grade+"</td>";
-      h += "<td style='font-weight:900;"+(girl?"color:#ff8888":"color:#fff")+"'>"+escapeHtml(m.name)+"</td>"
+      h += "<td style='font-weight:900;"+(girl?"color:#ff8888":"color:#fff")+"'>"+escapeHtml(m.name)+renderMemberSchool(m)+"</td>"
         +"<td style='font-size:.76rem;color:var(--ink-3)'>"+escapeHtml(m.kana)+"</td>"
         +"<td>"+renderMemberUniformBadges(m)+"</td>"
         +"<td style='text-align:center'>"+(girl?"<span style='color:#ff8888'>女</span>":"<span style='color:#88aaff'>男</span>")+"</td>"
@@ -358,7 +369,7 @@ function renderMobileCards(){
         +"<span class=\"mobile-member-number\">#"+escapeHtml(number)+"</span>"
         +"<span class=\"mobile-member-kana\">"+escapeHtml(member.kana||"ふりがな未登録")+"</span>"
         +"<span class=\"mobile-member-name"+(girl?" girl":"")+"\"><span class=\"gender-dot\" aria-hidden=\"true\" style=\"background:"+dot+"\"></span><span>"+escapeHtml(member.name)+"</span><span class=\"mobile-gender-text\">"+genderLabel+"</span></span>"
-        +renderMemberUniformBadges(member)+"</article>";
+        +renderMemberSchool(member)+renderMemberUniformBadges(member)+"</article>";
     }).join("")||'<div class="mobile-member-empty">この学年には団員がいません。</div>';
     sections.push("<section class=\"mobile-grade-section\"><button type=\"button\" class=\"mobile-grade-heading\" aria-expanded=\""+(open?"true":"false")+"\" aria-controls=\""+panelId+"\" onclick='toggleMobileGrade("+inlineArg(grade)+")'><span><span class=\"mobile-grade-title\">"+escapeHtml(grade)+"</span><span class=\"mobile-grade-count\">"+members.length+"名</span></span><span class=\"mobile-grade-toggle\">"+(open?"閉じる ▲":"開く ▼")+"</span></button><div class=\"mobile-grade-members\" id=\""+panelId+"\""+(open?"":" hidden")+">"+cards+"<button type=\"button\" class=\"mobile-add-member\" onclick='openNew("+inlineArg(grade)+","+nextMemberRow(grade)+")' aria-label=\""+escapeHtml(grade)+"に団員を追加\">＋ "+escapeHtml(grade)+"に団員を追加</button></div></section>");
   });
@@ -420,6 +431,7 @@ function openEdit(g,r){
   document.getElementById("edit-title").textContent = g+" "+(r+1)+"番目を編集";
   document.getElementById("edit-name").value = m.name||"";
   document.getElementById("edit-kana").value = m.kana||"";
+  document.getElementById("edit-school").value = m.school||"";
   document.getElementById("member-uniform-readonly").innerHTML=renderMemberUniformBadges(m);
   document.getElementById(m.gender==="f"?"edit-g-f":"edit-g-m").checked = true;
   document.getElementById("edit-del-btn").style.display = "inline-flex";
@@ -430,6 +442,7 @@ function openNew(g,r){
   document.getElementById("edit-title").textContent = g+" "+(r+1)+"番に追加";
   document.getElementById("edit-name").value = "";
   document.getElementById("edit-kana").value = "";
+  document.getElementById("edit-school").value = "";
   document.getElementById("member-uniform-readonly").innerHTML="<span style='color:var(--ink-3)'>登録後、ユニフォーム貸出管理から割り当てできます。</span>";
   document.getElementById("edit-g-m").checked = true;
   document.getElementById("edit-del-btn").style.display = "none";
@@ -518,12 +531,15 @@ function renderMemberUniformBadges(member){
 }
 function saveEdit(){
   var name = document.getElementById("edit-name").value.trim();
+  var school=document.getElementById("edit-school").value.trim();
+  if(school.length>80){alert("小学校は80文字以内で入力してください。");return;}
   var gEl  = document.querySelector("input[name='edit-gender']:checked");
   if(!name){ alert("氏名を入力してください。"); return; }
   var current = editId && memberRecords[editId] ? memberRecords[editId] : {};
   var changes = {
     name:name,
     kana:document.getElementById("edit-kana").value.trim(),
+    school:school,
     gender:gEl?gEl.value:"m",
     grade:editGrade,
     order:Number.isFinite(Number(current.order))?Number(current.order):editRow,
@@ -558,10 +574,10 @@ function exportCSV(){
     if(/^[=+\-@]/.test(text)) text="'"+text;
     return '"'+text.replace(/"/g,'""')+'"';
   }
-  var rows=[["学年","氏名","フリガナ","貸出ユニフォーム","性別"]];
+  var rows=[["学年","氏名","フリガナ","貸出ユニフォーム","性別","小学校"]];
   GRADES.forEach(function(g){
     (data[g]||[]).forEach(function(m){
-      if(m&&m.name) rows.push([g,m.name,m.kana||"",uniformAssignmentsForMember(m).map(memberUniformText).join(" / "),m.gender==="f"?"女":"男"]);
+      if(m&&m.name) rows.push([g,m.name,m.kana||"",uniformAssignmentsForMember(m).map(memberUniformText).join(" / "),m.gender==="f"?"女":"男",m.school||""]);
     });
   });
   var csv="\uFEFF"+rows.map(function(row){return row.map(csvCell).join(",");}).join("\n");
@@ -605,6 +621,7 @@ function convertLegacyMembers(legacy){
         name:String(member.name||""),
         kana:String(member.kana||""),
         num:String(member.num||""),
+        school:String(member.school||""),
         gender:member.gender==="f"?"f":"m",
         grade:grade,
         order:Number(position)||0,
