@@ -4,7 +4,7 @@ GitHub Pages + Cloud Firestoreを使用します。課金プランへの変更�
 
 ## 本番設定（個別共有リンクはログイン不要／一覧検索は登録コーチのみ）
 
-専用リンクを知る人全員が参加情報・会計・合宿設定を閲覧・編集する従来方式は維持します。**共有リンクなしでクラウドの合宿一覧を見るコーチだけ**Googleログインと登録済みUIDの閲覧権限が必要です。Firebase Authenticationを有効にしていない環境でも、既知の合宿共有リンクによる操作は従来どおり利用できます。
+専用リンクを知る人全員が参加情報・会計・合宿設定を閲覧・編集する従来方式は維持します。**共有リンクなしでクラウドの合宿一覧を見る端末だけ**Firebaseの匿名認証UIDと管理者承認が必要です。Googleログインや合言葉は不要です。Firebase Authenticationを有効にしていない環境でも、既知の合宿共有リンクによる操作は従来どおり利用できます。
 
 1. SparkのFirestore Standardを本番モードで作成します。本プロジェクトは東京リージョンに作成済みです。
 2. 現行の本番ルールを保存・比較し、`firestore.rules`の必要な変更をFirestoreルール画面へ反映して公開します。`campShared`の全件列挙は管理者が許可したGoogleアカウントだけに限定し、未認証・未登録の列挙、健康情報フィールド・位置情報・物理削除は引き続き禁止します。既存Realtime Databaseのルールは変更しません。
@@ -20,19 +20,22 @@ GitHub Pages + Cloud Firestoreを使用します。課金プランへの変更�
 
 開発時のQA依存はリポジトリ隣の `../qa` に `firebase`, `@firebase/rules-unit-testing`, `playwright` をインストールします。Java21とFirebase Firestoreエミュレーターを起動し、`node scripts/camp-free-rules.test.mjs`、続いて `node scripts/camp-free-browser.test.mjs` を実行します。QA依存を別の場所へ入れた場合は、`CAMP_QA_PACKAGE` にその `package.json` の絶対パスを指定します。`firebase-*-compat.js` は同じフォルダへ置いてください。Playwrightだけ別の場所にある場合は `PLAYWRIGHT_MODULE` を、画像・PDFの出力先を変える場合は `CAMP_QA_OUTPUT` を指定します。ブラウザテストは前者が作成するテストデータを利用します。匿名・未ログイン状態の読み書きを検証します。本番疎通は別途確認してください。
 
-## 共有リンクなしで合宿を直接選択する設定（コーチ用）
+## 共有リンクなしで合宿を直接選択する設定（端末の初回承認）
 
-1. Firebase Console → Authentication → Sign-in method で**Google**を有効化。Authentication → Settings → Authorized domainsで `yoshimismcfc-dotcom.github.io` が承認済みか確認します。設定とFirebase Auth利用開始はプロジェクト管理者が行います。
-2. コーチが `camps.html` で「Googleでログインして一覧を表示」を押します。LINE内ブラウザで認証できなければSafari・Chromeで開きます。未登録なら画面の「登録依頼用のユーザーIDをコピー」でFirebase AuthenticationのGoogle UIDを管理者に伝えます。
-3. Firebase Console → Firestore Database → Data で **`campDirectoryReaders/{そのUID}`** のドキュメントを作り、Boolean型 `enabled: true` を登録します。退任者は`enabled: false`として無効にできます。コーチ本人にFirebase Consoleの管理権限を渡す必要はありません。
-4. Firebase Console → Firestore Database → Rulesで現行本番ルールを控え、`firebase-free/firestore.rules`の新しい`campDirectoryReaders`照合と`campShared/{c}`の`allow list`条件を**既存ルールと比較して**反映・公開します。未承認者の`list`を許可する書き方、`allow read: if true`、`allow list: if true`は使わないでください。
-5. コーチが再び「合宿一覧」を開き、保存済みの合宿が直接表示されることを確認します。**コードをGitHub Pagesに公開しただけでは管理画面側の設定は完了しません。** 本番ルール・認証状態はこのリポジトリから検査できません。
+Googleログインも合言葉も不要です。**Firebase匿名認証による端末識別＋管理者の初回承認**で、合宿一覧だけを見せます。匿名認証は本人確認ではありません。管理者は本人・端末の正当性を別途確認してください。
 
-Googleログインは合宿一覧の発見だけに適用され、既存の共有URLからの個別読み書きは従来方式です。登録コーチには全合宿のUUIDが見えるため、登録は必要最小限とし、端末の紛失時は適切に利用停止してください。
+1. Firebase Console → Authentication → Sign-in method で **「匿名」** を有効にする。Googleプロバイダーを新規有効化する必要はありません。Identity Platformの匿名アカウント自動削除を使っている場合、承認済み端末のUIDが消える可能性があるため、その設定と運用を確認します。
+2. コーチがSafariなどで合宿管理 `camps.html` を開くと、アプリが匿名UIDを自動作成します。初回だけ「コーチ・担当者の呼び名」を入力して「この端末の利用を申請する」を押します。申請は `campDirectoryRequests/{匿名UID}` に保存されます。申請だけでは合宿一覧を閲覧できません。
+3. Firebase管理者はFirebase Console → Firestore Database → Data → `campDirectoryRequests` で申請を確認し、LINEや対面など別の方法でコーチ本人・端末を確認します。自己申告の名前だけを本人確認として扱わないでください。
+4. 管理者が `campDirectoryReaders/{匿名UID}` ドキュメントを作成し、Boolean型の `enabled: true` を設定すると、その端末だけが合宿一覧を閲覧できます。退任・紛失時は `enabled: false` に変更します。このコレクションはユーザーから書き込み不可です。
+5. 管理者が既存の本番Firestoreルールを保存・比較し、`firebase-free/firestore.rules` の匿名UID承認判定、申請の厳格な作成規則、非承認者の一覧禁止を反映して公開します。未承認の `campShared` 全件列挙を許可してはいけません。アプリのコードをGitHubへ公開しただけでは本番ルールは変わりません。
+6. コーチが「最新情報を取得」を押すと、承認済み端末ではクラウドの全合宿一覧を直接表示します。以後、同じブラウザならGoogleログイン・合言葉なしです。SafariとLINE内ブラウザ、別のスマートフォン、サイトデータ消去後は異なるUIDになることがあり、再申請・承認が必要です。
+
+既存の合宿参加者・会計・行程と共有リンクは変更しません。**申請レコードは承認ではなく、承認済みUIDだけが一覧の全合宿UUIDを取得できる**構造です。本番のFirebase匿名認証・Firestoreルール・UIDの承認済み状況は、このリポジトリからは確認できません。
 
 ## 合宿のクラウド保存（運用対象）
 
-`camps.html`の合宿情報・参加者・行程・会計は既存のCloud Firestore `campShared`に保存します。保存成功メッセージはサーバーへの書込みと再読込が終わってから表示します。端末の合宿一覧は未ログイン時には以前開いた合宿IDから照会します。登録コーチはGoogleログイン後にCloud Firestoreの合宿一覧を直接表示でき、別端末でも共有リンクなしで選べます。配車・点呼・部屋割り機能は利用者の指定で削除し、クラウドへの新しい保存領域は増やしません。以前の端末内配車データは意図しないデータ消去を避けるため自動削除しません。
+`camps.html`の合宿情報・参加者・行程・会計は既存のCloud Firestore `campShared`に保存します。保存成功メッセージはサーバーへの書込みと再読込が終わってから表示します。端末の合宿一覧は未ログイン時には以前開いた合宿IDから照会します。承認済み端末は匿名UIDによってCloud Firestoreの合宿一覧を直接表示でき、同じブラウザでは共有リンクなしで選べます。別の端末・ブラウザでは初回申請と管理者承認が必要です。配車・点呼・部屋割り機能は利用者の指定で削除し、クラウドへの新しい保存領域は増やしません。以前の端末内配車データは意図しないデータ消去を避けるため自動削除しません。
 
 ## バックアップ・復旧
 
