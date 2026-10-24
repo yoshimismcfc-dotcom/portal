@@ -51,5 +51,11 @@ test('合宿画面は承認申請とログインなしで一覧を開く',()=>{
  const app=readFileSync(new URL('../camp/free-app.mjs',import.meta.url),'utf8');
  assert.match(app,/createCampDirectory\(firebase\.firestore\(\)\)/);
  assert.doesNotMatch(app,/requestApproval|signInAnonymously|この端末の利用を申請する|Googleでログインして一覧を表示/);
- assert.match(app,/誰でも合宿や参加状況・会計情報を確認・編集できます/);
+ assert.doesNotMatch(app,/公開設定のため、サイトにアクセスした誰でも/);
+ assert.doesNotMatch(app,/公開型の合宿です。誰でも氏名/);
+ assert.doesNotMatch(app,/共有リンクがなくても誰でも参加者・金額/);
+ assert.match(app,/クラウド一覧を表示するためのFirestore公開設定が未反映/);
+ const page=readFileSync(new URL('../camps.html',import.meta.url),'utf8');
+ assert.doesNotMatch(page,/参加者の出欠・参加費・入金履歴も公開されるため/);
+ assert.match(page,/無料版の使い方/);
 });

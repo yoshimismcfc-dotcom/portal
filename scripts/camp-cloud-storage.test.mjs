@@ -59,5 +59,6 @@ test('合宿画面には削除済みの配車・部屋割り・点呼処理を�
  const html=readFileSync(new URL('../camps.html',import.meta.url),'utf8');
  assert.doesNotMatch(app,/logistics-local|operations:'配車・点呼'|localOnly/);
  assert.match(app,/クラウドに保存しました/);
- assert.match(html,/Cloud Firestore/);
+ assert.match(html,/無料版の使い方/);
+ assert.doesNotMatch(html,/参加者の出欠・参加費・入金履歴も公開されるため/);
 });
