@@ -59,3 +59,16 @@ test('合宿画面は承認申請とログインなしで一覧を開く',()=>{
  assert.doesNotMatch(page,/参加者の出欠・参加費・入金履歴も公開されるため/);
  assert.match(page,/無料版の使い方/);
 });
+
+test('非表示にした合宿の一覧欄だけ撤去し、保存済みの合宿は削除しない',()=>{
+ const app=readFileSync(new URL('../camp/free-app.mjs',import.meta.url),'utf8');
+ const guide=readFileSync(new URL('../camp-free-guide.html',import.meta.url),'utf8');
+ const service=readFileSync(new URL('../camp/free-service.mjs',import.meta.url),'utf8');
+ assert.doesNotMatch(app,/非表示にした合宿（|合宿を確認・復元/);
+ assert.match(app,/const active=all\.filter\(c=>!c\.archived\)/);
+ assert.match(app,/合宿を一覧から非表示（再表示は共有リンクから）/);
+ assert.match(app,/async function open\(id\)/);
+ assert.match(guide,/共有リンクから合宿を開き/);
+ assert.match(service,/async meta\(id,data,revision\)/);
+ assert.doesNotMatch(app,/\.delete\(\)/);
+});
