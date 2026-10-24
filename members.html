@@ -129,7 +129,7 @@
     <div class="sort-bar">
       <span class="sort-lbl">並び替え</span>
       <div class="control-scroll" role="toolbar" aria-label="団員の並び替え">
-        <button class="sort-btn on" id="sb-none" aria-pressed="true" onclick="setSort('none')">学年順</button>
+        <button class="sort-btn on" id="sb-none" aria-pressed="true" onclick="setSort('none')">学年・名前順</button>
         <button class="sort-btn" id="sb-kana" aria-pressed="false" onclick="setSort('kana')">あいうえお順</button>
         <button class="sort-btn" id="sb-num" aria-pressed="false" onclick="setSort('num')">背番号順</button>
         <button class="sort-btn" id="sb-gender" aria-pressed="false" onclick="setSort('gender')">男女別</button>
@@ -247,6 +247,15 @@ var data = JSON.parse(JSON.stringify(INIT));
   var el = document.getElementById("grade-badge");
   if(el) el.textContent = sy+"年度";
 })();
+
+// 同じ学年内はふりがな優先の五十音順。既存の order は残すが表示順には使わない。
+var memberNameCollator=new Intl.Collator("ja",{numeric:true,sensitivity:"base"});
+function compareMemberNames(a,b){
+  var aName=String(a.kana||a.name||"").trim(),bName=String(b.kana||b.name||"").trim();
+  return memberNameCollator.compare(aName,bName)
+    ||memberNameCollator.compare(String(a.name||""),String(b.name||""))
+    ||memberNameCollator.compare(String(a.id||""),String(b.id||""));
+}
 
 /* ===== 描画 ===== */
 function render(){
@@ -386,7 +395,7 @@ function cycleSort(g){
 
   // その学年内のデータを並べ替え
   var members = (data[g]||[]).filter(function(m){return m&&m.name;});
-  if(next==="kana")   members.sort(function(a,b){return (a.kana||"").localeCompare(b.kana||"","ja");});
+  if(next==="kana"||next==="none") members.sort(compareMemberNames);
   if(next==="num") members.sort(function(a,b){var au=uniformAssignmentsForMember(a),bu=uniformAssignmentsForMember(b);var an=au.filter(function(u){return u.state==="lent";}).concat(au.filter(function(u){return u.state==="planned";}))[0];var bn=bu.filter(function(u){return u.state==="lent";}).concat(bu.filter(function(u){return u.state==="planned";}))[0];return (parseInt(an&&an.num||a.num)||999)-(parseInt(bn&&bn.num||b.num)||999);});
   // nullで埋める
   while(members.length < ROWS) members.push(null);
@@ -599,11 +608,7 @@ function recordsToGrid(records){
   });
   GRADES.forEach(function(grade){
     next[grade]=next[grade].filter(function(member){return member&&member.name;});
-    next[grade].sort(function(a,b){
-      var ao=Number.isFinite(Number(a.order))?Number(a.order):999;
-      var bo=Number.isFinite(Number(b.order))?Number(b.order):999;
-      return ao-bo||(a.kana||a.name).localeCompare(b.kana||b.name,"ja");
-    });
+    next[grade].sort(compareMemberNames);
   });
   return next;
 }
@@ -665,6 +670,7 @@ function startMemberSync(){
       if(value&&typeof value==="object"&&Object.keys(value).length){
         memberRecords=value;
         data=recordsToGrid(value);
+        gradeSortState={};
         render();
         setSaveMessage("☁️ Firebaseと同期済み",false);
       }else{
