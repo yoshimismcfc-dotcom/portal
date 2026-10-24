@@ -11,7 +11,7 @@ export function usedSeats(state,people,v){
 export function usedBeds(state,people,room){
  return participantsForOperations(people).filter(p=>p.overnight&&state.allocation[p.id]?.room===room.id).length;
 }
-export function verifyOperations(state,people){
+export function verifyOperations(state,people,{enforceCapacity=true}={}){
  if(!state||state.version!==1||!Array.isArray(state.vehicles)||!Array.isArray(state.rooms)||
  !state.allocation||Array.isArray(state.allocation)||!state.rollcall||Array.isArray(state.rollcall))bad('端末内のデータ形式を確認してください。');
  if(state.vehicles.length>24||state.rooms.length>32||Object.keys(state.allocation).length>120||Object.keys(state.rollcall).length>120)bad('登録件数が上限を超えています。');
@@ -25,10 +25,10 @@ export function verifyOperations(state,people){
  }
  for(const v of state.vehicles){
   if(typeof v.driver!=='string'||v.driver&&!people.some(p=>p.id===v.driver&&['coach','parent','other'].includes(p.kind)))bad('運転者は参加する大人から選んでください。');
-  if(v.active&&usedSeats(state,people,v)>v.capacity)bad(v.label+'の乗車定員を超えています。運転者も定員に含みます。');
+  if(enforceCapacity&&v.active&&usedSeats(state,people,v)>v.capacity)bad(v.label+'の乗車定員を超えています。運転者も定員に含みます。');
   if(v.driver&&state.allocation[v.driver]?.vehicle&&state.allocation[v.driver].vehicle!==v.id)bad('運転者が別の車に割り当てられています。');
  }
- for(const r of state.rooms)if(r.active&&usedBeds(state,people,r)>r.capacity)bad(r.label+'の宿泊定員を超えています。');
+ for(const r of state.rooms)if(enforceCapacity&&r.active&&usedBeds(state,people,r)>r.capacity)bad(r.label+'の宿泊定員を超えています。');
  for(const [id,a] of Object.entries(state.allocation)){
   if(!people.some(p=>p.id===id)||!a||typeof a.vehicle!=='string'||typeof a.room!=='string')bad('参加者の割り当てを確認してください。');
   if(a.vehicle&&!state.vehicles.some(v=>v.id===a.vehicle))bad('登録されていない車両があります。');
@@ -72,7 +72,7 @@ export function readOperations(store,campId,people){
  const source=store.getItem(localOperationsKey(campId));
  if(!source)return emptyOperations();
  const value=JSON.parse(source);
- return verifyOperations(value,people);
+ return verifyOperations(value,people,{enforceCapacity:false});
 }
 export function writeOperations(store,campId,state,people){
  const next=verifyOperations(state,people);
