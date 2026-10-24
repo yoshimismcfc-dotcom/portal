@@ -128,6 +128,7 @@
             <tr><td>⚡ よく使う</td><td>チームカレンダー・出欠確認・📁コーチ専用フォルダ・やることリスト・天気WBGT・説明書</td></tr>
             <tr><td>👨‍👩‍👦 入団・連絡</td><td>団員名簿・体験入団申込・担当フォルダ・会計業務</td></tr>
             <tr><td>🏟️ 試合・大会</td><td>当番・荷物チェック・ユニフォーム貸出・ピッチサイズ・審判ガイド・写真アルバム・YouTube</td></tr>
+            <tr><td>🏕️ 合宿</td><td><a href="camps.html">合宿管理</a>（参加・会計・行程）・<a href="Activities/BINGO/index.html">ビンゴ</a></td></tr>
             <tr><td>🔗 SNS・外部リンク</td><td>LINE登録・Instagram・LINEシェア・ホームページ・注文リンク集</td></tr>
           </tbody>
         </table>
@@ -135,7 +136,8 @@
           よく使う：<code style="font-size:.72rem">…/portal/#sec-quick</code><br>
           入団・連絡：<code style="font-size:.72rem">…/portal/#sec-join</code><br>
           試合・大会：<code style="font-size:.72rem">…/portal/#sec-match</code><br>
-          SNS・外部リンク：<code style="font-size:.72rem">…/portal/#sec-links</code>
+          SNS・外部リンク：<code style="font-size:.72rem">…/portal/#sec-links</code><br>
+          合宿：<code style="font-size:.72rem">…/portal/#sec-camp</code>
         </div>
         <div class="tip">📢 コーチからの<strong style="color:#60c0ff">青いお知らせ（ガイダンス）</strong>や<strong style="color:#ff8080">赤い注意事項（アラート）</strong>が一番上に表示されます。</div>
         <div class="tip">📋 <strong>📋 LINEコピー（緑ボタン）</strong>：対応ページにある緑のボタンを押すとテキストがコピーされ、LINEにそのまま貼り付けできます。</div>
@@ -152,6 +154,7 @@
             <tr><td>団員名簿</td><td>☁️ Firebase（団員ごとに追加・修正・削除）</td></tr>
             <tr><td>ユニフォーム・やることリスト・当番表・練習日誌・会計・大会任務分担など</td><td>☁️ Firebase（自動）／通信失敗時は端末に一時保存</td></tr>
             <tr><td>大会要綱・対戦表</td><td>☁️ Firebase（💾保存ボタンを押した時）</td></tr>
+            <tr><td>合宿管理</td><td>☁️ Cloud Firestore（共有リンクから編集。通常の名簿とは別管理）</td></tr>
           </tbody>
         </table>
         <div class="tip-g">✅ 「クラウドに保存しました」と表示されたデータは、ブラウザの履歴を消去してもFirebase側に残ります。事前に保存状態を確認してください。</div>
@@ -324,10 +327,11 @@
       <div class="acc-body">
         <ul class="step-list">
           <li>学年別に団員の一覧が表示されます</li>
-          <li>セルをタップして氏名・ふりがな・背番号・性別を直接編集</li>
-          <li>「💾 保存」でFirebaseに保存されます</li>
+          <li><strong>氏名をタップ</strong>して編集画面を開き、氏名・ふりがな・性別・小学校（任意）などを入力します</li>
+          <li>編集画面の<strong>「保存」</strong>を押し、「クラウドに保存しました」と表示されたことを確認します。保存できなかった場合は、通信を確認して再度保存してください</li>
+          <li>小学校は未登録でも使えます。年長児は空欄のままで構いません</li>
           <li>「📋 LINEコピー」で学年別名簿をLINEに送れます</li>
-          <li>「📥 CSV出力」でExcelにエクスポートできます</li>
+          <li>「📥 CSV出力」でExcel用CSVを保存できます。小学校はCSVに含まれますが、LINEコピーには含まれません</li>
         </ul>
       </div>
     </div>
@@ -385,7 +389,19 @@
 
   <!-- ===== コーチ専用フォルダ ===== -->
   <div class="g-tab-content" id="tab-coach">
-    <div class="tip">🎉 <strong>行事・レクリエーション → BINGO</strong>から、行事用の75球ビンゴを開けます。司会者が「次の番号を出す」を押し、参加者は紙のカードで楽しめます。抽選番号はクラウドに保存し、コーチ全員で1つのゲームを共有します。通信が切れると抽選を止め、再接続後に続きから再開します。「会場表示」はテレビ・プロジェクター用に番号と履歴を大きく表示するモードです。画面内の「使い方・会場表示について」で詳しく確認できます。</div>
+    <div class="acc-section">
+      <div class="acc-hdr" onclick="tog(this)"><div class="acc-icon">⚽</div><div class="acc-title">練習メニュー：FIFA 11＋・Kids <span class="badge-new">新規</span></div><div class="acc-arrow">▶</div></div>
+      <div class="acc-body">
+        <ul class="step-list">
+          <li>コーチ専用フォルダ → <a href="coach_menu.html">「練習メニュー」</a> → 「FIFA 11＋・Kids」の「内容を見る」を開きます</li>
+          <li><strong>7〜13歳</strong>はKidsの7種目を日本語の説明で確認できます。種目をタップすると動きと回数が開きます</li>
+          <li><strong>14歳以上</strong>の通常版は、年齢別の折りたたみを開いて確認します。小学生向けKidsと混同しないでください</li>
+          <li>Kidsの英語原本は補足資料です。日本語の説明は公式翻訳ではなく要約のため、細かな指導方法は原本で確認してください</li>
+        </ul>
+        <p class="desc"><a href="fifa11plus.html">FIFA 11＋・Kidsの日本語案内を開く</a></p>
+      </div>
+    </div>
+    <div class="tip">🎉 <strong>ホーム最下部「🏕️ 合宿」→「ビンゴ」</strong>から、行事用の75球ビンゴを開けます。司会者が「次の番号を出す」を押し、参加者は紙のカードで楽しめます。抽選番号はクラウドに保存し、コーチ全員で1つのゲームを共有します。通信が切れると抽選を止め、再接続後に続きから再開します。「会場表示」はテレビ・プロジェクター用に番号と履歴を大きく表示するモードです。画面内の「使い方・会場表示について」で詳しく確認できます。</div>
     <div class="tip">🔓 コーチ専用フォルダの<strong>試合・大会</strong>では、直近3大会を横スクロールのない縦一覧で表示します。大会を選ぶと、参加確定数・準備完了数・大会までの日数と<strong>次に行うこと</strong>を確認でき、試合調整・任務分担・要項／対戦表・会計へ直接移動できます。過去の大会は折りたたんで表示します。その下は<strong>試合・大会 → コーチ共有 → お知らせ → データ → 外部ツール → 行事・レクリエーション</strong>の順です。「大会準備の状況をLINEで共有」から、選択大会を直接開ける専用URLと最新の進捗を共有できます。同日開催の複数大会も別々に選べます。大会IDで確実に区別されます。各画面上部の「← 戻る」は、LINEやホーム画面アプリから直接開いた場合も、選択大会の進捗またはホームへ安全に戻ります。</div>
 
     <div class="acc-section">
