@@ -70,6 +70,9 @@ export function createLocalOperationsUI({getCamp,el,button,edit,field,message,re
    const n=usedSeats(state,c.participants,v);
    line(carSection,v.label+(v.active?'':'（使用しない）'),n+'/'+v.capacity+'席・運転者 '+personName(c.participants,v.driver),
     [button('編集',()=>editor('vehicle',v))]);
+   const riders=people.filter(p=>state.allocation[p.id]?.vehicle===v.id);
+   notice(carSection,'乗車予定：'+(riders.length?riders.map(p=>p.name).join('・'):'まだいません'));
+   if(v.active&&n>v.capacity)carSection.append(el('p','定員超過です。割当または車両定員を見直してください。','budget-alert'));
    if(v.active&&!v.driver)notice(carSection,v.label+'：運転者が未設定です。');
   }
   roomSection.append(el('summary','🛏️ 部屋の登録（'+state.rooms.filter(r=>r.active).length+'室）'));
@@ -77,6 +80,9 @@ export function createLocalOperationsUI({getCamp,el,button,edit,field,message,re
   for(const room of state.rooms){
    line(roomSection,room.label+(room.active?'':'（使用しない）'),usedBeds(state,c.participants,room)+'/'+room.capacity+'人',
     [button('編集',()=>editor('room',room))]);
+   const guests=people.filter(p=>p.overnight&&state.allocation[p.id]?.room===room.id);
+   notice(roomSection,'宿泊予定：'+(guests.length?guests.map(p=>p.name).join('・'):'まだいません'));
+   if(room.active&&guests.length>room.capacity)roomSection.append(el('p','定員超過です。割当または部屋の定員を見直してください。','budget-alert'));
   }
   config.append(carSection,roomSection);p.append(config);
 
