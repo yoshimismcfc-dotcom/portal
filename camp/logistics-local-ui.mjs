@@ -27,6 +27,7 @@ export function createLocalOperationsUI({getCamp,el,button,edit,field,message,re
    const next={...item,...data,label:data.label.trim(),capacity:Number(data.capacity)};
    if(!next.label)throw Error('名前を入力してください。');
    update({kind,item:next});
+   return ()=>{rerender();message('この端末に保存しました（他の端末には共有されません）。');};
   },{successText:'この端末に保存しました（他の端末には共有されません）。'});
  }
  function assignEditor(person,state){
@@ -35,7 +36,7 @@ export function createLocalOperationsUI({getCamp,el,button,edit,field,message,re
   const rooms=[['','未設定'],...state.rooms.filter(r=>r.active).map(r=>[r.id,r.label])];
   edit(person.name+'の割当',[field('vehicle','乗る車両','text',vehicles),
    ...(person.overnight?[field('room','宿泊する部屋','text',rooms)]:[])],
-   prior,async d=>{update({kind:'assign',id:person.id,vehicle:d.vehicle,room:person.overnight?d.room:''});},
+   prior,async d=>{update({kind:'assign',id:person.id,vehicle:d.vehicle,room:person.overnight?d.room:''});return ()=>{rerender();message('この端末の割当を保存しました。他端末には共有されません。');};},
    {successText:'この端末の割当を保存しました。他端末には共有されません。'});
  }
  function saveQuick(change){
