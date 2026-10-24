@@ -66,7 +66,7 @@ test('合宿名簿は6年から年長・不明の順、同学年内は日本語�
  assert.equal(JSON.stringify(rows),snapshot);
  assert.equal(gradeRank('小学 ６ 年生'),6);
  assert.equal(gradeRank('学年未設定'),-100);
- assert.ok(compareGradeAndName({name:'秋山',grade:'5年'},{name:'佐藤',grade:'5年'})<0);
+ assert.ok(compareGradeAndName({name:'秋山',kana:'あきやま',grade:'5年'},{name:'佐藤',kana:'さとう',grade:'5年'})<0);
 });
 
 test('合宿画面の直接一覧は説明ボックスを除去、障害時だけエラーを表示',()=>{
