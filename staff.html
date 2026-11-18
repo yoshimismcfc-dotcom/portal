@@ -30,6 +30,9 @@
     .role-qualification strong{font-weight:900}
     .role-actions{display:flex;gap:6px;margin-top:8px;justify-content:flex-end}
     .act-btn{border:1px solid;border-radius:6px;padding:4px 10px;font-size:.7rem;font-weight:700;cursor:pointer;background:none;transition:.15s}
+    .act-move{color:var(--ink-2);border-color:var(--line-2);min-width:44px;min-height:44px;font-size:1rem;padding:4px 8px}
+    .act-move:hover:not(:disabled){color:#fff;border-color:var(--cyan);background:rgba(0,212,255,.1)}
+    .act-move:disabled{opacity:.4;cursor:not-allowed}
     .act-edit{color:var(--cyan);border-color:rgba(0,212,255,.35)}.act-edit:hover{background:rgba(0,212,255,.1)}
     .act-del{color:#ff6680;border-color:rgba(255,68,102,.35)}.act-del:hover{background:rgba(255,68,102,.1)}
     /* モーダル */
@@ -40,6 +43,7 @@
     .modal-btns{display:flex;gap:8px;justify-content:flex-end;margin-top:14px;flex-wrap:wrap}
     /* グリッド */
     .staff-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+    .staff-order-help{font-size:.8rem;color:var(--ink-3);margin:-4px 0 12px}
     @media(max-width:480px){.staff-grid{grid-template-columns:1fr}}
   </style>
 </head>
@@ -64,6 +68,7 @@
     <div style="display:flex;gap:8px;margin-bottom:14px">
       <button class="btn btn-primary" onclick="openAdd('coach')">＋ コーチを追加</button>
     </div>
+    <p class="staff-order-help">矢印ボタンで順番を変更できます。変更はクラウドに保存されます。</p>
     <div class="staff-grid" id="coach-list"></div>
   </div>
 
@@ -140,13 +145,15 @@ dbListen("staff/parent", function(val){
 
 function renderCoach(){
   var list=document.getElementById("coach-list");
-  list.innerHTML=_coachData.map(function(s){
+  list.innerHTML=_coachData.map(function(s,index){
     return '<div class="role-card">'
       +'<div class="role-label">'+escH(s.role)+'</div>'
       +'<div class="role-name">'+escH(withTitle("coach",s.name))+'</div>'
       +(s.note?'<div class="role-sub">'+escH(s.note)+'</div>':"")
       +(s.qualifications?'<div class="role-sub role-qualification"><strong>保有資格：</strong>'+escH(s.qualifications).replace(/\r?\n/g,"<br>")+'</div>':"")
       +'<div class="role-actions">'
+      +'<button class="act-btn act-move" aria-label="'+escH(withTitle("coach",s.name))+ 'を上へ移動" title="上へ移動" onclick="moveCoach('+inlineJsArg(s.id)+',-1)"'+(index===0?' disabled':'')+'>↑</button>'
+      +'<button class="act-btn act-move" aria-label="'+escH(withTitle("coach",s.name))+ 'を下へ移動" title="下へ移動" onclick="moveCoach('+inlineJsArg(s.id)+',1)"'+(index===_coachData.length-1?' disabled':'')+'>↓</button>'
       +'<button class="act-btn act-edit" onclick="openEdit(\'coach\','+inlineJsArg(s.id)+')">✏️ 編集</button>'
       +'<button class="act-btn act-del"  onclick="confirmDel(\'coach\','+inlineJsArg(s.id)+')">🗑</button>'
       +'</div></div>';
@@ -176,6 +183,19 @@ function switchTab(id,btn){
 
 function showCoachQualification(type){
   document.getElementById("coach-qualification-field").style.display=type==="coach"?"block":"none";
+}
+
+function moveCoach(id,direction){
+  var from=_coachData.findIndex(function(s){return s.id===id;});
+  var to=from+direction;
+  if(from<0||to<0||to>=_coachData.length)return;
+  var reordered=_coachData.slice();
+  var moved=reordered[from];
+  reordered[from]=reordered[to];
+  reordered[to]=moved;
+  _coachData=reordered;
+  renderCoach();
+  dbSave("staff/coach",_coachData,KEY_C,null);
 }
 
 function openAdd(type){
