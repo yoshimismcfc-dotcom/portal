@@ -26,6 +26,8 @@
     .role-card.parent .role-label{color:var(--cyan)}
     .role-name{font-size:1rem;font-weight:900;color:#fff;margin-bottom:2px}
     .role-sub{font-size:.78rem;color:var(--ink-3);line-height:1.6}
+    .role-qualification{margin-top:6px;color:var(--cyan);white-space:normal}
+    .role-qualification strong{font-weight:900}
     .role-actions{display:flex;gap:6px;margin-top:8px;justify-content:flex-end}
     .act-btn{border:1px solid;border-radius:6px;padding:4px 10px;font-size:.7rem;font-weight:700;cursor:pointer;background:none;transition:.15s}
     .act-edit{color:var(--cyan);border-color:rgba(0,212,255,.35)}.act-edit:hover{background:rgba(0,212,255,.1)}
@@ -83,6 +85,8 @@
       <input class="form-control" id="m-role" placeholder="例：監督、6年担当、会計"></div>
     <div class="form-group"><label class="form-label">名前（敬称は自動でつきます）</label>
       <input class="form-control" id="m-name" placeholder="例：片山"></div>
+    <div class="form-group" id="coach-qualification-field" style="display:none"><label class="form-label" for="m-qualifications">保有資格（任意）</label>
+      <textarea class="form-control" id="m-qualifications" rows="3" placeholder="例：JFA公認D級、サッカー4級審判員&#10;複数ある場合は1行ずつ入力できます"></textarea></div>
     <div class="form-group"><label class="form-label">備考（連絡先・メモ等）</label>
       <textarea class="form-control" id="m-note" rows="2" placeholder="例：LINE: 090-XXXX"></textarea></div>
     <div class="modal-btns">
@@ -141,6 +145,7 @@ function renderCoach(){
       +'<div class="role-label">'+escH(s.role)+'</div>'
       +'<div class="role-name">'+escH(withTitle("coach",s.name))+'</div>'
       +(s.note?'<div class="role-sub">'+escH(s.note)+'</div>':"")
+      +(s.qualifications?'<div class="role-sub role-qualification"><strong>保有資格：</strong>'+escH(s.qualifications).replace(/\r?\n/g,"<br>")+'</div>':"")
       +'<div class="role-actions">'
       +'<button class="act-btn act-edit" onclick="openEdit(\'coach\','+inlineJsArg(s.id)+')">✏️ 編集</button>'
       +'<button class="act-btn act-del"  onclick="confirmDel(\'coach\','+inlineJsArg(s.id)+')">🗑</button>'
@@ -169,12 +174,17 @@ function switchTab(id,btn){
   btn.classList.add("active");
 }
 
+function showCoachQualification(type){
+  document.getElementById("coach-qualification-field").style.display=type==="coach"?"block":"none";
+}
+
 function openAdd(type){
   editId=null; editType=type;
   document.getElementById("modal-title").textContent=type==="coach"?"コーチを追加":"保護者を追加";
   document.getElementById("del-btn").style.display="none";
   document.getElementById("m-type").value=type;
-  ["m-role","m-name","m-note"].forEach(function(id){document.getElementById(id).value="";});
+  ["m-role","m-name","m-note","m-qualifications"].forEach(function(id){document.getElementById(id).value="";});
+  showCoachQualification(type);
   document.getElementById("modal").classList.add("open");
 }
 function openEdit(type,id){
@@ -188,6 +198,8 @@ function openEdit(type,id){
   document.getElementById("m-role").value=s.role||"";
   document.getElementById("m-name").value=s.name||"";
   document.getElementById("m-note").value=s.note||"";
+  document.getElementById("m-qualifications").value=s.qualifications||"";
+  showCoachQualification(type);
   document.getElementById("modal").classList.add("open");
 }
 function saveStaff(){
@@ -201,6 +213,7 @@ function saveStaff(){
     note: document.getElementById("m-note").value.trim(),
   };
   if(type==="coach"){
+    entry.qualifications=document.getElementById("m-qualifications").value.trim();
     var idx=_coachData.findIndex(function(x){return x.id===entry.id;});
     if(idx>=0) _coachData[idx]=entry; else _coachData.push(entry);
     dbSave("staff/coach",_coachData,KEY_C,null);
