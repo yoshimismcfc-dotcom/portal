@@ -154,7 +154,7 @@ function renderCoach(){
       +'<div class="role-label">'+escH(s.role)+'</div>'
       +'<div class="role-name">'+escH(withTitle("coach",s.name))+'</div>'
       +(s.phone?renderCoachPhone(s.phone):"")
-      +(s.note?'<div class="role-sub">'+escH(s.note)+'</div>':"")
+      +(s.note?'<div class="role-sub">'+renderCoachNote(s.note)+'</div>':"")
       +(s.qualifications?'<div class="role-sub role-qualification"><strong>保有資格：</strong>'+escH(s.qualifications).replace(/\r?\n/g,"<br>")+'</div>':"")
       +'<div class="role-actions">'
       +'<button class="act-btn act-move" aria-label="'+escH(withTitle("coach",s.name))+ 'を上へ移動" title="上へ移動" onclick="moveCoach('+inlineJsArg(s.id)+',-1)"'+(index===0?' disabled':'')+'>↑</button>'
@@ -199,6 +199,16 @@ function renderCoachPhone(phone){
   var safeDial=/^\+?\d+$/.test(dial)&&dial.replace(/\D/g,"").length>=3?dial:"";
   if(!safeDial)return '<div class="role-sub">電話番号：'+escH(display)+'</div>';
   return '<a class="role-phone" href="tel:'+safeDial+'" aria-label="電話をかける：'+escH(display)+'">📞 '+escH(display)+'</a>';
+}
+
+function renderCoachNote(note){
+  return String(note||"").split(/(\+?\d[\d\s().-]{5,}\d)/g).map(function(part){
+    var dial=part.replace(/[\s().-]/g,"");
+    if(!/^\+?\d+$/.test(dial)||dial.replace(/\D/g,"").length<7){
+      return escH(part).replace(/\r?\n/g,"<br>");
+    }
+    return '<a class="role-phone" href="tel:'+dial+'" aria-label="電話をかける：'+escH(part)+'">'+escH(part)+'</a>';
+  }).join("");
 }
 
 function moveCoach(id,direction){
