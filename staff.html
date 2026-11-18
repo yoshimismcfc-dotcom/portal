@@ -26,6 +26,8 @@
     .role-card.parent .role-label{color:var(--cyan)}
     .role-name{font-size:1rem;font-weight:900;color:#fff;margin-bottom:2px}
     .role-sub{font-size:.78rem;color:var(--ink-3);line-height:1.6}
+    .role-phone{display:inline-flex;align-items:center;min-height:44px;color:var(--cyan);font-size:.9rem;text-decoration:underline;text-underline-offset:3px}
+    .role-phone:focus-visible{outline:2px solid var(--cyan);outline-offset:2px;border-radius:4px}
     .role-qualification{margin-top:6px;color:var(--cyan);white-space:normal}
     .role-qualification strong{font-weight:900}
     .role-actions{display:flex;gap:6px;margin-top:8px;justify-content:flex-end}
@@ -90,6 +92,8 @@
       <input class="form-control" id="m-role" placeholder="例：監督、6年担当、会計"></div>
     <div class="form-group"><label class="form-label">名前（敬称は自動でつきます）</label>
       <input class="form-control" id="m-name" placeholder="例：片山"></div>
+    <div class="form-group" id="coach-phone-field" style="display:none"><label class="form-label" for="m-phone">電話番号（任意・タップで発信）</label>
+      <input class="form-control" id="m-phone" type="tel" inputmode="tel" autocomplete="tel" placeholder="例：090-1234-5678"></div>
     <div class="form-group" id="coach-qualification-field" style="display:none"><label class="form-label" for="m-qualifications">保有資格（任意）</label>
       <textarea class="form-control" id="m-qualifications" rows="3" placeholder="例：JFA公認D級、サッカー4級審判員&#10;複数ある場合は1行ずつ入力できます"></textarea></div>
     <div class="form-group"><label class="form-label">備考（連絡先・メモ等）</label>
@@ -149,6 +153,7 @@ function renderCoach(){
     return '<div class="role-card">'
       +'<div class="role-label">'+escH(s.role)+'</div>'
       +'<div class="role-name">'+escH(withTitle("coach",s.name))+'</div>'
+      +(s.phone?renderCoachPhone(s.phone):"")
       +(s.note?'<div class="role-sub">'+escH(s.note)+'</div>':"")
       +(s.qualifications?'<div class="role-sub role-qualification"><strong>保有資格：</strong>'+escH(s.qualifications).replace(/\r?\n/g,"<br>")+'</div>':"")
       +'<div class="role-actions">'
@@ -182,7 +187,18 @@ function switchTab(id,btn){
 }
 
 function showCoachQualification(type){
-  document.getElementById("coach-qualification-field").style.display=type==="coach"?"block":"none";
+  var isCoach=type==="coach";
+  document.getElementById("coach-qualification-field").style.display=isCoach?"block":"none";
+  document.getElementById("coach-phone-field").style.display=isCoach?"block":"none";
+}
+
+function renderCoachPhone(phone){
+  var display=String(phone||"").trim();
+  if(!display)return "";
+  var dial=display.replace(/[\s().-]/g,"");
+  var safeDial=/^\+?\d+$/.test(dial)&&dial.replace(/\D/g,"").length>=3?dial:"";
+  if(!safeDial)return '<div class="role-sub">電話番号：'+escH(display)+'</div>';
+  return '<a class="role-phone" href="tel:'+safeDial+'" aria-label="電話をかける：'+escH(display)+'">📞 '+escH(display)+'</a>';
 }
 
 function moveCoach(id,direction){
@@ -203,7 +219,7 @@ function openAdd(type){
   document.getElementById("modal-title").textContent=type==="coach"?"コーチを追加":"保護者を追加";
   document.getElementById("del-btn").style.display="none";
   document.getElementById("m-type").value=type;
-  ["m-role","m-name","m-note","m-qualifications"].forEach(function(id){document.getElementById(id).value="";});
+  ["m-role","m-name","m-note","m-qualifications","m-phone"].forEach(function(id){document.getElementById(id).value="";});
   showCoachQualification(type);
   document.getElementById("modal").classList.add("open");
 }
@@ -218,6 +234,7 @@ function openEdit(type,id){
   document.getElementById("m-role").value=s.role||"";
   document.getElementById("m-name").value=s.name||"";
   document.getElementById("m-note").value=s.note||"";
+  document.getElementById("m-phone").value=s.phone||"";
   document.getElementById("m-qualifications").value=s.qualifications||"";
   showCoachQualification(type);
   document.getElementById("modal").classList.add("open");
@@ -233,6 +250,7 @@ function saveStaff(){
     note: document.getElementById("m-note").value.trim(),
   };
   if(type==="coach"){
+    entry.phone=document.getElementById("m-phone").value.trim();
     entry.qualifications=document.getElementById("m-qualifications").value.trim();
     var idx=_coachData.findIndex(function(x){return x.id===entry.id;});
     if(idx>=0) _coachData[idx]=entry; else _coachData.push(entry);
