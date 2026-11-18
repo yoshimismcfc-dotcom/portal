@@ -14,7 +14,7 @@
 - `common.css` / `common.js` — 共通デザイン、テーマ、PWA登録、印刷、保存通知、端末内エラーログ
 - `firebase-config.js` — Firebase初期化、リアルタイム読込、保存結果の共通処理
 - `sw.js` / `manifest.json` / `offline.html` — PWAと一部オフライン表示
-- `members.html` / `staff.html` — 団員名簿・担当者
+- `members.html` / `staff.html` — 団員名簿・担当者（コーチの保有資格も登録・表示できます）
 - `game_adjust.html` / `tournament.html` / `duty_match.html` — 試合調整・大会資料・当番
 - `tournament-scheduler.js` — 対戦カードの重複を防ぎ、連続試合と休憩偏りを減らす対戦順最適化
 - `finance.html` / `accounting.html` — 現行の会計画面
