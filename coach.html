@@ -316,7 +316,55 @@
     body[data-theme="light"] .coach-flow-step.is-current .coach-flow-no,body[data-theme="light"] .coach-flow-step.is-current .coach-flow-status{color:#8f4200}
     body[data-theme="light"] .coach-flow-step.is-complete .coach-flow-no,body[data-theme="light"] .coach-flow-step.is-complete .coach-flow-status{color:#166534}
     @media(max-width:520px){.coach-flow{grid-template-columns:repeat(2,minmax(0,1fr))}.coach-dashboard-head{display:block}}
-    @media(max-width:340px){.coach-flow-step{min-height:132px;padding:8px 7px}.coach-flow-name{font-size:.64rem}.coach-flow-desc{font-size:.53rem}}
+    /* Match the spacing and card hierarchy of the coach menu. */
+    .coach-event-browser{padding:0;border:0;background:none;overflow:visible}
+    body[data-theme="light"] .coach-event-browser{background:none}
+    .coach-dashboard-head,.coach-preparation-heading,.coach-dashboard-section-title{
+      padding:12px 14px;border-inline-start:4px solid #379b56;
+      background:linear-gradient(90deg,rgba(46,125,50,.28),transparent)
+    }
+    .coach-dashboard-title{margin:0;font-size:1.25rem;line-height:1.4}
+    .coach-dashboard-copy,.coach-share-note{font-size:.875rem;line-height:1.6}
+    .coach-event-selected{padding:0;border:0;background:none;min-width:0;scroll-margin-top:76px}
+    body[data-theme="light"] .coach-event-selected{background:none}
+    .coach-event-select-block{padding:14px;border-radius:14px}
+    .coach-event-select-label,.coach-event-select-help{font-size:.875rem}
+    .coach-event-select-label{margin-bottom:8px}
+    .coach-event-selected-title{margin:0 0 10px;font-size:1.25rem}
+    .coach-event-select{min-width:0;max-width:100%;font-size:1rem}
+    .coach-event-selected-meta{
+      display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px;
+      margin:14px 0 10px;font-size:1rem
+    }
+    .coach-event-selected-meta div{min-width:0;padding:9px 10px;background:rgba(127,154,184,.12);border-radius:8px}
+    .coach-event-selected-meta dt{font-size:.875rem}
+    .coach-event-selected-meta dd{margin:2px 0 0;font-weight:800;overflow-wrap:anywhere}
+    .coach-event-countdown{font-size:.875rem}
+    .coach-next-step{margin-top:14px;padding:14px;border-radius:14px}
+    .coach-next-step-label,.coach-next-step-text{font-size:1rem}
+    .coach-next-step a{min-height:48px;padding:10px;text-align:center;font-size:1rem}
+    .coach-preparation-heading,.coach-dashboard-section-title{
+      margin:20px 0 10px;color:#fff;font-size:1.0625rem;font-weight:900
+    }
+    .coach-flow{gap:10px}
+    .coach-flow-step{
+      display:flex;flex-direction:column;min-height:44px;padding:12px;
+      border-radius:14px;background:#14294c
+    }
+    .coach-flow-icon{font-size:1.25rem}
+    .coach-flow-no,.coach-flow-status{font-size:.8125rem}
+    .coach-flow-name{font-size:1rem}
+    .coach-flow-desc{margin-bottom:8px;font-size:.875rem}
+    .coach-flow-footer{margin-top:auto}
+    .coach-flow-step:focus-visible,.coach-event-selected button:focus-visible,.coach-next-step a:focus-visible{
+      outline:3px solid currentColor;outline-offset:2px
+    }
+    .coach-event-selected button,.coach-empty-action{min-height:48px;padding:8px 12px;font-size:1rem}
+    .coach-event-empty{font-size:1rem}
+    body[data-theme="light"] .coach-dashboard-section-title{color:#17263c}
+    @media(max-width:359px){
+      .coach-flow,.coach-event-selected-meta{grid-template-columns:minmax(0,1fr)}
+    }
   </style>
 </head>
 <body>
@@ -343,7 +391,7 @@
     <div class="c-section-div" id="coach-match"><div class="csd-icon">🏟️</div><div class="csd-text">試合・大会</div><div class="csd-sub">MATCH & TOURNAMENT</div></div>
     <div class="coach-event-browser" id="coach-event-browser" aria-live="polite">
       <div class="coach-dashboard-head">
-        <div><div class="coach-dashboard-title">🏆 大会管理ダッシュボード</div><div class="coach-dashboard-copy">大会を選び、準備・当日入力・PDF・会計まで順番に進めます。</div></div>
+        <div><h2 class="coach-dashboard-title">🏆 大会管理ダッシュボード</h2><div class="coach-dashboard-copy">大会を選び、準備・当日入力・PDF・会計まで順番に進めます。</div></div>
       </div>
       <div class="coach-event-empty">大会情報を読み込んでいます…</div>
     </div>
@@ -1254,7 +1302,7 @@ document.addEventListener("DOMContentLoaded", function(){
   function flowStepHtml(index,action,state,current,item){
     var label=state==="complete"?"完了":state==="working"?"作業中":"未着手";
     var href=eventActionHref(action.page,item,action.view);
-    return '<a class="coach-flow-step is-'+state+(current?' is-current':'')+'" href="'+escapeHtml(href)+'" aria-label="STEP '+index+' '+escapeHtml(action.name)+'、'+label+'。タップして開く"><span class="coach-flow-top"><span class="coach-flow-icon" aria-hidden="true">'+action.icon+'</span><span class="coach-flow-no">STEP '+index+'</span></span><strong class="coach-flow-name">'+escapeHtml(action.name)+'</strong><span class="coach-flow-desc">'+escapeHtml(action.desc)+'</span><span><span class="coach-flow-status">'+label+'</span></span><span class="coach-flow-arrow" aria-hidden="true">›</span></a>';
+    return '<a class="coach-flow-step is-'+state+(current?' is-current':'')+'" href="'+escapeHtml(href)+'" aria-label="STEP '+index+' '+escapeHtml(action.name)+'、'+label+'。タップして開く"><span class="coach-flow-top"><span class="coach-flow-icon" aria-hidden="true">'+action.icon+'</span><span class="coach-flow-no">STEP '+index+'</span></span><strong class="coach-flow-name">'+escapeHtml(action.name)+'</strong><span class="coach-flow-desc">'+escapeHtml(action.desc)+'</span><span class="coach-flow-footer"><span class="coach-flow-status">'+label+'</span></span><span class="coach-flow-arrow" aria-hidden="true">›</span></a>';
   }
   function preparationHtml(item,prep,confirmed){
     var target=Number(item&&item.target)||0;
@@ -1275,7 +1323,7 @@ document.addEventListener("DOMContentLoaded", function(){
       {icon:"🏆",name:"順位表・PDF出力",desc:"順位を確認し、保存先を選ぶ",page:"tournament.html",view:"rankings"},
       {icon:"💰",name:"会計・決算",desc:"大会の収支を入力・確認",page:"accounting.html"}
     ];
-    return '<div class="coach-preparation-heading"><span>大会の流れ・操作</span><span class="coach-preparation-help">タップすると各画面を開きます</span></div><div class="coach-flow" aria-label="大会の進行状況と操作">'+actions.map(function(action,index){return flowStepHtml(index+1,action,states[index],index===current,item);}).join("")+'</div>';
+    return '<h3 class="coach-preparation-heading">大会の流れ・操作</h3><div class="coach-flow" aria-label="大会の進行状況と操作">'+actions.map(function(action,index){return flowStepHtml(index+1,action,states[index],index===current,item);}).join("")+'</div>';
   }
   function nextActionFor(item,prep,confirmed){
     var target=Number(item&&item.target)||0;
@@ -1300,8 +1348,8 @@ document.addEventListener("DOMContentLoaded", function(){
     return '<div class="coach-next-step"><div class="coach-next-step-label">次にやること</div><div class="coach-next-step-text">'+escapeHtml(action.text)+'</div><a href="'+escapeHtml(eventActionHref(action.page,item,action.view))+'">'+escapeHtml(action.label)+'</a></div>';
   }
   function coachEventOptionLabel(item){
-    var compactDate=String(item&&item.dateIso||"").replace(/-/g,".")||"日付未設定";
-    return [compactDate,item&&item.cat,displayTournamentName(item)].filter(Boolean).join("｜");
+    var date=String(item&&item.dateIso||"").replace(/-/g,".")||"日付未設定";
+    return [displayTournamentName(item),date,item&&item.cat].filter(Boolean).join("｜");
   }
   function copyText(textValue){
     if(navigator.clipboard&&window.isSecureContext)return navigator.clipboard.writeText(textValue);
@@ -1356,7 +1404,7 @@ document.addEventListener("DOMContentLoaded", function(){
     if(!sorted.length){
       var emptyShareNotice=requestedCoachEventPending?'<div class="coach-share-link-notice error">共有された大会が見つかりませんでした。</div>':'';
       requestedCoachEventPending=false;
-      root.innerHTML=emptyShareNotice+'<div class="coach-dashboard-head"><div><div class="coach-dashboard-title">🏆 大会管理ダッシュボード</div><div class="coach-dashboard-copy">大会を追加すると、準備・試合結果・会計まで一つの画面から進められます。</div></div></div><div class="coach-event-empty">まだ大会が登録されていません<br><button class="coach-empty-action" type="button" data-coach-add-event>＋ 最初の大会を追加する</button></div>';
+      root.innerHTML=emptyShareNotice+'<div class="coach-dashboard-head"><div><h2 class="coach-dashboard-title">🏆 大会管理ダッシュボード</h2><div class="coach-dashboard-copy">大会を追加すると、準備・試合結果・会計まで一つの画面から進められます。</div></div></div><div class="coach-event-empty">まだ大会が登録されていません<br><button class="coach-empty-action" type="button" data-coach-add-event>＋ 最初の大会を追加する</button></div>';
       var firstAdd=root.querySelector("[data-coach-add-event]");if(firstAdd)firstAdd.addEventListener("click",openCoachEventAdd);
       return;
     }
@@ -1371,18 +1419,30 @@ document.addEventListener("DOMContentLoaded", function(){
     var prep=preparationFor(selected);
     var confirmed=confirmedTeamCount(selected);
     var target=Number(selected&&selected.target)||0;
-    var meta=["日付："+coachEventLongDate(selected),"カテゴリー："+(selected.cat||"未設定"),"会場："+selectedEventVenue(selected),target?"参加確定："+confirmed+"チーム（目標 "+target+"チーム）":"参加確定："+confirmed+"チーム"].filter(Boolean);
+    var meta=[
+      ["日付",coachEventLongDate(selected)],
+      ["カテゴリー",selected.cat||"未設定"],
+      ["会場",selectedEventVenue(selected)],
+      ["参加確定",confirmed+"チーム"+(target?"（目標 "+target+"チーム）":"")]
+    ];
     var selectOptions=sorted.map(function(item){return '<option value="'+escapeHtml(String(item.id||""))+'"'+(String(item.id)===String(selected.id)?' selected':'')+'>'+escapeHtml(coachEventOptionLabel(item))+'</option>';}).join("");
-    root.innerHTML=shareNotice+'<div class="coach-dashboard-head"><div><div class="coach-dashboard-title">🏆 大会管理ダッシュボード</div><div class="coach-dashboard-copy">選択中の大会を確認し、下の「次にやること」から進めてください。</div></div></div>'
-      +'<div class="coach-event-selected"><div class="coach-event-select-block"><label class="coach-event-select-label" for="coach-event-select">選択中の大会</label><select class="coach-event-select" id="coach-event-select" data-coach-event-select aria-label="操作する大会を選ぶ">'+selectOptions+'</select><span class="coach-event-select-help">ここをタップすると、別の大会へ切り替えられます</span></div><div class="coach-event-selected-title">'+escapeHtml(displayTournamentName(selected))+'</div>'
-      +'<div class="coach-event-selected-meta">'+meta.map(function(value){return '<span>'+escapeHtml(value)+'</span>';}).join('')+'</div><span class="coach-event-countdown">'+escapeHtml(countdownFor(selected))+'</span>'
-      +'<button type="button" class="coach-event-edit-button" data-coach-edit-event="'+escapeHtml(String(selected.id||""))+'">✏️ 大会名・日付などを変更</button>'
-      +'<div class="coach-event-management-actions" aria-label="大会の追加と整理"><button type="button" class="coach-event-add-button" data-coach-add-event>＋ 新しい大会を追加</button><button type="button" class="coach-event-manage-button" data-coach-manage-events>大会を整理・削除</button></div>'
+    root.innerHTML=shareNotice+'<div class="coach-dashboard-head"><div><h2 class="coach-dashboard-title">🏆 大会管理ダッシュボード</h2><div class="coach-dashboard-copy">選択中の大会を確認し、下の「次にやること」から進めてください。</div></div></div>'
+      +'<div class="coach-event-selected"><div class="coach-event-select-block"><div class="coach-event-select-label">選択中の大会</div><h3 class="coach-event-selected-title" id="coach-current-event">'+escapeHtml(displayTournamentName(selected))+'</h3><select class="coach-event-select" id="coach-event-select" data-coach-event-select aria-label="操作する大会を選ぶ" aria-describedby="coach-current-event">'+selectOptions+'</select><span class="coach-event-select-help">ここをタップすると、別の大会へ切り替えられます</span></div>'
+      +'<dl class="coach-event-selected-meta">'+meta.map(function(field){return '<div><dt>'+field[0]+'</dt><dd>'+escapeHtml(field[1])+'</dd></div>';}).join('')+'</dl><span class="coach-event-countdown">'+escapeHtml(countdownFor(selected))+'</span>'
       +nextActionHtml(selected,prep,confirmed)
       +preparationHtml(selected,prep,confirmed)
+      +'<h3 class="coach-dashboard-section-title">大会の設定</h3>'
+      +'<button type="button" class="coach-event-edit-button" data-coach-edit-event="'+escapeHtml(String(selected.id||""))+'">✏️ 大会名・日付などを変更</button>'
+      +'<div class="coach-event-management-actions" aria-label="大会の追加と整理"><button type="button" class="coach-event-add-button" data-coach-add-event>＋ 新しい大会を追加</button><button type="button" class="coach-event-manage-button" data-coach-manage-events>大会を整理・削除</button></div>'
+      +'<h3 class="coach-dashboard-section-title">大会を共有</h3>'
       +'<button type="button" class="coach-share-button" data-coach-copy-id="'+escapeHtml(String(selected.id||""))+'">💬 大会準備の状況をLINEで共有</button><button type="button" class="coach-url-copy-button" data-coach-copy-url="'+escapeHtml(String(selected.id||""))+'">🔗 大会URLだけコピー</button><div class="coach-share-note">参加状況・任務分担・要項・対戦表・試合結果の進行状況と、この大会を直接開くURLを共有します</div><div class="coach-share-feedback" id="coach-share-feedback" role="status" aria-live="polite"></div></div>';
     var eventSelect=root.querySelector("[data-coach-event-select]");
-    if(eventSelect)eventSelect.addEventListener("change",function(){rememberCoachEvent(eventSelect.value);renderTournamentBrowser(sorted,next);});
+    if(eventSelect)eventSelect.addEventListener("change",function(){
+      rememberCoachEvent(eventSelect.value);
+      renderTournamentBrowser(sorted,next);
+      var updatedSelect=root.querySelector("[data-coach-event-select]");
+      if(updatedSelect)updatedSelect.focus({preventScroll:true});
+    });
     var editButton=root.querySelector("[data-coach-edit-event]");
     if(editButton)editButton.addEventListener("click",function(){openCoachEventEditor(editButton.getAttribute("data-coach-edit-event"));});
     var addButton=root.querySelector("[data-coach-add-event]");if(addButton)addButton.addEventListener("click",openCoachEventAdd);
