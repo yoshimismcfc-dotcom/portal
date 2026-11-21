@@ -156,7 +156,7 @@
       if(info?.authoritative){
         staffCoaches=namesFromStaff(records);
         linkLocalCoachAnswers();
-        coachRosterStatus=staffCoaches.length?"コーチ担当から "+staffCoaches.length+"名を読み込みました。":"コーチ担当に登録された名前がありません。";
+        coachRosterStatus=staffCoaches.length?"コーチ担当から"+staffCoaches.length+"名を表示":"コーチ担当に登録された名前がありません。";
       }else{
         coachRosterStatus="コーチ担当を確認できませんでした。通信状況を確認して、画面を開き直してください。";
       }
@@ -205,13 +205,49 @@
     return total;
   }
 
+  function safeCalendarEventUrl(value){
+    try{
+      var url=new URL(value);
+      if(url.protocol!=="https:"||url.username||url.password)return "";
+      if(url.hostname==="calendar.google.com"||
+         (url.hostname==="www.google.com"&&url.pathname.startsWith("/calendar/")))return url.href;
+    }catch(error){}
+    return "";
+  }
+
   function dayHeading(day){
     var date=fromISO(day.date);
-    var labels=Array.from(new Set(day.matches.map(categoryName))).map(function(category){return category==="その他"?"試合":category;});
-    var summary=labels.length?'<span class="day-match-label">'+esc(labels.join("・"))+'</span>':"";
-    var detail=holidays[day.date]||(!day.matches.length&&day.practice[0]?.title)||"";
-    return '<span class="board-date">'+(date.getMonth()+1)+"/"+date.getDate()+"（"+DAY_NAMES[date.getDay()]+'）</span>'+summary+
-      (detail?'<span class="board-event-title" title="'+esc(detail)+'">'+esc(detail)+'</span>':"");
+    var labels=Array.from(new Set(day.matches.map(categoryName)))
+      .sort(function(left,right){return left.localeCompare(right,"ja",{numeric:true});})
+      .map(function(category){return category==="その他"?"試合":category;});
+    var dayLabel=(date.getMonth()+1)+"/"+date.getDate()+"（"+DAY_NAMES[date.getDay()]+"）";
+    var fullLabels=labels.join("・");
+    var shortLabels=labels.length>3?labels.slice(0,2).join("・")+" ＋"+(labels.length-2):fullLabels;
+    var heading='<span class="board-date">'+esc(dayLabel)+(labels.length?'<span class="day-calendar-icon" aria-hidden="true">▦</span>':"")+'</span>';
+    if(labels.length){
+      heading+='<span class="day-match-label" title="'+esc(fullLabels)+'">'+esc(shortLabels)+'</span>';
+      var href=day.matches.length===1?safeCalendarEventUrl(day.matches[0].calendarUrl):"";
+      var label=esc(dateLabel(day.date)+" "+fullLabels+(href?"の詳細をGoogleカレンダーで開く":"の試合詳細を表示"));
+      if(href)return '<a class="day-detail-link" aria-label="'+label+'" href="'+esc(href)+'" target="_blank" rel="noopener">'+heading+'</a>';
+      return '<button type="button" class="day-detail-link" data-day-detail="'+esc(day.date)+'" aria-label="'+label+'">'+heading+'</button>';
+    }
+    var detail=holidays[day.date]||day.practice[0]?.title||"";
+    return heading+(detail?'<span class="board-event-title" title="'+esc(detail)+'">'+esc(detail)+'</span>':"");
+  }
+
+  function openDayDetails(day){
+    $("day-details-title").textContent=dateLabel(day.date)+"の試合";
+    var date=fromISO(day.date);
+    var dayUrl="https://calendar.google.com/calendar/r/day/"+date.getFullYear()+"/"+(date.getMonth()+1)+"/"+date.getDate();
+    $("day-details-list").innerHTML=day.matches.map(function(match){
+      var href=safeCalendarEventUrl(match.calendarUrl);
+      return '<section class="match-summary-event"><h3>'+esc(match.title||"試合")+'</h3>'+
+        '<div class="day-details-meta">'+esc(categoryName(match)+(match.startTime?" ・ "+match.startTime:""))+'</div>'+
+        (match.place?'<div class="day-details-meta">会場 '+esc(match.place)+'</div>':"")+
+        '<a class="secondary-button day-details-action" href="'+esc(href||dayUrl)+'" target="_blank" rel="noopener">'+
+        (href?"Googleカレンダーで試合詳細を開く":"Googleカレンダーで該当日を開く")+'</a></section>';
+    }).join("");
+    $("day-details-dialog").showModal();
   }
 
   function dayButton(day,person){
@@ -306,9 +342,10 @@
     panel.hidden=false;
     $("response-title").textContent="参加予定【"+(audience==="players"?"団員用":"コーチ用")+"】";
     $("respondent-count").textContent=people.length+"名";
-    $("response-summary").textContent="名前と日付が交わるマスで、練習・試合の出欠を入力できます。";
+    $("response-summary").textContent="日付は試合詳細、名前と日付のマスは出欠入力。";
     $("entry-mode-button").disabled=audience==="players"&&!members.length;
     $("coach-roster-status").textContent=coachRosterStatus;
+    $("coach-roster-status").hidden=audience!=="coaches";
     $("coach-editor").hidden=audience!=="coaches";$("grade-filters").hidden=audience!=="players";$("grade-filters").innerHTML="";
     if(audience==="players"){var grades=["すべて"].concat(GRADES.filter(function(g){return members.some(function(m){return m.grade===g;});}));$("grade-filters").innerHTML=grades.map(function(g){return '<button type="button" class="filter-chip'+(selectedGrade===g?" active":"")+'" data-grade="'+esc(g)+'">'+esc(g)+(g==="すべて"?"":"（"+members.filter(function(m){return m.grade===g;}).length+"）")+"</button>";}).join("");$("grade-filters").querySelectorAll("[data-grade]").forEach(function(btn){btn.addEventListener("click",function(){selectedGrade=btn.dataset.grade;renderResponse();});});if(selectedGrade!=="すべて")people=people.filter(function(p){return p.grade===selectedGrade;});}
 
@@ -385,6 +422,9 @@
         focusDayCell(day.date,person.id);
       });
     });
+    rows.querySelectorAll("[data-day-detail]").forEach(function(button){
+      button.addEventListener("click",function(){openDayDetails(daysByDate.get(button.dataset.dayDetail));});
+    });
     rows.querySelectorAll("[data-match-date]").forEach(function(btn){
       btn.addEventListener("click",function(){openMatchSummary(daysByDate.get(btn.dataset.matchDate),btn.dataset.matchCategory,people);});
     });
@@ -430,7 +470,8 @@
     var time=start?new Intl.DateTimeFormat("ja-JP",{timeZone:"Asia/Tokyo",hour:"2-digit",minute:"2-digit",hourCycle:"h23"}).format(start):"";
     return {
       id:"calendar_"+encodeURIComponent(event.sourceId),date:date,startTime:time,
-      kind:"match",category:event.label,title:event.title,place:event.location||""
+      kind:"match",category:event.label,title:event.title,place:event.location||"",
+      calendarUrl:safeCalendarEventUrl(event.url)
     };
   }
 
@@ -450,7 +491,7 @@
       if(!restore&&!previous&&!isAutomaticMatch(match))return;
       var hidden=previous?.hidden&&!restore;
       if(previous&&Boolean(previous.hidden)===Boolean(hidden)&&
-        ["date","startTime","title","place","category"].every(function(key){return previous[key]===match[key];}))return;
+        ["date","startTime","title","place","category","calendarUrl"].every(function(key){return previous[key]===match[key];}))return;
       events.set(match.id,{...match,...(hidden?{hidden:true}:{})});
       if(archived.has(match.id))resumed.add(match.id);
       changed=true;
