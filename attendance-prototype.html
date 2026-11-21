@@ -7,7 +7,7 @@
   <meta name="theme-color" content="#07152d">
   <title>出欠確認 試作版｜吉見SMC FC</title>
   <link rel="stylesheet" href="common.css">
-  <link rel="stylesheet" href="attendance-prototype.css?v=20261121-10">
+  <link rel="stylesheet" href="attendance-prototype.css?v=20261121-11">
   <script src="firebase-config.js"></script>
   <script src="common.js"></script>
 </head>
@@ -21,7 +21,7 @@
   </nav>
 
   <section class="panel response-panel" id="response-panel">
-    <div class="section-heading"><div><h1 id="response-title">参加予定【団員用】</h1><p id="response-summary">予定ごとに参加・未定・不参加を入力できます。</p></div><span id="respondent-count" class="month-label"></span></div>
+    <div class="section-heading"><div><h1 id="response-title">参加予定【団員用】</h1><p id="response-summary">予定ごとに参加・未定・不参加を入力できます。</p></div><div class="attendance-heading-actions"><span id="respondent-count" class="month-label"></span><button id="open-calendar-matches" class="secondary-button" type="button">試合を追加</button></div></div>
     <div id="coach-editor" class="coach-editor" hidden>
       <label for="coach-name-input">コーチ名を追加</label><div class="inline-form"><input id="coach-name-input" type="text" maxlength="40" placeholder="例：吉見 太郎"><button id="add-coach" type="button" class="primary-button">追加</button></div>
       <p class="small-note">名前はこの端末だけに保存されます。名前の編集・削除もできます。</p>
@@ -60,6 +60,23 @@
     <div id="attendance-form-events" class="attendance-form-events"></div>
     <label for="entry-comment">備考（任意）</label><textarea id="entry-comment" maxlength="80" rows="2" placeholder="送迎希望など（80文字以内）"></textarea>
     <div class="dialog-actions"><button type="button" id="cancel-attendance" class="secondary-button">キャンセル</button><button type="submit" id="save-attendance" class="primary-button">回答を保存</button></div>
+  </form>
+</dialog>
+<dialog id="calendar-match-dialog" class="event-dialog calendar-match-dialog" aria-labelledby="calendar-match-title">
+  <form method="dialog">
+    <h2 id="calendar-match-title">カレンダーから試合を追加</h2>
+    <label for="calendar-match-category">カテゴリー</label>
+    <select id="calendar-match-category">
+      <option value="">U7〜U12すべて</option>
+      <option>U7</option><option>U8</option><option>U9</option>
+      <option>U10</option><option>U11</option><option>U12</option>
+    </select>
+    <p id="calendar-match-status" class="dialog-date" role="status"></p>
+    <div id="calendar-match-list" class="calendar-match-list"></div>
+    <div class="dialog-actions">
+      <button id="refresh-calendar-matches" class="secondary-button" type="button">再読み込み</button>
+      <button class="secondary-button" value="close">閉じる</button>
+    </div>
   </form>
 </dialog>
 <dialog id="event-dialog" class="event-dialog">
