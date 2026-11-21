@@ -224,3 +224,7 @@
   .attendance-board-scroll { max-height: 60vh; max-height: 60svh; }
   .response-panel #coach-local-editor > summary { padding-block: 8px; }
 }
+
+.attendance-form-title .board-event-title { display: block; max-width: none; margin: 3px 0; white-space: normal; overflow-wrap: anywhere; color: inherit; font-size: inherit; }
+.attendance-form-event .day-details-action { margin: 0 0 8px; }
+.day-entry-event .day-details-action { grid-column: 1 / -1; justify-self: start; }
