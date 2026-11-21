@@ -49,6 +49,28 @@ try {
   assert.equal(viewB.docs[0].data().contact.earlyTime, '14:30');
   await assertSucceeds(setDoc(doc(coach, event('match-a') + '/coachAnswers/c1'), write('attending', {})));
   const visitor = env.unauthenticatedContext().firestore();
+  const shared = 'attendanceSharedAnswers/players:match-a:a';
+  const sharedAnswer = {
+    group:'players', eventId:'match-a', personId:'a', note:'',
+    ...write('attending', { message:'現地集合' })
+  };
+  await assertFails(setDoc(doc(visitor,shared),sharedAnswer));
+  await assertFails(setDoc(doc(visitor,'attendanceSharedConfig/v1'),{enabled:true}));
+  await env.withSecurityRulesDisabled(context =>
+    setDoc(doc(context.firestore(),'attendanceSharedConfig/v1'),{enabled:true}));
+  await assertSucceeds(setDoc(doc(visitor,shared),sharedAnswer));
+  const anotherPhone = env.unauthenticatedContext().firestore();
+  const sharedRows = await assertSucceeds(getDocs(collection(anotherPhone,'attendanceSharedAnswers')));
+  assert.equal(sharedRows.docs[0].data().contact.message, '現地集合');
+  await assertFails(updateDoc(doc(anotherPhone,shared),write('absent', {}, 1)));
+  await assertSucceeds(updateDoc(doc(anotherPhone,shared),write('absent', {}, 2)));
+  assert.equal((await getDoc(doc(visitor,shared))).data().value,'absent');
+  await assertFails(updateDoc(doc(anotherPhone,shared),{...write('attending', {}, 3),personId:'b'}));
+  await assertFails(getDoc(doc(anotherPhone,reply('match-a','a'))));
+  await env.withSecurityRulesDisabled(context =>
+    setDoc(doc(context.firestore(),'attendanceSharedConfig/v1'),{enabled:false}));
+  await assertFails(getDoc(doc(visitor,shared)));
+
   const key = 'a'.repeat(64);
   const door = event('match-a') + '/guestLinks/' + key;
   const publicNote = 'attendancePublicNotices/match-a';
