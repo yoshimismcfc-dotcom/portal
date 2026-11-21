@@ -44,11 +44,60 @@ service cloud.firestore {
   match /attendanceAccounts/{uid} {
    allow get: if attendanceEnabled() && request.auth.uid == uid;
   }
+  match /attendancePublicNotices/{e} {
+   allow get,list: if get(/databases/$(database)/documents/attendanceConfig/v1).data.enabled == true;
+   allow create,update: if attendanceCoach(e) && attendanceEvent(e).kind == 'match'
+    && request.resource.data.keys().hasOnly(['title','date','message','updatedAt'])
+    && request.resource.data.title == attendanceEvent(e).title
+    && request.resource.data.date == attendanceEvent(e).date
+    && str(request.resource.data.message,1200) && request.resource.data.message.size() > 0
+    && request.resource.data.updatedAt == request.time;
+   allow delete: if attendanceCoach(e);
+  }
   match /attendanceCloudEvents/{e} {
    allow get,list: if attendanceMember();
    match /roster/{p} {
     allow get: if attendanceCoach(e) || attendanceOwnPlayer(p);
     allow list: if attendanceCoach(e);
+   }
+   match /guestLinks/{key} {
+    function guestEnabled() {
+     return key.matches('[a-f0-9]{64}')
+      && get(/databases/$(database)/documents/attendanceConfig/v1).data.enabled == true
+      && resource.data.active == true && request.time < resource.data.expiresAt;
+    }
+    function eligibleGuest(p) {
+     let event = attendanceEvent(e);
+     let grade = attendanceRoster(e,p).grade;
+     return event.open == true && event.get('cancelled',false) == false
+      && ((event.kind == 'match' && grade in event.targetGrades)
+       || (event.kind == 'practice' && !(grade in event.practiceExcludedGrades)));
+    }
+    function validInvitation() {
+     let d = request.resource.data;
+     let event = attendanceEvent(e);
+     return key.matches('[a-f0-9]{64}')
+      && d.keys().hasOnly(['personId','personName','title','date','kind','localEventId','active','expiresAt'])
+      && str(d.personId,150) && d.personName == attendanceRoster(e,d.personId).name
+      && d.title == event.title && d.date == event.date && d.kind == event.kind
+      && d.localEventId == event.get('localEventId','') && d.active == true
+      && d.expiresAt is timestamp && d.expiresAt > request.time && d.expiresAt <= request.time + duration.value(100,'d')
+      && eligibleGuest(d.personId);
+    }
+    function validGuestResponse() {
+     let d = request.resource.data.answer;
+     return request.resource.data.diff(resource.data).affectedKeys().hasOnly(['answer'])
+      && d.keys().hasOnly(['value','contact','revision','updatedAt'])
+      && d.value in ['', 'attending', 'maybe', 'absent'] && attendanceContact(d.contact)
+      && d.updatedAt == request.time && d.revision == resource.data.get('answer',{}).get('revision',0) + 1
+      && (attendanceEvent(e).kind == 'match' || d.contact.size() == 0);
+    }
+    allow get: if (guestEnabled() && eligibleGuest(resource.data.personId)) || attendanceCoach(e);
+    allow list: if attendanceCoach(e);
+    allow create: if attendanceCoach(e) && validInvitation();
+    allow update: if (guestEnabled() && eligibleGuest(resource.data.personId) && validGuestResponse())
+     || (attendanceCoach(e) && request.resource.data.diff(resource.data).affectedKeys().hasOnly(['active'])
+      && request.resource.data.active == false);
    }
    match /playerAnswers/{p} {
     allow get: if attendanceCoach(e) || attendanceOwnPlayer(p);

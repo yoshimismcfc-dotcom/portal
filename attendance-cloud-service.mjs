@@ -89,10 +89,77 @@ export function attendanceStore(db, serverTimestamp) {
         if (!snapshot.metadata.fromCache) next(snapshot.docs.map(doc => ({ ...doc.data(), id: doc.id })));
       }, error);
     },
+    async publicNotices() {
+      const snapshot = await db.collection('attendancePublicNotices').orderBy('date','desc').get(server);
+      return snapshot.docs.map(doc => ({...doc.data(), id:doc.id}));
+    },
+    async publishNotice(event, message) {
+      return db.collection('attendancePublicNotices').doc(event.id).set({
+        title:event.title, date:event.date, message, updatedAt:serverTimestamp()
+      });
+    },
+    watchGuestLinks(id, next, error) {
+      return event(id).collection('guestLinks').onSnapshot({includeMetadataChanges:true}, snapshot => {
+        if (!snapshot.metadata.fromCache) next(snapshot.docs.map(doc => ({...doc.data(), key:doc.id})));
+      }, error);
+    },
+    async createGuestLink(item, person) {
+      const key = Array.from(crypto.getRandomValues(new Uint8Array(32)), value => value.toString(16).padStart(2,'0')).join('');
+      const expiresAt = new Date(Date.parse(item.date+'T23:59:59+09:00') + 86400000);
+      await event(item.id).collection('guestLinks').doc(key).set({
+        personId:person.id, personName:person.name, title:item.title, date:item.date, kind:item.kind,
+        localEventId:item.localEventId || '', active:true, expiresAt
+      });
+      return key;
+    },
+    async revokeGuestLink(id, key) {
+      return event(id).collection('guestLinks').doc(key).update({active:false});
+    },
     watchAnswers(id, next, error) {
       return event(id).collection('playerAnswers').onSnapshot({ includeMetadataChanges: true }, snapshot => {
         if (!snapshot.metadata.fromCache) next(new Map(snapshot.docs.map(doc => [doc.id, doc.data()])));
       }, error);
     }
   };
+}
+
+export function guestCredentials(hash) {
+  const values = new URLSearchParams(hash.replace(/^#/, ''));
+  const event = values.get('event') || '';
+  const key = values.get('key') || '';
+  return /^[A-Za-z0-9_-]{1,150}$/.test(event) && /^[a-f0-9]{64}$/.test(key) ? { event, key } : null;
+}
+
+export function guestAttendanceStore(db, serverTimestamp, {event, key}) {
+  const ref = db.collection('attendanceCloudEvents').doc(event).collection('guestLinks').doc(key);
+  const empty = () => ({value:'', contact:{}, revision:0});
+  async function read() {
+    const grant = (await ref.get({source:'server'})).data();
+    if (grant?.active !== true) throw Error('invalid-guest-link');
+    return grant;
+  }
+  return {
+    read,
+    async get() { return (await read()).answer || empty(); },
+    async save(id, person, draft, baseRevision) {
+      return db.runTransaction(async transaction => {
+        const grant = (await transaction.get(ref)).data();
+        if (grant?.active !== true || grant.personId !== person.id || id !== event) throw Error('invalid-guest-link');
+        const revision = (grant.answer?.revision ?? 0) + 1;
+        if (revision !== baseRevision + 1) throw Error('revision-conflict');
+        transaction.update(ref, {answer:{...draft,revision,updatedAt:serverTimestamp()}});
+        return revision;
+      });
+    }
+  };
+}
+
+export function latestAttendance(accountReplies, guestLinks) {
+  const latest = new Map(accountReplies);
+  for (const {personId, answer} of guestLinks) {
+    if (answer && (!latest.has(personId) || answer.updatedAt.toMillis() > latest.get(personId).updatedAt.toMillis())) {
+      latest.set(personId,answer);
+    }
+  }
+  return latest;
 }

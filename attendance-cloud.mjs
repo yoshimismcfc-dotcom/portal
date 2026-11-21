@@ -1,14 +1,18 @@
-import { answers, attendanceStore, availableEvents, contactFromForm, contactLabel, reviewRows } from './attendance-cloud-service.mjs';
+import { answers, attendanceStore, availableEvents, contactFromForm, contactLabel, reviewRows,
+  guestCredentials, guestAttendanceStore, latestAttendance } from './attendance-cloud-service.mjs?v=20261121-21';
 
 const $ = id => document.getElementById(id);
 const entry = $('cloud-answer');
 const login = $('cloud-login');
 const params = new URLSearchParams(location.search);
+const guest = guestCredentials(location.hash);
 const label = value => answers.find(option => option.value === value)?.label || '未回答';
-let auth, store, account, events = [], people = [], mode = 'entry';
+let auth, store, cloudStore, account, events = [], people = [], mode = 'entry';
 let authGeneration = 0, selectionGeneration = 0, subscriptions = [];
 let record, conflict, saving = false, dirty = false;
-let roster, replies;
+let roster, replies, guestLinks, publicNotices = [];
+let displayedLink = null;
+let showLogin = params.get('view') === 'review';
 let previousPerson = '', previousEvent = '';
 
 function status(message) { $('cloud-status').textContent = message; }
@@ -25,7 +29,7 @@ function clearSelection() {
   selectionGeneration++;
   for (const unsubscribe of subscriptions) unsubscribe();
   subscriptions = [];
-  roster = replies = record = conflict = null;
+  roster = replies = guestLinks = record = conflict = null;
   dirty = false;
   entry.reset();
   $('cloud-contact').open = false;
@@ -34,6 +38,8 @@ function clearSelection() {
   $('cloud-import').hidden = true;
   $('cloud-rows').replaceChildren();
   $('cloud-counts').replaceChildren();
+  hideGuestLink();
+  $('guest-link-person').replaceChildren();
   saveStatus('');
 }
 
@@ -104,11 +110,13 @@ async function openSelection() {
     $('cloud-review-meta').textContent = event.date.replace(/-/g, '/') + '　対象 ' +
       (event.targetGrades?.join('・') || '学年未設定');
     $('cloud-review-status').textContent = 'クラウドから読み込んでいます…';
+    $('public-notice-message').value = publicNotices.find(notice => notice.id === event.id)?.message || '';
+    $('publish-notice-status').textContent = '';
     const failed = () => {
       if (token !== selectionGeneration) return;
       for (const unsubscribe of subscriptions) unsubscribe();
       subscriptions = [];
-      roster = replies = null;
+      roster = replies = guestLinks = null;
       $('cloud-rows').replaceChildren();
       $('cloud-counts').replaceChildren();
       $('cloud-review-status').textContent = '一覧を取得できませんでした。接続や閲覧権限を確認してください。';
@@ -118,6 +126,9 @@ async function openSelection() {
     }, failed));
     subscriptions.push(store.watchAnswers(event.id, value => {
       if (token === selectionGeneration) { replies = value; renderReview(); }
+    }, failed));
+    subscriptions.push(store.watchGuestLinks(event.id, value => {
+      if (token === selectionGeneration) { guestLinks = value; renderReview(); }
     }, failed));
     return;
   }
@@ -147,9 +158,13 @@ async function openSelection() {
 }
 
 function renderReview() {
-  if (!roster || !replies) return;
+  if (!roster || !replies || !guestLinks) return;
   const { event } = selection();
-  const rows = reviewRows(event, roster, replies);
+  const rows = reviewRows(event, roster, latestAttendance(replies, guestLinks));
+  const previous = $('guest-link-person').value;
+  $('guest-link-person').replaceChildren(option('', '団員を選択'), ...rows.map(row => option(row.id,row.grade+'・'+row.name)));
+  $('guest-link-person').value = rows.some(row => row.id === previous) ? previous : '';
+  $('manage-guest-link').disabled = !event.open;
   $('cloud-counts').replaceChildren(...answers.map(answer => {
     const element = document.createElement('span');
     const count = rows.filter(row => row.value === answer.value).length;
@@ -181,6 +196,66 @@ function renderReview() {
     return tr;
   }));
   $('cloud-review-status').textContent = visible.length ? '表示 ' + visible.length + '人' : '該当する団員はいません。';
+}
+
+async function renderPublicNotices() {
+  $('public-notices').hidden = false;
+  const list = $('public-notice-list');
+  const statusLine = $('public-notice-status');
+  try {
+    publicNotices = await cloudStore.publicNotices();
+    list.replaceChildren(...publicNotices.map(notice => {
+      const article = document.createElement('article');
+      article.className = 'public-notice';
+      article.id = 'notice-'+notice.id;
+      const heading = document.createElement('h3');
+      heading.textContent = notice.date.replace(/-/g,'/')+' · '+notice.title;
+      const message = document.createElement('p');
+      message.textContent = notice.message;
+      const link = document.createElement('a');
+      link.href = 'attendance-cloud.html?'+new URLSearchParams({notice:notice.id});
+      link.textContent = 'この試合の公開連絡';
+      article.append(heading,message,link);
+      return article;
+    }));
+    statusLine.textContent = publicNotices.length ? '' : '公開中の試合連絡はありません。';
+    const selected = params.get('notice');
+    if (selected) $('notice-'+selected)?.scrollIntoView({block:'start'});
+  } catch {
+    statusLine.textContent = '公開連絡を取得できませんでした。';
+  }
+}
+
+function hideGuestLink() {
+  displayedLink = null;
+  $('guest-link-url').value = '';
+  $('guest-link-result').hidden = $('copy-guest-link').hidden = $('revoke-guest-link').hidden = true;
+  $('guest-link-status').textContent = '';
+}
+
+async function openGuest() {
+  const token = ++authGeneration;
+  $('cloud-workspace').hidden = true;
+  login.hidden = $('open-cloud-login').hidden = $('cloud-logout').hidden = true;
+  try {
+    const grant = await store.read();
+    if (token !== authGeneration) return;
+    events = [{ id:guest.event, title:grant.title, date:grant.date, kind:grant.kind, localEventId:grant.localEventId, open:true }];
+    people = [{ id:grant.personId, name:grant.personName, kind:'player' }];
+    $('cloud-person').replaceChildren(option('0',grant.personName));
+    $('cloud-event').replaceChildren(option(guest.event,grant.title));
+    $('cloud-tabs').hidden = $('person-field').hidden = $('event-field').hidden = true;
+    $('guest-heading').hidden = false;
+    $('guest-title').textContent = grant.title;
+    $('guest-person').textContent = grant.date.replace(/-/g,'/')+' · '+grant.personName;
+    $('cloud-workspace').hidden = false;
+    $('cloud-connect').hidden = true;
+    openSelection();
+  } catch {
+    if (token !== authGeneration) return;
+    status('回答用リンクを開けませんでした。公開状況、リンクの有効期限、通信環境をご確認ください。');
+    $('cloud-connect').hidden = false;
+  }
 }
 
 async function saveAnswer(revision = record?.revision) {
@@ -238,10 +313,14 @@ async function signedIn(user) {
   $('cloud-person').replaceChildren();
   $('cloud-event').replaceChildren();
   $('cloud-workspace').hidden = true;
-  login.hidden = Boolean(user);
+  login.hidden = Boolean(user) || !showLogin;
+  $('open-cloud-login').hidden = Boolean(user) || showLogin || !auth;
   $('cloud-logout').hidden = !user;
   $('cloud-connect').hidden = true;
-  if (!user) { status('登録済みのアカウントでログインしてください。'); return; }
+  if (!user) {
+    status(showLogin ? '登録済みのアカウントでログインしてください。' : '出欠を回答するときは、コーチから届いた回答用リンクを開いてください。');
+    return;
+  }
   if (!user.emailVerified) { status('メールアドレスの確認を済ませ、ログインし直してください。'); return; }
   status('クラウドの利用権限を確認しています…');
   try {
@@ -312,8 +391,78 @@ $('cloud-use-latest').onclick = () => {
   saveStatus('クラウドの最新回答を表示しました。');
 };
 $('cloud-keep-draft').onclick = () => { if (conflict) saveAnswer(conflict.revision); };
-$('cloud-connect').onclick = () => signedIn(auth.currentUser);
+$('cloud-connect').onclick = () => guest ? openGuest() : signedIn(auth.currentUser);
+$('open-cloud-login').onclick = () => { showLogin = true; signedIn(auth.currentUser); };
 $('cloud-logout').onclick = () => { if (canLeave()) auth.signOut(); };
+$('guest-link-person').onchange = hideGuestLink;
+$('manage-guest-link').onclick = async () => {
+  const {event} = selection();
+  const person = roster?.find(item => item.id === $('guest-link-person').value);
+  if (!event?.open || !person) {
+    $('guest-link-status').textContent = 'リンクを発行する団員を選んでください。';
+    return;
+  }
+  const button = $('manage-guest-link');
+  const token = selectionGeneration;
+  button.disabled = true;
+  hideGuestLink();
+  try {
+    const existing = guestLinks?.find(link => link.personId === person.id && link.active && link.expiresAt.toMillis() > Date.now());
+    const key = existing?.key || await store.createGuestLink(event,person);
+    if (token !== selectionGeneration || person.id !== $('guest-link-person').value) return;
+    displayedLink = key;
+    const url = new URL('attendance-cloud.html',location.href);
+    url.hash = new URLSearchParams({event:event.id,key});
+    $('guest-link-url').value = url.href;
+    $('guest-link-result').hidden = $('copy-guest-link').hidden = $('revoke-guest-link').hidden = false;
+    $('guest-link-url').focus();
+    $('guest-link-url').select();
+  } catch {
+    if (token === selectionGeneration) $('guest-link-status').textContent = 'リンクを発行できませんでした。';
+  } finally {
+    if (token === selectionGeneration) button.disabled = false;
+  }
+};
+$('copy-guest-link').onclick = async () => {
+  const field = $('guest-link-url');
+  try {
+    await navigator.clipboard.writeText(field.value);
+    $('guest-link-status').textContent = '回答用リンクをコピーしました。';
+  } catch {
+    field.focus();
+    field.select();
+    $('guest-link-status').textContent = '選択したリンクをコピーしてください。';
+  }
+};
+$('revoke-guest-link').onclick = async () => {
+  const {event} = selection(), key = displayedLink;
+  if (!event || !key || !confirm('この回答用リンクを無効にしますか？')) return;
+  const token = selectionGeneration;
+  try {
+    await store.revokeGuestLink(event.id,key);
+    if (token !== selectionGeneration) return;
+    hideGuestLink();
+    $('guest-link-status').textContent = 'リンクを無効にしました。';
+  } catch {
+    if (token === selectionGeneration) $('guest-link-status').textContent = 'リンクを無効にできませんでした。';
+  }
+};
+$('publish-notice').onclick = async () => {
+  const {event} = selection(), message = $('public-notice-message').value.trim();
+  if (!event || !message) {
+    $('publish-notice-status').textContent = '公開する連絡を入力してください。';
+    return;
+  }
+  if (!confirm('この連絡を、ログインなしで見られるように公開しますか？')) return;
+  const token = selectionGeneration;
+  try {
+    await store.publishNotice(event,message);
+    if (token === selectionGeneration) $('publish-notice-status').textContent = '試合の連絡を公開しました。';
+    renderPublicNotices();
+  } catch {
+    if (token === selectionGeneration) $('publish-notice-status').textContent = '連絡を公開できませんでした。';
+  }
+};
 login.onsubmit = async event => {
   event.preventDefault();
   const input = new FormData(login);
@@ -329,7 +478,6 @@ if (typeof window.onFirebaseReady === 'function') {
   window.onFirebaseReady(async () => {
     try {
       auth = window.FIREBASE_AUTH;
-      if (!auth) throw Error('auth-unavailable');
       if (!window.firebase.firestore) await new Promise((resolve, reject) => {
         const script = document.createElement('script');
         script.src = 'https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore-compat.js';
@@ -337,8 +485,17 @@ if (typeof window.onFirebaseReady === 'function') {
         script.onerror = reject;
         document.head.append(script);
       });
-      store = attendanceStore(window.firebase.firestore(), window.firebase.firestore.FieldValue.serverTimestamp);
-      auth.onAuthStateChanged(signedIn, () => status('認証サービスに接続できませんでした。'));
+      const db = window.firebase.firestore(), timestamp = window.firebase.firestore.FieldValue.serverTimestamp;
+      cloudStore = attendanceStore(db,timestamp);
+      renderPublicNotices();
+      if (guest) {
+        store = guestAttendanceStore(db,timestamp,guest);
+        openGuest();
+      } else {
+        store = cloudStore;
+        if (auth) auth.onAuthStateChanged(signedIn, () => status('認証サービスに接続できませんでした。'));
+        else signedIn(null);
+      }
     } catch { status('クラウド出欠を起動できませんでした。ページを開き直してください。'); }
   });
 } else status('認証サービスを読み込めませんでした。');

@@ -3,7 +3,7 @@ import { readFileSync } from 'node:fs';
 import { createRequire } from 'node:module';
 const require = createRequire(process.env.CAMP_QA_PACKAGE || new URL('../../qa/package.json', import.meta.url));
 const { initializeTestEnvironment, assertFails, assertSucceeds } = require('@firebase/rules-unit-testing');
-const { collection, doc, getDoc, getDocs, setDoc, serverTimestamp } = require('firebase/firestore');
+const { collection, doc, getDoc, getDocs, setDoc, updateDoc, serverTimestamp } = require('firebase/firestore');
 const env = await initializeTestEnvironment({
   projectId: 'demo-smc-attendance',
   firestore: { host: '127.0.0.1', port: 8085, rules: readFileSync(new URL('../firebase-free/firestore.rules', import.meta.url), 'utf8') }
@@ -21,7 +21,7 @@ try {
     await setDoc(doc(admin, 'attendanceAccounts/coach'), {active:true, players:{}, coachId:'c1', coachEvents:{'match-a':true,'match-b':true}});
     await setDoc(doc(admin, 'attendanceAccounts/other-coach'), {active:true, players:{}, coachId:'c2', coachEvents:{}});
     for (const id of ['match-a', 'match-b', 'practice']) {
-      await setDoc(doc(admin, event(id)), {date:'2026-12-12',open:true,kind:id === 'practice' ? 'practice' : 'match',targetGrades:['1年','年長'],practiceExcludedGrades:['1年']});
+      await setDoc(doc(admin, event(id)), {date:'2026-12-12',title:'テスト試合',open:true,kind:id === 'practice' ? 'practice' : 'match',targetGrades:['1年','年長'],practiceExcludedGrades:['1年']});
       for (const idOfChild of ['a', 'b']) await setDoc(doc(admin, event(id) + '/roster/' + idOfChild), { name:'テスト団員', grade:'1年' });
     }
   });
@@ -48,6 +48,30 @@ try {
   assert.equal(viewA.docs[0].data().contact.rideTrip, '帰りのみ');
   assert.equal(viewB.docs[0].data().contact.earlyTime, '14:30');
   await assertSucceeds(setDoc(doc(coach, event('match-a') + '/coachAnswers/c1'), write('attending', {})));
+  const visitor = env.unauthenticatedContext().firestore();
+  const key = 'a'.repeat(64);
+  const door = event('match-a') + '/guestLinks/' + key;
+  const publicNote = 'attendancePublicNotices/match-a';
+  const grant = {personId:'a',personName:'テスト団員',title:'テスト試合',date:'2026-12-12',kind:'match',localEventId:'',active:true,expiresAt:new Date(Date.now()+86400000)};
+  await assertFails(setDoc(doc(visitor,door),grant));
+  await assertSucceeds(setDoc(doc(coach,door),grant));
+  await assertSucceeds(getDoc(doc(visitor,door)));
+  await assertFails(getDoc(doc(visitor,event('match-a')+'/guestLinks/'+'b'.repeat(64))));
+  await assertFails(getDocs(collection(visitor,event('match-a')+'/guestLinks')));
+  await assertSucceeds(updateDoc(doc(visitor,door),{answer:write('attending',{ride:true,rideTrip:'帰りのみ'})}));
+  await assertFails(updateDoc(doc(visitor,door),{personId:'b'}));
+  await assertFails(updateDoc(doc(visitor,door),{answer:write('absent',{})}));
+  await assertSucceeds(getDocs(collection(coach,event('match-a')+'/guestLinks')));
+  await assertFails(getDocs(collection(db('other-coach'),event('match-a')+'/guestLinks')));
+  const notice = {title:'テスト試合',date:'2026-12-12',message:'集合は8時です。',updatedAt:serverTimestamp()};
+  await assertFails(setDoc(doc(visitor,publicNote),notice));
+  await assertSucceeds(setDoc(doc(coach,publicNote),notice));
+  assert.equal((await assertSucceeds(getDoc(doc(visitor,publicNote)))).data().message,'集合は8時です。');
+  await assertSucceeds(getDocs(collection(visitor,'attendancePublicNotices')));
+  await assertFails(getDoc(doc(visitor,reply('match-a','a'))));
+  await assertSucceeds(updateDoc(doc(coach,door),{active:false}));
+  await assertFails(getDoc(doc(visitor,door)));
+  await assertFails(updateDoc(doc(visitor,door),{answer:write('absent',{},2)}));
   console.log('Attendance rules: separated events, owner, assigned coach, denied peer and anonymous access OK');
 } finally {
   await env.cleanup();
