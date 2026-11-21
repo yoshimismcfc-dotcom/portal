@@ -1,0 +1,54 @@
+import assert from 'node:assert/strict';
+import { readFileSync } from 'node:fs';
+import { createRequire } from 'node:module';
+const require = createRequire(process.env.CAMP_QA_PACKAGE || new URL('../../qa/package.json', import.meta.url));
+const { initializeTestEnvironment, assertFails, assertSucceeds } = require('@firebase/rules-unit-testing');
+const { collection, doc, getDoc, getDocs, setDoc, serverTimestamp } = require('firebase/firestore');
+const env = await initializeTestEnvironment({
+  projectId: 'demo-smc-attendance',
+  firestore: { host: '127.0.0.1', port: 8085, rules: readFileSync(new URL('../firebase-free/firestore.rules', import.meta.url), 'utf8') }
+});
+try {
+  const event = id => 'attendanceCloudEvents/' + id;
+  const reply = (id, person) => event(id) + '/playerAnswers/' + person;
+  const db = (uid, verified = true) => env.authenticatedContext(uid, { email_verified: verified }).firestore();
+  await env.withSecurityRulesDisabled(async context => {
+    const admin = context.firestore();
+    await setDoc(doc(admin, 'attendanceConfig/v1'), { enabled: true });
+    for (const [uid, players] of [['parent-a', { a: {name:'テストA',grade:'1年'} }], ['parent-b', { b: {name:'テストB',grade:'1年'} }]]) {
+      await setDoc(doc(admin, 'attendanceAccounts', uid), { active:true, players, coachEvents:{} });
+    }
+    await setDoc(doc(admin, 'attendanceAccounts/coach'), {active:true, players:{}, coachId:'c1', coachEvents:{'match-a':true,'match-b':true}});
+    await setDoc(doc(admin, 'attendanceAccounts/other-coach'), {active:true, players:{}, coachId:'c2', coachEvents:{}});
+    for (const id of ['match-a', 'match-b', 'practice']) {
+      await setDoc(doc(admin, event(id)), {date:'2026-12-12',open:true,kind:id === 'practice' ? 'practice' : 'match',targetGrades:['1年','年長'],practiceExcludedGrades:['1年']});
+      for (const idOfChild of ['a', 'b']) await setDoc(doc(admin, event(id) + '/roster/' + idOfChild), { name:'テスト団員', grade:'1年' });
+    }
+  });
+  const parent = db('parent-a');
+  const coach = db('coach');
+  const write = (value, contact, revision = 1) => ({ value, contact, revision, updatedAt: serverTimestamp() });
+  await assertSucceeds(getDoc(doc(parent, reply('match-a', 'a'))));
+  await assertSucceeds(setDoc(doc(parent, reply('match-a', 'a')), write('attending', {ride:true,rideTrip:'帰りのみ'})));
+  await assertSucceeds(setDoc(doc(parent, reply('match-b', 'a')), write('maybe', {early:true,earlyTime:'14:30'})));
+  await assertFails(setDoc(doc(parent, reply('practice', 'a')), write('attending', {})));
+  await assertFails(setDoc(doc(parent, reply('match-a', 'b')), write('attending', {})));
+  await assertFails(setDoc(doc(parent, reply('match-a', 'a')), write('absent', {}, 1)));
+  await assertFails(setDoc(doc(parent, reply('match-a', 'a')), write('absent', {bad:'x'}, 2)));
+  await assertFails(setDoc(doc(parent, reply('match-a', 'a')), write('absent', {early:true,earlyTime:'29:30'}, 2)));
+  await assertFails(setDoc(doc(parent, 'attendanceAccounts/parent-a'), {active:true, coachEvents:{'match-a':true}}));
+  await assertFails(getDoc(doc(db('parent-b'), reply('match-a', 'a'))));
+  await assertFails(getDoc(doc(db('parent-a', false), reply('match-a', 'a'))));
+  await assertFails(getDoc(doc(db('other-coach'), reply('match-a', 'a'))));
+  await assertFails(getDoc(doc(env.unauthenticatedContext().firestore(), reply('match-a', 'a'))));
+  await assertFails(getDocs(collection(parent, event('match-a') + '/playerAnswers')));
+  await assertSucceeds(getDocs(collection(coach, event('match-a') + '/roster')));
+  const viewA = await assertSucceeds(getDocs(collection(coach, event('match-a') + '/playerAnswers')));
+  const viewB = await assertSucceeds(getDocs(collection(coach, event('match-b') + '/playerAnswers')));
+  assert.equal(viewA.docs[0].data().contact.rideTrip, '帰りのみ');
+  assert.equal(viewB.docs[0].data().contact.earlyTime, '14:30');
+  await assertSucceeds(setDoc(doc(coach, event('match-a') + '/coachAnswers/c1'), write('attending', {})));
+  console.log('Attendance rules: separated events, owner, assigned coach, denied peer and anonymous access OK');
+} finally {
+  await env.cleanup();
+}
