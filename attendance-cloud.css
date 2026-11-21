@@ -1,0 +1,35 @@
+.cloud-attendance [hidden] { display: none !important; }
+.cloud-attendance { max-width: 850px; }
+.cloud-attendance h1 { margin-block: 6px 10px; font-size: clamp(1.5rem, 7vw, 2rem); }
+.cloud-attendance .panel { margin-block: 12px; padding: 14px; }
+.cloud-stack { display: grid; gap: 10px; }
+.cloud-stack label, #cloud-review > label { display: block; font-weight: 750; }
+.cloud-attendance input:not([type=checkbox],[type=radio]), .cloud-attendance select, .cloud-attendance textarea { display: block; width: 100%; min-height: 44px; margin-top: 4px; font-size: 16px; }
+.cloud-attendance button { min-height: 44px; }
+.cloud-attendance p { overflow-wrap: anywhere; }
+.cloud-tabs { display: flex; gap: 8px; margin-top: 12px; }
+.cloud-tabs button { flex: 1; background: #173754; color: #fff; border: 1px solid #6385a4; border-radius: 9px; font: inherit; font-weight: 800; }
+.cloud-tabs button[aria-pressed=true] { background: #145d72; border-color: #76d9e6; }
+.cloud-answer-options, .cloud-counts { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 5px; }
+.cloud-answer-options label, .cloud-counts span { display: flex; align-items: center; justify-content: center; gap: 4px; padding: 6px 2px; min-height: 44px; border: 1px solid #6385a4; border-radius: 8px; text-align: center; }
+.cloud-answer-options label:has(input:checked) { background: #145d72; color: #fff; }
+.cloud-counts { margin-block: 10px; font-size: .85rem; }
+.cloud-contact-choice:not(:has(input:checked)) .cloud-contact-detail { display: none; }
+.cloud-attendance summary { cursor: pointer; min-height: 44px; padding-block: 10px; font-weight: 800; }
+.cloud-review-notice { padding: 10px; background: #3b2c16; color: #ffdfab; border-radius: 8px; }
+.cloud-table-wrap { max-height: 65vh; overflow: auto; border-radius: 9px; }
+.cloud-table { width: 100%; table-layout: fixed; border-collapse: separate; border-spacing: 0; background: #f6faff; color: #172d43; }
+.cloud-table :is(td,th) { border-bottom: 1px solid #cfddeb; padding: 9px 6px; overflow-wrap: anywhere; vertical-align: top; }
+.cloud-table thead th { position: sticky; top: 0; z-index: 1; background: #1c3b59; color: #fff; text-align: left; }
+.cloud-table th:first-child { width: 33%; }
+.cloud-table :is(th,td):nth-child(2) { width: 20%; text-align: center; }
+.cloud-table td[data-value=attending] { color: #156346; background: #e8f6ee; font-weight: 800; }
+.cloud-table td[data-value=maybe] { color: #765016; background: #fff2d8; font-weight: 800; }
+.cloud-table td[data-value=absent] { color: #942638; background: #fdebef; font-weight: 800; }
+@media(max-width: 430px) {
+  .cloud-attendance .panel { padding: 9px; }
+  .cloud-table { font-size: .85rem; }
+  .cloud-table th:first-child { width: 31%; }
+  .cloud-table th:nth-child(2) { width: 19%; }
+  .cloud-answer-options label { flex-wrap: wrap; }
+}

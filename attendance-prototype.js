@@ -447,7 +447,9 @@
         (grades||audience==="coaches"?groups.map(function(group){
         var names=eligible.filter(function(person){return answerValue(event,person)===group.value;}).map(function(person){return person.name;});
         return '<p><strong>'+esc((answerMark(group.value)+" "+group.label).trim())+' '+names.length+'人</strong><span>'+esc(names.join("、")||"—")+'</span></p>';
-      }).join(""):"")+matchCalendarAction(event)+(audience==="coaches"?coachContactList(event)+targetGradeEditor(event,grades):"")+'</section>';
+      }).join(""):"")+matchCalendarAction(event)+(audience==="coaches"?
+        '<a class="secondary-button day-details-action" href="attendance-cloud.html?view=review&amp;event='+encodeURIComponent(event.id)+'">クラウドの出欠・連絡一覧</a>'+
+        coachContactList(event)+targetGradeEditor(event,grades):"")+'</section>';
     }).join("");
     var dialog=$("match-summary-dialog");
     if(!dialog.open)dialog.showModal();

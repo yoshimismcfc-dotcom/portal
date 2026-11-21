@@ -1,6 +1,68 @@
 rules_version = '2';
 service cloud.firestore {
  match /databases/{database}/documents {
+  // Attendance grants and rosters are provisioned by an administrator.
+  function attendanceEnabled() {
+   return request.auth != null && request.auth.token.email_verified == true
+    && get(/databases/$(database)/documents/attendanceConfig/v1).data.enabled == true;
+  }
+  function attendanceAccount() {
+   return get(/databases/$(database)/documents/attendanceAccounts/$(request.auth.uid)).data;
+  }
+  function attendanceMember() { return attendanceEnabled() && attendanceAccount().active == true; }
+  function attendanceCoach(e) { return attendanceMember() && attendanceAccount().coachEvents.get(e,false) == true; }
+  function attendanceOwnPlayer(p) { return attendanceMember() && attendanceAccount().players.keys().hasAny([p]); }
+  function attendanceOwnCoach(e,p) { return attendanceCoach(e) && attendanceAccount().coachId == p; }
+  function attendanceEvent(e) { return get(/databases/$(database)/documents/attendanceCloudEvents/$(e)).data; }
+  function attendanceRoster(e,p) { return get(/databases/$(database)/documents/attendanceCloudEvents/$(e)/roster/$(p)).data; }
+  function attendanceContact(n) {
+   return n is map && n.keys().hasOnly(['ride','rideTrip','early','earlyTime','late','lateTime','other','message'])
+    && n.get('ride',false) is bool && n.get('early',false) is bool && n.get('late',false) is bool && n.get('other',false) is bool
+    && n.get('rideTrip','') in ['', '行きのみ', '帰りのみ', '往復']
+    && (n.get('rideTrip','') == '' || n.get('ride',false) == true)
+    && n.get('earlyTime','') is string && n.get('earlyTime','').matches('^(([01][0-9]|2[0-3]):[0-5][0-9])?$')
+    && n.get('lateTime','') is string && n.get('lateTime','').matches('^(([01][0-9]|2[0-3]):[0-5][0-9])?$')
+    && (n.get('earlyTime','') == '' || n.get('early',false) == true)
+    && (n.get('lateTime','') == '' || n.get('late',false) == true)
+    && str(n.get('message',''),160);
+  }
+  function attendanceAnswer() {
+   let d = request.resource.data;
+   return d.keys().hasOnly(['value','contact','revision','updatedAt'])
+    && d.value in ['', 'attending', 'maybe', 'absent'] && attendanceContact(d.contact) && revision();
+  }
+  function attendancePlayerMayWrite(e,p) {
+   let event = attendanceEvent(e);
+   let grade = attendanceRoster(e,p).grade;
+   return attendanceOwnPlayer(p) && event.open == true && event.get('cancelled',false) == false
+    && ((event.kind == 'match' && grade in event.targetGrades)
+     || (event.kind == 'practice' && !(grade in event.practiceExcludedGrades)));
+  }
+  match /attendanceConfig/v1 {
+   allow get: if request.auth != null && request.auth.token.email_verified == true;
+  }
+  match /attendanceAccounts/{uid} {
+   allow get: if attendanceEnabled() && request.auth.uid == uid;
+  }
+  match /attendanceCloudEvents/{e} {
+   allow get,list: if attendanceMember();
+   match /roster/{p} {
+    allow get: if attendanceCoach(e) || attendanceOwnPlayer(p);
+    allow list: if attendanceCoach(e);
+   }
+   match /playerAnswers/{p} {
+    allow get: if attendanceCoach(e) || attendanceOwnPlayer(p);
+    allow list: if attendanceCoach(e);
+    allow create,update: if attendancePlayerMayWrite(e,p) && attendanceAnswer()
+     && (attendanceEvent(e).kind == 'match' || request.resource.data.contact.size() == 0);
+   }
+   match /coachAnswers/{p} {
+    allow get: if attendanceOwnCoach(e,p);
+    allow create,update: if attendanceOwnCoach(e,p) && attendanceEvent(e).open == true && attendanceEvent(e).get('cancelled',false) == false
+     && attendanceAnswer() && request.resource.data.contact.size() == 0;
+   }
+  }
+
   function validId(c) { return c.matches('[0-9a-f]{8}-[0-9a-f]{4}-4[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}'); }
   function camp(c) { return get(/databases/$(database)/documents/campShared/$(c)).data; }
   function member(c) { return validId(c) && exists(/databases/$(database)/documents/campShared/$(c)); }
