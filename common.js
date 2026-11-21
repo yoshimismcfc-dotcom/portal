@@ -835,21 +835,23 @@ function enhanceCalendarUpcomingAgenda() {
           dateLink.setAttribute("aria-label", iso + "の予定");
           cell.append(dateLink);
           const entries = ranges.filter(({ start, last }) => start && start <= iso && last >= iso);
-          for (const { event } of entries.slice(0, 3)) {
+          for (const { event } of entries) {
             const link = document.createElement("a");
             link.className = "calendar-month-event";
             link.style.setProperty("--event-color", event.color);
             link.href = detailHref(iso, event);
-            link.textContent = event.allDay ? event.title : formatTime(event).split("〜")[0] + " " + event.title;
             link.title = event.title;
+            const name = document.createElement("span");
+            name.className = "calendar-month-event-title";
+            name.textContent = event.title;
+            link.append(name);
+            if (!event.allDay) {
+              const time = document.createElement("span");
+              time.className = "calendar-month-event-time";
+              time.textContent = formatTime(event).split("〜")[0];
+              link.append(time);
+            }
             cell.append(link);
-          }
-          if (entries.length > 3) {
-            const more = document.createElement("a");
-            more.className = "calendar-month-more";
-            more.href = detailHref(iso);
-            more.textContent = "他 " + (entries.length - 3) + "件";
-            cell.append(more);
           }
           nodes.push(cell);
         }
