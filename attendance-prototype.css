@@ -197,3 +197,30 @@
   .attendance-board-controls .board-toolbar button { padding-inline: 5px; }
   .attendance-board .day-match-label { max-width: 67px; }
 }
+
+.response-panel #coach-roster-status,
+.response-panel #calendar-sync-status { margin-top: 3px; color: #405676; font-size: .8rem; line-height: 1.35; }
+.response-panel #coach-editor { margin: 4px 0; padding: 0; border: 0; background: none; }
+.response-panel #coach-local-editor { color: #234a72; font-size: .85rem; }
+.response-panel #coach-local-editor > summary { display: list-item; padding: 10px 0; cursor: pointer; }
+.response-panel #coach-local-editor > label { display: block; }
+.response-panel #coach-editor[hidden], .response-panel #coach-roster-status[hidden] { display: none; }
+.response-panel .response-list { margin-top: 5px; }
+.response-panel .fixed-entry-bar { position: static; padding: 7px 0 0; border: 0; background: transparent; box-shadow: none; }
+.response-panel .fixed-entry-bar .primary-button { min-height: 44px; height: auto; font-size: 1rem; }
+.response-panel .entry-mode-icon { height: 44px; min-height: 44px; width: 44px; }
+.response-panel .entry-mode-icon svg { width: 24px; height: 24px; }
+.prototype-wrap { padding-bottom: 24px; }
+.attendance-board .day-detail-link { display: flex; flex-direction: column; align-items: center; justify-content: center; width: 100%; min-height: 44px; color: inherit; background: transparent; border: 0; border-radius: 5px; padding: 1px; cursor: pointer; font: inherit; text-decoration: none; }
+.attendance-board .day-detail-link .board-date { text-decoration: underline; text-underline-offset: 3px; }
+.attendance-board .day-detail-link:focus-visible { outline: 2px solid currentColor; outline-offset: -2px; }
+.day-calendar-icon { display: inline-block; padding-left: 3px; font-size: .75em; }
+#day-details-list { display: grid; gap: 9px; max-height: 55svh; overflow: auto; }
+.day-details-meta { margin: 3px 0; overflow-wrap: anywhere; }
+.day-details-action { display: inline-flex; align-items: center; margin-top: 5px; text-decoration: none; font-size: .85rem; }
+@media (max-width: 560px) {
+  .response-panel .section-heading p { font-size: .82rem; }
+  .response-panel .attendance-heading-actions { gap: 4px; }
+  .attendance-board-scroll { max-height: 60vh; max-height: 60svh; }
+  .response-panel #coach-local-editor > summary { padding-block: 8px; }
+}
