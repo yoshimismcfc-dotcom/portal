@@ -738,7 +738,7 @@ function enhanceCalendarUpcomingAgenda() {
         const from = new Date(today + "T00:00:00+09:00");
         const groups = CALENDARS.filter((calendar) => /^U(?:[7-9]|1[0-2])$/.test(calendar.label));
         const results = await Promise.allSettled(groups.map((calendar) =>
-          fetchCalendar(calendar, from.toISOString(), end.toISOString(), 250)
+          fetchCalendar(calendar, from.toISOString(), end.toISOString(), 250, true)
         ));
         const events = results.flatMap((result) => result.status === "fulfilled" ? result.value : []);
         const failed = results.flatMap((result, index) =>
@@ -747,6 +747,76 @@ function enhanceCalendarUpcomingAgenda() {
         matchPicker.dispatchEvent(new CustomEvent("smc-calendar-result", { detail: { events, failed } }));
       });
       return;
+    }
+
+    if (isCalendarPage) {
+      const panel = document.getElementById("calendar-selected-day");
+      const params = new URLSearchParams(location.search);
+      const date = params.get("date") || "";
+      const start = new Date(date + "T00:00:00+09:00");
+      if (panel && /^\d{4}-\d{2}-\d{2}$/.test(date) && !Number.isNaN(start.getTime()) &&
+          new Intl.DateTimeFormat("sv-SE", { timeZone: "Asia/Tokyo", dateStyle: "short" }).format(start) === date) {
+        renderSelectedDay(panel, start, params.get("event") || "");
+      }
+    }
+
+    async function renderSelectedDay(panel, start, selectedId) {
+      const heading = panel.querySelector("h2");
+      const status = panel.querySelector("[role=status]");
+      const list = panel.querySelector(".calendar-selected-events");
+      heading.textContent = new Intl.DateTimeFormat("ja-JP", {
+        timeZone: "Asia/Tokyo", year: "numeric", month: "long", day: "numeric", weekday: "short"
+      }).format(start) + "の予定";
+      panel.hidden = false;
+      heading.focus({ preventScroll: true });
+      panel.scrollIntoView({ block: "start" });
+      const end = new Date(start.getTime() + 86400000);
+      const results = await Promise.allSettled(CALENDARS.map((calendar) =>
+        fetchCalendar(calendar, start.toISOString(), end.toISOString(), 250, true)
+      ));
+      const events = results.flatMap((result) => result.status === "fulfilled" ? result.value : []);
+      const matches = events.map((event) => ({
+        ...event, attendanceId: event.sourceId ? "calendar_" + encodeURIComponent(event.sourceId) : ""
+      }));
+      const date = new Intl.DateTimeFormat("sv-SE", { timeZone: "Asia/Tokyo", dateStyle: "short" }).format(start);
+      try {
+        const local = JSON.parse(localStorage.getItem("yoshimi_smc_attendance_prototype_v1") || "{}");
+        const knownIds = new Set(matches.map((event) => event.attendanceId));
+        const failedLabels = new Set(CALENDARS.filter((_, index) => results[index].status === "rejected").map((calendar) => calendar.label));
+        for (const event of Array.isArray(local.events) ? local.events : []) {
+          if (event.date !== date || event.hidden || knownIds.has(event.id)) continue;
+          if (event.id.startsWith("calendar_") && !failedLabels.has(event.category)) continue;
+          matches.push({ attendanceId: event.id, title: event.title, location: event.place,
+            label: event.category || (event.kind === "match" ? "試合" : "練習"),
+            descriptionTime: event.startTime, allDay: true, start: date });
+        }
+      } catch (error) {
+        // Local attendance data is optional on the calendar.
+      }
+      matches.sort((a, b) => Number(b.attendanceId === selectedId && Boolean(selectedId)) -
+        Number(a.attendanceId === selectedId && Boolean(selectedId)) || a.start.localeCompare(b.start));
+      const warnings = [];
+      if (results.some((result) => result.status === "rejected")) warnings.push("一部のカレンダーを取得できませんでした。");
+      if (selectedId && !matches.some((event) => event.attendanceId === selectedId)) warnings.push("指定の試合が見つかりませんでした。");
+      if (!matches.length) warnings.push("表示できる予定がありません。");
+      status.textContent = warnings.join(" ");
+      for (const event of matches) {
+        const details = document.createElement("details");
+        details.open = Boolean(selectedId && event.attendanceId === selectedId);
+        const summary = document.createElement("summary");
+        summary.textContent = event.label + " · " + event.title;
+        details.append(summary);
+        const timeFormat = new Intl.DateTimeFormat("ja-JP", { timeZone: "Asia/Tokyo", hour: "2-digit", minute: "2-digit" });
+        const time = event.allDay ? event.descriptionTime : [event.start, event.end]
+          .filter((value) => value && !Number.isNaN(Date.parse(value))).map((value) => timeFormat.format(new Date(value))).join("〜");
+        for (const value of [time, event.location, window.SMCCalendarAttendance?.plainDescription(event.description)]) {
+          if (!value) continue;
+          const line = document.createElement("p");
+          line.textContent = value;
+          details.append(line);
+        }
+        list.append(details);
+      }
     }
 
     if (!document.getElementById("calendar-upcoming-style")) {
@@ -1242,7 +1312,7 @@ function enhanceCalendarUpcomingAgenda() {
       }
     }
 
-    async function fetchCalendar(calendar, timeMin, timeMax, limit = 40) {
+    async function fetchCalendar(calendar, timeMin, timeMax, limit = 40, includeDescription = false) {
       const url = new URL(`https://www.googleapis.com/calendar/v3/calendars/${encodeURIComponent(calendar.id)}/events`);
       url.searchParams.set("key", PUBLIC_CALENDAR_KEY);
       url.searchParams.set("timeMin", timeMin);
@@ -1260,6 +1330,7 @@ function enhanceCalendarUpcomingAgenda() {
         start: event.start?.dateTime || event.start?.date || "",
         end: event.end?.dateTime || event.end?.date || "",
         allDay: !event.start?.dateTime,
+        ...(includeDescription ? { description: event.description || "" } : {}),
         descriptionTime: !event.start?.dateTime ? extractDescriptionTime(event.description) : "",
         location: event.location || "",
         url: event.htmlLink || "",

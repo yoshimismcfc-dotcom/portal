@@ -19,6 +19,16 @@ assert.equal(
 assert.equal(attendance.extractChouseisanUrl("http://chouseisan.com/s?h=unsafe"), "");
 assert.equal(attendance.extractChouseisanUrl("https://example.com/?next=https://chouseisan.com.evil.test/"), "");
 assert.equal(attendance.formatDate("2026-08-30"), "8月30日（日）");
+assert.deepEqual(attendance.targetGrades("", "U7（1年以下）吉見フェスティバル"), ["1年"]);
+assert.deepEqual(attendance.targetGrades("【対象】１年生以下・年長", "U7"), ["1年", "年長"]);
+assert.deepEqual(attendance.targetGrades("", "U12 ６〜５年 練習試合"), ["6年", "5年"]);
+assert.deepEqual(
+  attendance.targetGrades("集合案内<br><b>【対象】５年～３年</b><br>【時間】9時", "U11（5年）新人戦"),
+  ["5年", "4年", "3年"]
+);
+assert.deepEqual(attendance.targetGrades("【対象学年】全学年", ""), ["6年", "5年", "4年", "3年", "2年", "1年", "年長"]);
+assert.equal(attendance.targetGrades("【対象】招待選手", "U8（2年）試合"), null);
+assert.equal(attendance.targetGrades("", "U12（第4回）試合"), null);
 
 const message = attendance.buildLineMessage([
   {title:"U10 練習試合", start:"2026-09-06", attendanceUrl:"https://chouseisan.com/s?h=u10"},

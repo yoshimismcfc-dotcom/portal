@@ -17,6 +17,57 @@
       .replace(/&#38;/gi, "&");
   }
 
+  var PLAYER_GRADES = ["6年", "5年", "4年", "3年", "2年", "1年", "年長"];
+
+  function plainDescription(value){
+    return decodeCalendarText(value)
+      .replace(/<\/(?:p|div|li)>/gi, "\n")
+      .replace(/<[^>]*>/g, "");
+  }
+
+  function parseTargetGrades(value){
+    var source = text(value).normalize("NFKC").replace(/\s+/g, "");
+    if (/^(全学年|全団員|全員)$/.test(source)) return PLAYER_GRADES.slice();
+    var grades = new Set();
+    for (var part of source.split(/[・、,/＋+]/)) {
+      var range = part.match(/^([1-6])(?:年(?:生)?)?[~〜～\-–—]([1-6])年(?:生)?$/);
+      if (range) {
+        var min = Math.min(Number(range[1]), Number(range[2]));
+        var max = Math.max(Number(range[1]), Number(range[2]));
+        for (var grade = min; grade <= max; grade++) grades.add(grade + "年");
+        continue;
+      }
+      var single = part.match(/^([1-6])年(?:生)?(以下|以上)?$/);
+      if (single) {
+        var number = Number(single[1]);
+        for (var candidate = 1; candidate <= 6; candidate++) {
+          if (single[2] === "以下" ? candidate <= number :
+              single[2] === "以上" ? candidate >= number : candidate === number) grades.add(candidate + "年");
+        }
+      } else if (part === "年長") {
+        grades.add(part);
+      } else {
+        return null;
+      }
+    }
+    return PLAYER_GRADES.filter(function(grade){ return grades.has(grade); });
+  }
+
+  function targetGrades(description, title){
+    var field = plainDescription(description).match(/(?:^|\n)\s*(?:【対象(?:学年)?】|対象(?:学年)?\s*[:：])\s*([^\n【]+)/);
+    if (field) return parseTargetGrades(field[1]);
+    var name = text(title).normalize("NFKC");
+    var label = name.match(/【対象(?:学年)?】\s*([^【]+)/);
+    if (label) return parseTargetGrades(label[1]);
+    var parts = name.matchAll(/\(([^()]*)\)/g);
+    for (var part of parts) {
+      var grades = parseTargetGrades(part[1]);
+      if (grades) return grades;
+    }
+    var leading = name.match(/^(?:U(?:[7-9]|1[0-2])\s*)?([1-6](?:年(?:生)?)?\s*[~〜～–—-]\s*[1-6]年(?:生)?|[1-6]年(?:生)?(?:以下|以上)?|全学年|年長)(?:\s|$)/i);
+    return leading ? parseTargetGrades(leading[1]) : null;
+  }
+
   function safeChouseisanUrl(value){
     try{
       var url = new URL(text(value));
@@ -126,6 +177,8 @@
   }
 
   return {
+    plainDescription: plainDescription,
+    targetGrades: targetGrades,
     safeChouseisanUrl: safeChouseisanUrl,
     safeCategoryColor: safeCategoryColor,
     extractChouseisanUrl: extractChouseisanUrl,
