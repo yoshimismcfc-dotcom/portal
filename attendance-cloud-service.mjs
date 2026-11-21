@@ -6,6 +6,7 @@ export const answers = [
 ];
 const trips = ['行きのみ', '帰りのみ', '往復'];
 const timePattern = /^(?:[01]\d|2[0-3]):[0-5]\d$/;
+const randomId = () => Array.from(crypto.getRandomValues(new Uint8Array(32)), value => value.toString(16).padStart(2,'0')).join('');
 
 export function contactFromForm(form) {
   const contact = {};
@@ -93,6 +94,10 @@ export function attendanceStore(db, serverTimestamp) {
       const snapshot = await db.collection('attendancePublicNotices').orderBy('date','desc').get(server);
       return snapshot.docs.map(doc => ({...doc.data(), id:doc.id}));
     },
+    async publicCoordination() {
+      const snapshot = await db.collection('attendancePublicCoordination').orderBy('date','desc').get(server);
+      return snapshot.docs.map(doc => doc.data());
+    },
     async publishNotice(event, message) {
       return db.collection('attendancePublicNotices').doc(event.id).set({
         title:event.title, date:event.date, message, updatedAt:serverTimestamp()
@@ -104,16 +109,26 @@ export function attendanceStore(db, serverTimestamp) {
       }, error);
     },
     async createGuestLink(item, person) {
-      const key = Array.from(crypto.getRandomValues(new Uint8Array(32)), value => value.toString(16).padStart(2,'0')).join('');
+      const key = randomId();
       const expiresAt = new Date(Date.parse(item.date+'T23:59:59+09:00') + 86400000);
-      await event(item.id).collection('guestLinks').doc(key).set({
+      const grant = {
         personId:person.id, personName:person.name, title:item.title, date:item.date, kind:item.kind,
         localEventId:item.localEventId || '', active:true, expiresAt
-      });
+      };
+      const batch = db.batch();
+      if (item.kind === 'match') {
+        grant.coordinationId = randomId();
+        batch.set(db.collection('attendanceCoordinationWriters').doc(grant.coordinationId),{eventId:item.id,key});
+      }
+      batch.set(event(item.id).collection('guestLinks').doc(key),grant);
+      await batch.commit();
       return key;
     },
-    async revokeGuestLink(id, key) {
-      return event(id).collection('guestLinks').doc(key).update({active:false});
+    async revokeGuestLink(id, key, coordinationId) {
+      const batch = db.batch();
+      batch.update(event(id).collection('guestLinks').doc(key),{active:false});
+      if (coordinationId) batch.delete(db.collection('attendancePublicCoordination').doc(coordinationId));
+      await batch.commit();
     },
     watchAnswers(id, next, error) {
       return event(id).collection('playerAnswers').onSnapshot({ includeMetadataChanges: true }, snapshot => {
@@ -139,7 +154,19 @@ export function guestAttendanceStore(db, serverTimestamp, {event, key}) {
     return grant;
   }
   return {
-    read,
+    async prepare() {
+      const grant = await read();
+      if (grant.kind !== 'match' || grant.coordinationId) return grant;
+      return db.runTransaction(async transaction => {
+        const current = (await transaction.get(ref)).data();
+        if (current?.active !== true) throw Error('invalid-guest-link');
+        if (current.coordinationId) return current;
+        const coordinationId = randomId();
+        transaction.update(ref,{coordinationId});
+        transaction.set(db.collection('attendanceCoordinationWriters').doc(coordinationId),{eventId:event,key});
+        return { ...current, coordinationId };
+      });
+    },
     async get() { return (await read()).answer || empty(); },
     async save(id, person, draft, baseRevision) {
       return db.runTransaction(async transaction => {
@@ -147,7 +174,19 @@ export function guestAttendanceStore(db, serverTimestamp, {event, key}) {
         if (grant?.active !== true || grant.personId !== person.id || id !== event) throw Error('invalid-guest-link');
         const revision = (grant.answer?.revision ?? 0) + 1;
         if (revision !== baseRevision + 1) throw Error('revision-conflict');
+        const { publicName = '', contact } = draft;
         transaction.update(ref, {answer:{...draft,revision,updatedAt:serverTimestamp()}});
+        if (grant.coordinationId && (publicName || grant.answer?.publicName)) {
+          const projection = db.collection('attendancePublicCoordination').doc(grant.coordinationId);
+          if (publicName) {
+            transaction.set(projection, {
+              eventId:event, title:grant.title, date:grant.date, name:publicName,
+              ride:contact.ride ?? false, rideTrip:contact.rideTrip ?? '',
+              early:contact.early ?? false, earlyTime:contact.earlyTime ?? '',
+              late:contact.late ?? false, lateTime:contact.lateTime ?? '', updatedAt:serverTimestamp()
+            });
+          } else transaction.delete(projection);
+        }
         return revision;
       });
     }
