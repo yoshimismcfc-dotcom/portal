@@ -769,7 +769,7 @@ function enhanceCalendarUpcomingAgenda() {
       }).format(start) + "の予定";
       panel.hidden = false;
       heading.focus({ preventScroll: true });
-      panel.scrollIntoView({ block: "start" });
+      panel.scrollIntoView({ block: "start", behavior: "instant" });
       const end = new Date(start.getTime() + 86400000);
       const results = await Promise.allSettled(CALENDARS.map((calendar) =>
         fetchCalendar(calendar, start.toISOString(), end.toISOString(), 250, true)
@@ -800,12 +800,16 @@ function enhanceCalendarUpcomingAgenda() {
       if (selectedId && !matches.some((event) => event.attendanceId === selectedId)) warnings.push("指定の試合が見つかりませんでした。");
       if (!matches.length) warnings.push("表示できる予定がありません。");
       status.textContent = warnings.join(" ");
+      const openEvent = selectedId ? matches.find((event) => event.attendanceId === selectedId)
+        : matches.length === 1 ? matches[0] : null;
+      let destination = null;
       for (const event of matches) {
         const details = document.createElement("details");
-        details.open = Boolean(selectedId && event.attendanceId === selectedId);
+        details.open = openEvent === event;
         const summary = document.createElement("summary");
         summary.textContent = event.label + " · " + event.title;
         details.append(summary);
+        if (details.open) destination = details;
         const timeFormat = new Intl.DateTimeFormat("ja-JP", { timeZone: "Asia/Tokyo", hour: "2-digit", minute: "2-digit" });
         const time = event.allDay ? event.descriptionTime : [event.start, event.end]
           .filter((value) => value && !Number.isNaN(Date.parse(value))).map((value) => timeFormat.format(new Date(value))).join("〜");
@@ -834,6 +838,15 @@ function enhanceCalendarUpcomingAgenda() {
           details.append(description);
         }
         list.append(details);
+      }
+      if (destination) {
+        requestAnimationFrame(() => {
+          const header = document.querySelector(".site-header");
+          const headerHeight = header?.getBoundingClientRect().height || 0;
+          destination.style.scrollMarginTop = Math.ceil(headerHeight + 8) + "px";
+          destination.querySelector("summary").focus({ preventScroll: true });
+          destination.scrollIntoView({ block: "start", behavior: "instant" });
+        });
       }
     }
 

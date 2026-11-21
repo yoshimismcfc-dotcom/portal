@@ -311,7 +311,9 @@
 .match-attendance-table td[data-value="absent"] { color: #9b3151; }
 .match-attendance-total { background: #eaf2ff; }
 .match-attendance-table td:last-child { white-space: pre-wrap; }
-.match-attendance-table.has-comments th:first-child { width: 34%; }
+.match-attendance-table.has-comments th:first-child { width: 42%; }
 .match-attendance-table.has-comments :is(th,td):nth-child(2) { width: 56px; }
 .match-attendance-table.has-comments td:last-child { font-weight: 550; }
+.match-attendance-name { line-height: 1.45; }
+.match-attendance-grade { white-space: nowrap; margin-inline-end: .3em; font-size: .88em; }
 #match-summary-title { font-size: clamp(1.12rem, 4.5vw, 1.45rem); line-height: 1.4; margin-bottom: 8px; }
