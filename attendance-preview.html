@@ -1,0 +1,131 @@
+<!doctype html>
+<html lang="ja">
+<head>
+  <meta charset="utf-8">
+  <meta name="robots" content="noindex,nofollow">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#07152d">
+  <title>出欠共有テスト｜吉見SMC FC</title>
+  <link rel="stylesheet" href="common.css">
+  <link rel="stylesheet" href="attendance-prototype.css?v=20261121-25">
+  <script src="firebase-config.js"></script>
+  <script src="calendar-attendance.js?v=20261121-19"></script>
+  <script src="common.js"></script>
+</head>
+<body>
+<header class="site-header"></header>
+<main class="page-wrap prototype-wrap">
+  <h1>出欠共有テスト</h1>
+  <p class="small-note">保存した回答は、このテスト用リンクを開いた人に共有されます。公開してよいテスト用の連絡だけを入力してください。</p>
+  <nav class="audience-tabs" aria-label="回答する人">
+    <button type="button" class="audience-tab active" data-audience="players" aria-pressed="true">⚽ 団員</button>
+    <button type="button" class="audience-tab" data-audience="coaches" aria-pressed="false">🧑‍🏫 コーチ</button>
+  </nav>
+
+  <section class="panel response-panel" id="response-panel">
+    <div class="section-heading"><div><h1 id="response-title">参加予定【団員用】</h1><p id="response-summary">予定ごとに参加・未定・不参加を入力できます。</p><p id="coach-roster-status" class="small-note" role="status" hidden></p><p id="calendar-sync-status" role="status"></p></div><div class="attendance-heading-actions"><span id="respondent-count" class="month-label"></span><button id="open-calendar-matches" class="secondary-button" type="button">試合一覧</button></div></div>
+    <div id="coach-editor" class="coach-editor" hidden>
+      <details id="coach-local-editor">
+        <summary>この端末だけコーチを追加</summary>
+        <label for="coach-name-input">コーチ名</label>
+        <div class="inline-form"><input id="coach-name-input" type="text" maxlength="40"><button id="add-coach" type="button" class="primary-button">追加</button></div>
+      </details>
+    </div>
+    <div class="attendance-board-controls">
+      <div class="response-filters" id="grade-filters" aria-label="学年の絞り込み"></div>
+      <div class="board-toolbar" id="board-toolbar" hidden><span id="board-status" role="status">参加者を縦、日程を横に表示中</span><button type="button" id="toggle-match-totals" aria-expanded="true" hidden>試合集計</button><button type="button" id="transpose-board" aria-pressed="false"><span class="transpose-label">行と列を入れ替え</span><span class="transpose-short" aria-hidden="true">縦横切替</span></button></div>
+    </div>
+    <p id="shared-attendance-status" class="small-note" role="status">クラウドの出欠を読み込み中です。</p>
+    <div id="response-list" class="response-list"></div>
+    <p id="answer-status" class="attendance-save-status" role="status" hidden></p>
+    <div class="fixed-entry-bar" id="fixed-entry-bar"><span id="entry-mode-help">予定を選び、出欠入力を開始してください。</span><button type="button" id="entry-mode-button" class="primary-button">出欠を入力する</button><button type="button" id="entry-mode-icon" class="entry-mode-icon" aria-label="名前を選んで出欠を入力"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 20h4l11-11a2.1 2.1 0 0 0-4-4L4 16v4Z"/><path d="m13.5 6.5 4 4M4 20l4-1"/></svg></button></div>
+  </section>
+
+  <details class="attendance-settings">
+    <summary>予定の登録・CSV出力</summary>
+  <section class="panel date-options-panel">
+    <div class="section-heading"><div><h2>出欠を取る日程</h2><p>練習・試合の詳細を追加する日を選んでください。</p><p id="roster-status" class="roster-status" role="status">団員名簿を読み込み中…</p></div></div>
+    <div id="date-options" class="date-options" aria-label="出欠対象日"></div>
+    <div class="selected-date-row"><div><span class="muted">選択日</span><strong id="selected-date-label">日程を選んでください</strong></div><button id="add-event" type="button" class="primary-button" disabled>＋ 選択した日に予定を追加</button></div>
+    <p class="small-note">今日から2か月先までの対象日を一覧から選べます。祝日は祝日名も表示します。</p>
+  </section>
+
+  <section class="panel event-panel" id="event-panel">
+    <div class="section-heading"><div><h2>予定一覧</h2><p>予定を選ぶと回答状況を確認・編集できます。</p></div><div class="event-tools"><button id="export-csv" type="button" class="secondary-button">📥 CSV出力</button><button id="reset-demo" type="button" class="secondary-button reset-button">試作データをリセット</button></div></div>
+    <div id="event-list" class="event-list"></div>
+  </section>
+
+  </details>
+  <p class="prototype-local-note" hidden>
+    <a id="device-trial-link" class="back-btn" href="attendance-prototype.html?device=1">この端末の試作記録</a>
+    <a id="cloud-entry-return" class="back-btn" href="attendance-prototype.html" hidden>出欠予定へ戻る</a>
+  </p>
+</main>
+<footer class="site-footer"></footer>
+<dialog id="attendance-dialog" class="event-dialog attendance-entry-dialog" aria-labelledby="attendance-entry-title">
+  <form id="attendance-form" method="dialog">
+    <div class="attendance-entry-scroll">
+      <h2 id="attendance-entry-title">出欠を入力</h2>
+      <label for="entry-person">入力する人</label><select id="entry-person" required autofocus><option value="">名前を選択してください</option></select>
+      <div id="attendance-form-events" class="attendance-form-events"></div>
+      <details id="entry-general-note" class="match-contact" hidden>
+        <summary>全日程の備考 <span>任意</span></summary>
+        <label class="contact-text" for="entry-comment">全日程に共通する備考<textarea id="entry-comment" maxlength="80" rows="2"></textarea></label>
+      </details>
+    </div>
+    <p data-entry-status class="attendance-save-status" role="status"></p>
+    <div class="dialog-actions"><button type="button" id="cancel-attendance" class="secondary-button">キャンセル</button><button type="submit" id="save-attendance" class="primary-button">回答を保存</button></div>
+  </form>
+</dialog>
+<dialog id="day-entry-dialog" class="event-dialog attendance-entry-dialog" aria-labelledby="day-entry-title">
+  <form id="day-entry-form">
+    <div class="attendance-entry-scroll">
+      <h2 id="day-entry-title">出欠を入力</h2>
+      <p id="day-entry-person" class="dialog-date"></p>
+      <div id="day-entry-events" class="day-entry-events"></div>
+    </div>
+    <p data-entry-status class="attendance-save-status" role="status"></p>
+    <div class="dialog-actions">
+      <button id="cancel-day-entry" class="secondary-button" type="button">キャンセル</button>
+      <button class="primary-button" type="submit">回答を保存</button>
+    </div>
+  </form>
+</dialog>
+<dialog id="match-summary-dialog" class="event-dialog attendance-entry-dialog" aria-labelledby="match-summary-title">
+  <form method="dialog">
+    <div class="attendance-entry-scroll">
+      <h2 id="match-summary-title">試合の出欠内訳</h2>
+      <div id="match-summary-list"></div>
+    </div>
+    <div class="dialog-actions"><button class="secondary-button" autofocus>閉じる</button></div>
+  </form>
+</dialog>
+<dialog id="calendar-match-dialog" class="event-dialog calendar-match-dialog" aria-labelledby="calendar-match-title">
+  <form method="dialog">
+    <h2 id="calendar-match-title">カレンダーの試合一覧</h2>
+    <label for="calendar-match-category">カテゴリー</label>
+    <select id="calendar-match-category">
+      <option value="">U7〜U12すべて</option>
+      <option>U7</option><option>U8</option><option>U9</option>
+      <option>U10</option><option>U11</option><option>U12</option>
+    </select>
+    <p id="calendar-match-status" class="dialog-date" role="status"></p>
+    <div id="calendar-match-list" class="calendar-match-list"></div>
+    <div class="dialog-actions">
+      <button id="refresh-calendar-matches" class="secondary-button" type="button">再読み込み</button>
+      <button class="secondary-button" value="close">閉じる</button>
+    </div>
+  </form>
+</dialog>
+<dialog id="event-dialog" class="event-dialog">
+  <form method="dialog" id="event-form">
+    <h2>予定を追加</h2><p id="dialog-date" class="dialog-date"></p>
+    <label for="event-kind">予定の種類</label><select id="event-kind" required><option value="practice">練習</option><option value="match">試合</option></select>
+    <label for="event-title">予定名</label><input id="event-title" maxlength="80" placeholder="例：通常練習／練習試合" required>
+    <label for="event-place">会場（任意）</label><input id="event-place" maxlength="80" placeholder="例：吉見北小学校">
+    <div class="dialog-actions"><button type="button" id="cancel-event" class="secondary-button">キャンセル</button><button type="submit" class="primary-button">予定を追加</button></div>
+  </form>
+</dialog>
+<script src="attendance-preview.js?v=20261122-1"></script>
+</body>
+</html>
