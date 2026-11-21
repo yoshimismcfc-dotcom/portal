@@ -468,7 +468,8 @@
     var rows=people.map(function(person){
       var value=answerValue(event,person,group);
       var label=answers.find(function(answer){return answer.value===value;})?.label||"未回答";
-      return '<tr><th scope="row">'+esc((group==="players"?(person.grade||"")+" ":"")+person.name)+
+      var grade=group==="players"&&person.grade?'<span class="match-attendance-grade">'+esc(person.grade)+'</span>':"";
+      return '<tr><th scope="row" class="match-attendance-name">'+grade+(grade?" ":"")+esc(person.name)+
         '</th><td data-value="'+esc(value)+'" aria-label="'+esc(label)+'">'+esc(answerMark(value)||"—")+'</td>'+
         (showComments?'<td>'+esc(matchComment(state.matchNotes[event.id]?.[person.id])||"—")+'</td>':"")+'</tr>';
     }).join("");

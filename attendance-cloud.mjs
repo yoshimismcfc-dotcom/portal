@@ -207,7 +207,14 @@ function attendanceRows(rows) {
     const row = document.createElement('tr');
     const name = document.createElement('th');
     name.scope = 'row';
-    name.textContent = [person.grade,person.name].filter(Boolean).join('・');
+    name.className = 'cloud-attendance-name';
+    if (person.grade) {
+      const grade = document.createElement('span');
+      grade.className = 'cloud-attendance-grade';
+      grade.textContent = person.grade;
+      name.append(grade);
+    }
+    name.append(document.createTextNode((person.grade ? ' ' : '') + person.name));
     const answer = document.createElement('td');
     const symbol = document.createElement('span');
     const marks = {attending:'○',maybe:'△',absent:'×'};
