@@ -6,6 +6,8 @@ const entry = $('cloud-answer');
 const login = $('cloud-login');
 const params = new URLSearchParams(location.search);
 const guest = guestCredentials(location.hash);
+const directEntry = params.get('view') === 'entry';
+if (directEntry) $('cloud-page-title').textContent = '出欠を入力する';
 const label = value => answers.find(option => option.value === value)?.label || '未回答';
 let auth, store, cloudStore, account, events = [], people = [], mode = 'entry';
 let authGeneration = 0, selectionGeneration = 0, subscriptions = [];
@@ -62,9 +64,13 @@ function renderEvents(preferred = $('cloud-event').value) {
   const person = selection().person;
   const visible = mode === 'review' ? events.filter(event => event.kind === 'match' &&
     account.coachEvents?.[event.id] === true) : person ? availableEvents(events, account, person) : [];
-  $('cloud-event').replaceChildren(option('', '日程・試合を選択'), ...visible.map(event =>
+  const requestedDate = directEntry ? params.get('date') : null;
+  const onRequestedDate = visible.filter(event => event.date === requestedDate);
+  const ordered = onRequestedDate.concat(visible.filter(event => event.date !== requestedDate));
+  $('cloud-event').replaceChildren(option('', '日程・試合を選択'), ...ordered.map(event =>
     option(event.id, event.date.replace(/-/g, '/') + ' · ' + event.title)));
-  $('cloud-event').value = visible.some(event => event.id === preferred) ? preferred : '';
+  $('cloud-event').value = visible.some(event => event.id === preferred) ? preferred :
+    !params.has('event') && onRequestedDate.length === 1 ? onRequestedDate[0].id : '';
   $('cloud-event').disabled = !visible.length;
   status(visible.length ? '' : '表示できる日程がありません。');
   openSelection();
@@ -392,7 +398,8 @@ async function signedIn(user) {
   $('cloud-logout').hidden = !user;
   $('cloud-connect').hidden = true;
   if (!user) {
-    status(showLogin ? '登録済みのアカウントでログインしてください。' : '出欠を回答するときは、コーチから届いた回答用リンクを開いてください。');
+    status(showLogin ? '登録済みのアカウントでログインしてください。' :
+      'クラウドに回答を保存するには、コーチから届いた回答用リンクを開いてください。');
     return;
   }
   if (!user.emailVerified) { status('メールアドレスの確認を済ませ、ログインし直してください。'); return; }
@@ -407,6 +414,11 @@ async function signedIn(user) {
     if (grant.coachId) people.push({ id: grant.coachId, name: grant.coachName || 'コーチ本人', kind: 'coach' });
     $('cloud-person').replaceChildren(...people.map((person, index) =>
       option(index, [person.grade, person.name].filter(Boolean).join('・'))));
+    if (directEntry && params.has('audience')) {
+      const kind = params.get('audience') === 'coaches' ? 'coach' : 'player';
+      const personIndex = people.findIndex(person => person.kind === kind);
+      if (personIndex !== -1) $('cloud-person').value = String(personIndex);
+    }
     $('show-review').hidden = !events.some(event => event.kind === 'match' && grant.coachEvents?.[event.id] === true);
     $('cloud-workspace').hidden = false;
     mode = params.get('view') === 'review' && !$('show-review').hidden ? 'review' : 'entry';
@@ -561,7 +573,7 @@ if (typeof window.onFirebaseReady === 'function') {
       });
       const db = window.firebase.firestore(), timestamp = window.firebase.firestore.FieldValue.serverTimestamp;
       cloudStore = attendanceStore(db,timestamp);
-      renderPublicMatches();
+      if (!directEntry) renderPublicMatches();
       if (guest) {
         store = guestAttendanceStore(db,timestamp,guest);
         openGuest();

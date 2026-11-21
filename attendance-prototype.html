@@ -54,7 +54,10 @@
   </section>
 
   </details>
-  <p class="prototype-local-note">試作版の回答・予定・コーチ名は、このブラウザに保存されます。</p>
+  <p class="prototype-local-note">
+    <a id="device-trial-link" class="back-btn" href="attendance-prototype.html?device=1">この端末の試作記録</a>
+    <a id="cloud-entry-return" class="back-btn" href="attendance-prototype.html" hidden>出欠予定へ戻る</a>
+  </p>
 </main>
 <footer class="site-footer"></footer>
 <dialog id="attendance-dialog" class="event-dialog attendance-entry-dialog" aria-labelledby="attendance-entry-title">
@@ -119,6 +122,6 @@
     <div class="dialog-actions"><button type="button" id="cancel-event" class="secondary-button">キャンセル</button><button type="submit" class="primary-button">予定を追加</button></div>
   </form>
 </dialog>
-<script src="attendance-prototype.js?v=20261121-25"></script>
+<script src="attendance-prototype.js?v=20261122-1"></script>
 </body>
 </html>

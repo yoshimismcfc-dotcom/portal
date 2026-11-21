@@ -5,6 +5,7 @@
   var DAY_NAMES=["日","月","火","水","木","金","土"];
   var ANSWERS=[{value:"attending",label:"参加"},{value:"maybe",label:"未定"},{value:"absent",label:"不参加"}];
   var TRIPS=["行きのみ","帰りのみ","往復"];
+  var deviceMode=new URLSearchParams(location.search).get("device")==="1";
   var state=loadState(),members=[],rosterState="読み込み中",holidays={},audience="players",selectedDate="",selectedEventId="",selectedGrade="すべて",transposeBoard=false;
   var staffCoaches=[],coachRosterStarted=false,coachRosterStatus="コーチ担当を読み込み中…";
   var $=function(id){return document.getElementById(id);};
@@ -287,11 +288,11 @@
       return '<span class="board-ineligible">'+(day.matches.every(function(event){return targetGrades(event);})?"対象外":"対象学年未設定")+'</span>';
     }
     var description=(marks?"練習 "+marks:"")+(answered.length?" "+answered.map(function(answer){return answer.label+" "+answerMark(answer.value);}).join("、"):"");
-    var cycle=day.matches.length===0&&day.practice.length===1;
+    var cycle=deviceMode&&day.matches.length===0&&day.practice.length===1;
     var style=cycle?"board-mark editable":"board-mark editable day-answer";
     return '<button type="button" class="'+style+'" data-answer-date="'+esc(day.date)+'" data-answer-person="'+esc(person.id)+
       '" data-value="'+esc(practice[0]||"")+'" aria-label="'+esc(person.name+" "+dateLabel(day.date)+" "+(review?"要確認。":"")+(description.trim()||"未回答")+(cycle?"。タップで回答を切り替え":"。出欠を入力"))+'">'+
-      (cycle?marks:(marks?'<span class="day-practice-mark">'+marks+'</span>':"")+reviewBadge+badge+extra)+'</button>';
+      (day.matches.length===0&&day.practice.length===1?marks:(marks?'<span class="day-practice-mark">'+marks+'</span>':"")+reviewBadge+badge+extra)+'</button>';
   }
 
   function matchSummaryButton(day,category,people){
@@ -311,7 +312,18 @@
     if(button)button.focus({preventScroll:true});
   }
 
+  function openCloudEntry(day,person){
+    var query=new URLSearchParams({view:"entry",audience:audience});
+    if(day){
+      query.set("date",day.date);
+      var available=day.matches.concat(day.practice).filter(function(event){return canAnswer(event,person,day);});
+      if(available.length===1)query.set("event",available[0].id);
+    }
+    location.assign("attendance-cloud.html?"+query);
+  }
+
   function saveDayAnswers(personId,updates,note){
+    if(!deviceMode)return false;
     var timestamp=new Date().toISOString();
     var before=state.answers;
     var beforeNotes=state.notes;
@@ -508,15 +520,16 @@
     panel.hidden=false;
     $("response-title").textContent="参加予定【"+(audience==="players"?"団員用":"コーチ用")+"】";
     $("respondent-count").textContent=people.length+"名";
-    $("response-summary").textContent="日付をタップするとカレンダー、マスをタップすると出欠入力が開きます。";
-    $("entry-mode-button").disabled=audience==="players"&&!members.length;
+    $("response-summary").textContent=deviceMode?"この端末の試作回答を表示しています。":
+      "表はこの端末の記録です。新しい回答はクラウドに保存します。";
+    $("entry-mode-button").disabled=deviceMode&&audience==="players"&&!members.length;
     $("coach-roster-status").textContent=coachRosterStatus;
     $("coach-roster-status").hidden=audience!=="coaches";
     $("coach-editor").hidden=audience!=="coaches";$("grade-filters").hidden=audience!=="players";$("grade-filters").innerHTML="";
     if(audience==="players"){var grades=["すべて"].concat(GRADES.filter(function(g){return members.some(function(m){return m.grade===g;});}));$("grade-filters").innerHTML=grades.map(function(g){return '<button type="button" class="filter-chip'+(selectedGrade===g?" active":"")+'" data-grade="'+esc(g)+'">'+esc(g)+(g==="すべて"?"":"（"+members.filter(function(m){return m.grade===g;}).length+"）")+"</button>";}).join("");$("grade-filters").querySelectorAll("[data-grade]").forEach(function(btn){btn.addEventListener("click",function(){selectedGrade=btn.dataset.grade;renderResponse();});});if(selectedGrade!=="すべて")people=people.filter(function(p){return p.grade===selectedGrade;});}
 
-    $("entry-mode-button").textContent="出欠を入力する";
-    $("entry-mode-help").textContent="名前を選び、複数の日程をまとめて回答できます。";
+    $("entry-mode-button").textContent=deviceMode?"試作回答を入力する":"出欠を入力する";
+    $("entry-mode-help").textContent=deviceMode?"この端末に保存します。":"クラウドに回答を保存します。";
     if(!people.length){
       rows.innerHTML='<div class="empty-state">'+(audience==="players"?esc(rosterState)+"。":esc(coachRosterStatus))+"</div>";
       return;
@@ -574,11 +587,15 @@
     var daysByDate=new Map(days.map(function(day){return [day.date,day];}));
     var peopleById=new Map(people.map(function(person){return [person.id,person];}));
     rows.querySelectorAll("[data-edit-person]").forEach(function(btn){
-      btn.addEventListener("click",function(){openAttendanceForm(btn.dataset.editPerson);});
+      btn.addEventListener("click",function(){
+        if(deviceMode)openAttendanceForm(btn.dataset.editPerson);
+        else openCloudEntry();
+      });
     });
     rows.querySelectorAll("[data-answer-date]").forEach(function(btn){
       btn.addEventListener("click",function(){
         var day=daysByDate.get(btn.dataset.answerDate),person=peopleById.get(btn.dataset.answerPerson);
+        if(!deviceMode){openCloudEntry(day,person);return;}
         if(day.matches.length||day.practice.length!==1){openDayEntry(day,person,btn);return;}
         var event=day.practice[0];
         var next={attending:"maybe",maybe:"absent",absent:"","":"attending"}[answerValue(event,person)];
@@ -819,7 +836,10 @@
     else window.addEventListener("load",requestMatches,{once:true});
   }
 
-  function init(){movePastEvents();
+  function init(){
+    $("reset-demo").hidden=!deviceMode;
+    $("device-trial-link").hidden=deviceMode;
+    $("cloud-entry-return").hidden=!deviceMode;movePastEvents();
     setupCalendarMatchPicker();
     $("match-summary-list").addEventListener("click",function(event){
       var button=event.target.closest("[data-target-action]");
@@ -874,7 +894,7 @@
     $("add-event").addEventListener("click",addEvent);$("cancel-event").addEventListener("click",function(){$("event-dialog").close();});$("event-form").addEventListener("submit",function(e){e.preventDefault();var title=$("event-title").value.trim();if(!title)return;if(selectedDate<todayISO()||selectedDate>maxDate()||!isDefaultDay(selectedDate)){alert("出欠予定は今日から2か月先までの水・木・土・日・祝日から登録してください。");return;}var kind=$("event-kind").value,dayId=defaultEvent(selectedDate).id;
       var reuseDay=kind==="practice"&&!eventForDate(selectedDate).some(function(event){return event.id===dayId||event.kind==="practice";});
       var id=reuseDay?dayId:"demo_"+Date.now().toString(36)+"_"+Math.random().toString(36).slice(2,7);state.events.push({id:id,date:selectedDate,kind:$("event-kind").value,title:title,place:$("event-place").value.trim(),createdAt:new Date().toISOString()});saveState();$("event-dialog").close();openEvent(id);});
-    $("entry-mode-button").addEventListener("click",function(){if(getPeople().length){openAttendanceForm("");return;}if(audience==="coaches"&&!state.coaches.length){$("coach-local-editor").open=true;$("coach-editor").scrollIntoView({behavior:"smooth",block:"center"});$("coach-name-input").focus({preventScroll:true});return;}});$("entry-mode-icon").addEventListener("click",function(){$("entry-mode-button").click();});$("transpose-board").addEventListener("click",function(){transposeBoard=!transposeBoard;renderResponse();});$("cancel-attendance").addEventListener("click",function(){$("attendance-dialog").close();});$("attendance-form").addEventListener("submit",saveAttendanceForm);$("entry-person").addEventListener("change",renderAttendanceFormEvents);$("export-csv").addEventListener("click",exportCsv);$("reset-demo").addEventListener("click",function(){if(!confirm("この端末に保存した試作の予定・回答・コーチ名をすべて削除しますか？団員名簿は変更されません。"))return;state={events:[],archive:[],coaches:[],coachLinks:{},answers:{},notes:{},matchNotes:{}};selectedEventId="";selectedDate="";localStorage.removeItem(STORAGE_KEY);render();});$("add-coach").addEventListener("click",function(){var input=$("coach-name-input"),name=input.value.trim();if(!name){input.focus();return;}if(getPeople().some(function(c){return coachNameKey(c.name)===coachNameKey(name);})){alert("同じ名前がすでに登録されています。");return;}state.coaches.push({id:"coach_"+Date.now().toString(36)+"_"+Math.random().toString(36).slice(2,6),name:name});input.value="";saveState();render();});
+    $("entry-mode-button").addEventListener("click",function(){if(!deviceMode){openCloudEntry();return;}if(getPeople().length){openAttendanceForm("");return;}if(audience==="coaches"&&!state.coaches.length){$("coach-local-editor").open=true;$("coach-editor").scrollIntoView({behavior:"smooth",block:"center"});$("coach-name-input").focus({preventScroll:true});return;}});$("entry-mode-icon").addEventListener("click",function(){$("entry-mode-button").click();});$("transpose-board").addEventListener("click",function(){transposeBoard=!transposeBoard;renderResponse();});$("cancel-attendance").addEventListener("click",function(){$("attendance-dialog").close();});$("attendance-form").addEventListener("submit",saveAttendanceForm);$("entry-person").addEventListener("change",renderAttendanceFormEvents);$("export-csv").addEventListener("click",exportCsv);$("reset-demo").addEventListener("click",function(){if(!confirm("この端末に保存した試作の予定・回答・コーチ名をすべて削除しますか？団員名簿は変更されません。"))return;state={events:[],archive:[],coaches:[],coachLinks:{},answers:{},notes:{},matchNotes:{}};selectedEventId="";selectedDate="";localStorage.removeItem(STORAGE_KEY);render();});$("add-coach").addEventListener("click",function(){var input=$("coach-name-input"),name=input.value.trim();if(!name){input.focus();return;}if(getPeople().some(function(c){return coachNameKey(c.name)===coachNameKey(name);})){alert("同じ名前がすでに登録されています。");return;}state.coaches.push({id:"coach_"+Date.now().toString(36)+"_"+Math.random().toString(36).slice(2,6),name:name});input.value="";saveState();render();});
     var archiveSection=document.createElement("section");archiveSection.className="panel archived-panel";archiveSection.innerHTML='<details><summary>過去の予定（試作データ）</summary><div id="archive-list" class="event-list"></div><p class="small-note">日付が過ぎた予定は一覧から自動で移し、試作版の回答記録はCSV出力用にこの端末へ残しています。</p></details>';$("event-panel").after(archiveSection);
     render();loadHolidays();readRoster();
   }
