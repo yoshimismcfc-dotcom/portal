@@ -1,5 +1,5 @@
 import { answers, attendanceStore, availableEvents, contactFromForm, contactLabel, reviewRows,
-  guestCredentials, guestAttendanceStore, latestAttendance } from './attendance-cloud-service.mjs?v=20261121-21';
+  guestCredentials, guestAttendanceStore, latestAttendance } from './attendance-cloud-service.mjs?v=20261121-22';
 
 const $ = id => document.getElementById(id);
 const entry = $('cloud-answer');
@@ -12,6 +12,7 @@ let authGeneration = 0, selectionGeneration = 0, subscriptions = [];
 let record, conflict, saving = false, dirty = false;
 let roster, replies, guestLinks, publicNotices = [];
 let displayedLink = null;
+let guestAlias = '';
 let showLogin = params.get('view') === 'review';
 let previousPerson = '', previousEvent = '';
 
@@ -78,6 +79,7 @@ function populate(response) {
     if (field.type === 'checkbox') field.checked = value === true;
     else field.value = value;
   }
+  entry.elements.namedItem('publicName').value = response.publicName && response.publicName !== guestAlias ? response.publicName : '';
   $('cloud-contact').open = Boolean(contactLabel(response.contact));
 }
 
@@ -226,6 +228,43 @@ async function renderPublicNotices() {
   }
 }
 
+async function renderPublicCoordination() {
+  const section = $('public-coordination');
+  const list = $('public-coordination-list');
+  const statusLine = $('public-coordination-status');
+  section.hidden = false;
+  try {
+    const groups = new Map();
+    for (const item of await cloudStore.publicCoordination()) {
+      if (!groups.has(item.eventId)) groups.set(item.eventId,[]);
+      groups.get(item.eventId).push(item);
+    }
+    list.replaceChildren(...Array.from(groups.values(), items => {
+      const section = document.createElement('section');
+      section.className = 'public-notice';
+      const title = document.createElement('h3');
+      title.textContent = items[0].date.replace(/-/g,'/')+' · '+items[0].title;
+      const list = document.createElement('ul');
+      list.className = 'coordination-rows';
+      for (const item of items) {
+        const row = document.createElement('li');
+        const name = document.createElement('strong');
+        name.textContent = item.name;
+        const contact = document.createElement('span');
+        contact.textContent = contactLabel(item);
+        row.append(name,contact);
+        list.append(row);
+      }
+      section.append(title,list);
+      return section;
+    }));
+    statusLine.textContent = groups.size ? '' : '公開中の送迎希望・早退・遅刻はありません。';
+  } catch {
+    list.replaceChildren();
+    statusLine.textContent = '保護者間の連絡を取得できませんでした。';
+  }
+}
+
 function hideGuestLink() {
   displayedLink = null;
   $('guest-link-url').value = '';
@@ -238,7 +277,7 @@ async function openGuest() {
   $('cloud-workspace').hidden = true;
   login.hidden = $('open-cloud-login').hidden = $('cloud-logout').hidden = true;
   try {
-    const grant = await store.read();
+    const grant = await store.prepare();
     if (token !== authGeneration) return;
     events = [{ id:guest.event, title:grant.title, date:grant.date, kind:grant.kind, localEventId:grant.localEventId, open:true }];
     people = [{ id:grant.personId, name:grant.personName, kind:'player' }];
@@ -248,6 +287,9 @@ async function openGuest() {
     $('guest-heading').hidden = false;
     $('guest-title').textContent = grant.title;
     $('guest-person').textContent = grant.date.replace(/-/g,'/')+' · '+grant.personName;
+    guestAlias = grant.coordinationId ? '保護者 '+grant.coordinationId.slice(0,6).toUpperCase() : '';
+    $('coordinate-choice').hidden = grant.kind !== 'match' || !guestAlias;
+    $('coordination-alias').textContent = guestAlias ? '空欄の場合は「'+guestAlias+'」と表示します。' : '';
     $('cloud-workspace').hidden = false;
     $('cloud-connect').hidden = true;
     openSelection();
@@ -268,6 +310,10 @@ async function saveAnswer(revision = record?.revision) {
   }
   const data = new FormData(entry);
   const draft = { value: data.get('value') ?? '', contact: $('cloud-contact').hidden ? {} : contactFromForm(data) };
+  if (guest && guestAlias) {
+    const { ride, early, late } = draft.contact;
+    draft.publicName = ride || early || late ? String(data.get('publicName') || '').trim().slice(0,24) || guestAlias : '';
+  }
   const token = selectionGeneration;
   let retry = false;
   saving = true;
@@ -282,6 +328,7 @@ async function saveAnswer(revision = record?.revision) {
     dirty = false;
     if (draft.value) $('cloud-review-notice').hidden = true;
     saveStatus('クラウドに保存しました。');
+    if (guest && guestAlias) renderPublicCoordination();
   } catch (error) {
     if (token !== selectionGeneration) return;
     saveStatus('クラウドに保存できませんでした。入力は残っています。');
@@ -439,7 +486,7 @@ $('revoke-guest-link').onclick = async () => {
   if (!event || !key || !confirm('この回答用リンクを無効にしますか？')) return;
   const token = selectionGeneration;
   try {
-    await store.revokeGuestLink(event.id,key);
+    await store.revokeGuestLink(event.id,key,guestLinks?.find(link => link.key === key)?.coordinationId);
     if (token !== selectionGeneration) return;
     hideGuestLink();
     $('guest-link-status').textContent = 'リンクを無効にしました。';
@@ -488,6 +535,7 @@ if (typeof window.onFirebaseReady === 'function') {
       const db = window.firebase.firestore(), timestamp = window.firebase.firestore.FieldValue.serverTimestamp;
       cloudStore = attendanceStore(db,timestamp);
       renderPublicNotices();
+      renderPublicCoordination();
       if (guest) {
         store = guestAttendanceStore(db,timestamp,guest);
         openGuest();

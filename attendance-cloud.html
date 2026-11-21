@@ -6,7 +6,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>クラウド出欠｜吉見SMC FC</title>
   <link rel="stylesheet" href="common.css">
-  <link rel="stylesheet" href="attendance-cloud.css?v=20261121-21">
+  <link rel="stylesheet" href="attendance-cloud.css?v=20261121-22">
   <script src="firebase-config.js"></script>
   <script src="common.js"></script>
 </head>
@@ -20,6 +20,11 @@
     <h2>試合の公開連絡</h2>
     <p id="public-notice-status" role="status"></p>
     <div id="public-notice-list" class="cloud-stack"></div>
+  </section>
+  <section id="public-coordination" class="panel" hidden>
+    <h2>試合ごとの保護者間の連絡</h2>
+    <p id="public-coordination-status" role="status"></p>
+    <div id="public-coordination-list" class="cloud-stack"></div>
   </section>
   <button id="open-cloud-login" type="button" class="secondary-button" hidden>コーチ・登録済みの方</button>
   <form id="cloud-login" class="panel cloud-stack" hidden>
@@ -55,6 +60,12 @@
             <label class="cloud-contact-detail">到着の予定時刻（任意） <input type="time" name="lateTime"></label></div>
           <label><input type="checkbox" name="other"> その他</label>
           <label>補足（任意） <textarea name="message" rows="3" maxlength="160" placeholder="例：荷物当番できます"></textarea></label>
+          <fieldset id="coordinate-choice" hidden>
+            <legend>保護者間で共有</legend>
+            <small>送迎希望・早退・遅刻は、保存すると誰でも見られる試合一覧に載ります。補足欄の文章は個別連絡に残ります。</small>
+            <label>公開用の呼び名（任意） <input type="text" name="publicName" maxlength="24" placeholder="例：背番号12の保護者" autocomplete="off"></label>
+            <small id="coordination-alias"></small>
+          </fieldset>
         </div>
       </details>
       <p id="cloud-save-status" role="status" aria-live="polite"></p>
@@ -99,6 +110,6 @@
   </section>
 </main>
 <footer class="site-footer"></footer>
-<script type="module" src="attendance-cloud.mjs?v=20261121-21"></script>
+<script type="module" src="attendance-cloud.mjs?v=20261121-22"></script>
 </body>
 </html>

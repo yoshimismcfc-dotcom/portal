@@ -54,6 +54,44 @@ service cloud.firestore {
     && request.resource.data.updatedAt == request.time;
    allow delete: if attendanceCoach(e);
   }
+  match /attendanceCoordinationWriters/{id} {
+   function pairedLink() {
+    let d = request.resource.data;
+    return getAfter(/databases/$(database)/documents/attendanceCloudEvents/$(d.eventId)/guestLinks/$(d.key)).data;
+   }
+   allow create: if id.matches('[a-f0-9]{64}')
+    && request.resource.data.keys().hasOnly(['eventId','key'])
+    && request.resource.data.key.matches('[a-f0-9]{64}')
+    && pairedLink().coordinationId == id
+    && (attendanceCoach(request.resource.data.eventId)
+     || (get(/databases/$(database)/documents/attendanceConfig/v1).data.enabled == true
+      && pairedLink().kind == 'match' && pairedLink().active == true && request.time < pairedLink().expiresAt));
+  }
+  match /attendancePublicCoordination/{id} {
+   function writer() { return get(/databases/$(database)/documents/attendanceCoordinationWriters/$(id)).data; }
+   function reply() {
+    let w = writer();
+    return getAfter(/databases/$(database)/documents/attendanceCloudEvents/$(w.eventId)/guestLinks/$(w.key)).data;
+   }
+   function privateWrite(j) {
+    return j.active == true && j.coordinationId == id && j.answer.updatedAt == request.time;
+   }
+   function validProjection() {
+    let w = writer();
+    let j = reply();
+    let d = request.resource.data;
+    let n = j.answer.contact;
+    return privateWrite(j) && j.kind == 'match' && j.answer.publicName.size() > 0
+     && d.keys().hasOnly(['eventId','title','date','name','ride','rideTrip','early','earlyTime','late','lateTime','updatedAt'])
+     && d.eventId == w.eventId && d.title == j.title && d.date == j.date && d.name == j.answer.publicName
+     && d.ride == n.get('ride',false) && d.rideTrip == n.get('rideTrip','')
+     && d.early == n.get('early',false) && d.earlyTime == n.get('earlyTime','')
+     && d.late == n.get('late',false) && d.lateTime == n.get('lateTime','') && d.updatedAt == request.time;
+   }
+   allow get,list: if get(/databases/$(database)/documents/attendanceConfig/v1).data.enabled == true;
+   allow create,update: if validProjection();
+   allow delete: if attendanceCoach(writer().eventId) || (privateWrite(reply()) && reply().answer.get('publicName','') == '');
+  }
   match /attendanceCloudEvents/{e} {
    allow get,list: if attendanceMember();
    match /roster/{p} {
@@ -77,17 +115,32 @@ service cloud.firestore {
      let d = request.resource.data;
      let event = attendanceEvent(e);
      return key.matches('[a-f0-9]{64}')
-      && d.keys().hasOnly(['personId','personName','title','date','kind','localEventId','active','expiresAt'])
+      && d.keys().hasOnly(['personId','personName','title','date','kind','localEventId','active','expiresAt','coordinationId'])
+      && (!d.keys().hasAny(['coordinationId']) || validCoordinationId(d.coordinationId))
       && str(d.personId,150) && d.personName == attendanceRoster(e,d.personId).name
       && d.title == event.title && d.date == event.date && d.kind == event.kind
       && d.localEventId == event.get('localEventId','') && d.active == true
       && d.expiresAt is timestamp && d.expiresAt > request.time && d.expiresAt <= request.time + duration.value(100,'d')
       && eligibleGuest(d.personId);
     }
+    function validCoordinationId(id) {
+     let index = getAfter(/databases/$(database)/documents/attendanceCoordinationWriters/$(id)).data;
+     return id.matches('[a-f0-9]{64}') && index.eventId == e && index.key == key;
+    }
+    function publicChoice(d) {
+     let name = d.get('publicName','');
+     let id = resource.data.get('coordinationId','');
+     let hadPublic = resource.data.get('answer',{}).get('publicName','') != '';
+     let hasCoordination = d.contact.get('ride',false) || d.contact.get('early',false) || d.contact.get('late',false);
+     return str(name,24) && (id != '' && hasCoordination
+      ? name.size() > 0 && resource.data.kind == 'match'
+       && getAfter(/databases/$(database)/documents/attendancePublicCoordination/$(id)).data.updatedAt == request.time
+      : name == '' && (!hadPublic || !existsAfter(/databases/$(database)/documents/attendancePublicCoordination/$(id))));
+    }
     function validGuestResponse() {
      let d = request.resource.data.answer;
      return request.resource.data.diff(resource.data).affectedKeys().hasOnly(['answer'])
-      && d.keys().hasOnly(['value','contact','revision','updatedAt'])
+      && d.keys().hasOnly(['value','contact','revision','updatedAt','publicName']) && publicChoice(d)
       && d.value in ['', 'attending', 'maybe', 'absent'] && attendanceContact(d.contact)
       && d.updatedAt == request.time && d.revision == resource.data.get('answer',{}).get('revision',0) + 1
       && (attendanceEvent(e).kind == 'match' || d.contact.size() == 0);
@@ -97,7 +150,12 @@ service cloud.firestore {
     allow create: if attendanceCoach(e) && validInvitation();
     allow update: if (guestEnabled() && eligibleGuest(resource.data.personId) && validGuestResponse())
      || (attendanceCoach(e) && request.resource.data.diff(resource.data).affectedKeys().hasOnly(['active'])
-      && request.resource.data.active == false);
+      && request.resource.data.active == false)
+     || ((attendanceCoach(e) || (guestEnabled() && eligibleGuest(resource.data.personId)))
+      && resource.data.kind == 'match' && resource.data.active == true
+      && !resource.data.keys().hasAny(['coordinationId'])
+      && request.resource.data.diff(resource.data).affectedKeys().hasOnly(['coordinationId'])
+      && validCoordinationId(request.resource.data.coordinationId));
    }
    match /playerAnswers/{p} {
     allow get: if attendanceCoach(e) || attendanceOwnPlayer(p);
