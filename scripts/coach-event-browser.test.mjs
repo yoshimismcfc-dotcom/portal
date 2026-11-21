@@ -114,10 +114,13 @@ const home = fs.readFileSync(path.join(root, "index.html"), "utf8");
 const matchStart = home.indexOf('id="sec-match"');
 const linksStart = home.indexOf('id="sec-links"', matchStart);
 const homeMatchSection = home.slice(matchStart, linksStart);
-assert.equal((homeMatchSection.match(/class="menu-card/g) || []).length, 1,
-  "ホームの試合・大会には大会管理ダッシュボードだけを表示してください");
+assert.equal((homeMatchSection.match(/class="menu-card/g) || []).length, 6,
+  "ホームの試合・大会には大会管理と既存の5項目を表示してください");
 assert.ok(homeMatchSection.includes('href="coach.html#coach-match"') && homeMatchSection.includes("大会管理ダッシュボード"),
   "大会管理ダッシュボードから大会専用画面へ移動できません");
+for (const label of ["当番・荷物チェック", "ユニフォーム貸出", "ピッチサイズ", "審判ガイド", "写真・動画アルバム"]) {
+  assert.ok(homeMatchSection.includes(label), `${label} を試合・大会に表示してください`);
+}
 for (const page of ["duty.html", "uniform.html", "pitch.html", "referee.html"]) {
   assert.ok(fs.existsSync(path.join(root, page)), `${page} の既存機能ページは削除しないでください`);
 }
