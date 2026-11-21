@@ -709,8 +709,9 @@ function enhanceCalendarUpcomingAgenda() {
     const calendarFrame = document.getElementById("gcal-iframe");
     const calendarWrap = calendarFrame?.closest(".gcal-wrap");
     const attendancePage = document.getElementById("match-attendance");
+    const matchPicker = document.getElementById("calendar-match-dialog");
     const isCalendarPage = Boolean(calendarFrame && calendarWrap);
-    if ((!isCalendarPage && !attendancePage) || (isCalendarPage && document.getElementById("calendar-upcoming-agenda"))) return;
+    if ((!isCalendarPage && !attendancePage && !matchPicker) || (isCalendarPage && document.getElementById("calendar-upcoming-agenda"))) return;
 
     const PUBLIC_CALENDAR_KEY = ["AIzaSyDRH2RymQBOFCcXIDDjJc", "EbBdyuVmfXLnQ"].join("");
     const CACHE_KEY = "smc-calendar-upcoming-v8";
@@ -725,6 +726,28 @@ function enhanceCalendarUpcomingAgenda() {
       { id: "01d22b708d632098f45dd7bc1be0cae88eff00e4d2e4b9f077c8d70bcca46de0@group.calendar.google.com", color: "#e4c441", label: "U9" },
       { id: "ccd8330bb3b6efb8f90a36e1655ac0459ddbe047155325367bb0feddd1eae83d@group.calendar.google.com", color: "#4285f4", label: "その他" }
     ];
+
+    if (matchPicker && !isCalendarPage && !attendancePage) {
+      matchPicker.dataset.calendarReady = "true";
+      matchPicker.addEventListener("smc-calendar-request", async () => {
+        const start = new Date();
+        const end = new Date(start);
+        end.setDate(end.getDate() + UPCOMING_DAYS);
+        // Include events earlier today as well as all upcoming events in Japan.
+        const today = new Intl.DateTimeFormat("sv-SE", { timeZone: "Asia/Tokyo", dateStyle: "short" }).format(start);
+        const from = new Date(today + "T00:00:00+09:00");
+        const groups = CALENDARS.filter((calendar) => /^U(?:[7-9]|1[0-2])$/.test(calendar.label));
+        const results = await Promise.allSettled(groups.map((calendar) =>
+          fetchCalendar(calendar, from.toISOString(), end.toISOString(), 250)
+        ));
+        const events = results.flatMap((result) => result.status === "fulfilled" ? result.value : []);
+        const failed = results.flatMap((result, index) =>
+          result.status === "rejected" ? [groups[index].label] : []
+        );
+        matchPicker.dispatchEvent(new CustomEvent("smc-calendar-result", { detail: { events, failed } }));
+      });
+      return;
+    }
 
     if (!document.getElementById("calendar-upcoming-style")) {
       const style = document.createElement("style");
@@ -1219,19 +1242,20 @@ function enhanceCalendarUpcomingAgenda() {
       }
     }
 
-    async function fetchCalendar(calendar, timeMin, timeMax) {
+    async function fetchCalendar(calendar, timeMin, timeMax, limit = 40) {
       const url = new URL(`https://www.googleapis.com/calendar/v3/calendars/${encodeURIComponent(calendar.id)}/events`);
       url.searchParams.set("key", PUBLIC_CALENDAR_KEY);
       url.searchParams.set("timeMin", timeMin);
       url.searchParams.set("timeMax", timeMax);
       url.searchParams.set("singleEvents", "true");
       url.searchParams.set("orderBy", "startTime");
-      url.searchParams.set("maxResults", "40");
+      url.searchParams.set("maxResults", String(limit));
       const response = await fetch(url.toString(), { referrerPolicy: "strict-origin-when-cross-origin" });
       if (!response.ok) throw new Error(`Calendar API ${response.status}`);
       const data = await response.json();
       return (data.items || []).map((event) => ({
         id: `${calendar.id}:${event.id || event.iCalUID || ""}:${event.start?.dateTime || event.start?.date || ""}`,
+        sourceId: event.id ? `${calendar.id}:${event.id}` : "",
         title: event.summary || "（タイトル未設定）",
         start: event.start?.dateTime || event.start?.date || "",
         end: event.end?.dateTime || event.end?.date || "",

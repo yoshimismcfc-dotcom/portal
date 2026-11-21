@@ -148,3 +148,13 @@
   .attendance-board .summary-symbol { font-size: 1rem; }
   .attendance-board .board-member-name { font-size: .94rem; }
 }
+
+.attendance-heading-actions { display: flex; align-items: center; justify-content: flex-end; flex-wrap: wrap; gap: 4px 8px; }
+.attendance-heading-actions .secondary-button { min-height: 44px; padding-inline: 9px; white-space: nowrap; font-size: .8rem; }
+.calendar-match-dialog { max-height: 90vh; max-height: 90svh; overflow: auto; }
+.calendar-match-list { display: grid; gap: 7px; max-height: 44vh; max-height: 44svh; overflow: auto; }
+.calendar-match-choice { text-align: left; overflow-wrap: anywhere; }
+.calendar-match-choice span { display: block; font-size: .82rem; font-weight: 500; }
+.calendar-match-choice strong { display: block; margin-block: 2px; }
+.calendar-match-choice .calendar-match-action { color: #a3e6cb; }
+.board-event-time { display: block; font-size: .72rem; font-variant-numeric: tabular-nums; }
