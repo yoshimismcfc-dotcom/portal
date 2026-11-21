@@ -47,6 +47,7 @@
       <p class="small-note">名前はこの端末だけに保存されます。名前の編集・削除もできます。</p>
     </div>
     <div class="response-filters" id="grade-filters" aria-label="学年の絞り込み"></div>
+    <div class="board-toolbar" id="board-toolbar" hidden><span id="board-status" role="status">参加者を縦、日程を横に表示中</span><button type="button" id="transpose-board" aria-pressed="false">行と列を入れ替え</button></div>
     <div id="response-list" class="response-list" aria-live="polite"></div>
   </section>
 
@@ -55,7 +56,7 @@
     <ul><li>団員名簿との連動や表示は分かりやすいか</li><li>回答の選択肢・カレンダー・CSVに必要な項目はそろっているか</li><li>本番運用に進める前に、回答データの共有方法と管理権限を決める</li></ul>
   </section>
 </main>
-<div class="fixed-entry-bar" id="fixed-entry-bar"><span id="entry-mode-help">予定を選び、出欠入力を開始してください。</span><button type="button" id="entry-mode-button" class="primary-button">出欠を入力する</button></div>
+<div class="fixed-entry-bar" id="fixed-entry-bar"><span id="entry-mode-help">予定を選び、出欠入力を開始してください。</span><button type="button" id="entry-mode-button" class="primary-button">出欠を入力する</button><button type="button" id="entry-mode-icon" class="entry-mode-icon" aria-label="名前を選んで出欠を入力"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 20h4l11-11a2.1 2.1 0 0 0-4-4L4 16v4Z"/><path d="m13.5 6.5 4 4M4 20l4-1"/></svg></button></div>
 <footer class="site-footer"></footer>
 <dialog id="attendance-dialog" class="event-dialog attendance-dialog">
   <form id="attendance-form" method="dialog">
