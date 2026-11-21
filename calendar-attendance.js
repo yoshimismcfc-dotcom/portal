@@ -40,6 +40,7 @@
       var single = part.match(/^([1-6])年(?:生)?(以下|以上)?$/);
       if (single) {
         var number = Number(single[1]);
+        if (single[2] === "以下") grades.add("年長");
         for (var candidate = 1; candidate <= 6; candidate++) {
           if (single[2] === "以下" ? candidate <= number :
               single[2] === "以上" ? candidate >= number : candidate === number) grades.add(candidate + "年");
