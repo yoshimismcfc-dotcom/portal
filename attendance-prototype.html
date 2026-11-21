@@ -7,7 +7,7 @@
   <meta name="theme-color" content="#07152d">
   <title>出欠確認 試作版｜吉見SMC FC</title>
   <link rel="stylesheet" href="common.css">
-  <link rel="stylesheet" href="attendance-prototype.css?v=20261121-16">
+  <link rel="stylesheet" href="attendance-prototype.css?v=20261121-17">
   <script src="firebase-config.js"></script>
   <script src="common.js"></script>
 </head>
@@ -56,20 +56,24 @@
   <p class="prototype-local-note">試作版の回答・予定・コーチ名は、このブラウザに保存されます。</p>
 </main>
 <footer class="site-footer"></footer>
-<dialog id="attendance-dialog" class="event-dialog attendance-dialog">
+<dialog id="attendance-dialog" class="event-dialog attendance-entry-dialog" aria-labelledby="attendance-entry-title">
   <form id="attendance-form" method="dialog">
-    <h2>出欠を入力</h2><p class="dialog-date">名前を選び、各日程の参加予定を入力してください。</p>
-    <label for="entry-person">入力する人</label><select id="entry-person" required><option value="">名前を選択してください</option></select>
-    <div id="attendance-form-events" class="attendance-form-events"></div>
-    <label for="entry-comment">備考（任意）</label><textarea id="entry-comment" maxlength="80" rows="2" placeholder="送迎希望など（80文字以内）"></textarea>
+    <div class="attendance-entry-scroll">
+      <h2 id="attendance-entry-title">出欠を入力</h2><p class="dialog-date">名前を選び、各日程の参加予定を入力してください。</p>
+      <label for="entry-person">入力する人</label><select id="entry-person" required autofocus><option value="">名前を選択してください</option></select>
+      <div id="attendance-form-events" class="attendance-form-events"></div>
+      <label for="entry-comment">備考（任意）</label><textarea id="entry-comment" maxlength="80" rows="2" placeholder="送迎希望など（80文字以内）"></textarea>
+    </div>
     <div class="dialog-actions"><button type="button" id="cancel-attendance" class="secondary-button">キャンセル</button><button type="submit" id="save-attendance" class="primary-button">回答を保存</button></div>
   </form>
 </dialog>
-<dialog id="day-entry-dialog" class="event-dialog day-entry-dialog" aria-labelledby="day-entry-title">
+<dialog id="day-entry-dialog" class="event-dialog attendance-entry-dialog" aria-labelledby="day-entry-title">
   <form id="day-entry-form">
-    <h2 id="day-entry-title">出欠を入力</h2>
-    <p id="day-entry-person" class="dialog-date"></p>
-    <div id="day-entry-events" class="day-entry-events"></div>
+    <div class="attendance-entry-scroll">
+      <h2 id="day-entry-title">出欠を入力</h2>
+      <p id="day-entry-person" class="dialog-date"></p>
+      <div id="day-entry-events" class="day-entry-events"></div>
+    </div>
     <div class="dialog-actions">
       <button id="cancel-day-entry" class="secondary-button" type="button">キャンセル</button>
       <button class="primary-button" type="submit">回答を保存</button>
@@ -116,6 +120,6 @@
     <div class="dialog-actions"><button type="button" id="cancel-event" class="secondary-button">キャンセル</button><button type="submit" class="primary-button">予定を追加</button></div>
   </form>
 </dialog>
-<script src="attendance-prototype.js?v=20261121-16"></script>
+<script src="attendance-prototype.js?v=20261121-17"></script>
 </body>
 </html>

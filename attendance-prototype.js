@@ -289,9 +289,10 @@
     if(button)button.focus({preventScroll:true});
   }
 
-  function saveDayAnswers(personId,updates){
+  function saveDayAnswers(personId,updates,note){
     var timestamp=new Date().toISOString();
     var before=state.answers;
+    var beforeNotes=state.notes;
     var answers={...before};
     updates.forEach(function(update){
       var current=before[update.id]?.[audience]||{};
@@ -302,7 +303,13 @@
       answers[update.id]={...before[update.id],[audience]:replies};
     });
     state.answers=answers;
-    if(!saveState()){state.answers=before;return false;}
+    if(note!==undefined){
+      var notes={...beforeNotes[audience]};
+      if(note)notes[personId]=note;
+      else delete notes[personId];
+      state.notes={...beforeNotes,[audience]:notes};
+    }
+    if(!saveState()){state.answers=before;state.notes=beforeNotes;return false;}
     return true;
   }
 
@@ -327,6 +334,7 @@
         }).join("")+matchCalendarAction(event)+'</fieldset>';
     }).join("");
     $("day-entry-dialog").showModal();
+    $("day-entry-events").parentElement.scrollTop=0;
   }
 
   function openMatchSummary(day,category,people){
@@ -444,26 +452,37 @@
     select.value=editingPersonId;$("entry-comment").value="";
     if(editingPersonId){events.forEach(function(event){var value=state.answers[event.id]&&state.answers[event.id][audience]&&state.answers[event.id][audience][editingPersonId];formAnswers[event.id]=value&&value.value||"";});$("entry-comment").value=state.notes[audience]&&state.notes[audience][editingPersonId]||"";}
     renderAttendanceFormEvents(events);$("attendance-dialog").showModal();
+    $("attendance-form-events").parentElement.scrollTop=0;
   }
   function renderAttendanceFormEvents(events){
     var root=$("attendance-form-events"),options=[{value:"attending",label:"○"},{value:"maybe",label:"△"},{value:"absent",label:"×"},{value:"",label:"未回答"}];
+    $("save-attendance").disabled=!editingPersonId;
+    $("entry-comment").disabled=!editingPersonId;
     root.innerHTML=events.map(function(event){
       var current=formAnswers[event.id]||"";
       return '<section class="attendance-form-event"><div class="attendance-form-date">'+dateLabel(event.date)+'</div>'+
         '<div class="attendance-form-title">'+eventDetails(event)+(event.place?" · "+esc(event.place):"")+'</div>'+
         matchCalendarAction(event)+'<div class="attendance-form-choices">'+options.map(function(option){
-          return '<button type="button" class="attendance-form-choice'+(current===option.value?" selected":"")+
-            '" data-form-event="'+esc(event.id)+'" data-form-value="'+esc(option.value)+'" aria-pressed="'+
-            String(current===option.value)+'">'+option.label+'</button>';
+          return '<button type="button" class="attendance-form-choice" data-form-event="'+esc(event.id)+
+            '" data-form-value="'+esc(option.value)+'" aria-pressed="'+String(current===option.value)+'"'+
+            (editingPersonId?"":" disabled")+'>'+option.label+'</button>';
         }).join("")+'</div></section>';
     }).join("");
-    root.querySelectorAll("[data-form-event]").forEach(function(button){button.addEventListener("click",function(){formAnswers[button.dataset.formEvent]=button.dataset.formValue;renderAttendanceFormEvents(events);});});
   }
   function saveAttendanceForm(event){
-    event.preventDefault();var personId=$("entry-person").value;if(!personId){alert("名前を選んでください。");return;}var person=getPeople().find(function(item){return item.id===personId;});if(!person){alert("入力する人を選び直してください。");return;}var now=new Date().toISOString();
-    getBoardEvents().forEach(function(item){if(!Object.hasOwn(formAnswers,item.id)||(!formAnswers[item.id]&&!state.answers[item.id]))return;if(!state.answers[item.id])state.answers[item.id]={};if(!state.answers[item.id][audience])state.answers[item.id][audience]={};if(formAnswers[item.id])state.answers[item.id][audience][personId]={value:formAnswers[item.id],updatedAt:now};else delete state.answers[item.id][audience][personId];});
-    if(!state.notes[audience])state.notes[audience]={};var note=$("entry-comment").value.trim().slice(0,80);if(note)state.notes[audience][personId]=note;else delete state.notes[audience][personId];
-    saveState();$("attendance-dialog").close();render();
+    event.preventDefault();
+    var personId=$("entry-person").value;
+    if(!getPeople().some(function(person){return person.id===personId;})){
+      alert("入力する人を選び直してください。");return;
+    }
+    var updates=getBoardEvents().filter(function(item){return Object.hasOwn(formAnswers,item.id);}).map(function(item){
+      return {id:item.id,value:formAnswers[item.id]};
+    });
+    var note=$("entry-comment").value.trim().slice(0,80);
+    if(!saveDayAnswers(personId,updates,note))return;
+    $("attendance-dialog").close();
+    renderEventList();renderResponse(true);
+    $("answer-status").textContent="回答を保存しました。";
   }
   function openEvent(id){
     selectedEventId=id;
@@ -608,6 +627,14 @@
 
   function init(){movePastEvents();
     setupCalendarMatchPicker();
+    $("attendance-form-events").addEventListener("click",function(event){
+      var button=event.target.closest("[data-form-event]");
+      if(!button||button.disabled)return;
+      formAnswers[button.dataset.formEvent]=button.dataset.formValue;
+      button.parentElement.querySelectorAll("[data-form-event]").forEach(function(choice){
+        choice.setAttribute("aria-pressed",String(choice===button));
+      });
+    });
     $("toggle-match-totals").addEventListener("click",function(){showMatchTotals=!showMatchTotals;renderResponse(true);});
     $("day-entry-form").addEventListener("submit",function(event){
       event.preventDefault();
