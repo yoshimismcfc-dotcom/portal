@@ -114,3 +114,37 @@
 @media (max-width: 365px) {
   .board-toolbar { flex-wrap: wrap; }
 }
+
+.transpose-short { display: none; }
+@media (max-width: 560px) {
+  .prototype-wrap .audience-tabs { margin-block: 6px; gap: 8px; }
+  .prototype-wrap .audience-tab { min-height: 44px; }
+  .response-panel { margin-top: 6px; padding-block: 8px; }
+  .response-panel .section-heading { align-items: start; gap: 6px; }
+  .response-panel .section-heading p { line-height: 1.35; margin-top: 3px; }
+  .attendance-board-controls {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) auto;
+    align-items: center;
+    gap: 6px;
+    margin-block: 5px;
+  }
+  .response-panel .response-filters { padding-block: 0; }
+  .attendance-board-controls .board-toolbar { margin: 0; }
+  .attendance-board-controls .board-toolbar button { white-space: nowrap; }
+  #board-status, .transpose-label {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    overflow: hidden;
+    clip-path: inset(50%);
+    white-space: nowrap;
+  }
+  .transpose-short { display: inline; }
+  .attendance-board-scroll { max-height: 78vh; max-height: 78svh; }
+  .attendance-board th, .attendance-board td { height: 45px; padding-block: 0; }
+  .attendance-board thead th { padding-block: 4px; }
+  .attendance-board .summary-row th, .attendance-board .summary-row td { height: 25px; }
+  .attendance-board .summary-symbol { font-size: 1rem; }
+  .attendance-board .board-member-name { font-size: .94rem; }
+}
