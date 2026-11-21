@@ -19,7 +19,8 @@ assert.equal(
 assert.equal(attendance.extractChouseisanUrl("http://chouseisan.com/s?h=unsafe"), "");
 assert.equal(attendance.extractChouseisanUrl("https://example.com/?next=https://chouseisan.com.evil.test/"), "");
 assert.equal(attendance.formatDate("2026-08-30"), "8月30日（日）");
-assert.deepEqual(attendance.targetGrades("", "U7（1年以下）吉見フェスティバル"), ["1年"]);
+assert.deepEqual(attendance.targetGrades("", "U7（1年以下）吉見フェスティバル"), ["1年", "年長"]);
+assert.deepEqual(attendance.targetGrades("", "U7（1年生）練習試合"), ["1年"]);
 assert.deepEqual(attendance.targetGrades("【対象】１年生以下・年長", "U7"), ["1年", "年長"]);
 assert.deepEqual(attendance.targetGrades("", "U12 ６〜５年 練習試合"), ["6年", "5年"]);
 assert.deepEqual(

@@ -738,7 +738,7 @@ function enhanceCalendarUpcomingAgenda() {
         const from = new Date(today + "T00:00:00+09:00");
         const groups = CALENDARS.filter((calendar) => /^U(?:[7-9]|1[0-2])$/.test(calendar.label));
         const results = await Promise.allSettled(groups.map((calendar) =>
-          fetchCalendar(calendar, from.toISOString(), end.toISOString(), 250, true)
+          fetchCalendar(calendar, from.toISOString(), end.toISOString(), 250, true, true)
         ));
         const events = results.flatMap((result) => result.status === "fulfilled" ? result.value : []);
         const failed = results.flatMap((result, index) =>
@@ -784,7 +784,7 @@ function enhanceCalendarUpcomingAgenda() {
         const knownIds = new Set(matches.map((event) => event.attendanceId));
         const failedLabels = new Set(CALENDARS.filter((_, index) => results[index].status === "rejected").map((calendar) => calendar.label));
         for (const event of Array.isArray(local.events) ? local.events : []) {
-          if (event.date !== date || event.hidden || knownIds.has(event.id)) continue;
+          if (event.date !== date || event.hidden || event.calendarInactive || knownIds.has(event.id)) continue;
           if (event.id.startsWith("calendar_") && !failedLabels.has(event.category)) continue;
           matches.push({ attendanceId: event.id, title: event.title, location: event.place,
             label: event.category || (event.kind === "match" ? "試合" : "練習"),
@@ -1312,7 +1312,7 @@ function enhanceCalendarUpcomingAgenda() {
       }
     }
 
-    async function fetchCalendar(calendar, timeMin, timeMax, limit = 40, includeDescription = false) {
+    async function fetchCalendar(calendar, timeMin, timeMax, limit = 40, includeDescription = false, requireComplete = false) {
       const url = new URL(`https://www.googleapis.com/calendar/v3/calendars/${encodeURIComponent(calendar.id)}/events`);
       url.searchParams.set("key", PUBLIC_CALENDAR_KEY);
       url.searchParams.set("timeMin", timeMin);
@@ -1323,6 +1323,7 @@ function enhanceCalendarUpcomingAgenda() {
       const response = await fetch(url.toString(), { referrerPolicy: "strict-origin-when-cross-origin" });
       if (!response.ok) throw new Error(`Calendar API ${response.status}`);
       const data = await response.json();
+      if (requireComplete && data.nextPageToken) throw new Error("Incomplete calendar response");
       return (data.items || []).map((event) => ({
         id: `${calendar.id}:${event.id || event.iCalUID || ""}:${event.start?.dateTime || event.start?.date || ""}`,
         sourceId: event.id ? `${calendar.id}:${event.id}` : "",
