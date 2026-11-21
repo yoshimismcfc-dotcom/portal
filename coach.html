@@ -8,6 +8,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <meta name="robots" content="noindex,nofollow">
   <title>コーチ専用メニュー｜吉見SMC FC</title>
+  <script>if(location.hash==="#coach-match")document.documentElement.classList.add("match-dashboard-only");</script>
   <script src="firebase-config.js"></script>
   <link rel="stylesheet" href="common.css">
   <script src="common.js"></script>
@@ -19,6 +20,12 @@
     .locked-area h2{font-size:1.15rem;margin-bottom:8px;color:var(--ink)}
     .locked-area p{font-size:.82rem;color:var(--ink-3);margin-bottom:18px}
     #coach-content{display:block}
+    html:not(.match-dashboard-only) #coach-match,
+    html:not(.match-dashboard-only) #coach-event-browser{display:none}
+    html.match-dashboard-only .hero-band,
+    html.match-dashboard-only .coach-quick-nav,
+    html.match-dashboard-only .coach-finder,
+    html.match-dashboard-only #coach-content>:not(#coach-match):not(#coach-event-browser):not(.modal-bg){display:none!important}
     .coach-btn-grid{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:24px}
     .coach-btn{background:var(--surface-lt);border:1px solid var(--line-2);border-radius:var(--r12);padding:16px 14px;display:flex;flex-direction:column;align-items:flex-start;gap:5px;cursor:pointer;text-decoration:none;color:inherit;transition:all .18s;position:relative;overflow:hidden}
     .coach-btn::before{content:"";position:absolute;top:0;left:0;width:3px;height:100%;background:var(--orange);border-radius:3px 0 0 3px}
@@ -413,7 +420,7 @@
   </div>
 
   <nav class="coach-quick-nav" aria-label="メニュー内移動">
-    <a href="#coach-match">🏟️ 試合・大会</a><a href="#coach-shared">🤝 共有</a><a href="#coach-notice">📢 お知らせ</a><a href="#coach-data">📁 データ</a><a href="#coach-tools">🔧 外部ツール</a><a href="index.html#sec-camp">🏕️ 合宿</a>
+    <a href="#coach-shared">🤝 共有</a><a href="#coach-notice">📢 お知らせ</a><a href="#coach-data">📁 データ</a><a href="#coach-tools">🔧 外部ツール</a><a href="index.html#sec-camp">🏕️ 合宿</a>
   </nav>
   <div class="coach-finder">
     <input id="coach-menu-search" type="search" placeholder="メニューを検索（例：対戦表、会計、日誌）" aria-label="コーチメニューを検索">
