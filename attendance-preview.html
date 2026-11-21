@@ -8,6 +8,7 @@
   <title>出欠共有テスト｜吉見SMC FC</title>
   <link rel="stylesheet" href="common.css">
   <link rel="stylesheet" href="attendance-prototype.css?v=20261121-25">
+  <link rel="stylesheet" href="attendance-preview.css?v=20261122-2">
   <script src="firebase-config.js"></script>
   <script src="calendar-attendance.js?v=20261121-19"></script>
   <script src="common.js"></script>
@@ -33,7 +34,7 @@
     </div>
     <div class="attendance-board-controls">
       <div class="response-filters" id="grade-filters" aria-label="学年の絞り込み"></div>
-      <div class="board-toolbar" id="board-toolbar" hidden><span id="board-status" role="status">参加者を縦、日程を横に表示中</span><button type="button" id="toggle-match-totals" aria-expanded="true" hidden>試合集計</button><button type="button" id="transpose-board" aria-pressed="false"><span class="transpose-label">行と列を入れ替え</span><span class="transpose-short" aria-hidden="true">縦横切替</span></button></div>
+      <div class="board-toolbar" id="board-toolbar" hidden><span id="board-status" role="status">名前が縦</span><div class="preview-board-actions"><button type="button" id="open-match-summary" aria-haspopup="dialog" hidden>試合集計</button><button type="button" id="transpose-board" aria-pressed="false">縦横切替</button></div></div>
     </div>
     <p id="shared-attendance-status" class="small-note" role="status">クラウドの出欠を読み込み中です。</p>
     <div id="response-list" class="response-list"></div>
@@ -94,7 +95,8 @@
 <dialog id="match-summary-dialog" class="event-dialog attendance-entry-dialog" aria-labelledby="match-summary-title">
   <form method="dialog">
     <div class="attendance-entry-scroll">
-      <h2 id="match-summary-title">試合の出欠内訳</h2>
+      <h2 id="match-summary-title">試合集計</h2>
+      <label class="preview-summary-date">日付<select id="match-summary-date"></select></label>
       <div id="match-summary-list"></div>
     </div>
     <div class="dialog-actions"><button class="secondary-button" autofocus>閉じる</button></div>
@@ -126,6 +128,6 @@
     <div class="dialog-actions"><button type="button" id="cancel-event" class="secondary-button">キャンセル</button><button type="submit" class="primary-button">予定を追加</button></div>
   </form>
 </dialog>
-<script src="attendance-preview.js?v=20261122-1"></script>
+<script src="attendance-preview.js?v=20261122-2"></script>
 </body>
 </html>
