@@ -31,6 +31,19 @@ assert.deepEqual(attendance.targetGrades("【対象学年】全学年", ""), ["6
 assert.equal(attendance.targetGrades("【対象】招待選手", "U8（2年）試合"), null);
 assert.equal(attendance.targetGrades("", "U12（第4回）試合"), null);
 
+const parts = attendance.descriptionLinks(
+  "集合：8時<br>URL（https://chouseisan.com/s?h=test）<br>" +
+  '<a href="https://drive.google.com/file/d/test/view?x=1&amp;y=2">要項</a>。' +
+  '<a href="javascript:alert(1)">リンク不可</a>'
+);
+assert.deepEqual(parts.filter(part => part.href).map(part => part.href), [
+  "https://chouseisan.com/s?h=test",
+  "https://drive.google.com/file/d/test/view?x=1&y=2"
+]);
+assert.ok(parts.map(part => part.text).join("").includes("集合：8時\n"));
+assert.ok(parts.map(part => part.text).join("").includes("要項"));
+assert.equal(attendance.descriptionLinks("https://user:secret@example.com/").some(part => part.href), false);
+
 const message = attendance.buildLineMessage([
   {title:"U10 練習試合", start:"2026-09-06", attendanceUrl:"https://chouseisan.com/s?h=u10"},
   {title:"U8 大会", start:"2026-08-30", attendanceUrl:"https://chouseisan.com/s?h=u8"},

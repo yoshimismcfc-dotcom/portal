@@ -440,37 +440,50 @@
   function openMatchSummary(day,category,people){
     $("match-summary-title").textContent=dateLabel(day.date)+" "+(category==="その他"?"その他の試合":category+"試合");
     $("match-summary-list").innerHTML=day.matches.filter(function(event){return categoryName(event)===category;}).map(function(event){
-      var groups=ANSWERS.concat({value:"",label:"未回答"});
-      var eligible=eligiblePeople(event,people),grades=targetGrades(event);
+      var grades=targetGrades(event),eligible=eligiblePeople(event,people);
       var target=grades?"対象 "+grades.join("・")+(audience==="players"?"／"+eligible.length+"名":""):"対象学年未設定";
       return '<section class="match-summary-event" data-target-event="'+esc(event.id)+'"><h3>'+esc(eventName(event))+'</h3><div class="match-target-note">'+esc(target)+'</div>'+
-        (grades||audience==="coaches"?groups.map(function(group){
-        var names=eligible.filter(function(person){return answerValue(event,person)===group.value;}).map(function(person){return person.name;});
-        return '<p><strong>'+esc((answerMark(group.value)+" "+group.label).trim())+' '+names.length+'人</strong><span>'+esc(names.join("、")||"—")+'</span></p>';
-      }).join(""):"")+matchCalendarAction(event)+(audience==="coaches"?
-        '<a class="secondary-button day-details-action" href="attendance-cloud.html?view=review&amp;event='+encodeURIComponent(event.id)+'">クラウドの出欠・連絡一覧</a>'+
-        coachContactList(event)+targetGradeEditor(event,grades):"")+'</section>';
+        (grades||audience==="coaches"?matchAttendanceTable(event,eligible,audience):"")+matchCalendarAction(event)+
+        '<a class="secondary-button day-details-action" href="attendance-cloud.html'+
+        (audience==="coaches"?'?view=review&amp;event='+encodeURIComponent(event.id):"")+'">試合の出欠・コメントを見る</a>'+
+        (audience==="coaches"?(grades?'<h4>団員の出欠・コメント</h4>'+matchAttendanceTable(event,members.filter(function(person){
+          return grades.includes(String(person.grade||"").normalize("NFKC").replace(/生$/,""));
+        }),"players"):"")+targetGradeEditor(event,grades):"")+'</section>';
     }).join("");
     var dialog=$("match-summary-dialog");
     if(!dialog.open)dialog.showModal();
   }
 
-  function coachContactList(event){
-    var notes=state.matchNotes[event.id]||{};
-    var contacts=members.filter(function(person){return Object.hasOwn(notes,person.id);});
-    if(!contacts.length)return "";
-    var items=contacts.map(function(person){
-      var note=notes[person.id],value=answerValue(event,person,"players");
-      var labels=[];
-      if(note.ride)labels.push("送迎希望"+(note.rideTrip?"（"+note.rideTrip+"）":""));
-      if(note.early)labels.push("早退"+(note.earlyTime?"（"+note.earlyTime+"）":""));
-      if(note.late)labels.push("遅刻・途中参加"+(note.lateTime?"（"+note.lateTime+"）":""));
-      if(note.other)labels.push("その他");
-      if(note.message)labels.push(note.message);
-      return '<li><strong>'+esc(person.name)+'</strong> <span>'+esc(answerMark(value)+" "+(ANSWERS.find(function(answer){return answer.value===value;})?.label||"未回答"))+'</span>'+
-        '<div>'+esc(labels.join("・"))+'</div></li>';
+  function matchAttendanceTable(event,people,group){
+    var date=fromISO(event.date);
+    var answers=ANSWERS.concat({value:"",label:"未回答"});
+    var canSeeComments=audience==="coaches"&&group==="players";
+    var totals=answers.map(function(answer){
+      var count=people.filter(function(person){return answerValue(event,person,group)===answer.value;}).length;
+      return '<tr class="match-attendance-total"><th scope="row">'+esc((answerMark(answer.value)+" "+answer.label).trim())+
+        '</th><td>'+count+'人</td>'+ (canSeeComments?'<td></td>':"") +'</tr>';
     }).join("");
-    return '<section class="coach-match-contacts"><h4>団員の連絡事項 '+contacts.length+'件 <small>この端末の試作データ</small></h4><ul>'+items+'</ul></section>';
+    var rows=people.map(function(person){
+      var value=answerValue(event,person,group);
+      var label=answers.find(function(answer){return answer.value===value;})?.label||"未回答";
+      return '<tr><th scope="row">'+esc((group==="players"?(person.grade||"")+" ":"")+person.name)+
+        '</th><td data-value="'+esc(value)+'" aria-label="'+esc(label)+'">'+esc(answerMark(value)||"—")+'</td>'+
+        (canSeeComments?'<td>'+esc(matchComment(state.matchNotes[event.id]?.[person.id])||"—")+'</td>':"")+'</tr>';
+    }).join("");
+    return '<div class="match-attendance-wrap"><table class="match-attendance-table"><thead><tr><th scope="col">参加者</th>'+
+      '<th scope="col">'+(date.getMonth()+1)+'/'+date.getDate()+'（'+DAY_NAMES[date.getDay()]+'）</th>'+
+      (canSeeComments?'<th scope="col">コメント</th>':"")+'</tr></thead><tbody>'+totals+'</tbody><tbody>'+rows+'</tbody></table></div>';
+  }
+
+  function matchComment(note){
+    if(!note)return "";
+    return [
+      note.ride&&("送迎希望"+(note.rideTrip?"（"+note.rideTrip+"）":"")),
+      note.early&&("早退"+(note.earlyTime?"（"+note.earlyTime+"）":"")),
+      note.late&&("遅刻・途中参加"+(note.lateTime?"（"+note.lateTime+"）":"")),
+      note.other&&"その他",
+      note.message
+    ].filter(Boolean).join("・");
   }
 
   function targetGradeEditor(event,grades){

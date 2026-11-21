@@ -1,5 +1,5 @@
 import { answers, attendanceStore, availableEvents, contactFromForm, contactLabel, reviewRows,
-  guestCredentials, guestAttendanceStore, latestAttendance } from './attendance-cloud-service.mjs?v=20261121-22';
+  guestCredentials, guestAttendanceStore, latestAttendance } from './attendance-cloud-service.mjs?v=20261121-23';
 
 const $ = id => document.getElementById(id);
 const entry = $('cloud-answer');
@@ -109,6 +109,7 @@ async function openSelection() {
   if (mode === 'review') {
     $('cloud-review').hidden = false;
     $('cloud-review-title').textContent = event.title;
+    $('cloud-date-heading').textContent = shortDate(event.date);
     $('cloud-review-meta').textContent = event.date.replace(/-/g, '/') + '　対象 ' +
       (event.targetGrades?.join('・') || '学年未設定');
     $('cloud-review-status').textContent = 'クラウドから読み込んでいます…';
@@ -167,12 +168,7 @@ function renderReview() {
   $('guest-link-person').replaceChildren(option('', '団員を選択'), ...rows.map(row => option(row.id,row.grade+'・'+row.name)));
   $('guest-link-person').value = rows.some(row => row.id === previous) ? previous : '';
   $('manage-guest-link').disabled = !event.open;
-  $('cloud-counts').replaceChildren(...answers.map(answer => {
-    const element = document.createElement('span');
-    const count = rows.filter(row => row.value === answer.value).length;
-    element.textContent = answer.label + ' ' + count + '人';
-    return element;
-  }));
+  $('cloud-counts').replaceChildren(...countRows(rows));
   const filter = $('cloud-filter').value;
   const visible = rows.filter(row => {
     switch (filter) {
@@ -183,86 +179,110 @@ function renderReview() {
       default: return true;
     }
   });
-  const body = $('cloud-rows');
-  body.replaceChildren(...visible.map(row => {
-    const tr = document.createElement('tr');
-    const name = document.createElement('th');
-    name.scope = 'row';
-    name.textContent = row.grade + '・' + row.name;
-    const value = document.createElement('td');
-    value.dataset.value = row.value;
-    value.textContent = label(row.value);
-    const notes = document.createElement('td');
-    notes.textContent = contactLabel(row.contact) || '—';
-    tr.append(name, value, notes);
-    return tr;
-  }));
+  $('cloud-rows').replaceChildren(...attendanceRows(visible));
   $('cloud-review-status').textContent = visible.length ? '表示 ' + visible.length + '人' : '該当する団員はいません。';
 }
 
-async function renderPublicNotices() {
+function shortDate(date) {
+  const day = new Date(date+'T00:00:00+09:00');
+  return new Intl.DateTimeFormat('ja-JP',{timeZone:'Asia/Tokyo',month:'numeric',day:'numeric',weekday:'short'}).format(day);
+}
+
+function countRows(rows) {
+  return answers.map(answer => {
+    const row = document.createElement('tr');
+    row.className = 'cloud-table-total';
+    const title = document.createElement('th');
+    title.scope = 'row';
+    title.textContent = answer.label;
+    const count = document.createElement('td');
+    count.textContent = rows.filter(person => person.value === answer.value).length+'人';
+    row.append(title,count,document.createElement('td'));
+    return row;
+  });
+}
+
+function attendanceRows(rows) {
+  return rows.map(person => {
+    const row = document.createElement('tr');
+    const name = document.createElement('th');
+    name.scope = 'row';
+    name.textContent = [person.grade,person.name].filter(Boolean).join('・');
+    const answer = document.createElement('td');
+    const symbol = document.createElement('span');
+    const marks = {attending:'○',maybe:'△',absent:'×'};
+    answer.dataset.value = person.value || '';
+    answer.className = 'cloud-attendance-answer';
+    answer.setAttribute('aria-label',person.value === undefined ? '表示なし' : label(person.value));
+    symbol.textContent = marks[person.value] || '—';
+    symbol.setAttribute('aria-hidden','true');
+    answer.append(symbol);
+    const notes = document.createElement('td');
+    notes.textContent = contactLabel(person.contact) || '—';
+    row.append(name,answer,notes);
+    return row;
+  });
+}
+
+async function renderPublicMatches() {
   $('public-notices').hidden = false;
   const list = $('public-notice-list');
   const statusLine = $('public-notice-status');
-  try {
-    publicNotices = await cloudStore.publicNotices();
-    list.replaceChildren(...publicNotices.map(notice => {
-      const article = document.createElement('article');
-      article.className = 'public-notice';
-      article.id = 'notice-'+notice.id;
-      const heading = document.createElement('h3');
-      heading.textContent = notice.date.replace(/-/g,'/')+' · '+notice.title;
+  const [notices,comments] = await Promise.allSettled([cloudStore.publicNotices(),cloudStore.publicCoordination()]);
+  if (notices.status === 'fulfilled') publicNotices = notices.value;
+  const games = new Map(publicNotices.map(notice => [notice.id,{...notice,rows:[]}]));
+  for (const item of comments.status === 'fulfilled' ? comments.value : []) {
+    if (!games.has(item.eventId)) games.set(item.eventId,{ ...item,id:item.eventId,rows:[] });
+    games.get(item.eventId).rows.push({name:item.name,value:item.value,contact:item});
+  }
+  const sorted = [...games.values()].sort((a,b) => a.date.localeCompare(b.date) || a.title.localeCompare(b.title,'ja'));
+  list.replaceChildren(...sorted.map(game => {
+    const article = document.createElement('article');
+    article.className = 'public-notice';
+    article.id = 'notice-'+game.id;
+    const heading = document.createElement('h2');
+    heading.textContent = shortDate(game.date)+' · '+game.title;
+    article.append(heading);
+    if (game.message) {
       const message = document.createElement('p');
-      message.textContent = notice.message;
-      const link = document.createElement('a');
-      link.href = 'attendance-cloud.html?'+new URLSearchParams({notice:notice.id});
-      link.textContent = 'この試合の公開連絡';
-      article.append(heading,message,link);
-      return article;
-    }));
-    statusLine.textContent = publicNotices.length ? '' : '公開中の試合連絡はありません。';
-    const selected = params.get('notice');
-    if (selected) $('notice-'+selected)?.scrollIntoView({block:'start'});
-  } catch {
-    statusLine.textContent = '公開連絡を取得できませんでした。';
-  }
-}
-
-async function renderPublicCoordination() {
-  const section = $('public-coordination');
-  const list = $('public-coordination-list');
-  const statusLine = $('public-coordination-status');
-  section.hidden = false;
-  try {
-    const groups = new Map();
-    for (const item of await cloudStore.publicCoordination()) {
-      if (!groups.has(item.eventId)) groups.set(item.eventId,[]);
-      groups.get(item.eventId).push(item);
+      message.textContent = game.message;
+      article.append(message);
     }
-    list.replaceChildren(...Array.from(groups.values(), items => {
-      const section = document.createElement('section');
-      section.className = 'public-notice';
-      const title = document.createElement('h3');
-      title.textContent = items[0].date.replace(/-/g,'/')+' · '+items[0].title;
-      const list = document.createElement('ul');
-      list.className = 'coordination-rows';
-      for (const item of items) {
-        const row = document.createElement('li');
-        const name = document.createElement('strong');
-        name.textContent = item.name;
-        const contact = document.createElement('span');
-        contact.textContent = contactLabel(item);
-        row.append(name,contact);
-        list.append(row);
+    if (game.rows.length) {
+      const wrap = document.createElement('div');
+      wrap.className = 'cloud-table-wrap';
+      wrap.tabIndex = 0;
+      wrap.setAttribute('role','region');
+      wrap.setAttribute('aria-label',game.title+'の出欠・コメント');
+      const table = document.createElement('table');
+      table.className = 'cloud-table';
+      const header = table.createTHead().insertRow();
+      for (const name of ['参加者',shortDate(game.date),'コメント']) {
+        const cell = document.createElement('th');
+        cell.scope = 'col';
+        cell.textContent = name;
+        header.append(cell);
       }
-      section.append(title,list);
-      return section;
-    }));
-    statusLine.textContent = groups.size ? '' : '公開中の送迎希望・早退・遅刻はありません。';
-  } catch {
-    list.replaceChildren();
-    statusLine.textContent = '保護者間の連絡を取得できませんでした。';
-  }
+      const totals = table.createTBody();
+      const responses = game.rows.filter(row => row.value !== undefined);
+      if (responses.length) totals.append(...countRows(responses));
+      table.createTBody().append(...attendanceRows(game.rows));
+      wrap.append(table);
+      article.append(wrap);
+      const caption = document.createElement('small');
+      caption.textContent = '人数はコメントが公開されている回答の集計です。';
+      article.append(caption);
+    }
+    const link = document.createElement('a');
+    link.href = 'attendance-cloud.html?'+new URLSearchParams({notice:game.id});
+    link.textContent = 'この試合の一覧';
+    article.append(link);
+    return article;
+  }));
+  statusLine.textContent = notices.status === 'rejected' || comments.status === 'rejected'
+    ? '試合の連絡を一部取得できませんでした。' : sorted.length ? '' : '掲載中の試合はありません。';
+  const selected = params.get('notice') || guest?.event;
+  if (selected && !guest) $('notice-'+selected)?.scrollIntoView({block:'start'});
 }
 
 function hideGuestLink() {
@@ -328,7 +348,7 @@ async function saveAnswer(revision = record?.revision) {
     dirty = false;
     if (draft.value) $('cloud-review-notice').hidden = true;
     saveStatus('クラウドに保存しました。');
-    if (guest && guestAlias) renderPublicCoordination();
+    if (guest && guestAlias) renderPublicMatches();
   } catch (error) {
     if (token !== selectionGeneration) return;
     saveStatus('クラウドに保存できませんでした。入力は残っています。');
@@ -390,7 +410,7 @@ async function signedIn(user) {
   } catch (error) {
     if (token !== authGeneration) return;
     status(error.message === 'account-inactive' ? '利用権限が登録されていません。クラブの管理者へご連絡ください。' :
-      error.message === 'cloud-disabled' ? 'クラウド出欠は公開準備中です。' : 'クラウドに接続できません。利用設定と通信環境をご確認ください。');
+      error.message === 'cloud-disabled' ? '試合の出欠は公開準備中です。' : 'クラウドに接続できません。利用設定と通信環境をご確認ください。');
     $('cloud-connect').hidden = false;
   }
 }
@@ -505,7 +525,7 @@ $('publish-notice').onclick = async () => {
   try {
     await store.publishNotice(event,message);
     if (token === selectionGeneration) $('publish-notice-status').textContent = '試合の連絡を公開しました。';
-    renderPublicNotices();
+    renderPublicMatches();
   } catch {
     if (token === selectionGeneration) $('publish-notice-status').textContent = '連絡を公開できませんでした。';
   }
@@ -534,8 +554,7 @@ if (typeof window.onFirebaseReady === 'function') {
       });
       const db = window.firebase.firestore(), timestamp = window.firebase.firestore.FieldValue.serverTimestamp;
       cloudStore = attendanceStore(db,timestamp);
-      renderPublicNotices();
-      renderPublicCoordination();
+      renderPublicMatches();
       if (guest) {
         store = guestAttendanceStore(db,timestamp,guest);
         openGuest();
@@ -544,6 +563,6 @@ if (typeof window.onFirebaseReady === 'function') {
         if (auth) auth.onAuthStateChanged(signedIn, () => status('認証サービスに接続できませんでした。'));
         else signedIn(null);
       }
-    } catch { status('クラウド出欠を起動できませんでした。ページを開き直してください。'); }
+    } catch { status('試合の出欠を起動できませんでした。ページを開き直してください。'); }
   });
 } else status('認証サービスを読み込めませんでした。');

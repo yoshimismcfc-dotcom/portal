@@ -4,9 +4,9 @@
   <meta charset="utf-8">
   <meta name="robots" content="noindex,nofollow">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>クラウド出欠｜吉見SMC FC</title>
+  <title>試合の出欠・コメント｜吉見SMC FC</title>
   <link rel="stylesheet" href="common.css">
-  <link rel="stylesheet" href="attendance-cloud.css?v=20261121-22">
+  <link rel="stylesheet" href="attendance-cloud.css?v=20261121-23">
   <script src="firebase-config.js"></script>
   <script src="common.js"></script>
 </head>
@@ -14,17 +14,11 @@
 <header class="site-header"></header>
 <main class="page-wrap cloud-attendance">
   <a class="back-btn" href="attendance-prototype.html">出欠確認・試作版へ戻る</a>
-  <h1>クラウド出欠</h1>
-  <p id="cloud-status" role="status" aria-live="polite">クラウド出欠を読み込んでいます…</p>
+  <h1>試合の出欠・コメント</h1>
+  <p id="cloud-status" role="status" aria-live="polite">試合の出欠を読み込んでいます…</p>
   <section id="public-notices" class="panel" hidden>
-    <h2>試合の公開連絡</h2>
     <p id="public-notice-status" role="status"></p>
     <div id="public-notice-list" class="cloud-stack"></div>
-  </section>
-  <section id="public-coordination" class="panel" hidden>
-    <h2>試合ごとの保護者間の連絡</h2>
-    <p id="public-coordination-status" role="status"></p>
-    <div id="public-coordination-list" class="cloud-stack"></div>
   </section>
   <button id="open-cloud-login" type="button" class="secondary-button" hidden>コーチ・登録済みの方</button>
   <form id="cloud-login" class="panel cloud-stack" hidden>
@@ -62,7 +56,7 @@
           <label>補足（任意） <textarea name="message" rows="3" maxlength="160" placeholder="例：荷物当番できます"></textarea></label>
           <fieldset id="coordinate-choice" hidden>
             <legend>保護者間で共有</legend>
-            <small>送迎希望・早退・遅刻は、保存すると誰でも見られる試合一覧に載ります。補足欄の文章は個別連絡に残ります。</small>
+            <small>送迎希望・早退・遅刻を登録すると、呼び名・出欠・時刻が試合の一覧に載ります。補足欄の文章は個別連絡に残ります。</small>
             <label>公開用の呼び名（任意） <input type="text" name="publicName" maxlength="24" placeholder="例：背番号12の保護者" autocomplete="off"></label>
             <small id="coordination-alias"></small>
           </fieldset>
@@ -80,12 +74,12 @@
     <section id="cloud-review" class="panel" hidden>
       <h2 id="cloud-review-title">出欠・連絡一覧</h2>
       <p id="cloud-review-meta"></p>
-      <div id="cloud-counts" class="cloud-counts"></div>
       <label>表示する回答 <select id="cloud-filter"><option value="">全員</option><option value="contact">連絡あり</option><option value="ride">送迎希望</option><option value="schedule">早退・遅刻</option><option value="pending">未回答</option></select></label>
       <p id="cloud-review-status" role="status"></p>
       <div class="cloud-table-wrap" tabindex="0" role="region" aria-label="団員の出欠・連絡一覧">
         <table class="cloud-table">
-          <thead><tr><th scope="col">学年・団員名</th><th scope="col">出欠</th><th scope="col">連絡事項</th></tr></thead>
+          <thead><tr><th scope="col">参加者</th><th scope="col" id="cloud-date-heading">出欠</th><th scope="col">コメント</th></tr></thead>
+          <tbody id="cloud-counts"></tbody>
           <tbody id="cloud-rows"></tbody>
         </table>
       </div>
@@ -110,6 +104,6 @@
   </section>
 </main>
 <footer class="site-footer"></footer>
-<script type="module" src="attendance-cloud.mjs?v=20261121-22"></script>
+<script type="module" src="attendance-cloud.mjs?v=20261121-23"></script>
 </body>
 </html>
