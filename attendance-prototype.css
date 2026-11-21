@@ -180,9 +180,7 @@
 .match-total-button:hover, .match-total-button:focus-visible { background: #cadff3; }
 .match-total-note { flex: 0 0 100%; font-size: .64rem; }
 .transposed-match-total { margin-top: 2px; font-size: .72rem; }
-.match-summary-dialog { max-height: 90svh; overflow: auto; }
 .day-entry-events, #match-summary-list { display: grid; gap: 9px; }
-#match-summary-list { max-height: 55svh; overflow: auto; }
 .match-summary-event { padding: 8px; border: 1px solid #527291; border-radius: 9px; }
 .match-summary-event h3 { margin: 0 0 6px; font-size: 1rem; overflow-wrap: anywhere; }
 .match-summary-event p { display: grid; grid-template-columns: 7em minmax(0,1fr); gap: 7px; margin: 3px 0; overflow-wrap: anywhere; }
@@ -313,3 +311,7 @@
 .match-attendance-table td[data-value="absent"] { color: #9b3151; }
 .match-attendance-total { background: #eaf2ff; }
 .match-attendance-table td:last-child { white-space: pre-wrap; }
+.match-attendance-table.has-comments th:first-child { width: 34%; }
+.match-attendance-table.has-comments :is(th,td):nth-child(2) { width: 56px; }
+.match-attendance-table.has-comments td:last-child { font-weight: 550; }
+#match-summary-title { font-size: clamp(1.12rem, 4.5vw, 1.45rem); line-height: 1.4; margin-bottom: 8px; }

@@ -444,35 +444,37 @@
       var target=grades?"対象 "+grades.join("・")+(audience==="players"?"／"+eligible.length+"名":""):"対象学年未設定";
       return '<section class="match-summary-event" data-target-event="'+esc(event.id)+'"><h3>'+esc(eventName(event))+'</h3><div class="match-target-note">'+esc(target)+'</div>'+
         (grades||audience==="coaches"?matchAttendanceTable(event,eligible,audience):"")+matchCalendarAction(event)+
-        '<a class="secondary-button day-details-action" href="attendance-cloud.html'+
-        (audience==="coaches"?'?view=review&amp;event='+encodeURIComponent(event.id):"")+'">試合の出欠・コメントを見る</a>'+
+        (audience==="coaches"?'<a class="secondary-button day-details-action" href="attendance-cloud.html?view=review&amp;event='+
+        encodeURIComponent(event.id)+'">試合の回答管理</a>':"")+
         (audience==="coaches"?(grades?'<h4>団員の出欠・コメント</h4>'+matchAttendanceTable(event,members.filter(function(person){
           return grades.includes(String(person.grade||"").normalize("NFKC").replace(/生$/,""));
         }),"players"):"")+targetGradeEditor(event,grades):"")+'</section>';
     }).join("");
     var dialog=$("match-summary-dialog");
-    if(!dialog.open)dialog.showModal();
+    if(!dialog.open){
+      dialog.showModal();
+      $("match-summary-list").parentElement.scrollTop=0;
+    }
   }
 
   function matchAttendanceTable(event,people,group){
-    var date=fromISO(event.date);
     var answers=ANSWERS.concat({value:"",label:"未回答"});
-    var canSeeComments=audience==="coaches"&&group==="players";
+    var showComments=group==="players";
     var totals=answers.map(function(answer){
       var count=people.filter(function(person){return answerValue(event,person,group)===answer.value;}).length;
       return '<tr class="match-attendance-total"><th scope="row">'+esc((answerMark(answer.value)+" "+answer.label).trim())+
-        '</th><td>'+count+'人</td>'+ (canSeeComments?'<td></td>':"") +'</tr>';
+        '</th><td>'+count+'人</td>'+ (showComments?'<td></td>':"") +'</tr>';
     }).join("");
     var rows=people.map(function(person){
       var value=answerValue(event,person,group);
       var label=answers.find(function(answer){return answer.value===value;})?.label||"未回答";
       return '<tr><th scope="row">'+esc((group==="players"?(person.grade||"")+" ":"")+person.name)+
         '</th><td data-value="'+esc(value)+'" aria-label="'+esc(label)+'">'+esc(answerMark(value)||"—")+'</td>'+
-        (canSeeComments?'<td>'+esc(matchComment(state.matchNotes[event.id]?.[person.id])||"—")+'</td>':"")+'</tr>';
+        (showComments?'<td>'+esc(matchComment(state.matchNotes[event.id]?.[person.id])||"—")+'</td>':"")+'</tr>';
     }).join("");
-    return '<div class="match-attendance-wrap"><table class="match-attendance-table"><thead><tr><th scope="col">参加者</th>'+
-      '<th scope="col">'+(date.getMonth()+1)+'/'+date.getDate()+'（'+DAY_NAMES[date.getDay()]+'）</th>'+
-      (canSeeComments?'<th scope="col">コメント</th>':"")+'</tr></thead><tbody>'+totals+'</tbody><tbody>'+rows+'</tbody></table></div>';
+    return '<div class="match-attendance-wrap"><table class="match-attendance-table'+(showComments?" has-comments":"")+'"><thead><tr><th scope="col">参加者</th>'+
+      '<th scope="col" aria-label="出欠 '+esc(dateLabel(event.date))+'">出欠</th>'+
+      (showComments?'<th scope="col">コメント・連絡事項</th>':"")+'</tr></thead><tbody>'+totals+'</tbody><tbody>'+rows+'</tbody></table></div>';
   }
 
   function matchComment(note){
