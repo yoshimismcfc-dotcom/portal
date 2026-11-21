@@ -21,7 +21,7 @@
   </nav>
 
   <section class="panel response-panel" id="response-panel">
-    <div class="section-heading"><div><h1 id="response-title">参加予定【団員用】</h1><p id="response-summary">予定ごとに参加・未定・不参加を入力できます。</p></div><div class="attendance-heading-actions"><span id="respondent-count" class="month-label"></span><button id="open-calendar-matches" class="secondary-button" type="button">試合を追加</button></div></div>
+    <div class="section-heading"><div><h1 id="response-title">参加予定【団員用】</h1><p id="response-summary">予定ごとに参加・未定・不参加を入力できます。</p><p id="calendar-sync-status" role="status"></p></div><div class="attendance-heading-actions"><span id="respondent-count" class="month-label"></span><button id="open-calendar-matches" class="secondary-button" type="button">試合一覧</button></div></div>
     <div id="coach-editor" class="coach-editor" hidden>
       <label for="coach-name-input">コーチ名を追加</label><div class="inline-form"><input id="coach-name-input" type="text" maxlength="40" placeholder="例：吉見 太郎"><button id="add-coach" type="button" class="primary-button">追加</button></div>
       <p class="small-note">名前はこの端末だけに保存されます。名前の編集・削除もできます。</p>
@@ -82,7 +82,7 @@
 </dialog>
 <dialog id="calendar-match-dialog" class="event-dialog calendar-match-dialog" aria-labelledby="calendar-match-title">
   <form method="dialog">
-    <h2 id="calendar-match-title">カレンダーから試合を追加</h2>
+    <h2 id="calendar-match-title">カレンダーの試合一覧</h2>
     <label for="calendar-match-category">カテゴリー</label>
     <select id="calendar-match-category">
       <option value="">U7〜U12すべて</option>
@@ -106,6 +106,6 @@
     <div class="dialog-actions"><button type="button" id="cancel-event" class="secondary-button">キャンセル</button><button type="submit" class="primary-button">予定を追加</button></div>
   </form>
 </dialog>
-<script src="attendance-prototype.js?v=20261121-12"></script>
+<script src="attendance-prototype.js?v=20261121-13"></script>
 </body>
 </html>
