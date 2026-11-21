@@ -47,7 +47,7 @@
     var active=state.events.slice().sort(function(a,b){return a.date.localeCompare(b.date)||a.title.localeCompare(b.title,"ja");});
     var list=$("event-list");
     if(!active.length){
-      list.innerHTML='<div class="empty-state">まだ予定がありません。カレンダーの日付を選んで追加してください。</div>';
+      list.innerHTML='<div class="empty-state">上の日程一覧から対象日を選び、予定を追加してください。</div>';
     }else{
       list.innerHTML=active.map(function(event){
         var c=answerCounts(event);
