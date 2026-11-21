@@ -726,6 +726,36 @@ function enhanceCalendarUpcomingAgenda() {
       { id: "01d22b708d632098f45dd7bc1be0cae88eff00e4d2e4b9f077c8d70bcca46de0@group.calendar.google.com", color: "#e4c441", label: "U9" },
       { id: "ccd8330bb3b6efb8f90a36e1655ac0459ddbe047155325367bb0feddd1eae83d@group.calendar.google.com", color: "#4285f4", label: "その他" }
     ];
+    const HOLIDAYS = { id: "ja.japanese#holiday@group.v.calendar.google.com", color: "#586575", label: "祝日" };
+    const calendarDateFormat = new Intl.DateTimeFormat("sv-SE", { timeZone: "Asia/Tokyo", dateStyle: "short" });
+
+    function eventDate(value) {
+      if (/^\d{4}-\d{2}-\d{2}$/.test(value)) return value;
+      const date = new Date(value);
+      return Number.isNaN(date.getTime()) ? "" : calendarDateFormat.format(date);
+    }
+
+    function detailHref(date, event) {
+      const query = new URLSearchParams({ date });
+      if (event?.sourceId) query.set("event", "calendar_" + encodeURIComponent(event.sourceId));
+      return "calendar.html?" + query;
+    }
+
+    function externalDetailLink(text, href) {
+      const link = document.createElement("a");
+      link.href = href;
+      link.target = "_blank";
+      link.rel = "noopener noreferrer";
+      link.className = "calendar-detail-link";
+      link.textContent = text;
+      return link;
+    }
+
+    function placeLink(place) {
+      const href = new URL("https://www.google.com/maps/search/");
+      href.search = new URLSearchParams({ api: "1", query: place.trim() });
+      return externalDetailLink(place, href);
+    }
 
     if (matchPicker && !isCalendarPage && !attendancePage) {
       matchPicker.dataset.calendarReady = "true";
@@ -754,10 +784,116 @@ function enhanceCalendarUpcomingAgenda() {
       const params = new URLSearchParams(location.search);
       const date = params.get("date") || "";
       const start = new Date(date + "T00:00:00+09:00");
-      if (panel && /^\d{4}-\d{2}-\d{2}$/.test(date) && !Number.isNaN(start.getTime()) &&
-          new Intl.DateTimeFormat("sv-SE", { timeZone: "Asia/Tokyo", dateStyle: "short" }).format(start) === date) {
+      const validDate = /^\d{4}-\d{2}-\d{2}$/.test(date) && eventDate(start) === date;
+      setupCalendarMonth(validDate ? date : eventDate(new Date()));
+      if (panel && validDate) {
         renderSelectedDay(panel, start, params.get("event") || "");
       }
+    }
+
+    function setupCalendarMonth(initialDate) {
+      const panel = document.getElementById("calendar-month");
+      if (!panel) return;
+      const title = document.getElementById("calendar-month-title");
+      const status = document.getElementById("calendar-month-status");
+      const grid = document.getElementById("calendar-month-grid");
+      const weekdays = ["日", "月", "火", "水", "木", "金", "土"];
+      const dayMs = 86400000;
+      const [year, month] = initialDate.split("-").map(Number);
+      const monthStart = new Date(Date.UTC(year, month - 1, 1));
+      let request = 0;
+
+      function paint(first, monthIndex, monthEvents) {
+        const nodes = weekdays.map((day) => {
+          const label = document.createElement("span");
+          label.className = "calendar-weekday";
+          label.textContent = day;
+          return label;
+        });
+        const today = eventDate(new Date());
+        const ranges = monthEvents.map((event) => {
+          const start = eventDate(event.start);
+          const endDate = new Date(event.allDay ? event.end + "T00:00:00+09:00" : event.end);
+          const last = Number.isNaN(endDate.getTime()) ? start : eventDate(new Date(endDate.getTime() - 1));
+          return { event, start, last: last > start ? last : start };
+        });
+        for (let index = 0; index < 42; index++) {
+          const day = new Date(first + index * dayMs);
+          const iso = day.toISOString().slice(0, 10);
+          const cell = document.createElement("div");
+          cell.className = "calendar-month-day";
+          if (day.getUTCMonth() !== monthIndex) cell.classList.add("is-other-month");
+          if (iso === today) cell.classList.add("is-today");
+          const dateLink = document.createElement("a");
+          dateLink.className = "calendar-month-date";
+          dateLink.href = detailHref(iso);
+          dateLink.textContent = String(day.getUTCDate());
+          dateLink.setAttribute("aria-label", iso + "の予定");
+          cell.append(dateLink);
+          const entries = ranges.filter(({ start, last }) => start && start <= iso && last >= iso);
+          for (const { event } of entries.slice(0, 3)) {
+            const link = document.createElement("a");
+            link.className = "calendar-month-event";
+            link.style.setProperty("--event-color", event.color);
+            link.href = detailHref(iso, event);
+            link.textContent = event.allDay ? event.title : formatTime(event).split("〜")[0] + " " + event.title;
+            link.title = event.title;
+            cell.append(link);
+          }
+          if (entries.length > 3) {
+            const more = document.createElement("a");
+            more.className = "calendar-month-more";
+            more.href = detailHref(iso);
+            more.textContent = "他 " + (entries.length - 3) + "件";
+            cell.append(more);
+          }
+          nodes.push(cell);
+        }
+        grid.replaceChildren(...nodes);
+      }
+
+      async function loadMonth() {
+        const version = ++request;
+        const index = monthStart.getUTCMonth();
+        const first = monthStart.getTime() - monthStart.getUTCDay() * dayMs;
+        title.textContent = monthStart.getUTCFullYear() + "年 " + (index + 1) + "月";
+        status.textContent = "予定を読み込んでいます…";
+        delete calendarWrap.dataset.monthFallback;
+        paint(first, index, []);
+        const jstOffset = 9 * 3600000;
+        const results = await Promise.allSettled([...CALENDARS, HOLIDAYS].map((calendar) =>
+          fetchCalendar(calendar, new Date(first - jstOffset).toISOString(),
+            new Date(first + 42 * dayMs - jstOffset).toISOString(), 250, false, true)
+        ));
+        if (version !== request) return;
+        if (results.slice(0, CALENDARS.length).every((result) => result.status === "rejected")) {
+          calendarWrap.dataset.monthFallback = "";
+          grid.replaceChildren();
+          const end = new Date(Date.UTC(monthStart.getUTCFullYear(), index + 1, 1));
+          const dateRange = monthStart.toISOString().slice(0, 10) + "/" + end.toISOString().slice(0, 10);
+          if (typeof window.focusedCalendarSrc === "function") {
+            const url = new URL(window.focusedCalendarSrc("month"));
+            url.searchParams.set("dates", dateRange.replace(/-/g, ""));
+            calendarWrap.dataset.monthFallback = url.href;
+            if (calendarWrap.dataset.view === "month") calendarFrame.src = url;
+          }
+          status.textContent = "予定を読み込めなかったため、Google カレンダーを表示しています。";
+          return;
+        }
+        status.textContent = results.some((result) => result.status === "rejected") ? "一部の予定を取得できませんでした。" : "";
+        paint(first, index, results.flatMap((result) => result.status === "fulfilled" ? result.value : [])
+          .sort((left, right) => left.start.localeCompare(right.start)));
+      }
+
+      document.getElementById("calendar-month-prev").addEventListener("click", () => {
+        monthStart.setUTCMonth(monthStart.getUTCMonth() - 1);
+        loadMonth();
+      });
+      document.getElementById("calendar-month-next").addEventListener("click", () => {
+        monthStart.setUTCMonth(monthStart.getUTCMonth() + 1);
+        loadMonth();
+      });
+      loadMonth();
     }
 
     async function renderSelectedDay(panel, start, selectedId) {
@@ -771,7 +907,7 @@ function enhanceCalendarUpcomingAgenda() {
       heading.focus({ preventScroll: true });
       panel.scrollIntoView({ block: "start", behavior: "instant" });
       const end = new Date(start.getTime() + 86400000);
-      const results = await Promise.allSettled(CALENDARS.map((calendar) =>
+      const results = await Promise.allSettled([...CALENDARS, HOLIDAYS].map((calendar) =>
         fetchCalendar(calendar, start.toISOString(), end.toISOString(), 250, true)
       ));
       const events = results.flatMap((result) => result.status === "fulfilled" ? result.value : []);
@@ -813,27 +949,33 @@ function enhanceCalendarUpcomingAgenda() {
         const timeFormat = new Intl.DateTimeFormat("ja-JP", { timeZone: "Asia/Tokyo", hour: "2-digit", minute: "2-digit" });
         const time = event.allDay ? event.descriptionTime : [event.start, event.end]
           .filter((value) => value && !Number.isNaN(Date.parse(value))).map((value) => timeFormat.format(new Date(value))).join("〜");
-        for (const value of [time, event.location]) {
-          if (!value) continue;
+        if (time) {
           const line = document.createElement("p");
-          line.textContent = value;
+          line.textContent = time;
+          details.append(line);
+        }
+        if (event.location?.trim()) {
+          const line = document.createElement("p");
+          line.append(placeLink(event.location.trim()));
           details.append(line);
         }
         if (event.description) {
           const description = document.createElement("p");
           const parts = window.SMCCalendarAttendance?.descriptionLinks?.(event.description);
           for (const part of parts || [{text:event.description}]) {
-            if (!part.href) {
-              description.append(document.createTextNode(part.text));
-              continue;
+            if (part.href) {
+              description.append(externalDetailLink(part.text, part.href));
+            } else {
+              for (const line of part.text.split(/(?<=\n)/)) {
+                const address = line.match(/^(\s*【(?:会場|住所|場所)】[ \t　]*)([^\n]+)(\n?)$/);
+                if (address && address[2].trim()) {
+                  description.append(document.createTextNode(address[1]), placeLink(address[2].trim()),
+                    document.createTextNode(address[3]));
+                } else {
+                  description.append(document.createTextNode(line));
+                }
+              }
             }
-            const link = document.createElement("a");
-            link.href = part.href;
-            link.target = "_blank";
-            link.rel = "noopener noreferrer";
-            link.className = "calendar-detail-link";
-            link.textContent = part.text;
-            description.append(link);
           }
           details.append(description);
         }
@@ -1036,15 +1178,6 @@ function enhanceCalendarUpcomingAgenda() {
       return `${formatter.format(new Date(event.start))}〜${formatter.format(new Date(event.end))}`;
     }
 
-    function safeEventUrl(value) {
-      try {
-        const url = new URL(value);
-        return url.protocol === "https:" && url.hostname.endsWith("google.com") ? url.href : "";
-      } catch (error) {
-        return "";
-      }
-    }
-
     function setTodayNotice(events) {
       const target = document.getElementById("tn-info");
       if (!target) return;
@@ -1236,14 +1369,13 @@ function enhanceCalendarUpcomingAgenda() {
       }
 
       events.slice(0, 18).forEach((event) => {
-        const href = safeEventUrl(event.url);
+        const iso = eventDate(event.start);
+        const href = iso ? detailHref(iso, event) : "";
         const card = document.createElement(href ? "a" : "div");
         card.className = "calendar-event-card";
         if (href) {
           card.href = href;
-          card.target = "_blank";
-          card.rel = "noopener noreferrer";
-          card.setAttribute("aria-label", `${event.title}の詳細をGoogleカレンダーで開く`);
+          card.setAttribute("aria-label", `${event.title}の詳細を開く`);
         }
 
         const date = parseStart(event);

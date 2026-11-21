@@ -36,6 +36,24 @@
 
     /* ===== Googleカレンダー iframe ===== */
     .gcal-wrap{border-radius:var(--r12);overflow:hidden;border:1px solid var(--line-2);box-shadow:var(--shadow)}
+    .gcal-wrap[data-view="month"]:not([data-month-fallback]) iframe,.gcal-wrap:not([data-view="month"]) .calendar-month{display:none}
+    .calendar-month{background:#f4f8ff;color:#193653}
+    .calendar-month-toolbar{display:grid;grid-template-columns:44px 1fr 44px;align-items:center;text-align:center;padding:4px 8px;background:#203f61;color:#fff}
+    .calendar-month-toolbar h2{margin:0;font-size:1rem}
+    .calendar-month-toolbar button{border:0;border-radius:8px;background:#2e577d;color:#fff;min-height:44px;font:inherit;font-size:1.3rem;cursor:pointer}
+    #calendar-month-status{margin:0;padding:6px 8px;font-size:.78rem}
+    #calendar-month-status:empty{display:none}
+    .calendar-month-grid{display:grid;grid-template-columns:repeat(7,minmax(0,1fr));border-block-start:1px solid #cbd9e9}
+    .calendar-weekday{text-align:center;font-size:.77rem;font-weight:800;padding:5px 0;background:#e5effa}
+    .calendar-month-day{min-width:0;min-height:86px;padding:2px;border-inline-end:1px solid #cbd9e9;border-block-end:1px solid #cbd9e9}
+    .calendar-month-day.is-other-month{background:#e5ecf5}
+    .calendar-month-day.is-today{background:#d6eafb}
+    .calendar-month-day a{display:block}
+    .calendar-month-date{font-size:.77rem;font-weight:850;text-align:center;padding:4px 0;color:#204562}
+    .calendar-month-event{margin:2px 0;min-height:23px;line-height:1.2;padding:4px 2px;border-radius:4px;background:#dfeaf6;color:#102c47;border-inline-start:3px solid var(--event-color,#616161);font-size:.68rem;font-weight:800;white-space:nowrap;text-overflow:ellipsis;overflow:hidden;text-decoration:none}
+    .calendar-month-more{font-size:.68rem;color:#204562;text-align:center}
+    .calendar-month a:focus-visible,.calendar-month button:focus-visible{outline:2px solid #4f85bc;outline-offset:-2px}
+    @media(min-width:700px){.calendar-month-event{font-size:.78rem}.calendar-month-day{min-height:100px}}
     .gcal-wrap iframe{display:block;width:100%;height:calc(100vh - 260px);min-height:480px;border:none}
     @media(max-width:600px){.gcal-wrap iframe{height:72vh;min-height:420px}}
 
@@ -142,7 +160,16 @@
   </section>
 
   <!-- Googleカレンダー本体 -->
-  <div class="gcal-wrap">
+  <div class="gcal-wrap" data-view="month">
+    <section id="calendar-month" class="calendar-month" aria-label="月表示">
+      <div class="calendar-month-toolbar">
+        <button id="calendar-month-prev" type="button" aria-label="前の月">‹</button>
+        <h2 id="calendar-month-title"></h2>
+        <button id="calendar-month-next" type="button" aria-label="次の月">›</button>
+      </div>
+      <p id="calendar-month-status" role="status"></p>
+      <div id="calendar-month-grid" class="calendar-month-grid"></div>
+    </section>
     <iframe id="gcal-iframe"
       src="https://calendar.google.com/calendar/embed?height=600&wkst=1&ctz=Asia%2FTokyo&showPrint=0&showTitle=0&showNav=1&showDate=1&showTabs=0&showCalendars=0&mode=MONTH&src=eW9zaGltaS5zbWMuZmNAZ21haWwuY29t&src=ZmNlZmY4MjEzODJlMTRhYjhjNTA0YTIwZTEyNjI3M2U0ZmM1ODgzYmYzODdhN2FlMzAyNjJjYTZlOGM5ZWMwNUBncm91cC5jYWxlbmRhci5nb29nbGUuY29t&src=YjkwYmQ4MTAwMWNkMDk2MzU1MWM4Y2Q0NGViNTM1MzFkMTU4N2YzYWI4NzU5MzE4ZTgwMjNkYTY1YjdiMDhlZUBncm91cC5jYWxlbmRhci5nb29nbGUuY29t&src=MWU1YTdkN2ZkOTFjYTg0OTg3YjE5ODBhNjU3NmQ3MDM0ZjQzMWU3OTA2N2ZlMmM4ZTFhMzhmZWIwNmZlMjI5MkBncm91cC5jYWxlbmRhci5nb29nbGUuY29t&src=Zjg1OGY0MzMxN2JhYTFmZmIwY2UxMTEwYjAzYzZlY2FjM2JmMTBhNWQ1MzY3NDI0YTBiOWZjNTM4YjUwZWZjZkBncm91cC5jYWxlbmRhci5nb29nbGUuY29t&src=NzNiNzM1YmRlNWI5ZDIyZjI3M2M0ODBlNTcyMTg4NWQ1MWUxOWZlZGFkZTcxZGYwN2M1MjFlOTlmNmQ1M2YzYUBncm91cC5jYWxlbmRhci5nb29nbGUuY29t&src=MDFkMjJiNzA4ZDYzMjA5OGY0NWRkN2JjMWJlMGNhZTg4ZWZmMDBlNGQyZTRiOWYwNzdjOGQ3MGJjY2E0NmRlMEBncm91cC5jYWxlbmRhci5nb29nbGUuY29t&src=Y2NkODMzMGJiM2I2ZWZiOGY5MGEzNmUxNjU1YWMwNDU5ZGRiZTA0NzE1NTMyNTM2N2JiMGZlZGRkMWVhZTgzZEBncm91cC5jYWxlbmRhci5nb29nbGUuY29t&src=amEuamFwYW5lc2UjaG9saWRheUBncm91cC52LmNhbGVuZGFyLmdvb2dsZS5jb20&color=%23616161&color=%23f09300&color=%23d50000&color=%238e24aa&color=%230b8043&color=%237cb342&color=%23e4c441&color=%234285f4&color=%23616161"
       frameborder="0" scrolling="no" allowfullscreen></iframe>
@@ -207,7 +234,9 @@ function setView(mode, btn){
   document.querySelectorAll(".view-tab-btn").forEach(function(b){b.classList.remove("active");});
   btn.classList.add("active");
   var iframe = document.getElementById("gcal-iframe");
-  iframe.src = focusedCalendarSrc(mode);
+  iframe.closest(".gcal-wrap").dataset.view = mode;
+  if (mode !== "month") iframe.src = focusedCalendarSrc(mode);
+  else if (iframe.closest(".gcal-wrap").dataset.monthFallback) iframe.src = iframe.closest(".gcal-wrap").dataset.monthFallback;
   // リスト表示は高さを伸ばす
   iframe.style.height = mode === "agenda" ? "calc(100vh - 200px)" : "";
 }
