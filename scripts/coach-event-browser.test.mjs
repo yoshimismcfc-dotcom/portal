@@ -99,6 +99,27 @@ assert.match(source, /status==="OK"\|\|status==="要項送付済"/,
 assert.ok(source.indexOf('id="coach-event-browser"') < source.indexOf("セクション：コーチ共有"),
   "大会管理はコーチ共有より上へ配置してください");
 
+assert.ok(source.includes('if(location.hash==="#coach-match")document.documentElement.classList.add("match-dashboard-only")'),
+  "大会管理リンクから専用表示へ切り替わりません");
+assert.ok(source.includes("html:not(.match-dashboard-only) #coach-event-browser{display:none}"),
+  "通常のコーチ専用メニューで大会管理を隠してください");
+assert.ok(source.includes("html.match-dashboard-only #coach-content>:not(#coach-match):not(#coach-event-browser):not(.modal-bg){display:none!important}"),
+  "大会管理の専用表示にコーチ用メニューが混在しています");
+assert.doesNotMatch(source.slice(source.indexOf('<nav class="coach-quick-nav"'), source.indexOf('</nav>', source.indexOf('<nav class="coach-quick-nav"'))),
+  /coach-match|試合・大会/, "コーチ専用メニュー内に大会管理への重複ナビゲーションがあります");
+
+const home = fs.readFileSync(path.join(root, "index.html"), "utf8");
+const matchStart = home.indexOf('id="sec-match"');
+const linksStart = home.indexOf('id="sec-links"', matchStart);
+const homeMatchSection = home.slice(matchStart, linksStart);
+assert.equal((homeMatchSection.match(/class="menu-card/g) || []).length, 1,
+  "ホームの試合・大会には大会管理ダッシュボードだけを表示してください");
+assert.ok(homeMatchSection.includes('href="coach.html#coach-match"') && homeMatchSection.includes("大会管理ダッシュボード"),
+  "大会管理ダッシュボードから大会専用画面へ移動できません");
+for (const page of ["duty.html", "uniform.html", "pitch.html", "referee.html"]) {
+  assert.ok(fs.existsSync(path.join(root, page)), `${page} の既存機能ページは削除しないでください`);
+}
+
 const matchSectionStart = source.indexOf("セクション：試合・大会");
 const sharedSectionStart = source.indexOf("セクション：コーチ共有");
 const matchSection = source.slice(matchSectionStart, sharedSectionStart);
