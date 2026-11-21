@@ -9,7 +9,7 @@
   <script src="firebase-config.js"></script>
   <link rel="stylesheet" href="common.css">
   <!-- Googleカレンダー内の調整さんURLを安全に抽出する -->
-  <script src="calendar-attendance.js?v=20261121-23"></script>
+  <script src="calendar-attendance.js?v=20261122-1"></script>
   <script src="common.js"></script>
   <style>
     .page-wrap{max-width:100%!important;padding:10px 12px 40px!important}
@@ -28,6 +28,8 @@
     .calendar-selected-day{margin:12px 0;scroll-margin-top:90px;padding:16px;border:1px solid var(--line-2);border-radius:var(--r12);background:var(--surface-lt)}
     .calendar-selected-day h2{margin:0 0 8px;font-size:1.15rem}
     .calendar-selected-day [role=status]:empty{display:none}
+    .calendar-selected-next:empty{display:none}
+    .calendar-selected-next a{display:flex;align-items:center;min-height:44px;margin-top:10px;padding:8px 12px;border:1px solid var(--line-2);border-radius:10px;color:inherit;font-size:.9rem;font-weight:800;overflow-wrap:anywhere}
     .calendar-selected-events{display:grid;gap:8px}
     .calendar-selected-events details{border:1px solid var(--line-2);border-radius:10px;padding:0 12px;background:var(--surface-lt)}
     .calendar-selected-events summary{padding:12px 0;font-weight:800;cursor:pointer;min-height:44px;overflow-wrap:anywhere}
@@ -157,6 +159,7 @@
     <h2 id="calendar-selected-heading" tabindex="-1"></h2>
     <p role="status">該当日の予定を読み込んでいます…</p>
     <div class="calendar-selected-events"></div>
+    <div class="calendar-selected-next"></div>
   </section>
 
   <!-- Googleカレンダー本体 -->
@@ -194,10 +197,11 @@ setNotice("page-warning","warning-text",localStorage.getItem("smc_warning"));
 
 // 今日の日付表示
 (function(){
-  var now = new Date();
-  var DAYS = ["日","月","火","水","木","金","土"];
-  document.getElementById("tn-date").textContent = now.getDate();
-  document.getElementById("tn-dow").textContent = DAYS[now.getDay()]+"曜日";
+  var today = window.SMCCalendarAttendance.tokyoDate(new Date());
+  var date = new Date(today + "T00:00:00+09:00");
+  var weekday = new Intl.DateTimeFormat("ja-JP", {timeZone:"Asia/Tokyo",weekday:"long"});
+  document.getElementById("tn-date").textContent = Number(today.slice(-2));
+  document.getElementById("tn-dow").textContent = weekday.format(date);
 })();
 
 // ビュー切り替え

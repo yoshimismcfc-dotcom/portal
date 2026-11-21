@@ -779,15 +779,19 @@ function enhanceCalendarUpcomingAgenda() {
       return;
     }
 
+    const selectedDayPanel = isCalendarPage ? document.getElementById("calendar-selected-day") : null;
+    const params = new URLSearchParams(location.search);
+    const selectedDate = params.get("date") || "";
+    const selectedStart = new Date(selectedDate + "T00:00:00+09:00");
+    const explicitDate = /^\d{4}-\d{2}-\d{2}$/.test(selectedDate) && eventDate(selectedStart) === selectedDate;
+    const selectedDateFormat = new Intl.DateTimeFormat("ja-JP", {
+      timeZone: "Asia/Tokyo", year: "numeric", month: "long", day: "numeric", weekday: "short"
+    });
     if (isCalendarPage) {
-      const panel = document.getElementById("calendar-selected-day");
-      const params = new URLSearchParams(location.search);
-      const date = params.get("date") || "";
-      const start = new Date(date + "T00:00:00+09:00");
-      const validDate = /^\d{4}-\d{2}-\d{2}$/.test(date) && eventDate(start) === date;
-      setupCalendarMonth(validDate ? date : eventDate(new Date()));
-      if (panel && validDate) {
-        renderSelectedDay(panel, start, params.get("event") || "");
+      setupCalendarMonth(explicitDate ? selectedDate : eventDate(new Date()));
+      if (selectedDayPanel) {
+        if (explicitDate) renderSelectedDay(selectedDayPanel, selectedStart, params.get("event") || "");
+        else prepareSelectedDay(selectedDayPanel, "今日の予定");
       }
     }
 
@@ -896,14 +900,61 @@ function enhanceCalendarUpcomingAgenda() {
       loadMonth();
     }
 
+    function prepareSelectedDay(panel, label) {
+      panel.querySelector("h2").textContent = label;
+      panel.hidden = false;
+    }
+
+    function renderInitialDay(events, failedLabels = [], unavailable = false, today = eventDate(new Date())) {
+      const panel = selectedDayPanel;
+      if (!panel || explicitDate) return;
+      const local = localCalendarEvents(failedLabels, events);
+      const overview = window.SMCCalendarAttendance.initialCalendarDay(events.concat(local), today);
+      const showToday = overview.todaysEvents.length > 0;
+      const start = new Date((showToday || !overview.nextDate ? today : overview.nextDate) + "T00:00:00+09:00");
+      const label = showToday || !overview.nextDate ? "今日の予定" : "次の試合・行事";
+      prepareSelectedDay(panel, label + "（" + selectedDateFormat.format(start) + "）");
+      panel.querySelector(".calendar-selected-next").replaceChildren();
+      const status = panel.querySelector("[role=status]");
+      if (unavailable) status.textContent = "予定を取得できませんでした。通信状態を確認し、もう一度お試しください。";
+      else if (failedLabels.length) status.textContent = "一部のカレンダーを取得できませんでした。取得できた予定を表示しています。";
+      else if (!showToday && !overview.nextDate) status.textContent = "今後" + UPCOMING_DAYS + "日以内に次の試合・行事は登録されていません。";
+      else status.textContent = "";
+      paintSelectedEvents(panel, showToday ? overview.todaysEvents : overview.nextEvents, "", false);
+      setTodayNotice(overview.todaysEvents, unavailable || failedLabels.length > 0);
+
+      if (overview.practiceOnly && overview.nextDate) {
+        const next = document.createElement("a");
+        next.href = detailHref(overview.nextDate);
+        const first = overview.nextEvents[0];
+        const more = overview.nextEvents.length - 1;
+        const date = new Date(overview.nextDate + "T00:00:00+09:00");
+        next.textContent = "次の試合・行事　" + selectedDateFormat.format(date) + "　" + first.title + (more ? " ほか" + more + "件" : "");
+        panel.querySelector(".calendar-selected-next").append(next);
+      }
+    }
+
+    function localCalendarEvents(failedLabels, events, date) {
+      try {
+        const local = JSON.parse(localStorage.getItem("yoshimi_smc_attendance_prototype_v1") || "{}");
+        const knownIds = new Set(events.map((event) => event.sourceId && "calendar_" + encodeURIComponent(event.sourceId)));
+        return (Array.isArray(local.events) ? local.events : []).filter((event) =>
+          event?.id && event.date && (!date || event.date === date) && !event.hidden && !event.calendarInactive &&
+          !knownIds.has(event.id) && (!event.id.startsWith("calendar_") || failedLabels.includes(event.category))
+        ).map((event) => ({
+          attendanceId: event.id, title: event.title, location: event.place, kind: event.kind,
+          label: event.category || (event.kind === "match" ? "試合" : "練習"),
+          descriptionTime: event.startTime, allDay: true, start: event.date
+        }));
+      } catch {
+        return [];
+      }
+    }
+
     async function renderSelectedDay(panel, start, selectedId) {
       const heading = panel.querySelector("h2");
       const status = panel.querySelector("[role=status]");
-      const list = panel.querySelector(".calendar-selected-events");
-      heading.textContent = new Intl.DateTimeFormat("ja-JP", {
-        timeZone: "Asia/Tokyo", year: "numeric", month: "long", day: "numeric", weekday: "short"
-      }).format(start) + "の予定";
-      panel.hidden = false;
+      prepareSelectedDay(panel, selectedDateFormat.format(start) + "の予定");
       heading.focus({ preventScroll: true });
       panel.scrollIntoView({ block: "start", behavior: "instant" });
       const end = new Date(start.getTime() + 86400000);
@@ -911,37 +962,34 @@ function enhanceCalendarUpcomingAgenda() {
         fetchCalendar(calendar, start.toISOString(), end.toISOString(), 250, true)
       ));
       const events = results.flatMap((result) => result.status === "fulfilled" ? result.value : []);
-      const matches = events.map((event) => ({
-        ...event, attendanceId: event.sourceId ? "calendar_" + encodeURIComponent(event.sourceId) : ""
-      }));
-      const date = new Intl.DateTimeFormat("sv-SE", { timeZone: "Asia/Tokyo", dateStyle: "short" }).format(start);
-      try {
-        const local = JSON.parse(localStorage.getItem("yoshimi_smc_attendance_prototype_v1") || "{}");
-        const knownIds = new Set(matches.map((event) => event.attendanceId));
-        const failedLabels = new Set(CALENDARS.filter((_, index) => results[index].status === "rejected").map((calendar) => calendar.label));
-        for (const event of Array.isArray(local.events) ? local.events : []) {
-          if (event.date !== date || event.hidden || event.calendarInactive || knownIds.has(event.id)) continue;
-          if (event.id.startsWith("calendar_") && !failedLabels.has(event.category)) continue;
-          matches.push({ attendanceId: event.id, title: event.title, location: event.place,
-            label: event.category || (event.kind === "match" ? "試合" : "練習"),
-            descriptionTime: event.startTime, allDay: true, start: date });
-        }
-      } catch (error) {
-        // Local attendance data is optional on the calendar.
-      }
-      matches.sort((a, b) => Number(b.attendanceId === selectedId && Boolean(selectedId)) -
-        Number(a.attendanceId === selectedId && Boolean(selectedId)) || a.start.localeCompare(b.start));
+      const failedLabels = CALENDARS.filter((_, index) => results[index].status === "rejected").map((calendar) => calendar.label);
+      const matches = events.concat(localCalendarEvents(failedLabels, events, eventDate(start)));
       const warnings = [];
       if (results.some((result) => result.status === "rejected")) warnings.push("一部のカレンダーを取得できませんでした。");
-      if (selectedId && !matches.some((event) => event.attendanceId === selectedId)) warnings.push("指定の試合が見つかりませんでした。");
+      if (selectedId && !matches.some((event) => selectedId === attendanceEventId(event))) warnings.push("指定の試合が見つかりませんでした。");
       if (!matches.length) warnings.push("表示できる予定がありません。");
       status.textContent = warnings.join(" ");
-      const openEvent = selectedId ? matches.find((event) => event.attendanceId === selectedId)
+      paintSelectedEvents(panel, matches, selectedId, true);
+    }
+
+    function attendanceEventId(event) {
+      return event.attendanceId || (event.sourceId ? "calendar_" + encodeURIComponent(event.sourceId) : "");
+    }
+
+    function paintSelectedEvents(panel, events, selectedId, focus) {
+      const list = panel.querySelector(".calendar-selected-events");
+      const matches = events.slice().sort((a, b) =>
+        Number(Boolean(selectedId) && attendanceEventId(b) === selectedId) -
+        Number(Boolean(selectedId) && attendanceEventId(a) === selectedId) || a.start.localeCompare(b.start));
+      const previousOpen = new Map(Array.from(list.children, (item) => [item.dataset.eventKey, item.open]));
+      const openEvent = selectedId ? matches.find((event) => attendanceEventId(event) === selectedId)
         : matches.length === 1 ? matches[0] : null;
       let destination = null;
+      const cards = [];
       for (const event of matches) {
         const details = document.createElement("details");
-        details.open = openEvent === event;
+        details.dataset.eventKey = event.id || attendanceEventId(event);
+        details.open = previousOpen.get(details.dataset.eventKey) ?? (openEvent === event);
         const summary = document.createElement("summary");
         summary.textContent = event.label + " · " + event.title;
         details.append(summary);
@@ -979,9 +1027,10 @@ function enhanceCalendarUpcomingAgenda() {
           }
           details.append(description);
         }
-        list.append(details);
+        cards.push(details);
       }
-      if (destination) {
+      list.replaceChildren(...cards);
+      if (destination && focus) {
         requestAnimationFrame(() => {
           const header = document.querySelector(".site-header");
           const headerHeight = header?.getBoundingClientRect().height || 0;
@@ -1178,23 +1227,17 @@ function enhanceCalendarUpcomingAgenda() {
       return `${formatter.format(new Date(event.start))}〜${formatter.format(new Date(event.end))}`;
     }
 
-    function setTodayNotice(events) {
+    function setTodayNotice(todaysEvents, incomplete) {
       const target = document.getElementById("tn-info");
       if (!target) return;
-      const today = new Date();
-      const todaysEvents = events.filter((event) => {
-        const date = parseStart(event);
-        return date.getFullYear() === today.getFullYear() && date.getMonth() === today.getMonth() && date.getDate() === today.getDate();
-      });
-      target.replaceChildren();
       const dot = document.createElement("span");
       dot.className = "tn-dot";
       dot.style.background = todaysEvents[0]?.color || "var(--cyan)";
       const text = document.createElement("span");
       text.textContent = todaysEvents.length
         ? `${todaysEvents[0].title}${todaysEvents.length > 1 ? ` ほか${todaysEvents.length - 1}件` : ""}`
-        : "今日の登録予定はありません";
-      target.append(dot, text);
+        : incomplete ? "今日の予定を確認できませんでした" : "今日の登録予定はありません";
+      target.replaceChildren(dot, text);
     }
 
     function updateAttendanceSelection() {
@@ -1358,7 +1401,7 @@ function enhanceCalendarUpcomingAgenda() {
       list.replaceChildren();
       list.setAttribute("aria-busy", "false");
       badge.textContent = cached ? "保存データ" : "自動更新";
-      setTodayNotice(events);
+
 
       if (!events.length) {
         const empty = document.createElement("div");
@@ -1491,6 +1534,8 @@ function enhanceCalendarUpcomingAgenda() {
         id: `${calendar.id}:${event.id || event.iCalUID || ""}:${event.start?.dateTime || event.start?.date || ""}`,
         sourceId: event.id ? `${calendar.id}:${event.id}` : "",
         title: event.summary || "（タイトル未設定）",
+        ...(isCalendarPage ? { status: event.status,
+          kind: event.extendedProperties?.shared?.kind || event.extendedProperties?.private?.kind } : {}),
         start: event.start?.dateTime || event.start?.date || "",
         end: event.end?.dateTime || event.end?.date || "",
         allDay: !event.start?.dateTime,
@@ -1529,20 +1574,35 @@ function enhanceCalendarUpcomingAgenda() {
       if (refreshButton) refreshButton.disabled = true;
       if (attendanceRefresh) attendanceRefresh.disabled = true;
       const now = new Date();
+      const today = eventDate(now);
+      const agendaStart = isCalendarPage ? new Date(today + "T00:00:00+09:00") : now;
       const end = new Date(now);
       end.setDate(end.getDate() + UPCOMING_DAYS);
       try {
-        const results = await Promise.allSettled(CALENDARS.map((calendar) => fetchCalendar(calendar, now.toISOString(), end.toISOString())));
+        const results = await Promise.allSettled(CALENDARS.map((calendar) =>
+          fetchCalendar(calendar, agendaStart.toISOString(), end.toISOString(), isCalendarPage ? 250 : 40, isCalendarPage, isCalendarPage)
+        ));
         const successful = results.filter((result) => result.status === "fulfilled");
         if (!successful.length) throw new Error("All calendar requests failed");
         const seen = new Set();
         const events = successful.flatMap((result) => result.value)
           .sort((left, right) => left.start.localeCompare(right.start))
           .filter((event) => !seen.has(event.id) && seen.add(event.id));
+        if (isCalendarPage) {
+          const failedLabels = CALENDARS.filter((_, index) => results[index].status === "rejected").map((calendar) => calendar.label);
+          if (explicitDate) {
+            const todayEvents = window.SMCCalendarAttendance.initialCalendarDay(events, today).todaysEvents;
+            setTodayNotice(todayEvents, failedLabels.length > 0);
+          } else {
+            renderInitialDay(events, failedLabels, false, today);
+          }
+        }
         writeCache(events);
         lastLoadedAt = Date.now();
         renderEvents(events, false);
       } catch (error) {
+        if (isCalendarPage && explicitDate) setTodayNotice([], true);
+        else if (isCalendarPage) renderInitialDay([], CALENDARS.map((calendar) => calendar.label), true, today);
         if (cache?.events?.length) renderEvents(cache.events, true);
         else renderError();
       } finally {

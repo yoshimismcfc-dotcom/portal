@@ -73,6 +73,38 @@ const selectedMessage = attendance.buildLineMessage([
 ]);
 assert.ok(selectedMessage.includes("U10だけ"));
 
+const { initialCalendarDay, tokyoDate } = attendance;
+assert.equal(tokyoDate("2026-11-21T15:00:00Z"), "2026-11-22");
+assert.equal(tokyoDate("2026-11-22T14:59:59Z"), "2026-11-22");
+const today = "2026-11-22";
+const makeEvent = (title, start, extra = {}) => ({ title, start, allDay: true, ...extra });
+const screenshotEvents = [
+  makeEvent("U11(5年～3年)4種新人戦", today),
+  makeEvent("U7（1年以下）吉見フェスティバル", today),
+  makeEvent("U8（2年以下）吉見フェスティバル", today),
+  makeEvent("【練習中止】全体練習", today)
+];
+const upcoming = [
+  makeEvent("U12 練習試合", "2026-12-05"),
+  makeEvent("全体練習", "2026-11-23", { label: "U12" }),
+  makeEvent("【中止】交流戦", "2026-11-24"),
+  makeEvent("市民大会", "2026-12-05"),
+  makeEvent("U9", "2026-11-25"),
+  makeEvent("新人戦", "2026-11-28", { status: "cancelled" })
+];
+assert.deepEqual(initialCalendarDay([...screenshotEvents, ...upcoming], today).todaysEvents, screenshotEvents);
+assert.equal(initialCalendarDay(screenshotEvents, today).practiceOnly, false);
+const withoutToday = initialCalendarDay(upcoming, today);
+assert.equal(withoutToday.nextDate, "2026-12-05");
+assert.deepEqual(withoutToday.nextEvents.map(event => event.title), ["U12 練習試合", "市民大会"]);
+assert.equal(initialCalendarDay([makeEvent("低学年練習", today), ...upcoming], today).practiceOnly, true);
+assert.equal(initialCalendarDay([makeEvent("文化の日", today, { label: "祝日" })], today).todaysEvents.length, 0);
+assert.equal(initialCalendarDay([makeEvent("合宿", "2026-11-21", { end: "2026-11-23" })], today).todaysEvents.length, 1);
+assert.equal(initialCalendarDay([makeEvent("午前活動", "2026-11-23", { description: "【種別】ＴＭ" }), ...upcoming], today).nextDate, "2026-11-23");
+assert.equal(initialCalendarDay([makeEvent("交流戦（雨天中止）", "2026-11-23")], today).nextDate, "2026-11-23");
+assert.equal(initialCalendarDay([makeEvent("活動", "2026-11-23", { kind: "match" })], today).nextDate, "2026-11-23");
+assert.equal(initialCalendarDay([makeEvent("練習", "2026-11-23")], today).nextDate, "");
+
 const commonSource = fs.readFileSync(path.join(root, "common.js"), "utf8");
 const calendarHtml = fs.readFileSync(path.join(root, "calendar.html"), "utf8");
 const attendanceHtml = fs.readFileSync(path.join(root, "attendance.html"), "utf8");
