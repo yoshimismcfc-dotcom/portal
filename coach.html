@@ -8,7 +8,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <meta name="robots" content="noindex,nofollow">
   <title>コーチ専用メニュー｜吉見SMC FC</title>
-  <script>if(location.hash==="#coach-match")document.documentElement.classList.add("match-dashboard-only");</script>
+  <script>if(location.hash==="#coach-match"){document.documentElement.classList.add("match-dashboard-only");document.title="大会管理ダッシュボード｜吉見SMC FC";}</script>
   <script src="firebase-config.js"></script>
   <link rel="stylesheet" href="common.css">
   <script src="common.js"></script>
@@ -416,7 +416,7 @@
   <div class="hero-band">
     <div class="hero-emoji">🧑‍🏫</div>
     <div><div class="hero-title">コーチ専用メニュー</div>
-      <div class="hero-sub">試合・大会・連絡・会計を、ここからまとめて管理できます</div></div>
+      <div class="hero-sub">共有・お知らせ・練習資料など、コーチ向けメニューをまとめています</div></div>
   </div>
 
   <nav class="coach-quick-nav" aria-label="メニュー内移動">
@@ -1025,6 +1025,7 @@ document.addEventListener("DOMContentLoaded", function(){
   "use strict";
   var COACH_EVENT_KEY="smc_coach_selected_event_v1";
   function validCoachEventId(value){return /^[A-Za-z0-9_-]{1,100}$/.test(String(value||""))?String(value):"";}
+  var matchDashboardOnly=location.hash==="#coach-match";
   var requestedCoachEventRaw=new URLSearchParams(location.search).get("eventId")||"";
   var requestedCoachEventId=validCoachEventId(requestedCoachEventRaw);
   var requestedCoachEventPending=!!requestedCoachEventRaw;
@@ -1198,7 +1199,7 @@ document.addEventListener("DOMContentLoaded", function(){
   }
   function readCoachEventSnapshots(){return new Promise(function(resolve,reject){onFirebaseReady(function(db){Promise.all(["game_adjust","duty_match","tournament_saves","tournament_match_results","accounting"].map(function(path){return db.ref(path).once("value");})).then(function(snaps){resolve({gameAdjust:snaps[0].val(),duties:snaps[1].val(),tournamentSaves:snaps[2].val(),tournamentResults:snaps[3].val(),accounting:snaps[4].val()});}).catch(reject);});});}
   function applyCoachEventSnapshots(value){coachState.gameAdjust=value.gameAdjust;coachState.duties=SMCTournamentManagement.toArray(value.duties);coachState.tournamentSaves=value.tournamentSaves&&typeof value.tournamentSaves==="object"?value.tournamentSaves:{};coachState.tournamentResults=value.tournamentResults&&typeof value.tournamentResults==="object"?value.tournamentResults:{};coachState.accounting=value.accounting&&typeof value.accounting==="object"?value.accounting:{tournaments:[]};if(coachState.accounting)coachState.accounting.tournaments=SMCTournamentManagement.toArray(coachState.accounting.tournaments);}
-  function clearCoachEventSelection(){selectedCoachEventId="";try{sessionStorage.removeItem(COACH_EVENT_KEY);}catch(error){}var url=new URL(location.href);url.search="";url.hash="coach-match";history.replaceState({},"",url.pathname+url.hash);}
+  function clearCoachEventSelection(){selectedCoachEventId="";try{sessionStorage.removeItem(COACH_EVENT_KEY);}catch(error){}var url=new URL(location.href);url.search="";url.hash=matchDashboardOnly?"coach-match":"";history.replaceState({},"",url.pathname+url.hash);}
   function deleteCoachEventCloud(){
     if(coachEventDeleting||!activeCoachDeleteId)return;coachEventDeleting=true;var deletingId=activeCoachDeleteId,selectedBefore=selectedCoachEventId,button=document.getElementById("coach-event-delete-confirm");button.disabled=true;button.textContent="削除しています…";setCoachManageStatus("coach-event-delete-status","クラウドの最新データを確認しています…",false);
     readCoachEventSnapshots().then(function(snapshots){var plan=SMCTournamentManagement.buildDeletePlan(snapshots,activeCoachDeleteId);if(!plan.found)throw new Error("not-found");return new Promise(function(resolve,reject){onFirebaseReady(function(db){db.ref().update(plan.updates).then(resolve).catch(reject);});});}).then(function(){return readCoachEventSnapshots();}).then(function(latest){
@@ -1209,7 +1210,7 @@ document.addEventListener("DOMContentLoaded", function(){
 
   function syncCoachEventUrl(id){
     var safeId=validCoachEventId(id);if(!safeId)return;
-    var url=new URL(location.href);url.search="";url.searchParams.set("eventId",safeId);url.hash="coach-match";
+    var url=new URL(location.href);url.search="";url.searchParams.set("eventId",safeId);url.hash=matchDashboardOnly?"coach-match":"";
     history.replaceState({eventId:safeId},"",url.pathname+url.search+url.hash);
   }
 

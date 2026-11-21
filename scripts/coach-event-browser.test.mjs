@@ -99,8 +99,10 @@ assert.match(source, /status==="OK"\|\|status==="要項送付済"/,
 assert.ok(source.indexOf('id="coach-event-browser"') < source.indexOf("セクション：コーチ共有"),
   "大会管理はコーチ共有より上へ配置してください");
 
-assert.ok(source.includes('if(location.hash==="#coach-match")document.documentElement.classList.add("match-dashboard-only")'),
+assert.ok(source.includes('if(location.hash==="#coach-match"){document.documentElement.classList.add("match-dashboard-only");document.title="大会管理ダッシュボード｜吉見SMC FC";}'),
   "大会管理リンクから専用表示へ切り替わりません");
+assert.ok(source.includes('var matchDashboardOnly=location.hash==="#coach-match";') && source.includes('url.hash=matchDashboardOnly?"coach-match":"";'),
+  "通常メニューで大会専用URLへ意図せず切り替わらないようにしてください");
 assert.ok(source.includes("html:not(.match-dashboard-only) #coach-event-browser{display:none}"),
   "通常のコーチ専用メニューで大会管理を隠してください");
 assert.ok(source.includes("html.match-dashboard-only #coach-content>:not(#coach-match):not(#coach-event-browser):not(.modal-bg){display:none!important}"),
