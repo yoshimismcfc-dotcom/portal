@@ -1,0 +1,136 @@
+.response-panel .attendance-board-controls {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  align-items: center;
+  gap: 6px 12px;
+}
+
+.response-panel .response-filters {
+  min-width: 0;
+}
+
+.response-panel .response-filters[hidden] {
+  display: none;
+}
+
+.response-panel .filter-chip {
+  white-space: nowrap;
+}
+
+.response-panel .board-toolbar {
+  grid-column: 2;
+  margin: 0;
+  flex-wrap: nowrap;
+  gap: 8px;
+}
+
+.response-panel #board-status {
+  position: static;
+  width: auto;
+  height: auto;
+  clip-path: none;
+  white-space: nowrap;
+  color: #405676;
+  font-size: .8125rem;
+}
+
+.preview-board-actions {
+  display: flex;
+  gap: 6px;
+}
+
+.response-panel .board-toolbar button {
+  min-height: 44px;
+  padding-inline: 8px;
+  white-space: nowrap;
+}
+
+.attendance-board .person-col,
+.attendance-board.is-transposed .rotated-person {
+  width: auto;
+  min-width: 112px;
+  max-width: none;
+  white-space: nowrap;
+}
+
+.attendance-board .person-col .board-member-name,
+.attendance-board.is-transposed .rotated-person .board-member-name {
+  white-space: nowrap;
+  overflow-wrap: normal;
+  font-size: .875rem;
+}
+
+.attendance-board.is-transposed .event-col {
+  width: 104px;
+  min-width: 104px;
+  border-right: 1px solid var(--board-line);
+}
+
+.attendance-board th[data-board-date] {
+  min-width: 104px;
+  padding-block: 3px;
+}
+
+.attendance-board .event-count-summary {
+  margin: 2px 0 0;
+  color: inherit;
+  font-size: .75rem;
+  line-height: 1.25;
+  font-variant-numeric: tabular-nums;
+}
+
+.preview-day-summary {
+  min-height: 44px;
+  width: 100%;
+  padding: 0 3px;
+  border: 0;
+  border-radius: 5px;
+  background: #e3edf9;
+  color: #183b66;
+  font: inherit;
+  font-size: .75rem;
+  font-weight: 800;
+  white-space: nowrap;
+  cursor: pointer;
+}
+
+.preview-day-summary:hover,
+.preview-day-summary:focus-visible {
+  background: #d0e1f4;
+}
+
+.preview-summary-date {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin: 8px 0 12px;
+}
+
+.preview-summary-date select {
+  flex: 1;
+  min-width: 0;
+  min-height: 44px;
+  font: inherit;
+}
+
+.preview-match-count {
+  font-weight: 800;
+  font-variant-numeric: tabular-nums;
+}
+
+.preview-match-details > summary {
+  display: list-item;
+  min-height: 44px;
+  padding-block: 10px;
+  cursor: pointer;
+}
+
+@media (max-width: 640px) {
+  .response-panel .attendance-board-controls {
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  .response-panel .board-toolbar {
+    grid-column: 1;
+  }
+}
