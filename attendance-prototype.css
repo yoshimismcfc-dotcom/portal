@@ -300,3 +300,16 @@
 .coach-match-contacts small { display: block; color: #b9d2e3; }
 .coach-match-contacts ul { list-style: none; padding: 0; margin: 0; }
 .coach-match-contacts li { padding: 8px 0; border-top: 1px solid #49617b; overflow-wrap: anywhere; }
+
+.match-attendance-wrap { overflow-x: auto; border: 1px solid #57789d; border-radius: 10px; margin: 6px 0 10px; }
+.match-attendance-table { table-layout: fixed; width: 100%; border-collapse: collapse; background: #f4f8ff; color: #203753; font-size: .86rem; }
+.match-attendance-table :is(th,td) { padding: 8px 6px; text-align: left; vertical-align: middle; border-bottom: 1px solid #cfdbec; overflow-wrap: anywhere; }
+.match-attendance-table thead { background: #25496c; color: #fff; }
+.match-attendance-table :is(th,td):nth-child(2) { width: 72px; text-align: center; }
+.match-attendance-table tbody td:nth-child(2) { background: #e7f0fb; font-weight: 900; }
+.match-attendance-table td[data-value] { font-size: 1.25rem; }
+.match-attendance-table td[data-value="attending"] { color: #087455; }
+.match-attendance-table td[data-value="maybe"] { color: #8a5206; }
+.match-attendance-table td[data-value="absent"] { color: #9b3151; }
+.match-attendance-total { background: #eaf2ff; }
+.match-attendance-table td:last-child { white-space: pre-wrap; }

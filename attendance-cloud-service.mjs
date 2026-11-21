@@ -180,7 +180,7 @@ export function guestAttendanceStore(db, serverTimestamp, {event, key}) {
           const projection = db.collection('attendancePublicCoordination').doc(grant.coordinationId);
           if (publicName) {
             transaction.set(projection, {
-              eventId:event, title:grant.title, date:grant.date, name:publicName,
+              eventId:event, title:grant.title, date:grant.date, name:publicName, value:draft.value,
               ride:contact.ride ?? false, rideTrip:contact.rideTrip ?? '',
               early:contact.early ?? false, earlyTime:contact.earlyTime ?? '',
               late:contact.late ?? false, lateTime:contact.lateTime ?? '', updatedAt:serverTimestamp()

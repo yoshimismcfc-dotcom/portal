@@ -82,8 +82,9 @@ service cloud.firestore {
     let d = request.resource.data;
     let n = j.answer.contact;
     return privateWrite(j) && j.kind == 'match' && j.answer.publicName.size() > 0
-     && d.keys().hasOnly(['eventId','title','date','name','ride','rideTrip','early','earlyTime','late','lateTime','updatedAt'])
+     && d.keys().hasOnly(['eventId','title','date','name','value','ride','rideTrip','early','earlyTime','late','lateTime','updatedAt'])
      && d.eventId == w.eventId && d.title == j.title && d.date == j.date && d.name == j.answer.publicName
+     && d.get('value',j.answer.value) == j.answer.value
      && d.ride == n.get('ride',false) && d.rideTrip == n.get('rideTrip','')
      && d.early == n.get('early',false) && d.earlyTime == n.get('earlyTime','')
      && d.late == n.get('late',false) && d.lateTime == n.get('lateTime','') && d.updatedAt == request.time;

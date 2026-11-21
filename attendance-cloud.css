@@ -41,3 +41,11 @@
 .coordination-rows li { display: grid; grid-template-columns: minmax(88px, 1fr) 2fr; gap: 8px; padding-block: 8px; border-top: 1px solid #6385a4; overflow-wrap: anywhere; }
 #coordinate-choice { margin-top: 10px; }
 #coordinate-choice small { display: block; margin-block: 5px; }
+.cloud-table-total { background: #e6effa; }
+.cloud-table-total td:nth-child(2), .cloud-attendance-answer { background: #e9f2fb; }
+.cloud-attendance-answer span { font-size: 1.35rem; font-weight: 900; line-height: 1; }
+.cloud-table td:last-child { white-space: pre-wrap; }
+.public-notice h2 { margin: 0 0 8px; font-size: 1rem; }
+.public-notice .cloud-table-wrap { margin-top: 8px; }
+.public-notice small { display: block; margin-top: 6px; }
+.public-notice > a { display: inline-block; min-height: 44px; padding-top: 9px; }

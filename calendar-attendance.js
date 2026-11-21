@@ -25,6 +25,38 @@
       .replace(/<[^>]*>/g, "");
   }
 
+  function descriptionLinks(value){
+    var textWithLinks = String(value || "").replace(
+      /<a\b[^>]*?\s+href\s*=\s*(?:"([^"]*)"|'([^']*)'|([^\s>]+))[^>]*>([\s\S]*?)<\/a\s*>/gi,
+      function(tag, doubleQuoted, singleQuoted, unquoted, label){
+        var href = decodeCalendarText(doubleQuoted || singleQuoted || unquoted);
+        try {
+          var url = new URL(href);
+          if (!["https:", "http:"].includes(url.protocol) || url.username || url.password) return label;
+          return plainDescription(label) === href ? href : label + " " + href;
+        } catch(error){ return label; }
+      }
+    );
+    var source = plainDescription(textWithLinks);
+    var parts = [], start = 0;
+    var matches = source.matchAll(/\bhttps?:\/\/[^\s<>"'、。！？【】「」『』]+/gi);
+    for (var match of matches) {
+      var candidate = match[0].replace(/[.,;:!?）］｝]+$/, "");
+      while (candidate.endsWith(")") && candidate.split(")").length > candidate.split("(").length) {
+        candidate = candidate.slice(0,-1);
+      }
+      try {
+        var url = new URL(candidate);
+        if (url.username || url.password) continue;
+        if (match.index > start) parts.push({text:source.slice(start,match.index)});
+        parts.push({text:candidate,href:url.href});
+        start = match.index + candidate.length;
+      } catch(error){}
+    }
+    if(start < source.length) parts.push({text:source.slice(start)});
+    return parts;
+  }
+
   function parseTargetGrades(value){
     var source = text(value).normalize("NFKC").replace(/\s+/g, "");
     if (/^(全学年|全団員|全員)$/.test(source)) return PLAYER_GRADES.slice();
@@ -179,6 +211,7 @@
 
   return {
     plainDescription: plainDescription,
+    descriptionLinks: descriptionLinks,
     targetGrades: targetGrades,
     safeChouseisanUrl: safeChouseisanUrl,
     safeCategoryColor: safeCategoryColor,

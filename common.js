@@ -809,11 +809,29 @@ function enhanceCalendarUpcomingAgenda() {
         const timeFormat = new Intl.DateTimeFormat("ja-JP", { timeZone: "Asia/Tokyo", hour: "2-digit", minute: "2-digit" });
         const time = event.allDay ? event.descriptionTime : [event.start, event.end]
           .filter((value) => value && !Number.isNaN(Date.parse(value))).map((value) => timeFormat.format(new Date(value))).join("〜");
-        for (const value of [time, event.location, window.SMCCalendarAttendance?.plainDescription(event.description)]) {
+        for (const value of [time, event.location]) {
           if (!value) continue;
           const line = document.createElement("p");
           line.textContent = value;
           details.append(line);
+        }
+        if (event.description) {
+          const description = document.createElement("p");
+          const parts = window.SMCCalendarAttendance?.descriptionLinks?.(event.description);
+          for (const part of parts || [{text:event.description}]) {
+            if (!part.href) {
+              description.append(document.createTextNode(part.text));
+              continue;
+            }
+            const link = document.createElement("a");
+            link.href = part.href;
+            link.target = "_blank";
+            link.rel = "noopener noreferrer";
+            link.className = "calendar-detail-link";
+            link.textContent = part.text;
+            description.append(link);
+          }
+          details.append(description);
         }
         list.append(details);
       }

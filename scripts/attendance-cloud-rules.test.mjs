@@ -78,7 +78,7 @@ try {
   await assertSucceeds(pairing.commit());
   await assertFails(getDoc(doc(visitor,writer)));
   const sharedAnswer = {...write('attending',{ride:true,rideTrip:'帰りのみ',message:'本人だけの補足'},2),publicName:'テスト保護者'};
-  const publicData = {eventId:'match-a',title:'テスト試合',date:'2026-12-12',name:'テスト保護者',ride:true,rideTrip:'帰りのみ',
+  const publicData = {eventId:'match-a',title:'テスト試合',date:'2026-12-12',name:'テスト保護者',value:'attending',ride:true,rideTrip:'帰りのみ',
     early:false,earlyTime:'',late:false,lateTime:'',updatedAt:serverTimestamp()};
   await assertFails(setDoc(doc(visitor,projection),publicData));
   await assertFails(updateDoc(doc(visitor,door),{answer:sharedAnswer}));
@@ -89,6 +89,7 @@ try {
   const published = (await assertSucceeds(getDocs(collection(visitor,'attendancePublicCoordination')))).docs[0].data();
   assert.equal(published.rideTrip,'帰りのみ');
   assert.equal(published.name,'テスト保護者');
+  assert.equal(published.value,'attending');
   assert.equal(published.message,undefined);
   await assertFails(updateDoc(doc(visitor,door),{answer:write('absent',{},3)}));
   const clear = writeBatch(visitor);
