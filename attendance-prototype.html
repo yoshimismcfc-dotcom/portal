@@ -57,6 +57,15 @@
 </main>
 <div class="fixed-entry-bar" id="fixed-entry-bar"><span id="entry-mode-help">予定を選び、出欠入力を開始してください。</span><button type="button" id="entry-mode-button" class="primary-button">出欠を入力する</button></div>
 <footer class="site-footer"></footer>
+<dialog id="attendance-dialog" class="event-dialog attendance-dialog">
+  <form id="attendance-form" method="dialog">
+    <h2>出欠を入力</h2><p class="dialog-date">名前を選び、各日程の参加予定を入力してください。</p>
+    <label for="entry-person">入力する人</label><select id="entry-person" required><option value="">名前を選択してください</option></select>
+    <div id="attendance-form-events" class="attendance-form-events"></div>
+    <label for="entry-comment">備考（任意）</label><textarea id="entry-comment" maxlength="80" rows="2" placeholder="送迎希望など（80文字以内）"></textarea>
+    <div class="dialog-actions"><button type="button" id="cancel-attendance" class="secondary-button">キャンセル</button><button type="submit" id="save-attendance" class="primary-button">回答を保存</button></div>
+  </form>
+</dialog>
 <dialog id="event-dialog" class="event-dialog">
   <form method="dialog" id="event-form">
     <h2>予定を追加</h2><p id="dialog-date" class="dialog-date"></p>
