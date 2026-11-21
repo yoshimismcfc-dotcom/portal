@@ -209,7 +209,63 @@
     ].join("\n");
   }
 
+  var tokyoDateFormat = new Intl.DateTimeFormat("sv-SE", { timeZone: "Asia/Tokyo", dateStyle: "short" });
+
+  function tokyoDate(value){
+    if (typeof value === "string" && /^\d{4}-\d{2}-\d{2}$/.test(value)) return value;
+    var date = new Date(value);
+    return Number.isNaN(date.getTime()) ? "" : tokyoDateFormat.format(date);
+  }
+
+  function upcomingKind(event){
+    var title = text(event.title).normalize("NFKC");
+    var cancellation = /中止|取りやめ|キャンセル|順延|活動なし|お休み|^\s*(?:OFF|休み)\s*$/i;
+    if (event.status === "cancelled" || cancellation.test(title.replace(/(?:雨天|荒天)(?:の場合は?)?中止/g, ""))) return "cancelled";
+    if (["match", "tournament", "event", "camp"].includes(event.kind)) return "highlight";
+    if (event.kind === "practice") return "practice";
+
+    var highlight = /試合|大会|新人戦|交流戦|対抗戦|招待|選手権|カップ|リーグ|トレマ|フェス|マッチ|合宿|遠征|交流会|運動会|卒団式|体験会|行事|\b(?:TM|TRM|CUP|LEAGUE|vs)\b/i;
+    var practice = /練習|夜[練錬]|トレーニング|自主練/;
+    if (highlight.test(title)) return "highlight";
+    if (practice.test(title)) return "practice";
+
+    var kindLine = plainDescription(event.description).normalize("NFKC").match(/(?:^|\n)\s*(?:【(?:種別|種類|区分|内容)】|(?:種別|種類|区分|内容)\s*:)\s*([^\n]+)/);
+    if (kindLine && highlight.test(kindLine[1])) return "highlight";
+    if (kindLine && practice.test(kindLine[1])) return "practice";
+    return "other";
+  }
+
+  function initialCalendarDay(events, today){
+    var todaysEvents = [], nextEvents = [], nextDate = "";
+    for (var event of events) {
+      if (event.label === "祝日") continue;
+      var start = tokyoDate(event.start);
+      if (!start) continue;
+      var end = Date.parse(event.allDay ? event.end + "T00:00:00+09:00" : event.end);
+      var last = Number.isNaN(end) ? start : tokyoDate(end - 1);
+      var kind = upcomingKind(event);
+      if (start <= today && (last >= today || start === today)) {
+        todaysEvents.push(event);
+      } else if (start > today && kind === "highlight" && (!nextDate || start <= nextDate)) {
+        if (start !== nextDate) nextEvents = [];
+        nextDate = start;
+        nextEvents.push(event);
+      }
+    }
+    return {
+      todaysEvents: todaysEvents,
+      nextDate: nextDate,
+      nextEvents: nextEvents,
+      practiceOnly: todaysEvents.length > 0 && todaysEvents.every(function(event){
+        return upcomingKind(event) === "practice" ||
+          (upcomingKind(event) === "cancelled" && /練習|夜[練錬]|トレーニング/.test(event.title));
+      })
+    };
+  }
+
   return {
+    tokyoDate: tokyoDate,
+    initialCalendarDay: initialCalendarDay,
     plainDescription: plainDescription,
     descriptionLinks: descriptionLinks,
     targetGrades: targetGrades,
