@@ -33,3 +33,7 @@
   .cloud-table th:nth-child(2) { width: 19%; }
   .cloud-answer-options label { flex-wrap: wrap; }
 }
+.public-notice { padding: 10px 12px; border: 1px solid #6385a4; border-radius: 8px; }
+.public-notice h3 { margin: 0 0 8px; font-size: 1rem; }
+.public-notice p { white-space: pre-wrap; }
+.cloud-attendance details + details { margin-top: 10px; }

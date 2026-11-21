@@ -6,7 +6,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>クラウド出欠｜吉見SMC FC</title>
   <link rel="stylesheet" href="common.css">
-  <link rel="stylesheet" href="attendance-cloud.css">
+  <link rel="stylesheet" href="attendance-cloud.css?v=20261121-21">
   <script src="firebase-config.js"></script>
   <script src="common.js"></script>
 </head>
@@ -15,7 +15,13 @@
 <main class="page-wrap cloud-attendance">
   <a class="back-btn" href="attendance-prototype.html">出欠確認・試作版へ戻る</a>
   <h1>クラウド出欠</h1>
-  <p id="cloud-status" role="status" aria-live="polite">認証サービスを読み込んでいます…</p>
+  <p id="cloud-status" role="status" aria-live="polite">クラウド出欠を読み込んでいます…</p>
+  <section id="public-notices" class="panel" hidden>
+    <h2>試合の公開連絡</h2>
+    <p id="public-notice-status" role="status"></p>
+    <div id="public-notice-list" class="cloud-stack"></div>
+  </section>
+  <button id="open-cloud-login" type="button" class="secondary-button" hidden>コーチ・登録済みの方</button>
   <form id="cloud-login" class="panel cloud-stack" hidden>
     <h2>ログイン</h2>
     <label>メールアドレス <input required type="email" name="email" autocomplete="username"></label>
@@ -25,13 +31,14 @@
   <button id="cloud-logout" type="button" class="secondary-button" hidden>ログアウト</button>
   <button id="cloud-connect" type="button" class="secondary-button" hidden>接続をやり直す</button>
   <section id="cloud-workspace" hidden>
-    <div class="cloud-tabs" aria-label="表示">
+    <div id="cloud-tabs" class="cloud-tabs" aria-label="表示">
       <button id="show-entry" type="button" aria-pressed="true">出欠を入力</button>
       <button id="show-review" type="button" aria-pressed="false" hidden>試合の出欠・連絡一覧</button>
     </div>
     <div class="panel cloud-stack">
       <label id="person-field">回答する人 <select id="cloud-person"></select></label>
-      <label>日程・試合 <select id="cloud-event"></select></label>
+      <label id="event-field">日程・試合 <select id="cloud-event"></select></label>
+      <div id="guest-heading" hidden><h2 id="guest-title"></h2><p id="guest-person"></p></div>
       <a id="cloud-calendar" class="back-btn" target="_blank" rel="noopener" hidden>カレンダーで予定を開く</a>
     </div>
     <form id="cloud-answer" class="panel cloud-stack" hidden>
@@ -71,10 +78,27 @@
           <tbody id="cloud-rows"></tbody>
         </table>
       </div>
+      <details id="guest-link-manager">
+        <summary>団員の回答用リンク</summary>
+        <p>対象のご家庭に個別に共有してください。</p>
+        <label>団員 <select id="guest-link-person"></select></label>
+        <button id="manage-guest-link" class="secondary-button" type="button">回答用リンクを表示・発行</button>
+        <label id="guest-link-result" hidden>回答用リンク <input id="guest-link-url" type="url" readonly></label>
+        <button id="copy-guest-link" class="secondary-button" type="button" hidden>回答用リンクをコピー</button>
+        <button id="revoke-guest-link" class="secondary-button" type="button" hidden>このリンクを無効にする</button>
+        <p id="guest-link-status" role="status"></p>
+      </details>
+      <details id="public-notice-editor">
+        <summary>全員に見える試合の連絡を登録</summary>
+        <p>集合時間、会場、持ち物などを記入してください。氏名・住所・個別の送迎希望は記載しないでください。</p>
+        <label>公開する連絡 <textarea id="public-notice-message" maxlength="1200" rows="4"></textarea></label>
+        <button id="publish-notice" class="primary-button" type="button">公開する</button>
+        <p id="publish-notice-status" role="status"></p>
+      </details>
     </section>
   </section>
 </main>
 <footer class="site-footer"></footer>
-<script type="module" src="attendance-cloud.mjs"></script>
+<script type="module" src="attendance-cloud.mjs?v=20261121-21"></script>
 </body>
 </html>
