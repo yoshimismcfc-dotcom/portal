@@ -9,7 +9,7 @@
   <script src="firebase-config.js"></script>
   <link rel="stylesheet" href="common.css">
   <!-- Googleカレンダー内の調整さんURLを安全に抽出する -->
-  <script src="calendar-attendance.js"></script>
+  <script src="calendar-attendance.js?v=20261121-18"></script>
   <script src="common.js"></script>
   <style>
     .page-wrap{max-width:100%!important;padding:10px 12px 40px!important}
@@ -24,6 +24,14 @@
     .legend-bar{display:flex;gap:10px;flex-wrap:wrap;margin-bottom:12px;padding:10px 14px;background:var(--surface-lt);border:1px solid var(--line-2);border-radius:var(--r8)}
     .leg{display:flex;align-items:center;gap:5px;font-size:.75rem;color:var(--ink-3);white-space:nowrap}
     .leg-dot{width:10px;height:10px;border-radius:2px;flex-shrink:0}
+
+    .calendar-selected-day{margin:12px 0;scroll-margin-top:90px;padding:16px;border:1px solid var(--line-2);border-radius:var(--r12);background:var(--surface-lt)}
+    .calendar-selected-day h2{margin:0 0 8px;font-size:1.15rem}
+    .calendar-selected-day [role=status]:empty{display:none}
+    .calendar-selected-events{display:grid;gap:8px}
+    .calendar-selected-events details{border:1px solid var(--line-2);border-radius:10px;padding:0 12px;background:var(--surface-lt)}
+    .calendar-selected-events summary{padding:12px 0;font-weight:800;cursor:pointer;min-height:44px;overflow-wrap:anywhere}
+    .calendar-selected-events p{margin:0 0 10px;white-space:pre-wrap;overflow-wrap:anywhere}
 
     /* ===== Googleカレンダー iframe ===== */
     .gcal-wrap{border-radius:var(--r12);overflow:hidden;border:1px solid var(--line-2);box-shadow:var(--shadow)}
@@ -126,6 +134,12 @@
     <span class="leg"><span class="leg-dot" style="background:#0b8043"></span>U7</span>
   </div>
 
+  <section id="calendar-selected-day" class="calendar-selected-day" aria-labelledby="calendar-selected-heading" hidden>
+    <h2 id="calendar-selected-heading" tabindex="-1"></h2>
+    <p role="status">該当日の予定を読み込んでいます…</p>
+    <div class="calendar-selected-events"></div>
+  </section>
+
   <!-- Googleカレンダー本体 -->
   <div class="gcal-wrap">
     <iframe id="gcal-iframe"
@@ -173,11 +187,26 @@ var BASE_SRC = "https://calendar.google.com/calendar/embed?height=600&wkst=1&ctz
 
 var MODE_MAP = {month:"MONTH", week:"WEEK", agenda:"AGENDA"};
 
+function focusedCalendarSrc(mode){
+  var date = new URLSearchParams(location.search).get("date") || "";
+  var start = new Date(date + "T00:00:00+09:00");
+  var src = BASE_SRC + "&mode=" + MODE_MAP[mode];
+  if (!/^\d{4}-\d{2}-\d{2}$/.test(date) || Number.isNaN(start.getTime()) ||
+      new Intl.DateTimeFormat("sv-SE", {timeZone:"Asia/Tokyo",dateStyle:"short"}).format(start) !== date) return src;
+  var next = new Date(start.getTime() + 86400000);
+  var end = new Intl.DateTimeFormat("sv-SE", {timeZone:"Asia/Tokyo",dateStyle:"short"}).format(next);
+  return src + "&dates=" + date.replace(/-/g,"") + "/" + end.replace(/-/g,"");
+}
+
+if (new URLSearchParams(location.search).has("date")) {
+  document.getElementById("gcal-iframe").src = focusedCalendarSrc("month");
+}
+
 function setView(mode, btn){
   document.querySelectorAll(".view-tab-btn").forEach(function(b){b.classList.remove("active");});
   btn.classList.add("active");
   var iframe = document.getElementById("gcal-iframe");
-  iframe.src = BASE_SRC + "&mode=" + MODE_MAP[mode];
+  iframe.src = focusedCalendarSrc(mode);
   // リスト表示は高さを伸ばす
   iframe.style.height = mode === "agenda" ? "calc(100vh - 200px)" : "";
 }

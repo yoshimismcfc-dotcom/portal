@@ -77,7 +77,7 @@
     $("add-event").disabled=!selectedDate||selectedDate<todayISO()||selectedDate>maxDate()||!isDefaultDay(selectedDate);
     $("selected-date-label").textContent=selectedDate?dateLabel(selectedDate)+(holidays[selectedDate]?" · "+holidays[selectedDate]:""):"日程を選んでください";
   }
-  function answerCounts(event){var table=state.answers[event.id]&&state.answers[event.id][audience]||{};var counts={attending:0,maybe:0,absent:0,unanswered:0};getPeople().forEach(function(person){var value=table[person.id]&&table[person.id].value;if(counts[value]!=null)counts[value]++;else counts.unanswered++;});return counts;}
+  function answerCounts(event){var counts={attending:0,maybe:0,absent:0,unanswered:0};eligiblePeople(event,getPeople()).forEach(function(person){var value=answerValue(event,person);if(Object.hasOwn(counts,value))counts[value]++;else counts.unanswered++;});return counts;}
   function renderEventList(){
     var active=state.events.filter(function(event){return !event.hidden;}).sort(function(a,b){return a.date.localeCompare(b.date)||a.title.localeCompare(b.title,"ja");});
     var list=$("event-list");
@@ -86,7 +86,8 @@
     }else{
       list.innerHTML=active.map(function(event){
         var c=answerCounts(event);
-        return '<article class="event-card'+(selectedEventId===event.id?" selected":"")+'"><button class="event-open" type="button" data-open-event="'+esc(event.id)+'"><strong>'+esc(event.title)+'</strong><span class="event-meta"><span>'+dateLabel(event.date)+'</span><span class="kind-badge '+(event.kind==="match"?"match":"")+'">'+(event.kind==="match"?"試合":"練習")+'</span>'+(event.place?'<span>'+esc(event.place)+'</span>':"")+"</span></button><span class=\"event-count\">参加 <b>"+c.attending+"</b> ・未定 "+c.maybe+'<br>未回答 '+c.unanswered+'</span><button type="button" class="delete-event" data-delete-event="'+esc(event.id)+'" aria-label="'+(event.id.startsWith("calendar_")?"この試合を表から非表示":"この予定を削除")+'">'+(event.id.startsWith("calendar_")?"非表示":"削除")+'</button></article>';
+        var unanswered=audience==="players"&&event.kind==="match"&&!targetGrades(event)?"対象学年未設定":"未回答 "+c.unanswered;
+        return '<article class="event-card'+(selectedEventId===event.id?" selected":"")+'"><button class="event-open" type="button" data-open-event="'+esc(event.id)+'"><strong>'+esc(event.title)+'</strong><span class="event-meta"><span>'+dateLabel(event.date)+'</span><span class="kind-badge '+(event.kind==="match"?"match":"")+'">'+(event.kind==="match"?"試合":"練習")+'</span>'+(event.place?'<span>'+esc(event.place)+'</span>':"")+"</span></button><span class=\"event-count\">参加 <b>"+c.attending+"</b> ・未定 "+c.maybe+'<br>'+unanswered+'</span><button type="button" class="delete-event" data-delete-event="'+esc(event.id)+'" aria-label="'+(event.id.startsWith("calendar_")?"この試合を表から非表示":"この予定を削除")+'">'+(event.id.startsWith("calendar_")?"非表示":"削除")+'</button></article>';
       }).join("");
     }
     list.querySelectorAll("[data-open-event]").forEach(function(btn){btn.addEventListener("click",function(){openEvent(btn.dataset.openEvent);});});
@@ -190,6 +191,24 @@
     return state.answers[event.id]?.[audience]?.[person.id]?.value||"";
   }
 
+  function targetGrades(event){
+    if(event.targetOverride)return event.targetOverride;
+    if(Object.hasOwn(event,"targetGrades"))return event.targetGrades;
+    return window.SMCCalendarAttendance.targetGrades("",event.title);
+  }
+
+  function eligibility(event,person){
+    if(audience!=="players"||event.kind!=="match")return "";
+    var grades=targetGrades(event);
+    if(!grades)return "対象学年未設定";
+    var grade=String(person.grade||"").normalize("NFKC").trim().replace(/生$/,"");
+    return grades.includes(grade)?"":"対象外";
+  }
+
+  function eligiblePeople(event,people){
+    return people.filter(function(person){return !eligibility(event,person);});
+  }
+
   function categoryName(event){
     return event.category||"その他";
   }
@@ -197,7 +216,7 @@
   function countAnswers(events,people){
     var total={attending:0,maybe:0,absent:0};
     events.forEach(function(event){
-      people.forEach(function(person){
+      eligiblePeople(event,people).forEach(function(person){
         var value=answerValue(event,person);
         if(Object.hasOwn(total,value))total[value]++;
       });
@@ -223,49 +242,40 @@
     var dayLabel=(date.getMonth()+1)+"/"+date.getDate()+"（"+DAY_NAMES[date.getDay()]+"）";
     var fullLabels=labels.join("・");
     var shortLabels=labels.length>3?labels.slice(0,2).join("・")+" ＋"+(labels.length-2):fullLabels;
-    var heading='<span class="board-date">'+esc(dayLabel)+(labels.length?'<span class="day-calendar-icon" aria-hidden="true">▦</span>':"")+'</span>';
+    var heading='<span class="board-date">'+esc(dayLabel)+'<span class="day-calendar-icon" aria-hidden="true">▦</span></span>';
     if(labels.length){
       heading+='<span class="day-match-label" title="'+esc(fullLabels)+'">'+esc(shortLabels)+'</span>';
-      var href=day.matches.length===1?safeCalendarEventUrl(day.matches[0].calendarUrl):"";
-      var label=esc(dateLabel(day.date)+" "+fullLabels+(href?"の詳細をGoogleカレンダーで開く":"の試合詳細を表示"));
-      if(href)return '<a class="day-detail-link" aria-label="'+label+'" href="'+esc(href)+'" target="_blank" rel="noopener">'+heading+'</a>';
-      return '<button type="button" class="day-detail-link" data-day-detail="'+esc(day.date)+'" aria-label="'+label+'">'+heading+'</button>';
+    }else{
+      var detail=holidays[day.date]||day.practice[0]?.title||"";
+      if(detail)heading+='<span class="board-event-title" title="'+esc(detail)+'">'+esc(detail)+'</span>';
     }
-    var detail=holidays[day.date]||day.practice[0]?.title||"";
-    return heading+(detail?'<span class="board-event-title" title="'+esc(detail)+'">'+esc(detail)+'</span>':"");
+    return calendarLink(day.date,heading,"day-detail-link","",dateLabel(day.date)+"の予定を開く");
+  }
+
+  function calendarLink(date,content,className,eventId,label){
+    var params=new URLSearchParams({date:date});
+    if(eventId)params.set("event",eventId);
+    return '<a class="'+className+'" href="calendar.html?'+esc(params)+'" target="_blank" rel="noopener"'+
+      (label?' aria-label="'+esc(label)+'"':"")+'>'+content+'</a>';
   }
 
   function matchCalendarAction(match){
-    if(match.kind!=="match")return "";
-    var href=safeCalendarEventUrl(match.calendarUrl);
-    if(!href){
-      var date=fromISO(match.date);
-      href="https://calendar.google.com/calendar/r/day/"+date.getFullYear()+"/"+(date.getMonth()+1)+"/"+date.getDate();
-      return '<a class="secondary-button day-details-action" href="'+esc(href)+'" target="_blank" rel="noopener">Googleカレンダーで該当日を開く</a>';
-    }
-    return '<a class="secondary-button day-details-action" href="'+esc(href)+'" target="_blank" rel="noopener">Googleカレンダーで試合詳細を開く</a>';
-  }
-
-  function openDayDetails(day){
-    $("day-details-title").textContent=dateLabel(day.date)+"の試合";
-    $("day-details-list").innerHTML=day.matches.map(function(match){
-      return '<section class="match-summary-event"><h3>'+esc(match.title||"試合")+'</h3>'+
-        '<div class="day-details-meta">'+esc(categoryName(match)+(match.startTime?" ・ "+match.startTime:""))+'</div>'+
-        (match.place?'<div class="day-details-meta">会場 '+esc(match.place)+'</div>':"")+
-        matchCalendarAction(match)+'</section>';
-    }).join("");
-    $("day-details-dialog").showModal();
+    return match.kind==="match"?calendarLink(match.date,"カレンダーで試合詳細を開く","secondary-button day-details-action",match.id):"";
   }
 
   function dayButton(day,person){
     var practice=day.practice.map(function(event){return answerValue(event,person);}).filter(Boolean);
-    var answered=day.matches.map(function(event){
+    var eligible=day.matches.filter(function(event){return !eligibility(event,person);});
+    var answered=eligible.map(function(event){
       return {label:event.category||"試合",value:answerValue(event,person)};
     }).filter(function(answer){return answer.value;});
     var first=answered[0];
     var badge=first?'<span class="day-match-chip" data-value="'+esc(first.value)+'">'+esc(first.label)+(first.value==="attending"?"":answerMark(first.value))+'</span>':"";
     var extra=answered.length>1?'<span class="day-more">＋'+(answered.length-1)+'</span>':"";
     var marks=practice.map(answerMark).join(" ");
+    if(!day.practice.length&&!eligible.length){
+      return '<span class="board-ineligible">'+(day.matches.every(function(event){return targetGrades(event);})?"対象外":"対象学年未設定")+'</span>';
+    }
     var description=(marks?"練習 "+marks:"")+(answered.length?" "+answered.map(function(answer){return answer.label+" "+answerMark(answer.value);}).join("、"):"");
     var cycle=day.matches.length===0&&day.practice.length===1;
     var style=cycle?"board-mark editable":"board-mark editable day-answer";
@@ -278,9 +288,11 @@
     var matches=day.matches.filter(function(event){return categoryName(event)===category;});
     if(!matches.length)return "—";
     var total=countAnswers(matches,people);
+    var awaitingGrades=audience==="players"&&matches.some(function(event){return !targetGrades(event);});
     var label=(category==="その他"?"その他の試合":category+"試合")+" "+dateLabel(day.date)+" 参加"+total.attending+"人、未定"+total.maybe+"人、不参加"+total.absent+"人";
     return '<button type="button" class="match-total-button" data-match-date="'+esc(day.date)+'" data-match-category="'+esc(category)+'" aria-label="'+esc(label+"。内訳を表示")+'">'+
       (matches.length>1?'<span class="match-total-note">'+matches.length+'試合・延べ</span>':"")+
+      (awaitingGrades?'<span class="match-total-note">対象学年未設定あり</span>':"")+
       '<span>○'+total.attending+'人</span> <span>△'+total.maybe+'人</span> <span>×'+total.absent+'人</span></button>';
   }
 
@@ -321,17 +333,18 @@
   function openDayEntry(day,person,trigger){
     activeDayEntry={day:day,person:person};
     dayEntryTrigger=trigger;
-    $("day-entry-title").textContent=dateLabel(day.date)+"の出欠";
+    $("day-entry-title").innerHTML=calendarLink(day.date,esc(dateLabel(day.date)),"entry-date-link")+"の出欠";
     $("day-entry-person").textContent=person.name;
     $("day-entry-events").innerHTML=day.practice.concat(day.matches).map(function(event,index){
+      var unavailable=eligibility(event,person);
       var current=answerValue(event,person);
       var options=[{value:"attending",label:event.kind==="match"?(event.category||"○ 参加"):"○ 参加"},
         {value:"maybe",label:"△ 未定"},{value:"absent",label:"× 不参加"},{value:"",label:"未回答"}];
       return '<fieldset class="day-entry-event"><legend>'+esc(eventName(event))+'</legend>'+
-        options.map(function(option){
+        (unavailable?'<span class="match-target-note">'+esc(unavailable)+'</span>':options.map(function(option){
           return '<label class="day-entry-choice"><input type="radio" name="day-answer-'+index+'" value="'+esc(option.value)+'"'+
             (option.value===current?" checked":"")+'><span>'+esc(option.label)+'</span></label>';
-        }).join("")+matchCalendarAction(event)+'</fieldset>';
+        }).join(""))+matchCalendarAction(event)+'</fieldset>';
     }).join("");
     $("day-entry-dialog").showModal();
     $("day-entry-events").parentElement.scrollTop=0;
@@ -341,23 +354,38 @@
     $("match-summary-title").textContent=dateLabel(day.date)+" "+(category==="その他"?"その他の試合":category+"試合");
     $("match-summary-list").innerHTML=day.matches.filter(function(event){return categoryName(event)===category;}).map(function(event){
       var groups=ANSWERS.concat({value:"",label:"未回答"});
-      return '<section class="match-summary-event"><h3>'+esc(eventName(event))+'</h3>'+groups.map(function(group){
-        var names=people.filter(function(person){return answerValue(event,person)===group.value;}).map(function(person){return person.name;});
+      var eligible=eligiblePeople(event,people),grades=targetGrades(event);
+      var target=grades?"対象 "+grades.join("・")+(audience==="players"?"／"+eligible.length+"名":""):"対象学年未設定";
+      return '<section class="match-summary-event" data-target-event="'+esc(event.id)+'"><h3>'+esc(eventName(event))+'</h3><div class="match-target-note">'+esc(target)+'</div>'+
+        (grades||audience==="coaches"?groups.map(function(group){
+        var names=eligible.filter(function(person){return answerValue(event,person)===group.value;}).map(function(person){return person.name;});
         return '<p><strong>'+esc((answerMark(group.value)+" "+group.label).trim())+' '+names.length+'人</strong><span>'+esc(names.join("、")||"—")+'</span></p>';
-      }).join("")+'</section>';
+      }).join(""):"")+matchCalendarAction(event)+(audience==="coaches"?targetGradeEditor(event,grades):"")+'</section>';
     }).join("");
-    $("match-summary-dialog").showModal();
+    var dialog=$("match-summary-dialog");
+    if(!dialog.open)dialog.showModal();
+  }
+
+  function targetGradeEditor(event,grades){
+    var fields=GRADES.map(function(grade){
+      return '<label><input type="checkbox" value="'+esc(grade)+'"'+(grades?.includes(grade)?" checked":"")+'>'+esc(grade)+'</label>';
+    }).join("");
+    return '<details class="match-target-editor"><summary>団員の対象学年を変更</summary>'+
+      '<div class="match-target-fields">'+fields+'</div><div class="match-target-buttons">'+
+      '<button type="button" class="secondary-button" data-target-action="save">対象学年を保存</button>'+
+      (event.targetOverride?'<button type="button" class="secondary-button" data-target-action="auto">自動判定に戻す</button>':"")+
+      '</div></details>';
   }
 
   function renderResponse(preserveScroll){
     var panel=$("response-panel"),rows=$("response-list"),oldBoard=rows.querySelector(".attendance-board-scroll");
     var savedTop=preserveScroll&&oldBoard?oldBoard.scrollTop:0,savedLeft=preserveScroll&&oldBoard?oldBoard.scrollLeft:0;
-    var people=getPeople(),days=groupBoardDays(getBoardEvents());
+    var roster=getPeople(),people=roster,days=groupBoardDays(getBoardEvents());
     $("board-toolbar").hidden=true;
     panel.hidden=false;
     $("response-title").textContent="参加予定【"+(audience==="players"?"団員用":"コーチ用")+"】";
     $("respondent-count").textContent=people.length+"名";
-    $("response-summary").textContent="日付は試合詳細、名前と日付のマスは出欠入力。";
+    $("response-summary").textContent="日付をタップするとカレンダー、マスをタップすると出欠入力が開きます。";
     $("entry-mode-button").disabled=audience==="players"&&!members.length;
     $("coach-roster-status").textContent=coachRosterStatus;
     $("coach-roster-status").hidden=audience!=="coaches";
@@ -387,7 +415,7 @@
       body=days.map(function(day){
         var totals=practiceTotals.get(day.date);
         var summaries=showMatchTotals?Array.from(new Set(day.matches.map(categoryName))).map(function(category){
-          return '<div class="transposed-match-total">'+esc(category)+' '+matchSummaryButton(day,category,people)+'</div>';
+          return '<div class="transposed-match-total">'+esc(category)+' '+matchSummaryButton(day,category,roster)+'</div>';
         }).join(""):"";
         return '<tr><th class="event-col" scope="row" data-board-date="'+esc(day.date)+'">'+dayHeading(day)+
           (day.practice.length?'<span class="event-count-summary">○'+totals.attending+' △'+totals.maybe+' ×'+totals.absent+'</span>':"")+summaries+'</th>'+
@@ -403,7 +431,7 @@
       }).join("");
       if(showMatchTotals)summary+=categories.map(function(category){
         return '<tr class="summary-row match-summary-row"><th class="person-col" scope="row">'+esc(category==="その他"?"その他の試合":category+"試合")+'</th>'+
-          days.map(function(day){return '<td>'+matchSummaryButton(day,category,people)+'</td>';}).join("")+'</tr>';
+          days.map(function(day){return '<td>'+matchSummaryButton(day,category,roster)+'</td>';}).join("")+'</tr>';
       }).join("");
       body=summary+people.map(function(person){
         var note=state.notes[audience]?.[person.id]||"";
@@ -437,11 +465,8 @@
         focusDayCell(day.date,person.id);
       });
     });
-    rows.querySelectorAll("[data-day-detail]").forEach(function(button){
-      button.addEventListener("click",function(){openDayDetails(daysByDate.get(button.dataset.dayDetail));});
-    });
     rows.querySelectorAll("[data-match-date]").forEach(function(btn){
-      btn.addEventListener("click",function(){openMatchSummary(daysByDate.get(btn.dataset.matchDate),btn.dataset.matchCategory,people);});
+      btn.addEventListener("click",function(){openMatchSummary(daysByDate.get(btn.dataset.matchDate),btn.dataset.matchCategory,roster);});
     });
     rows.querySelectorAll("[data-edit-coach]").forEach(function(btn){btn.addEventListener("click",function(){var coach=state.coaches.find(function(c){return c.id===btn.dataset.editCoach;});if(!coach)return;var name=prompt("コーチ名を入力してください",coach.name);if(name!==null&&name.trim()){coach.name=name.trim();saveState();render();}});});rows.querySelectorAll("[data-remove-coach]").forEach(function(btn){btn.addEventListener("click",function(){var coach=state.coaches.find(function(c){return c.id===btn.dataset.removeCoach;});if(coach&&confirm(coach.name+"さんを試作リストから削除しますか？")){state.coaches=state.coaches.filter(function(c){return c.id!==coach.id;});saveState();render();}});});
   }
@@ -456,26 +481,29 @@
   }
   function renderAttendanceFormEvents(events){
     var root=$("attendance-form-events"),options=[{value:"attending",label:"○"},{value:"maybe",label:"△"},{value:"absent",label:"×"},{value:"",label:"未回答"}];
+    var person=getPeople().find(function(item){return item.id===editingPersonId;});
     $("save-attendance").disabled=!editingPersonId;
     $("entry-comment").disabled=!editingPersonId;
     root.innerHTML=events.map(function(event){
       var current=formAnswers[event.id]||"";
-      return '<section class="attendance-form-event"><div class="attendance-form-date">'+dateLabel(event.date)+'</div>'+
+      var unavailable=person&&eligibility(event,person);
+      return '<section class="attendance-form-event"><div class="attendance-form-date">'+calendarLink(event.date,esc(dateLabel(event.date)),"entry-date-link")+'</div>'+
         '<div class="attendance-form-title">'+eventDetails(event)+(event.place?" · "+esc(event.place):"")+'</div>'+
-        matchCalendarAction(event)+'<div class="attendance-form-choices">'+options.map(function(option){
+        matchCalendarAction(event)+(unavailable?'<div class="match-target-note">'+esc(unavailable)+'</div>':'<div class="attendance-form-choices">'+options.map(function(option){
           return '<button type="button" class="attendance-form-choice" data-form-event="'+esc(event.id)+
             '" data-form-value="'+esc(option.value)+'" aria-pressed="'+String(current===option.value)+'"'+
             (editingPersonId?"":" disabled")+'>'+option.label+'</button>';
-        }).join("")+'</div></section>';
+        }).join("")+'</div>')+'</section>';
     }).join("");
   }
   function saveAttendanceForm(event){
     event.preventDefault();
     var personId=$("entry-person").value;
-    if(!getPeople().some(function(person){return person.id===personId;})){
+    var person=getPeople().find(function(item){return item.id===personId;});
+    if(!person){
       alert("入力する人を選び直してください。");return;
     }
-    var updates=getBoardEvents().filter(function(item){return Object.hasOwn(formAnswers,item.id);}).map(function(item){
+    var updates=getBoardEvents().filter(function(item){return !eligibility(item,person)&&Object.hasOwn(formAnswers,item.id);}).map(function(item){
       return {id:item.id,value:formAnswers[item.id]};
     });
     var note=$("entry-comment").value.trim().slice(0,80);
@@ -494,7 +522,7 @@
   }
   function render(){renderDateOptions();renderEventList();renderResponse();}
   function addEvent(){if(!selectedDate||!isDefaultDay(selectedDate)){alert("出欠予定は水・木・土・日・祝日から選んでください。");return;}$("dialog-date").textContent=dateLabel(selectedDate)+(holidays[selectedDate]?" · "+holidays[selectedDate]:"");$("event-title").value=fromISO(selectedDate).getDay()===3?"通常練習":fromISO(selectedDate).getDay()===4?"低学年練習":"";$("event-place").value="";$("event-dialog").showModal();}
-  function exportCsv(){var people=getPeople(),rows=[["対象","日付","種類","予定名","会場","名前","学年","出欠","備考","最終更新","カテゴリー","開始時刻"]],events=getBoardEvents().concat(state.events.filter(function(event){return event.hidden;}),state.archive,pastDefaultEvents()).sort(function(a,b){return a.date.localeCompare(b.date);});events.forEach(function(event){var table=state.answers[event.id]&&state.answers[event.id][audience]||{};people.forEach(function(person){var response=table[person.id]||{},note=state.notes[audience]&&state.notes[audience][person.id]||"";rows.push([audience==="players"?"団員":"コーチ",event.date,event.kind==="match"?"試合":event.kind==="practice"?"練習":"",event.title,event.place||"",person.name,person.grade||"",({attending:"参加",maybe:"未定",absent:"不参加"})[response.value]||"未回答",note,response.updatedAt||"",event.category||"",event.startTime||""]);});});function cell(value){var text=String(value==null?"":value);if(/^[=+\-@\t\r]/.test(text))text="'"+text;return '"'+text.replace(/"/g,'""')+'"';}var csv="\uFEFF"+rows.map(function(row){return row.map(cell).join(",");}).join("\r\n"),blob=new Blob([csv],{type:"text/csv;charset=utf-8"}),url=URL.createObjectURL(blob),a=document.createElement("a");a.href=url;a.download="吉見SMC_出欠試作_"+(audience==="players"?"団員":"コーチ")+"_"+todayISO()+".csv";document.body.appendChild(a);a.click();a.remove();setTimeout(function(){URL.revokeObjectURL(url);},0);}
+  function exportCsv(){var people=getPeople(),rows=[["対象","日付","種類","予定名","会場","名前","学年","出欠","備考","最終更新","カテゴリー","開始時刻"]],events=getBoardEvents().concat(state.events.filter(function(event){return event.hidden;}),state.archive,pastDefaultEvents()).sort(function(a,b){return a.date.localeCompare(b.date);});events.forEach(function(event){var table=state.answers[event.id]&&state.answers[event.id][audience]||{};people.forEach(function(person){var response=table[person.id]||{},note=state.notes[audience]&&state.notes[audience][person.id]||"";rows.push([audience==="players"?"団員":"コーチ",event.date,event.kind==="match"?"試合":event.kind==="practice"?"練習":"",event.title,event.place||"",person.name,person.grade||"",({attending:"参加",maybe:"未定",absent:"不参加"})[response.value]||eligibility(event,person)||"未回答",note,response.updatedAt||"",event.category||"",event.startTime||""]);});});function cell(value){var text=String(value==null?"":value);if(/^[=+\-@\t\r]/.test(text))text="'"+text;return '"'+text.replace(/"/g,'""')+'"';}var csv="\uFEFF"+rows.map(function(row){return row.map(cell).join(",");}).join("\r\n"),blob=new Blob([csv],{type:"text/csv;charset=utf-8"}),url=URL.createObjectURL(blob),a=document.createElement("a");a.href=url;a.download="吉見SMC_出欠試作_"+(audience==="players"?"団員":"コーチ")+"_"+todayISO()+".csv";document.body.appendChild(a);a.click();a.remove();setTimeout(function(){URL.revokeObjectURL(url);},0);}
   function calendarMatch(event){
     if(!event.sourceId||!/^U(?:[7-9]|1[0-2])$/.test(event.label))return null;
     var timed=/T/.test(event.start);
@@ -506,7 +534,8 @@
     return {
       id:"calendar_"+encodeURIComponent(event.sourceId),date:date,startTime:time,
       kind:"match",category:event.label,title:event.title,place:event.location||"",
-      calendarUrl:safeCalendarEventUrl(event.url)
+      calendarUrl:safeCalendarEventUrl(event.url),
+      targetGrades:window.SMCCalendarAttendance.targetGrades(event.description,event.title)
     };
   }
 
@@ -526,8 +555,9 @@
       if(!restore&&!previous&&!isAutomaticMatch(match))return;
       var hidden=previous?.hidden&&!restore;
       if(previous&&Boolean(previous.hidden)===Boolean(hidden)&&
-        ["date","startTime","title","place","category","calendarUrl"].every(function(key){return previous[key]===match[key];}))return;
-      events.set(match.id,{...match,...(hidden?{hidden:true}:{})});
+        ["date","startTime","title","place","category","calendarUrl"].every(function(key){return previous[key]===match[key];})&&
+        JSON.stringify(previous.targetGrades)===JSON.stringify(match.targetGrades))return;
+      events.set(match.id,{...match,...(hidden?{hidden:true}:{}),...(previous?.targetOverride?{targetOverride:previous.targetOverride}:{})});
       if(archived.has(match.id))resumed.add(match.id);
       changed=true;
     });
@@ -627,6 +657,28 @@
 
   function init(){movePastEvents();
     setupCalendarMatchPicker();
+    $("match-summary-list").addEventListener("click",function(event){
+      var button=event.target.closest("[data-target-action]");
+      if(!button||audience!=="coaches")return;
+      var card=button.closest("[data-target-event]");
+      var match=state.events.find(function(item){return item.id===card.dataset.targetEvent;});
+      if(!match)return;
+      var previous=match.targetOverride;
+      if(button.dataset.targetAction==="auto")delete match.targetOverride;
+      else{
+        var grades=Array.from(card.querySelectorAll("input:checked"),function(input){return input.value;});
+        if(!grades.length){alert("対象学年を1つ以上選んでください。");return;}
+        match.targetOverride=grades;
+      }
+      if(!saveState()){
+        if(previous)match.targetOverride=previous;
+        else delete match.targetOverride;
+        return;
+      }
+      renderEventList();renderResponse(true);
+      var day=groupBoardDays(getBoardEvents()).find(function(item){return item.date===match.date;});
+      if(day)openMatchSummary(day,categoryName(match),getPeople());
+    });
     $("attendance-form-events").addEventListener("click",function(event){
       var button=event.target.closest("[data-form-event]");
       if(!button||button.disabled)return;
@@ -640,8 +692,12 @@
       event.preventDefault();
       if(!activeDayEntry)return;
       var entry=activeDayEntry,form=new FormData(event.currentTarget);
+      var current=new Map(getBoardEvents().map(function(item){return [item.id,item];}));
       var updates=entry.day.practice.concat(entry.day.matches).map(function(item,index){
         return {id:item.id,value:form.get("day-answer-"+index)};
+      }).filter(function(update){
+        var item=current.get(update.id);
+        return update.value!==null&&item&&!eligibility(item,entry.person);
       });
       if(!saveDayAnswers(entry.person.id,updates))return;
       $("day-entry-dialog").close();

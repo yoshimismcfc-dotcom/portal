@@ -7,8 +7,9 @@
   <meta name="theme-color" content="#07152d">
   <title>出欠確認 試作版｜吉見SMC FC</title>
   <link rel="stylesheet" href="common.css">
-  <link rel="stylesheet" href="attendance-prototype.css?v=20261121-17">
+  <link rel="stylesheet" href="attendance-prototype.css?v=20261121-18">
   <script src="firebase-config.js"></script>
+  <script src="calendar-attendance.js?v=20261121-18"></script>
   <script src="common.js"></script>
 </head>
 <body>
@@ -80,13 +81,6 @@
     </div>
   </form>
 </dialog>
-<dialog id="day-details-dialog" class="event-dialog match-summary-dialog" aria-labelledby="day-details-title">
-  <form method="dialog">
-    <h2 id="day-details-title">試合詳細</h2>
-    <div id="day-details-list"></div>
-    <div class="dialog-actions"><button class="secondary-button">閉じる</button></div>
-  </form>
-</dialog>
 <dialog id="match-summary-dialog" class="event-dialog match-summary-dialog" aria-labelledby="match-summary-title">
   <form method="dialog">
     <h2 id="match-summary-title">試合の出欠内訳</h2>
@@ -120,6 +114,6 @@
     <div class="dialog-actions"><button type="button" id="cancel-event" class="secondary-button">キャンセル</button><button type="submit" class="primary-button">予定を追加</button></div>
   </form>
 </dialog>
-<script src="attendance-prototype.js?v=20261121-17"></script>
+<script src="attendance-prototype.js?v=20261121-18"></script>
 </body>
 </html>
