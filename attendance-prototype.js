@@ -235,17 +235,24 @@
     return heading+(detail?'<span class="board-event-title" title="'+esc(detail)+'">'+esc(detail)+'</span>':"");
   }
 
+  function matchCalendarAction(match){
+    if(match.kind!=="match")return "";
+    var href=safeCalendarEventUrl(match.calendarUrl);
+    if(!href){
+      var date=fromISO(match.date);
+      href="https://calendar.google.com/calendar/r/day/"+date.getFullYear()+"/"+(date.getMonth()+1)+"/"+date.getDate();
+      return '<a class="secondary-button day-details-action" href="'+esc(href)+'" target="_blank" rel="noopener">Googleカレンダーで該当日を開く</a>';
+    }
+    return '<a class="secondary-button day-details-action" href="'+esc(href)+'" target="_blank" rel="noopener">Googleカレンダーで試合詳細を開く</a>';
+  }
+
   function openDayDetails(day){
     $("day-details-title").textContent=dateLabel(day.date)+"の試合";
-    var date=fromISO(day.date);
-    var dayUrl="https://calendar.google.com/calendar/r/day/"+date.getFullYear()+"/"+(date.getMonth()+1)+"/"+date.getDate();
     $("day-details-list").innerHTML=day.matches.map(function(match){
-      var href=safeCalendarEventUrl(match.calendarUrl);
       return '<section class="match-summary-event"><h3>'+esc(match.title||"試合")+'</h3>'+
         '<div class="day-details-meta">'+esc(categoryName(match)+(match.startTime?" ・ "+match.startTime:""))+'</div>'+
         (match.place?'<div class="day-details-meta">会場 '+esc(match.place)+'</div>':"")+
-        '<a class="secondary-button day-details-action" href="'+esc(href||dayUrl)+'" target="_blank" rel="noopener">'+
-        (href?"Googleカレンダーで試合詳細を開く":"Googleカレンダーで該当日を開く")+'</a></section>';
+        matchCalendarAction(match)+'</section>';
     }).join("");
     $("day-details-dialog").showModal();
   }
@@ -317,7 +324,7 @@
         options.map(function(option){
           return '<label class="day-entry-choice"><input type="radio" name="day-answer-'+index+'" value="'+esc(option.value)+'"'+
             (option.value===current?" checked":"")+'><span>'+esc(option.label)+'</span></label>';
-        }).join("")+'</fieldset>';
+        }).join("")+matchCalendarAction(event)+'</fieldset>';
     }).join("");
     $("day-entry-dialog").showModal();
   }
@@ -440,7 +447,16 @@
   }
   function renderAttendanceFormEvents(events){
     var root=$("attendance-form-events"),options=[{value:"attending",label:"○"},{value:"maybe",label:"△"},{value:"absent",label:"×"},{value:"",label:"未回答"}];
-    root.innerHTML=events.map(function(event){var current=formAnswers[event.id]||"";return '<section class="attendance-form-event"><div class="attendance-form-date">'+dateLabel(event.date)+'</div><div class="attendance-form-title">'+eventDetails(event)+(event.place?" · "+esc(event.place):"")+'</div><div class="attendance-form-choices">'+options.map(function(option){return '<button type="button" class="attendance-form-choice'+(current===option.value?" selected":"")+'" data-form-event="'+esc(event.id)+'" data-form-value="'+esc(option.value)+'" aria-pressed="'+(current===option.value?"true":"false")+'">'+option.label+'</button>';}).join("")+'</div></section>';}).join("");
+    root.innerHTML=events.map(function(event){
+      var current=formAnswers[event.id]||"";
+      return '<section class="attendance-form-event"><div class="attendance-form-date">'+dateLabel(event.date)+'</div>'+
+        '<div class="attendance-form-title">'+eventDetails(event)+(event.place?" · "+esc(event.place):"")+'</div>'+
+        matchCalendarAction(event)+'<div class="attendance-form-choices">'+options.map(function(option){
+          return '<button type="button" class="attendance-form-choice'+(current===option.value?" selected":"")+
+            '" data-form-event="'+esc(event.id)+'" data-form-value="'+esc(option.value)+'" aria-pressed="'+
+            String(current===option.value)+'">'+option.label+'</button>';
+        }).join("")+'</div></section>';
+    }).join("");
     root.querySelectorAll("[data-form-event]").forEach(function(button){button.addEventListener("click",function(){formAnswers[button.dataset.formEvent]=button.dataset.formValue;renderAttendanceFormEvents(events);});});
   }
   function saveAttendanceForm(event){
