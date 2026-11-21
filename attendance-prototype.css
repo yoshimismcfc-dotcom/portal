@@ -54,3 +54,63 @@
 @media(max-width:560px){.board-toolbar{align-items:center;font-size:.98rem;gap:6px}.board-toolbar button{min-height:44px;padding:7px 9px;font-size:.86rem}.attendance-board-scroll{max-height:66vh}.attendance-board th,.attendance-board td{min-width:96px;padding:8px 7px;height:54px}.attendance-board .person-col{min-width:132px;width:132px}.attendance-board.is-transposed .event-col{min-width:136px;width:136px}.attendance-board.is-transposed .rotated-person{min-width:94px;width:94px;max-width:94px}.fixed-entry-bar{gap:9px;padding-inline:14px}.fixed-entry-bar .primary-button{min-height:68px;font-size:1.12rem}.entry-mode-icon{width:68px;height:68px}.prototype-wrap{padding-bottom:104px}}
 .date-options{display:grid;gap:8px;max-height:52vh;overflow:auto;margin-top:16px;padding-right:3px}.date-option{display:grid;grid-template-columns:minmax(100px,.7fr) minmax(0,1fr) auto;gap:10px;align-items:center;text-align:left;min-height:58px;padding:10px 13px;border-radius:12px;border:1px solid rgba(120,173,211,.35);background:rgba(5,19,39,.7);color:#eaf4fb;font:inherit;cursor:pointer}.date-option.selected{border-color:#55d9a2;background:rgba(10,93,73,.38);box-shadow:0 0 0 1px rgba(85,217,162,.3)}.date-option-date{font-size:1rem;font-weight:850;white-space:nowrap}.date-option-tags{display:flex;flex-wrap:wrap;gap:6px;color:#b8cde0;font-size:.88rem}.date-option-tags>span{padding:3px 8px;border-radius:999px;background:rgba(50,103,132,.35)}.date-option-tags .date-option-holiday{color:#ffe2a1;background:rgba(163,103,18,.3)}.date-option-tags .date-option-added{color:#8be8b5;background:rgba(17,107,85,.35)}.date-option-select{color:#8be8b5;font-weight:850;white-space:nowrap}.date-option:not(.selected) .date-option-select{color:#bed2df}
 @media(max-width:560px){.date-options{max-height:48vh}.date-option{grid-template-columns:minmax(86px,.55fr) minmax(0,1fr) auto;gap:7px;padding:10px 9px}.date-option-date{font-size:.94rem}.date-option-tags{font-size:.8rem}.date-option-select{font-size:.88rem}}
+
+/* Yoshimi SMC attendance board */
+.prototype-wrap { min-width: 0; }
+.prototype-wrap .audience-tabs { margin: 12px 0; }
+.response-panel {
+  --board-ink: #14294a;
+  --board-line: #d8e2ee;
+  min-width: 0;
+  margin-top: 8px;
+  border: 1px solid #d8e2ee;
+  border-top: 4px solid #1b5085;
+  border-radius: 14px;
+  background: #f2f6fb;
+  color: var(--board-ink);
+}
+.response-panel .section-heading h1 { margin: 0; color: var(--board-ink); font-size: clamp(1.25rem, 5vw, 1.75rem); }
+.response-panel .section-heading p { color: #405676; font-size: .875rem; }
+.response-panel .month-label { color: #405676; font-size: .875rem; }
+.response-panel .response-filters { flex-wrap: nowrap; overflow-x: auto; }
+.response-panel .filter-chip { flex: 0 0 auto; min-height: 44px; }
+.board-toolbar { color: #234a72; min-height: 44px; font-size: .875rem; }
+.board-toolbar button { border-radius: 9px; border-color: #7c99b9; color: #234a72; }
+.attendance-board-scroll { max-width: 100%; max-height: min(61vh, 680px); max-height: min(61svh, 680px); border: 1px solid var(--board-line); }
+.attendance-board { color: var(--board-ink); }
+.attendance-board th, .attendance-board td { min-width: 94px; height: 50px; padding: 4px 7px; border-color: var(--board-line); box-sizing: border-box; }
+.attendance-board thead th { background: #183b66; color: white; }
+.attendance-board thead .person-col, .attendance-board.is-transposed thead .event-col { z-index: 5; background: #183b66; color: white; }
+.attendance-board .person-col { width: 145px; min-width: 145px; max-width: 145px; border-right: 1px solid var(--board-line); }
+.attendance-board tbody .person-col { color: var(--board-ink); }
+.attendance-board .summary-row th, .attendance-board .summary-row td { background: #eaf0f8; height: 37px; color: var(--board-ink); font-size: .875rem; }
+.attendance-board .summary-symbol { display: inline-block; width: 1.2em; font-size: 1.25rem; vertical-align: middle; }
+.attendance-board .board-date { color: inherit; font-size: 1rem; white-space: nowrap; }
+.attendance-board .board-event-title, .attendance-board .board-kind { color: inherit; font-size: .68rem; max-width: 78px; margin: 0 auto; }
+.board-kind { font-weight: 750; }
+.attendance-board .board-member-name { min-height: 44px; color: inherit; font-size: .9rem; white-space: normal; overflow-wrap: anywhere; }
+.attendance-board .board-member-grade { display: inline; margin-right: .3em; color: #405676; font-size: .76rem; }
+.attendance-board.is-transposed thead .board-member-grade { color: #dbe8fa; }
+.attendance-board .board-mark.editable { width: 46px; height: 44px; border: 0; background: transparent; }
+.attendance-board .board-mark.editable:hover { background: #eaf0f8; }
+.attendance-board .board-mark:focus-visible { outline: 2px solid #285d98; outline-offset: -2px; }
+.attendance-board .mark-attending, .attendance-board .board-mark[data-value="attending"] { color: #007453; }
+.attendance-board .mark-maybe, .attendance-board .board-mark[data-value="maybe"] { color: #886000; }
+.attendance-board .mark-absent, .attendance-board .board-mark[data-value="absent"] { color: #ac4056; }
+.attendance-board .board-mark[data-value=""]::after { content: ""; width: 4px; height: 4px; background: #b4c3d4; border-radius: 50%; }
+.fixed-entry-bar .primary-button, .entry-mode-icon { background: #155e75; border-color: #155e75; }
+.attendance-settings > summary { cursor: pointer; padding: 14px 8px; font-weight: 800; }
+.prototype-local-note { font-size: .875rem; margin: 10px 8px; }
+.attendance-screen-reader { position: absolute; width: 1px; height: 1px; overflow: hidden; clip-path: inset(50%); white-space: nowrap; }
+@media (max-width: 560px) {
+  .response-panel { padding: 10px; margin-inline: -4px; }
+  .attendance-board th, .attendance-board td { min-width: 76px; padding-inline: 4px; }
+  .attendance-board .person-col { width: clamp(112px, 33vw, 145px); min-width: clamp(112px, 33vw, 145px); }
+  .attendance-board .board-date { font-size: .875rem; }
+  .attendance-board .board-event-title { max-width: 66px; }
+  .fixed-entry-bar .primary-button, .entry-mode-icon { min-height: 54px; height: 54px; }
+  .entry-mode-icon { width: 54px; }
+}
+@media (max-width: 365px) {
+  .board-toolbar { flex-wrap: wrap; }
+}
