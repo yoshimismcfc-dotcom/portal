@@ -8,7 +8,7 @@
   <title>出欠共有テスト｜吉見SMC FC</title>
   <link rel="stylesheet" href="common.css">
   <link rel="stylesheet" href="attendance-prototype.css?v=20261121-25">
-  <link rel="stylesheet" href="attendance-preview.css?v=20261122-13">
+  <link rel="stylesheet" href="attendance-preview.css?v=20261122-16">
   <script src="firebase-config.js"></script>
   <script src="calendar-attendance.js?v=20261122-14"></script>
   <script src="common.js"></script>
@@ -57,13 +57,51 @@
   </section>
 
   <section class="panel event-panel" id="event-panel">
-    <div class="section-heading"><div><h2>予定一覧</h2><p>予定を選ぶと回答状況を確認・編集できます。</p></div><div class="event-tools"><button id="export-csv" type="button" class="secondary-button">📥 CSV出力</button><button id="reset-demo" type="button" class="secondary-button reset-button">試作データをリセット</button></div></div>
+    <div class="section-heading"><div><h2>予定一覧</h2><p>出欠表から外した予定も、ここから確認・復元できます。</p></div><div class="event-tools"><button id="export-csv" type="button" class="secondary-button">📥 CSV出力</button><button id="reset-demo" type="button" class="secondary-button reset-button">試作データをリセット</button></div></div>
+    <label class="event-list-filter">予定の表示<select id="event-list-filter"><option value="">すべて</option><option value="active">出欠受付中</option><option value="excluded">出欠表から除外中</option><option value="inactive">カレンダー対象外</option></select></label>
+    <div class="event-visibility-feedback"><p id="event-visibility-status" class="small-note" role="status"></p><button id="event-visibility-undo" class="secondary-button" type="button" hidden>元に戻す</button></div>
     <div id="event-list" class="event-list"></div>
   </section>
 
   </details>
 </main>
 <footer class="site-footer"></footer>
+<dialog id="saved-event-dialog" class="event-dialog attendance-entry-dialog" aria-labelledby="saved-event-title">
+  <form method="dialog">
+    <div class="attendance-entry-scroll">
+      <h2 id="saved-event-title"></h2>
+      <div id="saved-event-info"></div>
+      <div id="saved-event-answers"></div>
+    </div>
+    <div class="dialog-actions"><button class="secondary-button" autofocus>閉じる</button></div>
+  </form>
+</dialog>
+<dialog id="csv-dialog" class="event-dialog attendance-entry-dialog" aria-labelledby="csv-title">
+  <form id="csv-form">
+    <div class="attendance-entry-scroll">
+      <h2 id="csv-title">CSV出力</h2>
+      <div class="csv-options">
+        <label>出力形式<select name="format"><option value="detail">出欠明細</option><option value="summary">予定別集計</option><option value="roster">参加者名簿</option><option value="contact">連絡事項一覧</option></select></label>
+        <label>対象者<select name="group"><option value="players">団員のみ</option><option value="coaches">コーチのみ</option><option value="both">団員とコーチ</option></select></label>
+        <label>期間<select name="period"><option value="current">現在の表示期間</option><option value="event">予定1件</option><option value="date">日付指定</option><option value="range">期間指定</option><option value="all">保存済みの全期間</option></select></label>
+        <label data-csv-period="event" hidden>予定<select name="eventId"></select></label>
+        <label data-csv-period="date range" hidden><span id="csv-from-label">開始日</span><input type="date" name="from"></label>
+        <label data-csv-period="range" hidden>終了日<input type="date" name="to"></label>
+        <label>予定の種類<select name="kind"><option value="">すべて</option><option value="match">試合</option><option value="practice">練習</option><option value="activity">行事</option></select></label>
+        <label>カテゴリー<select name="category"><option value="">すべて</option><option>全体</option><option>U7</option><option>U8</option><option>U9</option><option>U10</option><option>U11</option><option>U12</option></select></label>
+        <label>団員の学年<select name="grade"><option value="">すべて</option><option>6年</option><option>5年</option><option>4年</option><option>3年</option><option>2年</option><option>1年</option><option>年長</option></select></label>
+        <label>出欠<select name="answer"><option value="">すべて</option><option value="attending">参加</option><option value="maybe">未定</option><option value="absent">不参加</option><option value="unanswered">未回答</option><option value="restricted">対象外</option></select></label>
+      </div>
+      <fieldset class="csv-includes"><legend>出力に追加</legend>
+        <label><input type="checkbox" name="excluded"> 出欠表から除外した予定</label>
+        <label><input type="checkbox" name="inactive"> カレンダー対象外の予定</label>
+        <label><input type="checkbox" name="comments"> 連絡事項・備考</label>
+      </fieldset>
+      <p id="csv-status" role="status" class="small-note"></p>
+    </div>
+    <div class="dialog-actions"><button type="button" id="csv-close" class="secondary-button">閉じる</button><button type="submit" id="csv-download" class="primary-button" disabled>CSVを保存</button></div>
+  </form>
+</dialog>
 <dialog id="attendance-dialog" class="event-dialog attendance-entry-dialog" aria-labelledby="attendance-entry-title">
   <form id="attendance-form" method="dialog">
     <div class="attendance-entry-scroll">
@@ -171,6 +209,6 @@
     <div class="dialog-actions"><button type="button" id="cancel-event" class="secondary-button">キャンセル</button><button type="submit" class="primary-button">予定を追加</button></div>
   </form>
 </dialog>
-<script src="attendance-preview.js?v=20261122-15"></script>
+<script src="attendance-preview.js?v=20261122-16"></script>
 </body>
 </html>

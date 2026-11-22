@@ -72,6 +72,32 @@ export function sharedHolidaySettings(db, timestamp, sessionId) {
   };
 }
 
+export function sharedEventVisibility(db, timestamp, sessionId) {
+  const collection = db.collection('attendancePreviewSessions').doc(sessionId).collection('eventVisibility');
+  return {
+    listen(receive, unavailable) {
+      return collection.onSnapshot({ includeMetadataChanges: true }, snapshot => {
+        if (!snapshot.metadata.fromCache && !snapshot.metadata.hasPendingWrites) {
+          receive(new Map(snapshot.docs.map(doc => [doc.id, doc.data().excluded])));
+        }
+      }, unavailable);
+    },
+    save(eventId, excluded) {
+      return collection.doc(eventId).set({ excluded, updatedAt: timestamp() });
+    },
+    async importExcluded(eventIds) {
+      if (!eventIds.length) return;
+      await db.runTransaction(async transaction => {
+        const refs = eventIds.map(id => collection.doc(id));
+        const current = await Promise.all(refs.map(ref => transaction.get(ref)));
+        refs.forEach((ref, index) => {
+          if (!current[index].exists) transaction.set(ref, { excluded: true, updatedAt: timestamp() });
+        });
+      });
+    }
+  };
+}
+
 export async function loadSharedAttendance(keyPrefix) {
   await new Promise(resolve => window.onFirebaseReady(resolve));
   if (!window.firebase.firestore) {
@@ -88,6 +114,7 @@ export async function loadSharedAttendance(keyPrefix) {
   return {
     ...sharedAttendance(db, timestamp, keyPrefix),
     recruitment: previewRecruitment(db, timestamp, keyPrefix),
-    holidays: sharedHolidaySettings(db, timestamp, keyPrefix)
+    holidays: sharedHolidaySettings(db, timestamp, keyPrefix),
+    eventVisibility: sharedEventVisibility(db, timestamp, keyPrefix)
   };
 }

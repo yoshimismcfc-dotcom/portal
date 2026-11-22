@@ -523,3 +523,59 @@
   min-height: 44px;
   font-size: 1rem;
 }
+
+.attendance-preview-page .event-list-filter {
+  display: grid;
+  gap: .35rem;
+  max-width: 22rem;
+  margin-block: .6rem;
+}
+.attendance-preview-page .event-list-filter select,
+.attendance-preview-page .event-visibility-button,
+.attendance-preview-page .csv-options :is(select, input) {
+  min-height: 44px;
+  font-size: 1rem;
+}
+.attendance-preview-page .event-visibility-button {
+  grid-column: 1 / -1;
+  justify-self: start;
+}
+.attendance-preview-page .event-visibility-feedback {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: .5rem;
+}
+.attendance-preview-page .csv-options {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(min(100%, 12rem), 1fr));
+  gap: .5rem .75rem;
+}
+.attendance-preview-page .csv-options label:not([hidden]) {
+  display: grid;
+  gap: .25rem;
+  align-content: start;
+  min-width: 0;
+}
+.attendance-preview-page .csv-includes {
+  margin-block: 1rem .5rem;
+  padding: .5rem;
+  border: 1px solid var(--surface-bd);
+}
+.attendance-preview-page .csv-includes label {
+  display: flex;
+  align-items: center;
+  gap: .4rem;
+  min-height: 44px;
+  margin: 0;
+}
+.attendance-preview-page .csv-options [hidden],
+.attendance-preview-page #event-visibility-undo[hidden] {
+  display: none;
+}
+.attendance-preview-page .csv-includes input {
+  min-height: initial;
+  width: 1.2rem;
+  height: 1.2rem;
+  flex: none;
+}
