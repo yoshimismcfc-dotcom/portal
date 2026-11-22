@@ -331,6 +331,20 @@ assert.equal(preview.eligibility(linkedGirls, { grade: "4年", gender: "m" }, "p
 assert(preview.sync([practice, match, otherFixture, u8], ["全体"]));
 assert(preview.getBoardEvents().some(event => event.id === "calendar_whole-girls"));
 
+const reserveMatch = makeEvent("U12（6～5年）中部大会　予備日", "2026-11-29",
+  { label: "U12", sourceId: "reserve-match" });
+const reservePlaceholder = makeEvent("予備日", "2026-11-29",
+  { label: "U12", sourceId: "reserve-placeholder" });
+const cancelledReserve = { ...reserveMatch, sourceId: "reserve-cancelled", status: "cancelled" };
+assert(preview.sync([practice, match, otherFixture, u8, wholeTeamGirls, reserveMatch, reservePlaceholder, cancelledReserve]));
+const reserveDay = preview.groupBoardDays(preview.getBoardEvents()).find(day => day.date === "2026-11-29");
+assert.deepEqual(Array.from(reserveDay.matches, event => event.id).sort(), ["calendar_reserve-match", "calendar_whole-girls"]);
+const linkedReserve = reserveDay.matches.find(event => event.id === "calendar_reserve-match");
+assert.deepEqual(Array.from(linkedReserve.targetGrades), ["6年", "5年"]);
+assert.equal(preview.countAnswers([linkedReserve], [athlete, extraPlayer]).eligible, 2);
+assert.equal(preview.countAnswers([linkedReserve], [athlete, extraPlayer]).attending, 0);
+assert.deepEqual(dateIds("2026-11-28"), [practiceId, "calendar_fixture-two", "calendar_u8"]);
+
 const unifiedSchedule = preview.scheduleDays(preview.getBoardEvents(), "");
 const listedDay = unifiedSchedule.find(day => day.date === "2026-11-28");
 assert.equal(unifiedSchedule.filter(day => day.date === "2026-11-28").length, 1);

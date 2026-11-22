@@ -1347,7 +1347,7 @@
     var activityTitle=wholeTeamActivityTitle(event);
     var title=event.title.normalize("NFKC");
     var wholeTeamGirlsMatch=event.label==="全体"&&isGirlsMatch(event)&&hasMatchTitle(title)&&
-      !/会議|総会|説明会|保護者会|審判講習|予備日/.test(title);
+      !/会議|総会|説明会|保護者会|審判講習/.test(title);
     if(!activityTitle&&!wholeTeamGirlsMatch&&!/^U(?:[7-9]|1[0-2])$/.test(event.label))return null;
     var category=wholeTeamGirlsMatch?title.match(/\bU(?:[7-9]|1[0-2])\b/i)?.[0].toUpperCase()||"その他":event.label;
     var timed=/T/.test(event.start);
@@ -1370,17 +1370,19 @@
   }
 
   function hasMatchTitle(title){
-    return /試合|大会|交流戦|対抗戦|招待|カップ|リーグ|トレマ|フェス|マッチ|\b(?:TM|TRM|CUP|LEAGUE)\b|[vV][sS][.．]/i.test(title);
+    return /試合|大会|新人戦|選手権|交流戦|対抗戦|招待|カップ|リーグ|トレマ|フェス|マッチ|\b(?:TM|TRM|CUP|LEAGUE)\b|[vV][sS][.．]/i.test(title);
   }
 
   function isAutomaticMatch(match){
     var title=match.title.normalize("NFKC");
-    return hasMatchTitle(title)||!/練習|トレーニング|会議|総会|説明会|保護者会|審判講習|予備日/.test(title);
+    return hasMatchTitle(title)||!/練習|トレーニング|会議|総会|説明会|保護者会|審判講習/.test(title);
   }
 
   function calendarMatchUnavailable(match){
     if(window.SMCCalendarAttendance.upcomingKind(match)==="cancelled")return true;
-    return isWeekend(match.date)&&/運動会|体育祭|^年末年始$|年末年始休|休団|休業|会議|説明会|予備日/.test(match.title.normalize("NFKC"));
+    var title=match.title.normalize("NFKC");
+    if(/予備日/.test(title)&&!(match.kind==="match"&&hasMatchTitle(title)))return true;
+    return isWeekend(match.date)&&/運動会|体育祭|^年末年始$|年末年始休|休団|休業|会議|説明会/.test(title);
   }
 
   function syncCalendarAttendance(matches,restore,failed){
