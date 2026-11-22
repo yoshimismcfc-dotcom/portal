@@ -362,7 +362,7 @@
       $("shared-attendance-status").textContent="案内されたテスト用リンクを開いてください。";
       return;
     }
-    import("./attendance-preview-store.mjs?v=20261122-6").then(function(module){
+    import("./attendance-preview-store.mjs?v=20261122-7").then(function(module){
       return module.loadSharedAttendance(previewKey);
     }).then(function(store){
       sharedStore=store;
@@ -609,6 +609,7 @@
   function renderRecruitmentAccess(){
     $("recruitment-access").hidden=audience!=="coaches";
     $("recruitment-login").hidden=!recruitmentReady||coachSignedIn;
+    $("recruitment-google").hidden=!recruitmentReady||coachSignedIn;
     $("recruitment-logout").hidden=!coachSignedIn;
     $("recruitment-access-status").textContent=!recruitmentReady?"招集管理を利用するにはクラウドの設定が必要です。":
       coachCanRecruit?"試合集計から招集選手を編集できます。":
@@ -1123,6 +1124,19 @@
         $("recruitment-access-status").textContent="ログインできませんでした。登録済みのコーチアカウントを確認してください。";
       }finally{
         submit.disabled=false;
+      }
+    });
+    $("recruitment-google").addEventListener("click",async function(event){
+      var button=event.currentTarget;
+      button.disabled=true;
+      try{
+        await sharedStore.recruitment.signInWithGoogle(sharedStore.googleCoachProvider());
+      }catch(error){
+        $("recruitment-access-status").textContent=error.code==="auth/popup-blocked"
+          ?"ログイン画面が開けませんでした。Safariなどのブラウザでテストページを開いてください。"
+          :"Googleでログインできませんでした。登録済みのコーチアカウントを確認してください。";
+      }finally{
+        button.disabled=false;
       }
     });
     $("recruitment-logout").addEventListener("click",function(){
