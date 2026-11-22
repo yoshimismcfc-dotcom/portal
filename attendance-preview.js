@@ -27,6 +27,8 @@
   function maxDate(){var d=fromISO(todayISO()),day=d.getDate();d.setDate(1);d.setMonth(d.getMonth()+2);var lastDay=new Date(d.getFullYear(),d.getMonth()+1,0).getDate();d.setDate(Math.min(day,lastDay));return localISO(d);}
   function movePastEvents(){var today=todayISO(),active=[];state.events.forEach(function(event){if(event.date<today){event.archivedAt=new Date().toISOString();state.archive.push(event);}else active.push(event);});if(active.length!==state.events.length){state.events=active;saveState();}}
   function readRoster(){
+    if(previewRosterStarted)return;
+    previewRosterStarted=true;
     var started=false;
     function consume(db){if(started)return;started=true;db.ref("members_v2").once("value").then(function(snapshot){var raw=snapshot.val()||{},list=[];Object.keys(raw).forEach(function(id){var m=raw[id];if(m&&String(m.name||"").trim()){list.push({id:String(m.id||id),name:String(m.name).trim(),kana:String(m.kana||""),grade:String(m.grade||"未設定")});}});members=list.sort(function(a,b){var ga=GRADES.indexOf(a.grade),gb=GRADES.indexOf(b.grade);if(ga<0)ga=99;if(gb<0)gb=99;return ga-gb||String(a.kana||a.name).localeCompare(String(b.kana||b.name),"ja");});rosterState="名簿から"+members.length+"名を読み込みました";$("roster-status").textContent="✓ "+rosterState+"（読み取り専用）";render();renderSavedEvent();refreshCsvIfOpen();}).catch(function(){rosterState="団員名簿を読み込めませんでした。通信状態をご確認ください";$("roster-status").textContent="⚠ "+rosterState;render();});}
     if(window.FIREBASE_READY&&window.FIREBASE_DB)consume(window.FIREBASE_DB);else if(typeof window.onFirebaseReady==="function")window.onFirebaseReady(consume);else{rosterState="名簿の読み込み機能を利用できません";render();}
@@ -591,11 +593,7 @@
       store.listen(function(records){
         sharedRows=records;
         sharedReady=true;
-        if(!previewRosterStarted){
-          previewRosterStarted=true;
-          readRoster();
-          if(audience==="coaches")readStaffCoaches();
-        }
+        // Member and coach directories load independently from the share link.
         applySharedAnswers(records,store.key);
         renderSavedEvent();refreshCsvIfOpen();
         $("shared-attendance-status").textContent="テスト用リンクを開いた人がログインなしで閲覧・編集できます。";
@@ -1059,6 +1057,9 @@
       if(selectedGrade!=="すべて")people=people.filter(function(person){return person.grade===selectedGrade;});
     }
     $("respondent-count").textContent=people.length+"名";
+    if(audience==="players" && !people.length && rosterState==="読み込み中"){
+      $("response-summary").textContent="団員名簿を読み込み中です。";
+    }
 
     $("entry-mode-button").textContent=deviceMode?"試作回答を入力する":"出欠を入力する";
     $("entry-mode-help").textContent=deviceMode?"この端末に保存します。":"クラウドに回答を保存します。";
@@ -1462,6 +1463,10 @@
       var button=event.target.closest("button[data-holiday-date]");
       if(button)toggleHoliday(button.dataset.holidayDate);
     });
+    // Load names from the existing Realtime Database even without a
+    // Firestore attendance session token. Do not erase or recreate the roster.
+    readRoster();
+    readStaffCoaches();
     if(!deviceMode)startSharedAttendance();
     $("reset-demo").hidden=!deviceMode;
     movePastEvents();
@@ -1572,7 +1577,7 @@
       activeDayEntry=null;
       dayEntryTrigger=null;
     });
-    document.querySelectorAll(".audience-tab").forEach(function(btn){btn.addEventListener("click",function(){audience=btn.dataset.audience;if(audience==="coaches"&&sharedReady)readStaffCoaches();selectedGrade="すべて";document.querySelectorAll(".audience-tab").forEach(function(tab){var active=tab===btn;tab.classList.toggle("active",active);tab.setAttribute("aria-pressed",active?"true":"false");});render();});});
+    document.querySelectorAll(".audience-tab").forEach(function(btn){btn.addEventListener("click",function(){audience=btn.dataset.audience;if(audience==="coaches")readStaffCoaches();selectedGrade="すべて";document.querySelectorAll(".audience-tab").forEach(function(tab){var active=tab===btn;tab.classList.toggle("active",active);tab.setAttribute("aria-pressed",active?"true":"false");});render();});});
     $("add-event").addEventListener("click",addEvent);$("cancel-event").addEventListener("click",function(){$("event-dialog").close();});$("event-form").addEventListener("submit",function(e){e.preventDefault();var title=$("event-title").value.trim();if(!title)return;if(selectedDate<todayISO()||selectedDate>maxDate()||!isDefaultDay(selectedDate)){alert("今日から2か月先までの対象日を一覧から選んでください。");return;}var kind=$("event-kind").value,dayId=defaultEvent(selectedDate).id;
       var reuseDay=kind==="practice"&&!eventForDate(selectedDate).some(function(event){return event.id===dayId||event.kind==="practice";});
       var id=reuseDay?dayId:"demo_"+Date.now().toString(36)+"_"+Math.random().toString(36).slice(2,7);state.events.push({id:id,date:selectedDate,kind:$("event-kind").value,title:title,place:$("event-place").value.trim(),createdAt:new Date().toISOString()});saveState();$("event-dialog").close();openEvent(id);});
