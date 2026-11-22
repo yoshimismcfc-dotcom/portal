@@ -132,7 +132,7 @@ vm.runInNewContext(previewSource.replace('document.addEventListener("DOMContentL
   globalThis.preview = {
     state, getBoardEvents, groupBoardDays, countAnswers, renderEntryDay, applySharedAnswers, eligibility, matchRestriction,
     matchAttendanceTable, readEntryUpdates, eventListStatus,
-    categorySummaryRows, matchCategories, dayHeading, compactCountMarks, scheduleDays, dayButton,
+    categorySummaryRows, matchCategories, dayHeading, compactCountMarks, scheduleDays, dayButton, activitySummaryRow,
     setSharedReady(value) { sharedReady = value; },
     setRecruitment(records) { recruitmentRows = new Map(records); },
     setVisibility(values) { eventVisibility = new Map(values); },
@@ -189,6 +189,11 @@ assert.equal(activityDay.practice.length, 0);
 assert.equal(activityDay.matches.length, 0);
 assert.equal(preview.countAnswers([activity], [athlete], activityDay).eligible, 1);
 assert.match(preview.renderEntryDay(activityDay, athlete, true), />行事<.*スポ少マラソン/);
+preview.setSharedReady(true);
+preview.state.answers[activity.id]={players:{[athlete.id]:{value:"attending"}}};
+assert.match(preview.dayHeading(activityDay, [athlete]), /練習なし/);
+assert.match(preview.activitySummaryRow([activityDay], [athlete]),
+  /スポ少マラソンの出欠集計。対象 1人、参加 1人、未定 0人、不参加 0人、未回答 0人/);
 preview.useGroup("coaches");
 assert.equal(preview.countAnswers([activity], [coach], activityDay).eligible, 1);
 assert.match(preview.renderEntryDay(activityDay, coach, true), />行事<.*スポ少マラソン/);

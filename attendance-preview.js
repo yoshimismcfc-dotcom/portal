@@ -506,6 +506,29 @@
     }).join("");
   }
 
+  function activityCountButtons(day,people){
+    return day.activities.map(function(event){
+      var title=scheduleEventTitle(event);
+      var ready=deviceMode||sharedReady;
+      var total=countAnswers([event],people,day);
+      var target=targetCountText(total,1);
+      var label=title+"の出欠集計。"+(ready?
+        target+"、参加 "+total.attending+"人、未定 "+total.maybe+"人、不参加 "+total.absent+"人、未回答 "+
+          (total.eligible-total.attending-total.maybe-total.absent)+"人":"集計待ち");
+      return '<button type="button" class="category-count-button" data-activity-summary="'+esc(event.id)+
+        '" aria-haspopup="dialog" aria-label="'+esc(label)+'"><span class="activity-count-title">'+esc(title)+'</span>'+
+        (ready?'<span class="category-count-values" aria-hidden="true">'+compactCountMarks(total)+'</span>'+targetCountLine(target):
+          '<span class="category-count-empty">集計待ち</span>')+'</button>';
+    }).join("");
+  }
+
+  function activitySummaryRow(days,people){
+    if(!days.some(function(day){return day.activities.length;}))return "";
+    return '<tr class="category-count-row"><th class="person-col" scope="row">行事</th>'+
+      days.map(function(day){return '<td>'+(activityCountButtons(day,people)||
+        '<span class="category-count-empty" aria-label="行事なし">—</span>')+'</td>';}).join("")+'</tr>';
+  }
+
   function matchCountLabel(total){
     return ["対象 "+total.eligible+"名","参加 "+total.attending,"未定 "+total.maybe,
       "不参加 "+total.absent,"未回答 "+(total.eligible-total.attending-total.maybe-total.absent)]
@@ -1182,14 +1205,14 @@
           return '<div class="category-count-transposed"><span>'+esc(entry[0])+'</span>'+
             categoryCountButton(day,entry[0],entry[1],people)+'</div>';
         }).join("");
-        return '<tr><th class="event-col" scope="row" data-board-date="'+esc(day.date)+'">'+dayHeading(day,people)+categoryRows+'</th>'+
+        return '<tr><th class="event-col" scope="row" data-board-date="'+esc(day.date)+'">'+dayHeading(day,people)+activityCountButtons(day,people)+categoryRows+'</th>'+
           people.map(function(person){return '<td>'+dayButton(day,person)+'</td>';}).join("")+'</tr>';
       }).join("");
     }else{
       head='<thead><tr><th class="person-col" scope="col">参加者</th>'+days.map(function(day){
         return '<th scope="col" data-board-date="'+esc(day.date)+'">'+dayHeading(day,people)+'</th>';
       }).join("")+'</tr></thead><tbody>';
-      body=categorySummaryRows(days,categoriesByDate,people)+people.map(function(person){
+      body=activitySummaryRow(days,people)+categorySummaryRows(days,categoriesByDate,people)+people.map(function(person){
         var note=state.notes[audience]?.[person.id]||"";
         return '<tr><th class="person-col" scope="row">'+boardPersonName(person)+
           (note?'<span class="board-comment" title="'+esc(note)+'">'+esc(note)+'</span>':"")+'</th>'+
@@ -1234,6 +1257,12 @@
         renderEventList();renderResponse(true);
         $("answer-status").textContent="回答を保存しました。"+(answerMark(next)||"未回答");
         focusDayCell(day.date,person.id);
+      });
+    });
+    rows.querySelectorAll("[data-activity-summary]").forEach(function(btn){
+      btn.addEventListener("click",function(){
+        var activity=getBoardEvents().find(function(event){return event.id===btn.dataset.activitySummary;});
+        if(activity)showSavedEvent(activity);
       });
     });
     rows.querySelectorAll("[data-match-date]").forEach(function(btn){
