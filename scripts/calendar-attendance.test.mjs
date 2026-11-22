@@ -120,6 +120,9 @@ vm.runInNewContext(previewSource.replace('document.addEventListener("DOMContentL
   globalThis.preview = {
     state, getBoardEvents, groupBoardDays, countAnswers, renderEntryDay, applySharedAnswers,
     matchAttendanceTable, readEntryUpdates, eventListStatus,
+    categorySummaryRows, matchCategories,
+    setSharedReady(value) { sharedReady = value; },
+    setRecruitment(records) { recruitmentRows = new Map(records); },
     setVisibility(values) { eventVisibility = new Map(values); },
     useGroup(group) { audience = group; },
     sync(events, failed = []) {
@@ -248,6 +251,30 @@ assert(dateIds("2026-11-28").includes("calendar_fixture"), "Synced restoration o
 assert(preview.sync([practice, otherFixture]));
 assert(!dateIds("2026-11-28").includes("calendar_fixture"), "Restoration cannot reopen a calendar deletion");
 assert.equal(preview.eventListStatus(preview.state.events.find(event => event.id === "calendar_fixture"), false), "カレンダー対象外");
+
+const u8 = makeEvent("U8（2年）交流戦", "2026-11-28", { label: "U8", sourceId: "u8" });
+assert(preview.sync([practice, match, otherFixture, u8]));
+preview.useGroup("players");
+preview.setSharedReady(true);
+const extraPlayer = { id: "invited", name: "検証用・個別招集", grade: "5年" };
+preview.setRecruitment([["calendar_fixture", { decisions: { [extraPlayer.id]: "include" } }]]);
+preview.state.answers.calendar_fixture = { players: { [athlete.id]: { value: "attending" } } };
+preview.state.answers["calendar_fixture-two"] = { players: { [athlete.id]: { value: "maybe" } } };
+const categoryRows = () => {
+  const days = preview.groupBoardDays(preview.getBoardEvents()).filter(day => ["2026-11-25", "2026-11-28"].includes(day.date));
+  const byDate = new Map(days.map(day => [day.date, preview.matchCategories(day.matches)]));
+  return preview.categorySummaryRows(days, byDate, [athlete, extraPlayer]);
+};
+const totalsMarkup = categoryRows();
+assert.match(totalsMarkup, />U8試合<.*?>U12試合</);
+assert.doesNotMatch(totalsMarkup, /U7試合/);
+assert.match(totalsMarkup, /試合なし/);
+assert.match(totalsMarkup, /U12の試合集計。延べ・2試合　対象 3人、参加 1人、未定 1人、不参加 0人、未回答 1人/);
+preview.setVisibility([["calendar_fixture", true]]);
+assert.match(categoryRows(), /U12の試合集計。対象 1人、参加 0人、未定 1人、不参加 0人、未回答 0人/);
+preview.setSharedReady(false);
+assert.match(categoryRows(), /集計待ち/);
+preview.setSharedReady(true);
 
 const visibilityStore = sharedEventVisibility(db, () => null, "isolated-test");
 docs.set("calendar_fixture", { excluded: false });
