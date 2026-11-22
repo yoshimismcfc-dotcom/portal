@@ -1026,3 +1026,65 @@
   font-size: .875rem;
   line-height: 1.55;
 }
+
+#family-entry-dialog > .attendance-entry-scroll {
+  max-height: min(70vh, 42rem);
+  overflow-y: auto;
+  overscroll-behavior: contain;
+}
+
+#open-family-entry {
+  margin-block-end: .25rem;
+}
+
+#family-entry-dialog :is(button[hidden], form[hidden], div[hidden]) {
+  display: none;
+}
+
+#family-picker-people fieldset {
+  margin-block: .65rem;
+  border: 1px solid var(--surface-bd);
+  border-radius: .5rem;
+}
+
+#family-picker-people label {
+  display: flex;
+  gap: .5rem;
+  align-items: center;
+  min-height: 44px;
+  margin: 0;
+}
+
+#family-picker-people input[type="checkbox"] {
+  width: 1.1rem;
+  height: 1.1rem;
+  min-height: 0;
+}
+
+#family-entry select {
+  font-size: 1rem;
+}
+
+#family-bulk-actions, .family-person {
+  margin-block: .65rem;
+}
+
+.family-bulk-event {
+  padding: .55rem;
+  margin-block: .45rem;
+  border: 1px solid var(--surface-bd);
+  border-radius: .55rem;
+}
+
+.family-bulk-event p {
+  margin: .25rem 0;
+}
+
+.family-bulk-event button, #family-edit-people {
+  min-height: 44px;
+  margin: .15rem;
+}
+
+#family-status {
+  white-space: pre-line;
+}
