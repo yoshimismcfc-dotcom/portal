@@ -668,7 +668,7 @@
     return false;
   }
   function startSharedAttendance(){
-    import("./attendance-open-store.mjs?v=20261122-save1").then(function(module){
+    import("./attendance-open-store.mjs?v=20261123-practice-contact").then(function(module){
       return module.loadOpenAttendance();
     }).then(function(store){
       sharedStore=store;
@@ -776,9 +776,10 @@
       var groups={...answers[update.id]};
       var replies={...groups[audience]};
       var previous=replies[personId]||{};
-      if(update.contact===undefined&&(previous.value||"")===update.value)return;
+      var value=update.value??previous.value??"";
+      if(update.contact===undefined&&(previous.value||"")===value)return;
       var contact=update.contact===undefined?previous.contact: (update.contact||{});
-      if(update.value||contact)replies[personId]={value:update.value,contact:contact,updatedAt:timestamp};
+      if(value||contact)replies[personId]={value:value,contact:contact,updatedAt:timestamp};
       else delete replies[personId];
       answers[update.id]={...groups,[audience]:replies};
     });
@@ -830,6 +831,7 @@
       (showDate?'<h3>'+calendarLink(day.date,esc(dateLabel(day.date)),"entry-date-link")+'</h3>':"")+
       events.map(function(event){
         var match=event.kind==="match",current=answerValue(event,person);
+        var practice=!match&&event.kind!=="activity";
         var title=event.title||eventKindLabel(event);
         var coachPractice=audience==="coaches"&&!match&&event.kind!=="activity"&&day.matches.length>0;
         var practiceLocked=coachPractice&&day.matches.some(function(item){return answerValue(item,person)==="attending";});
@@ -847,7 +849,7 @@
               (option.value===current?" checked":"")+'><span>'+attendanceMark(option.value)+option.label+'</span></label>';
           }).join("")+'</div>'+
           (match?'<p class="match-optional-note">出欠だけで保存できます。遅刻・早退など、伝えておきたいことがある場合は「連絡事項（任意）」に入力してください。</p>'+
-            contactEditor(event,person):"")+
+            contactEditor(event,person):(practice?contactEditor(event,person):""))+
           (event.kind==="activity"?calendarLink(event.date,"カレンダーで行事詳細を開く","secondary-button day-details-action",event.id):matchCalendarAction(event))+'</article>';
       }).join("")+'</section>';
   }
@@ -901,10 +903,12 @@
       var coachMatch=audience==="coaches"&&day.matches.some(function(match){
         return (form.get("answer-"+match.id)??answerValue(match,person))==="attending";
       });
-      return dayEvents(day).filter(function(item){
-        return !(coachMatch&&day.practice.includes(item))&&form.has("answer-"+item.id)&&canAnswer(item,person,day);
-      }).map(function(item){
-        return {id:item.id,value:form.get("answer-"+item.id),contact:readMatchContact(form,item.id)};
+      return dayEvents(day).flatMap(function(item){
+        if(!form.has("answer-"+item.id)||!canAnswer(item,person,day))return [];
+        var contact=readMatchContact(form,item.id);
+        var locked=coachMatch&&day.practice.includes(item);
+        if(locked&&contact===undefined)return [];
+        return [{id:item.id,value:locked?undefined:form.get("answer-"+item.id),contact:contact}];
       });
     });
   }
@@ -1040,21 +1044,27 @@
     $("recruitment-close").disabled=true;
     updateRecruitmentCount();
     $("recruitment-save-status").textContent="保存中…";
+    var saved;
     try{
-      var saved=await sharedStore.recruitment.save(edit.event.id,edit.draft,edit.revision);
-      if((recruitmentRows.get(edit.event.id)?.revision||0)<saved.revision)recruitmentRows.set(edit.event.id,saved);
-      $("recruitment-dialog").close();
-      renderEventList();
-      renderResponse(true);
-      refreshSharedMatchSummary();
+      saved=await sharedStore.recruitment.save(edit.event.id,new Map(edit.draft),edit.revision);
     }catch(error){
-      $("recruitment-save-status").textContent=error.message==="recruitment-conflict"?
-        "別のコーチが更新しました。閉じて最新の招集を確認してください。":"招集を保存できませんでした。通信状態と編集権限をご確認ください。";
+      var code=error?.code||error?.message||"";
+      $("recruitment-save-status").textContent=code==="recruitment-conflict"?
+        "別の端末で招集が変更されました。最新の内容を確認してから、再度選択してください。":
+        /permission.denied/i.test(code)?"クラウドの書き込み権限を確認できません。選択内容はこの画面に残っています。":
+          "招集の保存を確認できませんでした。選択内容はこの画面に残っています。もう一度保存してください。";
+      return;
     }finally{
       savingRecruitment=false;
       $("recruitment-close").disabled=false;
       updateRecruitmentCount();
     }
+    if((recruitmentRows.get(edit.event.id)?.revision||0)<saved.revision)recruitmentRows.set(edit.event.id,saved);
+    $("recruitment-dialog").close();
+    renderEventList();
+    renderResponse(true);
+    refreshSharedMatchSummary();
+    announceSave("招集をクラウドに保存しました。");
   }
 
   function openMatchSummary(date,category){

@@ -1,6 +1,26 @@
 // Public pilot attendance, independent of legacy #test share links.
 // Uses a separate RTDB namespace. Never modifies legacy Firestore answers.
 const ROOT = "attendance_open_v1";
+const ESCAPED_ID_PREFIX = "smc-id:";
+const INVALID_KEY = /[.#$\[\]/\u0000-\u001f\u007f]/;
+
+function storageId(id) {
+  // Keep existing valid keys. Escape the prefix itself to make decoding unambiguous.
+  return INVALID_KEY.test(id)||id.startsWith(ESCAPED_ID_PREFIX)
+    ? ESCAPED_ID_PREFIX+encodeURIComponent(id).replace(/\./g,"%2E") : id;
+}
+
+function logicalId(id) {
+  if(!id.startsWith(ESCAPED_ID_PREFIX))return id;
+  try{return decodeURIComponent(id.slice(ESCAPED_ID_PREFIX.length));}
+  catch{return id;}
+}
+
+function recruitmentRecord(record) {
+  return {...record,decisions:Object.fromEntries(Object.entries(record?.decisions||{})
+    .map(([id,decision])=>[logicalId(id),decision]))};
+}
+
 
 function answerField(row, field) {
   return row?.[field] || (field === "contact" ? {} : "");
@@ -24,9 +44,9 @@ export function loadOpenAttendance() {
         ref.on("value",snap=>receive(transform(snap.val())),e=>unavailable(e?.message||"クラウドの読込に失敗しました"));
         return ()=>ref.off();
       };
-      const tx=(ref,update)=>new Promise((ok,fail)=>{
+      const tx=(ref,update,conflict="shared-attendance-conflict")=>new Promise((ok,fail)=>{
         ref.transaction(update,(error,committed,snap)=>{
-          if(error)fail(error);else if(!committed)fail(new Error("shared-attendance-conflict"));else ok(snap.val());
+          if(error)fail(error);else if(!committed)fail(new Error(conflict));else ok(snap.val());
         },false);
       });
       resolve({
@@ -34,7 +54,8 @@ export function loadOpenAttendance() {
         listen(receive,unavailable){return listenMap("answers",receive,unavailable);},
         async save(group,personId,updates,note,baseline,confirmed=new Map()){
           const changes=updates.map(update=>{
-            const fields={value:update.value};
+            const fields={};
+            if(update.value!==undefined)fields.value=update.value;
             if(update.contact!==undefined)fields.contact=update.contact||{};
             return {eventId:update.id,fields};
           });
@@ -84,14 +105,23 @@ export function loadOpenAttendance() {
           save(date,excluded){return db.ref(ROOT+"/holidayExclusions/"+date).set({excluded,updatedAt:Date.now()});}
         },
         recruitment:{
-          listen(receive,unavailable){return listenMap("recruitment",receive,unavailable);},
+          listen(receive,unavailable){
+            return listenMap("recruitment",receive,unavailable,records=>new Map(
+              Object.entries(records||{}).map(([id,record])=>[logicalId(id),recruitmentRecord(record)])));
+          },
           async save(eventId,changes,baselineRevision){
-            return tx(db.ref(ROOT+"/recruitment/"+eventId),current=>{
+            const ref=db.ref(ROOT+"/recruitment").child(storageId(eventId));
+            const saved=await tx(ref,current=>{
               if((current?.revision||0)!==baselineRevision)return;
-              const decisions={...(current?.decisions||{})};
-              for(const [personId,decision] of changes){if(decision==="default")delete decisions[personId];else decisions[personId]=decision;}
-              return {decisions,revision:baselineRevision+1,updatedAt:Date.now()};
-            });
+              const decisions=Object.assign(Object.create(null),current?.decisions);
+              for(const [personId,decision] of changes){
+                const id=storageId(personId);
+                if(decision==="default")delete decisions[id];
+                else decisions[id]=decision;
+              }
+              return {decisions:{...decisions},revision:baselineRevision+1,updatedAt:Date.now()};
+            },"recruitment-conflict");
+            return recruitmentRecord(saved);
           }
         }
       });
