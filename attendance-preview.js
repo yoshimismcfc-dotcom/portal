@@ -447,10 +447,14 @@
     return (value.getMonth()+1)+"/"+value.getDate()+"（"+DAY_NAMES[value.getDay()]+"）";
   }
 
+  function attendanceMark(value){
+    return value?'<i class="attendance-mark" data-mark="'+esc(value)+'" aria-hidden="true"></i>':"";
+  }
+
   function compactCountMarks(total){
-    return '<span class="count-yes">○'+total.attending+'</span>'+
-      '<span class="count-maybe">△'+total.maybe+'</span>'+
-      '<span class="count-no">×'+total.absent+'</span>';
+    return '<span class="count-yes">'+attendanceMark("attending")+total.attending+'</span>'+
+      '<span class="count-maybe">'+attendanceMark("maybe")+total.maybe+'</span>'+
+      '<span class="count-no">'+attendanceMark("absent")+total.absent+'</span>';
   }
 
   function responseCountText(total){
@@ -573,20 +577,44 @@
     return match.kind==="match"?calendarLink(match.date,"カレンダーで試合詳細を開く","secondary-button day-details-action",match.id):"";
   }
 
+  function coachDayMark(day,person){
+    var answers=day.matches.concat(day.practice,day.activities).map(function(event){
+      return {event:event,value:attendanceValue(event,person,day)};
+    });
+    for(var value of ["attending","absent","maybe"]){
+      var answer=answers.find(function(item){
+        return item.value===value&&(value!=="absent"||item.event.kind!=="match");
+      });
+      if(answer)return answer;
+    }
+    return {value:""};
+  }
+
   function dayButton(day,person){
+    if(audience==="coaches"){
+      var mark=coachDayMark(day,person);
+      var category=mark.event?.kind==="match"?(mark.event.category||"試合"):"";
+      var label=mark.event?(category||eventKindLabel(mark.event))+" "+answerMark(mark.value):"出欠を確認";
+      return '<button type="button" class="board-mark editable day-answer" data-answer-date="'+esc(day.date)+
+        '" data-answer-person="'+esc(person.id)+'" data-value="'+esc(mark.value)+'" aria-label="'+
+        esc(person.name+" "+dateLabel(day.date)+" "+label+"。出欠を入力")+'">'+
+        attendanceMark(mark.value)+(category?'<span class="coach-mark-category">'+esc(category)+'</span>':"")+'</button>';
+    }
     var practiceEvents=day.practice.filter(function(event){return canAnswer(event,person,day);});
     var activities=day.activities.filter(function(event){return canAnswer(event,person,day);});
     var practice=practiceEvents.map(function(event){return attendanceValue(event,person,day);}).filter(Boolean);
-    var activityMarks=activities.map(function(event){return answerMark(answerValue(event,person));}).filter(Boolean).join(" ");
+    var activityValues=activities.map(function(event){return answerValue(event,person);}).filter(Boolean);
+    var activityMarks=activityValues.map(answerMark).join(" ");
     var eligible=day.matches.filter(function(event){return !eligibility(event,person);});
     var answered=eligible.map(function(event){
       return {label:event.category||"試合",value:answerValue(event,person)};
     }).filter(function(answer){return answer.value;});
     var badges=answered.map(function(answer){
       return '<span class="day-match-chip" data-value="'+esc(answer.value)+'">'+
-        esc(answerMark(answer.value)+" "+answer.label)+'</span>';
+        attendanceMark(answer.value)+esc(answer.label)+'</span>';
     }).join("");
     var marks=practice.map(answerMark).join(" ");
+    var practiceSymbols=practice.map(attendanceMark).join(" ");
     var review=eligible.some(function(match){return needsMatchReview(match,person,day);});
     var reviewBadge=review?'<span class="board-review">要確認</span>':"";
     if(!practiceEvents.length&&!activities.length&&!eligible.length){
@@ -599,9 +627,9 @@
     var style=cycle?"board-mark editable":"board-mark editable day-answer";
     return '<button type="button" class="'+style+'" data-answer-date="'+esc(day.date)+'" data-answer-person="'+esc(person.id)+
       '" data-value="'+esc(practice[0]||"")+'" aria-label="'+esc(person.name+" "+dateLabel(day.date)+" "+(review?"要確認。":"")+(description.trim()||"未回答")+(cycle?"。タップで回答を切り替え":"。出欠を入力"))+'">'+
-      (dayEvents(day).length===1&&day.practice.length===1?marks:
-        (marks?'<span class="day-practice-mark">'+marks+'</span>':"")+
-        (activityMarks?'<span class="day-practice-mark">'+activityMarks+'</span>':"")+reviewBadge+badges)+'</button>';
+      (dayEvents(day).length===1&&day.practice.length===1?practiceSymbols:
+        (marks?'<span class="day-practice-mark">'+practiceSymbols+'</span>':"")+
+        (activityMarks?'<span class="day-practice-mark">'+activityValues.map(attendanceMark).join(" ")+'</span>':"")+reviewBadge+badges)+'</button>';
   }
 
   function focusDayCell(date,personId){
@@ -804,7 +832,7 @@
           '<div class="entry-answer-options" role="group" aria-label="'+esc(title+"の出欠")+'"'+
             (coachPractice?' data-coach-practice'+(practiceLocked?" hidden":""):"")+'>'+choices.map(function(option){
             return '<label><input type="radio" name="answer-'+esc(event.id)+'" value="'+esc(option.value)+'"'+
-              (option.value===current?" checked":"")+'><span><b>'+answerMark(option.value)+'</b>'+option.label+'</span></label>';
+              (option.value===current?" checked":"")+'><span>'+attendanceMark(option.value)+option.label+'</span></label>';
           }).join("")+'</div>'+
           (match?'<p class="match-optional-note">出欠だけで保存できます。遅刻・早退など、伝えておきたいことがある場合は「連絡事項（任意）」に入力してください。</p>'+
             contactEditor(event,person):"")+

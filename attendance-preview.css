@@ -916,3 +916,48 @@
   overflow-wrap: anywhere;
   white-space: normal;
 }
+
+.attendance-preview-page .attendance-mark {
+  display: inline-block;
+  position: relative;
+  box-sizing: border-box;
+  inline-size: .92rem;
+  block-size: .92rem;
+  flex: 0 0 auto;
+  vertical-align: -.11em;
+}
+
+.attendance-preview-page .attendance-mark[data-mark="attending"] {
+  border: 1.5px solid currentColor;
+  border-radius: 50%;
+}
+
+.attendance-preview-page .attendance-mark[data-mark="maybe"] {
+  background: currentColor;
+  clip-path: polygon(evenodd, 50% 0, 100% 100%, 0 100%, 50% 0, 50% 19%, 15% 89%, 85% 89%, 50% 19%);
+}
+
+.attendance-preview-page .attendance-mark[data-mark="absent"]::before,
+.attendance-preview-page .attendance-mark[data-mark="absent"]::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  margin: auto;
+  inline-size: 115%;
+  block-size: 1.5px;
+  background: currentColor;
+  transform: translateX(-6.5%) rotate(45deg);
+}
+
+.attendance-preview-page .attendance-mark[data-mark="absent"]::after {
+  transform: translateX(-6.5%) rotate(-45deg);
+}
+
+.attendance-preview-page .attendance-board .day-answer .attendance-mark {
+  inline-size: 1.08rem;
+  block-size: 1.08rem;
+}
+
+.attendance-preview-page .entry-answer-options .attendance-mark {
+  justify-self: center;
+}
