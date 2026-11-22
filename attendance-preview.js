@@ -586,7 +586,7 @@
     return false;
   }
   function startSharedAttendance(){
-    import("./attendance-open-store.mjs?v=20261122-open1").then(function(module){
+    import("./attendance-open-store.mjs?v=20261122-save1").then(function(module){
       return module.loadOpenAttendance();
     }).then(function(store){
       sharedStore=store;
@@ -635,6 +635,13 @@
     });
   }
 
+  var entryConflicts=new Map();
+  function resetEntrySave(form){
+    entryConflicts=new Map();
+    form.querySelector("[data-entry-status]").textContent="";
+    form.querySelector('button[type="submit"]').textContent="回答を保存";
+  }
+
   async function submitEntry(personId,updates,note,form){
     if(deviceMode)return saveDayAnswers(personId,updates,note);
     var status=form.querySelector("[data-entry-status]");
@@ -644,21 +651,36 @@
       return false;
     }
     savingShared=true;
-    var buttons=Array.from(form.querySelectorAll("button, select")).filter(function(button){return !button.disabled;});
-    buttons.forEach(function(button){button.disabled=true;});
+    var controls=Array.from(form.elements).filter(function(control){return !control.disabled;});
+    controls.forEach(function(control){control.disabled=true;});
+    var submit=form.querySelector('button[type="submit"]');
+    var priorConflicts=entryConflicts;
     status.textContent="クラウドに保存中…";
+    var waiting=setTimeout(function(){
+      if(entryConflicts===priorConflicts)status.textContent="クラウドの応答を待っています。入力内容はこの画面に残っています。";
+    },6000);
     try{
-      await sharedStore.save(audience,personId,updates,note,entryBaseline);
+      var conflicts=await sharedStore.save(audience,personId,updates,note,entryBaseline,priorConflicts);
+      if(entryConflicts!==priorConflicts)return false;
+      entryConflicts=conflicts;
+      if(conflicts.size){
+        status.textContent="同じ出欠や連絡事項に別の更新がありました。入力した内容を優先する場合は「入力内容で上書き」を押してください。";
+        submit.textContent="入力内容で上書き";
+        return false;
+      }
       status.textContent="";
       return true;
     }catch(error){
-      status.textContent=error.message==="shared-attendance-conflict"
-        ?"別の端末で回答が更新されました。入力内容を控え、画面を開き直して最新の回答を確認してください。"
-        :"保存できませんでした。通信状態を確認して、もう一度保存してください。";
+      if(entryConflicts!==priorConflicts)return false;
+      var denied=/permission.denied/i.test(error?.code||error?.message||"");
+      status.textContent=denied
+        ?"クラウドの書き込み権限を確認できませんでした。入力内容はこの画面に残っています。"
+        :"一部またはすべての保存を確認できませんでした。入力内容はこの画面に残っています。もう一度保存してください。";
       return false;
     }finally{
+      clearTimeout(waiting);
       savingShared=false;
-      buttons.forEach(function(button){button.disabled=false;});
+      controls.forEach(function(control){control.disabled=false;});
     }
   }
 
@@ -700,7 +722,7 @@
 
   function openDayEntry(day,person,trigger){
     entryBaseline=sharedRows;
-    $("day-entry-form").querySelector("[data-entry-status]").textContent="";
+    resetEntrySave($("day-entry-form"));
     activeDayEntry={day:day,person:person};
     dayEntryTrigger=trigger;
     $("day-entry-title").innerHTML=calendarLink(day.date,esc(dateLabel(day.date)),"entry-date-link")+"の出欠";
@@ -1197,7 +1219,7 @@
   function renderAttendanceFormEvents(){
     var root=$("attendance-form-events");
     entryBaseline=sharedRows;
-    $("attendance-form").querySelector("[data-entry-status]").textContent="";
+    resetEntrySave($("attendance-form"));
     var person=getPeople().find(function(item){return item.id===$("entry-person").value;});
     $("save-attendance").disabled=!person;
     $("entry-general-note").hidden=!person;
