@@ -196,6 +196,8 @@ assert.match(preview.activitySummaryRow([activityDay], [athlete]),
   /スポ少マラソンの出欠集計。対象 1人、参加 1人、未定 0人、不参加 0人、未回答 0人/);
 preview.useGroup("coaches");
 assert.equal(preview.countAnswers([activity], [coach], activityDay).eligible, 1);
+assert.match(preview.activitySummaryRow([activityDay], [coach]), /スポ少マラソンの出欠集計。参加 0人、未定 0人、不参加 0人/);
+assert.doesNotMatch(preview.activitySummaryRow([activityDay], [coach]), /対象|未回答/);
 assert.match(preview.renderEntryDay(activityDay, coach, true), />行事<.*スポ少マラソン/);
 assert(preview.sync([{ ...marathon, title: marathon.title + "中止" }, match]));
 assert.deepEqual(dateIds("2026-12-05"), []);
@@ -266,9 +268,11 @@ preview.state.answers[coachPractice.id] = { coaches: { [coach.id]: { value: "att
 preview.state.answers[coachMatchA.id] = { coaches: { [coach.id]: { value: "attending" }, [secondCoach.id]: { value: "absent" } } };
 preview.state.answers[coachMatchB.id] = { coaches: { [coach.id]: { value: "attending" }, [secondCoach.id]: { value: "maybe" } } };
 const coaches = [coach, secondCoach];
-assert.match(preview.dayHeading(coachDay, coaches), /練習 対象 2人、参加 1人、未定 0人、不参加 1人/);
+assert.match(preview.dayHeading(coachDay, coaches), /練習の集計。参加 1人、未定 0人、不参加 1人/);
+assert.doesNotMatch(preview.dayHeading(coachDay, coaches), /対象|未回答/);
 const coachCategories = new Map([[coachDay.date, preview.matchCategories(coachDay.matches)]]);
-assert.match(preview.categorySummaryRows([coachDay], coachCategories, coaches), /2試合　対象 2人、参加 1人、未定 1人、不参加 0人/);
+assert.match(preview.categorySummaryRows([coachDay], coachCategories, coaches), /2試合　参加 1人、未定 1人、不参加 0人/);
+assert.doesNotMatch(preview.categorySummaryRows([coachDay], coachCategories, coaches), /対象|未回答/);
 assert.match(preview.dayButton(coachDay, coach), /練習 ×/);
 assert.match(preview.renderEntryDay(coachDay, coach, true), /data-coach-practice-note role="status"><strong>× 不参加/);
 assert.deepEqual({ ...preview.countAnswers([coachPractice], coaches, coachDay) }, { eligible: 2, attending: 1, maybe: 0, absent: 1 });
