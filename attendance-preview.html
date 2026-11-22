@@ -8,7 +8,7 @@
   <title>出欠共有テスト｜吉見SMC FC</title>
   <link rel="stylesheet" href="common.css">
   <link rel="stylesheet" href="attendance-prototype.css?v=20261121-25">
-  <link rel="stylesheet" href="attendance-preview.css?v=20261122-11">
+  <link rel="stylesheet" href="attendance-preview.css?v=20261122-12">
   <script src="firebase-config.js"></script>
   <script src="calendar-attendance.js?v=20261121-19"></script>
   <script src="common.js"></script>
@@ -98,6 +98,23 @@
     <div class="dialog-actions"><button class="secondary-button" autofocus>閉じる</button></div>
   </form>
 </dialog>
+<dialog id="match-detail-dialog" class="event-dialog attendance-entry-dialog" aria-labelledby="match-detail-title">
+  <form method="dialog">
+    <header class="match-detail-header">
+      <h2 id="match-detail-title"></h2>
+      <p id="match-detail-date"></p>
+      <div id="match-detail-tabs" role="tablist" aria-label="試合の情報">
+        <button type="button" role="tab" class="secondary-button" id="match-detail-info-tab" aria-controls="match-detail-info" aria-selected="true" autofocus>試合詳細</button>
+        <button type="button" role="tab" class="secondary-button" id="match-detail-attendance-tab" aria-controls="match-detail-attendance" aria-selected="false" tabindex="-1">出欠一覧</button>
+      </div>
+    </header>
+    <div class="attendance-entry-scroll" id="match-detail-scroll">
+      <section id="match-detail-info" role="tabpanel" aria-labelledby="match-detail-info-tab" tabindex="0"></section>
+      <section id="match-detail-attendance" role="tabpanel" aria-labelledby="match-detail-attendance-tab" tabindex="0" hidden></section>
+    </div>
+    <div class="dialog-actions"><button class="secondary-button">試合集計に戻る</button></div>
+  </form>
+</dialog>
 <dialog id="recruitment-dialog" class="event-dialog attendance-entry-dialog" aria-labelledby="recruitment-title">
   <form id="recruitment-form">
     <div class="recruitment-search-panel">
@@ -149,6 +166,6 @@
     <div class="dialog-actions"><button type="button" id="cancel-event" class="secondary-button">キャンセル</button><button type="submit" class="primary-button">予定を追加</button></div>
   </form>
 </dialog>
-<script src="attendance-preview.js?v=20261122-11"></script>
+<script src="attendance-preview.js?v=20261122-12"></script>
 </body>
 </html>
