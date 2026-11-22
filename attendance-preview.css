@@ -579,28 +579,3 @@
   height: 1.2rem;
   flex: none;
 }
-
-/* Unified attendance schedule: one compact card list, shared editing for everyone. */
-.attendance-preview-page .unified-schedule{min-width:0}
-.attendance-preview-page .unified-schedule-heading{align-items:flex-start;gap:12px;flex-wrap:wrap}
-.attendance-preview-page .unified-schedule-heading h2{font-size:clamp(1.18rem,4.6vw,1.5rem);line-height:1.3}
-.attendance-preview-page .unified-schedule-heading p{max-width:42rem;line-height:1.5}
-.attendance-preview-page .unified-event-list{display:grid;gap:10px;max-height:none;overflow:visible}
-.attendance-preview-page .unified-event-card{display:grid;grid-template-columns:minmax(0,1fr);gap:10px;padding:14px;border:1px solid var(--surface-bd);border-radius:14px}
-.attendance-preview-page .unified-event-main{min-width:0}
-.attendance-preview-page .unified-event-top{display:flex;align-items:center;flex-wrap:wrap;justify-content:space-between;gap:8px}
-.attendance-preview-page .unified-event-top strong{font-size:1rem;font-variant-numeric:tabular-nums}
-.attendance-preview-page .unified-event-title{font-weight:850;font-size:1rem;line-height:1.4;margin:6px 0;overflow-wrap:anywhere}
-.attendance-preview-page .unified-status{display:inline-block;padding:3px 10px;border-radius:999px;font-weight:800;font-size:.75rem;background:var(--navy-820);color:var(--ink-2)}
-.attendance-preview-page .unified-status.is-open{color:var(--attendance-yes);background:rgba(0,180,120,.12)}
-.attendance-preview-page .unified-event-card .event-meta{font-size:.8rem;line-height:1.5;overflow-wrap:anywhere}
-.attendance-preview-page .unified-count{display:block;margin-top:7px;font-size:.78rem;color:var(--ink-2)}
-.attendance-preview-page .unified-event-actions{display:flex;gap:8px;flex-wrap:wrap}
-.attendance-preview-page .unified-event-actions button{min-height:44px;padding:8px 13px;font-size:.86rem;white-space:normal}
-.attendance-preview-page .unified-event-actions .primary-button{min-width:116px}
-.attendance-preview-page .event-list-filter select{min-height:44px}
-@media(max-width:480px){
- .attendance-preview-page .unified-schedule{padding:14px 12px}
- .attendance-preview-page .unified-event-card{padding:12px}
- .attendance-preview-page .unified-event-actions button{flex:1 1 auto}
-}
