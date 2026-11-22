@@ -327,9 +327,10 @@
     var answered=eligible.map(function(event){
       return {label:event.category||"試合",value:answerValue(event,person)};
     }).filter(function(answer){return answer.value;});
-    var first=answered[0];
-    var badge=first?'<span class="day-match-chip" data-value="'+esc(first.value)+'">'+esc(first.label)+(first.value==="attending"?"":answerMark(first.value))+'</span>':"";
-    var extra=answered.length>1?'<span class="day-more">＋'+(answered.length-1)+'</span>':"";
+    var badges=answered.map(function(answer){
+      return '<span class="day-match-chip" data-value="'+esc(answer.value)+'">'+
+        esc(answerMark(answer.value)+" "+answer.label)+'</span>';
+    }).join("");
     var marks=practice.map(answerMark).join(" ");
     var review=eligible.some(function(match){return needsMatchReview(match,person,day);});
     var reviewBadge=review?'<span class="board-review">要確認</span>':"";
@@ -343,7 +344,7 @@
     var style=cycle?"board-mark editable":"board-mark editable day-answer";
     return '<button type="button" class="'+style+'" data-answer-date="'+esc(day.date)+'" data-answer-person="'+esc(person.id)+
       '" data-value="'+esc(practice[0]||"")+'" aria-label="'+esc(person.name+" "+dateLabel(day.date)+" "+(review?"要確認。":"")+(description.trim()||"未回答")+(cycle?"。タップで回答を切り替え":"。出欠を入力"))+'">'+
-      (day.matches.length===0&&day.practice.length===1?marks:(marks?'<span class="day-practice-mark">'+marks+'</span>':"")+reviewBadge+badge+extra)+'</button>';
+      (day.matches.length===0&&day.practice.length===1?marks:(marks?'<span class="day-practice-mark">'+marks+'</span>':"")+reviewBadge+badges)+'</button>';
   }
 
   function focusDayCell(date,personId){
@@ -821,13 +822,6 @@
     $("transpose-board").setAttribute("aria-pressed",String(transposeBoard));
     rows.innerHTML='<div class="attendance-board-scroll" role="region" aria-label="出欠一覧、上下左右にスクロール" tabindex="0"><table class="attendance-board'+(transposeBoard?" is-transposed":"")+'">'+head+body+'</tbody></table></div>';
     var newBoard=rows.querySelector(".attendance-board-scroll");
-    var dateWidth=0;
-    newBoard.querySelectorAll("th[data-board-date]").forEach(function(cell){
-      var button=cell.querySelector(".preview-day-summary");
-      var extra=button?Math.max(0,button.scrollWidth-button.clientWidth):0;
-      dateWidth=Math.max(dateWidth,Math.ceil(cell.getBoundingClientRect().width+extra));
-    });
-    if(dateWidth)newBoard.style.setProperty("--preview-date-width",dateWidth+"px");
     if(preserveScroll){newBoard.scrollTop=savedTop;newBoard.scrollLeft=savedLeft;}
     var daysByDate=new Map(days.map(function(day){return [day.date,day];}));
     var peopleById=new Map(people.map(function(person){return [person.id,person];}));
