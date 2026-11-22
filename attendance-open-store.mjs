@@ -96,13 +96,17 @@ export function loadOpenAttendance() {
           return conflicts;
         },
         eventVisibility:{
-          listen(receive,unavailable){return listenMap("eventVisibility",receive,unavailable,v=>new Map(Object.entries(v||{}).map(([id,row])=>[id,Boolean(row?.excluded)])));},
-          save(eventId,excluded){return db.ref(ROOT+"/eventVisibility/"+eventId).set({excluded,updatedAt:Date.now()});},
-          async importExcluded(ids){for(const id of ids){const ref=db.ref(ROOT+"/eventVisibility/"+id);await tx(ref,v=>v||{excluded:true,updatedAt:Date.now()});}}
+          listen(receive,unavailable){return listenMap("eventVisibility",receive,unavailable,v=>new Map(Object.entries(v||{}).map(([id,row])=>[logicalId(id),Boolean(row?.excluded)])));},
+          save(eventId,excluded){return db.ref(ROOT+"/eventVisibility").child(storageId(eventId)).set({excluded,updatedAt:Date.now()});},
+          async importExcluded(ids){for(const id of ids){const ref=db.ref(ROOT+"/eventVisibility").child(storageId(id));await tx(ref,v=>v||{excluded:true,updatedAt:Date.now()});}}
         },
         holidays:{
           listen(receive,unavailable){return listenMap("holidayExclusions",receive,unavailable,v=>new Set(Object.keys(v||{}).filter(id=>v[id]?.excluded===true)));},
           save(date,excluded){return db.ref(ROOT+"/holidayExclusions/"+date).set({excluded,updatedAt:Date.now()});}
+        },
+        season:{
+          listen(receive,unavailable){return listenMap("yearEndSchedule",receive,unavailable,value=>value);},
+          save(period){return db.ref(ROOT+"/yearEndSchedule").set({...period,updatedAt:Date.now()});}
         },
         recruitment:{
           listen(receive,unavailable){

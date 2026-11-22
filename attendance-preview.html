@@ -8,7 +8,7 @@
   <title>出欠共有テスト｜吉見SMC FC</title>
   <link rel="stylesheet" href="common.css">
   <link rel="stylesheet" href="attendance-prototype.css?v=20261121-25">
-  <link rel="stylesheet" href="attendance-preview.css?v=20261123-direct-list">
+  <link rel="stylesheet" href="attendance-preview.css?v=20261123-year-end">
   <script src="firebase-config.js"></script>
   <script src="calendar-attendance.js?v=20261122-girls2"></script>
   <script src="common.js"></script>
@@ -76,7 +76,17 @@
       <p id="roster-status" class="roster-status" role="status">団員名簿を読み込み中…</p>
       <label class="event-list-filter">表示する予定<select id="event-list-filter"><option value="">すべて</option><option value="active">出欠受付中</option><option value="excluded">出欠表から除外中</option><option value="inactive">カレンダー対象外</option></select></label>
       <details class="schedule-secondary">
-        <summary>祝日の設定・過去の予定</summary>
+        <summary>年末年始・祝日の設定・過去の予定</summary>
+        <section aria-labelledby="year-end-title">
+          <h3 id="year-end-title">年末年始の出欠設定</h3>
+          <p class="small-note">指定した期間は、カレンダーに登録された予定で出欠を取ります。通常の日程に戻すときは、日付を両方空欄にして保存してください。</p>
+          <form id="year-end-form">
+            <label>開始日 <input type="date" name="start"></label>
+            <label>終了日 <input type="date" name="end"></label>
+            <button id="year-end-save" class="secondary-button" type="submit" disabled>期間を保存</button>
+          </form>
+          <p id="year-end-status" class="small-note" role="status">年末年始の設定を読み込み中です。</p>
+        </section>
         <section aria-labelledby="holiday-attendance-title">
           <h3 id="holiday-attendance-title">祝日の出欠設定</h3>
           <p class="small-note">活動がない祝日は、自動表示を外せます。登録済みの試合・練習は表示されます。</p>
@@ -241,6 +251,6 @@
     <div class="dialog-actions"><button type="button" id="cancel-event" class="secondary-button">キャンセル</button><button type="submit" class="primary-button">予定を追加</button></div>
   </form>
 </dialog>
-<script src="attendance-preview.js?v=20261123-practice-contact"></script>
+<script src="attendance-preview.js?v=20261123-year-end"></script>
 </body>
 </html>

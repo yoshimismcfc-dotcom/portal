@@ -980,3 +980,27 @@
 #match-detail-tabs[hidden], #match-detail-return[hidden] {
   display: none;
 }
+
+#year-end-form {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: end;
+  gap: .65rem;
+  margin-block: .5rem;
+}
+
+#year-end-form label {
+  display: grid;
+  gap: .2rem;
+}
+
+#year-end-form input {
+  min-height: 44px;
+  padding-inline: .5rem;
+  font: inherit;
+  font-size: 1rem;
+  background: var(--navy-820);
+  color: var(--ink);
+  border: 1px solid var(--surface-bd);
+  border-radius: .4rem;
+}

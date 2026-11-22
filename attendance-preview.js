@@ -11,6 +11,9 @@
   var previewRosterStarted=false, sharedStore, sharedRows=new Map(), sharedReady=false, savingShared=false, entryBaseline;
   if(!deviceMode){state.answers={};state.matchNotes={};state.notes={};state.coaches=[];state.coachLinks={};}
   var weekendPracticeDates=new Set(), calendarMatchesChecked=false;
+  var seasonPeriod=null, seasonReady=false, savingSeason=false, calendarSyncResult=null;
+  var SEASON_CACHE="yoshimi_attendance_season_period";
+  try{seasonPeriod=validSeasonPeriod(JSON.parse(localStorage.getItem(SEASON_CACHE)||"null"));}catch(error){}
   var eventVisibility=new Map(),visibilityReady=false,visibilitySaving=false,undoVisibility=null;
   var viewedEvent=null,csvModule=null;
   var excludedHolidays=new Set(), holidaySettingsReady=false, savingHoliday=false;
@@ -39,7 +42,20 @@
     fetch("https://holidays-jp.github.io/api/v1/date.json").then(function(r){if(!r.ok)throw new Error("holiday data unavailable");return r.json();}).then(function(data){holidays=data||{};localStorage.setItem("yoshimi_jp_holidays_cache_v1",JSON.stringify({savedAt:Date.now(),data:holidays}));renderHolidaySettings();renderEventList();renderResponse(true);}).catch(function(){if(!Object.keys(holidays).length){holidays={};renderHolidaySettings();renderEventList();renderResponse(true);}});
   }
   function isWeekend(iso){return [0,6].includes(fromISO(iso).getDay());}
+  function validSeasonPeriod(value){
+    var validDate=function(date){
+      return typeof date==="string"&&/^\d{4}-\d{2}-\d{2}$/.test(date)&&localISO(fromISO(date))===date;
+    };
+    return validDate(value?.start)&&validDate(value?.end)&&value.start<=value.end?
+      {start:value.start,end:value.end}:null;
+  }
+
+  function isSeasonDate(iso){
+    return Boolean(seasonPeriod&&iso>=seasonPeriod.start&&iso<=seasonPeriod.end);
+  }
+
   function isDefaultDay(iso){
+    if(isSeasonDate(iso))return false;
     return isWeekend(iso)?weekendPracticeDates.has(iso):[3,4].includes(fromISO(iso).getDay())||Boolean(holidays[iso]);
   }
   function syncWeekendPractices(events,failed){
@@ -58,7 +74,7 @@
       var registered=eventForDate(iso);
       var regular=defaultEvent(iso);
       if(isDefaultDay(iso)&&!excludedHolidays.has(iso)&&!manuallyExcluded(regular)&&!state.events.some(function(event){
-        return event.date===iso&&!event.calendarInactive&&(event.id===regular.id||event.kind!=="match");
+        return event.date===iso&&!event.calendarInactive&&!event.seasonOnly&&(event.id===regular.id||event.kind!=="match");
       })){
         if(isWeekend(iso)||registered.length)regular.kind="practice";
         events.push(regular);
@@ -80,8 +96,13 @@
   }
   function manuallyExcluded(event){return eventVisibility.get(event.id)??Boolean(event.hidden);}
   function eventForDate(iso){
-    var active=state.events.filter(function(event){return event.date===iso&&!manuallyExcluded(event)&&!event.calendarInactive;});
-    if(!isWeekend(iso))return active;
+    var seasonal=isSeasonDate(iso);
+    var active=state.events.filter(function(event){
+      if(event.date!==iso||manuallyExcluded(event)||event.calendarInactive)return false;
+      if(seasonal)return event.id.startsWith("calendar_");
+      return !event.seasonOnly;
+    });
+    if(seasonal||!isWeekend(iso))return active;
     if(!calendarMatchesChecked)return [];
     if(weekendPracticeDates.has(iso))return active;
     var nonPractice=active.filter(function(event){return event.kind!=="practice";});
@@ -134,6 +155,7 @@
     var today=todayISO(),end=maxDate();
     function canAdd(date){return date>=today&&date<=end&&isDefaultDay(date);}
     saved.forEach(function(event){
+      if(event.seasonOnly&&!isSeasonDate(event.date))return;
       if(filter==="active"&&!active.has(event.id))return;
       if(filter==="excluded"&&!manuallyExcluded(event))return;
       if(filter==="inactive"&&!event.calendarInactive)return;
@@ -373,9 +395,9 @@
     if((group||audience)!=="players")return "";
     if(event.kind==="match")return matchRestriction(event,person,recruitmentDecision(event,person));
     var grade=normalizedGrade(person);
-    if(event.kind==="activity"){
-      var activityGrades=targetGrades(event);
-      return activityGrades&&!activityGrades.includes(grade)?"対象外":"";
+    if(event.kind==="activity"||event.seasonOnly){
+      var grades=targetGrades(event);
+      return grades&&!grades.includes(grade)?"対象外":"";
     }
     var weekday=fromISO(event.date).getDay();
     if(weekday===3)return GRADES.slice(0,3).includes(grade)?"":"対象外";
@@ -667,8 +689,53 @@
     $("shared-attendance-status").textContent="出欠クラウドへの接続を確認中です。通信状態を確認して再度お試しください。";
     return false;
   }
+  function updateSeasonInputs(){
+    var form=$("year-end-form");
+    form.elements.start.value=seasonPeriod?.start||"";
+    form.elements.end.value=seasonPeriod?.end||"";
+  }
+
+  function applySeasonPeriod(period){
+    var previous=seasonPeriod;
+    seasonPeriod=validSeasonPeriod(period);
+    try{localStorage.setItem(SEASON_CACHE,JSON.stringify(seasonPeriod));}catch(error){}
+    if(previous?.start!==seasonPeriod?.start||previous?.end!==seasonPeriod?.end||!seasonReady)updateSeasonInputs();
+    seasonReady=true;
+    $("year-end-save").disabled=savingSeason;
+    $("year-end-status").textContent=seasonPeriod?"設定中："+dateLabel(seasonPeriod.start)+"〜"+dateLabel(seasonPeriod.end):"特別期間は未設定です。";
+    renderEventList();renderResponse(true);refreshSharedMatchSummary();refreshCsvIfOpen();
+    renderCalendarSyncStatus();
+  }
+
+  async function saveSeasonPeriod(event){
+    event.preventDefault();
+    if(!seasonReady||savingSeason)return;
+    var fields=event.currentTarget.elements;
+    var input={start:fields.start.value,end:fields.end.value};
+    var period=validSeasonPeriod(input);
+    var status=$("year-end-status");
+    if(!period&&(input.start||input.end)){
+      status.textContent="開始日と終了日を入力し、終了日は開始日以降にしてください。";
+      return;
+    }
+    savingSeason=true;
+    $("year-end-save").disabled=true;
+    fields.start.disabled=fields.end.disabled=true;
+    status.textContent="設定を保存中…";
+    try{
+      await sharedStore.season.save(period);
+      applySeasonPeriod(period);
+    }catch(error){
+      status.textContent="設定をクラウドに保存できませんでした。入力は残っています。";
+    }finally{
+      savingSeason=false;
+      fields.start.disabled=fields.end.disabled=false;
+      $("year-end-save").disabled=!seasonReady;
+    }
+  }
+
   function startSharedAttendance(){
-    import("./attendance-open-store.mjs?v=20261123-practice-contact").then(function(module){
+    import("./attendance-open-store.mjs?v=20261123-year-end").then(function(module){
       return module.loadOpenAttendance();
     }).then(function(store){
       sharedStore=store;
@@ -690,6 +757,11 @@
         holidaySettingsReady=false;
         $("holiday-attendance-status").textContent="祝日設定に接続できません。";
         renderHolidaySettings();
+      });
+      store.season.listen(applySeasonPeriod,function(){
+        seasonReady=false;
+        $("year-end-save").disabled=true;
+        $("year-end-status").textContent="年末年始の設定に接続できません。";
       });
       store.recruitment.listen(function(records){
         recruitmentRows=records;
@@ -713,6 +785,7 @@
       sharedReady=false;
       $("shared-attendance-status").textContent="出欠クラウドを開始できません。通信またはFirebase設定を確認してください。";
       $("holiday-attendance-status").textContent="祝日設定に接続できません。";
+      $("year-end-status").textContent="年末年始の設定に接続できません。";
       renderResponse(true);
     });
   }
@@ -1514,11 +1587,18 @@
   function calendarAttendanceEvent(event){
     if(!event.sourceId)return null;
     var activityTitle=wholeTeamActivityTitle(event);
-    var title=event.title.normalize("NFKC");
+    var title=event.title.normalize("NFKC").trim();
+    var kind=window.SMCCalendarAttendance.upcomingKind(event);
+    var ageGroup=/^U(?:[7-9]|1[0-2])$/.test(event.label);
+    var isPractice=!activityTitle&&(event.label==="全体"||ageGroup)&&kind==="practice";
+    var newYearActivity=!activityTitle&&!isPractice&&(event.label==="全体"||ageGroup)&&
+      (/初蹴り/.test(title)&&!hasMatchTitle(title)||event.kind==="event");
     var wholeTeamGirlsMatch=event.label==="全体"&&isGirlsMatch(event)&&hasMatchTitle(title)&&
       !/会議|総会|説明会|保護者会|審判講習/.test(title);
-    if(!activityTitle&&!wholeTeamGirlsMatch&&!/^U(?:[7-9]|1[0-2])$/.test(event.label))return null;
-    var category=wholeTeamGirlsMatch?title.match(/\bU(?:[7-9]|1[0-2])\b/i)?.[0].toUpperCase()||"その他":event.label;
+    var seasonMatch=event.label==="全体"&&!wholeTeamGirlsMatch&&!activityTitle&&!isPractice&&!newYearActivity&&
+      (event.kind==="match"||event.kind==="tournament"||hasMatchTitle(title))&&!/会議|総会|説明会|保護者会|審判講習/.test(title);
+    if(!activityTitle&&!newYearActivity&&!isPractice&&!wholeTeamGirlsMatch&&!seasonMatch&&!ageGroup)return null;
+    var category=(wholeTeamGirlsMatch||seasonMatch)?title.match(/\bU(?:[7-9]|1[0-2])\b/i)?.[0].toUpperCase()||"その他":event.label;
     var timed=/T/.test(event.start);
     var start=timed?new Date(event.start):null;
     if(start&&isNaN(start.getTime()))return null;
@@ -1532,7 +1612,8 @@
       id:"calendar_"+encodeURIComponent(event.sourceId),date:date,startTime:time,
       endTime:end&&!isNaN(end.getTime())?clock.format(end):"",descriptionTime:event.descriptionTime||"",
       description:event.description||"",
-      kind:activityTitle?"activity":"match",status:event.status,category:category,calendarLabel:event.label,title:displayTitle,place:event.location||"",
+      kind:activityTitle||newYearActivity?"activity":isPractice?"practice":"match",
+      seasonOnly:isPractice||newYearActivity||seasonMatch,status:event.status,category:category,calendarLabel:event.label,title:displayTitle,place:event.location||"",
       calendarUrl:safeCalendarEventUrl(event.url),
       targetGrades:window.SMCCalendarAttendance.targetGrades(event.description,displayTitle)
     };
@@ -1550,6 +1631,7 @@
   function calendarMatchUnavailable(match){
     if(window.SMCCalendarAttendance.upcomingKind(match)==="cancelled")return true;
     var title=match.title.normalize("NFKC");
+    if(/^(?:【)?(?:練習|活動|年末年始)?(?:休み|休業|休団)(?:】)?(?:$|[（(\s])/i.test(title))return true;
     if(/予備日/.test(title)&&!(match.kind==="match"&&hasMatchTitle(title)))return true;
     return isWeekend(match.date)&&/運動会|体育祭|^年末年始$|年末年始休|休団|休業|会議|説明会/.test(title);
   }
@@ -1570,10 +1652,10 @@
     matches.forEach(function(match){
       if(calendarMatchUnavailable(match))return;
       var previous=events.get(match.id);
-      if(!restore&&!previous&&match.kind==="match"&&!isAutomaticMatch(match))return;
+      if(!restore&&!previous&&match.kind==="match"&&!match.seasonOnly&&!isAutomaticMatch(match))return;
       var hidden=previous?.hidden&&!restore;
       if(previous&&!previous.calendarInactive&&Boolean(previous.hidden)===Boolean(hidden)&&
-        ["date","startTime","endTime","descriptionTime","description","title","place","category","calendarLabel","calendarUrl","kind"].every(function(key){return previous[key]===match[key];})&&
+        ["date","startTime","endTime","descriptionTime","description","title","place","category","calendarLabel","calendarUrl","kind","seasonOnly"].every(function(key){return previous[key]===match[key];})&&
         JSON.stringify(previous.targetGrades)===JSON.stringify(match.targetGrades))return;
       events.set(match.id,{...match,...(hidden?{hidden:true}:{}),...(previous?.targetOverride?{targetOverride:previous.targetOverride}:{})});
       if(archived.has(match.id))resumed.add(match.id);
@@ -1590,13 +1672,24 @@
     return false;
   }
 
+  function renderCalendarSyncStatus(){
+    if(!calendarSyncResult)return;
+    var totals={match:0,activity:0,practice:0};
+    getBoardEvents().forEach(function(event){if(event.id.startsWith("calendar_")&&Object.hasOwn(totals,event.kind))totals[event.kind]++;});
+    var failed=calendarSyncResult.failed;
+    $("calendar-sync-status").textContent=!calendarSyncResult.saved?"カレンダーの予定を保存できませんでした。":
+      "カレンダー連携："+totals.match+"件の試合"+(totals.activity?"・"+totals.activity+"件の行事":"")+
+      (totals.practice?"・"+totals.practice+"件の練習":"")+
+      (failed.length?"（"+failed.join("・")+"の取得に失敗。前回取得した予定を表示しています）":"");
+  }
+
   function setupCalendarMatchPicker(){
     var dialog=$("calendar-match-dialog"),list=$("calendar-match-list"),status=$("calendar-match-status");
     var category=$("calendar-match-category"),refresh=$("refresh-calendar-matches"),syncStatus=$("calendar-sync-status");
     var matches=[],failed=[],loading=false,loaded=false;
 
     function renderMatches(){
-      var visible=matches.filter(function(match){return !calendarMatchUnavailable(match)&&(!category.value||match.category===category.value);});
+      var visible=matches.filter(function(match){return (!match.seasonOnly||isSeasonDate(match.date))&&!calendarMatchUnavailable(match)&&(!category.value||match.category===category.value);});
       list.replaceChildren();
       if(loading){status.textContent="カレンダーを読み込んでいます…";return;}
       var message=visible.length?visible.length+"件の予定。試合をタップすると、出欠表の該当日に移動します。":"2か月以内の予定がありません。";
@@ -1653,13 +1746,8 @@
       });
       matches=linked.filter(function(event){return event.kind==="match";});
       var saved=syncCalendarAttendance(linked,false,failed);
-      var active=linked.filter(function(event){
-        return state.events.some(function(item){return item.id===event.id&&!manuallyExcluded(item)&&!item.calendarInactive;});
-      });
-      var activities=active.filter(function(event){return event.kind==="activity";}).length;
-      syncStatus.textContent=!saved?"カレンダーの予定を保存できませんでした。":
-        "カレンダー連携："+(active.length-activities)+"件の試合"+(activities?"・"+activities+"件の行事":"")+
-        (failed.length?"（"+failed.join("・")+"は取得できませんでした）":"");
+      calendarSyncResult={saved:saved,failed:failed};
+      renderCalendarSyncStatus();
       renderHolidaySettings();renderEventList();renderResponse(true);
       refreshSharedMatchSummary();refreshCsvIfOpen();
       loading=false;
@@ -1680,6 +1768,8 @@
   }
 
   function init(){
+    updateSeasonInputs();
+    $("year-end-form").addEventListener("submit",saveSeasonPeriod);
     $("event-list-filter").addEventListener("change",renderEventList);
     $("event-visibility-undo").addEventListener("click",function(){
       if(undoVisibility)setEventExclusion(undoVisibility.event,undoVisibility.excluded);
