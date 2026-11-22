@@ -149,6 +149,14 @@
     // Never delete hidden entries; keep them available for restoration and CSV.
     var known=new Map();
     board.concat(state.events).forEach(function(event){known.set(event.id,event);});
+    // Keep default dates visible even when their attendance has been stopped.
+    for(var date=fromISO(todayISO()),end=fromISO(maxDate());date<=end;date.setDate(date.getDate()+1)){
+      var iso=localISO(date);
+      if(isDefaultDay(iso)){
+        var fallback=defaultEvent(iso);
+        if(!known.has(fallback.id))known.set(fallback.id,fallback);
+      }
+    }
     var events=Array.from(known.values()).filter(function(event){
       if(!filter)return true;
       if(filter==="active")return active.has(event.id);
@@ -159,7 +167,7 @@
       String(a.title||"").localeCompare(String(b.title||""),"ja");});
     list.innerHTML=events.map(function(event){
       var accepting=active.has(event.id),excluded=manuallyExcluded(event);
-      var manual=!event.id.startsWith("day_");
+      var manual=true;
       var date=fromISO(event.date);
       var dateText=(date.getMonth()+1)+"/"+date.getDate()+"（"+DAY_NAMES[date.getDay()]+"）";
       var title=event.title||((date.getDay()===3)?"通常練習":(date.getDay()===4)?"低学年練習":holidays[event.date]||"活動予定");
