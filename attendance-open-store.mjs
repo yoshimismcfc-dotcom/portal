@@ -1,12 +1,23 @@
 // Public pilot attendance, independent of legacy #test share links.
 // Uses a separate RTDB namespace. Never modifies legacy Firestore answers.
 const ROOT = "attendance_open_v1";
+
+function answerField(row, field) {
+  return row?.[field] || (field === "contact" ? {} : "");
+}
+
+function sameField(field, a, b) {
+  if (field !== "contact") return a === b;
+  const keys = Object.keys(a);
+  return keys.length === Object.keys(b).length && keys.every(key => a[key] === b[key]);
+}
+
 export function loadOpenAttendance() {
   return new Promise((resolve,reject)=>{
     if(typeof window.onFirebaseReady!=="function") { reject(new Error("firebase-unavailable"));return; }
     window.onFirebaseReady(db=>{
       if(!db){reject(new Error("firebase-unavailable"));return;}
-      const key=(eventId,group,personId)=>[group,eventId,personId].map(encodeURIComponent).join(":");
+      const key=(eventId,group,personId)=>[group,eventId,personId].map(part => encodeURIComponent(part).replace(/\./g, "%2E")).join(":");
       const answers=db.ref(ROOT+"/answers");
       const listenMap=(path,receive,unavailable,transform=(v)=>new Map(Object.entries(v||{})))=>{
         const ref=db.ref(ROOT+"/"+path);
@@ -21,19 +32,47 @@ export function loadOpenAttendance() {
       resolve({
         key,
         listen(receive,unavailable){return listenMap("answers",receive,unavailable);},
-        async save(group,personId,updates,note,baseline){
-          const changes=updates.map(u=>{
-            const id=key(u.id,group,personId),original=baseline.get(id);
-            return {id,original,data:{eventId:u.id,value:u.value,contact:u.contact===undefined?(original?.contact||{}):(u.contact||{}),note:""}};
+        async save(group,personId,updates,note,baseline,confirmed=new Map()){
+          const changes=updates.map(update=>{
+            const fields={value:update.value};
+            if(update.contact!==undefined)fields.contact=update.contact||{};
+            return {eventId:update.id,fields};
           });
-          if(note!==undefined){const id=key("",group,personId);changes.push({id,original:baseline.get(id),data:{eventId:"",value:"",contact:{},note}});}
-          for(const {id,original,data} of changes){
-            if((original?.value||"")===(data.value||"")&&(original?.note||"")===(data.note||"")&&JSON.stringify(original?.contact||{})===JSON.stringify(data.contact))continue;
-            await tx(answers.child(id),current=>{
-              if((current?.revision||0)!==(original?.revision||0))return;
-              return {...data,group,personId,revision:(original?.revision||0)+1,updatedAt:Date.now()};
+          if(note!==undefined)changes.push({eventId:"",fields:{note}});
+          const conflicts=new Map();
+          const attempts=await Promise.allSettled(changes.map(async ({eventId,fields})=>{
+            const id=key(eventId,group,personId),original=baseline.get(id);
+            const edited=Object.keys(fields).filter(field=>!sameField(field,answerField(original,field),fields[field]));
+            if(!edited.length)return;
+            await new Promise((resolve,reject)=>{
+              let conflictingFields;
+              answers.child(id).transaction(current=>{
+                const pending=edited.filter(field=>!sameField(field,answerField(current,field),fields[field]));
+                const checked=confirmed.get(id);
+                conflictingFields=pending.filter(field=>{
+                  const value=answerField(current,field);
+                  return !sameField(field,answerField(original,field),value)&&
+                    !(checked&&Object.hasOwn(checked,field)&&sameField(field,checked[field],value));
+                });
+                if(conflictingFields.length||!pending.length)return;
+                const row={eventId,group,personId,value:answerField(current,"value"),
+                  contact:answerField(current,"contact"),note:answerField(current,"note"),
+                  revision:(current?.revision||0)+1,updatedAt:Date.now()};
+                pending.forEach(field=>{row[field]=fields[field];});
+                return row;
+              },(error,committed,snapshot)=>{
+                if(error){reject(error);return;}
+                if(!committed&&conflictingFields?.length){
+                  const current=snapshot.val();
+                  conflicts.set(id,Object.fromEntries(conflictingFields.map(field=>[field,answerField(current,field)])));
+                }
+                resolve();
+              },false);
             });
-          }
+          }));
+          const failure=attempts.find(attempt=>attempt.status==="rejected");
+          if(failure)throw failure.reason;
+          return conflicts;
         },
         eventVisibility:{
           listen(receive,unavailable){return listenMap("eventVisibility",receive,unavailable,v=>new Map(Object.entries(v||{}).map(([id,row])=>[id,Boolean(row?.excluded)])));},
