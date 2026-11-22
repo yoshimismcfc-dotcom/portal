@@ -58,7 +58,8 @@
   }
 
   function parseTargetGrades(value){
-    var source = text(value).normalize("NFKC").replace(/\s+/g, "");
+    var source = text(value).normalize("NFKC").replace(/\s+/g, "")
+      .replace(/^女子(?:のみ|限定)?[:：]?|(?:の)?女子(?:のみ|限定)?$/g, "");
     if (/^(全学年|全団員|全員)$/.test(source)) return PLAYER_GRADES.slice();
     var grades = new Set();
     for (var part of source.split(/[・、,/＋+]/)) {
@@ -86,9 +87,27 @@
     return PLAYER_GRADES.filter(function(grade){ return grades.has(grade); });
   }
 
+  function targetField(description){
+    return plainDescription(description).match(/(?:^|\n)\s*(?:【対象(?:学年)?】|対象(?:学年)?\s*[:：])\s*([^\n【]+)/)?.[1] || "";
+  }
+
+  function girlsOnly(description, title){
+    function includesGirls(value){
+      return /女子/.test(value) &&
+        !/男女|女子\s*(?:も|可|歓迎|混合)|男子\s*[・、/+＋と]\s*女子|女子\s*[・、/+＋と](?:\s*男子)/.test(value);
+    }
+    var field=targetField(description).normalize("NFKC");
+    var name=text(title).normalize("NFKC");
+    if(/女子|男子|男女/.test(field))return includesGirls(field);
+    return includesGirls(name);
+  }
+
   function targetGrades(description, title){
-    var field = plainDescription(description).match(/(?:^|\n)\s*(?:【対象(?:学年)?】|対象(?:学年)?\s*[:：])\s*([^\n【]+)/);
-    if (field) return parseTargetGrades(field[1]);
+    var field=targetField(description);
+    if (field) {
+      var explicit=parseTargetGrades(field);
+      if(explicit || !/^女子(?:のみ|限定)?$/.test(field.normalize("NFKC").trim()))return explicit;
+    }
     var name = text(title).normalize("NFKC");
     var label = name.match(/【対象(?:学年)?】\s*([^【]+)/);
     if (label) return parseTargetGrades(label[1]);
@@ -97,7 +116,7 @@
       var grades = parseTargetGrades(part[1]);
       if (grades) return grades;
     }
-    var leading = name.match(/^(?:U(?:[7-9]|1[0-2])\s*)?([1-6](?:年(?:生)?)?\s*[~〜～–—-]\s*[1-6]年(?:生)?|[1-6]年(?:生)?(?:以下|以上)?|全学年|年長)(?:\s|$)/i);
+    var leading = name.match(/^(?:U(?:[7-9]|1[0-2])\s*)?([1-6](?:年(?:生)?)?\s*[~〜～–—-]\s*[1-6]年(?:生)?|[1-6]年(?:生)?(?:以下|以上)?|全学年|年長)(?=\s|$|(?:の)?女子)/i);
     return leading ? parseTargetGrades(leading[1]) : null;
   }
 
@@ -270,6 +289,7 @@
     plainDescription: plainDescription,
     descriptionLinks: descriptionLinks,
     targetGrades: targetGrades,
+    girlsOnly: girlsOnly,
     safeChouseisanUrl: safeChouseisanUrl,
     safeCategoryColor: safeCategoryColor,
     extractChouseisanUrl: extractChouseisanUrl,

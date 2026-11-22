@@ -29,7 +29,7 @@
     if(previewRosterStarted)return;
     previewRosterStarted=true;
     var started=false;
-    function consume(db){if(started)return;started=true;db.ref("members_v2").once("value").then(function(snapshot){var raw=snapshot.val()||{},list=[];Object.keys(raw).forEach(function(id){var m=raw[id];if(m&&String(m.name||"").trim()){list.push({id:String(m.id||id),name:String(m.name).trim(),kana:String(m.kana||""),grade:String(m.grade||"未設定")});}});members=list.sort(function(a,b){var ga=GRADES.indexOf(a.grade),gb=GRADES.indexOf(b.grade);if(ga<0)ga=99;if(gb<0)gb=99;return ga-gb||String(a.kana||a.name).localeCompare(String(b.kana||b.name),"ja");});rosterState="名簿から"+members.length+"名を読み込みました";$("roster-status").textContent="✓ "+rosterState+"（読み取り専用）";render();renderSavedEvent();refreshCsvIfOpen();}).catch(function(){rosterState="団員名簿を読み込めませんでした。通信状態をご確認ください";$("roster-status").textContent="⚠ "+rosterState;render();});}
+    function consume(db){if(started)return;started=true;db.ref("members_v2").once("value").then(function(snapshot){var raw=snapshot.val()||{},list=[];Object.keys(raw).forEach(function(id){var m=raw[id];if(m&&String(m.name||"").trim()){list.push({id:String(m.id||id),name:String(m.name).trim(),kana:String(m.kana||""),grade:String(m.grade||"未設定"),gender:m.gender==="f"||m.gender==="m"?m.gender:""});}});members=list.sort(function(a,b){var ga=GRADES.indexOf(a.grade),gb=GRADES.indexOf(b.grade);if(ga<0)ga=99;if(gb<0)gb=99;return ga-gb||String(a.kana||a.name).localeCompare(String(b.kana||b.name),"ja");});rosterState="名簿から"+members.length+"名を読み込みました";$("roster-status").textContent="✓ "+rosterState+"（読み取り専用）";render();renderSavedEvent();refreshCsvIfOpen();}).catch(function(){rosterState="団員名簿を読み込めませんでした。通信状態をご確認ください";$("roster-status").textContent="⚠ "+rosterState;render();});}
     if(window.FIREBASE_READY&&window.FIREBASE_DB)consume(window.FIREBASE_DB);else if(typeof window.onFirebaseReady==="function")window.onFirebaseReady(consume);else{rosterState="名簿の読み込み機能を利用できません";render();}
     window.setTimeout(function(){if(!started){rosterState="名簿の読み込みに時間がかかっています。画面を更新してください";render();}},10000);
   }
@@ -336,8 +336,8 @@
 
   function targetGrades(event){
     if(event.targetOverride)return event.targetOverride;
-    if(Object.hasOwn(event,"targetGrades"))return event.targetGrades;
-    return window.SMCCalendarAttendance.targetGrades("",event.title);
+    if(event.targetGrades)return event.targetGrades;
+    return window.SMCCalendarAttendance.targetGrades(event.description,event.title);
   }
 
   function normalizedGrade(person){
@@ -349,17 +349,29 @@
     return decisions&&Object.hasOwn(decisions,person.id)?decisions[person.id]:"default";
   }
 
-  function eligibility(event,person,group){
-    if((group||audience)!=="players")return "";
-    var grade=normalizedGrade(person);
-    if(event.kind==="match"){
-      var decision=recruitmentDecision(event,person);
-      if(decision==="include")return "";
-      if(decision==="exclude")return "招集対象外";
+  function isGirlsMatch(event){
+    return window.SMCCalendarAttendance.girlsOnly(event.description,event.title);
+  }
+
+  function matchGenderRestriction(event,person){
+    if(!isGirlsMatch(event)||person.gender==="f")return "";
+    return person.gender==="m"?"対象外":"対象要確認";
+  }
+
+  function matchRestriction(event,person,decision){
+    if(decision==="exclude")return "招集対象外";
+    if(decision!=="include"){
       var grades=targetGrades(event);
       if(!grades)return "対象学年未設定";
-      return grades.includes(grade)?"":"対象外";
+      if(!grades.includes(normalizedGrade(person)))return "対象外";
     }
+    return matchGenderRestriction(event,person);
+  }
+
+  function eligibility(event,person,group){
+    if((group||audience)!=="players")return "";
+    if(event.kind==="match")return matchRestriction(event,person,recruitmentDecision(event,person));
+    var grade=normalizedGrade(person);
     if(event.kind==="activity"){
       var activityGrades=targetGrades(event);
       return activityGrades&&!activityGrades.includes(grade)?"対象外":"";
@@ -526,7 +538,7 @@
     var reviewBadge=review?'<span class="board-review">要確認</span>':"";
     if(!practiceEvents.length&&!activities.length&&!eligible.length){
       var restrictions=day.matches.map(function(event){return eligibility(event,person);});
-      var reason=restrictions.includes("招集対象外")?"招集対象外":restrictions.includes("対象学年未設定")?"対象学年未設定":"対象外";
+      var reason=restrictions.includes("招集対象外")?"招集対象外":restrictions.includes("対象学年未設定")?"対象学年未設定":restrictions.includes("対象要確認")?"対象要確認":"対象外";
       return '<span class="board-ineligible">'+reason+'</span>';
     }
     var description=(marks?"練習 "+marks:"")+(activityMarks?" 行事 "+activityMarks:"")+(answered.length?" "+answered.map(function(answer){return answer.label+" "+answerMark(answer.value);}).join("、"):"");
@@ -803,8 +815,10 @@
   function matchTargetLabel(event){
     var grades=targetGrades(event);
     var players=members.filter(function(person){return !eligibility(event,person,"players");}).length;
-    var individual=members.filter(function(person){return recruitmentDecision(event,person)==="include";}).length;
-    return (grades?"対象学年 "+grades.join("・"):"対象学年未設定")+"／団員 "+players+"名"+
+    var individual=members.filter(function(person){
+      return recruitmentDecision(event,person)==="include"&&!eligibility(event,person,"players");
+    }).length;
+    return (grades?"対象学年 "+grades.join("・"):"対象学年未設定")+(isGirlsMatch(event)?"／女子のみ":"")+"／団員 "+players+"名"+
       (individual?"（個別招集 "+individual+"名）":"");
   }
 
@@ -827,20 +841,24 @@
   function openRecruitment(event){
     if(!recruitmentReady)return;
     var record=recruitmentRows.get(event.id);
-    var grades=targetGrades(event)||[];
     recruitmentEdit={event:event,revision:record?.revision||0,initial:new Map(),draft:new Map()};
     $("recruitment-event").textContent=dateLabel(event.date)+" "+eventName(event);
     $("recruitment-search").value="";
     $("recruitment-save-status").textContent="";
     $("recruitment-members").innerHTML=members.map(function(person){
       var decision=recruitmentDecision(event,person);
-      var base=grades.includes(normalizedGrade(person));
+      var restriction=matchRestriction(event,person,"default");
+      var base=!restriction;
       var answer=answerValue(event,person,"players");
       var hasRecord=Boolean(answer||matchComment(matchContact(event.id,person.id,"players")));
       recruitmentEdit.initial.set(person.id,decision);
       var alternate=base?"exclude":"include";
-      var options=[["default",base?"対象済み":"対象外"],[alternate,base?"招集しない":"個別招集"]];
-      if(decision!=="default"&&decision!==alternate)options.push([decision,decision==="include"?"個別招集":"招集しない"]);
+      var genderRestriction=matchGenderRestriction(event,person);
+      var options=[["default",base?"対象済み":restriction]];
+      if(!genderRestriction)options.push([alternate,base?"招集しない":"個別招集"]);
+      if(!options.some(function(option){return option[0]===decision;})){
+        options.push([decision,decision==="include"?(genderRestriction?"個別招集（対象外）":"個別招集"):"招集しない"]);
+      }
       return '<label class="recruitment-member" data-recruit-person="'+esc(person.id)+'" data-search="'+
         esc(normalizeRecruitmentSearch([person.grade,person.name,person.kana].join(" ")))+'"><span>'+
         esc(person.grade+" "+person.name)+(hasRecord?"<small>回答・連絡あり</small>":"")+'</span>'+
@@ -868,11 +886,9 @@
 
   function updateRecruitmentCount(){
     var edit=recruitmentEdit;
-    var grades=targetGrades(edit.event)||[];
     function total(decisions){
       return members.filter(function(person){
-        var decision=decisions.get(person.id);
-        return decision==="include"||(decision!=="exclude"&&grades.includes(normalizedGrade(person)));
+        return !matchRestriction(edit.event,person,decisions.get(person.id));
       }).length;
     }
     $("recruitment-count").textContent="対象 "+total(edit.initial)+"名 → "+total(new Map([...edit.initial,...edit.draft]))+"名";
@@ -887,11 +903,10 @@
       $("recruitment-save-status").textContent="クラウドへの接続を確認してください。";
       return;
     }
-    var grades=targetGrades(edit.event)||[];
     var recordedRemoval=members.some(function(person){
       if(!edit.draft.has(person.id))return false;
       var next=edit.draft.get(person.id);
-      return (next==="exclude"||(next==="default"&&!grades.includes(normalizedGrade(person))))&&
+      return matchRestriction(edit.event,person,next)&&
         (answerValue(edit.event,person,"players")||matchComment(matchContact(edit.event.id,person.id,"players")));
     });
     if(recordedRemoval&&!confirm("対象から外す団員に回答または連絡事項があります。記録は保存したまま、集計から外しますか？"))return;
