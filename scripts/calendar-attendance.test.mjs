@@ -120,7 +120,7 @@ vm.runInNewContext(previewSource.replace('document.addEventListener("DOMContentL
   globalThis.preview = {
     state, getBoardEvents, groupBoardDays, countAnswers, renderEntryDay, applySharedAnswers,
     matchAttendanceTable, readEntryUpdates, eventListStatus,
-    categorySummaryRows, matchCategories, dayHeading, compactCountMarks,
+    categorySummaryRows, matchCategories, dayHeading, compactCountMarks, scheduleDays,
     setSharedReady(value) { sharedReady = value; },
     setRecruitment(records) { recruitmentRows = new Map(records); },
     setVisibility(values) { eventVisibility = new Map(values); },
@@ -287,6 +287,17 @@ assert.doesNotMatch(narrowHeading, /▦|練習・行事|対象|未回答/);
 assert.doesNotMatch(categoryRows(), /category-count-context/);
 assert.match(preview.compactCountMarks({ attending: 12, maybe: 10, absent: 11 }),
   /○12<\/span><span class="count-maybe">△10<\/span><span class="count-no">×11/);
+
+const unifiedSchedule = preview.scheduleDays(preview.getBoardEvents(), "");
+const listedDay = unifiedSchedule.find(day => day.date === "2026-11-28");
+assert.equal(unifiedSchedule.filter(day => day.date === "2026-11-28").length, 1);
+assert(listedDay.canAdd);
+assert(listedDay.events.some(event => event.id === "calendar_fixture"));
+assert(listedDay.events.some(event => event.id === "calendar_fixture-two"));
+assert(unifiedSchedule.find(day => day.date === "2026-11-25").events.some(event => event.id === "day_2026-11-25"));
+const excludedSchedule = preview.scheduleDays(preview.getBoardEvents(), "excluded");
+assert(excludedSchedule.some(day => day.events.some(event => event.id === "calendar_fixture")));
+assert(!excludedSchedule.some(day => day.events.some(event => event.id === "calendar_fixture-two")));
 
 const visibilityStore = sharedEventVisibility(db, () => null, "isolated-test");
 docs.set("calendar_fixture", { excluded: false });
