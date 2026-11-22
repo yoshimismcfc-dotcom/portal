@@ -11,7 +11,7 @@
   var staffCoaches=[],coachRosterStarted=false,coachRosterStatus="コーチ担当を読み込み中…";
   var previewRosterStarted=false, sharedStore, sharedRows=new Map(), sharedReady=false, savingShared=false, entryBaseline;
   if(!deviceMode){state.answers={};state.matchNotes={};state.notes={};state.coaches=[];state.coachLinks={};}
-  var recruitmentRows=new Map(),recruitmentReady=false,coachSignedIn=false,coachCanRecruit=false,recruitmentEdit=null,savingRecruitment=false;
+  var recruitmentRows=new Map(),recruitmentReady=false,recruitmentEdit=null,savingRecruitment=false;
   var $=function(id){return document.getElementById(id);};
   function loadState(){try{var value=JSON.parse(localStorage.getItem(STORAGE_KEY)||"{}");return {events:Array.isArray(value.events)?value.events:[],archive:Array.isArray(value.archive)?value.archive:[],coaches:Array.isArray(value.coaches)?value.coaches:[],coachLinks:value.coachLinks&&typeof value.coachLinks==="object"&&!Array.isArray(value.coachLinks)?value.coachLinks:{},answers:value.answers&&typeof value.answers==="object"?value.answers:{},notes:value.notes&&typeof value.notes==="object"?value.notes:{},matchNotes:value.matchNotes&&typeof value.matchNotes==="object"?value.matchNotes:{}};}catch(e){return {events:[],archive:[],coaches:[],coachLinks:{},answers:{},notes:{},matchNotes:{}};}}
   function saveState(){try{localStorage.setItem(STORAGE_KEY,JSON.stringify(deviceMode?state:{...loadState(),events:state.events,archive:state.archive}));return true;}catch(e){alert("このブラウザに保存できませんでした。プライベートブラウズ設定や空き容量をご確認ください。");return false;}}
@@ -362,26 +362,18 @@
       $("shared-attendance-status").textContent="案内されたテスト用リンクを開いてください。";
       return;
     }
-    import("./attendance-preview-store.mjs?v=20261122-7").then(function(module){
+    import("./attendance-preview-store.mjs?v=20261122-8").then(function(module){
       return module.loadSharedAttendance(previewKey);
     }).then(function(store){
       sharedStore=store;
       store.recruitment.listen(function(records){
         recruitmentRows=records;
         recruitmentReady=true;
-        renderRecruitmentAccess();
         renderEventList();
         renderResponse(true);
         refreshSharedMatchSummary();
       },function(){
         recruitmentReady=false;
-        renderRecruitmentAccess();
-        refreshSharedMatchSummary();
-      });
-      store.recruitment.watchCoach(function(signedIn,allowed){
-        coachSignedIn=signedIn;
-        coachCanRecruit=allowed;
-        renderRecruitmentAccess();
         refreshSharedMatchSummary();
       });
       store.listen(function(records){
@@ -588,7 +580,7 @@
       section.querySelector(".preview-match-count").textContent=matchCountLabel(countAnswers([event],summary.people));
       section.querySelector(".match-target-note").textContent=matchTargetLabel(event);
       var edit=section.querySelector("[data-recruit-event]");
-      if(edit)edit.disabled=!coachCanRecruit||!recruitmentReady||!members.length;
+      if(edit)edit.disabled=!recruitmentReady||!members.length;
       section.querySelectorAll("[data-summary-group]").forEach(function(table){
         var group=table.dataset.summaryGroup;
         var people=group===audience?eligiblePeople(event,summary.people):
@@ -606,18 +598,8 @@
       (individual?"（個別招集 "+individual+"名）":"");
   }
 
-  function renderRecruitmentAccess(){
-    $("recruitment-access").hidden=audience!=="coaches";
-    $("recruitment-login").hidden=!recruitmentReady||coachSignedIn;
-    $("recruitment-google").hidden=!recruitmentReady||coachSignedIn;
-    $("recruitment-logout").hidden=!coachSignedIn;
-    $("recruitment-access-status").textContent=!recruitmentReady?"招集管理を利用するにはクラウドの設定が必要です。":
-      coachCanRecruit?"試合集計から招集選手を編集できます。":
-      coachSignedIn?"このアカウントに招集の編集権限がありません。":"登録済みのコーチアカウントでログインしてください。";
-  }
-
   function openRecruitment(event){
-    if(audience!=="coaches"||!coachCanRecruit||!recruitmentReady)return;
+    if(!recruitmentReady)return;
     var record=recruitmentRows.get(event.id);
     var grades=targetGrades(event)||[];
     recruitmentEdit={event:event,revision:record?.revision||0,initial:new Map(),draft:new Map()};
@@ -661,8 +643,8 @@
     event.preventDefault();
     var edit=recruitmentEdit;
     if(!edit||!edit.draft.size||savingRecruitment)return;
-    if(!coachCanRecruit||!recruitmentReady){
-      $("recruitment-save-status").textContent="編集権限とクラウドへの接続を確認してください。";
+    if(!recruitmentReady){
+      $("recruitment-save-status").textContent="クラウドへの接続を確認してください。";
       return;
     }
     var grades=targetGrades(edit.event)||[];
@@ -716,9 +698,9 @@
         '<div class="preview-match-count">'+matchCountLabel(countAnswers([event],people))+'</div>'+
         '<div class="match-target-note">'+esc(target)+'</div>'+
         (table?'<details class="preview-match-details"'+(day.matches.length===1?" open":"")+'><summary>出欠・コメントの内訳</summary>'+table+'</details>':"")+
-        matchCalendarAction(event)+(audience==="coaches"?
+        matchCalendarAction(event)+(!deviceMode?
           '<button type="button" class="secondary-button day-details-action" data-recruit-event="'+esc(event.id)+'"'+
-          (coachCanRecruit&&recruitmentReady&&members.length?"":" disabled")+'>招集選手を編集</button>'+targetGradeEditor(event,grades):"")+'</section>';
+          (recruitmentReady&&members.length?"":" disabled")+'>招集選手を編集</button>':"")+(audience==="coaches"?targetGradeEditor(event,grades):"")+'</section>';
     }).join("");
     var dialog=$("match-summary-dialog");
     if(!dialog.open){
@@ -777,7 +759,6 @@
     var people=getPeople(),days=groupBoardDays(getBoardEvents());
     $("board-toolbar").hidden=true;
     panel.hidden=false;
-    renderRecruitmentAccess();
     $("response-title").textContent="参加予定【"+(audience==="players"?"団員用":"コーチ用")+"】";
     $("response-summary").textContent=deviceMode?"この端末の試作回答を表示しています。":
       "試合・練習の出欠とコメントをクラウドで共有します。";
@@ -1111,39 +1092,6 @@
     $("device-trial-link").hidden=deviceMode;
     $("cloud-entry-return").hidden=!deviceMode;movePastEvents();
     setupCalendarMatchPicker();
-    $("recruitment-login").addEventListener("submit",async function(event){
-      event.preventDefault();
-      var form=event.currentTarget;
-      var fields=new FormData(form);
-      var submit=form.querySelector("button");
-      submit.disabled=true;
-      try{
-        await sharedStore.recruitment.signIn(String(fields.get("email")).trim(),fields.get("password"));
-        form.reset();
-      }catch{
-        $("recruitment-access-status").textContent="ログインできませんでした。登録済みのコーチアカウントを確認してください。";
-      }finally{
-        submit.disabled=false;
-      }
-    });
-    $("recruitment-google").addEventListener("click",async function(event){
-      var button=event.currentTarget;
-      button.disabled=true;
-      try{
-        await sharedStore.recruitment.signInWithGoogle(sharedStore.googleCoachProvider());
-      }catch(error){
-        $("recruitment-access-status").textContent=error.code==="auth/popup-blocked"
-          ?"ログイン画面が開けませんでした。Safariなどのブラウザでテストページを開いてください。"
-          :"Googleでログインできませんでした。登録済みのコーチアカウントを確認してください。";
-      }finally{
-        button.disabled=false;
-      }
-    });
-    $("recruitment-logout").addEventListener("click",function(){
-      sharedStore.recruitment.signOut().catch(function(){
-        $("recruitment-access-status").textContent="ログアウトできませんでした。";
-      });
-    });
     $("recruitment-search").addEventListener("input",function(event){
       var query=event.target.value.normalize("NFKC").replace(/\s+/g,"").toLowerCase();
       $("recruitment-members").querySelectorAll("[data-search]").forEach(function(row){row.hidden=!row.dataset.search.includes(query);});

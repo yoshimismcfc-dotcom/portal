@@ -8,7 +8,7 @@
   <title>出欠共有テスト｜吉見SMC FC</title>
   <link rel="stylesheet" href="common.css">
   <link rel="stylesheet" href="attendance-prototype.css?v=20261121-25">
-  <link rel="stylesheet" href="attendance-preview.css?v=20261122-7">
+  <link rel="stylesheet" href="attendance-preview.css?v=20261122-8">
   <script src="firebase-config.js"></script>
   <script src="calendar-attendance.js?v=20261121-19"></script>
   <script src="common.js"></script>
@@ -32,17 +32,6 @@
         <div class="inline-form"><input id="coach-name-input" type="text" maxlength="40"><button id="add-coach" type="button" class="primary-button">追加</button></div>
       </details>
     </div>
-    <details id="recruitment-access" hidden>
-      <summary>招集の管理</summary>
-      <p id="recruitment-access-status" class="small-note" role="status"></p>
-      <button type="button" id="recruitment-google" class="secondary-button" hidden>Googleでログイン</button>
-      <form id="recruitment-login" hidden>
-        <label>メールアドレス<input name="email" type="email" autocomplete="username" required></label>
-        <label>パスワード<input name="password" type="password" autocomplete="current-password" required></label>
-        <button type="submit" class="secondary-button">ログイン</button>
-      </form>
-      <button type="button" id="recruitment-logout" class="secondary-button" hidden>ログアウト</button>
-    </details>
     <div class="attendance-board-controls">
       <div class="response-filters" id="grade-filters" aria-label="学年の絞り込み"></div>
       <div class="board-toolbar" id="board-toolbar" hidden><span id="board-status" role="status">名前が縦</span><div class="preview-board-actions"><button type="button" id="open-match-summary" aria-haspopup="dialog" hidden>試合集計</button><button type="button" id="transpose-board" aria-pressed="false">縦横切替</button></div></div>
@@ -156,6 +145,6 @@
     <div class="dialog-actions"><button type="button" id="cancel-event" class="secondary-button">キャンセル</button><button type="submit" class="primary-button">予定を追加</button></div>
   </form>
 </dialog>
-<script src="attendance-preview.js?v=20261122-7"></script>
+<script src="attendance-preview.js?v=20261122-8"></script>
 </body>
 </html>

@@ -7,16 +7,9 @@ service cloud.firestore {
     return session.matches('^[a-f0-9]{48}$')
      && get(/databases/$(database)/documents/attendancePreviewRecruitmentConfig/$(session)).data.enabled == true;
    }
-   function verifiedCoach() {
-    return request.auth != null && request.auth.token.email_verified == true
-     && get(/databases/$(database)/documents/attendancePreviewSessions/$(session)/coachGrants/$(request.auth.uid)).data.active == true;
-   }
-   match /coachGrants/{uid} {
-    allow get: if recruitmentEnabled() && request.auth != null && request.auth.uid == uid;
-   }
    match /recruitment/{eventId} {
     allow get, list: if recruitmentEnabled();
-    allow create, update: if recruitmentEnabled() && verifiedCoach()
+    allow create, update: if recruitmentEnabled()
      && eventId.matches('^(calendar_|demo_)[^/]{1,490}$')
      && request.resource.data.keys().hasOnly(['decisions','revision','updatedAt'])
      && request.resource.data.decisions is map && request.resource.data.decisions.size() <= 100
