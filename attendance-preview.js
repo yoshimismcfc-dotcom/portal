@@ -415,16 +415,24 @@
   }
 
   function dayHeading(day,people){
-    var heading='<span class="board-date">'+esc(compactDate(day.date))+'<span class="day-calendar-icon" aria-hidden="true">▦</span></span>';
     var totals=countAnswers(dayEvents(day),people,day);
-    heading+='<span class="event-count-summary">'+compactTotal(totals)+'</span>';
-    var label=dateLabel(day.date)+"の予定を開く。"+(dayEvents(day).length>1?"延べ":"")+"対象"+totals.eligible+"、参加"+totals.attending+"、未定"+totals.maybe+"、不参加"+totals.absent;
     var categories=matchCategoryLabel(day.matches);
-    var summary=categories?'<button type="button" class="preview-day-summary" data-match-date="'+esc(day.date)+
+    var label=dateLabel(day.date)+"の予定を開く。対象"+totals.eligible+
+      "、参加"+totals.attending+"、未定"+totals.maybe+"、不参加"+totals.absent;
+    var date='<span class="board-date">'+esc(compactDate(day.date))+
+      '<span class="day-calendar-icon" aria-hidden="true">▦</span></span>';
+    var count='<span class="event-count-summary" aria-label="'+esc(label)+'">'+
+      '<span class="count-yes">○'+totals.attending+'</span>'+
+      '<span class="count-maybe">△'+totals.maybe+'</span>'+
+      '<span class="count-no">×'+totals.absent+'</span>'+
+      '<span class="count-eligible">対象'+totals.eligible+'名</span></span>';
+    var category=categories?'<button type="button" class="preview-day-summary" data-match-date="'+esc(day.date)+
       '" aria-haspopup="dialog" aria-label="'+esc(compactDate(day.date)+"の試合集計 "+categories)+'">'+esc(categories)+'</button>':
-      '<span class="preview-day-summary-space" aria-hidden="true"></span>';
-    if(day.activities.length)heading+='<span class="event-count-summary">'+esc(day.activities.map(function(event){return event.title;}).join("・"))+'</span>';
-    return calendarLink(day.date,heading,"day-detail-link","",label)+summary;
+      '<span class="preview-day-summary-space">練習・行事</span>';
+    if(day.activities.length)category='<span class="preview-day-activity">'+
+      esc(day.activities.map(function(event){return event.title;}).join("・"))+'</span>'+category;
+    return '<div class="board-day-heading">'+calendarLink(day.date,date,"day-detail-link","",label)+
+      '<div class="board-day-category">'+category+'</div>'+count+'</div>';
   }
 
   function boardPersonName(person){
@@ -1044,6 +1052,20 @@
     rows.innerHTML='<div class="attendance-board-scroll" role="region" aria-label="出欠一覧、上下左右にスクロール" tabindex="0"><table class="attendance-board'+(transposeBoard?" is-transposed":"")+'">'+head+body+'</tbody></table></div>';
     var newBoard=rows.querySelector(".attendance-board-scroll");
     if(preserveScroll){newBoard.scrollTop=savedTop;newBoard.scrollLeft=savedLeft;}
+    // iOS: keep horizontal position stable when the gesture starts on the
+    // sticky name column. Vertical scrolling remains native for both columns.
+    var lockLeft=null,unlockNameGesture=function(){lockLeft=null;};
+    newBoard.addEventListener("touchstart",function(event){
+      lockLeft=event.target.closest("th.person-col,th.event-col")?newBoard.scrollLeft:null;
+    },{passive:true});
+    newBoard.addEventListener("touchmove",function(){
+      if(lockLeft!==null&&newBoard.scrollLeft!==lockLeft)newBoard.scrollLeft=lockLeft;
+    },{passive:true});
+    newBoard.addEventListener("scroll",function(){
+      if(lockLeft!==null&&newBoard.scrollLeft!==lockLeft)newBoard.scrollLeft=lockLeft;
+    },{passive:true});
+    newBoard.addEventListener("touchend",unlockNameGesture,{passive:true});
+    newBoard.addEventListener("touchcancel",unlockNameGesture,{passive:true});
     var daysByDate=new Map(days.map(function(day){return [day.date,day];}));
     var peopleById=new Map(people.map(function(person){return [person.id,person];}));
     rows.querySelectorAll("[data-edit-person]").forEach(function(btn){
