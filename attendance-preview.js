@@ -185,7 +185,7 @@
     }).join("")||'<p class="small-note">この端末で確認できる過去の予定はありません。</p>';
   }
   function compactCountText(total){
-    return "参加 "+total.attending+"/"+total.eligible+" · 未定 "+total.maybe+" · 不参加 "+total.absent;
+    return "参加 "+total.attending+(audience==="coaches"?"":"/"+total.eligible)+" · 未定 "+total.maybe+" · 不参加 "+total.absent;
   }
 
   function renderSavedEvent(){
@@ -288,7 +288,7 @@
         staffCoaches=namesFromStaff(records);
         staffCoachesReady=true;
         linkLocalCoachAnswers();
-        coachRosterStatus=staffCoaches.length?"コーチ担当から"+staffCoaches.length+"名を表示":"コーチ担当に登録された名前がありません。";
+        coachRosterStatus=staffCoaches.length?"":"コーチ担当に登録された名前がありません。";
       }else{
         coachRosterStatus="コーチ担当を確認できませんでした。通信状況を確認して、画面を開き直してください。";
       }
@@ -453,6 +453,10 @@
       '<span class="count-no">×'+total.absent+'</span>';
   }
 
+  function responseCountText(total){
+    return "参加 "+total.attending+"人、未定 "+total.maybe+"人、不参加 "+total.absent+"人";
+  }
+
   function targetCountText(total,eventCount){
     return "対象 "+(eventCount>1?"延べ":"")+total.eligible+"人";
   }
@@ -484,16 +488,15 @@
     if(!matches)return '<span class="category-count-empty" aria-label="試合なし">—</span>';
     var coaches=audience==="coaches";
     var total=coaches?countCoaches(matches,people,day):countAnswers(matches,people,day);
-    var target=targetCountText(total,coaches?1:matches.length);
+    var target=coaches?"":targetCountText(total,matches.length);
     var unanswered=total.eligible-total.attending-total.maybe-total.absent;
     var multiple=matches.length>1?(coaches?"":"延べ・")+matches.length+"試合　":"";
     var ready=deviceMode||sharedReady;
     var label=compactDate(day.date)+" "+category+"の試合集計。"+(ready?
-      multiple+target+"、参加 "+total.attending+"人、未定 "+total.maybe+
-      "人、不参加 "+total.absent+"人、未回答 "+unanswered+"人":"集計待ち");
+      multiple+(coaches?responseCountText(total):target+"、"+responseCountText(total)+"、未回答 "+unanswered+"人"):"集計待ち");
     return '<button type="button" class="category-count-button" data-match-date="'+esc(day.date)+
       '" data-match-category="'+esc(category)+'" aria-haspopup="dialog" aria-label="'+esc(label)+'">'+
-      (ready?'<span class="category-count-values" aria-hidden="true">'+compactCountMarks(total)+'</span>'+targetCountLine(target):
+      (ready?'<span class="category-count-values" aria-hidden="true">'+compactCountMarks(total)+'</span>'+(target?targetCountLine(target):""):
       '<span class="category-count-empty">集計待ち</span>')+'</button>';
   }
 
@@ -511,13 +514,13 @@
       var title=scheduleEventTitle(event);
       var ready=deviceMode||sharedReady;
       var total=countAnswers([event],people,day);
-      var target=targetCountText(total,1);
+      var target=audience==="coaches"?"":targetCountText(total,1);
       var label=title+"の出欠集計。"+(ready?
-        target+"、参加 "+total.attending+"人、未定 "+total.maybe+"人、不参加 "+total.absent+"人、未回答 "+
-          (total.eligible-total.attending-total.maybe-total.absent)+"人":"集計待ち");
+        (target?target+"、":"")+responseCountText(total)+(target?"、未回答 "+
+          (total.eligible-total.attending-total.maybe-total.absent)+"人":""):"集計待ち");
       return '<button type="button" class="category-count-button" data-activity-summary="'+esc(event.id)+
         '" aria-haspopup="dialog" aria-label="'+esc(label)+'"><span class="activity-count-title">'+esc(title)+'</span>'+
-        (ready?'<span class="category-count-values" aria-hidden="true">'+compactCountMarks(total)+'</span>'+targetCountLine(target):
+        (ready?'<span class="category-count-values" aria-hidden="true">'+compactCountMarks(total)+'</span>'+(target?targetCountLine(target):""):
           '<span class="category-count-empty">集計待ち</span>')+'</button>';
     }).join("");
   }
@@ -530,9 +533,12 @@
   }
 
   function matchCountLabel(total){
-    return ["対象 "+total.eligible+"名","参加 "+total.attending,"未定 "+total.maybe,
-      "不参加 "+total.absent,"未回答 "+(total.eligible-total.attending-total.maybe-total.absent)]
-      .map(function(label){return "<span>"+esc(label)+"</span>";}).join(" ");
+    var labels=["参加 "+total.attending,"未定 "+total.maybe,"不参加 "+total.absent];
+    if(audience!=="coaches"){
+      labels.unshift("対象 "+total.eligible+"名");
+      labels.push("未回答 "+(total.eligible-total.attending-total.maybe-total.absent));
+    }
+    return labels.map(function(label){return "<span>"+esc(label)+"</span>";}).join(" ");
   }
 
   function dayHeading(day,people){
@@ -543,11 +549,11 @@
     }
     var coaches=audience==="coaches";
     var total=coaches?countCoaches(day.practice,people,day):countAnswers(day.practice,people,day);
-    var target="練習 "+targetCountText(total,coaches?1:day.practice.length);
+    var target=coaches?"":"練習 "+targetCountText(total,day.practice.length);
     var ready=deviceMode||sharedReady;
-    label+=ready?target+"、参加 "+total.attending+"人、未定 "+total.maybe+"人、不参加 "+total.absent+"人":"練習の集計待ち";
+    label+=ready?(target?target+"、":"練習の集計。")+responseCountText(total):"練習の集計待ち";
     var count='<span class="event-count-summary" aria-hidden="true">'+(ready?compactCountMarks(total):"集計待ち")+'</span>';
-    return '<div class="board-day-heading">'+calendarLink(day.date,date+count+(ready?targetCountLine(target):""),"day-detail-link","",label)+'</div>';
+    return '<div class="board-day-heading">'+calendarLink(day.date,date+count+(ready&&target?targetCountLine(target):""),"day-detail-link","",label)+'</div>';
   }
 
   function boardPersonName(person){
@@ -890,7 +896,8 @@
       var event=summary.day.matches.find(function(match){return match.id===section.dataset.targetEvent;});
       if(!event)return;
       section.querySelector(".preview-match-count").innerHTML=matchCountLabel(countAnswers([event],summary.people));
-      section.querySelector(".match-target-note").textContent=matchTargetLabel(event);
+      var targetNote=section.querySelector(".match-target-note");
+      if(targetNote)targetNote.textContent=matchTargetLabel(event);
       var edit=section.querySelector("[data-recruit-event]");
       if(edit)edit.disabled=!recruitmentReady||!members.length;
     });
@@ -1039,7 +1046,7 @@
       var grades=targetGrades(event);
       return '<section class="match-summary-event" data-target-event="'+esc(event.id)+'"><h3>'+esc(eventName(event))+'</h3>'+
         '<div class="preview-match-count">'+matchCountLabel(countAnswers([event],people))+'</div>'+
-        '<div class="match-target-note">'+esc(matchTargetLabel(event))+'</div>'+
+        (audience==="coaches"?"":'<div class="match-target-note">'+esc(matchTargetLabel(event))+'</div>')+
         '<button type="button" class="secondary-button day-details-action" data-match-detail="'+esc(event.id)+'">試合詳細・出欠一覧</button> '+(!deviceMode?
           '<button type="button" class="secondary-button day-details-action" data-recruit-event="'+esc(event.id)+'"'+
           (recruitmentReady&&members.length?"":" disabled")+'>招集選手を編集</button>':"")+(audience==="coaches"?targetGradeEditor(event,grades):"")+'</section>';
@@ -1101,7 +1108,7 @@
 
   function matchAttendanceTable(event,people,group,day){
     var answers=ANSWERS.concat({value:"",label:"未回答"});
-    var totals=answers.map(function(answer){
+    var totals=(group==="coaches"?ANSWERS:answers).map(function(answer){
       var count=people.filter(function(person){return attendanceValue(event,person,day,group)===answer.value;}).length;
       return '<tr class="match-attendance-total"><th scope="row">'+esc((answerMark(answer.value)+" "+answer.label).trim())+
         '</th><td>'+count+'人</td><td></td></tr>';
@@ -1180,7 +1187,8 @@
       }
       people=filterPeopleByGrade(people);
     }
-    $("respondent-count").textContent=people.length+"名";
+    $("respondent-count").textContent=audience==="coaches"?"":people.length+"名";
+    $("respondent-count").hidden=audience==="coaches";
     if(!deviceMode&&!sharedReady&&people.length){
       $("entry-mode-help").textContent="クラウドの接続を確認中です。";
     }
