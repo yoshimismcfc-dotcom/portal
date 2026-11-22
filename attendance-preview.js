@@ -503,92 +503,58 @@
     Object.assign(state,{answers:answers,notes:notes});
   }
 
-  function openShareConnection(){
-    var dialog=$("share-connection-dialog");
-    if(!dialog)return;
-    $("share-connection-status").textContent= /^[a-f0-9]{48}$/.test(previewKey)
-      ?"共有データに接続できていません。通信状態をご確認ください。元の共有URLをもう一度開くこともできます。"
-      :"現在のURLには出欠共有用の識別子がありません。以前回答したときの共有URLを入力してください。";
-    $("share-connection-url").value="";
-    if(!dialog.open)dialog.showModal();
-  }
   function requireSharedConnection(){
-    if(deviceMode||sharedReady)return true;
-    openShareConnection();
+    if(sharedReady)return true;
+    $("shared-attendance-status").textContent="出欠クラウドへの接続を確認中です。通信状態を確認して再度お試しください。";
     return false;
   }
   function startSharedAttendance(){
-    if(!/^[a-f0-9]{48}$/.test(previewKey)){
-      $("shared-attendance-status").textContent="氏名は表示できますが、出欠入力には以前の共有リンクへの接続が必要です。下の「共有リンクを接続」を押してください。";
-      $("holiday-attendance-status").textContent="祝日の出欠予定を編集するには、案内されたテスト用リンクを開いてください。";
-      return;
-    }
-    import("./attendance-preview-store.mjs?v=20261122-16").then(function(module){
-      return module.loadSharedAttendance(previewKey);
+    import("./attendance-open-store.mjs?v=20261122-open1").then(function(module){
+      return module.loadOpenAttendance();
     }).then(function(store){
       sharedStore=store;
-      var legacyExclusions=Array.from(new Set(state.events.concat(state.archive)
-        .filter(function(event){return event.hidden&&event.id.startsWith("calendar_");})
-        .map(function(event){return event.id;})));
       store.eventVisibility.listen(function(records){
         eventVisibility=records;
         visibilityReady=true;
-        if(legacyExclusions.length){
-          var pending=legacyExclusions.filter(function(id){return !records.has(id);});
-          legacyExclusions=[];
-          store.eventVisibility.importExcluded(pending).catch(function(){
-            $("event-visibility-status").textContent="この端末の旧設定を共有できませんでした。再読み込みしてお試しください。";
-          });
-        }
         renderDateOptions();renderEventList();renderResponse(true);refreshSharedMatchSummary();refreshCsvIfOpen();
       },function(){
         visibilityReady=false;
-        $("event-visibility-status").textContent="出欠表の表示設定を同期できませんでした。";
+        $("event-visibility-status").textContent="予定の受付設定に接続できません。";
         renderEventList();
       });
       store.holidays.listen(function(excluded){
-        var status=$("holiday-attendance-status");
-        if(!holidaySettingsReady)status.textContent="";
         excludedHolidays=excluded;
         holidaySettingsReady=true;
-        renderDateOptions();
-        renderResponse(true);
+        $("holiday-attendance-status").textContent="";
+        renderDateOptions();renderResponse(true);
       },function(message){
         holidaySettingsReady=false;
-        $("holiday-attendance-status").textContent=message;
+        $("holiday-attendance-status").textContent="祝日設定に接続できません。";
         renderHolidaySettings();
       });
       store.recruitment.listen(function(records){
         recruitmentRows=records;
         recruitmentReady=true;
-        renderEventList();
-        renderResponse(true);
+        renderEventList();renderResponse(true);
         refreshSharedMatchSummary();refreshCsvIfOpen();
-      },function(){
-        recruitmentReady=false;
-        refreshSharedMatchSummary();
-      });
+      },function(){recruitmentReady=false;refreshSharedMatchSummary();});
       store.listen(function(records){
         sharedRows=records;
         sharedReady=true;
-        $("share-connection-open").hidden=true;
-        // The name directory loads on page open, not after a share session succeeds.
         applySharedAnswers(records,store.key);
         renderSavedEvent();refreshCsvIfOpen();
-        $("shared-attendance-status").textContent="テスト用リンクを開いた人がログインなしで閲覧・編集できます。";
-        renderEventList();
-        renderResponse(true);
-        refreshSharedMatchSummary();
+        $("shared-attendance-status").textContent="出欠を共有しています。名前をタップして入力できます。";
+        renderEventList();renderResponse(true);refreshSharedMatchSummary();
       },function(message){
         sharedReady=false;
-        $("share-connection-open").hidden=false;
-        $("shared-attendance-status").textContent=message;
+        $("shared-attendance-status").textContent="出欠クラウドに接続できません。Firebaseの保存先のアクセス設定・通信を確認してください。";
         renderResponse(true);
       });
     }).catch(function(){
-      $("share-connection-open").hidden=false;
-      $("shared-attendance-status").textContent="クラウド出欠に接続できません。共有リンクと通信状態をご確認ください。";
-      $("holiday-attendance-status").textContent="祝日の設定に接続できません。ページを開き直してください。";
+      sharedReady=false;
+      $("shared-attendance-status").textContent="出欠クラウドを開始できません。通信またはFirebase設定を確認してください。";
+      $("holiday-attendance-status").textContent="祝日設定に接続できません。";
+      renderResponse(true);
     });
   }
 
@@ -1016,7 +982,7 @@
       "試合・練習の出欠とコメントをクラウドで共有します。";
     // Do not silently disable the input button when a session link is missing.
     // Clicking it explains how to reconnect without overwriting old answers.
-    $("entry-mode-button").disabled=!getPeople().length;
+    $("entry-mode-button").disabled=!getPeople().length||!sharedReady;
     $("entry-mode-icon").disabled=$("entry-mode-button").disabled;
     $("coach-roster-status").textContent=coachRosterStatus;
     $("coach-roster-status").hidden=audience!=="coaches";
@@ -1041,7 +1007,7 @@
     }
     $("respondent-count").textContent=people.length+"名";
     if(!deviceMode&&!sharedReady&&people.length){
-      $("entry-mode-help").textContent="氏名を表示しています。入力には元の共有テストURLが必要です。";
+      $("entry-mode-help").textContent="クラウドの接続を確認中です。";
     }
 
     $("entry-mode-button").textContent=deviceMode?"試作回答を入力する":"出欠を入力する";
@@ -1428,27 +1394,6 @@
   }
 
   function init(){
-    $("share-connection-open").addEventListener("click",openShareConnection);
-    $("share-connection-close").addEventListener("click",function(){$("share-connection-dialog").close();});
-    $("share-connection-form").addEventListener("submit",function(event){
-      event.preventDefault();
-      var raw=$("share-connection-url").value.trim(),key="";
-      try{
-        if(/^[a-f0-9]{48}$/i.test(raw))key=raw.toLowerCase();
-        else{
-          var url=new URL(raw,location.href);
-          if(url.origin!==location.origin||url.pathname!==location.pathname)throw Error("different-page");
-          key=new URLSearchParams(url.hash.replace(/^#/,"")).get("test")||"";
-        }
-      }catch(error){}
-      if(!/^[a-f0-9]{48}$/.test(key)){
-        $("share-connection-status").textContent="URLを確認してください。以前の同じ出欠テストページの共有リンク（#test=…付き）が必要です。";
-        return;
-      }
-      // Never mint a new session key or migrate answers implicitly.
-      location.replace(location.pathname+location.search+"#test="+key);
-      location.reload();
-    });
     $("event-list-filter").addEventListener("change",renderEventList);
     $("event-visibility-undo").addEventListener("click",function(){
       if(undoVisibility)setEventExclusion(undoVisibility.event,undoVisibility.excluded);
@@ -1462,7 +1407,6 @@
       $(id).addEventListener("cancel",function(event){if(savingShared)event.preventDefault();});
     });
     $("shared-attendance-status").hidden=deviceMode;
-    $("share-connection-open").hidden=Boolean(deviceMode||sharedReady);
     $("holiday-attendance-status").textContent="祝日の設定を読み込み中です。";
     $("holiday-attendance-list").addEventListener("click",function(event){
       var button=event.target.closest("button[data-holiday-date]");
