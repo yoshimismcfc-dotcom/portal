@@ -266,7 +266,10 @@ const categoryRows = () => {
   return preview.categorySummaryRows(days, byDate, [athlete, extraPlayer]);
 };
 const totalsMarkup = categoryRows();
-assert.match(totalsMarkup, />U8試合<.*?>U12試合</);
+assert.match(totalsMarkup, />U12試合<.*?>U8試合</);
+const unorderedCategories = ["U10", "U8", "", "U12", "U7", "U11", "U9"].map(category => ({ category }));
+assert.deepEqual(Array.from(preview.matchCategories(unorderedCategories).keys()),
+  ["U12", "U11", "U10", "U9", "U8", "U7", "その他"]);
 assert.doesNotMatch(totalsMarkup, /U7試合/);
 assert.match(totalsMarkup, /試合なし/);
 assert.match(totalsMarkup, /U12の試合集計。延べ・2試合　対象 3人、参加 1人、未定 1人、不参加 0人、未回答 1人/);

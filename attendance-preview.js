@@ -413,7 +413,10 @@
       grouped.get(name).push(event);
     });
     return new Map(Array.from(grouped).sort(function(a,b){
-      return Number(a[0]==="その他")-Number(b[0]==="その他")||a[0].localeCompare(b[0],"ja",{numeric:true});
+      var ageA=Number(/^U(\d+)$/.exec(a[0])?.[1]||0);
+      var ageB=Number(/^U(\d+)$/.exec(b[0])?.[1]||0);
+      return ageB-ageA||Number(a[0]==="その他")-Number(b[0]==="その他")||
+        a[0].localeCompare(b[0],"ja",{numeric:true});
     }));
   }
 
