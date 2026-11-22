@@ -376,3 +376,143 @@
 .attendance-preview-page .entry-answer-options input:focus-visible + span {
   outline-color: var(--cyan);
 }
+
+.preview-match-count,
+.preview-comment-tags,
+.recruitment-counts {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px 12px;
+}
+
+.preview-match-count > span {
+  white-space: nowrap;
+}
+
+.preview-match-comments {
+  margin-block: 8px;
+  padding: 9px 10px;
+  border: 1px solid var(--surface-bd);
+  border-inline-start: 3px solid var(--cyan);
+  border-radius: 8px;
+  background: var(--navy-820);
+}
+
+.preview-match-comments h4 {
+  margin: 0;
+  font-size: .9375rem;
+}
+
+/* Override the prototype's two-column information rows inside comment cards. */
+.match-summary-event .preview-match-comments p {
+  display: block;
+  margin: 4px 0 0;
+}
+
+.preview-match-comments ul {
+  list-style: none;
+}
+
+.preview-match-comments li {
+  margin-block-start: 7px;
+  padding-block-start: 7px;
+  border-block-start: 1px solid var(--line);
+}
+
+.preview-comment-person {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  gap: 2px 8px;
+  overflow-wrap: anywhere;
+}
+
+.preview-comments-empty,
+.preview-comment-answer,
+.recruitment-counts {
+  color: var(--ink-2);
+  font-size: .875rem;
+}
+
+.preview-comment-answer[data-value="attending"] { color: var(--attendance-yes); }
+.preview-comment-answer[data-value="maybe"] { color: var(--attendance-maybe); }
+.preview-comment-answer[data-value="absent"] { color: var(--attendance-no); }
+
+.preview-comment-tags {
+  gap: 4px;
+  margin-block-start: 4px;
+}
+
+.preview-comment-tags span {
+  padding: 2px 6px;
+  border-radius: 5px;
+  background: var(--navy-760);
+  color: var(--ink);
+  font-size: .8125rem;
+}
+
+.preview-comment-message {
+  white-space: pre-wrap;
+  overflow-wrap: anywhere;
+}
+
+.recruitment-search-panel {
+  flex-shrink: 0;
+  padding: 12px 16px 8px;
+  border-block-end: 1px solid var(--surface-bd);
+}
+
+.recruitment-search-panel h2 {
+  font-size: 1.25rem;
+}
+
+#recruitment-event {
+  font-size: .875rem;
+  overflow-wrap: anywhere;
+}
+
+#recruitment-dialog label[for="recruitment-search"] {
+  margin: 8px 0 4px;
+}
+
+.recruitment-search-controls {
+  display: flex;
+  gap: 6px;
+}
+
+#recruitment-search {
+  min-width: 0;
+  min-height: 44px;
+  font-size: 16px;
+}
+
+#recruitment-clear {
+  min-height: 44px;
+  padding-inline: 10px;
+}
+
+.recruitment-counts {
+  justify-content: space-between;
+  margin-block-start: 6px;
+}
+
+#recruitment-results {
+  flex: 1 1 auto;
+  padding-block: 0 8px;
+}
+
+#recruitment-members .recruitment-member[hidden],
+#recruitment-clear[hidden],
+#recruitment-save-status:empty {
+  display: none;
+}
+
+#recruitment-save-status {
+  padding-inline: 16px;
+}
+
+#recruitment-dialog.recruitment-keyboard-open {
+  inset-block: var(--recruitment-visible-top) auto;
+  margin-block: 0;
+  --entry-height: var(--recruitment-visible-height);
+}
