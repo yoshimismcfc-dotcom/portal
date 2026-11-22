@@ -1,4 +1,4 @@
-import { previewRecruitment } from "./attendance-preview-recruitment.mjs?v=20261122-7";
+import { previewRecruitment } from "./attendance-preview-recruitment.mjs?v=20261122-8";
 
 export function sharedAttendance(db, serverTimestamp, keyPrefix) {
   const collection = db.collection('attendancePreviewSessions').doc(keyPrefix).collection('answers');
@@ -67,7 +67,6 @@ export async function loadSharedAttendance(keyPrefix) {
   const timestamp = window.firebase.firestore.FieldValue.serverTimestamp;
   return {
     ...sharedAttendance(db, timestamp, keyPrefix),
-    recruitment: previewRecruitment(db, window.FIREBASE_AUTH, timestamp, keyPrefix),
-    googleCoachProvider: () => new window.firebase.auth.GoogleAuthProvider()
+    recruitment: previewRecruitment(db, timestamp, keyPrefix)
   };
 }

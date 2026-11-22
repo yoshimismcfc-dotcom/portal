@@ -119,9 +119,8 @@ GitHub Pages + Cloud Firestoreを使用します。課金プランへの変更�
 
 Firebase 管理者向けの有効化手順。
 
-1. 本番にある既存ルールを控え、`firestore.rules` のうちコメント `Attendance preview recruitment` に続く `match /attendancePreviewSessions/{session}` ブロックを既存のルールへ追加します。すでにある `answers` ルールはそのまま維持します。必要な既存関数は `revision()` です。リポジトリ上のルール全体で本番を置き換えないでください。
-2. Firebase Authentication の登録済み Google アカウントか、メール確認済みのメール／パスワードアカウントを使います。Google ログインには Firebase Authentication の承認済みドメインに GitHub Pages のドメインが必要です。まだない場合はコーチ本人が管理するアカウントを用意します。
-3. Firestore コンソールで `attendancePreviewRecruitmentConfig/{テスト用セッションID}` に `enabled: true`（boolean）を設定します。同じセッションの `attendancePreviewSessions/{テスト用セッションID}/coachGrants/{Firebase Auth UID}` に `active: true`（boolean）を設定します。
-4. テストページの「コーチ → 招集の管理」でログインし、「試合集計 → 招集選手を編集」から対象を選びます。回答者は既存のテスト用リンクを使用します。設定文書とコーチ権限は Firebase 管理者が管理します。
+1. 稼働中の既存ルールを控え、`firestore.rules` のコメント `Attendance preview recruitment` の後にある `match /attendancePreviewSessions/{session}` ブロックを追記します。既存の `answers` ルールと `revision()` は維持します。
+2. Firestore の `attendancePreviewRecruitmentConfig/{テスト用セッションID}` に `enabled: true`（boolean）を設定します。設定の書き込みは Firebase 管理者が行います。
+3. テスト用リンクを開き、「試合集計 → 招集選手を編集」で団員を追加・除外できます。リンクを知っている人はログインなしで同じ招集設定を編集できます。
 
-招集の変更は試合ID単位で保存され、保存済みの出欠や連絡情報は変更しません。アプリで集計・入力に使う対象者は `対象学年に該当する団員 + 個別招集 - 招集対象外` です。従来のテスト回答データへのアクセスルールは既存のものを引き続き使用します。手動登録で端末にのみ存在する試合は、別端末の一覧に自動追加されません。端末間の確認にはカレンダー連携の試合を使用してください。
+招集の変更は試合単位で保存されます。対象者は「対象学年に該当する団員 ＋ 個別招集 − 招集対象外」です。端末間で確認するときはカレンダー連携の試合を使用してください。手動で追加した試合の日付は端末内に保存されます。

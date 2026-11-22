@@ -1,4 +1,4 @@
-export function previewRecruitment(db, auth, timestamp, sessionId) {
+export function previewRecruitment(db, timestamp, sessionId) {
   const session = db.collection('attendancePreviewSessions').doc(sessionId);
   const recruitment = session.collection('recruitment');
 
@@ -9,34 +9,6 @@ export function previewRecruitment(db, auth, timestamp, sessionId) {
           receive(new Map(snapshot.docs.map(doc => [doc.id, doc.data()])));
         }
       }, unavailable);
-    },
-
-    watchCoach(receive) {
-      if (!auth) {
-        receive(false, false);
-        return;
-      }
-      let unwatch;
-      auth.onAuthStateChanged(user => {
-        unwatch?.();
-        receive(Boolean(user), false);
-        if (!user?.emailVerified) return;
-        unwatch = session.collection('coachGrants').doc(user.uid).onSnapshot({ includeMetadataChanges: true },
-          snapshot => receive(true, !snapshot.metadata.fromCache && snapshot.data()?.active === true),
-          () => receive(true, false));
-      }, () => receive(false, false));
-    },
-
-    signIn(email, password) {
-      return auth.signInWithEmailAndPassword(email, password);
-    },
-
-    signInWithGoogle(provider) {
-      return auth.signInWithPopup(provider);
-    },
-
-    signOut() {
-      return auth.signOut();
     },
 
     async save(eventId, changes, baselineRevision) {
