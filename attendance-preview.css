@@ -1004,3 +1004,25 @@
   border: 1px solid var(--surface-bd);
   border-radius: .4rem;
 }
+
+.attendance-preview-page .attendance-holiday-notice {
+  margin-block: .65rem;
+  padding: .65rem .75rem;
+  border: 1px solid var(--surface-bd);
+  border-inline-start: 3px solid var(--attendance-board-link);
+  border-radius: .65rem;
+  background: var(--navy-900);
+  color: var(--ink);
+}
+
+.attendance-preview-page .attendance-holiday-notice h2 {
+  margin: 0 0 .25rem;
+  font-size: 1rem;
+}
+
+.attendance-preview-page .attendance-holiday-notice p {
+  margin: 0;
+  color: var(--ink-2);
+  font-size: .875rem;
+  line-height: 1.55;
+}

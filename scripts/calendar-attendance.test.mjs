@@ -515,3 +515,25 @@ assert.deepEqual(dateIds("2027-01-04"), []);
 assert.equal(preview.state.answers["calendar_year-practice"].players[eligiblePlayer.id].value,"attending");
 preview.setSeason(null);
 assert.deepEqual(dateIds("2026-12-30"), ["day_2026-12-30"]);
+
+// Holiday availability remains separate from a subsequently confirmed match.
+const holidayDate = "2026-11-23";
+const holidayId = "day_"+holidayDate;
+const holidayMatch = makeEvent("U12（6年）祝日交流戦", holidayDate, {label:"U12",sourceId:"holiday-match"});
+const holidayDay = () => preview.groupBoardDays(preview.getBoardEvents()).find(day=>day.date===holidayDate);
+assert(preview.sync([]));
+assert.equal(holidayDay().practice.length,0);
+assert.equal(holidayDay().activities[0].title,"祝日・試合に備えた出欠確認");
+assert.match(preview.renderEntryDay(holidayDay(),athlete,true), /試合に備えた出欠確認.*連絡事項（任意）/);
+assert(preview.sync([holidayMatch]));
+assert.deepEqual(dateIds(holidayDate), ["calendar_holiday-match"]);
+preview.state.answers[holidayId]={players:{[athlete.id]:{value:"maybe",contact:{message:"事前連絡"}}}};
+assert.deepEqual(dateIds(holidayDate), [holidayId,"calendar_holiday-match"]);
+assert.equal(holidayDay().activities[0].holidayReference,true);
+assert.match(preview.activitySummaryRow([holidayDay()],[athlete]), /参照のみ/);
+assert.doesNotMatch(preview.renderEntryDay(holidayDay(),athlete,true), /試合に備えた出欠確認/);
+assert.match(preview.matchAttendanceTable(holidayDay().activities[0],[athlete],"players",holidayDay()), /事前連絡/);
+assert.match(preview.renderEntryDay(holidayDay(),athlete,true), /祝日交流戦/);
+assert(preview.sync([]));
+assert.equal(holidayDay().activities[0].holidayReference,false);
+assert.equal(preview.countAnswers(holidayDay().activities,[athlete],holidayDay()).maybe,1);
