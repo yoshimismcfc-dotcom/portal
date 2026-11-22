@@ -395,8 +395,10 @@
     return (value.getMonth()+1)+"/"+value.getDate()+"（"+DAY_NAMES[value.getDay()]+"）";
   }
 
-  function compactTotal(total){
-    return "○"+total.attending+"/"+total.eligible+" △"+total.maybe+" ×"+total.absent;
+  function compactCountMarks(total){
+    return '<span class="count-yes">○'+total.attending+'</span>'+
+      '<span class="count-maybe">△'+total.maybe+'</span>'+
+      '<span class="count-no">×'+total.absent+'</span>';
   }
 
   function matchCategory(event){
@@ -415,12 +417,6 @@
     }));
   }
 
-  function matchCategoryLabel(matches){
-    return Array.from(matchCategories(matches),function(entry){
-      return entry[0]+(entry[1].length>1?"（"+entry[1].length+"試合）":"");
-    }).join("・");
-  }
-
   function categoryCountButton(day,category,matches,people){
     if(!matches)return '<span class="category-count-empty" aria-label="試合なし">—</span>';
     var total=countAnswers(matches,people,day);
@@ -432,10 +428,8 @@
       "人、不参加 "+total.absent+"人、未回答 "+unanswered+"人":"集計待ち");
     return '<button type="button" class="category-count-button" data-match-date="'+esc(day.date)+
       '" data-match-category="'+esc(category)+'" aria-haspopup="dialog" aria-label="'+esc(label)+'">'+
-      (ready?'<span class="category-count-values"><span class="count-yes">○'+total.attending+'</span>'+
-      '<span class="count-maybe">△'+total.maybe+'</span><span class="count-no">×'+total.absent+'</span></span>'+
-      '<span class="category-count-context">'+multiple+'対象 '+total.eligible+'・未回答 '+unanswered+'</span>':
-      '<span class="category-count-context">集計待ち</span>')+'</button>';
+      (ready?'<span class="category-count-values" aria-hidden="true">'+compactCountMarks(total)+'</span>':
+      '<span class="category-count-empty">集計待ち</span>')+'</button>';
   }
 
   function categorySummaryRows(days,byDate,people){
@@ -454,24 +448,13 @@
   }
 
   function dayHeading(day,people){
-    var totals=countAnswers(dayEvents(day),people,day);
-    var categories=matchCategoryLabel(day.matches);
-    var label=dateLabel(day.date)+"の予定を開く。対象"+totals.eligible+
-      "、参加"+totals.attending+"、未定"+totals.maybe+"、不参加"+totals.absent;
-    var date='<span class="board-date">'+esc(compactDate(day.date))+
-      '<span class="day-calendar-icon" aria-hidden="true">▦</span></span>';
-    var count='<span class="event-count-summary" aria-label="'+esc(label)+'">'+
-      '<span class="count-yes">○'+totals.attending+'</span>'+
-      '<span class="count-maybe">△'+totals.maybe+'</span>'+
-      '<span class="count-no">×'+totals.absent+'</span>'+
-      '<span class="count-eligible">対象'+totals.eligible+'名</span></span>';
-    var category=categories?'<button type="button" class="preview-day-summary" data-match-date="'+esc(day.date)+
-      '" aria-haspopup="dialog" aria-label="'+esc(compactDate(day.date)+"の試合集計 "+categories)+'">'+esc(categories)+'</button>':
-      '<span class="preview-day-summary-space">練習・行事</span>';
-    if(day.activities.length)category='<span class="preview-day-activity">'+
-      esc(day.activities.map(function(event){return event.title;}).join("・"))+'</span>'+category;
-    return '<div class="board-day-heading">'+calendarLink(day.date,date,"day-detail-link","",label)+
-      '<div class="board-day-category">'+category+'</div>'+count+'</div>';
+    var total=countAnswers(dayEvents(day),people,day);
+    var ready=deviceMode||sharedReady;
+    var label=dateLabel(day.date)+"の予定を開く。"+(ready?
+      "参加 "+total.attending+"人、未定 "+total.maybe+"人、不参加 "+total.absent+"人":"集計待ち");
+    var date='<span class="board-date">'+esc(compactDate(day.date))+'</span>';
+    var count='<span class="event-count-summary" aria-hidden="true">'+(ready?compactCountMarks(total):"集計待ち")+'</span>';
+    return '<div class="board-day-heading">'+calendarLink(day.date,date+count,"day-detail-link","",label)+'</div>';
   }
 
   function boardPersonName(person){
