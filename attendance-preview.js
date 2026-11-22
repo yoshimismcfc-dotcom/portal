@@ -328,6 +328,12 @@
       }
       if(audience==="coaches"){renderEventList();renderResponse(true);}
       renderSavedEvent();refreshCsvIfOpen();
+      if($("family-entry-dialog").open&&!$("family-picker").hidden){
+        if(family.awaitRoster&&staffCoachesReady&&!family.pickerTouched){
+          family.awaitRoster=false;
+          showFamilyEntry(selectedFamily());
+        }else renderFamilyPicker();
+      }
     },null,null);
   }
 
@@ -1435,6 +1441,240 @@
     rows.querySelectorAll("[data-edit-coach]").forEach(function(btn){btn.addEventListener("click",function(){var coach=state.coaches.find(function(c){return c.id===btn.dataset.editCoach;});if(!coach)return;var name=prompt("コーチ名を入力してください",coach.name);if(name!==null&&name.trim()){coach.name=name.trim();saveState();render();}});});rows.querySelectorAll("[data-remove-coach]").forEach(function(btn){btn.addEventListener("click",function(){var coach=state.coaches.find(function(c){return c.id===btn.dataset.removeCoach;});if(coach&&confirm(coach.name+"さんを試作リストから削除しますか？")){state.coaches=state.coaches.filter(function(c){return c.id!==coach.id;});saveState();render();}});});
   }
 
+  var FAMILY_KEY="yoshimi_smc_family_entry_v1";
+  var family=null;
+
+  function familyKey(group,id){return group+":"+id;}
+
+  function selectedFamily(){
+    try{
+      var ids=JSON.parse(localStorage.getItem(FAMILY_KEY)||"[]");
+      return new Set(Array.isArray(ids)?ids:[]);
+    }catch(error){return new Set();}
+  }
+
+  function familyRoster(){
+    return ["players","coaches"].flatMap(function(group){
+      return getPeople(group).map(function(person){return {group:group,person:person,key:familyKey(group,person.id)};});
+    });
+  }
+
+  function inFamilyGroup(group,action){
+    var previous=audience;
+    audience=group;
+    try{return action();}
+    finally{audience=previous;}
+  }
+
+  function familyLabel(member){
+    return [member.group==="coaches"?"コーチ":member.person.grade,member.person.name].filter(Boolean).join(" ");
+  }
+
+  function renderFamilyPicker(){
+    var area=$("family-picker-people");
+    var checked=selectedFamily();
+    area.querySelectorAll("input[name=family-person]").forEach(function(input){
+      if(input.checked)checked.add(input.value);
+      else checked.delete(input.value);
+    });
+    var roster=familyRoster();
+    $("family-clear-people").hidden=!selectedFamily().size;
+    area.innerHTML=["players","coaches"].map(function(group){
+      var people=roster.filter(function(member){return member.group===group;});
+      return '<fieldset><legend>'+(group==="players"?"団員":"コーチ")+'</legend>'+
+        (people.map(function(member){
+          return '<label><input type="checkbox" name="family-person" value="'+esc(member.key)+'"'+
+            (checked.has(member.key)?" checked":"")+'><span>'+esc(familyLabel(member))+'</span></label>';
+        }).join("")||'<p class="small-note">名簿を確認中です。</p>')+'</fieldset>';
+    }).join("");
+  }
+
+  function familyControlData(section){
+    var data=new FormData();
+    section.querySelectorAll("[data-family-field]").forEach(function(field){
+      if(field.disabled||(["radio","checkbox"].includes(field.type)&&!field.checked))return;
+      data.append(field.dataset.familyField,field.value);
+    });
+    return data;
+  }
+
+  function familyUpdates(section,member,day){
+    return inFamilyGroup(member.group,function(){
+      return readEntryUpdates(familyControlData(section),member.person,[day]);
+    });
+  }
+
+  function familyChanged(update,baseline){
+    if(update.value!==undefined&&(baseline?.value||"")!==update.value)return true;
+    if(update.contact===undefined)return false;
+    var old=baseline?.contact||{},next=update.contact||{};
+    return Object.keys(old).length!==Object.keys(next).length||Object.keys(next).some(function(key){return old[key]!==next[key];});
+  }
+
+  function familyBulkCandidates(eventId){
+    return family.members.flatMap(function(member,index){
+      var section=$("family-entries").children[index];
+      var inputs=Array.from(section.querySelectorAll('input[type="radio"]')).filter(function(input){
+        return input.dataset.familyField==="answer-"+eventId&&!input.closest("[data-coach-practice][hidden]");
+      });
+      return inputs.length?[{member:member,inputs:inputs}]:[];
+    });
+  }
+
+  function renderFamilyBulk(){
+    $("family-bulk-actions").innerHTML=dayEvents(family.day).filter(function(event){return !event.holidayReference;}).map(function(event){
+      var candidates=familyBulkCandidates(event.id);
+      if(candidates.length<2)return "";
+      return '<section class="family-bulk-event"><strong>'+esc(scheduleEventTitle(event))+'</strong><p>'+
+        esc(candidates.map(function(item){return familyLabel(item.member);}).join("・"))+'</p>'+
+        ANSWERS.map(function(answer){
+          return '<button type="button" class="secondary-button" data-family-event="'+esc(event.id)+'" data-family-value="'+
+            esc(answer.value)+'">まとめて'+answerMark(answer.value)+'</button>';
+        }).join(" ")+'</section>';
+    }).join("");
+  }
+
+  function renderFamilyDay(){
+    var select=$("family-date");
+    var days=groupBoardDays(getBoardEvents());
+    family.day=days.find(function(day){return day.date===select.value;})||days[0];
+    family.baseline=sharedRows;
+    family.confirmed=new Map();
+    family.dirty=false;
+    $("family-status").textContent="";
+    $("family-entries").innerHTML="";
+    $("family-bulk-actions").innerHTML="";
+    $("family-save").disabled=!family.day;
+    if(!family.day){$("family-status").textContent="入力できる予定がありません。";return;}
+    select.value=family.day.date;
+    family.members.forEach(function(member,index){
+      var section=document.createElement("section");
+      section.className="family-person";
+      section.innerHTML='<h3>'+esc(familyLabel(member))+'</h3>'+inFamilyGroup(member.group,function(){
+        return renderEntryDay(family.day,member.person,false)||'<p class="small-note">対象の予定はありません。</p>';
+      });
+      section.querySelectorAll("[name]").forEach(function(input){
+        input.dataset.familyField=input.name;
+        input.name="family-"+index+"-"+input.name;
+      });
+      section.addEventListener("change",function(event){
+        family.dirty=true;
+        if(member.group==="coaches"&&event.target.matches('.is-match input[type="radio"]')){
+          inFamilyGroup(member.group,function(){updateCoachPracticeOptions(event);});
+          renderFamilyBulk();
+        }
+      });
+      section.addEventListener("input",function(){family.dirty=true;});
+      $("family-entries").append(section);
+    });
+    renderFamilyBulk();
+  }
+
+  function showFamilyEntry(ids){
+    family.members=familyRoster().filter(function(member){return ids.has(member.key);});
+    var showEntry=family.members.length>0;
+    $("family-picker").hidden=showEntry;
+    $("family-entry").hidden=!showEntry;
+    $("family-save").hidden=!showEntry;
+    if(!showEntry){renderFamilyPicker();return;}
+    $("family-date").innerHTML=groupBoardDays(getBoardEvents()).map(function(day){
+      return '<option value="'+esc(day.date)+'">'+esc(dateLabel(day.date))+'</option>';
+    }).join("");
+    renderFamilyDay();
+  }
+
+  function openFamilyEntry(){
+    if(!requireSharedConnection())return;
+    family={members:[],dirty:false,saving:false};
+    $("family-picker-people").replaceChildren();
+    $("family-status").textContent="";
+    var ids=selectedFamily();
+    var needsCoaches=[...ids].some(function(id){return id.startsWith("coaches:");});
+    $("family-entry-dialog").showModal();
+    readStaffCoaches();
+    if(needsCoaches&&!staffCoachesReady){
+      family.awaitRoster=true;
+      $("family-picker").hidden=false;
+      $("family-entry").hidden=true;
+      $("family-save").hidden=true;
+      renderFamilyPicker();
+      $("family-status").textContent="コーチ名簿を確認しています。";
+      return;
+    }
+    showFamilyEntry(ids);
+  }
+
+  function familyCanDiscard(){
+    return !family?.saving&&(!family?.dirty||confirm("保存していない家族分の入力を破棄しますか？"));
+  }
+
+  function applyFamilyBulk(button){
+    var value=button.dataset.familyValue;
+    var candidates=familyBulkCandidates(button.dataset.familyEvent);
+    var changed=candidates.filter(function(item){return item.inputs.find(function(input){return input.checked;})?.value!==value;});
+    if(changed.length&&!confirm(changed.map(function(item){return familyLabel(item.member);}).join("・")+
+      " の回答を "+answerMark(value)+" にしますか？"))return;
+    changed.forEach(function(item){
+      var radio=item.inputs.find(function(input){return input.value===value;});
+      radio.checked=true;
+      radio.dispatchEvent(new Event("change",{bubbles:true}));
+    });
+  }
+
+  async function saveFamily(){
+    if(!family?.day||family.saving||savingShared||!sharedReady)return;
+    var currentDay=groupBoardDays(getBoardEvents()).find(function(day){return day.date===family.day.date;});
+    var status=$("family-status");
+    var activeEvents=currentDay&&dayEvents(currentDay).filter(function(event){return !event.holidayReference;});
+    var originalEvents=dayEvents(family.day).filter(function(event){return !event.holidayReference;});
+    if(!activeEvents||originalEvents.some(function(event){return !activeEvents.some(function(item){return item.id===event.id;});})){
+      status.textContent="予定が変更されました。入力はこの画面に残っています。最新の予定を出欠表で確認してください。";
+      return;
+    }
+    var jobs=family.members.flatMap(function(member,index){
+      var section=$("family-entries").children[index];
+      return familyUpdates(section,member,currentDay).flatMap(function(update){
+        var key=sharedStore.key(update.id,member.group,member.person.id);
+        return familyChanged(update,family.baseline.get(key))?[{member:member,key:key,update:update}]:[];
+      });
+    });
+    if(!jobs.length){status.textContent="変更した回答はありません。";return;}
+    if(family.confirmed.size&&!confirm("前回確認した別の端末の変更を、今回の入力で上書きしますか？"))return;
+    family.saving=true;
+    var controls=Array.from($("family-entry-dialog").querySelectorAll("button,input,select,textarea"))
+      .filter(function(input){return !input.disabled;});
+    controls.forEach(function(input){input.disabled=true;});
+    status.textContent="家族分の回答を保存中…";
+    var results=await Promise.allSettled(jobs.map(function(job){
+      return sharedStore.save(job.member.group,job.member.person.id,[job.update],undefined,family.baseline,family.confirmed);
+    }));
+    var failed=[],conflicts=new Map();
+    family.baseline=new Map(family.baseline);
+    results.forEach(function(result,index){
+      var job=jobs[index];
+      if(result.status==="fulfilled"&&!result.value.size){
+        var previous=family.baseline.get(job.key)||{};
+        family.baseline.set(job.key,{...previous,
+          value:job.update.value??previous.value,contact:job.update.contact===undefined?previous.contact:job.update.contact});
+        return;
+      }
+      var title=dayEvents(currentDay).find(function(event){return event.id===job.update.id;});
+      failed.push(familyLabel(job.member)+"｜"+scheduleEventTitle(title)+(result.status==="fulfilled"?"（別の端末で変更あり）":"（保存できませんでした）"));
+      if(result.status==="fulfilled")result.value.forEach(function(fields,key){conflicts.set(key,fields);});
+    });
+    family.confirmed=conflicts;
+    family.saving=false;
+    family.dirty=Boolean(failed.length);
+    controls.forEach(function(input){input.disabled=false;});
+    if(failed.length){
+      status.textContent=(jobs.length-failed.length)+"件保存しました。次の入力はこの画面に残っています。\n"+failed.join("\n");
+      return;
+    }
+    $("family-entry-dialog").close();
+    renderEventList();renderResponse(true);
+    announceSave("家族分の回答をクラウドに保存しました。");
+  }
+
   function openAttendanceForm(personId){
     var people=getPeople(),select=$("entry-person");
     select.innerHTML='<option value="">名前を選択してください</option>'+people.map(function(person){
@@ -1783,6 +2023,52 @@
   function init(){
     updateSeasonInputs();
     $("year-end-form").addEventListener("submit",saveSeasonPeriod);
+    $("open-family-entry").addEventListener("click",openFamilyEntry);
+    $("family-picker").addEventListener("change",function(){family.pickerTouched=true;});
+    $("family-picker").addEventListener("submit",function(event){
+      event.preventDefault();
+      var ids=new Set(new FormData(event.currentTarget).getAll("family-person"));
+      var remembered=true;
+      try{localStorage.setItem(FAMILY_KEY,JSON.stringify([...ids]));}
+      catch(error){remembered=false;}
+      $("family-picker-people").replaceChildren();
+      $("family-status").textContent="";
+      family.awaitRoster=false;
+      showFamilyEntry(ids);
+      if(!remembered)$("family-status").textContent="この端末に名前を記憶できませんでした。今回の入力は続けられます。";
+    });
+    $("family-clear-people").addEventListener("click",function(){
+      try{localStorage.removeItem(FAMILY_KEY);}
+      catch(error){$("family-status").textContent="この端末の家族登録を解除できませんでした。";return;}
+      $("family-picker-people").replaceChildren();
+      renderFamilyPicker();
+      $("family-status").textContent="この端末の家族登録を解除しました。";
+    });
+    $("family-edit-people").addEventListener("click",function(){
+      if(!familyCanDiscard())return;
+      family.dirty=false;
+      $("family-picker-people").replaceChildren();
+      $("family-picker").hidden=false;
+      $("family-entry").hidden=true;
+      $("family-save").hidden=true;
+      $("family-status").textContent="";
+      renderFamilyPicker();
+    });
+    $("family-date").addEventListener("change",function(event){
+      if(familyCanDiscard())renderFamilyDay();
+      else event.currentTarget.value=family.day.date;
+    });
+    $("family-bulk-actions").addEventListener("click",function(event){
+      var button=event.target.closest("[data-family-event]");
+      if(button)applyFamilyBulk(button);
+    });
+    $("family-save").addEventListener("click",saveFamily);
+    $("family-close").addEventListener("click",function(){
+      if(familyCanDiscard())$("family-entry-dialog").close();
+    });
+    $("family-entry-dialog").addEventListener("cancel",function(event){
+      if(!familyCanDiscard())event.preventDefault();
+    });
     $("event-list-filter").addEventListener("change",renderEventList);
     $("event-visibility-undo").addEventListener("click",function(){
       if(undoVisibility)setEventExclusion(undoVisibility.event,undoVisibility.excluded);

@@ -8,7 +8,7 @@
   <title>出欠共有テスト｜吉見SMC FC</title>
   <link rel="stylesheet" href="common.css">
   <link rel="stylesheet" href="attendance-prototype.css?v=20261121-25">
-  <link rel="stylesheet" href="attendance-preview.css?v=20261123-holiday-guide">
+  <link rel="stylesheet" href="attendance-preview.css?v=20261123-family1">
   <script src="firebase-config.js"></script>
   <script src="calendar-attendance.js?v=20261122-girls2"></script>
   <script src="common.js"></script>
@@ -64,6 +64,7 @@
         </ul>
       </details>
     </section>
+    <button type="button" id="open-family-entry" class="secondary-button">家族で入力</button>
     <div id="response-list" class="response-list"></div>
     <p id="answer-status" class="attendance-save-status" role="status" hidden></p>
     <div class="fixed-entry-bar" id="fixed-entry-bar"><span id="entry-mode-help">予定を選び、出欠入力を開始してください。</span><button type="button" id="entry-mode-button" class="primary-button">出欠を入力する</button><button type="button" id="entry-mode-icon" class="entry-mode-icon" aria-label="名前を選んで出欠を入力"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 20h4l11-11a2.1 2.1 0 0 0-4-4L4 16v4Z"/><path d="m13.5 6.5 4 4M4 20l4-1"/></svg></button></div>
@@ -158,6 +159,29 @@
     <p data-entry-status class="attendance-save-status" role="status"></p>
     <div class="dialog-actions"><button type="button" id="cancel-attendance" class="secondary-button">キャンセル</button><button type="submit" id="save-attendance" class="primary-button">回答を保存</button></div>
   </form>
+</dialog>
+<dialog id="family-entry-dialog" class="event-dialog attendance-entry-dialog" aria-labelledby="family-entry-title">
+  <div class="attendance-entry-scroll">
+    <h2 id="family-entry-title">家族で入力</h2>
+    <form id="family-picker">
+      <p class="small-note">一緒に入力したい団員・コーチの名前を選んでください。この組み合わせはこの端末だけに保存します。</p>
+      <div id="family-picker-people"></div>
+      <button type="submit" class="primary-button">選んだ名前を登録</button>
+      <button type="button" class="secondary-button" id="family-clear-people" hidden>この端末の登録を解除</button>
+    </form>
+    <div id="family-entry" hidden>
+      <label for="family-date">入力する日</label>
+      <select id="family-date"></select>
+      <button type="button" id="family-edit-people" class="secondary-button">家族の名前を変更</button>
+      <div id="family-bulk-actions"></div>
+      <div id="family-entries"></div>
+    </div>
+  </div>
+  <p id="family-status" class="attendance-save-status" role="status"></p>
+  <div class="dialog-actions">
+    <button type="button" id="family-close" class="secondary-button">閉じる</button>
+    <button type="button" id="family-save" class="primary-button" hidden>家族分を保存</button>
+  </div>
 </dialog>
 <dialog id="day-entry-dialog" class="event-dialog attendance-entry-dialog" aria-labelledby="day-entry-title">
   <form id="day-entry-form">
@@ -255,6 +279,6 @@
     <div class="dialog-actions"><button type="button" id="cancel-event" class="secondary-button">キャンセル</button><button type="submit" class="primary-button">予定を追加</button></div>
   </form>
 </dialog>
-<script src="attendance-preview.js?v=20261123-holiday-guide"></script>
+<script src="attendance-preview.js?v=20261123-family1"></script>
 </body>
 </html>

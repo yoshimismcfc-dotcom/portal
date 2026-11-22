@@ -123,14 +123,14 @@ assert.equal(initialCalendarDay([makeEvent("練習", "2026-11-23")], today).next
 // Exercise the same event list used by the attendance board, entry forms and totals.
 const previewSource = fs.readFileSync(path.join(root, "attendance-preview.js"), "utf8");
 const previewContext = {
-  Intl, URLSearchParams, location: { hash: "" }, window: { SMCCalendarAttendance: attendance },
+  Intl, FormData, URLSearchParams, location: { hash: "" }, window: { SMCCalendarAttendance: attendance },
   localStorage: { getItem: () => null, setItem() {} }
 };
 vm.runInNewContext(previewSource.replace('document.addEventListener("DOMContentLoaded",init);', `
   todayISO = () => "2026-11-22";
   holidays["2026-11-23"] = "勤労感謝の日";
   globalThis.preview = {
-    state, getBoardEvents, groupBoardDays, countAnswers, renderEntryDay, applySharedAnswers, eligibility, matchRestriction,
+    state, familyChanged, familyUpdates, familyKey, getBoardEvents, groupBoardDays, countAnswers, renderEntryDay, applySharedAnswers, eligibility, matchRestriction,
     matchAttendanceTable, readEntryUpdates, eventListStatus,
     categorySummaryRows, matchCategories, dayHeading, compactCountMarks, scheduleDays, dayButton, activitySummaryRow, detailChoices, attendanceEventTitle,
     setSeason(period) { seasonPeriod = validSeasonPeriod(period); },
@@ -537,3 +537,28 @@ assert.match(preview.renderEntryDay(holidayDay(),athlete,true), /祝日交流戦
 assert(preview.sync([]));
 assert.equal(holidayDay().activities[0].holidayReference,false);
 assert.equal(preview.countAnswers(holidayDay().activities,[athlete],holidayDay()).maybe,1);
+
+// A parent coach and children use isolated selections even for the same date.
+const sibling = {id:"family-sibling",name:"検証用兄弟",grade:"2年"};
+const older = {...athlete,id:"family-older"};
+const parent = {...coach,id:"family-parent"};
+const familyPractice = {id:"family-training",date:"2026-11-28",kind:"practice"};
+const olderGame = {id:"family-u12",date:familyPractice.date,kind:"match",targetGrades:["6年"]};
+const youngerGame = {id:"family-u8",date:familyPractice.date,kind:"match",targetGrades:["2年"]};
+const familyDay = {date:familyPractice.date,practice:[familyPractice],matches:[olderGame,youngerGame],activities:[]};
+const familySection = values => ({querySelectorAll:()=>Object.entries(values).map(([key,value])=>({
+  dataset:{familyField:key},value
+}))});
+const entryFor = (group,person,values,day=familyDay) => Array.from(preview.familyUpdates(familySection(values),{group,person},day));
+assert.equal(preview.familyKey("players","same"),"players:same");
+assert.notEqual(preview.familyKey("players","same"),preview.familyKey("coaches","same"));
+for(const player of [older,sibling]){
+  assert.equal(entryFor("players",player,{"answer-family-training":"attending"},{...familyDay,matches:[]})[0].value,"attending");
+}
+const sharedChoices={"answer-family-training":"attending","answer-family-u12":"attending","answer-family-u8":"maybe"};
+assert.deepEqual(entryFor("players",older,sharedChoices).map(x=>x.id), ["family-u12"]);
+assert.deepEqual(entryFor("players",sibling,sharedChoices).map(x=>x.id), ["family-u8"]);
+assert.deepEqual(entryFor("coaches",parent,sharedChoices).map(x=>x.id), ["family-u12","family-u8"]);
+assert.equal(preview.familyChanged({value:"attending",contact:{late:true,message:"遅刻"}},
+  {value:"attending",contact:{message:"遅刻",late:true}}),false);
+assert.equal(preview.familyChanged({value:"maybe"},{value:"attending"}),true);
