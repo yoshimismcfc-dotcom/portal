@@ -3,6 +3,7 @@ import fs from "node:fs";
 import {createRequire} from "node:module";
 import path from "node:path";
 import vm from "node:vm";
+import {sharedAttendance} from "../attendance-preview-store.mjs";
 import {fileURLToPath} from "node:url";
 
 const require = createRequire(import.meta.url);
@@ -116,11 +117,13 @@ vm.runInNewContext(previewSource.replace('document.addEventListener("DOMContentL
   todayISO = () => "2026-11-22";
   holidays["2026-11-23"] = "勤労感謝の日";
   globalThis.preview = {
-    state, getBoardEvents,
+    state, getBoardEvents, groupBoardDays, countAnswers, renderEntryDay, applySharedAnswers,
+    matchAttendanceTable, readEntryUpdates,
+    useGroup(group) { audience = group; },
     sync(events, failed = []) {
       syncWeekendPractices(events, failed);
       calendarMatchesChecked = true;
-      return syncCalendarMatches(events.map(calendarMatch).filter(Boolean), false, failed);
+      return syncCalendarAttendance(events.map(calendarAttendanceEvent).filter(Boolean), false, failed);
     }
   };
 `), previewContext);
@@ -151,6 +154,81 @@ assert(preview.sync([practice]));
 assert.deepEqual(dateIds("2026-11-28"), [practiceId]);
 assert.deepEqual(dateIds("2026-11-23"), ["day_2026-11-23"]);
 assert.deepEqual(dateIds("2026-11-25"), ["day_2026-11-25"]);
+
+const marathon = makeEvent("全体練習は中止でスポ少マラソン", "2026-12-05", {
+  label: "全体", sourceId: "marathon", location: "テスト会場"
+});
+const athlete = { id: "same-id", name: "検証用団員", grade: "6年" };
+const coach = { id: "same-id", name: "検証用コーチ" };
+assert(preview.sync([marathon, match]));
+assert(preview.sync([marathon, match]));
+assert.deepEqual(dateIds("2026-12-05"), ["calendar_marathon"]);
+const activityDay = preview.groupBoardDays(preview.getBoardEvents()).find(day => day.date === "2026-12-05");
+const activity = activityDay.activities[0];
+assert.equal(activity.title, "スポ少マラソン");
+assert.equal(activity.place, "テスト会場");
+assert.equal(activity.startTime, "");
+assert.equal(activityDay.practice.length, 0);
+assert.equal(activityDay.matches.length, 0);
+assert.equal(preview.countAnswers([activity], [athlete], activityDay).eligible, 1);
+assert.match(preview.renderEntryDay(activityDay, athlete, true), />行事<.*スポ少マラソン/);
+preview.useGroup("coaches");
+assert.equal(preview.countAnswers([activity], [coach], activityDay).eligible, 1);
+assert.match(preview.renderEntryDay(activityDay, coach, true), />行事<.*スポ少マラソン/);
+assert(preview.sync([{ ...marathon, title: marathon.title + "中止" }, match]));
+assert.deepEqual(dateIds("2026-12-05"), []);
+assert(preview.sync([marathon, match]));
+assert.deepEqual(dateIds("2026-12-05"), ["calendar_marathon"]);
+assert(preview.sync([match]));
+assert.deepEqual(dateIds("2026-12-05"), []);
+
+// Two independent clients share only this isolated test database.
+const docs = new Map();
+const snapshot = () => ({ metadata: {}, docs: Array.from(docs, ([id, data]) => ({ id, data: () => data })) });
+const listeners = [];
+const answerCollection = {
+  doc: id => id,
+  onSnapshot(options, receive) { listeners.push(receive); receive(snapshot()); }
+};
+const db = {
+  collection: () => ({ doc: () => ({ collection: () => answerCollection }) }),
+  async runTransaction(write) {
+    const changes = new Map();
+    await write({ get: async id => ({ data: () => docs.get(id) }), set: (id, data) => changes.set(id, data) });
+    changes.forEach((data, id) => docs.set(id, data));
+    listeners.forEach(receive => receive(snapshot()));
+  }
+};
+const writer = sharedAttendance(db, () => null, "isolated-test");
+const reader = sharedAttendance(db, () => null, "isolated-test");
+let remote;
+reader.listen(records => { remote = records; preview.applySharedAnswers(records, reader.key); });
+const fixtureId = "calendar_fixture";
+const matchDay = preview.groupBoardDays(preview.getBoardEvents()).find(day => day.date === "2026-11-28");
+const fixture = matchDay.matches[0];
+assert.match(preview.renderEntryDay(matchDay, coach, true), /連絡事項.*name="lateTime-calendar_fixture"/);
+const form = new FormData();
+form.set("answer-" + fixtureId, "attending");
+form.set("contact-" + fixtureId, "1");
+form.set("late-" + fixtureId, "on");
+form.set("lateTime-" + fixtureId, "10:30");
+form.set("early-" + fixtureId, "on");
+form.set("earlyTime-" + fixtureId, "14:00");
+await writer.save("coaches", coach.id, preview.readEntryUpdates(form, coach, [matchDay]), undefined, remote);
+const coachRow = () => preview.matchAttendanceTable(fixture, [coach], "coaches");
+assert.match(coachRow(), /○ 参加/);
+assert.match(coachRow(), /早退（14:00）.*遅刻・途中参加（10:30）/);
+assert.doesNotMatch(preview.matchAttendanceTable(fixture, [athlete], "players"), /10:30|14:00/);
+assert.doesNotMatch(preview.matchAttendanceTable({ ...fixture, id: "same-day-other-fixture" }, [coach], "coaches"), /10:30|14:00/);
+form.set("lateTime-" + fixtureId, "10:45");
+await writer.save("coaches", coach.id, preview.readEntryUpdates(form, coach, [matchDay]), undefined, remote);
+assert.match(coachRow(), /10:45/);
+assert.doesNotMatch(coachRow(), /10:30/);
+form.delete("late-" + fixtureId);
+form.delete("early-" + fixtureId);
+await writer.save("coaches", coach.id, preview.readEntryUpdates(form, coach, [matchDay]), undefined, remote);
+assert.match(coachRow(), /○ 参加/);
+assert.doesNotMatch(coachRow(), /10:45|14:00/);
 
 const commonSource = fs.readFileSync(path.join(root, "common.js"), "utf8");
 const calendarHtml = fs.readFileSync(path.join(root, "calendar.html"), "utf8");
