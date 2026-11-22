@@ -145,21 +145,42 @@
     var board=getBoardEvents(),active=new Set(board.map(function(event){return event.id;}));
     var days=new Map(groupBoardDays(board).map(function(day){return [day.date,day];}));
     var list=$("event-list"),filter=$("event-list-filter").value;
-    var events=state.events.filter(function(event){
-      return !filter||(filter==="active"?active.has(event.id):filter==="inactive"?event.calendarInactive:manuallyExcluded(event));
-    }).sort(function(a,b){return a.date.localeCompare(b.date)||a.title.localeCompare(b.title,"ja");});
+    // One list for actual calendar events AND automatically generated practice dates.
+    // Never delete hidden entries; keep them available for restoration and CSV.
+    var known=new Map();
+    board.concat(state.events).forEach(function(event){known.set(event.id,event);});
+    var events=Array.from(known.values()).filter(function(event){
+      if(!filter)return true;
+      if(filter==="active")return active.has(event.id);
+      if(filter==="inactive")return Boolean(event.calendarInactive);
+      return manuallyExcluded(event)||!active.has(event.id);
+    }).sort(function(a,b){return a.date.localeCompare(b.date)||
+      String(a.startTime||"").localeCompare(String(b.startTime||""))||
+      String(a.title||"").localeCompare(String(b.title||""),"ja");});
     list.innerHTML=events.map(function(event){
       var accepting=active.has(event.id),excluded=manuallyExcluded(event);
+      var manual=!event.id.startsWith("day_");
+      var date=fromISO(event.date);
+      var dateText=(date.getMonth()+1)+"/"+date.getDate()+"（"+DAY_NAMES[date.getDay()]+"）";
+      var title=event.title||((date.getDay()===3)?"通常練習":(date.getDay()===4)?"低学年練習":holidays[event.date]||"活動予定");
       var c=accepting?countAnswers([event],getPeople(),days.get(event.date)):null;
-      var totals=c?'<span class="event-count">参加 <b>'+c.attending+'/'+c.eligible+'</b> ・未定 '+c.maybe+
-        '<br>未回答 '+(c.eligible-c.attending-c.maybe-c.absent)+'</span>':"";
-      return '<article class="event-card"><button class="event-open" type="button" data-open-event="'+esc(event.id)+'"><strong>'+
-        esc(event.title)+'</strong><span class="event-meta">'+dateLabel(event.date)+' · '+eventKindLabel(event)+
-        (event.place?' · '+esc(event.place):"")+'</span><span class="kind-badge">'+eventListStatus(event,accepting)+'</span>'+
-        (excluded&&event.calendarInactive?'<span class="event-meta">手動でも除外中</span>':"")+'</button>'+totals+
-        ((accepting||excluded)?'<button type="button" class="secondary-button event-visibility-button" data-toggle-event="'+esc(event.id)+'"'+
-          (!visibilityReady||visibilitySaving?" disabled":"")+'>'+(excluded?"出欠表に戻す":"出欠表から外す")+'</button>':"")+'</article>';
-    }).join("")||'<div class="empty-state">条件に合う予定はありません。</div>';
+      var totals=c?'<span class="unified-count">参加 '+c.attending+' / 欠席 '+c.absent+' / 未回答 '+Math.max(0,c.eligible-c.attending-c.maybe-c.absent)+'</span>':"";
+      var status=accepting?"受付中":event.calendarInactive?"カレンダー対象外":"受付なし";
+      var disabled=!visibilityReady||visibilitySaving;
+      var toggle=manual&&!event.calendarInactive?
+        '<button type="button" class="secondary-button event-visibility-button" data-toggle-event="'+esc(event.id)+'"'+(disabled?" disabled":"")+'>'+(excluded?"受付を再開":"受付を停止")+'</button>':"";
+      var add=event.id.startsWith("day_")&&isDefaultDay(event.date)?
+        '<button type="button" class="secondary-button" data-add-date="'+esc(event.date)+'">＋ 予定を追加</button>':"";
+      var action=accepting?"出欠を確認":"予定を見る";
+      return '<article class="event-card unified-event-card">'+
+        '<div class="unified-event-main"><div class="unified-event-top"><strong>'+esc(dateText)+'</strong>'+
+        '<span class="unified-status '+(accepting?"is-open":"is-closed")+'">'+status+'</span></div>'+
+        '<div class="unified-event-title">'+esc(title)+'</div>'+
+        '<div class="event-meta">'+esc(eventKindLabel(event))+
+        (event.startTime?' · '+esc(event.startTime):"")+
+        (event.place?' · '+esc(event.place):"")+'</div>'+totals+'</div>'+
+        '<div class="unified-event-actions"><button class="primary-button" type="button" data-open-event="'+esc(event.id)+'">'+action+'</button>'+toggle+add+'</div></article>';
+    }).join("")||'<div class="empty-state">条件に合う予定はありません。表示設定を「すべて」にすると受付停止中の予定も確認できます。</div>';
     var archive=$("archive-list");
     if(archive)archive.innerHTML=state.archive.slice().sort(function(a,b){return b.date.localeCompare(a.date);}).map(function(event){
       return '<div class="event-card"><button class="event-open" type="button" data-open-event="'+esc(event.id)+'"><strong>'+
@@ -208,15 +229,22 @@
     }
   }
   function handleEventListClick(event){
-    var button=event.target.closest("button[data-open-event],button[data-toggle-event]");
+    var button=event.target.closest("button[data-open-event],button[data-toggle-event],button[data-add-date]");
     if(!button)return;
+    if(button.dataset.addDate){
+      selectedDate=button.dataset.addDate;
+      renderDateOptions();
+      addEvent();
+      return;
+    }
     var id=button.dataset.openEvent||button.dataset.toggleEvent;
-    var item=state.events.concat(state.archive).find(function(entry){return entry.id===id;});
+    var item=state.events.concat(state.archive,getBoardEvents()).find(function(entry){return entry.id===id;});
     if(!item)return;
     if(button.dataset.toggleEvent){setEventExclusion(item,!manuallyExcluded(item));return;}
     if(getBoardEvents().some(function(entry){return entry.id===id;}))openEvent(id);
     else showSavedEvent(item);
   }
+
   function coachNameKey(name){
     return String(name||"").normalize("NFKC").replace(/\s+/g,"").replace(/コーチ$/,"");
   }
