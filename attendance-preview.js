@@ -287,8 +287,9 @@
   }
 
   function matchCountLabel(total){
-    return "対象 "+total.eligible+"名　参加 "+total.attending+"　未定 "+total.maybe+
-      "　不参加 "+total.absent+"　未回答 "+(total.eligible-total.attending-total.maybe-total.absent);
+    return ["対象 "+total.eligible+"名","参加 "+total.attending,"未定 "+total.maybe,
+      "不参加 "+total.absent,"未回答 "+(total.eligible-total.attending-total.maybe-total.absent)]
+      .map(function(label){return "<span>"+esc(label)+"</span>";}).join(" ");
   }
 
   function dayHeading(day,people){
@@ -578,8 +579,9 @@
     $("match-summary-list").querySelectorAll("[data-target-event]").forEach(function(section){
       var event=summary.day.matches.find(function(match){return match.id===section.dataset.targetEvent;});
       if(!event)return;
-      section.querySelector(".preview-match-count").textContent=matchCountLabel(countAnswers([event],summary.people));
+      section.querySelector(".preview-match-count").innerHTML=matchCountLabel(countAnswers([event],summary.people));
       section.querySelector(".match-target-note").textContent=matchTargetLabel(event);
+      section.querySelector(".preview-match-comments").innerHTML=matchComments(event);
       var edit=section.querySelector("[data-recruit-event]");
       if(edit)edit.disabled=!recruitmentReady||!members.length;
       section.querySelectorAll("[data-summary-group]").forEach(function(table){
@@ -597,6 +599,22 @@
     var individual=members.filter(function(person){return recruitmentDecision(event,person)==="include";}).length;
     return (grades?"対象学年 "+grades.join("・"):"対象学年未設定")+"／団員 "+players+"名"+
       (individual?"（個別招集 "+individual+"名）":"");
+  }
+
+  function normalizeRecruitmentSearch(value){
+    return String(value||"").normalize("NFKC").toLowerCase().replace(/\s+/g,"")
+      .replace(/[ァ-ヶ]/g,function(character){return String.fromCharCode(character.charCodeAt(0)-96);});
+  }
+
+  function filterRecruitment(){
+    var query=normalizeRecruitmentSearch($("recruitment-search").value),shown=0;
+    $("recruitment-members").querySelectorAll("[data-search]").forEach(function(row){
+      row.hidden=!row.dataset.search.includes(query);
+      if(!row.hidden)shown++;
+    });
+    $("recruitment-clear").hidden=!$("recruitment-search").value;
+    $("recruitment-result-count").textContent=shown?(query?"該当 "+shown+"名":"全 "+shown+"名"):"一致する選手がいません";
+    $("recruitment-results").scrollTop=0;
   }
 
   function openRecruitment(event){
@@ -617,7 +635,7 @@
       var options=[["default",base?"対象済み":"対象外"],[alternate,base?"招集しない":"個別招集"]];
       if(decision!=="default"&&decision!==alternate)options.push([decision,decision==="include"?"個別招集":"招集しない"]);
       return '<label class="recruitment-member" data-recruit-person="'+esc(person.id)+'" data-search="'+
-        esc([person.grade,person.name,person.kana].join(" ").normalize("NFKC").replace(/\s+/g,"").toLowerCase())+'"><span>'+
+        esc(normalizeRecruitmentSearch([person.grade,person.name,person.kana].join(" ")))+'"><span>'+
         esc(person.grade+" "+person.name)+(hasRecord?"<small>回答・連絡あり</small>":"")+'</span>'+
         '<select aria-label="'+esc(person.name+"の招集区分")+'">'+options.map(function(option){
           return '<option value="'+option[0]+'"'+(decision===option[0]?" selected":"")+'>'+option[1]+'</option>';
@@ -625,6 +643,20 @@
     }).join("");
     updateRecruitmentCount();
     $("recruitment-dialog").showModal();
+    fitRecruitmentViewport();
+    filterRecruitment();
+  }
+
+  function fitRecruitmentViewport(){
+    var dialog=$("recruitment-dialog"),viewport=window.visualViewport;
+    if(!viewport||!dialog.open)return;
+    if(viewport.scale===1&&viewport.height<window.innerHeight-24){
+      dialog.style.setProperty("--recruitment-visible-top",Math.max(0,viewport.offsetTop)+6+"px");
+      dialog.style.setProperty("--recruitment-visible-height",Math.max(0,viewport.height-12)+"px");
+      dialog.classList.add("recruitment-keyboard-open");
+    }else{
+      dialog.classList.remove("recruitment-keyboard-open");
+    }
   }
 
   function updateRecruitmentCount(){
@@ -692,13 +724,14 @@
       var grades=targetGrades(event),eligible=eligiblePeople(event,people);
       var target=matchTargetLabel(event);
       var table=audience==="coaches"?matchAttendanceTable(event,eligible,audience)+
-        '<h4>団員の出欠・コメント</h4>'+matchAttendanceTable(event,members.filter(function(person){
+        '<h4>団員の出欠一覧</h4>'+matchAttendanceTable(event,members.filter(function(person){
           return !eligibility(event,person,"players");
         }),"players"):matchAttendanceTable(event,eligible,audience);
       return '<section class="match-summary-event" data-target-event="'+esc(event.id)+'"><h3>'+esc(eventName(event))+'</h3>'+
+        '<section class="preview-match-comments" aria-label="出欠コメント・連絡事項">'+matchComments(event)+'</section>'+
         '<div class="preview-match-count">'+matchCountLabel(countAnswers([event],people))+'</div>'+
         '<div class="match-target-note">'+esc(target)+'</div>'+
-        (table?'<details class="preview-match-details"'+(day.matches.length===1?" open":"")+'><summary>出欠・コメントの内訳</summary>'+table+'</details>':"")+
+        (table?'<details class="preview-match-details"><summary>全員の出欠一覧</summary>'+table+'</details>':"")+
         matchCalendarAction(event)+(!deviceMode?
           '<button type="button" class="secondary-button day-details-action" data-recruit-event="'+esc(event.id)+'"'+
           (recruitmentReady&&members.length?"":" disabled")+'>招集選手を編集</button>':"")+(audience==="coaches"?targetGradeEditor(event,grades):"")+'</section>';
@@ -732,15 +765,36 @@
       (showComments?'<th scope="col">コメント・連絡事項</th>':"")+'</tr></thead><tbody>'+totals+'</tbody><tbody>'+rows+'</tbody></table></div>';
   }
 
+  function matchComments(event){
+    var rows=members.filter(function(person){return !eligibility(event,person,"players");}).map(function(person){
+      var note=state.matchNotes[event.id]?.[person.id];
+      var tags=matchContactLabels(note);
+      var message=String(note?.message||"").trim();
+      if(!tags.length&&!message)return "";
+      var value=answerValue(event,person,"players");
+      var answer=ANSWERS.find(function(item){return item.value===value;});
+      return '<li><div class="preview-comment-person"><strong>'+esc([person.grade,person.name].filter(Boolean).join(" "))+
+        '</strong><span class="preview-comment-answer" data-value="'+esc(value)+'">'+
+        esc(answer?answerMark(value)+" "+answer.label:"未回答")+'</span></div>'+
+        (tags.length?'<div class="preview-comment-tags">'+tags.map(function(tag){return '<span>'+esc(tag)+'</span>';}).join("")+'</div>':"")+
+        (message?'<p class="preview-comment-message">'+esc(message)+'</p>':"")+'</li>';
+    }).filter(Boolean);
+    return '<h4>出欠コメント・連絡事項</h4>'+
+      (rows.length?'<ul>'+rows.join("")+'</ul>':'<p class="preview-comments-empty">出欠コメントなし</p>');
+  }
+
   function matchComment(note){
-    if(!note)return "";
+    return matchContactLabels(note).concat(note?.message||"").filter(Boolean).join("・");
+  }
+
+  function matchContactLabels(note){
+    if(!note)return [];
     return [
       note.ride&&("送迎希望"+(note.rideTrip?"（"+note.rideTrip+"）":"")),
       note.early&&("早退"+(note.earlyTime?"（"+note.earlyTime+"）":"")),
       note.late&&("遅刻・途中参加"+(note.lateTime?"（"+note.lateTime+"）":"")),
-      note.other&&"その他",
-      note.message
-    ].filter(Boolean).join("・");
+      note.other&&"その他"
+    ].filter(Boolean);
   }
 
   function targetGradeEditor(event,grades){
@@ -1086,8 +1140,14 @@
     movePastEvents();
     setupCalendarMatchPicker();
     $("recruitment-search").addEventListener("input",function(event){
-      var query=event.target.value.normalize("NFKC").replace(/\s+/g,"").toLowerCase();
-      $("recruitment-members").querySelectorAll("[data-search]").forEach(function(row){row.hidden=!row.dataset.search.includes(query);});
+      if(!event.isComposing)filterRecruitment();
+    });
+    $("recruitment-search").addEventListener("compositionend",filterRecruitment);
+    $("recruitment-clear").addEventListener("click",function(){
+      var input=$("recruitment-search");
+      input.value="";
+      input.focus({preventScroll:true});
+      filterRecruitment();
     });
     $("recruitment-members").addEventListener("change",function(event){
       var row=event.target.closest("[data-recruit-person]");
@@ -1100,6 +1160,8 @@
     $("recruitment-form").addEventListener("submit",saveRecruitment);
     $("recruitment-close").addEventListener("click",function(){$("recruitment-dialog").close();});
     $("recruitment-dialog").addEventListener("cancel",function(event){if(savingRecruitment)event.preventDefault();});
+    window.visualViewport?.addEventListener("resize",fitRecruitmentViewport);
+    window.visualViewport?.addEventListener("scroll",fitRecruitmentViewport);
     $("match-summary-list").addEventListener("click",function(event){
       var recruit=event.target.closest("[data-recruit-event]");
       if(recruit&&activeMatchSummary){

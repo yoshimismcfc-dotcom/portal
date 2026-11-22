@@ -8,7 +8,7 @@
   <title>出欠共有テスト｜吉見SMC FC</title>
   <link rel="stylesheet" href="common.css">
   <link rel="stylesheet" href="attendance-prototype.css?v=20261121-25">
-  <link rel="stylesheet" href="attendance-preview.css?v=20261122-9">
+  <link rel="stylesheet" href="attendance-preview.css?v=20261122-11">
   <script src="firebase-config.js"></script>
   <script src="calendar-attendance.js?v=20261121-19"></script>
   <script src="common.js"></script>
@@ -100,17 +100,25 @@
 </dialog>
 <dialog id="recruitment-dialog" class="event-dialog attendance-entry-dialog" aria-labelledby="recruitment-title">
   <form id="recruitment-form">
-    <div class="attendance-entry-scroll">
+    <div class="recruitment-search-panel">
       <h2 id="recruitment-title">招集選手を編集</h2>
       <p id="recruitment-event"></p>
-      <label for="recruitment-search">学年・氏名で検索</label>
-      <input type="search" id="recruitment-search">
-      <p id="recruitment-count" role="status"></p>
-      <div id="recruitment-members"></div>
-      <p id="recruitment-save-status" role="status"></p>
+      <label for="recruitment-search">学年・氏名・ふりがなで検索</label>
+      <div class="recruitment-search-controls">
+        <input type="search" id="recruitment-search" autocomplete="off" aria-controls="recruitment-results">
+        <button type="button" class="secondary-button" id="recruitment-clear" hidden>クリア</button>
+      </div>
+      <div class="recruitment-counts">
+        <p id="recruitment-result-count" role="status"></p>
+        <p id="recruitment-count" role="status"></p>
+      </div>
     </div>
+    <div id="recruitment-results" class="attendance-entry-scroll">
+      <div id="recruitment-members"></div>
+    </div>
+    <p id="recruitment-save-status" role="status"></p>
     <div class="dialog-actions">
-      <button type="button" class="secondary-button" id="recruitment-close">キャンセル</button>
+      <button type="button" class="secondary-button" id="recruitment-close" autofocus>キャンセル</button>
       <button type="submit" class="primary-button" id="recruitment-save">招集を保存</button>
     </div>
   </form>
@@ -141,6 +149,6 @@
     <div class="dialog-actions"><button type="button" id="cancel-event" class="secondary-button">キャンセル</button><button type="submit" class="primary-button">予定を追加</button></div>
   </form>
 </dialog>
-<script src="attendance-preview.js?v=20261122-10"></script>
+<script src="attendance-preview.js?v=20261122-11"></script>
 </body>
 </html>
