@@ -792,3 +792,62 @@
   border-top: 1px solid var(--board-line);
   font-size: .75rem;
 }
+
+.attendance-preview-page .schedule-heading,
+.attendance-preview-page .schedule-day-heading {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: .4rem .75rem;
+}
+.attendance-preview-page .schedule-heading h2,
+.attendance-preview-page .schedule-day-heading h3 {
+  margin: 0;
+}
+.attendance-preview-page .schedule-heading button,
+.attendance-preview-page .schedule-day-heading button {
+  min-height: 44px;
+  white-space: nowrap;
+}
+.attendance-preview-page .schedule-secondary {
+  border-block: 1px solid var(--surface-bd);
+  padding-block: .5rem;
+  margin-block: .65rem;
+}
+.attendance-preview-page .schedule-secondary > summary {
+  min-height: 44px;
+  align-content: center;
+  cursor: pointer;
+}
+.attendance-preview-page .schedule-day {
+  background: var(--navy-900);
+  border: 1px solid var(--surface-bd);
+  border-radius: .8rem;
+  padding: .65rem .8rem;
+}
+.attendance-preview-page .schedule-event {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: .35rem .7rem;
+  padding-block: .45rem;
+  border-top: 1px solid var(--surface-bd);
+}
+.attendance-preview-page .schedule-day-heading + .schedule-event {
+  margin-top: .35rem;
+}
+.attendance-preview-page .schedule-event .event-open {
+  flex: 1 1 12rem;
+  min-height: 44px;
+  color: var(--ink);
+}
+.attendance-preview-page .schedule-event .event-meta,
+.attendance-preview-page .schedule-event-count {
+  color: var(--ink-2);
+  font-size: .875rem;
+}
+.attendance-preview-page #saved-event-open-board[hidden],
+.attendance-preview-page #reset-demo[hidden] {
+  display: none;
+}
