@@ -132,7 +132,7 @@ vm.runInNewContext(previewSource.replace('document.addEventListener("DOMContentL
   globalThis.preview = {
     state, getBoardEvents, groupBoardDays, countAnswers, renderEntryDay, applySharedAnswers, eligibility, matchRestriction,
     matchAttendanceTable, readEntryUpdates, eventListStatus,
-    categorySummaryRows, matchCategories, dayHeading, compactCountMarks, scheduleDays, dayButton, activitySummaryRow,
+    categorySummaryRows, matchCategories, dayHeading, compactCountMarks, scheduleDays, dayButton, activitySummaryRow, detailChoices, attendanceEventTitle,
     setSharedReady(value) { sharedReady = value; },
     setRecruitment(records) { recruitmentRows = new Map(records); },
     setVisibility(values) { eventVisibility = new Map(values); },
@@ -351,7 +351,12 @@ preview.setSharedReady(true);
 const narrowDay = preview.groupBoardDays(preview.getBoardEvents()).find(day => day.date === "2026-11-25");
 const narrowHeading = preview.dayHeading(narrowDay, [athlete]);
 assert.match(narrowHeading, /href="calendar.html\?date=2026-11-25"/);
-assert.match(narrowHeading, /board-date[^>]*>11\/25（水）<\/span><span class="event-count-summary"/);
+assert.match(narrowHeading, /data-practice-date="2026-11-25"[^>]*><span class="event-count-summary"/);
+assert.equal(preview.attendanceEventTitle({ kind:"match", category:"U8", title:"Ｕ８(２年)北坂戸大会" }), "Ｕ８(２年)北坂戸大会");
+assert.deepEqual(Array.from(preview.detailChoices(practiceWithMatches,"match","U12"), item=>item.id),
+  ["calendar_fixture","calendar_fixture-two"]);
+assert.equal(preview.detailChoices(practiceWithMatches,"match","U8").length,1);
+assert.equal(preview.detailChoices(practiceWithMatches,"practice","").length,1);
 assert.doesNotMatch(narrowHeading, /▦|練習・行事|未回答/);
 assert.match(narrowHeading, /board-target-count" aria-hidden="true">練習 対象 1人/);
 assert.match(totalsMarkup, /board-target-count" aria-hidden="true">対象 延べ3人/);
