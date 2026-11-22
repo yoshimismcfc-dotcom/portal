@@ -8,7 +8,7 @@
   <title>出欠共有テスト｜吉見SMC FC</title>
   <link rel="stylesheet" href="common.css">
   <link rel="stylesheet" href="attendance-prototype.css?v=20261121-25">
-  <link rel="stylesheet" href="attendance-preview.css?v=20261122-16">
+  <link rel="stylesheet" href="attendance-preview.css?v=20261122-17">
   <script src="firebase-config.js"></script>
   <script src="calendar-attendance.js?v=20261122-14"></script>
   <script src="common.js"></script>
@@ -49,18 +49,25 @@
     <div id="holiday-attendance-list"></div>
     <p id="holiday-attendance-status" class="small-note" role="status"></p>
   </section>
-  <section class="panel date-options-panel">
-    <div class="section-heading"><div><h2>出欠を取る日程</h2><p>練習・試合の詳細を追加する日を選んでください。</p><p id="roster-status" class="roster-status" role="status">団員名簿を読み込み中…</p></div></div>
-    <div id="date-options" class="date-options" aria-label="出欠対象日"></div>
-    <div class="selected-date-row"><div><span class="muted">選択日</span><strong id="selected-date-label">日程を選んでください</strong></div><button id="add-event" type="button" class="primary-button" disabled>＋ 選択した日に予定を追加</button></div>
-    <p class="small-note">今日から2か月先までの対象日を選べます。土日はカレンダーに練習・試合がある日が対象です。</p>
-  </section>
+  <!-- Legacy date selectors remain in the DOM for compatibility, but are no longer shown separately. -->
+  <div class="attendance-legacy-date-controls" hidden>
+    <p id="roster-status" class="roster-status" role="status">団員名簿を読み込み中…</p>
+    <div id="date-options" class="date-options"></div>
+    <div class="selected-date-row"><strong id="selected-date-label"></strong><button id="add-event" type="button" disabled>予定を追加</button></div>
+  </div>
 
-  <section class="panel event-panel" id="event-panel">
-    <div class="section-heading"><div><h2>予定一覧</h2><p>出欠表から外した予定も、ここから確認・復元できます。</p></div><div class="event-tools"><button id="export-csv" type="button" class="secondary-button">📥 CSV出力</button><button id="reset-demo" type="button" class="secondary-button reset-button">試作データをリセット</button></div></div>
-    <label class="event-list-filter">予定の表示<select id="event-list-filter"><option value="">すべて</option><option value="active">出欠受付中</option><option value="excluded">出欠表から除外中</option><option value="inactive">カレンダー対象外</option></select></label>
-    <div class="event-visibility-feedback"><p id="event-visibility-status" class="small-note" role="status"></p><button id="event-visibility-undo" class="secondary-button" type="button" hidden>元に戻す</button></div>
-    <div id="event-list" class="event-list"></div>
+  <section class="panel event-panel unified-schedule" id="event-panel">
+    <div class="section-heading unified-schedule-heading">
+      <div><h2>出欠確認・予定一覧</h2><p>予定を選ぶと出欠を確認できます。受付の停止・再開も全員が操作できます。</p></div>
+      <div class="event-tools"><button id="export-csv" type="button" class="secondary-button">CSV出力</button><button id="reset-demo" type="button" class="secondary-button reset-button">試作データをリセット</button></div>
+    </div>
+    <label class="event-list-filter">表示する予定
+      <select id="event-list-filter">
+        <option value="">すべて</option><option value="active">出欠受付中</option><option value="excluded">受付なし</option><option value="inactive">カレンダー対象外</option>
+      </select>
+    </label>
+    <div class="event-visibility-feedback"><p id="event-visibility-status" class="small-note" role="status" aria-live="polite"></p><button id="event-visibility-undo" class="secondary-button" type="button" hidden>元に戻す</button></div>
+    <div id="event-list" class="event-list unified-event-list"></div>
   </section>
 
   </details>
