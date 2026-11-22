@@ -320,6 +320,17 @@ assert.equal(preview.matchRestriction(girlsFixture, youngerGirl, "include"), "")
 assert.equal(preview.matchRestriction(girlsFixture, girl, "exclude"), "招集対象外");
 assert.equal(preview.eligibility({ ...girlsFixture, title: "交流戦（６～３年）" }, boy, "players"), "");
 
+const wholeTeamGirls = makeEvent("埼玉県U10（4年•３年女子）大会", "2026-11-29",
+  { label: "全体", sourceId: "whole-girls" });
+assert(preview.sync([practice, match, otherFixture, u8, wholeTeamGirls]));
+const linkedGirls = preview.getBoardEvents().find(event => event.id === "calendar_whole-girls");
+assert.equal(linkedGirls.category, "U10");
+assert.deepEqual(Array.from(linkedGirls.targetGrades), ["4年", "3年"]);
+assert.equal(preview.eligibility(linkedGirls, { grade: "4年", gender: "f" }, "players"), "");
+assert.equal(preview.eligibility(linkedGirls, { grade: "4年", gender: "m" }, "players"), "対象外");
+assert(preview.sync([practice, match, otherFixture, u8], ["全体"]));
+assert(preview.getBoardEvents().some(event => event.id === "calendar_whole-girls"));
+
 const unifiedSchedule = preview.scheduleDays(preview.getBoardEvents(), "");
 const listedDay = unifiedSchedule.find(day => day.date === "2026-11-28");
 assert.equal(unifiedSchedule.filter(day => day.date === "2026-11-28").length, 1);

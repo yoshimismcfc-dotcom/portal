@@ -1345,7 +1345,11 @@
   function calendarAttendanceEvent(event){
     if(!event.sourceId)return null;
     var activityTitle=wholeTeamActivityTitle(event);
-    if(!activityTitle&&!/^U(?:[7-9]|1[0-2])$/.test(event.label))return null;
+    var title=event.title.normalize("NFKC");
+    var wholeTeamGirlsMatch=event.label==="全体"&&isGirlsMatch(event)&&hasMatchTitle(title)&&
+      !/会議|総会|説明会|保護者会|審判講習|予備日/.test(title);
+    if(!activityTitle&&!wholeTeamGirlsMatch&&!/^U(?:[7-9]|1[0-2])$/.test(event.label))return null;
+    var category=wholeTeamGirlsMatch?title.match(/\bU(?:[7-9]|1[0-2])\b/i)?.[0].toUpperCase()||"その他":event.label;
     var timed=/T/.test(event.start);
     var start=timed?new Date(event.start):null;
     if(start&&isNaN(start.getTime()))return null;
@@ -1359,16 +1363,19 @@
       id:"calendar_"+encodeURIComponent(event.sourceId),date:date,startTime:time,
       endTime:end&&!isNaN(end.getTime())?clock.format(end):"",descriptionTime:event.descriptionTime||"",
       description:event.description||"",
-      kind:activityTitle?"activity":"match",status:event.status,category:event.label,title:displayTitle,place:event.location||"",
+      kind:activityTitle?"activity":"match",status:event.status,category:category,calendarLabel:event.label,title:displayTitle,place:event.location||"",
       calendarUrl:safeCalendarEventUrl(event.url),
       targetGrades:window.SMCCalendarAttendance.targetGrades(event.description,displayTitle)
     };
   }
 
+  function hasMatchTitle(title){
+    return /試合|大会|交流戦|対抗戦|招待|カップ|リーグ|トレマ|フェス|マッチ|\b(?:TM|TRM|CUP|LEAGUE)\b|[vV][sS][.．]/i.test(title);
+  }
+
   function isAutomaticMatch(match){
     var title=match.title.normalize("NFKC");
-    var isMatch=/試合|大会|交流戦|対抗戦|招待|カップ|リーグ|トレマ|フェス|マッチ|\b(?:TM|TRM|CUP|LEAGUE)\b|[vV][sS][.．]/i.test(title);
-    return isMatch||!/練習|トレーニング|会議|総会|説明会|保護者会|審判講習|予備日/.test(title);
+    return hasMatchTitle(title)||!/練習|トレーニング|会議|総会|説明会|保護者会|審判講習|予備日/.test(title);
   }
 
   function calendarMatchUnavailable(match){
@@ -1383,7 +1390,7 @@
     if(failed){
       var received=new Set(matches.filter(function(match){return !calendarMatchUnavailable(match);}).map(function(match){return match.id;}));
       events.forEach(function(event,id){
-        if(id.startsWith("calendar_")&&!event.calendarInactive&&!failed.includes(event.category)&&!received.has(id)){
+        if(id.startsWith("calendar_")&&!event.calendarInactive&&!failed.includes(event.calendarLabel||event.category)&&!received.has(id)){
           events.set(id,{...event,calendarInactive:true});
           changed=true;
         }
@@ -1395,7 +1402,7 @@
       if(!restore&&!previous&&match.kind==="match"&&!isAutomaticMatch(match))return;
       var hidden=previous?.hidden&&!restore;
       if(previous&&!previous.calendarInactive&&Boolean(previous.hidden)===Boolean(hidden)&&
-        ["date","startTime","endTime","descriptionTime","description","title","place","category","calendarUrl","kind"].every(function(key){return previous[key]===match[key];})&&
+        ["date","startTime","endTime","descriptionTime","description","title","place","category","calendarLabel","calendarUrl","kind"].every(function(key){return previous[key]===match[key];})&&
         JSON.stringify(previous.targetGrades)===JSON.stringify(match.targetGrades))return;
       events.set(match.id,{...match,...(hidden?{hidden:true}:{}),...(previous?.targetOverride?{targetOverride:previous.targetOverride}:{})});
       if(archived.has(match.id))resumed.add(match.id);
