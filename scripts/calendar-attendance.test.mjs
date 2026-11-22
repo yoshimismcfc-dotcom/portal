@@ -211,10 +211,14 @@ reader.listen(records => { remote = records; preview.applySharedAnswers(records,
 const fixtureId = "calendar_fixture";
 const matchDay = preview.groupBoardDays(preview.getBoardEvents()).find(day => day.date === "2026-11-28");
 const fixture = matchDay.matches[0];
-assert.match(preview.renderEntryDay(matchDay, coach, true), /連絡事項.*name="lateTime-calendar_fixture"/);
+assert.match(preview.renderEntryDay(matchDay, coach, true),
+  /出欠だけで保存できます。.*<details class="match-contact"><summary>連絡事項（任意）.*name="lateTime-calendar_fixture"/);
 const form = new FormData();
 form.set("answer-" + fixtureId, "attending");
 form.set("contact-" + fixtureId, "1");
+await writer.save("coaches", coach.id, preview.readEntryUpdates(form, coach, [matchDay]), undefined, remote);
+assert.equal(remote.get(writer.key(fixtureId, "coaches", coach.id)).value, "attending");
+assert.deepEqual(remote.get(writer.key(fixtureId, "coaches", coach.id)).contact, {});
 form.set("late-" + fixtureId, "on");
 form.set("lateTime-" + fixtureId, "10:30");
 form.set("early-" + fixtureId, "on");

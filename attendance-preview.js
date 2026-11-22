@@ -606,7 +606,7 @@
         sharedReady=true;
         applySharedAnswers(records,store.key);
         renderSavedEvent();refreshCsvIfOpen();
-        $("shared-attendance-status").textContent="出欠を共有しています。名前をタップして入力できます。";
+        $("shared-attendance-status").textContent="出欠を共有しています。";
         renderEventList();renderResponse(true);refreshSharedMatchSummary();
       },function(message){
         sharedReady=false;
@@ -714,7 +714,8 @@
             return '<label><input type="radio" name="answer-'+esc(event.id)+'" value="'+esc(option.value)+'"'+
               (option.value===current?" checked":"")+'><span><b>'+answerMark(option.value)+'</b>'+option.label+'</span></label>';
           }).join("")+'</div>'+
-          (match?contactEditor(event,person):"")+
+          (match?'<p class="match-optional-note">出欠だけで保存できます。遅刻・早退など、伝えておきたいことがある場合は「連絡事項（任意）」に入力してください。</p>'+
+            contactEditor(event,person):"")+
           (event.kind==="activity"?calendarLink(event.date,"カレンダーで行事詳細を開く","secondary-button day-details-action",event.id):matchCalendarAction(event))+'</article>';
       }).join("")+'</section>';
   }
@@ -729,14 +730,14 @@
       {key:"late",label:"遅刻・途中参加",detail:'<label>到着の予定時刻（任意）<input type="time" name="lateTime-'+suffix+'" value="'+esc(note.lateTime||"")+'"></label>'},
       {key:"other",label:"その他",detail:""}
     ];
-    return '<details class="match-contact"><summary>連絡事項 <span>'+(Object.keys(note).length?"入力済み":"任意")+'</span></summary>'+
+    return '<details class="match-contact"><summary>連絡事項（任意）'+(Object.keys(note).length?' <span>入力済み</span>':"")+'</summary>'+
       '<input type="hidden" name="contact-'+suffix+'" value="1">'+
       choices.map(function(choice){
         return '<div class="contact-option"><label><input type="checkbox" name="'+choice.key+'-'+suffix+'"'+
           (note[choice.key]?" checked":"")+'>'+choice.label+'</label>'+
           (choice.detail?'<div class="contact-detail">'+choice.detail+'</div>':"")+'</div>';
       }).join("")+
-      '<label class="contact-text">補足（任意）<textarea name="message-'+suffix+'" maxlength="160" rows="2" placeholder="例：会場を14時ごろ出発します">'+esc(note.message||"")+'</textarea></label>'+
+      '<label class="contact-text">補足（任意）<textarea name="message-'+suffix+'" maxlength="160" rows="2" placeholder="例：到着は9:30ごろです">'+esc(note.message||"")+'</textarea></label>'+
       '<small class="contact-help">'+(deviceMode?"連絡事項はこの端末に保存します。":"入力した連絡事項はこの出欠テストにアクセスできる人が閲覧できます。")+'</small></details>';
   }
 
@@ -1051,6 +1052,7 @@
     $("board-toolbar").hidden=true;
     panel.hidden=false;
     $("response-title").textContent="参加予定【"+(audience==="players"?"団員用":"コーチ用")+"】";
+    $("attendance-guide-name").textContent=audience==="players"?"お子さんの名前":"ご自身の名前";
     $("response-summary").textContent=deviceMode?"この端末の試作回答を表示しています。":
       "試合・練習の出欠とコメントをクラウドで共有します。";
     // Do not silently disable the input button when a session link is missing.
