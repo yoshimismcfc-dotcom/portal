@@ -503,9 +503,23 @@
     Object.assign(state,{answers:answers,notes:notes});
   }
 
+  function openShareConnection(){
+    var dialog=$("share-connection-dialog");
+    if(!dialog)return;
+    $("share-connection-status").textContent= /^[a-f0-9]{48}$/.test(previewKey)
+      ?"共有データに接続できていません。通信状態をご確認ください。元の共有URLをもう一度開くこともできます。"
+      :"現在のURLには出欠共有用の識別子がありません。以前回答したときの共有URLを入力してください。";
+    $("share-connection-url").value="";
+    if(!dialog.open)dialog.showModal();
+  }
+  function requireSharedConnection(){
+    if(deviceMode||sharedReady)return true;
+    openShareConnection();
+    return false;
+  }
   function startSharedAttendance(){
     if(!/^[a-f0-9]{48}$/.test(previewKey)){
-      $("shared-attendance-status").textContent="氏名は名簿から表示します。以前の出欠回答を確認・編集するには、元の共有テスト用リンク（#test=…付き）で開いてください。回答データは削除していません。";
+      $("shared-attendance-status").textContent="氏名は表示できますが、出欠入力には以前の共有リンクへの接続が必要です。下の「共有リンクを接続」を押してください。";
       $("holiday-attendance-status").textContent="祝日の出欠予定を編集するには、案内されたテスト用リンクを開いてください。";
       return;
     }
@@ -557,6 +571,7 @@
       store.listen(function(records){
         sharedRows=records;
         sharedReady=true;
+        $("share-connection-open").hidden=true;
         // The name directory loads on page open, not after a share session succeeds.
         applySharedAnswers(records,store.key);
         renderSavedEvent();refreshCsvIfOpen();
@@ -566,11 +581,13 @@
         refreshSharedMatchSummary();
       },function(message){
         sharedReady=false;
+        $("share-connection-open").hidden=false;
         $("shared-attendance-status").textContent=message;
         renderResponse(true);
       });
     }).catch(function(){
-      $("shared-attendance-status").textContent="クラウド出欠を開始できません。ページを開き直してください。";
+      $("share-connection-open").hidden=false;
+      $("shared-attendance-status").textContent="クラウド出欠に接続できません。共有リンクと通信状態をご確認ください。";
       $("holiday-attendance-status").textContent="祝日の設定に接続できません。ページを開き直してください。";
     });
   }
@@ -997,7 +1014,9 @@
     $("response-title").textContent="参加予定【"+(audience==="players"?"団員用":"コーチ用")+"】";
     $("response-summary").textContent=deviceMode?"この端末の試作回答を表示しています。":
       "試合・練習の出欠とコメントをクラウドで共有します。";
-    $("entry-mode-button").disabled=(!deviceMode&&!sharedReady)||!getPeople().length;
+    // Do not silently disable the input button when a session link is missing.
+    // Clicking it explains how to reconnect without overwriting old answers.
+    $("entry-mode-button").disabled=!getPeople().length;
     $("entry-mode-icon").disabled=$("entry-mode-button").disabled;
     $("coach-roster-status").textContent=coachRosterStatus;
     $("coach-roster-status").hidden=audience!=="coaches";
@@ -1064,13 +1083,13 @@
     var peopleById=new Map(people.map(function(person){return [person.id,person];}));
     rows.querySelectorAll("[data-edit-person]").forEach(function(btn){
       btn.addEventListener("click",function(){
-        if(deviceMode||sharedReady)openAttendanceForm(btn.dataset.editPerson);
+        if(requireSharedConnection())openAttendanceForm(btn.dataset.editPerson);
       });
     });
     rows.querySelectorAll("[data-answer-date]").forEach(function(btn){
       btn.addEventListener("click",function(){
         var day=daysByDate.get(btn.dataset.answerDate),person=peopleById.get(btn.dataset.answerPerson);
-        if(!deviceMode){if(sharedReady)openDayEntry(day,person,btn);return;}
+        if(!deviceMode){if(requireSharedConnection())openDayEntry(day,person,btn);return;}
         if(dayEvents(day).length!==1||day.practice.length!==1){openDayEntry(day,person,btn);return;}
         var event=day.practice[0];
         var next={attending:"maybe",maybe:"absent",absent:"","":"attending"}[answerValue(event,person)];
@@ -1409,6 +1428,27 @@
   }
 
   function init(){
+    $("share-connection-open").addEventListener("click",openShareConnection);
+    $("share-connection-close").addEventListener("click",function(){$("share-connection-dialog").close();});
+    $("share-connection-form").addEventListener("submit",function(event){
+      event.preventDefault();
+      var raw=$("share-connection-url").value.trim(),key="";
+      try{
+        if(/^[a-f0-9]{48}$/i.test(raw))key=raw.toLowerCase();
+        else{
+          var url=new URL(raw,location.href);
+          if(url.origin!==location.origin||url.pathname!==location.pathname)throw Error("different-page");
+          key=new URLSearchParams(url.hash.replace(/^#/,"")).get("test")||"";
+        }
+      }catch(error){}
+      if(!/^[a-f0-9]{48}$/.test(key)){
+        $("share-connection-status").textContent="URLを確認してください。以前の同じ出欠テストページの共有リンク（#test=…付き）が必要です。";
+        return;
+      }
+      // Never mint a new session key or migrate answers implicitly.
+      location.replace(location.pathname+location.search+"#test="+key);
+      location.reload();
+    });
     $("event-list-filter").addEventListener("change",renderEventList);
     $("event-visibility-undo").addEventListener("click",function(){
       if(undoVisibility)setEventExclusion(undoVisibility.event,undoVisibility.excluded);
@@ -1422,6 +1462,7 @@
       $(id).addEventListener("cancel",function(event){if(savingShared)event.preventDefault();});
     });
     $("shared-attendance-status").hidden=deviceMode;
+    $("share-connection-open").hidden=Boolean(deviceMode||sharedReady);
     $("holiday-attendance-status").textContent="祝日の設定を読み込み中です。";
     $("holiday-attendance-list").addEventListener("click",function(event){
       var button=event.target.closest("button[data-holiday-date]");
@@ -1545,7 +1586,7 @@
     $("add-event").addEventListener("click",addEvent);$("cancel-event").addEventListener("click",function(){$("event-dialog").close();});$("event-form").addEventListener("submit",function(e){e.preventDefault();var title=$("event-title").value.trim();if(!title)return;if(selectedDate<todayISO()||selectedDate>maxDate()||!isDefaultDay(selectedDate)){alert("今日から2か月先までの対象日を一覧から選んでください。");return;}var kind=$("event-kind").value,dayId=defaultEvent(selectedDate).id;
       var reuseDay=kind==="practice"&&!eventForDate(selectedDate).some(function(event){return event.id===dayId||event.kind==="practice";});
       var id=reuseDay?dayId:"demo_"+Date.now().toString(36)+"_"+Math.random().toString(36).slice(2,7);state.events.push({id:id,date:selectedDate,kind:$("event-kind").value,title:title,place:$("event-place").value.trim(),createdAt:new Date().toISOString()});saveState();$("event-dialog").close();openEvent(id);});
-    $("entry-mode-button").addEventListener("click",function(){if(!deviceMode&&!sharedReady)return;if(getPeople().length){openAttendanceForm("");return;}if(audience==="coaches"&&!state.coaches.length){$("coach-local-editor").open=true;$("coach-editor").scrollIntoView({behavior:"smooth",block:"center"});$("coach-name-input").focus({preventScroll:true});return;}});$("entry-mode-icon").addEventListener("click",function(){$("entry-mode-button").click();});$("transpose-board").addEventListener("click",function(){transposeBoard=!transposeBoard;renderResponse();});$("cancel-attendance").addEventListener("click",function(){$("attendance-dialog").close();});$("attendance-form").addEventListener("submit",saveAttendanceForm);$("entry-person").addEventListener("change",renderAttendanceFormEvents);$("export-csv").addEventListener("click",openCsv);$("reset-demo").addEventListener("click",function(){if(!confirm("この端末に保存した試作の予定・回答・コーチ名をすべて削除しますか？団員名簿は変更されません。"))return;state={events:[],archive:[],coaches:[],coachLinks:{},answers:{},notes:{},matchNotes:{}};selectedEventId="";selectedDate="";localStorage.removeItem(STORAGE_KEY);render();});$("add-coach").addEventListener("click",function(){var input=$("coach-name-input"),name=input.value.trim();if(!name){input.focus();return;}if(getPeople().some(function(c){return coachNameKey(c.name)===coachNameKey(name);})){alert("同じ名前がすでに登録されています。");return;}state.coaches.push({id:"coach_"+Date.now().toString(36)+"_"+Math.random().toString(36).slice(2,6),name:name});input.value="";saveState();render();});
+    $("entry-mode-button").addEventListener("click",function(){if(!requireSharedConnection())return;if(getPeople().length){openAttendanceForm("");return;}if(audience==="coaches"&&!state.coaches.length){$("coach-local-editor").open=true;$("coach-editor").scrollIntoView({behavior:"smooth",block:"center"});$("coach-name-input").focus({preventScroll:true});return;}});$("entry-mode-icon").addEventListener("click",function(){$("entry-mode-button").click();});$("transpose-board").addEventListener("click",function(){transposeBoard=!transposeBoard;renderResponse();});$("cancel-attendance").addEventListener("click",function(){$("attendance-dialog").close();});$("attendance-form").addEventListener("submit",saveAttendanceForm);$("entry-person").addEventListener("change",renderAttendanceFormEvents);$("export-csv").addEventListener("click",openCsv);$("reset-demo").addEventListener("click",function(){if(!confirm("この端末に保存した試作の予定・回答・コーチ名をすべて削除しますか？団員名簿は変更されません。"))return;state={events:[],archive:[],coaches:[],coachLinks:{},answers:{},notes:{},matchNotes:{}};selectedEventId="";selectedDate="";localStorage.removeItem(STORAGE_KEY);render();});$("add-coach").addEventListener("click",function(){var input=$("coach-name-input"),name=input.value.trim();if(!name){input.focus();return;}if(getPeople().some(function(c){return coachNameKey(c.name)===coachNameKey(name);})){alert("同じ名前がすでに登録されています。");return;}state.coaches.push({id:"coach_"+Date.now().toString(36)+"_"+Math.random().toString(36).slice(2,6),name:name});input.value="";saveState();render();});
     var archiveSection=document.createElement("section");archiveSection.className="panel archived-panel";archiveSection.innerHTML='<details><summary>過去の予定（試作データ）</summary><div id="archive-list" class="event-list"></div><p class="small-note">日付が過ぎた予定は一覧から自動で移し、試作版の回答記録はCSV出力用にこの端末へ残しています。</p></details>';$("event-panel").after(archiveSection);
     $("archive-list").addEventListener("click",handleEventListClick);
     render();loadHolidays();
