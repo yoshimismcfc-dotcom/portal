@@ -2,6 +2,7 @@ import assert from "node:assert/strict";
 import fs from "node:fs";
 import {createRequire} from "node:module";
 import path from "node:path";
+import vm from "node:vm";
 import {fileURLToPath} from "node:url";
 
 const require = createRequire(import.meta.url);
@@ -104,6 +105,52 @@ assert.equal(initialCalendarDay([makeEvent("午前活動", "2026-11-23", { descr
 assert.equal(initialCalendarDay([makeEvent("交流戦（雨天中止）", "2026-11-23")], today).nextDate, "2026-11-23");
 assert.equal(initialCalendarDay([makeEvent("活動", "2026-11-23", { kind: "match" })], today).nextDate, "2026-11-23");
 assert.equal(initialCalendarDay([makeEvent("練習", "2026-11-23")], today).nextDate, "");
+
+// Exercise the same event list used by the attendance board, entry forms and totals.
+const previewSource = fs.readFileSync(path.join(root, "attendance-preview.js"), "utf8");
+const previewContext = {
+  Intl, URLSearchParams, location: { hash: "" }, window: { SMCCalendarAttendance: attendance },
+  localStorage: { getItem: () => null, setItem() {} }
+};
+vm.runInNewContext(previewSource.replace('document.addEventListener("DOMContentLoaded",init);', `
+  todayISO = () => "2026-11-22";
+  holidays["2026-11-23"] = "勤労感謝の日";
+  globalThis.preview = {
+    state, getBoardEvents,
+    sync(events, failed = []) {
+      syncWeekendPractices(events, failed);
+      calendarMatchesChecked = true;
+      return syncCalendarMatches(events.map(calendarMatch).filter(Boolean), false, failed);
+    }
+  };
+`), previewContext);
+const preview = previewContext.preview;
+const practice = makeEvent("全体練習", "2026-11-28T08:00:00+09:00", { label: "全体" });
+const match = makeEvent("U12（6年）大会", "2026-11-28", { label: "U12", sourceId: "fixture" });
+const cancelledPractice = { ...practice, title: "【練習中止】全体練習" };
+const school = makeEvent("小学校の運動会", "2026-11-29", { label: "全体" });
+const holidayBreak = makeEvent("年末年始休み", "2027-01-02", { label: "U12", sourceId: "break" });
+const dateIds = (date) => Array.from(preview.getBoardEvents().filter(event => event.date === date), event => event.id);
+const practiceId = "day_2026-11-28";
+preview.state.answers[practiceId] = { players: { demo: { value: "attending" } } };
+assert.deepEqual(dateIds("2026-11-28"), []);
+assert(preview.sync([practice, match, school, holidayBreak]));
+assert.deepEqual(dateIds("2026-11-28"), [practiceId, "calendar_fixture"]);
+assert.deepEqual(dateIds("2026-11-29"), []);
+assert.deepEqual(dateIds("2027-01-02"), []);
+assert(preview.sync([], ["全体", "U12"]));
+assert.deepEqual(dateIds("2026-11-28"), [practiceId, "calendar_fixture"]);
+assert(preview.sync([cancelledPractice, match, school]));
+assert.deepEqual(dateIds("2026-11-28"), ["calendar_fixture"]);
+assert(preview.sync([practice, { ...match, status: "cancelled" }]));
+assert.deepEqual(dateIds("2026-11-28"), [practiceId]);
+assert(preview.sync([]));
+assert.deepEqual(dateIds("2026-11-28"), []);
+assert.equal(preview.state.answers[practiceId].players.demo.value, "attending");
+assert(preview.sync([practice]));
+assert.deepEqual(dateIds("2026-11-28"), [practiceId]);
+assert.deepEqual(dateIds("2026-11-23"), ["day_2026-11-23"]);
+assert.deepEqual(dateIds("2026-11-25"), ["day_2026-11-25"]);
 
 const commonSource = fs.readFileSync(path.join(root, "common.js"), "utf8");
 const calendarHtml = fs.readFileSync(path.join(root, "calendar.html"), "utf8");
