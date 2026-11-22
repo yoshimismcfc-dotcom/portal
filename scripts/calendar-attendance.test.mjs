@@ -132,7 +132,7 @@ vm.runInNewContext(previewSource.replace('document.addEventListener("DOMContentL
   globalThis.preview = {
     state, getBoardEvents, groupBoardDays, countAnswers, renderEntryDay, applySharedAnswers, eligibility, matchRestriction,
     matchAttendanceTable, readEntryUpdates, eventListStatus,
-    categorySummaryRows, matchCategories, dayHeading, compactCountMarks, scheduleDays,
+    categorySummaryRows, matchCategories, dayHeading, compactCountMarks, scheduleDays, dayButton,
     setSharedReady(value) { sharedReady = value; },
     setRecruitment(records) { recruitmentRows = new Map(records); },
     setVisibility(values) { eventVisibility = new Map(values); },
@@ -251,6 +251,33 @@ await writer.save("coaches", coach.id, preview.readEntryUpdates(form, coach, [ma
 assert.match(coachRow(), /○ 参加/);
 assert.doesNotMatch(coachRow(), /10:45|14:00/);
 
+const coachPractice = { id: "coach-practice", date: matchDay.date, kind: "practice" };
+const coachMatchA = { ...fixture, id: "coach-match-a", category: "U12" };
+const coachMatchB = { ...fixture, id: "coach-match-b", category: "U12" };
+const coachDay = { date: matchDay.date, practice: [coachPractice], matches: [coachMatchA, coachMatchB], activities: [] };
+const secondCoach = { id: "coach-two", name: "検証用コーチ2" };
+preview.setSharedReady(true);
+preview.state.answers[coachPractice.id] = { coaches: { [coach.id]: { value: "attending" }, [secondCoach.id]: { value: "attending" } } };
+preview.state.answers[coachMatchA.id] = { coaches: { [coach.id]: { value: "attending" }, [secondCoach.id]: { value: "absent" } } };
+preview.state.answers[coachMatchB.id] = { coaches: { [coach.id]: { value: "attending" }, [secondCoach.id]: { value: "maybe" } } };
+const coaches = [coach, secondCoach];
+assert.match(preview.dayHeading(coachDay, coaches), /練習 対象 2人、参加 1人、未定 0人、不参加 1人/);
+const coachCategories = new Map([[coachDay.date, preview.matchCategories(coachDay.matches)]]);
+assert.match(preview.categorySummaryRows([coachDay], coachCategories, coaches), /2試合　対象 2人、参加 1人、未定 1人、不参加 0人/);
+assert.match(preview.dayButton(coachDay, coach), /練習 ×/);
+assert.match(preview.renderEntryDay(coachDay, coach, true), /data-coach-practice-note role="status"><strong>× 不参加/);
+assert.deepEqual({ ...preview.countAnswers([coachPractice], coaches, coachDay) }, { eligible: 2, attending: 1, maybe: 0, absent: 1 });
+const practiceAndMatchForm = new FormData();
+practiceAndMatchForm.set("answer-"+coachPractice.id, "attending");
+practiceAndMatchForm.set("answer-"+coachMatchA.id, "maybe");
+assert(!preview.readEntryUpdates(practiceAndMatchForm, coach, [coachDay]).some(update => update.id === coachPractice.id));
+practiceAndMatchForm.set("answer-"+coachMatchB.id, "absent");
+assert(preview.readEntryUpdates(practiceAndMatchForm, coach, [coachDay]).some(update => update.id === coachPractice.id));
+delete preview.state.answers[coachMatchA.id].coaches[coach.id];
+delete preview.state.answers[coachMatchB.id].coaches[coach.id];
+assert.match(preview.dayButton(coachDay, coach), /練習 ○/);
+assert.equal(preview.state.answers[coachPractice.id].coaches[coach.id].value, "attending");
+
 const otherFixture = { ...match, sourceId: "fixture-two" };
 assert(preview.sync([practice, match, otherFixture]));
 preview.setVisibility([["calendar_fixture", true]]);
@@ -289,7 +316,7 @@ const practiceDayHeading = preview.dayHeading(practiceWithMatches, practicePeopl
 assert.match(practiceDayHeading, /練習 対象 1人/);
 assert.doesNotMatch(practiceDayHeading, /対象 延べ|参加 1人/);
 assert.match(preview.dayHeading({ ...practiceWithMatches, matches: [] }, practicePeople), /対象 4人/);
-assert.match(preview.dayHeading({ ...practiceWithMatches, practice: [] }, practicePeople), /対象 延べ4人/);
+assert.match(preview.dayHeading({ ...practiceWithMatches, practice: [] }, practicePeople), /練習なし/);
 const totalsMarkup = categoryRows();
 assert.match(totalsMarkup, />U12試合<.*?>U8試合</);
 const unorderedCategories = ["U10", "U8", "", "U12", "U7", "U11", "U9"].map(category => ({ category }));
@@ -309,7 +336,7 @@ const narrowHeading = preview.dayHeading(narrowDay, [athlete]);
 assert.match(narrowHeading, /href="calendar.html\?date=2026-11-25"/);
 assert.match(narrowHeading, /board-date[^>]*>11\/25（水）<\/span><span class="event-count-summary"/);
 assert.doesNotMatch(narrowHeading, /▦|練習・行事|未回答/);
-assert.match(narrowHeading, /board-target-count" aria-hidden="true">対象 1人/);
+assert.match(narrowHeading, /board-target-count" aria-hidden="true">練習 対象 1人/);
 assert.match(totalsMarkup, /board-target-count" aria-hidden="true">対象 延べ3人/);
 assert.match(categoryRows(), /board-target-count" aria-hidden="true">対象 1人/);
 assert.doesNotMatch(categoryRows(), /category-count-context/);

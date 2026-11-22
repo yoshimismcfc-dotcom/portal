@@ -195,11 +195,12 @@
     $("saved-event-open-board").hidden=!getBoardEvents().some(function(item){return item.id===event.id;});
     $("saved-event-info").innerHTML='<p>'+esc(dateLabel(event.date))+'</p>'+matchDetailInfo(event);
     var groups=["players","coaches"];
+    var day=groupBoardDays(getBoardEvents().filter(function(item){return item.date===event.date;}))[0];
     $("saved-event-answers").innerHTML=groups.map(function(group){
       var people=getPeople(group).filter(function(person){
         return !eligibility(event,person,group)||Boolean(answerValue(event,person,group)||matchContact(event.id,person.id,group));
       });
-      return '<h3>'+(group==="players"?"団員":"コーチ")+'</h3>'+matchAttendanceTable(event,people,group);
+      return '<h3>'+(group==="players"?"団員":"コーチ")+'</h3>'+matchAttendanceTable(event,people,group,day);
     }).join("");
   }
   function showSavedEvent(event){
@@ -401,11 +402,29 @@
       day.practice.some(function(practice){return !eligibility(practice,person)&&answerValue(practice,person)==="attending";});
   }
 
+  function attendanceValue(event,person,day,group){
+    group=group||audience;
+    if(group==="coaches"&&event.kind!=="match"&&event.kind!=="activity"&&day?.matches.some(function(match){
+      return answerValue(match,person,group)==="attending";
+    }))return "absent";
+    return answerValue(event,person,group);
+  }
+
+  function countCoaches(events,people,day){
+    var total={attending:0,maybe:0,absent:0,eligible:people.length};
+    people.forEach(function(person){
+      var values=events.map(function(event){return attendanceValue(event,person,day,"coaches");});
+      var answer=ANSWERS.find(function(option){return values.includes(option.value);});
+      if(answer)total[answer.value]++;
+    });
+    return total;
+  }
+
   function countAnswers(events,people,day){
     var total={attending:0,maybe:0,absent:0,eligible:0};
     events.forEach(function(event){
       eligiblePeople(event,people,day).forEach(function(person){
-        var value=answerValue(event,person);
+        var value=attendanceValue(event,person,day);
         total.eligible++;
         if(ANSWERS.some(function(answer){return answer.value===value;}))total[value]++;
       });
@@ -463,10 +482,11 @@
 
   function categoryCountButton(day,category,matches,people){
     if(!matches)return '<span class="category-count-empty" aria-label="試合なし">—</span>';
-    var total=countAnswers(matches,people,day);
-    var target=targetCountText(total,matches.length);
+    var coaches=audience==="coaches";
+    var total=coaches?countCoaches(matches,people,day):countAnswers(matches,people,day);
+    var target=targetCountText(total,coaches?1:matches.length);
     var unanswered=total.eligible-total.attending-total.maybe-total.absent;
-    var multiple=matches.length>1?"延べ・"+matches.length+"試合　":"";
+    var multiple=matches.length>1?(coaches?"":"延べ・")+matches.length+"試合　":"";
     var ready=deviceMode||sharedReady;
     var label=compactDate(day.date)+" "+category+"の試合集計。"+(ready?
       multiple+target+"、参加 "+total.attending+"人、未定 "+total.maybe+
@@ -493,14 +513,16 @@
   }
 
   function dayHeading(day,people){
-    var practiceOnly=audience==="players"&&day.practice.length>0&&day.matches.length>0;
-    var events=practiceOnly?day.practice:dayEvents(day);
-    var total=countAnswers(events,people,day);
-    var target=(practiceOnly?"練習 ":"")+targetCountText(total,events.length);
-    var ready=deviceMode||sharedReady;
-    var label=dateLabel(day.date)+"の予定を開く。"+(ready?
-      target+"、参加 "+total.attending+"人、未定 "+total.maybe+"人、不参加 "+total.absent+"人":"集計待ち");
     var date='<span class="board-date">'+esc(compactDate(day.date))+'</span>';
+    var label=dateLabel(day.date)+"の予定を開く。";
+    if(!day.practice.length){
+      return '<div class="board-day-heading">'+calendarLink(day.date,date+targetCountLine("練習なし"),"day-detail-link","",label+"練習なし")+'</div>';
+    }
+    var coaches=audience==="coaches";
+    var total=coaches?countCoaches(day.practice,people,day):countAnswers(day.practice,people,day);
+    var target="練習 "+targetCountText(total,coaches?1:day.practice.length);
+    var ready=deviceMode||sharedReady;
+    label+=ready?target+"、参加 "+total.attending+"人、未定 "+total.maybe+"人、不参加 "+total.absent+"人":"練習の集計待ち";
     var count='<span class="event-count-summary" aria-hidden="true">'+(ready?compactCountMarks(total):"集計待ち")+'</span>';
     return '<div class="board-day-heading">'+calendarLink(day.date,date+count+(ready?targetCountLine(target):""),"day-detail-link","",label)+'</div>';
   }
@@ -525,7 +547,7 @@
   function dayButton(day,person){
     var practiceEvents=day.practice.filter(function(event){return canAnswer(event,person,day);});
     var activities=day.activities.filter(function(event){return canAnswer(event,person,day);});
-    var practice=practiceEvents.map(function(event){return answerValue(event,person);}).filter(Boolean);
+    var practice=practiceEvents.map(function(event){return attendanceValue(event,person,day);}).filter(Boolean);
     var activityMarks=activities.map(function(event){return answerMark(answerValue(event,person));}).filter(Boolean).join(" ");
     var eligible=day.matches.filter(function(event){return !eligibility(event,person);});
     var answered=eligible.map(function(event){
@@ -740,13 +762,18 @@
       events.map(function(event){
         var match=event.kind==="match",current=answerValue(event,person);
         var title=event.title||eventKindLabel(event);
+        var coachPractice=audience==="coaches"&&!match&&event.kind!=="activity"&&day.matches.length>0;
+        var practiceLocked=coachPractice&&day.matches.some(function(item){return answerValue(item,person)==="attending";});
         var review=match&&needsMatchReview(event,person,day);
         var choices=ANSWERS.concat({value:"",label:"未回答"});
         return '<article class="response-entry-card '+(match?"is-match":"")+'"'+(review?' data-needs-review="true"':"")+'>'+
           '<div class="entry-card-heading"><span class="entry-kind">'+eventKindLabel(event)+'</span><h4>'+esc(title)+'</h4></div>'+
           (event.startTime||event.descriptionTime||event.place?'<p class="entry-card-meta">'+esc([event.startTime||event.descriptionTime,event.place].filter(Boolean).join(" ・ "))+'</p>':"")+
           (review?'<p class="entry-review"><strong>要確認</strong> 練習に○で回答済みです。試合の出欠を入力してください。</p>':"")+
-          '<div class="entry-answer-options" role="group" aria-label="'+esc(title+"の出欠")+'">'+choices.map(function(option){
+          (coachPractice?'<p class="entry-review" data-coach-practice-note role="status"'+
+            (practiceLocked?"":" hidden")+'><strong>× 不参加</strong> 同じ日の試合に参加するため、練習は自動で不参加になります。</p>':"")+
+          '<div class="entry-answer-options" role="group" aria-label="'+esc(title+"の出欠")+'"'+
+            (coachPractice?' data-coach-practice'+(practiceLocked?" hidden":""):"")+'>'+choices.map(function(option){
             return '<label><input type="radio" name="answer-'+esc(event.id)+'" value="'+esc(option.value)+'"'+
               (option.value===current?" checked":"")+'><span><b>'+answerMark(option.value)+'</b>'+option.label+'</span></label>';
           }).join("")+'</div>'+
@@ -792,10 +819,21 @@
     return Object.keys(contact).length?contact:null;
   }
 
+  function updateCoachPracticeOptions(event){
+    if(audience!=="coaches"||!event.target.matches('.is-match input[type="radio"]'))return;
+    var day=event.target.closest(".entry-day");
+    var locked=Boolean(day.querySelector('.is-match input[value="attending"]:checked'));
+    day.querySelectorAll("[data-coach-practice]").forEach(function(options){options.hidden=locked;});
+    day.querySelectorAll("[data-coach-practice-note]").forEach(function(note){note.hidden=!locked;});
+  }
+
   function readEntryUpdates(form,person,days){
     return days.flatMap(function(day){
+      var coachMatch=audience==="coaches"&&day.matches.some(function(match){
+        return (form.get("answer-"+match.id)??answerValue(match,person))==="attending";
+      });
       return dayEvents(day).filter(function(item){
-        return form.has("answer-"+item.id)&&canAnswer(item,person,day);
+        return !(coachMatch&&day.practice.includes(item))&&form.has("answer-"+item.id)&&canAnswer(item,person,day);
       }).map(function(item){
         return {id:item.id,value:form.get("answer-"+item.id),contact:readMatchContact(form,item.id)};
       });
@@ -1038,15 +1076,15 @@
     $("match-detail-scroll").scrollTop=0;
   }
 
-  function matchAttendanceTable(event,people,group){
+  function matchAttendanceTable(event,people,group,day){
     var answers=ANSWERS.concat({value:"",label:"未回答"});
     var totals=answers.map(function(answer){
-      var count=people.filter(function(person){return answerValue(event,person,group)===answer.value;}).length;
+      var count=people.filter(function(person){return attendanceValue(event,person,day,group)===answer.value;}).length;
       return '<tr class="match-attendance-total"><th scope="row">'+esc((answerMark(answer.value)+" "+answer.label).trim())+
         '</th><td>'+count+'人</td><td></td></tr>';
     }).join("");
     var rows=people.map(function(person){
-      var value=answerValue(event,person,group);
+      var value=attendanceValue(event,person,day,group);
       var label=answers.find(function(answer){return answer.value===value;})?.label||"未回答";
       var grade=group==="players"&&person.grade?'<span class="match-attendance-grade">'+esc(person.grade)+'</span>':"";
       var invite=group==="players"&&recruitmentDecision(event,person)==="include"?'<span class="recruitment-badge">個別招集</span>':"";
@@ -1335,7 +1373,7 @@
       return getPeople(personGroup).map(function(person){
         var answer=state.answers[event.id]?.[personGroup]?.[person.id]||{};
         var contact=matchContact(event.id,person.id,personGroup);
-        return {...person,value:answer.value,updatedAt:answer.updatedAt,contact:contact,contactText:matchComment(contact),
+        return {...person,value:attendanceValue(event,person,days.get(event.date),personGroup),updatedAt:answer.updatedAt,contact:contact,contactText:matchComment(contact),
           note:state.notes[personGroup]?.[person.id],restricted:responseRestriction(event,person,days.get(event.date),personGroup)};
       });
     });
@@ -1639,6 +1677,8 @@
       renderEventList();renderResponse(true);
       openMatchSummary(match.date);
     });
+    $("attendance-form-events").addEventListener("change",updateCoachPracticeOptions);
+    $("day-entry-events").addEventListener("change",updateCoachPracticeOptions);
     $("attendance-form-events").addEventListener("click",function(event){
       if(event.target.id!=="jump-entry-review")return;
       var card=event.currentTarget.querySelector("[data-needs-review]");
