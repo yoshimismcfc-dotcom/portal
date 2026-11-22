@@ -272,7 +272,7 @@ assert.deepEqual(Array.from(preview.matchCategories(unorderedCategories).keys())
   ["U12", "U11", "U10", "U9", "U8", "U7", "その他"]);
 assert.doesNotMatch(totalsMarkup, /U7試合/);
 assert.match(totalsMarkup, /試合なし/);
-assert.match(totalsMarkup, /U12の試合集計。延べ・2試合　対象 3人、参加 1人、未定 1人、不参加 0人、未回答 1人/);
+assert.match(totalsMarkup, /U12の試合集計。延べ・2試合　対象 延べ3人、参加 1人、未定 1人、不参加 0人、未回答 1人/);
 preview.setVisibility([["calendar_fixture", true]]);
 assert.match(categoryRows(), /U12の試合集計。対象 1人、参加 0人、未定 1人、不参加 0人、未回答 0人/);
 preview.setSharedReady(false);
@@ -283,7 +283,10 @@ const narrowDay = preview.groupBoardDays(preview.getBoardEvents()).find(day => d
 const narrowHeading = preview.dayHeading(narrowDay, [athlete]);
 assert.match(narrowHeading, /href="calendar.html\?date=2026-11-25"/);
 assert.match(narrowHeading, /board-date[^>]*>11\/25（水）<\/span><span class="event-count-summary"/);
-assert.doesNotMatch(narrowHeading, /▦|練習・行事|対象|未回答/);
+assert.doesNotMatch(narrowHeading, /▦|練習・行事|未回答/);
+assert.match(narrowHeading, /board-target-count" aria-hidden="true">対象 1人/);
+assert.match(totalsMarkup, /board-target-count" aria-hidden="true">対象 延べ3人/);
+assert.match(categoryRows(), /board-target-count" aria-hidden="true">対象 1人/);
 assert.doesNotMatch(categoryRows(), /category-count-context/);
 assert.match(preview.compactCountMarks({ attending: 12, maybe: 10, absent: 11 }),
   /○12<\/span><span class="count-maybe">△10<\/span><span class="count-no">×11/);
