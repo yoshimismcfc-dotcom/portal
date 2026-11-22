@@ -34,6 +34,18 @@ assert.deepEqual(attendance.targetGrades("【対象学年】全学年", ""), ["6
 assert.equal(attendance.targetGrades("【対象】招待選手", "U8（2年）試合"), null);
 assert.equal(attendance.targetGrades("", "U12（第4回）試合"), null);
 
+assert.deepEqual(attendance.targetGrades("", "寄居大会（６～３年女子）"), ["6年", "5年", "4年", "3年"]);
+assert.deepEqual(attendance.targetGrades("【対象】５年～３年の女子のみ", "U11交流戦"), ["5年", "4年", "3年"]);
+assert.deepEqual(attendance.targetGrades("【対象】女子のみ", "U11（5年）大会"), ["5年"]);
+assert.equal(attendance.targetGrades("", "U10大会（女子）"), null);
+assert(attendance.girlsOnly("", "寄居大会（６～３年女子）"));
+assert(attendance.girlsOnly("", "U10大会（女子）"));
+assert(attendance.girlsOnly("【対象】全学年の女子", "交流戦"));
+assert(!attendance.girlsOnly("【対象】５年・４年", "U11交流戦"));
+assert(!attendance.girlsOnly("", "U11交流戦（女子も可）"));
+assert(!attendance.girlsOnly("【対象】男女", "U11女子交流戦"));
+assert(!attendance.girlsOnly("集合は女子チームと同じ場所", "U11交流戦"));
+
 const parts = attendance.descriptionLinks(
   "集合：8時<br>URL（https://chouseisan.com/s?h=test）<br>" +
   '<a href="https://drive.google.com/file/d/test/view?x=1&amp;y=2">要項</a>。' +
@@ -118,7 +130,7 @@ vm.runInNewContext(previewSource.replace('document.addEventListener("DOMContentL
   todayISO = () => "2026-11-22";
   holidays["2026-11-23"] = "勤労感謝の日";
   globalThis.preview = {
-    state, getBoardEvents, groupBoardDays, countAnswers, renderEntryDay, applySharedAnswers,
+    state, getBoardEvents, groupBoardDays, countAnswers, renderEntryDay, applySharedAnswers, eligibility, matchRestriction,
     matchAttendanceTable, readEntryUpdates, eventListStatus,
     categorySummaryRows, matchCategories, dayHeading, compactCountMarks, scheduleDays,
     setSharedReady(value) { sharedReady = value; },
@@ -294,6 +306,19 @@ assert.match(categoryRows(), /board-target-count" aria-hidden="true">対象 1人
 assert.doesNotMatch(categoryRows(), /category-count-context/);
 assert.match(preview.compactCountMarks({ attending: 12, maybe: 10, absent: 11 }),
   /○12<\/span><span class="count-maybe">△10<\/span><span class="count-no">×11/);
+
+const girlsFixture = { id: "girls-fixture", kind: "match", title: "寄居大会（６～３年女子）", targetGrades: null };
+const girl = { id: "g", grade: "6年", gender: "f" };
+const boy = { id: "b", grade: "6年", gender: "m" };
+const youngerGirl = { id: "y", grade: "2年", gender: "f" };
+const unregistered = { id: "u", grade: "5年" };
+assert.equal(preview.countAnswers([girlsFixture], [girl, boy, youngerGirl, unregistered]).eligible, 1);
+assert.equal(preview.eligibility(girlsFixture, unregistered, "players"), "対象要確認");
+assert.equal(preview.eligibility(girlsFixture, boy, "coaches"), "");
+assert.equal(preview.matchRestriction(girlsFixture, boy, "include"), "対象外");
+assert.equal(preview.matchRestriction(girlsFixture, youngerGirl, "include"), "");
+assert.equal(preview.matchRestriction(girlsFixture, girl, "exclude"), "招集対象外");
+assert.equal(preview.eligibility({ ...girlsFixture, title: "交流戦（６～３年）" }, boy, "players"), "");
 
 const unifiedSchedule = preview.scheduleDays(preview.getBoardEvents(), "");
 const listedDay = unifiedSchedule.find(day => day.date === "2026-11-28");
