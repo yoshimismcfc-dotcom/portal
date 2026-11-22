@@ -120,7 +120,7 @@ vm.runInNewContext(previewSource.replace('document.addEventListener("DOMContentL
   globalThis.preview = {
     state, getBoardEvents, groupBoardDays, countAnswers, renderEntryDay, applySharedAnswers,
     matchAttendanceTable, readEntryUpdates, eventListStatus,
-    categorySummaryRows, matchCategories,
+    categorySummaryRows, matchCategories, dayHeading, compactCountMarks,
     setSharedReady(value) { sharedReady = value; },
     setRecruitment(records) { recruitmentRows = new Map(records); },
     setVisibility(values) { eventVisibility = new Map(values); },
@@ -275,6 +275,15 @@ assert.match(categoryRows(), /U12の試合集計。対象 1人、参加 0人、�
 preview.setSharedReady(false);
 assert.match(categoryRows(), /集計待ち/);
 preview.setSharedReady(true);
+
+const narrowDay = preview.groupBoardDays(preview.getBoardEvents()).find(day => day.date === "2026-11-25");
+const narrowHeading = preview.dayHeading(narrowDay, [athlete]);
+assert.match(narrowHeading, /href="calendar.html\?date=2026-11-25"/);
+assert.match(narrowHeading, /board-date[^>]*>11\/25（水）<\/span><span class="event-count-summary"/);
+assert.doesNotMatch(narrowHeading, /▦|練習・行事|対象|未回答/);
+assert.doesNotMatch(categoryRows(), /category-count-context/);
+assert.match(preview.compactCountMarks({ attending: 12, maybe: 10, absent: 11 }),
+  /○12<\/span><span class="count-maybe">△10<\/span><span class="count-no">×11/);
 
 const visibilityStore = sharedEventVisibility(db, () => null, "isolated-test");
 docs.set("calendar_fixture", { excluded: false });
