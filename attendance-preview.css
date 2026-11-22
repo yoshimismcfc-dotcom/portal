@@ -137,13 +137,6 @@
   font-variant-numeric: tabular-nums;
 }
 
-.preview-match-details > summary {
-  display: list-item;
-  min-height: 44px;
-  padding-block: 10px;
-  cursor: pointer;
-}
-
 @media (max-width: 640px) {
   .response-panel .attendance-board-controls {
     grid-template-columns: minmax(0, 1fr);
@@ -378,7 +371,6 @@
 }
 
 .preview-match-count,
-.preview-comment-tags,
 .recruitment-counts {
   display: flex;
   flex-wrap: wrap;
@@ -389,71 +381,66 @@
   white-space: nowrap;
 }
 
-.preview-match-comments {
-  margin-block: 8px;
-  padding: 9px 10px;
-  border: 1px solid var(--surface-bd);
-  border-inline-start: 3px solid var(--cyan);
-  border-radius: 8px;
-  background: var(--navy-820);
-}
-
-.preview-match-comments h4 {
-  margin: 0;
-  font-size: .9375rem;
-}
-
-/* Override the prototype's two-column information rows inside comment cards. */
-.match-summary-event .preview-match-comments p {
-  display: block;
-  margin: 4px 0 0;
-}
-
-.preview-match-comments ul {
-  list-style: none;
-}
-
-.preview-match-comments li {
-  margin-block-start: 7px;
-  padding-block-start: 7px;
-  border-block-start: 1px solid var(--line);
-}
-
-.preview-comment-person {
-  display: flex;
-  flex-wrap: wrap;
-  align-items: baseline;
-  gap: 2px 8px;
+.match-detail-header {
+  padding: 14px 16px 0;
   overflow-wrap: anywhere;
 }
 
-.preview-comments-empty,
-.preview-comment-answer,
+#match-detail-date {
+  color: var(--ink-2);
+}
+
+#match-detail-tabs {
+  display: grid;
+  grid-template-columns: repeat(2,minmax(0,1fr));
+  gap: 6px;
+  margin-top: 10px;
+}
+
+#match-detail-tabs [aria-selected="true"] {
+  color: var(--attendance-selected);
+  border-color: var(--attendance-selected);
+  background: var(--attendance-selected-bg);
+}
+
+#match-detail-scroll {
+  flex: 1 1 auto;
+}
+
+.match-detail-fields {
+  display: grid;
+  grid-template-columns: auto minmax(0,1fr);
+  gap: 6px 10px;
+  margin-bottom: 10px;
+  overflow-wrap: anywhere;
+}
+
+.match-detail-fields dt {
+  font-weight: 700;
+  color: var(--ink-2);
+}
+
+.match-detail-description {
+  white-space: pre-wrap;
+  overflow-wrap: anywhere;
+}
+
+#match-detail-info a {
+  color: var(--cyan);
+}
+
+#match-detail-attendance td[data-value] {
+  font-size: .875rem;
+  line-height: 1.4;
+}
+
+#match-detail-attendance .has-comments :is(th,td):nth-child(2) {
+  width: 4.75rem;
+}
+
 .recruitment-counts {
   color: var(--ink-2);
   font-size: .875rem;
-}
-
-.preview-comment-answer[data-value="attending"] { color: var(--attendance-yes); }
-.preview-comment-answer[data-value="maybe"] { color: var(--attendance-maybe); }
-.preview-comment-answer[data-value="absent"] { color: var(--attendance-no); }
-
-.preview-comment-tags {
-  gap: 4px;
-  margin-block-start: 4px;
-}
-
-.preview-comment-tags span {
-  padding: 2px 6px;
-  border-radius: 5px;
-  background: var(--navy-760);
-  color: var(--ink);
-  font-size: .8125rem;
-}
-
-.preview-comment-message {
-  white-space: pre-wrap;
-  overflow-wrap: anywhere;
 }
 
 .recruitment-search-panel {

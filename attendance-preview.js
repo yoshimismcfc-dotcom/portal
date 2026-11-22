@@ -176,7 +176,7 @@
   }
   function answerMark(value){return value==="attending"?"○":value==="maybe"?"△":value==="absent"?"×":"";}
 
-  var activeDayEntry=null, dayEntryTrigger=null, activeMatchSummary=null;
+  var activeDayEntry=null, dayEntryTrigger=null, activeMatchSummary=null, activeMatchDetailId="";
 
   function groupBoardDays(events){
     var days=new Map();
@@ -581,16 +581,10 @@
       if(!event)return;
       section.querySelector(".preview-match-count").innerHTML=matchCountLabel(countAnswers([event],summary.people));
       section.querySelector(".match-target-note").textContent=matchTargetLabel(event);
-      section.querySelector(".preview-match-comments").innerHTML=matchComments(event);
       var edit=section.querySelector("[data-recruit-event]");
       if(edit)edit.disabled=!recruitmentReady||!members.length;
-      section.querySelectorAll("[data-summary-group]").forEach(function(table){
-        var group=table.dataset.summaryGroup;
-        var people=group===audience?eligiblePeople(event,summary.people):
-          members.filter(function(person){return !eligibility(event,person,"players");});
-        table.outerHTML=matchAttendanceTable(event,people,group);
-      });
     });
+    refreshMatchDetail();
   }
 
   function matchTargetLabel(event){
@@ -721,18 +715,11 @@
     }).join("");
     select.value=day.date;
     $("match-summary-list").innerHTML=day.matches.map(function(event){
-      var grades=targetGrades(event),eligible=eligiblePeople(event,people);
-      var target=matchTargetLabel(event);
-      var table=audience==="coaches"?matchAttendanceTable(event,eligible,audience)+
-        '<h4>団員の出欠一覧</h4>'+matchAttendanceTable(event,members.filter(function(person){
-          return !eligibility(event,person,"players");
-        }),"players"):matchAttendanceTable(event,eligible,audience);
+      var grades=targetGrades(event);
       return '<section class="match-summary-event" data-target-event="'+esc(event.id)+'"><h3>'+esc(eventName(event))+'</h3>'+
-        '<section class="preview-match-comments" aria-label="出欠コメント・連絡事項">'+matchComments(event)+'</section>'+
         '<div class="preview-match-count">'+matchCountLabel(countAnswers([event],people))+'</div>'+
-        '<div class="match-target-note">'+esc(target)+'</div>'+
-        (table?'<details class="preview-match-details"><summary>全員の出欠一覧</summary>'+table+'</details>':"")+
-        matchCalendarAction(event)+(!deviceMode?
+        '<div class="match-target-note">'+esc(matchTargetLabel(event))+'</div>'+
+        '<button type="button" class="secondary-button day-details-action" data-match-detail="'+esc(event.id)+'">試合詳細・出欠一覧</button> '+(!deviceMode?
           '<button type="button" class="secondary-button day-details-action" data-recruit-event="'+esc(event.id)+'"'+
           (recruitmentReady&&members.length?"":" disabled")+'>招集選手を編集</button>':"")+(audience==="coaches"?targetGradeEditor(event,grades):"")+'</section>';
     }).join("");
@@ -741,6 +728,54 @@
       dialog.showModal();
       $("match-summary-list").parentElement.scrollTop=0;
     }
+  }
+
+  function matchDetailInfo(event){
+    var time=[event.startTime,event.endTime].filter(Boolean).join("〜")||event.descriptionTime;
+    var place=String(event.place||"").trim();
+    var description=window.SMCCalendarAttendance.descriptionLinks(event.description).map(function(part){
+      return part.href?'<a href="'+esc(part.href)+'" target="_blank" rel="noopener noreferrer">'+esc(part.text)+'</a>':esc(part.text);
+    }).join("");
+    var map="https://www.google.com/maps/search/?api=1&query="+encodeURIComponent(place);
+    return (time||place?'<dl class="match-detail-fields">'+
+      (time?'<dt>時間</dt><dd>'+esc(time)+'</dd>':"")+
+      (place?'<dt>会場</dt><dd><a href="'+esc(map)+'" target="_blank" rel="noopener noreferrer">'+esc(place)+'</a></dd>':"")+
+      '</dl>':"")+
+      (description?'<div class="match-detail-description">'+description+'</div>':"")+
+      (!time&&!place&&!description?'<p>追加の予定情報は登録されていません。</p>':"");
+  }
+
+  function refreshMatchDetail(){
+    if(!activeMatchDetailId||!activeMatchSummary)return;
+    var event=state.events.find(function(item){return item.id===activeMatchDetailId;})||
+      activeMatchSummary.day.matches.find(function(item){return item.id===activeMatchDetailId;});
+    if(!event)return;
+    $("match-detail-title").textContent=eventName(event);
+    $("match-detail-date").textContent=dateLabel(event.date);
+    $("match-detail-info").innerHTML=matchDetailInfo(event);
+    var players=members.filter(function(person){return !eligibility(event,person,"players");});
+    $("match-detail-attendance").innerHTML=
+      (audience==="coaches"?'<h3>コーチの出欠</h3>'+matchAttendanceTable(event,eligiblePeople(event,getPeople()),"coaches")+
+        '<h3>団員の出欠一覧</h3>':"")+
+      (players.length?matchAttendanceTable(event,players,"players"):"<p>対象の団員がいません。</p>");
+  }
+
+  function showMatchDetailTab(selected){
+    $("match-detail-tabs").querySelectorAll('[role="tab"]').forEach(function(tab){
+      var active=tab===selected;
+      tab.setAttribute("aria-selected",String(active));
+      tab.tabIndex=active?0:-1;
+      $(tab.getAttribute("aria-controls")).hidden=!active;
+    });
+    $("match-detail-scroll").scrollTop=0;
+  }
+
+  function openMatchDetail(event){
+    activeMatchDetailId=event.id;
+    refreshMatchDetail();
+    showMatchDetailTab($("match-detail-info-tab"));
+    $("match-detail-dialog").showModal();
+    $("match-detail-scroll").scrollTop=0;
   }
 
   function matchAttendanceTable(event,people,group){
@@ -757,30 +792,12 @@
       var grade=group==="players"&&person.grade?'<span class="match-attendance-grade">'+esc(person.grade)+'</span>':"";
       var invite=group==="players"&&recruitmentDecision(event,person)==="include"?'<span class="recruitment-badge">個別招集</span>':"";
       return '<tr><th scope="row" class="match-attendance-name">'+grade+(grade?" ":"")+esc(person.name)+invite+
-        '</th><td data-value="'+esc(value)+'" aria-label="'+esc(label)+'">'+esc(answerMark(value)||"—")+'</td>'+
+        '</th><td data-value="'+esc(value)+'" aria-label="'+esc(label)+'">'+esc(answerMark(value)?answerMark(value)+" "+label:label)+'</td>'+
         (showComments?'<td>'+esc(matchComment(state.matchNotes[event.id]?.[person.id])||"—")+'</td>':"")+'</tr>';
     }).join("");
-    return '<div class="match-attendance-wrap" data-summary-group="'+esc(group)+'"><table class="match-attendance-table'+(showComments?" has-comments":"")+'"><thead><tr><th scope="col">参加者</th>'+
+    return '<div class="match-attendance-wrap"><table class="match-attendance-table'+(showComments?" has-comments":"")+'"><thead><tr><th scope="col">参加者</th>'+
       '<th scope="col" aria-label="出欠 '+esc(dateLabel(event.date))+'">出欠</th>'+
       (showComments?'<th scope="col">コメント・連絡事項</th>':"")+'</tr></thead><tbody>'+totals+'</tbody><tbody>'+rows+'</tbody></table></div>';
-  }
-
-  function matchComments(event){
-    var rows=members.filter(function(person){return !eligibility(event,person,"players");}).map(function(person){
-      var note=state.matchNotes[event.id]?.[person.id];
-      var tags=matchContactLabels(note);
-      var message=String(note?.message||"").trim();
-      if(!tags.length&&!message)return "";
-      var value=answerValue(event,person,"players");
-      var answer=ANSWERS.find(function(item){return item.value===value;});
-      return '<li><div class="preview-comment-person"><strong>'+esc([person.grade,person.name].filter(Boolean).join(" "))+
-        '</strong><span class="preview-comment-answer" data-value="'+esc(value)+'">'+
-        esc(answer?answerMark(value)+" "+answer.label:"未回答")+'</span></div>'+
-        (tags.length?'<div class="preview-comment-tags">'+tags.map(function(tag){return '<span>'+esc(tag)+'</span>';}).join("")+'</div>':"")+
-        (message?'<p class="preview-comment-message">'+esc(message)+'</p>':"")+'</li>';
-    }).filter(Boolean);
-    return '<h4>出欠コメント・連絡事項</h4>'+
-      (rows.length?'<ul>'+rows.join("")+'</ul>':'<p class="preview-comments-empty">出欠コメントなし</p>');
   }
 
   function matchComment(note){
@@ -992,9 +1009,13 @@
     if(start&&isNaN(start.getTime()))return null;
     var date=start?new Intl.DateTimeFormat("sv-SE",{timeZone:"Asia/Tokyo",dateStyle:"short"}).format(start):event.start;
     if(!/^\d{4}-\d{2}-\d{2}$/.test(date)||date<todayISO()||date>maxDate())return null;
-    var time=start?new Intl.DateTimeFormat("ja-JP",{timeZone:"Asia/Tokyo",hour:"2-digit",minute:"2-digit",hourCycle:"h23"}).format(start):"";
+    var clock=new Intl.DateTimeFormat("ja-JP",{timeZone:"Asia/Tokyo",hour:"2-digit",minute:"2-digit",hourCycle:"h23"});
+    var time=start?clock.format(start):"";
+    var end=timed&&event.end?new Date(event.end):null;
     return {
       id:"calendar_"+encodeURIComponent(event.sourceId),date:date,startTime:time,
+      endTime:end&&!isNaN(end.getTime())?clock.format(end):"",descriptionTime:event.descriptionTime||"",
+      description:event.description||"",
       kind:"match",category:event.label,title:event.title,place:event.location||"",
       calendarUrl:safeCalendarEventUrl(event.url),
       targetGrades:window.SMCCalendarAttendance.targetGrades(event.description,event.title)
@@ -1030,7 +1051,7 @@
       if(!restore&&!previous&&!isAutomaticMatch(match))return;
       var hidden=previous?.hidden&&!restore;
       if(previous&&!previous.calendarInactive&&Boolean(previous.hidden)===Boolean(hidden)&&
-        ["date","startTime","title","place","category","calendarUrl"].every(function(key){return previous[key]===match[key];})&&
+        ["date","startTime","endTime","descriptionTime","description","title","place","category","calendarUrl"].every(function(key){return previous[key]===match[key];})&&
         JSON.stringify(previous.targetGrades)===JSON.stringify(match.targetGrades))return;
       events.set(match.id,{...match,...(hidden?{hidden:true}:{}),...(previous?.targetOverride?{targetOverride:previous.targetOverride}:{})});
       if(archived.has(match.id))resumed.add(match.id);
@@ -1114,6 +1135,7 @@
         failed.length===6?"カレンダーを読み込めませんでした。":
         "カレンダー連携："+visible+"件の試合"+(failed.length?"（"+failed.join("・")+"は取得できませんでした）":"");
       renderDateOptions();renderEventList();renderResponse(true);
+      refreshMatchDetail();
       loading=false;
       loaded=true;
       refresh.disabled=false;
@@ -1162,7 +1184,28 @@
     $("recruitment-dialog").addEventListener("cancel",function(event){if(savingRecruitment)event.preventDefault();});
     window.visualViewport?.addEventListener("resize",fitRecruitmentViewport);
     window.visualViewport?.addEventListener("scroll",fitRecruitmentViewport);
+    $("match-detail-tabs").addEventListener("click",function(event){
+      var tab=event.target.closest('[role="tab"]');
+      if(tab)showMatchDetailTab(tab);
+    });
+    $("match-detail-tabs").addEventListener("keydown",function(event){
+      if(!["ArrowLeft","ArrowRight","Home","End"].includes(event.key))return;
+      var tabs=Array.from(event.currentTarget.querySelectorAll('[role="tab"]'));
+      var index=tabs.indexOf(event.target);
+      if(index<0)return;
+      event.preventDefault();
+      var selected=tabs[event.key==="Home"?0:event.key==="End"?tabs.length-1:(index+1)%tabs.length];
+      showMatchDetailTab(selected);
+      selected.focus();
+    });
+    $("match-detail-dialog").addEventListener("close",function(){activeMatchDetailId="";});
     $("match-summary-list").addEventListener("click",function(event){
+      var detail=event.target.closest("[data-match-detail]");
+      if(detail&&activeMatchSummary){
+        var match=activeMatchSummary.day.matches.find(function(item){return item.id===detail.dataset.matchDetail;});
+        if(match)openMatchDetail(match);
+        return;
+      }
       var recruit=event.target.closest("[data-recruit-event]");
       if(recruit&&activeMatchSummary){
         var selectedMatch=activeMatchSummary.day.matches.find(function(match){return match.id===recruit.dataset.recruitEvent;});
