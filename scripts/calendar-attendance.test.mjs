@@ -3,7 +3,8 @@ import fs from "node:fs";
 import {createRequire} from "node:module";
 import path from "node:path";
 import vm from "node:vm";
-import {sharedAttendance} from "../attendance-preview-store.mjs";
+import {buildAttendanceRows, encodeAttendanceCsv} from "../attendance-preview-csv.mjs";
+import {sharedAttendance, sharedEventVisibility} from "../attendance-preview-store.mjs";
 import {fileURLToPath} from "node:url";
 
 const require = createRequire(import.meta.url);
@@ -118,7 +119,8 @@ vm.runInNewContext(previewSource.replace('document.addEventListener("DOMContentL
   holidays["2026-11-23"] = "勤労感謝の日";
   globalThis.preview = {
     state, getBoardEvents, groupBoardDays, countAnswers, renderEntryDay, applySharedAnswers,
-    matchAttendanceTable, readEntryUpdates,
+    matchAttendanceTable, readEntryUpdates, eventListStatus,
+    setVisibility(values) { eventVisibility = new Map(values); },
     useGroup(group) { audience = group; },
     sync(events, failed = []) {
       syncWeekendPractices(events, failed);
@@ -194,7 +196,7 @@ const db = {
   collection: () => ({ doc: () => ({ collection: () => answerCollection }) }),
   async runTransaction(write) {
     const changes = new Map();
-    await write({ get: async id => ({ data: () => docs.get(id) }), set: (id, data) => changes.set(id, data) });
+    await write({ get: async id => ({ data: () => docs.get(id), exists: docs.has(id) }), set: (id, data) => changes.set(id, data) });
     changes.forEach((data, id) => docs.set(id, data));
     listeners.forEach(receive => receive(snapshot()));
   }
@@ -229,6 +231,57 @@ form.delete("early-" + fixtureId);
 await writer.save("coaches", coach.id, preview.readEntryUpdates(form, coach, [matchDay]), undefined, remote);
 assert.match(coachRow(), /○ 参加/);
 assert.doesNotMatch(coachRow(), /10:45|14:00/);
+
+const otherFixture = { ...match, sourceId: "fixture-two" };
+assert(preview.sync([practice, match, otherFixture]));
+preview.setVisibility([["calendar_fixture", true]]);
+assert.deepEqual(dateIds("2026-11-28"), [practiceId, "calendar_fixture-two"]);
+assert.match(preview.matchAttendanceTable(fixture, [coach], "coaches"), /○ 参加/);
+assert.equal(preview.eventListStatus(fixture, false), "出欠表から除外中");
+assert(preview.sync([practice, match, otherFixture]));
+assert.deepEqual(dateIds("2026-11-28"), [practiceId, "calendar_fixture-two"]);
+preview.setVisibility([["calendar_fixture", false]]);
+assert.deepEqual(dateIds("2026-11-28"), [practiceId, "calendar_fixture", "calendar_fixture-two"]);
+const legacyFixture = preview.state.events.find(event => event.id === "calendar_fixture");
+legacyFixture.hidden = true;
+assert(dateIds("2026-11-28").includes("calendar_fixture"), "Synced restoration overrides a legacy local exclusion");
+assert(preview.sync([practice, otherFixture]));
+assert(!dateIds("2026-11-28").includes("calendar_fixture"), "Restoration cannot reopen a calendar deletion");
+assert.equal(preview.eventListStatus(preview.state.events.find(event => event.id === "calendar_fixture"), false), "カレンダー対象外");
+
+const visibilityStore = sharedEventVisibility(db, () => null, "isolated-test");
+docs.set("calendar_fixture", { excluded: false });
+await visibilityStore.importExcluded(["calendar_fixture", "calendar_fixture-two"]);
+assert.equal(docs.get("calendar_fixture-two").excluded, true);
+assert.equal(docs.get("calendar_fixture").excluded, false);
+
+const csvEvent = { ...fixture, kindLabel: "試合", status: "active", statusLabel: "出欠受付中" };
+const csvExcluded = { ...csvEvent, id: "excluded", status: "excluded", statusLabel: "出欠表から除外中" };
+const csvInactive = { ...csvEvent, id: "inactive", status: "inactive", statusLabel: "カレンダー対象外" };
+const csvOptions = { groups: ["players", "coaches"], states: ["active"], format: "detail" };
+const csvPeople = (event, group) => group === "players" ? [
+  { ...athlete, value: "attending", contactText: '=1+2, "引用"\n次の行', contact: { lateTime: "10:30" } },
+  { name: "検証用・未回答", grade: "6年" }, { name: "検証用・対象外", restricted: "対象外", grade: "5年" }
+] : [{ ...coach, value: "absent" }];
+const fixtures = [csvEvent, csvExcluded, csvInactive];
+const exportRows = options => buildAttendanceRows(fixtures, { ...csvOptions, ...options }, csvPeople);
+assert.equal(exportRows({}).length, 5);
+assert.equal(exportRows({ groups: ["coaches"] }).length, 2);
+assert.equal(exportRows({ groups: ["players"] }).length, 4);
+assert.equal(exportRows({ answer: "unanswered" }).length, 2);
+assert.equal(exportRows({ answer: "restricted" }).length, 2);
+assert.equal(exportRows({ grade: "6年" }).length, 4);
+assert.equal(exportRows({ kind: "practice" }).length, 1);
+assert.equal(exportRows({ from: "2026-12-01" }).length, 1);
+assert.equal(exportRows({ format: "roster" }).length, 2);
+assert.equal(exportRows({ format: "contact" }).length, 2);
+assert.equal(exportRows({ format: "summary" }).length, 3);
+assert.deepEqual(exportRows({ format: "summary" })[1].slice(-6), [2, 1, 0, 0, 1, 1]);
+assert.equal(exportRows({ format: "summary", states: ["active", "excluded", "inactive"] }).length, 7);
+assert.equal(exportRows({ states: ["excluded", "inactive"], eventId: "inactive" })[1][6], "カレンダー対象外");
+const encoded = encodeAttendanceCsv(exportRows({format:"contact"}));
+assert.equal(encoded[0], "\uFEFF");
+assert(encoded.includes('"\'=1+2, ""引用""\n次の行"'));
 
 const commonSource = fs.readFileSync(path.join(root, "common.js"), "utf8");
 const calendarHtml = fs.readFileSync(path.join(root, "calendar.html"), "utf8");
