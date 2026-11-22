@@ -99,6 +99,18 @@
   background: #d0e1f4;
 }
 
+#attendance-form-events .entry-day h3 {
+  font-size: clamp(1.25rem, 4.8vw, 1.375rem);
+  font-weight: 850;
+  line-height: 1.35;
+}
+
+#attendance-form-events .entry-date-link {
+  text-wrap: balance;
+  text-decoration-thickness: 1px;
+  text-decoration-color: #9eb9d6;
+}
+
 .preview-summary-date {
   display: flex;
   align-items: center;
