@@ -114,3 +114,14 @@ GitHub Pages + Cloud Firestoreを使用します。課金プランへの変更�
 合宿のアーカイブは通常一覧から除外します。「非表示にした合宿」の表示欄は利用者の希望で撤去しました。アーカイブ済み合宿を再表示したい場合は、その合宿の共有URL（UUIDを含むリンク）で直接開き、合宿情報の「合宿を一覧から非表示」チェックを外してください。物理削除はせず参加者・会計など関連データを保全します。
 
 追加検査：`scripts/camp-shared-special-rules.test.mjs`、`scripts/camp-shared-special-browser.test.mjs`。未認証2端末の編集・再読込・競合・非公開領域拒否・履歴保護・配分・PDF・5幅と両テーマ・非表示と復元導線を検査します。
+
+### 出欠共有テストの個別招集
+
+Firebase 管理者向けの有効化手順。
+
+1. 本番にある既存ルールを控え、`firestore.rules` のうちコメント `Attendance preview recruitment` に続く `match /attendancePreviewSessions/{session}` ブロックを既存のルールへ追加します。すでにある `answers` ルールはそのまま維持します。必要な既存関数は `revision()` です。リポジトリ上のルール全体で本番を置き換えないでください。
+2. Firebase Authentication のメール／パスワードの登録済みアカウントを使い、メールを確認済みにします。まだない場合はコーチ本人が管理するアカウントを用意します。
+3. Firestore コンソールで `attendancePreviewRecruitmentConfig/{テスト用セッションID}` に `enabled: true`（boolean）を設定します。同じセッションの `attendancePreviewSessions/{テスト用セッションID}/coachGrants/{Firebase Auth UID}` に `active: true`（boolean）を設定します。
+4. テストページの「コーチ → 招集の管理」でログインし、「試合集計 → 招集選手を編集」から対象を選びます。回答者は既存のテスト用リンクを使用します。設定文書とコーチ権限は Firebase 管理者が管理します。
+
+招集の変更は試合ID単位で保存され、保存済みの出欠や連絡情報は変更しません。アプリで集計・入力に使う対象者は `対象学年に該当する団員 + 個別招集 - 招集対象外` です。従来のテスト回答データへのアクセスルールは既存のものを引き続き使用します。手動登録で端末にのみ存在する試合は、別端末の一覧に自動追加されません。端末間の確認にはカレンダー連携の試合を使用してください。

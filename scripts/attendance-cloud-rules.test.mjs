@@ -49,6 +49,29 @@ try {
   assert.equal(viewB.docs[0].data().contact.earlyTime, '14:30');
   await assertSucceeds(setDoc(doc(coach, event('match-a') + '/coachAnswers/c1'), write('attending', {})));
   const visitor = env.unauthenticatedContext().firestore();
+  const previewSession = '1'.repeat(48);
+  const previewPath = 'attendancePreviewSessions/' + previewSession;
+  const selectionPath = previewPath + '/recruitment/calendar_test-match';
+  const grantPath = previewPath + '/coachGrants/coach';
+  const selection = {decisions: {a:'include', b:'exclude'}, revision:1, updatedAt:serverTimestamp()};
+  await assertFails(getDoc(doc(visitor,selectionPath)));
+  await env.withSecurityRulesDisabled(async context => {
+    const admin = context.firestore();
+    await setDoc(doc(admin,'attendancePreviewRecruitmentConfig',previewSession),{enabled:true});
+    await setDoc(doc(admin,grantPath),{active:true});
+  });
+  await assertSucceeds(getDoc(doc(coach,grantPath)));
+  await assertFails(getDoc(doc(parent,grantPath)));
+  await assertFails(setDoc(doc(parent,previewPath+'/coachGrants/parent-a'),{active:true}));
+  await assertFails(setDoc(doc(visitor,selectionPath),selection));
+  await assertFails(setDoc(doc(parent,selectionPath),selection));
+  await assertFails(setDoc(doc(db('coach',false),selectionPath),selection));
+  await assertSucceeds(setDoc(doc(coach,selectionPath),selection));
+  assert.deepEqual((await assertSucceeds(getDoc(doc(visitor,selectionPath)))).data().decisions,{a:'include',b:'exclude'});
+  await assertFails(updateDoc(doc(coach,selectionPath),{revision:1,updatedAt:serverTimestamp()}));
+  await assertFails(updateDoc(doc(coach,selectionPath),{decisions:{a:'invalid'},revision:2,updatedAt:serverTimestamp()}));
+  await assertSucceeds(updateDoc(doc(coach,selectionPath),{decisions:{a:'include'},revision:2,updatedAt:serverTimestamp()}));
+
   const key = 'a'.repeat(64);
   const door = event('match-a') + '/guestLinks/' + key;
   const publicNote = 'attendancePublicNotices/match-a';
