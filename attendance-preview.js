@@ -76,7 +76,6 @@
     $("add-event").disabled=!selectedDate||selectedDate<todayISO()||selectedDate>maxDate()||!isDefaultDay(selectedDate);
     $("selected-date-label").textContent=selectedDate?dateLabel(selectedDate)+(holidays[selectedDate]?" · "+holidays[selectedDate]:""):"日程を選んでください";
   }
-  function answerCounts(event,day){var counts={attending:0,maybe:0,absent:0,unanswered:0};eligiblePeople(event,getPeople(),day).forEach(function(person){var value=answerValue(event,person);if(Object.hasOwn(counts,value))counts[value]++;else counts.unanswered++;});return counts;}
   function renderEventList(){
     var active=state.events.filter(function(event){return !event.hidden&&!event.calendarInactive;}).sort(function(a,b){return a.date.localeCompare(b.date)||a.title.localeCompare(b.title,"ja");});
     var days=new Map(groupBoardDays(active).map(function(day){return [day.date,day];}));
@@ -85,9 +84,9 @@
       list.innerHTML='<div class="empty-state">日程を選ぶと予定の詳細を追加できます。</div>';
     }else{
       list.innerHTML=active.map(function(event){
-        var c=answerCounts(event,days.get(event.date));
-        var unanswered=audience==="players"&&event.kind==="match"&&!targetGrades(event)?"対象学年未設定":"未回答 "+c.unanswered;
-        return '<article class="event-card'+(selectedEventId===event.id?" selected":"")+'"><button class="event-open" type="button" data-open-event="'+esc(event.id)+'"><strong>'+esc(event.title)+'</strong><span class="event-meta"><span>'+dateLabel(event.date)+'</span><span class="kind-badge '+(event.kind==="match"?"match":"")+'">'+(event.kind==="match"?"試合":"練習")+'</span>'+(event.place?'<span>'+esc(event.place)+'</span>':"")+"</span></button><span class=\"event-count\">参加 <b>"+c.attending+"</b> ・未定 "+c.maybe+'<br>'+unanswered+'</span><button type="button" class="delete-event" data-delete-event="'+esc(event.id)+'" aria-label="'+(event.id.startsWith("calendar_")?"この試合を表から非表示":"この予定を削除")+'">'+(event.id.startsWith("calendar_")?"非表示":"削除")+'</button></article>';
+        var c=countAnswers([event],getPeople(),days.get(event.date));
+        var unanswered=audience==="players"&&event.kind==="match"&&!targetGrades(event)?"対象学年未設定":"未回答 "+(c.eligible-c.attending-c.maybe-c.absent);
+        return '<article class="event-card'+(selectedEventId===event.id?" selected":"")+'"><button class="event-open" type="button" data-open-event="'+esc(event.id)+'"><strong>'+esc(event.title)+'</strong><span class="event-meta"><span>'+dateLabel(event.date)+'</span><span class="kind-badge '+(event.kind==="match"?"match":"")+'">'+(event.kind==="match"?"試合":"練習")+'</span>'+(event.place?'<span>'+esc(event.place)+'</span>':"")+"</span></button><span class=\"event-count\">参加 <b>"+c.attending+"/"+c.eligible+"</b> ・未定 "+c.maybe+'<br>'+unanswered+'</span><button type="button" class="delete-event" data-delete-event="'+esc(event.id)+'" aria-label="'+(event.id.startsWith("calendar_")?"この試合を表から非表示":"この予定を削除")+'">'+(event.id.startsWith("calendar_")?"非表示":"削除")+'</button></article>';
       }).join("");
     }
     list.querySelectorAll("[data-open-event]").forEach(function(btn){btn.addEventListener("click",function(){openEvent(btn.dataset.openEvent);});});
@@ -199,16 +198,26 @@
   }
 
   function eligibility(event,person){
-    if(audience!=="players"||event.kind!=="match")return "";
-    var grades=targetGrades(event);
-    if(!grades)return "対象学年未設定";
+    if(audience!=="players")return "";
     var grade=String(person.grade||"").normalize("NFKC").trim().replace(/生$/,"");
-    return grades.includes(grade)?"":"対象外";
+    if(event.kind==="match"){
+      var grades=targetGrades(event);
+      if(!grades)return "対象学年未設定";
+      return grades.includes(grade)?"":"対象外";
+    }
+    var weekday=fromISO(event.date).getDay();
+    if(weekday===3)return GRADES.slice(0,3).includes(grade)?"":"対象外";
+    if(weekday===4)return GRADES.slice(3).includes(grade)?"":"対象外";
+    return "";
+  }
+
+  function responseRestriction(event,person,day){
+    return eligibility(event,person)||
+      (audience==="players"&&event.kind!=="match"&&day?.matches.some(function(match){return !eligibility(match,person);})?"試合優先":"");
   }
 
   function canAnswer(event,person,day){
-    if(event.kind==="match")return !eligibility(event,person);
-    return audience!=="players"||!day?.matches.some(function(match){return !eligibility(match,person);});
+    return !responseRestriction(event,person,day);
   }
 
   function eligiblePeople(event,people,day){
@@ -217,15 +226,16 @@
 
   function needsMatchReview(match,person,day){
     return audience==="players"&&!eligibility(match,person)&&!answerValue(match,person)&&
-      day.practice.some(function(practice){return answerValue(practice,person)==="attending";});
+      day.practice.some(function(practice){return !eligibility(practice,person)&&answerValue(practice,person)==="attending";});
   }
 
   function countAnswers(events,people,day){
-    var total={attending:0,maybe:0,absent:0};
+    var total={attending:0,maybe:0,absent:0,eligible:0};
     events.forEach(function(event){
       eligiblePeople(event,people,day).forEach(function(person){
         var value=answerValue(event,person);
-        if(Object.hasOwn(total,value))total[value]++;
+        total.eligible++;
+        if(ANSWERS.some(function(answer){return answer.value===value;}))total[value]++;
       });
     });
     return total;
@@ -247,14 +257,14 @@
   }
 
   function compactTotal(total){
-    return "○"+total.attending+" △"+total.maybe+" ×"+total.absent;
+    return "○"+total.attending+"/"+total.eligible+" △"+total.maybe+" ×"+total.absent;
   }
 
   function dayHeading(day,people){
     var heading='<span class="board-date">'+esc(compactDate(day.date))+'<span class="day-calendar-icon" aria-hidden="true">▦</span></span>';
     var totals=countAnswers(day.practice.concat(day.matches),people,day);
     heading+='<span class="event-count-summary">'+compactTotal(totals)+'</span>';
-    var label=dateLabel(day.date)+"の予定を開く。回答件数、参加"+totals.attending+"、未定"+totals.maybe+"、不参加"+totals.absent;
+    var label=dateLabel(day.date)+"の予定を開く。"+(day.practice.length+day.matches.length>1?"延べ":"")+"対象"+totals.eligible+"、参加"+totals.attending+"、未定"+totals.maybe+"、不参加"+totals.absent;
     return calendarLink(day.date,heading,"day-detail-link","",label)+
       (day.matches.length?'<button type="button" class="preview-day-summary" data-match-date="'+esc(day.date)+'" aria-haspopup="dialog" aria-label="'+esc(compactDate(day.date)+"の試合集計、"+day.matches.length+"試合")+'">試合集計 '+day.matches.length+'</button>':"");
   }
@@ -277,8 +287,8 @@
   }
 
   function dayButton(day,person){
-    var practice=day.practice.filter(function(event){return canAnswer(event,person,day);})
-      .map(function(event){return answerValue(event,person);}).filter(Boolean);
+    var practiceEvents=day.practice.filter(function(event){return canAnswer(event,person,day);});
+    var practice=practiceEvents.map(function(event){return answerValue(event,person);}).filter(Boolean);
     var eligible=day.matches.filter(function(event){return !eligibility(event,person);});
     var answered=eligible.map(function(event){
       return {label:event.category||"試合",value:answerValue(event,person)};
@@ -289,8 +299,8 @@
     var marks=practice.map(answerMark).join(" ");
     var review=eligible.some(function(match){return needsMatchReview(match,person,day);});
     var reviewBadge=review?'<span class="board-review">要確認</span>':"";
-    if(!day.practice.length&&!eligible.length){
-      return '<span class="board-ineligible">'+(day.matches.every(function(event){return targetGrades(event);})?"対象外":"対象学年未設定")+'</span>';
+    if(!practiceEvents.length&&!eligible.length){
+      return '<span class="board-ineligible">'+(day.matches.some(function(event){return eligibility(event,person)==="対象学年未設定";})?"対象学年未設定":"対象外")+'</span>';
     }
     var description=(marks?"練習 "+marks:"")+(answered.length?" "+answered.map(function(answer){return answer.label+" "+answerMark(answer.value);}).join("、"):"");
     var cycle=deviceMode&&day.matches.length===0&&day.practice.length===1;
@@ -763,10 +773,10 @@
         var response=table[person.id]||{};
         var label=ANSWERS.find(function(answer){return answer.value===response.value;})?.label;
         var day=days.get(event.date);
-        if(event.kind!=="match"&&day&&!canAnswer(event,person,day))label="試合優先";
+        label=responseRestriction(event,person,day)||label;
         if(event.calendarInactive)label=label?"カレンダー対象外（記録："+label+"）":"カレンダー対象外";
         rows.push([audience==="players"?"団員":"コーチ",event.date,event.kind==="match"?"試合":event.kind==="practice"?"練習":"",
-          event.title,event.place||"",person.name,person.grade||"",label||eligibility(event,person)||"未回答",
+          event.title,event.place||"",person.name,person.grade||"",label||"未回答",
           [state.notes[audience]?.[person.id],audience==="players"?matchComment(state.matchNotes[event.id]?.[person.id]):""].filter(Boolean).join("・"),response.updatedAt||"",event.category||"",event.startTime||""]);
       });
     });
