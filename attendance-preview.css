@@ -62,12 +62,12 @@
 
 .attendance-board.is-transposed .event-col {
   width: 104px;
-  min-width: 104px;
+  min-width: var(--preview-date-width, 104px);
   border-right: 1px solid var(--board-line);
 }
 
 .attendance-board th[data-board-date] {
-  min-width: 104px;
+  min-width: var(--preview-date-width, 104px);
   padding-block: 3px;
 }
 
@@ -92,6 +92,11 @@
   font-weight: 800;
   white-space: nowrap;
   cursor: pointer;
+}
+
+.preview-day-summary-space {
+  display: block;
+  height: 44px;
 }
 
 .preview-day-summary:hover,

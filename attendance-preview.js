@@ -260,13 +260,34 @@
     return "○"+total.attending+"/"+total.eligible+" △"+total.maybe+" ×"+total.absent;
   }
 
+  function matchCategoryLabel(matches){
+    var counts=new Map();
+    matches.forEach(function(event){
+      var category=String(event.category||"").trim()||"その他";
+      counts.set(category,(counts.get(category)||0)+1);
+    });
+    return Array.from(counts).sort(function(a,b){
+      return Number(a[0]==="その他")-Number(b[0]==="その他")||a[0].localeCompare(b[0],"ja",{numeric:true});
+    }).map(function(entry){
+      return entry[0]+(entry[1]>1?"（"+entry[1]+"試合）":"");
+    }).join("・");
+  }
+
+  function matchCountLabel(total){
+    return "対象 "+total.eligible+"名　参加 "+total.attending+"　未定 "+total.maybe+
+      "　不参加 "+total.absent+"　未回答 "+(total.eligible-total.attending-total.maybe-total.absent);
+  }
+
   function dayHeading(day,people){
     var heading='<span class="board-date">'+esc(compactDate(day.date))+'<span class="day-calendar-icon" aria-hidden="true">▦</span></span>';
     var totals=countAnswers(day.practice.concat(day.matches),people,day);
     heading+='<span class="event-count-summary">'+compactTotal(totals)+'</span>';
     var label=dateLabel(day.date)+"の予定を開く。"+(day.practice.length+day.matches.length>1?"延べ":"")+"対象"+totals.eligible+"、参加"+totals.attending+"、未定"+totals.maybe+"、不参加"+totals.absent;
-    return calendarLink(day.date,heading,"day-detail-link","",label)+
-      (day.matches.length?'<button type="button" class="preview-day-summary" data-match-date="'+esc(day.date)+'" aria-haspopup="dialog" aria-label="'+esc(compactDate(day.date)+"の試合集計、"+day.matches.length+"試合")+'">試合集計 '+day.matches.length+'</button>':"");
+    var categories=matchCategoryLabel(day.matches);
+    var summary=categories?'<button type="button" class="preview-day-summary" data-match-date="'+esc(day.date)+
+      '" aria-haspopup="dialog" aria-label="'+esc(compactDate(day.date)+"の試合集計 "+categories)+'">'+esc(categories)+'</button>':
+      '<span class="preview-day-summary-space" aria-hidden="true"></span>';
+    return calendarLink(day.date,heading,"day-detail-link","",label)+summary;
   }
 
   function boardPersonName(person){
@@ -531,7 +552,7 @@
     $("match-summary-list").querySelectorAll("[data-target-event]").forEach(function(section){
       var event=summary.day.matches.find(function(match){return match.id===section.dataset.targetEvent;});
       if(!event)return;
-      section.querySelector(".preview-match-count").textContent=compactTotal(countAnswers([event],summary.people));
+      section.querySelector(".preview-match-count").textContent=matchCountLabel(countAnswers([event],summary.people));
       section.querySelectorAll("[data-summary-group]").forEach(function(table){
         var group=table.dataset.summaryGroup;
         var people=group===audience?eligiblePeople(event,summary.people):
@@ -560,7 +581,7 @@
           return grades.includes(String(person.grade||"").normalize("NFKC").replace(/生$/,""));
         }),"players"):"");
       return '<section class="match-summary-event" data-target-event="'+esc(event.id)+'"><h3>'+esc(eventName(event))+'</h3>'+
-        '<div class="preview-match-count">'+compactTotal(countAnswers([event],people))+'</div>'+
+        '<div class="preview-match-count">'+matchCountLabel(countAnswers([event],people))+'</div>'+
         '<div class="match-target-note">'+esc(target)+'</div>'+
         (table?'<details class="preview-match-details"'+(day.matches.length===1?" open":"")+'><summary>出欠・コメントの内訳</summary>'+table+'</details>':"")+
         matchCalendarAction(event)+(audience==="coaches"?targetGradeEditor(event,grades):"")+'</section>';
@@ -683,6 +704,13 @@
     $("transpose-board").setAttribute("aria-pressed",String(transposeBoard));
     rows.innerHTML='<div class="attendance-board-scroll" role="region" aria-label="出欠一覧、上下左右にスクロール" tabindex="0"><table class="attendance-board'+(transposeBoard?" is-transposed":"")+'">'+head+body+'</tbody></table></div>';
     var newBoard=rows.querySelector(".attendance-board-scroll");
+    var dateWidth=0;
+    newBoard.querySelectorAll("th[data-board-date]").forEach(function(cell){
+      var button=cell.querySelector(".preview-day-summary");
+      var extra=button?Math.max(0,button.scrollWidth-button.clientWidth):0;
+      dateWidth=Math.max(dateWidth,Math.ceil(cell.getBoundingClientRect().width+extra));
+    });
+    if(dateWidth)newBoard.style.setProperty("--preview-date-width",dateWidth+"px");
     if(preserveScroll){newBoard.scrollTop=savedTop;newBoard.scrollLeft=savedLeft;}
     var daysByDate=new Map(days.map(function(day){return [day.date,day];}));
     var peopleById=new Map(people.map(function(person){return [person.id,person];}));
