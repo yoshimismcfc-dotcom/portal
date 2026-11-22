@@ -273,7 +273,15 @@ assert.doesNotMatch(preview.dayHeading(coachDay, coaches), /対象|未回答/);
 const coachCategories = new Map([[coachDay.date, preview.matchCategories(coachDay.matches)]]);
 assert.match(preview.categorySummaryRows([coachDay], coachCategories, coaches), /2試合　参加 1人、未定 1人、不参加 0人/);
 assert.doesNotMatch(preview.categorySummaryRows([coachDay], coachCategories, coaches), /対象|未回答/);
-assert.match(preview.dayButton(coachDay, coach), /練習 ×/);
+const coachCell = preview.dayButton(coachDay, coach);
+assert.match(coachCell, /U12 ○/);
+assert.equal((coachCell.match(/data-mark=/g)||[]).length, 1);
+assert.doesNotMatch(coachCell, /練習 ×|data-mark="absent"/);
+const absentPractice = { ...coachDay, practice: [{ ...coachPractice, id: "coach-absent-practice" }] };
+preview.state.answers["coach-absent-practice"]={coaches:{[secondCoach.id]:{value:"absent"}}};
+assert.match(preview.dayButton(absentPractice, secondCoach), /練習 ×/);
+const matchOnly = { ...coachDay, practice: [], matches: [coachMatchA] };
+assert.doesNotMatch(preview.dayButton(matchOnly, secondCoach), /data-mark|U12 ×/);
 assert.match(preview.renderEntryDay(coachDay, coach, true), /data-coach-practice-note role="status"><strong>× 不参加/);
 assert.deepEqual({ ...preview.countAnswers([coachPractice], coaches, coachDay) }, { eligible: 2, attending: 1, maybe: 0, absent: 1 });
 const practiceAndMatchForm = new FormData();
@@ -349,8 +357,10 @@ assert.match(narrowHeading, /board-target-count" aria-hidden="true">練習 対�
 assert.match(totalsMarkup, /board-target-count" aria-hidden="true">対象 延べ3人/);
 assert.match(categoryRows(), /board-target-count" aria-hidden="true">対象 1人/);
 assert.doesNotMatch(categoryRows(), /category-count-context/);
-assert.match(preview.compactCountMarks({ attending: 12, maybe: 10, absent: 11 }),
-  /○12<\/span><span class="count-maybe">△10<\/span><span class="count-no">×11/);
+const formattedCounts = preview.compactCountMarks({ attending: 12, maybe: 10, absent: 11 });
+assert.match(formattedCounts, /data-mark="attending"[^>]*><\/i>12/);
+assert.match(formattedCounts, /data-mark="maybe"[^>]*><\/i>10/);
+assert.match(formattedCounts, /data-mark="absent"[^>]*><\/i>11/);
 
 const girlsFixture = { id: "girls-fixture", kind: "match", title: "寄居大会（６～３年女子）", targetGrades: null };
 const girl = { id: "g", grade: "6年", gender: "f" };
