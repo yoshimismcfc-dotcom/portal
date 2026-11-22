@@ -8,7 +8,7 @@
   <title>出欠共有テスト｜吉見SMC FC</title>
   <link rel="stylesheet" href="common.css">
   <link rel="stylesheet" href="attendance-prototype.css?v=20261121-25">
-  <link rel="stylesheet" href="attendance-preview.css?v=20261123-year-end">
+  <link rel="stylesheet" href="attendance-preview.css?v=20261123-holiday-guide">
   <script src="firebase-config.js"></script>
   <script src="calendar-attendance.js?v=20261122-girls2"></script>
   <script src="common.js"></script>
@@ -38,6 +38,10 @@
     </div>
     <p id="shared-attendance-status" class="small-note" role="status">クラウドの出欠を読み込み中です。</p>
 
+    <aside class="attendance-holiday-notice" aria-labelledby="attendance-holiday-notice-title">
+      <h2 id="attendance-holiday-notice-title">祝日の出欠について</h2>
+      <p>祝日は通常練習がお休みです。試合が入る場合に備えて、参加できるかを事前に確認しています。予定が決まっていない方は「△未定」で入力し、分かり次第変更してください。</p>
+    </aside>
     <section class="attendance-input-guide" aria-labelledby="attendance-input-guide-title">
       <h2 id="attendance-input-guide-title">出欠の入力方法</h2>
       <ol>
@@ -251,6 +255,6 @@
     <div class="dialog-actions"><button type="button" id="cancel-event" class="secondary-button">キャンセル</button><button type="submit" class="primary-button">予定を追加</button></div>
   </form>
 </dialog>
-<script src="attendance-preview.js?v=20261123-year-end"></script>
+<script src="attendance-preview.js?v=20261123-holiday-guide"></script>
 </body>
 </html>
