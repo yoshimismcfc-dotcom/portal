@@ -6,7 +6,6 @@
   var ANSWERS=[{value:"attending",label:"参加"},{value:"maybe",label:"未定"},{value:"absent",label:"不参加"}];
   var TRIPS=["行きのみ","帰りのみ","往復"];
   var deviceMode=false;
-  var previewKey=new URLSearchParams(location.hash.slice(1)).get("test")||"";
   var state=loadState(),members=[],rosterState="読み込み中",holidays={},audience="players",selectedDate="",selectedEventId="",selectedGrade="すべて",transposeBoard=false;
   var staffCoaches=[],staffCoachesReady=false,coachRosterStarted=false,coachRosterStatus="コーチ担当を読み込み中…";
   var previewRosterStarted=false, sharedStore, sharedRows=new Map(), sharedReady=false, savingShared=false, entryBaseline;
@@ -674,7 +673,7 @@
           (choice.detail?'<div class="contact-detail">'+choice.detail+'</div>':"")+'</div>';
       }).join("")+
       '<label class="contact-text">補足（任意）<textarea name="message-'+suffix+'" maxlength="160" rows="2" placeholder="例：会場を14時ごろ出発します">'+esc(note.message||"")+'</textarea></label>'+
-      '<small class="contact-help">'+(deviceMode?"連絡事項はこの端末に保存します。":"入力した連絡事項はテスト用リンクを開いた人が閲覧できます。")+'</small></details>';
+      '<small class="contact-help">'+(deviceMode?"連絡事項はこの端末に保存します。":"入力した連絡事項はこの出欠テストにアクセスできる人が閲覧できます。")+'</small></details>';
   }
 
   function readMatchContact(form,id){
