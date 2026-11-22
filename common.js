@@ -766,7 +766,7 @@ function enhanceCalendarUpcomingAgenda() {
         // Include events earlier today as well as all upcoming events in Japan.
         const today = new Intl.DateTimeFormat("sv-SE", { timeZone: "Asia/Tokyo", dateStyle: "short" }).format(start);
         const from = new Date(today + "T00:00:00+09:00");
-        const groups = CALENDARS.filter((calendar) => /^U(?:[7-9]|1[0-2])$/.test(calendar.label));
+        const groups = CALENDARS.filter((calendar) => calendar.label === "全体" || /^U(?:[7-9]|1[0-2])$/.test(calendar.label));
         const results = await Promise.allSettled(groups.map((calendar) =>
           fetchCalendar(calendar, from.toISOString(), end.toISOString(), 250, true, true)
         ));
@@ -1536,7 +1536,7 @@ function enhanceCalendarUpcomingAgenda() {
         id: `${calendar.id}:${event.id || event.iCalUID || ""}:${event.start?.dateTime || event.start?.date || ""}`,
         sourceId: event.id ? `${calendar.id}:${event.id}` : "",
         title: event.summary || "（タイトル未設定）",
-        ...(isCalendarPage ? { status: event.status,
+        ...(isCalendarPage || matchPicker ? { status: event.status,
           kind: event.extendedProperties?.shared?.kind || event.extendedProperties?.private?.kind } : {}),
         start: event.start?.dateTime || event.start?.date || "",
         end: event.end?.dateTime || event.end?.date || "",

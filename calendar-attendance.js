@@ -266,6 +266,7 @@
   return {
     tokyoDate: tokyoDate,
     initialCalendarDay: initialCalendarDay,
+    upcomingKind: upcomingKind,
     plainDescription: plainDescription,
     descriptionLinks: descriptionLinks,
     targetGrades: targetGrades,

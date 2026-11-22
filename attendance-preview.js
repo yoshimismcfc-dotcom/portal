@@ -11,6 +11,7 @@
   var staffCoaches=[],coachRosterStarted=false,coachRosterStatus="コーチ担当を読み込み中…";
   var previewRosterStarted=false, sharedStore, sharedRows=new Map(), sharedReady=false, savingShared=false, entryBaseline;
   if(!deviceMode){state.answers={};state.matchNotes={};state.notes={};state.coaches=[];state.coachLinks={};}
+  var weekendPracticeDates=new Set(), calendarMatchesChecked=false;
   var excludedHolidays=new Set(), holidaySettingsReady=false, savingHoliday=false;
   var recruitmentRows=new Map(),recruitmentReady=false,recruitmentEdit=null,savingRecruitment=false;
   var $=function(id){return document.getElementById(id);};
@@ -34,7 +35,16 @@
     catch(e){}
     fetch("https://holidays-jp.github.io/api/v1/date.json").then(function(r){if(!r.ok)throw new Error("holiday data unavailable");return r.json();}).then(function(data){holidays=data||{};localStorage.setItem("yoshimi_jp_holidays_cache_v1",JSON.stringify({savedAt:Date.now(),data:holidays}));renderDateOptions();renderResponse(true);}).catch(function(){if(!Object.keys(holidays).length){holidays={};renderDateOptions();renderResponse(true);}});
   }
-  function isDefaultDay(iso){var date=fromISO(iso);return [0,3,4,6].indexOf(date.getDay())>=0||Boolean(holidays[iso]);}
+  function isWeekend(iso){return [0,6].includes(fromISO(iso).getDay());}
+  function isDefaultDay(iso){
+    return isWeekend(iso)?weekendPracticeDates.has(iso):[3,4].includes(fromISO(iso).getDay())||Boolean(holidays[iso]);
+  }
+  function syncWeekendPractices(events,failed){
+    if(failed.includes("全体"))return;
+    weekendPracticeDates=new Set(events.filter(function(event){
+      return event.label==="全体"&&window.SMCCalendarAttendance.upcomingKind(event)==="practice";
+    }).map(function(event){return window.SMCCalendarAttendance.tokyoDate(event.start);}).filter(isWeekend));
+  }
   function defaultEvent(iso){
     return {id:"day_"+iso,date:iso,kind:"",title:holidays[iso]||""};
   }
@@ -45,7 +55,7 @@
       var registered=eventForDate(iso);
       var regular=defaultEvent(iso);
       if(isDefaultDay(iso)&&!excludedHolidays.has(iso)&&!registered.some(function(event){return event.id===regular.id||event.kind!=="match";})){
-        if(registered.length)regular.kind="practice";
+        if(isWeekend(iso)||registered.length)regular.kind="practice";
         events.push(regular);
       }
       events.push.apply(events,registered.sort(function(a,b){
@@ -63,7 +73,14 @@
         Object.values(state.answers[id]||{}).some(function(responses){return Object.keys(responses).length;});
     }).map(function(id){return defaultEvent(id.slice(4));});
   }
-  function eventForDate(iso){return state.events.filter(function(e){return e.date===iso&&!e.hidden&&!e.calendarInactive;});}
+  function eventForDate(iso){
+    var active=state.events.filter(function(event){return event.date===iso&&!event.hidden&&!event.calendarInactive;});
+    if(!isWeekend(iso))return active;
+    if(!calendarMatchesChecked)return [];
+    if(weekendPracticeDates.has(iso))return active;
+    var matches=active.filter(function(event){return event.kind==="match";});
+    return matches.some(function(event){return event.id.startsWith("calendar_");})?matches:[];
+  }
   function renderHolidaySettings(){
     var list=$("holiday-attendance-list"),today=todayISO(),end=maxDate();
     var focused=document.activeElement?.dataset.holidayDate;
@@ -115,7 +132,8 @@
     $("selected-date-label").textContent=selectedDate?dateLabel(selectedDate)+(holidays[selectedDate]?" · "+holidays[selectedDate]:""):"日程を選んでください";
   }
   function renderEventList(){
-    var active=state.events.filter(function(event){return !event.hidden&&!event.calendarInactive;}).sort(function(a,b){return a.date.localeCompare(b.date)||a.title.localeCompare(b.title,"ja");});
+    var active=state.events.filter(function(event){return eventForDate(event.date).includes(event);})
+      .sort(function(a,b){return a.date.localeCompare(b.date)||a.title.localeCompare(b.title,"ja");});
     var days=new Map(groupBoardDays(active).map(function(day){return [day.date,day];}));
     var list=$("event-list");
     if(!active.length){
@@ -1022,12 +1040,12 @@
     else $("response-panel").scrollIntoView({behavior:"smooth",block:"start"});
   }
   function render(){renderDateOptions();renderEventList();renderResponse();}
-  function addEvent(){if(!selectedDate||!isDefaultDay(selectedDate)){alert("出欠予定は水・木・土・日・祝日から選んでください。");return;}$("dialog-date").textContent=dateLabel(selectedDate)+(holidays[selectedDate]?" · "+holidays[selectedDate]:"");$("event-title").value=fromISO(selectedDate).getDay()===3?"通常練習":fromISO(selectedDate).getDay()===4?"低学年練習":"";$("event-place").value="";$("event-dialog").showModal();}
+  function addEvent(){if(!selectedDate||!isDefaultDay(selectedDate)){alert("一覧に表示されている対象日を選んでください。");return;}$("dialog-date").textContent=dateLabel(selectedDate)+(holidays[selectedDate]?" · "+holidays[selectedDate]:"");$("event-title").value=fromISO(selectedDate).getDay()===3?"通常練習":fromISO(selectedDate).getDay()===4?"低学年練習":"";$("event-place").value="";$("event-dialog").showModal();}
   function exportCsv(){
     var people=getPeople(),active=getBoardEvents();
     var days=new Map(groupBoardDays(active).map(function(day){return [day.date,day];}));
     var rows=[["対象","日付","種類","予定名","会場","名前","学年","出欠","備考","最終更新","カテゴリー","開始時刻"]];
-    var events=active.concat(state.events.filter(function(item){return item.hidden||item.calendarInactive;}),state.archive,pastDefaultEvents());
+    var events=active.concat(state.events.filter(function(item){return !isWeekend(item.date)&&(item.hidden||item.calendarInactive);}),state.archive,pastDefaultEvents());
     events.sort(function(a,b){return a.date.localeCompare(b.date);}).forEach(function(event){
       var table=state.answers[event.id]?.[audience]||{};
       people.forEach(function(person){
@@ -1067,7 +1085,7 @@
       id:"calendar_"+encodeURIComponent(event.sourceId),date:date,startTime:time,
       endTime:end&&!isNaN(end.getTime())?clock.format(end):"",descriptionTime:event.descriptionTime||"",
       description:event.description||"",
-      kind:"match",category:event.label,title:event.title,place:event.location||"",
+      kind:"match",status:event.status,category:event.label,title:event.title,place:event.location||"",
       calendarUrl:safeCalendarEventUrl(event.url),
       targetGrades:window.SMCCalendarAttendance.targetGrades(event.description,event.title)
     };
@@ -1079,8 +1097,9 @@
     return isMatch||!/練習|トレーニング|会議|総会|説明会|保護者会|審判講習|予備日/.test(title);
   }
 
-  function cancelledMatch(match){
-    return /中止|キャンセル|活動なし|お休み|^\s*(?:OFF|休み)\s*$/i.test(match.title.normalize("NFKC"));
+  function calendarMatchUnavailable(match){
+    if(window.SMCCalendarAttendance.upcomingKind(match)==="cancelled")return true;
+    return isWeekend(match.date)&&/運動会|体育祭|^年末年始$|年末年始休|休団|休業|会議|説明会|予備日/.test(match.title.normalize("NFKC"));
   }
 
   function syncCalendarMatches(matches,restore,failed){
@@ -1088,7 +1107,7 @@
     var archived=new Set(state.archive.map(function(event){return event.id;}));
     var resumed=new Set(),changed=false;
     if(failed){
-      var received=new Set(matches.filter(function(match){return !cancelledMatch(match);}).map(function(match){return match.id;}));
+      var received=new Set(matches.filter(function(match){return !calendarMatchUnavailable(match);}).map(function(match){return match.id;}));
       events.forEach(function(event,id){
         if(id.startsWith("calendar_")&&!event.calendarInactive&&!failed.includes(event.category)&&!received.has(id)){
           events.set(id,{...event,calendarInactive:true});
@@ -1097,7 +1116,7 @@
       });
     }
     matches.forEach(function(match){
-      if(cancelledMatch(match))return;
+      if(calendarMatchUnavailable(match))return;
       var previous=events.get(match.id);
       if(!restore&&!previous&&!isAutomaticMatch(match))return;
       var hidden=previous?.hidden&&!restore;
@@ -1125,12 +1144,11 @@
     var matches=[],failed=[],loading=false,loaded=false;
 
     function renderMatches(){
-      var visible=matches.filter(function(match){return !cancelledMatch(match)&&(!category.value||match.category===category.value);});
+      var visible=matches.filter(function(match){return !calendarMatchUnavailable(match)&&(!category.value||match.category===category.value);});
       list.replaceChildren();
       if(loading){status.textContent="カレンダーを読み込んでいます…";return;}
       var message=visible.length?visible.length+"件の予定。試合をタップすると、出欠表の該当日に移動します。":"2か月以内の予定がありません。";
-      if(failed.length===6)message="カレンダーを取得できませんでした。再読み込みをお試しください。";
-      else if(failed.length)message+=" "+failed.join("・")+"は読み込めませんでした。";
+      if(failed.length)message+=" "+failed.join("・")+"は読み込めませんでした。";
       status.textContent=message;
 
       visible.forEach(function(match){
@@ -1174,19 +1192,21 @@
       dialog.dispatchEvent(new Event("smc-calendar-request"));
     }
     dialog.addEventListener("smc-calendar-result",function(event){
+      failed=event.detail.failed;
+      syncWeekendPractices(event.detail.events,failed);
+      calendarMatchesChecked=true;
       matches=event.detail.events.map(calendarMatch).filter(Boolean).sort(function(a,b){
         return a.date.localeCompare(b.date)||a.startTime.localeCompare(b.startTime,"ja")||a.category.localeCompare(b.category,"ja",{numeric:true});
       });
-      failed=event.detail.failed;
       var saved=syncCalendarMatches(matches,false,failed);
       var visible=matches.filter(function(match){
         return state.events.some(function(item){return item.id===match.id&&!item.hidden&&!item.calendarInactive;});
       }).length;
       syncStatus.textContent=!saved?"試合を保存できませんでした。":
-        failed.length===6?"カレンダーを読み込めませんでした。":
         "カレンダー連携："+visible+"件の試合"+(failed.length?"（"+failed.join("・")+"は取得できませんでした）":"");
       renderDateOptions();renderEventList();renderResponse(true);
       refreshMatchDetail();
+      refreshSharedMatchSummary();
       loading=false;
       loaded=true;
       refresh.disabled=false;
@@ -1199,6 +1219,7 @@
     });
     category.addEventListener("change",renderMatches);
     refresh.addEventListener("click",requestMatches);
+    document.addEventListener("visibilitychange",function(){if(!document.hidden)requestMatches();});
     if(dialog.dataset.calendarReady==="true"||document.readyState==="complete")requestMatches();
     else window.addEventListener("load",requestMatches,{once:true});
   }
@@ -1324,7 +1345,7 @@
       dayEntryTrigger=null;
     });
     document.querySelectorAll(".audience-tab").forEach(function(btn){btn.addEventListener("click",function(){audience=btn.dataset.audience;if(audience==="coaches"&&sharedReady)readStaffCoaches();selectedGrade="すべて";document.querySelectorAll(".audience-tab").forEach(function(tab){var active=tab===btn;tab.classList.toggle("active",active);tab.setAttribute("aria-pressed",active?"true":"false");});render();});});
-    $("add-event").addEventListener("click",addEvent);$("cancel-event").addEventListener("click",function(){$("event-dialog").close();});$("event-form").addEventListener("submit",function(e){e.preventDefault();var title=$("event-title").value.trim();if(!title)return;if(selectedDate<todayISO()||selectedDate>maxDate()||!isDefaultDay(selectedDate)){alert("出欠予定は今日から2か月先までの水・木・土・日・祝日から登録してください。");return;}var kind=$("event-kind").value,dayId=defaultEvent(selectedDate).id;
+    $("add-event").addEventListener("click",addEvent);$("cancel-event").addEventListener("click",function(){$("event-dialog").close();});$("event-form").addEventListener("submit",function(e){e.preventDefault();var title=$("event-title").value.trim();if(!title)return;if(selectedDate<todayISO()||selectedDate>maxDate()||!isDefaultDay(selectedDate)){alert("今日から2か月先までの対象日を一覧から選んでください。");return;}var kind=$("event-kind").value,dayId=defaultEvent(selectedDate).id;
       var reuseDay=kind==="practice"&&!eventForDate(selectedDate).some(function(event){return event.id===dayId||event.kind==="practice";});
       var id=reuseDay?dayId:"demo_"+Date.now().toString(36)+"_"+Math.random().toString(36).slice(2,7);state.events.push({id:id,date:selectedDate,kind:$("event-kind").value,title:title,place:$("event-place").value.trim(),createdAt:new Date().toISOString()});saveState();$("event-dialog").close();openEvent(id);});
     $("entry-mode-button").addEventListener("click",function(){if(!deviceMode&&!sharedReady)return;if(getPeople().length){openAttendanceForm("");return;}if(audience==="coaches"&&!state.coaches.length){$("coach-local-editor").open=true;$("coach-editor").scrollIntoView({behavior:"smooth",block:"center"});$("coach-name-input").focus({preventScroll:true});return;}});$("entry-mode-icon").addEventListener("click",function(){$("entry-mode-button").click();});$("transpose-board").addEventListener("click",function(){transposeBoard=!transposeBoard;renderResponse();});$("cancel-attendance").addEventListener("click",function(){$("attendance-dialog").close();});$("attendance-form").addEventListener("submit",saveAttendanceForm);$("entry-person").addEventListener("change",renderAttendanceFormEvents);$("export-csv").addEventListener("click",exportCsv);$("reset-demo").addEventListener("click",function(){if(!confirm("この端末に保存した試作の予定・回答・コーチ名をすべて削除しますか？団員名簿は変更されません。"))return;state={events:[],archive:[],coaches:[],coachLinks:{},answers:{},notes:{},matchNotes:{}};selectedEventId="";selectedDate="";localStorage.removeItem(STORAGE_KEY);render();});$("add-coach").addEventListener("click",function(){var input=$("coach-name-input"),name=input.value.trim();if(!name){input.focus();return;}if(getPeople().some(function(c){return coachNameKey(c.name)===coachNameKey(name);})){alert("同じ名前がすでに登録されています。");return;}state.coaches.push({id:"coach_"+Date.now().toString(36)+"_"+Math.random().toString(36).slice(2,6),name:name});input.value="";saveState();render();});
