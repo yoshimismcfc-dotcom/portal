@@ -370,7 +370,7 @@
   margin-top: 10px;
 }
 
-#match-detail-tabs [aria-selected="true"] {
+#match-detail-tabs [aria-expanded="true"] {
   color: var(--attendance-selected);
   border-color: var(--attendance-selected);
   background: var(--attendance-selected-bg);
@@ -960,4 +960,23 @@
 
 .attendance-preview-page .entry-answer-options .attendance-mark {
   justify-self: center;
+}
+
+
+.attendance-preview-page .board-day-heading .day-detail-link {
+  min-height: 0;
+}
+
+.attendance-preview-page .practice-count-button {
+  margin-block: 2px;
+  padding-block: 2px;
+}
+
+#match-detail-choices:not([hidden]) {
+  display: grid;
+  gap: 8px;
+}
+
+#match-detail-tabs[hidden], #match-detail-return[hidden] {
+  display: none;
 }
