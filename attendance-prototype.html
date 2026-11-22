@@ -5,17 +5,25 @@
   <meta name="robots" content="noindex,nofollow">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <meta name="theme-color" content="#07152d">
-  <title>出欠確認 試作版｜吉見SMC FC</title>
+  <title>旧出欠試作版のご案内｜吉見SMC FC</title>
   <link rel="stylesheet" href="common.css">
-  <link rel="stylesheet" href="attendance-prototype.css?v=20261121-25">
-  <script src="firebase-config.js"></script>
-  <script src="calendar-attendance.js?v=20261121-19"></script>
   <script src="common.js"></script>
 </head>
 <body>
 <header class="site-header"></header>
+<main id="retired-attendance" class="page-wrap">
+  <section class="panel" aria-labelledby="retired-attendance-title">
+    <h1 id="retired-attendance-title">旧出欠試作版は終了しました</h1>
+    <p>出欠を確認・入力するには、すでに配布された「出欠共有テスト」のリンクを開いてください。</p>
+    <p><a class="back-btn" href="attendance.html">出欠確認・参加案内へ戻る</a></p>
+    <p id="local-attendance-access" hidden><a class="back-btn" href="?device=1">この端末に残っている試作記録を開く</a></p>
+    <p id="local-attendance-error" role="status" hidden>端末内の試作記録の画面を読み込めませんでした。通信状況を確認して開き直してください。</p>
+  </section>
+</main>
+<template id="local-attendance-template">
 <main class="page-wrap prototype-wrap">
-  <a class="back-btn" href="attendance.html">出欠確認・参加案内へ戻る</a>
+  <h1>この端末の旧出欠試作記録</h1>
+  <p class="small-note">この端末に保存された試作記録を確認・出力できます。</p>
   <nav class="audience-tabs" aria-label="回答する人">
     <button type="button" class="audience-tab active" data-audience="players" aria-pressed="true">⚽ 団員</button>
     <button type="button" class="audience-tab" data-audience="coaches" aria-pressed="false">🧑‍🏫 コーチ</button>
@@ -55,11 +63,9 @@
 
   </details>
   <p class="prototype-local-note">
-    <a id="device-trial-link" class="back-btn" href="attendance-prototype.html?device=1">この端末の試作記録</a>
-    <a id="cloud-entry-return" class="back-btn" href="attendance-prototype.html" hidden>出欠予定へ戻る</a>
+    <a class="back-btn" href="attendance-prototype.html">旧版の終了案内へ戻る</a>
   </p>
 </main>
-<footer class="site-footer"></footer>
 <dialog id="attendance-dialog" class="event-dialog attendance-entry-dialog" aria-labelledby="attendance-entry-title">
   <form id="attendance-form" method="dialog">
     <div class="attendance-entry-scroll">
@@ -122,6 +128,56 @@
     <div class="dialog-actions"><button type="button" id="cancel-event" class="secondary-button">キャンセル</button><button type="submit" class="primary-button">予定を追加</button></div>
   </form>
 </dialog>
-<script src="attendance-prototype.js?v=20261122-1"></script>
+</template>
+<footer class="site-footer"></footer>
+<script>
+(async function () {
+  const notice = document.getElementById("retired-attendance");
+  if (new URLSearchParams(location.search).get("device") !== "1") {
+    try {
+      document.getElementById("local-attendance-access").hidden =
+        !localStorage.getItem("yoshimi_smc_attendance_prototype_v1");
+    } catch {
+      // The retirement notice is available even if storage is disabled.
+    }
+    return;
+  }
+
+  const stylesheet = document.createElement("link");
+  stylesheet.rel = "stylesheet";
+  stylesheet.href = "attendance-prototype.css?v=20261121-25";
+  document.head.append(stylesheet);
+
+  const legacy = document.getElementById("local-attendance-template").content.cloneNode(true);
+  const archive = document.createElement("div");
+  archive.hidden = true;
+  archive.append(legacy);
+  notice.after(archive);
+
+  function loadScript(src) {
+    return new Promise((resolve, reject) => {
+      const script = document.createElement("script");
+      script.src = src;
+      script.onload = resolve;
+      script.onerror = reject;
+      document.head.append(script);
+    });
+  }
+
+  try {
+    await Promise.all([
+      loadScript("firebase-config.js"),
+      loadScript("calendar-attendance.js?v=20261121-19")
+    ]);
+    await loadScript("attendance-prototype.js?v=20261122-2");
+    notice.hidden = true;
+    archive.hidden = false;
+    document.title = "この端末の旧出欠試作記録｜吉見SMC FC";
+  } catch {
+    archive.remove();
+    document.getElementById("local-attendance-error").hidden = false;
+  }
+})();
+</script>
 </body>
 </html>

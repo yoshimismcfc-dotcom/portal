@@ -1083,8 +1083,7 @@
     $("shared-attendance-status").hidden=deviceMode;
     if(!deviceMode)startSharedAttendance();
     $("reset-demo").hidden=!deviceMode;
-    $("device-trial-link").hidden=deviceMode;
-    $("cloud-entry-return").hidden=!deviceMode;movePastEvents();
+    movePastEvents();
     setupCalendarMatchPicker();
     $("recruitment-search").addEventListener("input",function(event){
       var query=event.target.value.normalize("NFKC").replace(/\s+/g,"").toLowerCase();
