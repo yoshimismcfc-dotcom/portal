@@ -503,3 +503,23 @@
   margin-block: 0;
   --entry-height: var(--recruitment-visible-height);
 }
+
+.holiday-attendance-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: .45rem .8rem;
+  padding: .55rem 0;
+  border-bottom: 1px solid var(--surface-bd);
+}
+
+.holiday-attendance-row small {
+  display: block;
+  color: var(--ink-2);
+}
+
+.holiday-attendance-row button {
+  min-height: 44px;
+  font-size: 1rem;
+}

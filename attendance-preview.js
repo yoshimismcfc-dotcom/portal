@@ -11,6 +11,7 @@
   var staffCoaches=[],coachRosterStarted=false,coachRosterStatus="コーチ担当を読み込み中…";
   var previewRosterStarted=false, sharedStore, sharedRows=new Map(), sharedReady=false, savingShared=false, entryBaseline;
   if(!deviceMode){state.answers={};state.matchNotes={};state.notes={};state.coaches=[];state.coachLinks={};}
+  var excludedHolidays=new Set(), holidaySettingsReady=false, savingHoliday=false;
   var recruitmentRows=new Map(),recruitmentReady=false,recruitmentEdit=null,savingRecruitment=false;
   var $=function(id){return document.getElementById(id);};
   function loadState(){try{var value=JSON.parse(localStorage.getItem(STORAGE_KEY)||"{}");return {events:Array.isArray(value.events)?value.events:[],archive:Array.isArray(value.archive)?value.archive:[],coaches:Array.isArray(value.coaches)?value.coaches:[],coachLinks:value.coachLinks&&typeof value.coachLinks==="object"&&!Array.isArray(value.coachLinks)?value.coachLinks:{},answers:value.answers&&typeof value.answers==="object"?value.answers:{},notes:value.notes&&typeof value.notes==="object"?value.notes:{},matchNotes:value.matchNotes&&typeof value.matchNotes==="object"?value.matchNotes:{}};}catch(e){return {events:[],archive:[],coaches:[],coachLinks:{},answers:{},notes:{},matchNotes:{}};}}
@@ -43,7 +44,7 @@
       var iso=localISO(date);
       var registered=eventForDate(iso);
       var regular=defaultEvent(iso);
-      if(isDefaultDay(iso)&&!registered.some(function(event){return event.id===regular.id||event.kind!=="match";})){
+      if(isDefaultDay(iso)&&!excludedHolidays.has(iso)&&!registered.some(function(event){return event.id===regular.id||event.kind!=="match";})){
         if(registered.length)regular.kind="practice";
         events.push(regular);
       }
@@ -63,13 +64,49 @@
     }).map(function(id){return defaultEvent(id.slice(4));});
   }
   function eventForDate(iso){return state.events.filter(function(e){return e.date===iso&&!e.hidden&&!e.calendarInactive;});}
+  function renderHolidaySettings(){
+    var list=$("holiday-attendance-list"),today=todayISO(),end=maxDate();
+    var focused=document.activeElement?.dataset.holidayDate;
+    var dates=Object.keys(holidays).filter(function(date){
+      return /^\d{4}-\d{2}-\d{2}$/.test(date)&&date>=today&&date<=end;
+    }).sort();
+    list.innerHTML=dates.length?dates.map(function(date){
+      var excluded=excludedHolidays.has(date);
+      var name=dateLabel(date)+" "+holidays[date];
+      var action=excluded?"出欠表に戻す":"出欠表から外す";
+      return '<div class="holiday-attendance-row"><div><strong>'+esc(name)+'</strong>'+
+        (excluded?'<small>自動表示を停止中</small>':"")+'</div>'+
+        '<button type="button" class="secondary-button" data-holiday-date="'+date+'" aria-label="'+esc(name+"を"+action)+'"'+
+        (holidaySettingsReady&&!savingHoliday?"":" disabled")+'>'+action+'</button></div>';
+    }).join(""):'<p class="small-note">今後2か月の祝日を表示します。</p>';
+    if(focused)list.querySelector('[data-holiday-date="'+focused+'"]')?.focus({preventScroll:true});
+  }
+  async function toggleHoliday(date){
+    if(!holidaySettingsReady||savingHoliday||!holidays[date]||date<todayISO()||date>maxDate())return;
+    var exclude=!excludedHolidays.has(date);
+    var list=$("holiday-attendance-list"),status=$("holiday-attendance-status");
+    savingHoliday=true;
+    status.textContent="祝日の設定を保存中です。";
+    renderHolidaySettings();
+    try{
+      await sharedStore.holidays.save(date,exclude);
+      status.textContent=dateLabel(date)+(exclude?"の自動表示を出欠表から外しました。":"の自動表示を出欠表に戻しました。");
+    }catch(error){
+      status.textContent="祝日の設定を保存できませんでした。通信状態を確認して再度お試しください。";
+    }finally{
+      savingHoliday=false;
+      renderHolidaySettings();
+      if(document.activeElement===document.body)list.querySelector('[data-holiday-date="'+date+'"]')?.focus({preventScroll:true});
+    }
+  }
   function renderDateOptions(){
+    renderHolidaySettings();
     var list=$("date-options"),start=fromISO(todayISO()),end=fromISO(maxDate()),parts=[];
     for(var date=new Date(start);date<=end;date.setDate(date.getDate()+1)){
       var iso=localISO(date);if(!isDefaultDay(iso))continue;
       var items=eventForDate(iso),holiday=holidays[iso],weekday=date.getDay(),routine=weekday===3?"通常練習":weekday===4?"低学年練習":"";
       var classes="date-option"+(selectedDate===iso?" selected":"")+(items.length?" has-event":"");
-      var tags=(holiday?'<span class="date-option-holiday">'+esc(holiday)+"</span>":"")+(routine?"<span>"+esc(routine)+"</span>":"")+(items.length?'<span class="date-option-added">登録済み '+items.length+"件</span>":"");
+      var tags=(holiday?'<span class="date-option-holiday">'+esc(holiday)+"</span>":"")+(excludedHolidays.has(iso)?"<span>自動表示なし</span>":routine?"<span>"+esc(routine)+"</span>":"")+(items.length?'<span class="date-option-added">登録済み '+items.length+"件</span>":"");
       parts.push('<button type="button" class="'+classes+'" data-date="'+iso+'" aria-pressed="'+(selectedDate===iso?"true":"false")+'"><span class="date-option-date">'+(date.getMonth()+1)+"/"+date.getDate()+"（"+DAY_NAMES[weekday]+'）</span><span class="date-option-tags">'+tags+'</span><span class="date-option-select">'+(selectedDate===iso?"選択中":"選ぶ")+"</span></button>");
     }
     list.innerHTML=parts.length?parts.join(""):'<div class="empty-state">今後2か月以内に対象日がありません。</div>';
@@ -362,12 +399,25 @@
   function startSharedAttendance(){
     if(!/^[a-f0-9]{48}$/.test(previewKey)){
       $("shared-attendance-status").textContent="案内されたテスト用リンクを開いてください。";
+      $("holiday-attendance-status").textContent="祝日の出欠予定を編集するには、案内されたテスト用リンクを開いてください。";
       return;
     }
-    import("./attendance-preview-store.mjs?v=20261122-8").then(function(module){
+    import("./attendance-preview-store.mjs?v=20261122-13").then(function(module){
       return module.loadSharedAttendance(previewKey);
     }).then(function(store){
       sharedStore=store;
+      store.holidays.listen(function(excluded){
+        var status=$("holiday-attendance-status");
+        if(!holidaySettingsReady)status.textContent="";
+        excludedHolidays=excluded;
+        holidaySettingsReady=true;
+        renderDateOptions();
+        renderResponse(true);
+      },function(message){
+        holidaySettingsReady=false;
+        $("holiday-attendance-status").textContent=message;
+        renderHolidaySettings();
+      });
       store.recruitment.listen(function(records){
         recruitmentRows=records;
         recruitmentReady=true;
@@ -413,6 +463,7 @@
       });
     }).catch(function(){
       $("shared-attendance-status").textContent="クラウド出欠を開始できません。ページを開き直してください。";
+      $("holiday-attendance-status").textContent="祝日の設定に接続できません。ページを開き直してください。";
     });
   }
 
@@ -1157,6 +1208,11 @@
       $(id).addEventListener("cancel",function(event){if(savingShared)event.preventDefault();});
     });
     $("shared-attendance-status").hidden=deviceMode;
+    $("holiday-attendance-status").textContent="祝日の設定を読み込み中です。";
+    $("holiday-attendance-list").addEventListener("click",function(event){
+      var button=event.target.closest("button[data-holiday-date]");
+      if(button)toggleHoliday(button.dataset.holidayDate);
+    });
     if(!deviceMode)startSharedAttendance();
     $("reset-demo").hidden=!deviceMode;
     movePastEvents();
