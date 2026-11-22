@@ -133,6 +133,7 @@ vm.runInNewContext(previewSource.replace('document.addEventListener("DOMContentL
     state, getBoardEvents, groupBoardDays, countAnswers, renderEntryDay, applySharedAnswers, eligibility, matchRestriction,
     matchAttendanceTable, readEntryUpdates, eventListStatus,
     categorySummaryRows, matchCategories, dayHeading, compactCountMarks, scheduleDays, dayButton, activitySummaryRow, detailChoices, attendanceEventTitle,
+    setSeason(period) { seasonPeriod = validSeasonPeriod(period); },
     setSharedReady(value) { sharedReady = value; },
     setRecruitment(records) { recruitmentRows = new Map(records); },
     setVisibility(values) { eventVisibility = new Map(values); },
@@ -477,3 +478,40 @@ assert.ok(attendanceHtml.includes('src="calendar-attendance.js"'), "出欠ペー
 assert.equal(calendarHtml.includes('id="calendar-attendance-copy"'), false, "カレンダーHTMLに管理用のコピーボタンを重複配置しないでください");
 
 console.log("OK: 調整さんURLの安全な抽出、試合・カテゴリー選択、カテゴリー色、LINE案内文、画面の役割分担を検査しました。");
+
+// The year-end interval crosses into January and uses saved calendar IDs for replies.
+preview.setSeason({ start:"2026-12-28", end:"2027-01-07" });
+const seasonalPractice = makeEvent("臨時練習（5年・4年）","2026-12-29", { label:"全体", sourceId:"year-practice" });
+const firstKick = makeEvent("初蹴り（全学年）","2027-01-02", { label:"全体", sourceId:"first-kick", kind:"event" });
+const seasonalMatch = makeEvent("新春交流戦（2年）","2027-01-02", { label:"U8", sourceId:"new-year-match" });
+const movedPractice = { ...seasonalPractice, start:"2027-01-04", location:"変更後の会場" };
+assert(preview.sync([seasonalPractice, firstKick, seasonalMatch, holidayBreak]));
+assert.deepEqual(dateIds("2026-12-30"), []);
+assert.deepEqual(dateIds("2027-01-07"), []);
+assert.deepEqual(dateIds("2027-01-13"), ["day_2027-01-13"]);
+assert.deepEqual(dateIds("2026-12-29"), ["calendar_year-practice"]);
+assert.deepEqual(dateIds("2027-01-02"), ["calendar_first-kick", "calendar_new-year-match"]);
+const yearDay = () => preview.groupBoardDays(preview.getBoardEvents()).find(day=>day.practice.some(event=>event.id==="calendar_year-practice"));
+const eligiblePlayer={id:"year-player",grade:"4年"};
+assert.equal(preview.eligibility(yearDay().practice[0],eligiblePlayer,"players"),"");
+assert.equal(preview.eligibility(yearDay().practice[0],athlete,"players"),"対象外");
+assert.equal(preview.eligibility(yearDay().practice[0],coach,"coaches"),"");
+preview.state.answers["calendar_year-practice"]={players:{[eligiblePlayer.id]:{value:"attending",contact:{message:"練習連絡"}}}};
+assert(preview.sync([movedPractice, firstKick, seasonalMatch]));
+assert.deepEqual(dateIds("2026-12-29"), []);
+assert.deepEqual(dateIds("2027-01-04"), ["calendar_year-practice"]);
+preview.useGroup("players");
+assert.equal(preview.countAnswers(yearDay().practice,[eligiblePlayer],yearDay()).attending,1);
+assert.match(preview.matchAttendanceTable(yearDay().practice[0],[eligiblePlayer],"players",yearDay()),/練習連絡/);
+assert(preview.sync([seasonalMatch],["全体"]));
+assert.deepEqual(dateIds("2027-01-04"), ["calendar_year-practice"]);
+assert.deepEqual(dateIds("2027-01-02"), ["calendar_first-kick", "calendar_new-year-match"]);
+assert(preview.sync([{ ...movedPractice, status:"cancelled" },firstKick,seasonalMatch]));
+assert.deepEqual(dateIds("2027-01-04"), []);
+assert(preview.sync([movedPractice,firstKick,seasonalMatch]));
+assert.equal(preview.countAnswers(yearDay().practice,[eligiblePlayer],yearDay()).attending,1);
+assert(preview.sync([firstKick,seasonalMatch]));
+assert.deepEqual(dateIds("2027-01-04"), []);
+assert.equal(preview.state.answers["calendar_year-practice"].players[eligiblePlayer.id].value,"attending");
+preview.setSeason(null);
+assert.deepEqual(dateIds("2026-12-30"), ["day_2026-12-30"]);
