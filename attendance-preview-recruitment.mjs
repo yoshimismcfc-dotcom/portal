@@ -31,6 +31,10 @@ export function previewRecruitment(db, auth, timestamp, sessionId) {
       return auth.signInWithEmailAndPassword(email, password);
     },
 
+    signInWithGoogle(provider) {
+      return auth.signInWithPopup(provider);
+    },
+
     signOut() {
       return auth.signOut();
     },

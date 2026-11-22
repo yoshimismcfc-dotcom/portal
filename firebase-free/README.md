@@ -120,7 +120,7 @@ GitHub Pages + Cloud Firestoreを使用します。課金プランへの変更�
 Firebase 管理者向けの有効化手順。
 
 1. 本番にある既存ルールを控え、`firestore.rules` のうちコメント `Attendance preview recruitment` に続く `match /attendancePreviewSessions/{session}` ブロックを既存のルールへ追加します。すでにある `answers` ルールはそのまま維持します。必要な既存関数は `revision()` です。リポジトリ上のルール全体で本番を置き換えないでください。
-2. Firebase Authentication のメール／パスワードの登録済みアカウントを使い、メールを確認済みにします。まだない場合はコーチ本人が管理するアカウントを用意します。
+2. Firebase Authentication の登録済み Google アカウントか、メール確認済みのメール／パスワードアカウントを使います。Google ログインには Firebase Authentication の承認済みドメインに GitHub Pages のドメインが必要です。まだない場合はコーチ本人が管理するアカウントを用意します。
 3. Firestore コンソールで `attendancePreviewRecruitmentConfig/{テスト用セッションID}` に `enabled: true`（boolean）を設定します。同じセッションの `attendancePreviewSessions/{テスト用セッションID}/coachGrants/{Firebase Auth UID}` に `active: true`（boolean）を設定します。
 4. テストページの「コーチ → 招集の管理」でログインし、「試合集計 → 招集選手を編集」から対象を選びます。回答者は既存のテスト用リンクを使用します。設定文書とコーチ権限は Firebase 管理者が管理します。
 
