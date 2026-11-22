@@ -1,6 +1,30 @@
 rules_version = '2';
 service cloud.firestore {
  match /databases/{database}/documents {
+  // Attendance preview recruitment. Install alongside the deployed preview answer rules.
+  match /attendancePreviewSessions/{session} {
+   function recruitmentEnabled() {
+    return session.matches('^[a-f0-9]{48}$')
+     && get(/databases/$(database)/documents/attendancePreviewRecruitmentConfig/$(session)).data.enabled == true;
+   }
+   function verifiedCoach() {
+    return request.auth != null && request.auth.token.email_verified == true
+     && get(/databases/$(database)/documents/attendancePreviewSessions/$(session)/coachGrants/$(request.auth.uid)).data.active == true;
+   }
+   match /coachGrants/{uid} {
+    allow get: if recruitmentEnabled() && request.auth != null && request.auth.uid == uid;
+   }
+   match /recruitment/{eventId} {
+    allow get, list: if recruitmentEnabled();
+    allow create, update: if recruitmentEnabled() && verifiedCoach()
+     && eventId.matches('^(calendar_|demo_)[^/]{1,490}$')
+     && request.resource.data.keys().hasOnly(['decisions','revision','updatedAt'])
+     && request.resource.data.decisions is map && request.resource.data.decisions.size() <= 100
+     && request.resource.data.decisions.values().hasOnly(['include','exclude'])
+     && request.resource.data.revision is int && revision();
+   }
+  }
+
   // Attendance grants and rosters are provisioned by an administrator.
   function attendanceEnabled() {
    return request.auth != null && request.auth.token.email_verified == true

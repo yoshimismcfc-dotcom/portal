@@ -151,3 +151,59 @@
     grid-column: 1;
   }
 }
+
+#recruitment-access {
+  margin-block: 8px;
+  color: #234a72;
+}
+
+#recruitment-access > summary {
+  min-height: 44px;
+  padding-block: 10px;
+  font-weight: 800;
+  cursor: pointer;
+}
+
+#recruitment-login:not([hidden]) {
+  display: grid;
+  gap: 8px;
+}
+
+#recruitment-login label {
+  display: grid;
+  gap: 4px;
+}
+
+#recruitment-login input,
+#recruitment-login button,
+#recruitment-logout {
+  min-height: 44px;
+  font-size: 16px;
+}
+
+#recruitment-members .recruitment-member:not([hidden]) {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(7em, auto);
+  align-items: center;
+  gap: 8px;
+}
+
+.recruitment-member span {
+  overflow-wrap: anywhere;
+}
+
+.recruitment-member select {
+  min-height: 44px;
+}
+
+.recruitment-member small {
+  display: block;
+  color: #b9d2e3;
+}
+
+.recruitment-badge {
+  display: inline-block;
+  margin-inline-start: .3em;
+  color: inherit;
+  font-size: .75em;
+}

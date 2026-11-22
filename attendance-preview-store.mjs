@@ -1,3 +1,5 @@
+import { previewRecruitment } from "./attendance-preview-recruitment.mjs?v=20261122-6";
+
 export function sharedAttendance(db, serverTimestamp, keyPrefix) {
   const collection = db.collection('attendancePreviewSessions').doc(keyPrefix).collection('answers');
   const key = (eventId, group, personId) =>
@@ -61,5 +63,10 @@ export async function loadSharedAttendance(keyPrefix) {
       document.head.append(script);
     });
   }
-  return sharedAttendance(window.firebase.firestore(), window.firebase.firestore.FieldValue.serverTimestamp, keyPrefix);
+  const db = window.firebase.firestore();
+  const timestamp = window.firebase.firestore.FieldValue.serverTimestamp;
+  return {
+    ...sharedAttendance(db, timestamp, keyPrefix),
+    recruitment: previewRecruitment(db, window.FIREBASE_AUTH, timestamp, keyPrefix)
+  };
 }
