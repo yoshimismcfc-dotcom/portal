@@ -810,3 +810,51 @@
   .attendance-preview-page .attendance-board .person-col{min-width:142px;width:142px;max-width:142px}
   .attendance-preview-page .attendance-board th[data-board-date]{min-width:158px;width:158px}
 }
+
+.attendance-preview-page .attendance-board .category-count-row > :is(th, td) {
+  background: var(--attendance-board-head);
+}
+.attendance-preview-page .attendance-board .category-count-row > th {
+  font-size: .875rem;
+  font-weight: 800;
+}
+.category-count-button {
+  display: grid;
+  justify-items: center;
+  align-content: center;
+  gap: .15rem;
+  width: 100%;
+  min-height: 44px;
+  padding: .2rem .25rem;
+  border: 1px solid var(--board-line);
+  border-radius: .4rem;
+  background: var(--attendance-board-frozen);
+  color: var(--ink);
+  font: inherit;
+  cursor: pointer;
+}
+.category-count-button:hover {
+  border-color: var(--attendance-board-link);
+}
+.category-count-values {
+  display: flex;
+  justify-content: center;
+  flex-wrap: wrap;
+  column-gap: .45rem;
+  font-size: .875rem;
+  font-weight: 800;
+  font-variant-numeric: tabular-nums;
+}
+.category-count-values .count-yes { color: var(--attendance-board-yes); }
+.category-count-values .count-maybe { color: var(--attendance-board-maybe); }
+.category-count-values .count-no { color: var(--attendance-board-no); }
+.category-count-context, .category-count-empty {
+  color: var(--ink-2);
+  font-size: .75rem;
+}
+.category-count-transposed {
+  display: grid;
+  gap: .15rem;
+  margin-top: .4rem;
+  font-size: .75rem;
+}
