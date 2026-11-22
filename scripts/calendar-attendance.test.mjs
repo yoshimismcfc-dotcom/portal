@@ -269,6 +269,14 @@ preview.state.answers[coachMatchA.id] = { coaches: { [coach.id]: { value: "atten
 preview.state.answers[coachMatchB.id] = { coaches: { [coach.id]: { value: "attending" }, [secondCoach.id]: { value: "maybe" } } };
 const coaches = [coach, secondCoach];
 assert.match(preview.dayHeading(coachDay, coaches), /練習の集計。参加 1人、未定 0人、不参加 1人/);
+assert.match(preview.renderEntryDay(coachDay, secondCoach, true), /連絡事項（任意）.*name="message-coach-practice"/);
+const practiceNoteForm = new FormData();
+practiceNoteForm.set("answer-coach-practice","attending");
+practiceNoteForm.set("contact-coach-practice","1");
+practiceNoteForm.set("message-coach-practice","練習に遅れます");
+const practiceNote = preview.readEntryUpdates(practiceNoteForm, coach, [coachDay])[0];
+assert.equal(practiceNote.value, undefined);
+assert.equal(practiceNote.contact.message, "練習に遅れます");
 assert.doesNotMatch(preview.dayHeading(coachDay, coaches), /対象|未回答/);
 const coachCategories = new Map([[coachDay.date, preview.matchCategories(coachDay.matches)]]);
 assert.match(preview.categorySummaryRows([coachDay], coachCategories, coaches), /2試合　参加 1人、未定 1人、不参加 0人/);

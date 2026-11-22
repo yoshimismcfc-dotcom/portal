@@ -94,6 +94,11 @@ test('公開版は一部保存の再試行と同時編集を処理する', async
     assert.equal((await firstDevice.save(group, person, updates, undefined, emptyBaseline)).size, 0);
     assert.equal(records.get(matchKey).revision, 1);
     assert.equal(records.get(practiceKey).value, 'maybe');
+    await firstDevice.save(group, person, [{ id: practice, contact: { message: '練習に遅れます' } }],
+      undefined, new Map(records));
+    assert.equal(records.get(practiceKey).value, 'maybe');
+    assert.equal(records.get(practiceKey).contact.message, '練習に遅れます');
+
 
     const baseline = new Map(records);
     await secondDevice.save(group, person, [{ id: match, value: 'absent' }], undefined, baseline);
@@ -118,6 +123,47 @@ test('公開版は一部保存の再試行と同時編集を処理する', async
     assert.equal((await firstDevice.save(group, person, draft, undefined, baseline, updatedConflicts)).size, 0);
     assert.equal(records.get(matchKey).value, 'maybe');
     assert.deepEqual(records.get(matchKey).contact, {});
+  } finally {
+    delete globalThis.window;
+  }
+});
+
+test('ピリオドを含む試合・団員の識別子でも個別招集を保存して読み戻せる', async () => {
+  const records = { 'calendar_existing%40example': { revision: 1, decisions: { 'player-a': 'exclude' } } };
+  let receive;
+  const snapshot = value => ({ val: () => value });
+  const ref = () => ({
+    on(_name, listener) { receive = listener; receive(snapshot(records)); },
+    off() {},
+    child(key) {
+      assert.doesNotMatch(key, /[.#$\[\]/]/);
+      return {
+        transaction(update, complete) {
+          const next = update(records[key] || null);
+          if (next === undefined) { complete(null, false); return; }
+          for (const id of Object.keys(next.decisions)) assert.doesNotMatch(id, /[.#$\[\]/]/);
+          records[key] = next;
+          receive(snapshot(records));
+          complete(null, true, snapshot(next));
+        }
+      };
+    }
+  });
+  globalThis.window = { onFirebaseReady: ready => ready({ ref }) };
+  try {
+    const writer = await loadOpenAttendance();
+    const reader = await loadOpenAttendance();
+    let updated;
+    reader.recruitment.listen(rows => { updated = rows; });
+    assert.equal(updated.get('calendar_existing%40example').decisions['player-a'], 'exclude');
+    const fixture = 'calendar_fixture%40example.com%3A01';
+    const saved = await writer.recruitment.save(fixture, new Map([['player.a','include'],['player-b','include']]), 0);
+    assert.deepEqual(saved.decisions, { 'player.a': 'include', 'player-b': 'include' });
+    assert.deepEqual(updated.get(fixture), saved);
+    await assert.rejects(writer.recruitment.save(fixture, new Map([['player.a','default']]), 0), /recruitment-conflict/);
+    await writer.recruitment.save(fixture, new Map([['player.a','default']]), 1);
+    assert.deepEqual(updated.get(fixture).decisions, { 'player-b': 'include' });
+    assert.equal(updated.get('calendar_existing%40example').revision, 1);
   } finally {
     delete globalThis.window;
   }
