@@ -6,6 +6,7 @@
   var ANSWERS=[{value:"attending",label:"参加"},{value:"maybe",label:"未定"},{value:"absent",label:"不参加"}];
   var TRIPS=["行きのみ","帰りのみ","往復"];
   var deviceMode=new URLSearchParams(location.search).get("device")==="1";
+  if(!deviceMode)return;
   var state=loadState(),members=[],rosterState="読み込み中",holidays={},audience="players",selectedDate="",selectedEventId="",selectedGrade="すべて",transposeBoard=false;
   var staffCoaches=[],coachRosterStarted=false,coachRosterStatus="コーチ担当を読み込み中…";
   var $=function(id){return document.getElementById(id);};
@@ -838,8 +839,7 @@
 
   function init(){
     $("reset-demo").hidden=!deviceMode;
-    $("device-trial-link").hidden=deviceMode;
-    $("cloud-entry-return").hidden=!deviceMode;movePastEvents();
+    movePastEvents();
     setupCalendarMatchPicker();
     $("match-summary-list").addEventListener("click",function(event){
       var button=event.target.closest("[data-target-action]");
@@ -898,5 +898,6 @@
     var archiveSection=document.createElement("section");archiveSection.className="panel archived-panel";archiveSection.innerHTML='<details><summary>過去の予定（試作データ）</summary><div id="archive-list" class="event-list"></div><p class="small-note">日付が過ぎた予定は一覧から自動で移し、試作版の回答記録はCSV出力用にこの端末へ残しています。</p></details>';$("event-panel").after(archiveSection);
     render();loadHolidays();readRoster();
   }
-  document.addEventListener("DOMContentLoaded",init);
+  if(document.readyState==="loading")document.addEventListener("DOMContentLoaded",init);
+  else init();
 })();
