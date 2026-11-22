@@ -7,6 +7,14 @@ service cloud.firestore {
     return session.matches('^[a-f0-9]{48}$')
      && get(/databases/$(database)/documents/attendancePreviewRecruitmentConfig/$(session)).data.enabled == true;
    }
+   match /holidayExclusions/{date} {
+    allow get, list: if recruitmentEnabled();
+    allow create, update: if recruitmentEnabled()
+     && date.matches('^[0-9]{4}-[0-9]{2}-[0-9]{2}$')
+     && request.resource.data.keys().hasOnly(['excluded','updatedAt'])
+     && request.resource.data.excluded is bool
+     && request.resource.data.updatedAt == request.time;
+   }
    match /recruitment/{eventId} {
     allow get, list: if recruitmentEnabled();
     allow create, update: if recruitmentEnabled()

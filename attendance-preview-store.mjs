@@ -52,6 +52,26 @@ export function sharedAttendance(db, serverTimestamp, keyPrefix) {
   };
 }
 
+export function sharedHolidaySettings(db, timestamp, sessionId) {
+  const collection = db.collection('attendancePreviewSessions').doc(sessionId).collection('holidayExclusions');
+
+  return {
+    listen(receive, unavailable) {
+      return collection.onSnapshot({ includeMetadataChanges: true }, snapshot => {
+        if (snapshot.metadata.hasPendingWrites) return;
+        if (snapshot.metadata.fromCache) {
+          unavailable('クラウドの祝日設定を確認中です。');
+          return;
+        }
+        receive(new Set(snapshot.docs.filter(doc => doc.data().excluded === true).map(doc => doc.id)));
+      }, () => unavailable('祝日の設定を読み込めません。通信状態を確認してページを開き直してください。'));
+    },
+    save(date, excluded) {
+      return collection.doc(date).set({ excluded, updatedAt: timestamp() });
+    }
+  };
+}
+
 export async function loadSharedAttendance(keyPrefix) {
   await new Promise(resolve => window.onFirebaseReady(resolve));
   if (!window.firebase.firestore) {
@@ -67,6 +87,7 @@ export async function loadSharedAttendance(keyPrefix) {
   const timestamp = window.firebase.firestore.FieldValue.serverTimestamp;
   return {
     ...sharedAttendance(db, timestamp, keyPrefix),
-    recruitment: previewRecruitment(db, timestamp, keyPrefix)
+    recruitment: previewRecruitment(db, timestamp, keyPrefix),
+    holidays: sharedHolidaySettings(db, timestamp, keyPrefix)
   };
 }

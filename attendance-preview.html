@@ -8,7 +8,7 @@
   <title>出欠共有テスト｜吉見SMC FC</title>
   <link rel="stylesheet" href="common.css">
   <link rel="stylesheet" href="attendance-prototype.css?v=20261121-25">
-  <link rel="stylesheet" href="attendance-preview.css?v=20261122-12">
+  <link rel="stylesheet" href="attendance-preview.css?v=20261122-13">
   <script src="firebase-config.js"></script>
   <script src="calendar-attendance.js?v=20261121-19"></script>
   <script src="common.js"></script>
@@ -44,6 +44,11 @@
 
   <details class="attendance-settings">
     <summary>予定の登録・CSV出力</summary>
+  <section class="panel holiday-attendance-panel" aria-labelledby="holiday-attendance-title">
+    <div class="section-heading"><div><h2 id="holiday-attendance-title">祝日の出欠予定</h2><p>祝日も通常どおり出欠を取ります。活動がない日だけ自動表示を外せます。登録済みの試合・練習は引き続き表示します。</p></div></div>
+    <div id="holiday-attendance-list"></div>
+    <p id="holiday-attendance-status" class="small-note" role="status"></p>
+  </section>
   <section class="panel date-options-panel">
     <div class="section-heading"><div><h2>出欠を取る日程</h2><p>練習・試合の詳細を追加する日を選んでください。</p><p id="roster-status" class="roster-status" role="status">団員名簿を読み込み中…</p></div></div>
     <div id="date-options" class="date-options" aria-label="出欠対象日"></div>
@@ -166,6 +171,6 @@
     <div class="dialog-actions"><button type="button" id="cancel-event" class="secondary-button">キャンセル</button><button type="submit" class="primary-button">予定を追加</button></div>
   </form>
 </dialog>
-<script src="attendance-preview.js?v=20261122-12"></script>
+<script src="attendance-preview.js?v=20261122-13"></script>
 </body>
 </html>
