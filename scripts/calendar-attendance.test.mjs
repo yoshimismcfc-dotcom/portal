@@ -281,6 +281,15 @@ const categoryRows = () => {
   const byDate = new Map(days.map(day => [day.date, preview.matchCategories(day.matches)]));
   return preview.categorySummaryRows(days, byDate, [athlete, extraPlayer]);
 };
+const practiceWithMatches = preview.groupBoardDays(preview.getBoardEvents()).find(day => day.date === "2026-11-28");
+const practiceOnlyPlayer = { id: "practice-only", grade: "4年" };
+const youngerMatchPlayer = { id: "younger-match", grade: "2年" };
+const practicePeople = [athlete, extraPlayer, practiceOnlyPlayer, youngerMatchPlayer];
+const practiceDayHeading = preview.dayHeading(practiceWithMatches, practicePeople);
+assert.match(practiceDayHeading, /練習 対象 1人/);
+assert.doesNotMatch(practiceDayHeading, /対象 延べ|参加 1人/);
+assert.match(preview.dayHeading({ ...practiceWithMatches, matches: [] }, practicePeople), /対象 4人/);
+assert.match(preview.dayHeading({ ...practiceWithMatches, practice: [] }, practicePeople), /対象 延べ4人/);
 const totalsMarkup = categoryRows();
 assert.match(totalsMarkup, />U12試合<.*?>U8試合</);
 const unorderedCategories = ["U10", "U8", "", "U12", "U7", "U11", "U9"].map(category => ({ category }));

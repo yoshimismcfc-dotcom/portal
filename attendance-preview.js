@@ -493,8 +493,10 @@
   }
 
   function dayHeading(day,people){
-    var events=dayEvents(day),total=countAnswers(events,people,day);
-    var target=targetCountText(total,events.length);
+    var practiceOnly=audience==="players"&&day.practice.length>0&&day.matches.length>0;
+    var events=practiceOnly?day.practice:dayEvents(day);
+    var total=countAnswers(events,people,day);
+    var target=(practiceOnly?"練習 ":"")+targetCountText(total,events.length);
     var ready=deviceMode||sharedReady;
     var label=dateLabel(day.date)+"の予定を開く。"+(ready?
       target+"、参加 "+total.attending+"人、未定 "+total.maybe+"人、不参加 "+total.absent+"人":"集計待ち");
