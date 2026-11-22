@@ -62,7 +62,7 @@
       .replace(/^女子(?:のみ|限定)?[:：]?|(?:の)?女子(?:のみ|限定)?$/g, "");
     if (/^(全学年|全団員|全員)$/.test(source)) return PLAYER_GRADES.slice();
     var grades = new Set();
-    for (var part of source.split(/[・、,/＋+]/)) {
+    for (var part of source.split(/[・•･、,/＋+]/)) {
       var range = part.match(/^([1-6])(?:年(?:生)?)?[~〜～\-–—]([1-6])年(?:生)?$/);
       if (range) {
         var min = Math.min(Number(range[1]), Number(range[2]));
