@@ -17,7 +17,7 @@
 <header class="site-header"></header>
 <main class="page-wrap prototype-wrap">
   <h1>出欠共有テスト</h1>
-  <p class="small-note">保存した回答は、このテスト用リンクを開いた人に共有されます。公開してよいテスト用の連絡だけを入力してください。</p>
+  <p class="small-note">団員・コーチの氏名を選んで出欠を入力できます。入力内容は、この出欠テストを利用する全員に共有されます。個人情報や非公開の連絡は入力しないでください。</p>
   <nav class="audience-tabs" aria-label="回答する人">
     <button type="button" class="audience-tab active" data-audience="players" aria-pressed="true">⚽ 団員</button>
     <button type="button" class="audience-tab" data-audience="coaches" aria-pressed="false">🧑‍🏫 コーチ</button>
@@ -37,7 +37,7 @@
       <div class="board-toolbar" id="board-toolbar" hidden><span id="board-status" role="status">名前が縦</span><div class="preview-board-actions"><button type="button" id="open-match-summary" aria-haspopup="dialog" hidden>試合集計</button><button type="button" id="transpose-board" aria-pressed="false">縦横切替</button></div></div>
     </div>
     <p id="shared-attendance-status" class="small-note" role="status">クラウドの出欠を読み込み中です。</p>
-    <button id="share-connection-open" type="button" class="secondary-button" hidden>共有リンクを接続して出欠を入力</button>
+    
     <div id="response-list" class="response-list"></div>
     <p id="answer-status" class="attendance-save-status" role="status" hidden></p>
     <div class="fixed-entry-bar" id="fixed-entry-bar"><span id="entry-mode-help">予定を選び、出欠入力を開始してください。</span><button type="button" id="entry-mode-button" class="primary-button">出欠を入力する</button><button type="button" id="entry-mode-icon" class="entry-mode-icon" aria-label="名前を選んで出欠を入力"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 20h4l11-11a2.1 2.1 0 0 0-4-4L4 16v4Z"/><path d="m13.5 6.5 4 4M4 20l4-1"/></svg></button></div>
@@ -210,17 +210,6 @@
     <div class="dialog-actions"><button type="button" id="cancel-event" class="secondary-button">キャンセル</button><button type="submit" class="primary-button">予定を追加</button></div>
   </form>
 </dialog>
-<dialog id="share-connection-dialog" class="event-dialog" aria-labelledby="share-connection-title">
-  <form id="share-connection-form">
-    <h2 id="share-connection-title">出欠の共有リンクに接続</h2>
-    <p id="share-connection-status" role="status">以前の共有テストURLを入力してください。</p>
-    <label for="share-connection-url">以前入力したときの共有URL
-      <input id="share-connection-url" type="text" inputmode="url" autocomplete="off" spellcheck="false" placeholder="https://…/attendance-preview.html#test=…" required>
-    </label>
-    <p class="small-note">名前や回答を新しく作り直しません。以前と同じ共有リンクを使うと、保存済みの出欠を読み込めます。</p>
-    <div class="dialog-actions"><button type="button" id="share-connection-close" class="secondary-button">閉じる</button><button type="submit" class="primary-button">接続する</button></div>
-  </form>
-</dialog>
-<script src="attendance-preview.js?v=20261122-connect1"></script>
+<script src="attendance-preview.js?v=20261122-open1"></script>
 </body>
 </html>
