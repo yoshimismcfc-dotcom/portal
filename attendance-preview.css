@@ -559,7 +559,7 @@
   --board-ink: var(--ink);
   --board-line: var(--surface-bd);
   --attendance-date-width: 6rem;
-  --attendance-person-width: 7.5rem;
+  --attendance-person-width: 8.5rem;
   --attendance-board-bg: var(--navy-820);
   --attendance-board-head: var(--navy-760);
   --attendance-board-frozen: var(--navy-900);
@@ -636,7 +636,7 @@
   min-width: var(--attendance-person-width);
   width: var(--attendance-person-width);
   max-width: var(--attendance-person-width);
-  padding-inline: 4px;
+  padding-inline: 7px;
   box-shadow:2px 0 0 var(--board-line);
 }
 .attendance-preview-page .attendance-board .person-col .board-member-name,
@@ -654,7 +654,7 @@
 }
 .attendance-preview-page .attendance-board .board-member-grade {
   display: inline;
-  margin: 0;
+  margin: 0 .125rem 0 0;
   color:var(--ink-2);
   font-size:.76rem;
   font-weight:700;
@@ -741,7 +741,7 @@
   min-width: var(--attendance-person-width);
   max-width: var(--attendance-person-width);
   width: var(--attendance-person-width);
-  padding-inline: 4px;
+  padding-inline: 7px;
 }
 .attendance-preview-page .attendance-board.is-transposed .rotated-person .board-member-name {
   text-align:center;
