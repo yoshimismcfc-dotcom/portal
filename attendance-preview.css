@@ -678,7 +678,7 @@
 }
 .attendance-preview-page .attendance-board .board-date {
   font-size: .9375rem;
-  line-height: 1.25;
+  line-height: 1.12;
 }
 .attendance-preview-page .attendance-board .event-count-summary,
 .attendance-preview-page .category-count-values {
@@ -990,6 +990,7 @@
 
 .attendance-preview-page .board-day-heading .day-detail-link {
   min-height: 0;
+  padding-block: 0;
 }
 
 .attendance-preview-page .practice-count-button {
@@ -1178,7 +1179,7 @@
 }
 
 .attendance-preview-page .attendance-board {
-  --attendance-date-width: 8.5rem;
+  --attendance-date-width: 7.875rem;
 }
 
 .event-role-counts {
@@ -1195,6 +1196,7 @@
   display: block;
   justify-self: center;
   max-inline-size: calc(var(--attendance-date-width) - .4rem);
+  line-height: 1.1;
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
@@ -1205,9 +1207,15 @@
   align-items: center;
   justify-content: center;
   justify-items: start;
-  gap: .2rem;
+  gap: .125rem;
   min-width: 44px;
-  padding-inline: .125rem;
+  padding-inline: .0625rem;
+}
+
+@media (hover: hover) and (pointer: fine) and (not (any-pointer: coarse)) {
+  .event-role-counts .role-count-button {
+    min-height: 38px;
+  }
 }
 
 .event-role-counts .role-count-button + .role-count-button {
@@ -1221,7 +1229,7 @@
 }
 
 .attendance-preview-page .role-count-button .category-count-values {
-  gap: .3rem;
+  gap: .2rem;
   font-size: .75rem;
 }
 
@@ -1229,13 +1237,13 @@
   display: inline-grid;
   grid-template-columns: auto minmax(2ch, max-content);
   align-items: center;
-  gap: .1rem;
+  gap: .0625rem;
   text-align: end;
 }
 
 .attendance-preview-page :is(.role-count-button, .board-attendance-legend) .attendance-mark {
-  inline-size: .72rem;
-  block-size: .72rem;
+  inline-size: .68rem;
+  block-size: .68rem;
 }
 
 .attendance-role-tabs {
@@ -1273,6 +1281,7 @@
 
 /* Attendance lists keep compact cells while their controls retain full touch targets. */
 .attendance-preview-page .attendance-board tbody > tr > :is(th, td) {
+  height: 45px;
   padding-block: 0;
 }
 
