@@ -1226,3 +1226,106 @@
 .event-participants [role="tabpanel"][hidden] {
   display: none;
 }
+
+/* Attendance lists keep compact cells while their controls retain full touch targets. */
+.attendance-preview-page .attendance-board tbody > tr > :is(th, td) {
+  padding-block: 0;
+}
+
+.attendance-preview-page .attendance-board .day-answer,
+.attendance-preview-page .attendance-board .board-mark.editable {
+  min-height: 44px;
+  padding-block: 1px;
+  vertical-align: middle;
+}
+
+.attendance-preview-page .attendance-board .day-match-chip {
+  min-height: 0;
+  padding: 1px 3px;
+}
+
+.attendance-preview-page .attendance-board .board-comment {
+  margin: 0;
+  line-height: 1.15;
+  font-weight: 500;
+}
+
+.attendance-preview-page .match-attendance-wrap {
+  margin-block: 2px 4px;
+}
+
+.attendance-preview-page .match-attendance-table {
+  line-height: 1.25;
+}
+
+.attendance-preview-page .match-attendance-table :is(th, td) {
+  padding: 4px 6px;
+}
+
+.attendance-preview-page .match-attendance-table :is(.match-attendance-name:has(.participant-edit), .participant-contact-cell) {
+  padding-block: 0;
+}
+
+.participant-edit {
+  display: block;
+  width: 100%;
+  padding-block: 1px;
+  line-height: 1.25;
+}
+
+.participant-contact summary {
+  display: block;
+  min-height: 44px;
+  align-content: center;
+  cursor: pointer;
+}
+
+.participant-contact summary::-webkit-details-marker {
+  display: none;
+}
+
+.participant-contact:not([open]) summary {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.match-detail-header {
+  padding: 6px 10px 0;
+}
+
+.match-detail-header h2,
+#calendar-attendance-title {
+  margin-block: 0 2px;
+  font-size: 1rem;
+  line-height: 1.25;
+}
+
+#match-detail-date,
+#calendar-attendance-status {
+  margin-block: 0 2px;
+  font-size: .8125rem;
+  line-height: 1.25;
+}
+
+#match-detail-tabs {
+  margin-top: 2px;
+}
+
+#match-detail-scroll,
+#match-summary-dialog .attendance-entry-scroll,
+#saved-event-dialog .attendance-entry-scroll {
+  padding: 4px 8px;
+}
+
+:is(#match-detail-dialog, #match-summary-dialog, #saved-event-dialog) .dialog-actions {
+  padding: 3px 8px;
+}
+
+.attendance-role-tabs {
+  padding-block: 0 2px;
+}
+
+.calendar-attendance-embedded #calendar-attendance-view {
+  padding: 2px 4px;
+}
