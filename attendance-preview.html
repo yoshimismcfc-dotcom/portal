@@ -8,7 +8,7 @@
   <title>出欠共有テスト｜吉見SMC FC</title>
   <link rel="stylesheet" href="common.css">
   <link rel="stylesheet" href="attendance-prototype.css?v=20261121-25">
-  <link rel="stylesheet" href="attendance-preview.css?v=20261123-family1">
+  <link rel="stylesheet" href="attendance-preview.css?v=20261123-cloud-family1">
   <script src="firebase-config.js"></script>
   <script src="calendar-attendance.js?v=20261122-girls2"></script>
   <script src="common.js"></script>
@@ -61,10 +61,11 @@
           <li>「・」は未回答です。「対象外」の日は入力不要です。</li>
           <li>予定が未定なら「△未定」で保存できます。決まったら、入力画面を開き直して変更してください。</li>
           <li>画面上部の「団員」「コーチ」で入力する人を切り替えられます。</li>
+          <li>「家族を登録」で団員・コーチの名前を選ぶと、次回から登録した名前をタップして「家族まとめて入力」を選べます。</li>
         </ul>
       </details>
     </section>
-    <button type="button" id="open-family-entry" class="secondary-button">家族で入力</button>
+    <button type="button" id="open-family-entry" class="secondary-button">家族を登録</button>
     <div id="response-list" class="response-list"></div>
     <p id="answer-status" class="attendance-save-status" role="status" hidden></p>
     <div class="fixed-entry-bar" id="fixed-entry-bar"><span id="entry-mode-help">予定を選び、出欠入力を開始してください。</span><button type="button" id="entry-mode-button" class="primary-button">出欠を入力する</button><button type="button" id="entry-mode-icon" class="entry-mode-icon" aria-label="名前を選んで出欠を入力"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 20h4l11-11a2.1 2.1 0 0 0-4-4L4 16v4Z"/><path d="m13.5 6.5 4 4M4 20l4-1"/></svg></button></div>
@@ -107,6 +108,11 @@
       <div id="event-list" class="event-list"></div>
     </section>
   </details>
+</main>
+<main id="calendar-attendance-view" class="page-wrap prototype-wrap" hidden>
+  <h1 id="calendar-attendance-title">出欠一覧</h1>
+  <p id="calendar-attendance-status" role="status">出欠を読み込み中です。</p>
+  <div id="calendar-attendance-people"></div>
 </main>
 <footer class="site-footer"></footer>
 <dialog id="saved-event-dialog" class="event-dialog attendance-entry-dialog" aria-labelledby="saved-event-title">
@@ -160,14 +166,24 @@
     <div class="dialog-actions"><button type="button" id="cancel-attendance" class="secondary-button">キャンセル</button><button type="submit" id="save-attendance" class="primary-button">回答を保存</button></div>
   </form>
 </dialog>
+<dialog id="family-choice-dialog" class="event-dialog attendance-entry-dialog" aria-labelledby="family-choice-title">
+  <form method="dialog">
+    <div class="attendance-entry-scroll">
+      <h2 id="family-choice-title">出欠の入力方法</h2>
+      <p id="family-choice-person"></p>
+      <div id="family-choice-actions"></div>
+    </div>
+    <div class="dialog-actions"><button class="secondary-button" type="submit">閉じる</button></div>
+  </form>
+</dialog>
 <dialog id="family-entry-dialog" class="event-dialog attendance-entry-dialog" aria-labelledby="family-entry-title">
   <div class="attendance-entry-scroll">
     <h2 id="family-entry-title">家族で入力</h2>
     <form id="family-picker">
-      <p class="small-note">一緒に入力したい団員・コーチの名前を選んでください。この組み合わせはこの端末だけに保存します。</p>
+      <p class="small-note">一緒に入力する団員・コーチを2人以上選んでください。登録はクラウドに保存され、このページを開いた人が確認・変更できます。</p>
       <div id="family-picker-people"></div>
-      <button type="submit" class="primary-button">選んだ名前を登録</button>
-      <button type="button" class="secondary-button" id="family-clear-people" hidden>この端末の登録を解除</button>
+      <button type="submit" class="primary-button" id="family-picker-save">家族を登録して入力へ</button>
+      <button type="button" class="secondary-button" id="family-clear-people" hidden>この家族登録を解除</button>
     </form>
     <div id="family-entry" hidden>
       <label for="family-date">入力する日</label>
@@ -279,6 +295,6 @@
     <div class="dialog-actions"><button type="button" id="cancel-event" class="secondary-button">キャンセル</button><button type="submit" class="primary-button">予定を追加</button></div>
   </form>
 </dialog>
-<script src="attendance-preview.js?v=20261123-family1"></script>
+<script src="attendance-preview.js?v=20261123-cloud-family1"></script>
 </body>
 </html>

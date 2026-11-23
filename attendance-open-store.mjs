@@ -95,6 +95,19 @@ export function loadOpenAttendance() {
           if(failure)throw failure.reason;
           return conflicts;
         },
+        families:{
+          listen(receive,unavailable){return listenMap("families",receive,unavailable);},
+          newId(){return db.ref(ROOT+"/families").push().key;},
+          save(id,people,revision){
+            const ref=db.ref(ROOT+"/families").child(id);
+            const members=[...new Set(people)].sort().join("\n");
+            return tx(ref,current=>{
+              if(current?.members===members)return current;
+              if((current?.revision||0)!==revision)return;
+              return members?{members,revision:revision+1}:null;
+            },"family-conflict");
+          }
+        },
         eventVisibility:{
           listen(receive,unavailable){return listenMap("eventVisibility",receive,unavailable,v=>new Map(Object.entries(v||{}).map(([id,row])=>[logicalId(id),Boolean(row?.excluded)])));},
           save(eventId,excluded){return db.ref(ROOT+"/eventVisibility").child(storageId(eventId)).set({excluded,updatedAt:Date.now()});},

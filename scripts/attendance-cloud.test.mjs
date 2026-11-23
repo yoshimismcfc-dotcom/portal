@@ -168,3 +168,47 @@ test('ピリオドを含む試合・団員の識別子でも個別招集を保�
     delete globalThis.window;
   }
 });
+
+test('家族登録を別端末から読み込み、競合を検出して個別に解除できる', async () => {
+  const families = {};
+  let receive;
+  const snapshot = value => ({val: () => value});
+  const ref = path => {
+    assert.equal(path, 'attendance_open_v1/families');
+    return {
+      push: () => ({key: 'family-one'}),
+      on(_event, listener) { receive = listener; receive(snapshot(families)); },
+      child(id) {
+        return {
+          transaction(update, complete) {
+            const next = update(families[id] || null);
+            if (next === undefined) return complete(null, false);
+            if (next === null) delete families[id];
+            else families[id] = next;
+            receive(snapshot(families));
+            complete(null, true, snapshot(next));
+          }
+        };
+      }
+    };
+  };
+  globalThis.window = { onFirebaseReady: ready => ready({ ref: path =>
+    path === 'attendance_open_v1/answers' ? {} : ref(path)
+  }) };
+  try {
+    const writer = (await loadOpenAttendance()).families;
+    const reader = (await loadOpenAttendance()).families;
+    let updated;
+    reader.listen(rows => { updated = rows; });
+    const id = writer.newId();
+    const people = ['players:one', 'coaches:parent'];
+    await writer.save(id, people, 0);
+    assert.deepEqual(updated.get(id), {members: 'coaches:parent\nplayers:one', revision: 1});
+    await writer.save(id, [...people].reverse(), 0);
+    await assert.rejects(reader.save(id, ['players:two', 'coaches:parent'], 0), /family-conflict/);
+    await reader.save(id, [], 1);
+    assert.equal(updated.has(id), false);
+  } finally {
+    delete globalThis.window;
+  }
+});

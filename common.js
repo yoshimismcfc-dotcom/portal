@@ -1029,6 +1029,29 @@ function enhanceCalendarUpcomingAgenda() {
           }
           details.append(description);
         }
+        const attendanceId = attendanceEventId(event);
+        const attendanceKind = window.SMCCalendarAttendance?.upcomingKind(event);
+        const date = eventDate(event.start);
+        const eventName = event.title.normalize("NFKC");
+        const teamMarathon = event.label === "全体" && /スポ(?:少|ーツ少年団)\s*(?:の\s*)?マラソン/.test(eventName);
+        const meeting = /会議|総会|説明会|保護者会|審判講習/.test(eventName);
+        if (attendanceId && date && event.label !== "祝日" && attendanceKind !== "cancelled" && !meeting &&
+          (event.attendanceId || teamMarathon || attendanceKind === "practice" || attendanceKind === "highlight" ||
+            /^U(?:[7-9]|1[0-2])$/.test(event.label))) {
+          const button = document.createElement("button");
+          button.className = "secondary-button calendar-attendance-open";
+          button.type = "button";
+          button.textContent = "出欠一覧";
+          button.setAttribute("aria-haspopup", "dialog");
+          button.onclick = () => {
+            const dialog = document.getElementById("calendar-attendance-dialog");
+            const frame = dialog.querySelector("iframe");
+            const query = new URLSearchParams({ "calendar-attendance": attendanceId, date });
+            frame.src = "attendance-preview.html?" + query;
+            dialog.showModal();
+          };
+          details.append(button);
+        }
         cards.push(details);
       }
       list.replaceChildren(...cards);

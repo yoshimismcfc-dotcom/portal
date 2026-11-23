@@ -1088,3 +1088,36 @@
 #family-status {
   white-space: pre-line;
 }
+
+#family-choice-actions {
+  display: grid;
+  gap: .5rem;
+  margin-block: .65rem;
+}
+
+#family-choice-actions button {
+  min-height: 44px;
+}
+
+#family-choice-actions span {
+  display: block;
+  font-size: .875rem;
+}
+
+.calendar-attendance-embedded {
+  background: var(--surface);
+}
+
+.calendar-attendance-embedded > :is(header, footer, main:not(#calendar-attendance-view)) {
+  display: none;
+}
+
+.calendar-attendance-embedded #calendar-attendance-view {
+  padding: 8px;
+  margin: 0 auto;
+}
+
+#calendar-attendance-people h2 {
+  font-size: 1rem;
+  margin: 1rem 0 .35rem;
+}
