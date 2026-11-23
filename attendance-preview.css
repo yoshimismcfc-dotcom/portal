@@ -402,12 +402,12 @@
   color: var(--cyan);
 }
 
-#match-detail-attendance td[data-value] {
+.event-participants td[data-value] {
   font-size: .875rem;
   line-height: 1.4;
 }
 
-#match-detail-attendance .has-comments :is(th,td):nth-child(2) {
+.event-participants .has-comments :is(th,td):nth-child(2) {
   width: 4.75rem;
 }
 
@@ -1037,7 +1037,7 @@
   margin-block-end: .25rem;
 }
 
-#family-entry-dialog :is(button[hidden], form[hidden], div[hidden]) {
+#family-entry-dialog :is(button, form, div, label, select, p)[hidden] {
   display: none;
 }
 
@@ -1117,7 +1117,28 @@
   margin: 0 auto;
 }
 
-#calendar-attendance-people h2 {
+.event-participants h3 {
   font-size: 1rem;
   margin: 1rem 0 .35rem;
+}
+
+.participant-edit {
+  min-height: 44px;
+  max-width: 100%;
+  border: 0;
+  padding: .2rem .15rem;
+  background: transparent;
+  color: inherit;
+  text-align: left;
+  font: inherit;
+  text-decoration: underline;
+  text-underline-offset: .18em;
+  overflow-wrap: anywhere;
+  cursor: pointer;
+}
+
+#family-name, #family-existing {
+  font-size: 1rem;
+  min-height: 44px;
+  margin-block-end: .5rem;
 }

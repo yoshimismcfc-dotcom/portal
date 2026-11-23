@@ -8,7 +8,7 @@
   <title>出欠共有テスト｜吉見SMC FC</title>
   <link rel="stylesheet" href="common.css">
   <link rel="stylesheet" href="attendance-prototype.css?v=20261121-25">
-  <link rel="stylesheet" href="attendance-preview.css?v=20261123-cloud-family1">
+  <link rel="stylesheet" href="attendance-preview.css?v=20261123-attendance-list2">
   <script src="firebase-config.js"></script>
   <script src="calendar-attendance.js?v=20261122-girls2"></script>
   <script src="common.js"></script>
@@ -112,7 +112,8 @@
 <main id="calendar-attendance-view" class="page-wrap prototype-wrap" hidden>
   <h1 id="calendar-attendance-title">出欠一覧</h1>
   <p id="calendar-attendance-status" role="status">出欠を読み込み中です。</p>
-  <div id="calendar-attendance-people"></div>
+  <p id="calendar-attendance-save" class="attendance-save-status" role="status" hidden></p>
+  <div id="calendar-attendance-people" class="event-participants"></div>
 </main>
 <footer class="site-footer"></footer>
 <dialog id="saved-event-dialog" class="event-dialog attendance-entry-dialog" aria-labelledby="saved-event-title">
@@ -181,14 +182,20 @@
     <h2 id="family-entry-title">家族で入力</h2>
     <form id="family-picker">
       <p class="small-note">一緒に入力する団員・コーチを2人以上選んでください。登録はクラウドに保存され、このページを開いた人が確認・変更できます。</p>
+      <label id="family-existing-label" hidden>登録済みの家族
+        <select id="family-existing"><option value="">新しい家族を登録</option></select>
+      </label>
+      <label for="family-name">家族名</label>
+      <input id="family-name" type="text" maxlength="30" placeholder="例：武部家" required>
       <div id="family-picker-people"></div>
       <button type="submit" class="primary-button" id="family-picker-save">家族を登録して入力へ</button>
       <button type="button" class="secondary-button" id="family-clear-people" hidden>この家族登録を解除</button>
     </form>
     <div id="family-entry" hidden>
-      <label for="family-date">入力する日</label>
+      <label id="family-date-label" for="family-date">入力する日</label>
+      <p id="family-event-label" hidden></p>
       <select id="family-date"></select>
-      <button type="button" id="family-edit-people" class="secondary-button">家族の名前を変更</button>
+      <button type="button" id="family-edit-people" class="secondary-button">家族名・メンバーを変更</button>
       <div id="family-bulk-actions"></div>
       <div id="family-entries"></div>
     </div>
@@ -236,7 +243,7 @@
     <div class="attendance-entry-scroll" id="match-detail-scroll">
       <div id="match-detail-choices" hidden></div>
       <section id="match-detail-info" aria-label="試合詳細" hidden></section>
-      <section id="match-detail-attendance" aria-label="出欠一覧"></section>
+      <section id="match-detail-attendance" class="event-participants" aria-label="参加者一覧"></section>
     </div>
     <div class="dialog-actions">
       <button type="button" class="secondary-button" id="match-detail-return" hidden>出欠一覧に戻る</button>
@@ -295,6 +302,6 @@
     <div class="dialog-actions"><button type="button" id="cancel-event" class="secondary-button">キャンセル</button><button type="submit" class="primary-button">予定を追加</button></div>
   </form>
 </dialog>
-<script src="attendance-preview.js?v=20261123-cloud-family1"></script>
+<script src="attendance-preview.js?v=20261123-attendance-list2"></script>
 </body>
 </html>

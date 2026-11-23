@@ -206,7 +206,10 @@ test('家族登録を別端末から読み込み、競合を検出して個別�
     assert.deepEqual(updated.get(id), {members: 'coaches:parent\nplayers:one', revision: 1});
     await writer.save(id, [...people].reverse(), 0);
     await assert.rejects(reader.save(id, ['players:two', 'coaches:parent'], 0), /family-conflict/);
-    await reader.save(id, [], 1);
+    await reader.save(id, people, 1, 'テスト家');
+    assert.deepEqual(updated.get(id), {members: 'coaches:parent\nplayers:one', revision: 2, name: 'テスト家'});
+    await assert.rejects(writer.save(id, people, 1, '別の家族名'), /family-conflict/);
+    await reader.save(id, [], 2);
     assert.equal(updated.has(id), false);
   } finally {
     delete globalThis.window;

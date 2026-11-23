@@ -130,7 +130,7 @@ vm.runInNewContext(previewSource.replace('document.addEventListener("DOMContentL
   todayISO = () => "2026-11-22";
   holidays["2026-11-23"] = "勤労感謝の日";
   globalThis.preview = {
-    state, familyChanged, familyUpdates, familyKey, calendarAttendanceSelection, getBoardEvents, groupBoardDays, countAnswers, renderEntryDay, applySharedAnswers, eligibility, matchRestriction,
+    state, familyChanged, familyUpdates, familyKey, editableDayEvents, calendarAttendanceSelection, getBoardEvents, groupBoardDays, countAnswers, renderEntryDay, applySharedAnswers, eligibility, matchRestriction,
     matchAttendanceTable, readEntryUpdates, eventListStatus,
     categorySummaryRows, matchCategories, dayHeading, compactCountMarks, scheduleDays, dayButton, activitySummaryRow, detailChoices, attendanceEventTitle,
     setSeason(period) { seasonPeriod = validSeasonPeriod(period); },
@@ -575,3 +575,9 @@ assert.deepEqual(entryFor("coaches",parent,sharedChoices).map(x=>x.id), ["family
 assert.equal(preview.familyChanged({value:"attending",contact:{late:true,message:"遅刻"}},
   {value:"attending",contact:{message:"遅刻",late:true}}),false);
 assert.equal(preview.familyChanged({value:"maybe"},{value:"attending"}),true);
+
+assert.deepEqual(Array.from(preview.editableDayEvents(familyDay, older, "players", olderGame.id), event => event.id), [olderGame.id]);
+assert.deepEqual(Array.from(preview.editableDayEvents(familyDay, sibling, "players", olderGame.id)), []);
+assert.deepEqual(Array.from(preview.editableDayEvents(familyDay, parent, "coaches", youngerGame.id), event => event.id), [youngerGame.id]);
+assert.match(preview.matchAttendanceTable(olderGame, [older], "players", familyDay, true), /data-participant="family-older" data-participant-group="players"/);
+assert.doesNotMatch(preview.matchAttendanceTable(olderGame, [sibling], "players", familyDay, true), /data-participant=/);
