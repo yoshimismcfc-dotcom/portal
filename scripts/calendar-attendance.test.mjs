@@ -130,7 +130,7 @@ vm.runInNewContext(previewSource.replace('document.addEventListener("DOMContentL
   todayISO = () => "2026-11-22";
   holidays["2026-11-23"] = "勤労感謝の日";
   globalThis.preview = {
-    state, familyChanged, familyUpdates, familyKey, getBoardEvents, groupBoardDays, countAnswers, renderEntryDay, applySharedAnswers, eligibility, matchRestriction,
+    state, familyChanged, familyUpdates, familyKey, calendarAttendanceSelection, getBoardEvents, groupBoardDays, countAnswers, renderEntryDay, applySharedAnswers, eligibility, matchRestriction,
     matchAttendanceTable, readEntryUpdates, eventListStatus,
     categorySummaryRows, matchCategories, dayHeading, compactCountMarks, scheduleDays, dayButton, activitySummaryRow, detailChoices, attendanceEventTitle,
     setSeason(period) { seasonPeriod = validSeasonPeriod(period); },
@@ -141,7 +141,8 @@ vm.runInNewContext(previewSource.replace('document.addEventListener("DOMContentL
     sync(events, failed = []) {
       syncWeekendPractices(events, failed);
       calendarMatchesChecked = true;
-      return syncCalendarAttendance(events.map(calendarAttendanceEvent).filter(Boolean), false, failed);
+      syncedCalendarEvents=events.map(calendarAttendanceEvent).filter(Boolean);
+      return syncCalendarAttendance(syncedCalendarEvents, false, failed);
     }
   };
 `), previewContext);
@@ -157,6 +158,18 @@ preview.state.answers[practiceId] = { players: { demo: { value: "attending" } } 
 assert.deepEqual(dateIds("2026-11-28"), []);
 assert(preview.sync([practice, match, school, holidayBreak]));
 assert.deepEqual(dateIds("2026-11-28"), [practiceId, "calendar_fixture"]);
+const saturdayList = () => preview.groupBoardDays(preview.getBoardEvents().filter(event => event.date === "2026-11-28"))[0];
+const nextMatch = {...match, sourceId:"second-match", title:"U8（2年）練習試合", label:"U8"};
+const linkedPractice = {...practice, sourceId:"one-practice"};
+preview.sync([linkedPractice, match, nextMatch]);
+assert.equal(preview.calendarAttendanceSelection(saturdayList(),"calendar_fixture").title, match.title);
+assert.equal(preview.calendarAttendanceSelection(saturdayList(),"calendar_second-match").title, nextMatch.title);
+assert.equal(preview.calendarAttendanceSelection(saturdayList(),"calendar_one-practice").id, practiceId);
+assert.equal(preview.calendarAttendanceSelection(saturdayList(),"calendar_missing"), undefined);
+preview.sync([linkedPractice, {...linkedPractice, sourceId:"another-practice"}, match]);
+assert.equal(preview.calendarAttendanceSelection(saturdayList(),"calendar_one-practice"), undefined);
+preview.sync([practice, match, school, holidayBreak]);
+
 assert.deepEqual(dateIds("2026-11-29"), []);
 assert.deepEqual(dateIds("2027-01-02"), []);
 assert(preview.sync([], ["全体", "U12"]));

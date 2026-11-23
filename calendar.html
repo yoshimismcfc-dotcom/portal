@@ -92,6 +92,12 @@
     .ag-body{flex:1;min-width:0}
     .ag-title{font-size:.86rem;font-weight:900;color:#fff}
     .ag-meta{font-size:.72rem;color:var(--ink-3);margin-top:1px}
+    .calendar-attendance-open{margin:8px 0 12px;min-height:44px}
+    #calendar-attendance-dialog{width:min(94vw,48rem);max-width:none;padding:12px;border:1px solid var(--line-2);border-radius:14px;background:var(--surface);color:var(--ink)}
+    #calendar-attendance-dialog::backdrop{background:rgba(0,0,0,.6)}
+    #calendar-attendance-dialog iframe{display:block;width:100%;height:min(67dvh,38rem);border:0}
+    #calendar-attendance-dialog form{display:flex;justify-content:flex-end;margin:0 0 8px}
+    #calendar-attendance-dialog button{min-height:44px}
   </style>
 </head>
 <body>
@@ -248,6 +254,15 @@ function setView(mode, btn){
 
 
 
+</script>
+<dialog id="calendar-attendance-dialog" aria-label="予定の出欠一覧">
+  <form method="dialog"><button type="submit" class="secondary-button" autofocus>閉じる</button></form>
+  <iframe title="予定の出欠一覧"></iframe>
+</dialog>
+<script>
+  document.getElementById("calendar-attendance-dialog").addEventListener("close", function(){
+    if(!this.open)this.querySelector("iframe").removeAttribute("src");
+  });
 </script>
 </body>
 </html>
