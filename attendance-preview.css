@@ -193,15 +193,14 @@
   .small-note, .muted, .section-heading p, .response-panel .month-label,
   .response-panel #calendar-sync-status, .board-toolbar, .board-ineligible,
   .event-meta, .event-count, .match-target-note, .entry-card-meta,
-  .contact-help, .coach-match-contacts small, .dialog-date, #entry-mode-help,
+  .contact-help, .coach-match-contacts small, .dialog-date,
   .calendar-match-choice .calendar-match-action, .response-panel #coach-local-editor
 ) {
   color: var(--ink-2);
 }
 
 .attendance-preview-page :is(
-  .audience-tab, .filter-chip, .secondary-button, .board-toolbar button,
-  .entry-mode-icon
+  .audience-tab, .filter-chip, .secondary-button, .board-toolbar button
 ) {
   background: var(--navy-820);
   border-color: var(--surface-bd);
@@ -215,13 +214,19 @@
   box-shadow: none;
 }
 
-.attendance-preview-page :is(.primary-button, .fixed-entry-bar .primary-button) {
+.attendance-preview-page .primary-button {
   background: var(--wine);
   border-color: var(--orange);
   color: #fff;
 }
 
-.attendance-preview-page :is(.primary-button, .fixed-entry-bar .primary-button):hover {
+#entry-mode-button {
+  width: 100%;
+  min-height: 44px;
+  margin-block: .4rem .65rem;
+}
+
+.attendance-preview-page .primary-button:hover {
   background: var(--wine-2);
 }
 

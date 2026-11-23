@@ -8,7 +8,7 @@
   <title>出欠共有テスト｜吉見SMC FC</title>
   <link rel="stylesheet" href="common.css">
   <link rel="stylesheet" href="attendance-prototype.css?v=20261121-25">
-  <link rel="stylesheet" href="attendance-preview.css?v=20261124-fold-summary">
+  <link rel="stylesheet" href="attendance-preview.css?v=20261124-entry-top">
   <script src="firebase-config.js"></script>
   <script src="calendar-attendance.js?v=20261122-girls2"></script>
   <script src="common.js"></script>
@@ -25,6 +25,8 @@
 
   <section class="panel response-panel" id="response-panel">
     <div class="section-heading"><div><h1 id="response-title">参加予定【団員用】</h1><p id="response-summary">予定ごとに参加・未定・不参加を入力できます。</p><p id="coach-roster-status" class="small-note" role="status" hidden></p><p id="calendar-sync-status" role="status"></p></div><div class="attendance-heading-actions"><span id="respondent-count" class="month-label"></span><button id="open-calendar-matches" class="secondary-button" type="button">試合一覧</button></div></div>
+    <button type="button" id="entry-mode-button" class="primary-button" aria-haspopup="dialog" disabled>出欠を入力する</button>
+    <p id="answer-status" class="attendance-save-status" role="status" hidden></p>
     <div id="coach-editor" class="coach-editor" hidden>
       <details id="coach-local-editor">
         <summary>この端末だけコーチを追加</summary>
@@ -61,12 +63,10 @@
     </section>
     <button type="button" id="open-family-entry" class="secondary-button">家族を登録</button>
     <div id="board-summary-controls" hidden>
-      <p class="board-summary-help"><span id="attendance-guide-name">お子さんの名前</span>をタップするか、赤い「<span id="attendance-guide-entry">出欠を入力する</span>」ボタンから名前を選んでください。人数は「出欠集計を表示」で確認できます。</p>
+      <p class="board-summary-help"><span id="attendance-guide-name">お子さんの名前</span>をタップするか、上の赤い「<span id="attendance-guide-entry">出欠を入力する</span>」ボタンから名前を選んでください。人数は「出欠集計を表示」で確認できます。</p>
       <button type="button" id="toggle-board-summary" class="secondary-button" aria-expanded="false" aria-controls="response-list"><span id="board-summary-label">出欠集計を表示（練習・試合・行事）</span><span id="board-summary-arrow" aria-hidden="true">▾</span></button>
     </div>
     <div id="response-list" class="response-list"></div>
-    <p id="answer-status" class="attendance-save-status" role="status" hidden></p>
-    <div class="fixed-entry-bar" id="fixed-entry-bar"><span id="entry-mode-help">予定を選び、出欠入力を開始してください。</span><button type="button" id="entry-mode-button" class="primary-button">出欠を入力する</button><button type="button" id="entry-mode-icon" class="entry-mode-icon" aria-label="名前を選んで出欠を入力"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 20h4l11-11a2.1 2.1 0 0 0-4-4L4 16v4Z"/><path d="m13.5 6.5 4 4M4 20l4-1"/></svg></button></div>
   </section>
 
   <details class="attendance-settings">
@@ -300,6 +300,6 @@
     <div class="dialog-actions"><button type="button" id="cancel-event" class="secondary-button">キャンセル</button><button type="submit" class="primary-button">予定を追加</button></div>
   </form>
 </dialog>
-<script src="attendance-preview.js?v=20261124-fold-summary"></script>
+<script src="attendance-preview.js?v=20261124-entry-top"></script>
 </body>
 </html>
