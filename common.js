@@ -1032,8 +1032,11 @@ function enhanceCalendarUpcomingAgenda() {
         const attendanceId = attendanceEventId(event);
         const attendanceKind = window.SMCCalendarAttendance?.upcomingKind(event);
         const date = eventDate(event.start);
-        if (attendanceId && date && event.label !== "祝日" && attendanceKind !== "cancelled" &&
-          (event.attendanceId || attendanceKind === "practice" || attendanceKind === "highlight" ||
+        const eventName = event.title.normalize("NFKC");
+        const teamMarathon = event.label === "全体" && /スポ(?:少|ーツ少年団)\s*(?:の\s*)?マラソン/.test(eventName);
+        const meeting = /会議|総会|説明会|保護者会|審判講習/.test(eventName);
+        if (attendanceId && date && event.label !== "祝日" && attendanceKind !== "cancelled" && !meeting &&
+          (event.attendanceId || teamMarathon || attendanceKind === "practice" || attendanceKind === "highlight" ||
             /^U(?:[7-9]|1[0-2])$/.test(event.label))) {
           const button = document.createElement("button");
           button.className = "secondary-button calendar-attendance-open";
