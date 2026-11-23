@@ -1431,8 +1431,8 @@
     panel.hidden=false;
     $("response-title").textContent="参加予定【"+(audience==="players"?"団員用":"コーチ用")+"】";
     $("attendance-guide-name").textContent=audience==="players"?"お子さんの名前":"ご自身の名前";
-    $("response-summary").textContent=deviceMode?"この端末の試作回答を表示しています。":
-      "試合・練習の出欠とコメントをクラウドで共有します。";
+    $("response-summary").hidden=!deviceMode;
+    $("response-summary").textContent=deviceMode?"この端末の試作回答を表示しています。":"";
     // Do not silently disable the input button when a session link is missing.
     // Clicking it explains how to reconnect without overwriting old answers.
     $("entry-mode-button").disabled=!getPeople().length||!sharedReady;
