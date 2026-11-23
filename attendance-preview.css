@@ -1147,22 +1147,51 @@
   --attendance-date-width: 6.75rem;
 }
 
+.event-role-counts {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(min-content, 1fr));
+}
+
 .event-role-counts + .event-role-counts {
   border-top: 1px solid var(--board-line, var(--surface-bd));
 }
 
+.attendance-preview-page .event-role-counts .activity-count-title {
+  grid-column: 1 / -1;
+  display: block;
+  justify-self: center;
+  max-inline-size: calc(var(--attendance-date-width) - .4rem);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
 .event-role-counts .role-count-button {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  gap: .25rem;
+  align-content: center;
+  justify-items: center;
+  gap: 0;
+  min-width: 44px;
+  padding-inline: .125rem;
+}
+
+.event-role-counts .role-count-button + .role-count-button {
+  border-inline-start: 1px solid var(--board-line);
 }
 
 .role-count-label {
-  min-width: 2.15rem;
-  text-align: left;
   font-size: .75rem;
+  line-height: 1.2;
   white-space: nowrap;
+}
+
+.attendance-preview-page .role-count-button .category-count-values {
+  gap: .125rem;
+  font-size: .75rem;
+}
+
+.attendance-preview-page .role-count-button .attendance-mark {
+  inline-size: .65rem;
+  block-size: .65rem;
 }
 
 .attendance-role-tabs {

@@ -515,7 +515,8 @@
     return events.map(function(event){
       var title=attendanceEventTitle(event)+(event.holidayReference?"（参照のみ）":"");
       var caption=showTitle||events.length>1;
-      return '<div class="event-role-counts">'+(caption?'<span class="activity-count-title">'+esc(title)+'</span>':"")+
+      var shortTitle=event.holidayAvailability?(event.holidayReference?"祝日出欠（参考）":"祝日出欠"):title;
+      return '<div class="event-role-counts">'+(caption?'<span class="activity-count-title" title="'+esc(title)+'">'+esc(shortTitle)+'</span>':"")+
         ["players","coaches"].map(function(group){
           var roster=group===audience?people:getPeople(group);
           var ready=(deviceMode||sharedReady)&&(roster.length||
