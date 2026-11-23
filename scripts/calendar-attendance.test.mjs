@@ -597,3 +597,5 @@ for (const group of ["players","coaches"]) {
   assert.deepEqual(orderedNames(group), ["未回答・先", "参加・先", "参加・後", "未定", "欠席", "未回答・後"]);
 }
 assert.deepEqual(rosterForOrder.map(person=>person.id), ["0","1","2","3","4","5"]);
+
+assert.match(preview.activitySummaryRow([holidayDay()], [athlete]), /title="祝日・試合に備えた出欠確認">祝日出欠(?:（参考）)?<\/span>/);
