@@ -1382,3 +1382,54 @@
 .calendar-attendance-embedded #calendar-attendance-view {
   padding: 2px 4px;
 }
+
+
+/* Attendance link affordances: quiet, accessible, and theme-neutral.
+   Keep existing anchor/button semantics and click handlers intact. */
+.attendance-preview-page #attendance-form-events .entry-date-link,
+.attendance-preview-page #day-entry-title .entry-date-link,
+.attendance-preview-page .attendance-board .day-detail-link .board-date,
+.attendance-preview-page .event-participants .participant-edit {
+  text-decoration: none;
+}
+
+.attendance-preview-page #attendance-form-events .entry-date-link,
+.attendance-preview-page #day-entry-title .entry-date-link {
+  border-radius: 8px;
+  padding-inline: 4px;
+  margin-inline: -4px;
+  transition: background-color .15s ease;
+}
+
+.attendance-preview-page .event-participants .participant-edit {
+  border-radius: 6px;
+  transition: background-color .15s ease;
+}
+
+@media (hover: hover) {
+  .attendance-preview-page :is(#attendance-form-events, #day-entry-title) .entry-date-link:hover,
+  .attendance-preview-page .event-participants .participant-edit:hover,
+  .attendance-preview-page .attendance-board .day-detail-link:hover {
+    background-color: rgba(133, 190, 233, .12);
+  }
+}
+
+.attendance-preview-page :is(#attendance-form-events, #day-entry-title) .entry-date-link:active,
+.attendance-preview-page .event-participants .participant-edit:active,
+.attendance-preview-page .attendance-board .day-detail-link:active {
+  background-color: rgba(133, 190, 233, .2);
+}
+
+.attendance-preview-page :is(#attendance-form-events, #day-entry-title) .entry-date-link:focus-visible,
+.attendance-preview-page .event-participants .participant-edit:focus-visible,
+.attendance-preview-page .attendance-board .day-detail-link:focus-visible {
+  outline: 2px solid var(--orange, #f6ae49);
+  outline-offset: 2px;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .attendance-preview-page :is(#attendance-form-events, #day-entry-title) .entry-date-link,
+  .attendance-preview-page .event-participants .participant-edit {
+    transition: none;
+  }
+}
