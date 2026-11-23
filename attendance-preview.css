@@ -747,8 +747,8 @@
   text-align:center;
 }
 .attendance-preview-page .attendance-board.is-transposed th.event-col {
-  min-width: 8rem;
-  width: 8rem;
+  min-width: var(--attendance-date-width);
+  width: var(--attendance-date-width);
 }
 @media(max-width:520px){
   .attendance-preview-page .attendance-board-scroll{max-height:min(64svh,650px)}
@@ -1178,12 +1178,12 @@
 }
 
 .attendance-preview-page .attendance-board {
-  --attendance-date-width: 6.75rem;
+  --attendance-date-width: 8.5rem;
 }
 
 .event-role-counts {
   display: grid;
-  grid-template-columns: repeat(2, minmax(min-content, 1fr));
+  grid-template-columns: minmax(min-content, 1fr);
 }
 
 .event-role-counts + .event-role-counts {
@@ -1201,15 +1201,17 @@
 }
 
 .event-role-counts .role-count-button {
-  align-content: center;
-  justify-items: center;
-  gap: 0;
+  grid-template-columns: 2.25rem max-content;
+  align-items: center;
+  justify-content: center;
+  justify-items: start;
+  gap: .2rem;
   min-width: 44px;
   padding-inline: .125rem;
 }
 
 .event-role-counts .role-count-button + .role-count-button {
-  border-inline-start: 1px solid var(--board-line);
+  border-block-start: 1px solid var(--board-line);
 }
 
 .role-count-label {
