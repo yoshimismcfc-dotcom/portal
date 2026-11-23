@@ -836,6 +836,29 @@
   white-space: nowrap;
 }
 
+#board-summary-controls {
+  margin-block: .45rem;
+}
+
+.board-summary-help {
+  margin: 0 0 .4rem;
+  color: var(--ink-2);
+  font-size: .875rem;
+  line-height: 1.5;
+}
+
+#toggle-board-summary {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: .4rem;
+  width: 100%;
+  min-height: 44px;
+  padding: .4rem .65rem;
+  text-align: left;
+  font-size: .875rem;
+}
+
 .board-attendance-legend {
   display: flex;
   flex-wrap: wrap;
