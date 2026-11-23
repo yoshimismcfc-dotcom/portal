@@ -92,12 +92,41 @@
     .ag-body{flex:1;min-width:0}
     .ag-title{font-size:.86rem;font-weight:900;color:#fff}
     .ag-meta{font-size:.72rem;color:var(--ink-3);margin-top:1px}
-    .calendar-attendance-open{margin:8px 0 12px;min-height:44px}
-    #calendar-attendance-dialog{width:min(94vw,48rem);max-width:none;padding:4px 6px 6px;border:1px solid var(--line-2);border-radius:14px;background:var(--surface);color:var(--ink)}
-    #calendar-attendance-dialog::backdrop{background:rgba(0,0,0,.6)}
-    #calendar-attendance-dialog iframe{display:block;width:100%;height:min(76dvh,44rem);border:0}
-    #calendar-attendance-dialog form{display:flex;justify-content:flex-end;margin:0}
-    #calendar-attendance-dialog button{min-height:44px}
+    .calendar-attendance-open,.calendar-attendance-close{
+      appearance:none;display:inline-flex;align-items:center;justify-content:center;gap:7px;
+      min-height:44px;padding:6px 12px;border:1px solid var(--line-2);border-radius:10px;
+      font:inherit;font-size:.875rem;font-weight:800;white-space:nowrap;cursor:pointer;
+    }
+    .calendar-attendance-open{
+      margin:0 0 10px;background:#192652;border-color:#f6b653;color:#ffd08a;
+    }
+    body[data-theme="light"] .calendar-attendance-open{
+      background:#fff2df;border-color:#a0570a;color:#773b07;
+    }
+    .calendar-attendance-open-icon{font-size:1.1em;line-height:1}
+    #calendar-attendance-dialog{
+      box-sizing:border-box;width:min(calc(100% - 20px),48rem);max-width:none;
+      height:min(86dvh,48rem);max-height:calc(100dvh - 20px);
+      padding:0;overflow:hidden;border:1px solid var(--line-2);border-radius:14px;
+      background:var(--navy-900);color:var(--ink);
+    }
+    body[data-theme="light"] #calendar-attendance-dialog{background:#fff}
+    #calendar-attendance-dialog[open]{display:grid;grid-template-rows:auto minmax(0,1fr)}
+    #calendar-attendance-dialog::backdrop{background:rgba(4,9,22,.72)}
+    .calendar-attendance-header{
+      display:grid;grid-template-columns:minmax(0,1fr) auto;align-items:start;gap:8px;
+      max-height:36dvh;overflow:auto;padding:8px 10px;border-bottom:1px solid var(--line-2);
+    }
+    .calendar-attendance-header h2{margin:0;font-size:1rem;line-height:1.35;overflow-wrap:anywhere}
+    .calendar-attendance-header h2:focus{outline:none}
+    .calendar-attendance-header p{margin:2px 0 0;color:var(--ink-2);font-size:.8125rem;line-height:1.35}
+    .calendar-attendance-header form{position:sticky;top:0;margin:0}
+    .calendar-attendance-close{background:#192652;color:var(--ink)}
+    body[data-theme="light"] .calendar-attendance-close{background:#edf3fa;color:#173451}
+    #calendar-attendance-dialog iframe{display:block;width:100%;height:100%;border:0}
+    .calendar-attendance-close:focus-visible,.calendar-attendance-open:focus-visible{
+      outline:2px solid currentColor;outline-offset:2px;
+    }
   </style>
 </head>
 <body>
@@ -255,8 +284,16 @@ function setView(mode, btn){
 
 
 </script>
-<dialog id="calendar-attendance-dialog" aria-label="予定の出欠一覧">
-  <form method="dialog"><button type="submit" class="secondary-button" autofocus>閉じる</button></form>
+<dialog id="calendar-attendance-dialog" aria-labelledby="calendar-attendance-dialog-title" aria-describedby="calendar-attendance-dialog-date">
+  <div class="calendar-attendance-header">
+    <div>
+      <h2 id="calendar-attendance-dialog-title" tabindex="-1" autofocus>出欠一覧</h2>
+      <p id="calendar-attendance-dialog-date"></p>
+    </div>
+    <form method="dialog">
+      <button type="submit" class="calendar-attendance-close"><span aria-hidden="true">×</span> 閉じる</button>
+    </form>
+  </div>
   <iframe title="予定の出欠一覧"></iframe>
 </dialog>
 <script>

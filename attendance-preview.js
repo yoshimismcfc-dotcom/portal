@@ -8,7 +8,8 @@
   var deviceMode=false;
   var params=new URLSearchParams(location.search);
   var calendarView=params.has("calendar-attendance")?{
-    id:params.get("calendar-attendance"),date:params.get("date")||""
+    id:params.get("calendar-attendance"),date:params.get("date")||"",
+    parentHeader:window.parent!==window&&params.get("calendar-dialog")==="1"
   }:null;
   var syncedCalendarEvents=[];
   var state=loadState(),members=[],rosterState="読み込み中",holidays={},audience="players",selectedDate="",selectedEventId="",selectedGrade="すべて",transposeBoard=false;
@@ -1380,7 +1381,7 @@
       return;
     }
     $("calendar-attendance-title").textContent=attendanceEventTitle(event)+"の出欠一覧";
-    status.textContent=dateLabel(date);
+    status.textContent=calendarView.parentHeader?"":dateLabel(date);
     renderEventParticipants(rows,event,day);
   }
 
@@ -2344,6 +2345,7 @@
     setupParticipantEditing();
     if(calendarView){
       document.body.classList.add("calendar-attendance-embedded");
+      $("calendar-attendance-title").hidden=calendarView.parentHeader;
       $("calendar-attendance-view").hidden=false;
       window.setTimeout(function(){calendarView.delayed=true;renderCalendarAttendance();},12000);
       readRoster();
