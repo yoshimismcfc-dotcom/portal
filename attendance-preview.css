@@ -1142,3 +1142,58 @@
   min-height: 44px;
   margin-block-end: .5rem;
 }
+
+.attendance-preview-page .attendance-board {
+  --attendance-date-width: 6.75rem;
+}
+
+.event-role-counts + .event-role-counts {
+  border-top: 1px solid var(--board-line, var(--surface-bd));
+}
+
+.event-role-counts .role-count-button {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: .25rem;
+}
+
+.role-count-label {
+  min-width: 2.15rem;
+  text-align: left;
+  font-size: .75rem;
+  white-space: nowrap;
+}
+
+.attendance-role-tabs {
+  position: sticky;
+  inset-block-start: 0;
+  z-index: 3;
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: .35rem;
+  padding-block: .25rem;
+  background: var(--surface);
+}
+
+.attendance-role-tabs [role="tab"] {
+  min-height: 44px;
+  padding: .35rem .5rem;
+  border: 1px solid var(--surface-bd);
+  border-radius: .4rem;
+  color: var(--ink);
+  background: var(--surface);
+  font: inherit;
+  cursor: pointer;
+}
+
+.attendance-role-tabs [aria-selected="true"] {
+  border-color: var(--attendance-selected);
+  color: var(--attendance-selected);
+  background: var(--attendance-selected-bg);
+  font-weight: 700;
+}
+
+.event-participants [role="tabpanel"][hidden] {
+  display: none;
+}
