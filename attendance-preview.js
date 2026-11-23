@@ -568,8 +568,9 @@
     return labels.map(function(label){return "<span>"+esc(label)+"</span>";}).join(" ");
   }
 
-  function dayHeading(day,people){
+  function dayHeading(day,people,showSummary=true){
     var date=calendarLink(day.date,calendarIcon+'<span class="board-date">'+esc(compactDate(day.date))+'</span>',"day-detail-link","",dateLabel(day.date)+"の予定を開く");
+    if(!showSummary)return '<div class="board-day-heading">'+date+'</div>';
     var counts=eventCountButtons(day,day.practice,people,"practice",false)||
       '<span class="category-count-empty" aria-label="練習なし">—</span>';
     return '<div class="board-day-heading">'+date+
@@ -1393,12 +1394,40 @@
     renderEventParticipants(rows,event,day);
   }
 
+  var BOARD_SUMMARY_KEY="yoshimi_smc_attendance_summary_expanded";
+  var boardSummaryExpanded=false;
+  try{boardSummaryExpanded=localStorage.getItem(BOARD_SUMMARY_KEY)==="true";}catch(error){}
+
+  function toggleBoardSummary(){
+    var board=$("response-list").querySelector(".attendance-board-scroll");
+    // Anchor the first visible date even when expanding changes column widths or row heights.
+    var edge=transposeBoard?"top":"left",far=transposeBoard?"bottom":"right";
+    var scroll=transposeBoard?"scrollTop":"scrollLeft";
+    var fixedEdge=function(view){return view.querySelector("thead th").getBoundingClientRect()[far];};
+    var origin=fixedEdge(board);
+    var anchor=Array.from(board.querySelectorAll("[data-board-date]")).find(function(cell){
+      var rect=cell.getBoundingClientRect();
+      return rect[edge]<=origin+1&&rect[far]>origin+1;
+    });
+    var offset=anchor?Math.max(0,origin-anchor.getBoundingClientRect()[edge]):0;
+    boardSummaryExpanded=!boardSummaryExpanded;
+    try{localStorage.setItem(BOARD_SUMMARY_KEY,String(boardSummaryExpanded));}catch(error){}
+    renderResponse(true);
+    if(anchor){
+      var current=$("response-list").querySelector(".attendance-board-scroll");
+      var cell=current.querySelector('[data-board-date="'+anchor.dataset.boardDate+'"]');
+      var rect=cell.getBoundingClientRect();
+      current[scroll]+=rect[edge]-fixedEdge(current)+Math.min(offset,rect[far]-rect[edge]-1);
+    }
+  }
+
   function renderResponse(preserveScroll){
     if(calendarView){renderCalendarAttendance();return;}
     var panel=$("response-panel"),rows=$("response-list"),oldBoard=rows.querySelector(".attendance-board-scroll");
     var savedTop=preserveScroll&&oldBoard?oldBoard.scrollTop:0,savedLeft=preserveScroll&&oldBoard?oldBoard.scrollLeft:0;
     var people=getPeople(),summaryPeople=people,days=groupBoardDays(getBoardEvents());
     $("board-toolbar").hidden=true;
+    $("board-summary-controls").hidden=true;
     panel.hidden=false;
     $("response-title").textContent="参加予定【"+(audience==="players"?"団員用":"コーチ用")+"】";
     $("attendance-guide-name").textContent=audience==="players"?"お子さんの名前":"ご自身の名前";
@@ -1436,6 +1465,7 @@
     }
 
     $("entry-mode-button").textContent=deviceMode?"試作回答を入力する":"出欠を入力する";
+    $("attendance-guide-entry").textContent=$("entry-mode-button").textContent;
     $("entry-mode-help").textContent=deviceMode?"この端末に保存します。":"クラウドに回答を保存します。";
     if(!people.length){
       rows.innerHTML='<div class="empty-state">'+(audience==="players"?esc(rosterState)+"。":esc(coachRosterStatus))+"</div>";
@@ -1445,29 +1475,37 @@
 
     $("open-match-summary").hidden=!days.some(function(day){return day.matches.length;});
     var head,body;
-    var categoriesByDate=new Map(days.map(function(day){return [day.date,matchCategories(day.matches)];}));
+    var categoriesByDate=boardSummaryExpanded?new Map(days.map(function(day){
+      return [day.date,matchCategories(day.matches)];
+    })):null;
     if(transposeBoard){
       head='<thead><tr><th class="event-col" scope="col">日付</th>'+people.map(function(person){
         return '<th class="rotated-person" scope="col">'+boardPersonName(person)+'</th>';
       }).join("")+'</tr></thead><tbody>';
       body=days.map(function(day){
-        var categoryRows=Array.from(categoriesByDate.get(day.date),function(entry){
+        var categoryRows=boardSummaryExpanded?Array.from(categoriesByDate.get(day.date),function(entry){
           return '<div class="category-count-transposed"><span>'+esc(entry[0])+'</span>'+
             categoryCountButton(day,entry[1],summaryPeople)+'</div>';
-        }).join("");
-        return '<tr><th class="event-col" scope="row" data-board-date="'+esc(day.date)+'">'+dayHeading(day,summaryPeople)+activityCountButtons(day,summaryPeople)+categoryRows+'</th>'+
+        }).join(""):"";
+        return '<tr><th class="event-col" scope="row" data-board-date="'+esc(day.date)+'">'+
+          dayHeading(day,summaryPeople,boardSummaryExpanded)+
+          (boardSummaryExpanded?activityCountButtons(day,summaryPeople)+categoryRows:"")+'</th>'+
           people.map(function(person){return '<td>'+dayButton(day,person)+'</td>';}).join("")+'</tr>';
       }).join("");
     }else{
-      head='<thead><tr><th class="person-col" scope="col">練習の出欠</th>'+days.map(function(day){
-        return '<th scope="col" data-board-date="'+esc(day.date)+'">'+dayHeading(day,summaryPeople)+'</th>';
+      head='<thead><tr><th class="person-col" scope="col">'+(boardSummaryExpanded?"練習の出欠":"名前")+'</th>'+days.map(function(day){
+        return '<th scope="col" data-board-date="'+esc(day.date)+'">'+dayHeading(day,summaryPeople,boardSummaryExpanded)+'</th>';
       }).join("")+'</tr></thead><tbody>';
-      body=activitySummaryRow(days,summaryPeople)+categorySummaryRows(days,categoriesByDate,summaryPeople)+people.map(function(person){
+      body=(boardSummaryExpanded?activitySummaryRow(days,summaryPeople)+categorySummaryRows(days,categoriesByDate,summaryPeople):"")+people.map(function(person){
         return '<tr><th class="person-col" scope="row">'+boardPersonName(person)+'</th>'+
           days.map(function(day){return '<td>'+dayButton(day,person)+'</td>';}).join("")+'</tr>';
       }).join("");
     }
     $("board-toolbar").hidden=false;
+    $("board-summary-controls").hidden=false;
+    $("toggle-board-summary").setAttribute("aria-expanded",String(boardSummaryExpanded));
+    $("board-summary-label").textContent=boardSummaryExpanded?"出欠集計を閉じる":"出欠集計を表示（練習・試合・行事）";
+    $("board-summary-arrow").textContent=boardSummaryExpanded?"▴":"▾";
     $("board-status").textContent=transposeBoard?"日付が縦":"名前が縦";
     $("transpose-board").setAttribute("aria-pressed",String(transposeBoard));
     rows.innerHTML='<p class="board-attendance-legend"><span>'+attendanceMark("attending")+'参加</span>'+
@@ -2367,6 +2405,7 @@
       return;
     }
     updateSeasonInputs();
+    $("toggle-board-summary").addEventListener("click",toggleBoardSummary);
     $("year-end-form").addEventListener("submit",saveSeasonPeriod);
     $("event-list-filter").addEventListener("change",renderEventList);
     $("event-visibility-undo").addEventListener("click",function(){
