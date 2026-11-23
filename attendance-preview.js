@@ -569,7 +569,7 @@
   }
 
   function dayHeading(day,people){
-    var date=calendarLink(day.date,'<span class="board-date">'+esc(compactDate(day.date))+'</span>',"day-detail-link","",dateLabel(day.date)+"の予定を開く");
+    var date=calendarLink(day.date,calendarIcon+'<span class="board-date">'+esc(compactDate(day.date))+'</span>',"day-detail-link","",dateLabel(day.date)+"の予定を開く");
     var counts=eventCountButtons(day,day.practice,people,"practice",false)||
       '<span class="category-count-empty" aria-label="練習なし">—</span>';
     return '<div class="board-day-heading">'+date+
@@ -582,6 +582,12 @@
       (audience==="players"?'<span class="board-member-grade">'+esc(person.grade||"学年未登録")+'</span> ':"")+
       '<span>'+esc(person.name)+'</span>'+
       (note?'<span class="board-comment" title="'+esc(note)+'">'+esc(note)+'</span>':"")+'</button>';
+  }
+
+  var calendarIcon='<svg class="attendance-calendar-icon" viewBox="0 0 16 16" fill="none" stroke="currentColor" aria-hidden="true" focusable="false"><rect x="2" y="3.5" width="12" height="10.5" rx="1.5"/><path d="M5 2v3M11 2v3M2 7h12"/></svg>';
+
+  function entryCalendarDate(date){
+    return calendarLink(date,calendarIcon+'<span>'+esc(dateLabel(date))+'</span>',"entry-date-link");
   }
 
   function calendarLink(date,content,className,eventId,label){
@@ -893,7 +899,7 @@
     dayEntryTrigger=trigger;
     var selected=dayEvents(day).find(function(event){return event.id===eventId;});
     if(selected)$("day-entry-title").textContent=attendanceEventTitle(selected)+"の出欠";
-    else $("day-entry-title").innerHTML=calendarLink(day.date,esc(dateLabel(day.date)),"entry-date-link")+"の出欠";
+    else $("day-entry-title").innerHTML=entryCalendarDate(day.date)+"の出欠";
     $("day-entry-person").textContent=person.name;
     $("day-entry-events").innerHTML=inFamilyGroup(group,function(){return renderEntryDay(day,person,false,eventId);});
     $("day-entry-dialog").showModal();
@@ -904,16 +910,17 @@
     var events=editableDayEvents(day,person,audience,eventId);
     if(!events.length)return "";
     return '<section class="entry-day">'+
-      (showDate?'<h3>'+calendarLink(day.date,esc(dateLabel(day.date)),"entry-date-link")+'</h3>':"")+
+      (showDate?'<h3>'+entryCalendarDate(day.date)+'</h3>':"")+
       events.map(function(event){
         var match=event.kind==="match",current=answerValue(event,person);
         var title=event.title||eventKindLabel(event);
+        var eventHeading=match?calendarLink(event.date,calendarIcon+'<span>'+esc(title)+'</span>',"entry-match-link",event.id,title+"の詳細をカレンダーで開く"):esc(title);
         var coachPractice=audience==="coaches"&&!match&&event.kind!=="activity"&&day.matches.length>0;
         var practiceLocked=coachPractice&&day.matches.some(function(item){return answerValue(item,person)==="attending";});
         var review=match&&needsMatchReview(event,person,day);
         var choices=ANSWERS.concat({value:"",label:"未回答"});
         return '<article class="response-entry-card '+(match?"is-match":"")+'"'+(review?' data-needs-review="true"':"")+'>'+
-          '<div class="entry-card-heading"><span class="entry-kind">'+eventKindLabel(event)+'</span><h4>'+esc(title)+'</h4></div>'+
+          '<div class="entry-card-heading"><span class="entry-kind">'+eventKindLabel(event)+'</span><h4>'+eventHeading+'</h4></div>'+
           (event.startTime||event.descriptionTime||event.place?'<p class="entry-card-meta">'+esc([event.startTime||event.descriptionTime,event.place].filter(Boolean).join(" ・ "))+'</p>':"")+
           (review?'<p class="entry-review"><strong>要確認</strong> 練習に○で回答済みです。試合の出欠を入力してください。</p>':"")+
           (coachPractice?'<p class="entry-review" data-coach-practice-note role="status"'+
