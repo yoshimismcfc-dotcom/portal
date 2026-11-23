@@ -98,13 +98,13 @@ export function loadOpenAttendance() {
         families:{
           listen(receive,unavailable){return listenMap("families",receive,unavailable);},
           newId(){return db.ref(ROOT+"/families").push().key;},
-          save(id,people,revision){
+          save(id,people,revision,name=""){
             const ref=db.ref(ROOT+"/families").child(id);
             const members=[...new Set(people)].sort().join("\n");
             return tx(ref,current=>{
-              if(current?.members===members)return current;
+              if(current?.members===members&&(current.name||"")===name)return current;
               if((current?.revision||0)!==revision)return;
-              return members?{members,revision:revision+1}:null;
+              return members?{members,revision:revision+1,...(name?{name}:{})}:null;
             },"family-conflict");
           }
         },
