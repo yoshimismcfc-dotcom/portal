@@ -572,7 +572,8 @@
     var date=calendarLink(day.date,'<span class="board-date">'+esc(compactDate(day.date))+'</span>',"day-detail-link","",dateLabel(day.date)+"の予定を開く");
     var counts=eventCountButtons(day,day.practice,people,"practice",false)||
       '<span class="category-count-empty" aria-label="練習なし">—</span>';
-    return '<div class="board-day-heading">'+date+counts+'</div>';
+    return '<div class="board-day-heading">'+date+
+      (transposeBoard?'<span class="board-practice-label">練習の出欠</span>':"")+counts+'</div>';
   }
 
   function boardPersonName(person){
@@ -1451,7 +1452,7 @@
           people.map(function(person){return '<td>'+dayButton(day,person)+'</td>';}).join("")+'</tr>';
       }).join("");
     }else{
-      head='<thead><tr><th class="person-col" scope="col">参加者</th>'+days.map(function(day){
+      head='<thead><tr><th class="person-col" scope="col">練習の出欠</th>'+days.map(function(day){
         return '<th scope="col" data-board-date="'+esc(day.date)+'">'+dayHeading(day,summaryPeople)+'</th>';
       }).join("")+'</tr></thead><tbody>';
       body=activitySummaryRow(days,summaryPeople)+categorySummaryRows(days,categoriesByDate,summaryPeople)+people.map(function(person){
@@ -1462,7 +1463,9 @@
     $("board-toolbar").hidden=false;
     $("board-status").textContent=transposeBoard?"日付が縦":"名前が縦";
     $("transpose-board").setAttribute("aria-pressed",String(transposeBoard));
-    rows.innerHTML='<div class="attendance-board-scroll" role="region" aria-label="出欠一覧、上下左右にスクロール" tabindex="0"><table class="attendance-board'+(transposeBoard?" is-transposed":"")+'">'+head+body+'</tbody></table></div>';
+    rows.innerHTML='<p class="board-attendance-legend"><span>'+attendanceMark("attending")+'参加</span>'+
+      '<span>'+attendanceMark("maybe")+'未定</span><span>'+attendanceMark("absent")+'不参加</span></p>'+
+      '<div class="attendance-board-scroll" role="region" aria-label="出欠一覧、上下左右にスクロール" tabindex="0"><table class="attendance-board'+(transposeBoard?" is-transposed":"")+'">'+head+body+'</tbody></table></div>';
     var newBoard=rows.querySelector(".attendance-board-scroll");
     if(preserveScroll){newBoard.scrollTop=savedTop;newBoard.scrollLeft=savedLeft;}
     // iOS: keep horizontal position stable when the gesture starts on the
