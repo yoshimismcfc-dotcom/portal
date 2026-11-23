@@ -928,13 +928,19 @@
 }
 
 .attendance-preview-page .attendance-mark[data-mark="attending"] {
+  color: var(--attendance-board-yes);
   border: 1.5px solid currentColor;
   border-radius: 50%;
 }
 
 .attendance-preview-page .attendance-mark[data-mark="maybe"] {
+  color: var(--attendance-board-maybe);
   background: currentColor;
   clip-path: polygon(evenodd, 50% 0, 100% 100%, 0 100%, 50% 0, 50% 19%, 15% 89%, 85% 89%, 50% 19%);
+}
+
+.attendance-preview-page .attendance-mark[data-mark="absent"] {
+  color: var(--attendance-board-no);
 }
 
 .attendance-preview-page .attendance-mark[data-mark="absent"]::before,
