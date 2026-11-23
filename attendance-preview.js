@@ -1287,24 +1287,30 @@
 
   function matchAttendanceTable(event,people,group,day,editable=false){
     var answers=ANSWERS.concat({value:"",label:"未回答"});
+    var peopleByAnswer=new Map(answers.map(function(answer){return [answer.value,[]];}));
+    people.forEach(function(person){
+      var value=attendanceValue(event,person,day,group);
+      (peopleByAnswer.get(value)||peopleByAnswer.get("")).push(person);
+    });
     var totals=(group==="coaches"?ANSWERS:answers).map(function(answer){
-      var count=people.filter(function(person){return attendanceValue(event,person,day,group)===answer.value;}).length;
+      var count=peopleByAnswer.get(answer.value).length;
       return '<tr class="match-attendance-total"><th scope="row">'+esc((answerMark(answer.value)+" "+answer.label).trim())+
         '</th><td>'+count+'人</td><td></td></tr>';
     }).join("");
-    var rows=people.map(function(person){
-      var value=attendanceValue(event,person,day,group);
-      var label=answers.find(function(answer){return answer.value===value;})?.label||"未回答";
-      var grade=group==="players"&&person.grade?'<span class="match-attendance-grade">'+esc(person.grade)+'</span>':"";
-      var invite=group==="players"&&recruitmentDecision(event,person)==="include"?'<span class="recruitment-badge">個別招集</span>':"";
-      var name=grade+(grade?" ":"")+esc(person.name)+invite;
-      if(editable&&editableDayEvents(day,person,group,event.id).length){
-        name='<button type="button" class="participant-edit" data-participant="'+esc(person.id)+
-          '" data-participant-group="'+group+'" aria-label="'+esc(person.name+"の出欠を編集")+'">'+name+'</button>';
-      }
-      return '<tr><th scope="row" class="match-attendance-name">'+name+
-        '</th><td data-value="'+esc(value)+'" aria-label="'+esc(label)+'">'+esc(answerMark(value)?answerMark(value)+" "+label:label)+'</td>'+
-        '<td>'+esc(matchComment(matchContact(event.id,person.id,group))||"—")+'</td></tr>';
+    var rows=answers.flatMap(function(answer){
+      return peopleByAnswer.get(answer.value).map(function(person){
+        var value=answer.value,label=answer.label;
+        var grade=group==="players"&&person.grade?'<span class="match-attendance-grade">'+esc(person.grade)+'</span>':"";
+        var invite=group==="players"&&recruitmentDecision(event,person)==="include"?'<span class="recruitment-badge">個別招集</span>':"";
+        var name=grade+(grade?" ":"")+esc(person.name)+invite;
+        if(editable&&editableDayEvents(day,person,group,event.id).length){
+          name='<button type="button" class="participant-edit" data-participant="'+esc(person.id)+
+            '" data-participant-group="'+group+'" aria-label="'+esc(person.name+"の出欠を編集")+'">'+name+'</button>';
+        }
+        return '<tr><th scope="row" class="match-attendance-name">'+name+
+          '</th><td data-value="'+esc(value)+'" aria-label="'+esc(label)+'">'+esc(answerMark(value)?answerMark(value)+" "+label:label)+'</td>'+
+          '<td>'+esc(matchComment(matchContact(event.id,person.id,group))||"—")+'</td></tr>';
+      });
     }).join("");
     return '<div class="match-attendance-wrap"><table class="match-attendance-table has-comments"><thead><tr><th scope="col">参加者</th>'+
       '<th scope="col" aria-label="出欠 '+esc(dateLabel(event.date))+'">出欠</th>'+
