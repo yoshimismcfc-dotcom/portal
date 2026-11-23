@@ -575,9 +575,11 @@
   }
 
   function boardPersonName(person){
+    var note=transposeBoard?"":state.notes[audience]?.[person.id];
     return '<button type="button" class="board-member-name" data-edit-person="'+esc(person.id)+'">'+
       (audience==="players"?'<span class="board-member-grade">'+esc(person.grade||"学年未登録")+'</span> ':"")+
-      '<span>'+esc(person.name)+'</span></button>';
+      '<span>'+esc(person.name)+'</span>'+
+      (note?'<span class="board-comment" title="'+esc(note)+'">'+esc(note)+'</span>':"")+'</button>';
   }
 
   function calendarLink(date,content,className,eventId,label){
@@ -1299,14 +1301,16 @@
           name='<button type="button" class="participant-edit" data-participant="'+esc(person.id)+
             '" data-participant-group="'+group+'" aria-label="'+esc(person.name+"の出欠を編集")+'">'+name+'</button>';
         }
+        var contact=matchComment(matchContact(event.id,person.id,group));
         return '<tr><th scope="row" class="match-attendance-name">'+name+
           '</th><td data-value="'+esc(value)+'" aria-label="'+esc(label)+'">'+esc(answerMark(value)?answerMark(value)+" "+label:label)+'</td>'+
-          '<td>'+esc(matchComment(matchContact(event.id,person.id,group))||"—")+'</td></tr>';
+          '<td class="participant-contact-cell">'+(contact?
+            '<details class="participant-contact"><summary>'+esc(contact)+'</summary></details>':"—")+'</td></tr>';
       });
     }).join("");
     return '<div class="match-attendance-wrap"><table class="match-attendance-table has-comments"><thead><tr><th scope="col">参加者</th>'+
       '<th scope="col" aria-label="出欠 '+esc(dateLabel(event.date))+'">出欠</th>'+
-      '<th scope="col">コメント・連絡事項</th></tr></thead><tbody>'+totals+'</tbody><tbody>'+rows+'</tbody></table></div>';
+      '<th scope="col">連絡事項</th></tr></thead><tbody>'+totals+'</tbody><tbody>'+rows+'</tbody></table></div>';
   }
 
   function matchComment(note){
@@ -1450,9 +1454,7 @@
         return '<th scope="col" data-board-date="'+esc(day.date)+'">'+dayHeading(day,summaryPeople)+'</th>';
       }).join("")+'</tr></thead><tbody>';
       body=activitySummaryRow(days,summaryPeople)+categorySummaryRows(days,categoriesByDate,summaryPeople)+people.map(function(person){
-        var note=state.notes[audience]?.[person.id]||"";
-        return '<tr><th class="person-col" scope="row">'+boardPersonName(person)+
-          (note?'<span class="board-comment" title="'+esc(note)+'">'+esc(note)+'</span>':"")+'</th>'+
+        return '<tr><th class="person-col" scope="row">'+boardPersonName(person)+'</th>'+
           days.map(function(day){return '<td>'+dayButton(day,person)+'</td>';}).join("")+'</tr>';
       }).join("");
     }
