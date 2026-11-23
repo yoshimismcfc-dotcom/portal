@@ -8,7 +8,7 @@
   <title>出欠共有テスト｜吉見SMC FC</title>
   <link rel="stylesheet" href="common.css">
   <link rel="stylesheet" href="attendance-prototype.css?v=20261121-25">
-  <link rel="stylesheet" href="attendance-preview.css?v=20261124-entry-top">
+  <link rel="stylesheet" href="attendance-preview.css?v=20261124-simple-guide">
   <script src="firebase-config.js"></script>
   <script src="calendar-attendance.js?v=20261122-girls2"></script>
   <script src="common.js"></script>
@@ -17,14 +17,14 @@
 <header class="site-header"></header>
 <main class="page-wrap prototype-wrap">
   <h1>出欠共有テスト</h1>
-  <p class="small-note">団員・コーチの氏名を選んで出欠を入力できます。入力内容は、この出欠テストを利用する全員に共有されます。個人情報や非公開の連絡は入力しないでください。</p>
+  <p class="small-note">回答と連絡事項は利用者全員に共有されます。個人情報や非公開の連絡は入力しないでください。</p>
   <nav class="audience-tabs" aria-label="回答する人">
     <button type="button" class="audience-tab active" data-audience="players" aria-pressed="true">⚽ 団員</button>
     <button type="button" class="audience-tab" data-audience="coaches" aria-pressed="false">🧑‍🏫 コーチ</button>
   </nav>
 
   <section class="panel response-panel" id="response-panel">
-    <div class="section-heading"><div><h1 id="response-title">参加予定【団員用】</h1><p id="response-summary">予定ごとに参加・未定・不参加を入力できます。</p><p id="coach-roster-status" class="small-note" role="status" hidden></p><p id="calendar-sync-status" role="status"></p></div><div class="attendance-heading-actions"><span id="respondent-count" class="month-label"></span><button id="open-calendar-matches" class="secondary-button" type="button">試合一覧</button></div></div>
+    <div class="section-heading"><div><h1 id="response-title">参加予定【団員用】</h1><p id="response-summary" hidden></p><p id="coach-roster-status" class="small-note" role="status" hidden></p><p id="calendar-sync-status" role="status"></p></div><div class="attendance-heading-actions"><span id="respondent-count" class="month-label"></span><button id="open-calendar-matches" class="secondary-button" type="button">試合一覧</button></div></div>
     <button type="button" id="entry-mode-button" class="primary-button" aria-haspopup="dialog" disabled>出欠を入力する</button>
     <p id="answer-status" class="attendance-save-status" role="status" hidden></p>
     <div id="coach-editor" class="coach-editor" hidden>
@@ -40,33 +40,21 @@
     </div>
     <p id="shared-attendance-status" class="small-note" role="status">クラウドの出欠を読み込み中です。</p>
 
-    <aside class="attendance-holiday-notice" aria-labelledby="attendance-holiday-notice-title">
-      <h2 id="attendance-holiday-notice-title">祝日の出欠について</h2>
-      <p>祝日は通常練習がお休みです。試合が入る場合に備えて、参加できるかを事前に確認しています。予定が決まっていない方は「△未定」で入力し、分かり次第変更してください。</p>
-    </aside>
-    <section class="attendance-input-guide" aria-labelledby="attendance-input-guide-title">
-      <h2 id="attendance-input-guide-title">出欠の入力方法</h2>
-      <ol>
-        <li>日程ごとに「○参加」「△未定」「×不参加」を選びます。</li>
-        <li>遅刻・早退・送迎希望などがあれば、練習や試合ごとの「連絡事項（任意）」に入力します。</li>
-        <li>「回答を保存」を押します。連絡事項は空欄でも保存できます。</li>
-      </ol>
-      <details>
-        <summary>入力で迷ったとき</summary>
-        <ul>
-          <li>「・」は未回答です。「対象外」の日は入力不要です。</li>
-          <li>予定が未定なら「△未定」で保存できます。決まったら、入力画面を開き直して変更してください。</li>
-          <li>画面上部の「団員」「コーチ」で入力する人を切り替えられます。</li>
-          <li>「家族を登録」で団員・コーチの名前を選ぶと、次回から登録した名前をタップして「家族まとめて入力」を選べます。</li>
-        </ul>
-      </details>
-    </section>
-    <button type="button" id="open-family-entry" class="secondary-button">家族を登録</button>
+    <details class="attendance-input-guide">
+      <summary>入力で迷ったとき</summary>
+      <ul>
+        <li>日程ごとに出欠を選び、「回答を保存」を押してください。・は未回答、「対象外」は入力不要です。</li>
+        <li>遅刻・早退・送迎希望は「連絡事項（任意）」に入力できます。</li>
+        <li>祝日は通常練習がお休みです。試合が入る場合に備えて出欠を確認します。予定が未定なら△を選び、決まったら変更してください。</li>
+        <li>まとめて回答する家族は、表の下の「家族を登録」から設定できます。</li>
+      </ul>
+    </details>
     <div id="board-summary-controls" hidden>
-      <p class="board-summary-help"><span id="attendance-guide-name">お子さんの名前</span>をタップするか、上の赤い「<span id="attendance-guide-entry">出欠を入力する</span>」ボタンから名前を選んでください。人数は「出欠集計を表示」で確認できます。</p>
+      <p class="board-summary-help"><span id="attendance-guide-name">お子さんの名前</span>をタップするか、上の赤い「<span id="attendance-guide-entry">出欠を入力する</span>」ボタンから名前を選んでください。</p>
       <button type="button" id="toggle-board-summary" class="secondary-button" aria-expanded="false" aria-controls="response-list"><span id="board-summary-label">出欠集計を表示（練習・試合・行事）</span><span id="board-summary-arrow" aria-hidden="true">▾</span></button>
     </div>
     <div id="response-list" class="response-list"></div>
+    <button type="button" id="open-family-entry" class="secondary-button" aria-haspopup="dialog">家族を登録</button>
   </section>
 
   <details class="attendance-settings">
@@ -300,6 +288,6 @@
     <div class="dialog-actions"><button type="button" id="cancel-event" class="secondary-button">キャンセル</button><button type="submit" class="primary-button">予定を追加</button></div>
   </form>
 </dialog>
-<script src="attendance-preview.js?v=20261124-entry-top"></script>
+<script src="attendance-preview.js?v=20261124-simple-guide"></script>
 </body>
 </html>
