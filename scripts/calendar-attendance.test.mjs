@@ -581,3 +581,21 @@ assert.deepEqual(Array.from(preview.editableDayEvents(familyDay, sibling, "playe
 assert.deepEqual(Array.from(preview.editableDayEvents(familyDay, parent, "coaches", youngerGame.id), event => event.id), [youngerGame.id]);
 assert.match(preview.matchAttendanceTable(olderGame, [older], "players", familyDay, true), /data-participant="family-older" data-participant-group="players"/);
 assert.doesNotMatch(preview.matchAttendanceTable(olderGame, [sibling], "players", familyDay, true), /data-participant=/);
+
+// The shared participant list keeps roster order for ties and uses the latest answers.
+const rosterForOrder = ["未回答・先", "欠席", "参加・先", "未定", "参加・後", "未回答・後"].map((name, id) => ({id: String(id), name}));
+const eventForOrder = {...olderGame,id:"answer-order-example"};
+const orderedNames = (group) => Array.from(
+  preview.matchAttendanceTable(eventForOrder, rosterForOrder, group).matchAll(/class="match-attendance-name">([^<]*)/g),
+  match => match[1]
+);
+const repliesForOrder = {
+  1:{value:"absent"}, 2:{value:"attending"}, 3:{value:"maybe"}, 4:{value:"attending"}
+};
+preview.state.answers[eventForOrder.id] = {players:{...repliesForOrder},coaches:{...repliesForOrder}};
+for (const group of ["players","coaches"]) {
+  assert.deepEqual(orderedNames(group), ["参加・先", "参加・後", "未定", "欠席", "未回答・先", "未回答・後"]);
+  preview.state.answers[eventForOrder.id][group][0] = {value:"attending"};
+  assert.deepEqual(orderedNames(group), ["未回答・先", "参加・先", "参加・後", "未定", "欠席", "未回答・後"]);
+}
+assert.deepEqual(rosterForOrder.map(person=>person.id), ["0","1","2","3","4","5"]);
