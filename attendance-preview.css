@@ -813,6 +813,9 @@
 }
 @media(max-width:520px){
   .attendance-preview-page .attendance-board-scroll{max-height:min(64svh,650px)}
+  .attendance-preview-page .attendance-board-scroll:has(.attendance-board:not(.has-board-summary, .is-transposed)) {
+    max-height: min(calc(64svh + 54px), 704px);
+  }
 }
 
 .attendance-preview-page .attendance-board .board-schedule-summary > :is(th, td) {
@@ -943,6 +946,11 @@
 .attendance-preview-page .schedule-day-heading button {
   min-height: 44px;
   white-space: nowrap;
+}
+.attendance-preview-page .schedule-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: .4rem;
 }
 .attendance-preview-page .schedule-secondary {
   border-block: 1px solid var(--surface-bd);
@@ -1124,10 +1132,6 @@
   overscroll-behavior: contain;
 }
 
-#open-family-entry {
-  min-height: 44px;
-  margin-block-start: .65rem;
-}
 
 #family-entry-dialog :is(button, form, div, label, select, p)[hidden] {
   display: none;

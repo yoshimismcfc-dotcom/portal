@@ -8,7 +8,7 @@
   <title>出欠共有テスト｜吉見SMC FC</title>
   <link rel="stylesheet" href="common.css">
   <link rel="stylesheet" href="attendance-prototype.css?v=20261121-25">
-  <link rel="stylesheet" href="attendance-preview.css?v=20261124-single-line">
+  <link rel="stylesheet" href="attendance-preview.css?v=20261125-family-settings">
   <script src="firebase-config.js"></script>
   <script src="calendar-attendance.js?v=20261122-girls2"></script>
   <script src="common.js"></script>
@@ -45,7 +45,7 @@
       <ul>
         <li>日程ごとに出欠を選び、「回答を保存」を押してください。・は未回答、「対象外」は入力不要です。</li>
         <li>祝日は通常練習がお休みです。試合が入る場合に備えて出欠を確認します。予定が未定なら△を選び、決まったら変更してください。</li>
-        <li>まとめて回答する家族は、表の下の「家族を登録」から設定できます。</li>
+        <li>まとめて回答する家族は、「予定の確認・追加」の中にある「家族を登録」から設定できます。</li>
       </ul>
     </details>
     <div id="board-summary-controls" hidden>
@@ -54,7 +54,6 @@
       <button type="button" id="toggle-board-summary" class="secondary-button" aria-expanded="false" aria-controls="response-list"><span id="board-summary-label">出欠集計を表示（練習・試合・行事・祝日）</span><span id="board-summary-arrow" aria-hidden="true">▾</span></button>
     </div>
     <div id="response-list" class="response-list"></div>
-    <button type="button" id="open-family-entry" class="secondary-button" aria-haspopup="dialog">家族を登録</button>
   </section>
 
   <details class="attendance-settings">
@@ -65,7 +64,10 @@
         <div class="event-tools"><button id="export-csv" type="button" class="secondary-button">CSV出力</button><button id="reset-demo" type="button" class="secondary-button reset-button" hidden>試作データをリセット</button></div>
       </div>
       <p class="small-note">予定名を押すと詳細を確認できます。新しい予定は、その日の「＋ 予定を追加」から登録できます。</p>
-      <button id="open-calendar-matches" class="secondary-button" type="button" aria-haspopup="dialog">カレンダーから試合を追加・復元</button>
+      <div class="schedule-actions">
+        <button id="open-calendar-matches" class="secondary-button" type="button" aria-haspopup="dialog">カレンダーから試合を追加・復元</button>
+        <button type="button" id="open-family-entry" class="secondary-button" aria-haspopup="dialog">家族を登録</button>
+      </div>
       <p id="roster-status" class="roster-status" role="status">団員名簿を読み込み中…</p>
       <label class="event-list-filter">表示する予定<select id="event-list-filter"><option value="">すべて</option><option value="active">出欠受付中</option><option value="excluded">出欠表から除外中</option><option value="inactive">カレンダー対象外</option></select></label>
       <details class="schedule-secondary">
