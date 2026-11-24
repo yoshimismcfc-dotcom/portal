@@ -135,17 +135,7 @@
   grid-template-columns: minmax(0, 1fr);
 }
 
-.match-overview-counts .attendance-preview-page .board-schedule-group .event-role-counts .activity-count-title {
-  max-inline-size: 100%;
-  padding: .2rem .25rem 0;
-  white-space: normal;
-  overflow-wrap: anywhere;
-  font-size: .75rem;
-  line-height: 1.25;
-  text-align: center;
-}
-
-.event-role-counts .role-count-button {
+.match-overview-counts .event-role-counts .role-count-button {
   grid-template-columns: 3.25rem max-content;
   min-height: 44px;
   justify-content: start;
@@ -1276,6 +1266,16 @@
   white-space: nowrap;
 }
 
+.attendance-preview-page .board-schedule-group .event-role-counts .activity-count-title {
+  max-inline-size: 100%;
+  padding: .2rem .25rem 0;
+  white-space: normal;
+  overflow-wrap: anywhere;
+  font-size: .75rem;
+  line-height: 1.25;
+  text-align: center;
+}
+
 .event-role-counts .role-count-button {
   grid-template-columns: 2.25rem max-content;
   align-items: center;
@@ -1318,6 +1318,55 @@
 .attendance-preview-page :is(.role-count-button, .board-attendance-legend) .attendance-mark {
   inline-size: .68rem;
   block-size: .68rem;
+}
+
+@media (max-width: 560px) {
+  .attendance-preview-page .attendance-board {
+    --attendance-person-width: clamp(5.5rem, 27vw, 7rem);
+    --attendance-date-width: 6.625rem;
+  }
+
+  .attendance-preview-page .attendance-board .person-col {
+    padding-inline: .25rem;
+  }
+
+  .attendance-preview-page .attendance-board .board-date {
+    font-size: .85rem;
+  }
+
+  .attendance-preview-page .attendance-board .board-day-heading .day-detail-link {
+    gap: .125rem;
+  }
+
+  .attendance-preview-page .attendance-board.has-board-summary .day-detail-link {
+    min-height: 26px;
+  }
+
+  .attendance-preview-page .attendance-board .event-role-counts .role-count-button {
+    grid-template-columns: 2.0625rem max-content;
+    min-height: 32px;
+  }
+
+  .attendance-preview-page .attendance-board .role-count-button .category-count-values {
+    gap: .125rem;
+  }
+
+  .attendance-preview-page .attendance-board .role-count-button .attendance-mark {
+    inline-size: .57rem;
+    block-size: .57rem;
+  }
+
+  .attendance-preview-page .attendance-board .role-count-button .category-count-values > span {
+    gap: 0;
+  }
+
+  .attendance-preview-page .attendance-board .board-schedule-group {
+    margin: .125rem;
+  }
+
+  .attendance-preview-page .attendance-board .board-schedule-label {
+    padding-block: .125rem;
+  }
 }
 
 .attendance-role-tabs {
