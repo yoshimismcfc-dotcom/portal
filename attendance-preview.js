@@ -1969,6 +1969,7 @@
 
   function renderAttendanceFormEvents(){
     var root=$("attendance-form-events");
+    $("entry-family-button").hidden=Boolean($("entry-person").value);
     entryBaseline=sharedRows;
     resetEntrySave($("attendance-form"));
     var person=getPeople().find(function(item){return item.id===$("entry-person").value;});
@@ -2364,6 +2365,10 @@
       dayEntryTrigger=null;
     });
     $("open-family-entry").addEventListener("click",function(){openFamilyEntry();});
+    $("entry-family-button").addEventListener("click",function(){
+      openFamilyEntry();
+      if($("family-entry-dialog").open)$("attendance-dialog").close();
+    });
     $("family-existing").addEventListener("change",function(event){
       if(event.target.value)openFamilyEntry(event.target.value,family.scope);
     });

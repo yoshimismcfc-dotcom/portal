@@ -803,6 +803,10 @@
   }
 }
 
+#entry-family-button {
+  margin-block: .5rem;
+}
+
 #floating-entry-button {
   position: fixed;
   z-index: 50;
