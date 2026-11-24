@@ -8,7 +8,7 @@
   <title>出欠共有テスト｜吉見SMC FC</title>
   <link rel="stylesheet" href="common.css">
   <link rel="stylesheet" href="attendance-prototype.css?v=20261121-25">
-  <link rel="stylesheet" href="attendance-preview.css?v=20261125-sticky-scroll">
+  <link rel="stylesheet" href="attendance-preview.css?v=20261125-viewport-controls">
   <script src="firebase-config.js"></script>
   <script src="calendar-attendance.js?v=20261122-girls2"></script>
   <script src="common.js"></script>
@@ -54,6 +54,7 @@
       <button type="button" id="toggle-board-summary" class="secondary-button" aria-expanded="false" aria-controls="response-list"><span id="board-summary-label">出欠集計を表示（練習・試合・行事・祝日）</span><span id="board-summary-arrow" aria-hidden="true">▾</span></button>
     </div>
     <div id="response-list" class="response-list"></div>
+    <button type="button" id="floating-entry-button" class="primary-button" aria-haspopup="dialog" hidden>出欠を入力する</button>
   </section>
 
   <details class="attendance-settings">
@@ -294,6 +295,6 @@
     <div class="dialog-actions"><button type="button" id="cancel-event" class="secondary-button">キャンセル</button><button type="submit" class="primary-button">予定を追加</button></div>
   </form>
 </dialog>
-<script src="attendance-preview.js?v=20261125-sticky-scroll"></script>
+<script src="attendance-preview.js?v=20261125-viewport-controls"></script>
 </body>
 </html>
