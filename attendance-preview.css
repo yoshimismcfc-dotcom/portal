@@ -107,23 +107,52 @@
   background: var(--navy-760);
 }
 
-.preview-summary-date {
-  display: flex;
-  align-items: center;
-  gap: 10px;
-  margin: 8px 0 12px;
+.match-overview-day {
+  display: grid;
+  gap: 6px;
+  margin-block: 4px 12px;
 }
 
-.preview-summary-date select {
-  flex: 1;
-  min-width: 0;
+.match-overview-day h3,
+.match-overview-day h4 {
+  margin: 0;
+  font-size: 1rem;
+  overflow-wrap: anywhere;
+}
+
+.match-summary-event .match-overview-meta {
+  display: block;
+  color: var(--ink-2);
+  font-size: .8125rem;
+  line-height: 1.35;
+}
+
+.match-overview-counts {
+  margin-block: 4px;
+}
+
+.match-overview-counts .event-role-counts {
+  grid-template-columns: minmax(0, 1fr);
+}
+
+.match-overview-counts .event-role-counts .role-count-button {
+  grid-template-columns: 3.25rem max-content;
   min-height: 44px;
-  font: inherit;
+  justify-content: start;
+  gap: .5rem;
+  padding-inline: .625rem;
 }
 
-.preview-match-count {
-  font-weight: 800;
-  font-variant-numeric: tabular-nums;
+.match-overview-counts .role-count-label {
+  font-size: .875rem;
+}
+
+.attendance-preview-page .match-overview-counts .category-count-values {
+  font-size: .875rem;
+}
+
+.match-summary-event .day-details-action {
+  min-height: 44px;
 }
 
 @media (max-width: 640px) {
@@ -364,15 +393,10 @@
   outline-color: var(--cyan);
 }
 
-.preview-match-count,
 .recruitment-counts {
   display: flex;
   flex-wrap: wrap;
   gap: 4px 12px;
-}
-
-.preview-match-count > span {
-  white-space: nowrap;
 }
 
 .match-detail-header {

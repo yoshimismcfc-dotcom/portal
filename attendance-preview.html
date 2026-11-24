@@ -8,7 +8,7 @@
   <title>出欠共有テスト｜吉見SMC FC</title>
   <link rel="stylesheet" href="common.css">
   <link rel="stylesheet" href="attendance-prototype.css?v=20261121-25">
-  <link rel="stylesheet" href="attendance-preview.css?v=20261124-simple-guide">
+  <link rel="stylesheet" href="attendance-preview.css?v=20261124-match-overview">
   <script src="firebase-config.js"></script>
   <script src="calendar-attendance.js?v=20261122-girls2"></script>
   <script src="common.js"></script>
@@ -24,7 +24,7 @@
   </nav>
 
   <section class="panel response-panel" id="response-panel">
-    <div class="section-heading"><div><h1 id="response-title">参加予定【団員用】</h1><p id="response-summary" hidden></p><p id="coach-roster-status" class="small-note" role="status" hidden></p><p id="calendar-sync-status" role="status"></p></div><div class="attendance-heading-actions"><span id="respondent-count" class="month-label"></span><button id="open-calendar-matches" class="secondary-button" type="button">試合一覧</button></div></div>
+    <div class="section-heading"><div><h1 id="response-title">参加予定【団員用】</h1><p id="response-summary" hidden></p><p id="coach-roster-status" class="small-note" role="status" hidden></p><p id="calendar-sync-status" role="status"></p></div><div class="attendance-heading-actions"><span id="respondent-count" class="month-label"></span><button id="open-match-summary" class="secondary-button" type="button" aria-haspopup="dialog">試合の予定・出欠</button></div></div>
     <button type="button" id="entry-mode-button" class="primary-button" aria-haspopup="dialog" disabled>出欠を入力する</button>
     <p id="answer-status" class="attendance-save-status" role="status" hidden></p>
     <div id="coach-editor" class="coach-editor" hidden>
@@ -36,7 +36,7 @@
     </div>
     <div class="attendance-board-controls">
       <div class="response-filters" id="grade-filters" aria-label="学年の絞り込み"></div>
-      <div class="board-toolbar" id="board-toolbar" hidden><span id="board-status" role="status">名前が縦</span><div class="preview-board-actions"><button type="button" id="open-match-summary" aria-haspopup="dialog" hidden>試合集計</button><button type="button" id="transpose-board" aria-pressed="false">縦横切替</button></div></div>
+      <div class="board-toolbar" id="board-toolbar" hidden><span id="board-status" role="status">名前が縦</span><div class="preview-board-actions"><button type="button" id="transpose-board" aria-pressed="false">縦横切替</button></div></div>
     </div>
     <p id="shared-attendance-status" class="small-note" role="status">クラウドの出欠を読み込み中です。</p>
 
@@ -64,6 +64,7 @@
         <div class="event-tools"><button id="export-csv" type="button" class="secondary-button">CSV出力</button><button id="reset-demo" type="button" class="secondary-button reset-button" hidden>試作データをリセット</button></div>
       </div>
       <p class="small-note">予定名を押すと詳細を確認できます。新しい予定は、その日の「＋ 予定を追加」から登録できます。</p>
+      <button id="open-calendar-matches" class="secondary-button" type="button" aria-haspopup="dialog">カレンダーから試合を追加・復元</button>
       <p id="roster-status" class="roster-status" role="status">団員名簿を読み込み中…</p>
       <label class="event-list-filter">表示する予定<select id="event-list-filter"><option value="">すべて</option><option value="active">出欠受付中</option><option value="excluded">出欠表から除外中</option><option value="inactive">カレンダー対象外</option></select></label>
       <details class="schedule-secondary">
@@ -207,9 +208,12 @@
 </dialog>
 <dialog id="match-summary-dialog" class="event-dialog attendance-entry-dialog" aria-labelledby="match-summary-title">
   <form method="dialog">
+    <header class="match-detail-header">
+      <h2 id="match-summary-title" tabindex="-1">試合の予定・出欠</h2>
+      <p class="small-note">団員・コーチの人数をタップすると、出欠一覧が開きます。</p>
+    </header>
     <div class="attendance-entry-scroll">
-      <h2 id="match-summary-title">試合集計</h2>
-      <label class="preview-summary-date">日付<select id="match-summary-date"></select></label>
+      <p id="match-summary-status" role="status" hidden></p>
       <div id="match-summary-list"></div>
     </div>
     <div class="dialog-actions"><button class="secondary-button" autofocus>閉じる</button></div>
@@ -263,7 +267,7 @@
 </dialog>
 <dialog id="calendar-match-dialog" class="event-dialog calendar-match-dialog" aria-labelledby="calendar-match-title">
   <form method="dialog">
-    <h2 id="calendar-match-title">カレンダーの試合一覧</h2>
+    <h2 id="calendar-match-title">試合の追加・復元</h2>
     <label for="calendar-match-category">カテゴリー</label>
     <select id="calendar-match-category">
       <option value="">U7〜U12すべて</option>
@@ -287,6 +291,6 @@
     <div class="dialog-actions"><button type="button" id="cancel-event" class="secondary-button">キャンセル</button><button type="submit" class="primary-button">予定を追加</button></div>
   </form>
 </dialog>
-<script src="attendance-preview.js?v=20261124-simple-guide"></script>
+<script src="attendance-preview.js?v=20261124-match-overview"></script>
 </body>
 </html>
