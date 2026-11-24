@@ -637,7 +637,7 @@
 /* The headers and all answers share one native scroll container. */
 .attendance-preview-page .attendance-board thead th {
   position: sticky;
-  top: 0;
+  top: var(--board-header-offset, 0px);
   z-index: 5;
   background: var(--attendance-board-head);
   color: var(--ink);
@@ -792,11 +792,32 @@
   min-width: var(--attendance-date-width);
   width: var(--attendance-date-width);
 }
-@media(max-width:520px){
-  .attendance-preview-page .attendance-board-scroll{max-height:min(64svh,650px)}
-  .attendance-preview-page .attendance-board-scroll:has(.attendance-board:not(.has-board-summary, .is-transposed)) {
-    max-height: min(calc(64svh + 54px), 704px);
+@media (max-width: 560px) {
+  .attendance-preview-page .attendance-board-scroll {
+    max-height: min(64svh, 650px);
   }
+
+  .attendance-preview-page .attendance-board-scroll:has(.attendance-board:not(.has-board-summary, .is-transposed)) {
+    max-height: min(704px, max(calc(64svh + 54px),
+      calc(100svh - var(--attendance-header-height, 64px) - 58px - env(safe-area-inset-bottom, 0px))));
+  }
+}
+
+#floating-entry-button {
+  position: fixed;
+  z-index: 50;
+  left: 50%;
+  bottom: calc(var(--entry-bottom-inset, 0px) + max(.5rem, env(safe-area-inset-bottom, 0px)));
+  transform: translateX(-50%);
+  min-height: 44px;
+  width: min(calc(100% - 2rem), 20rem);
+  padding-block: .25rem;
+}
+
+#response-panel:has(#floating-entry-button:not([hidden])) .attendance-board-scroll::after {
+  content: "";
+  display: block;
+  height: calc(52px + env(safe-area-inset-bottom, 0px));
 }
 
 .attendance-preview-page .attendance-board .board-schedule-summary > :is(th, td) {

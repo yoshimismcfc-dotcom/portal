@@ -1391,6 +1391,51 @@
   var boardSummaryExpanded=false;
   try{boardSummaryExpanded=localStorage.getItem(BOARD_SUMMARY_KEY)==="true";}catch(error){}
 
+  function setupBoardViewport(){
+    var header=document.querySelector(".site-header"),list=$("response-list");
+    var entry=$("entry-mode-button"),floating=$("floating-entry-button");
+    var viewport=window.visualViewport,frame=0;
+
+    function update(){
+      frame=0;
+      var board=list.querySelector(".attendance-board-scroll");
+      var viewTop=viewport?.offsetTop||0;
+      var viewBottom=viewport?viewTop+viewport.height:window.innerHeight;
+      var headerBounds=header.getBoundingClientRect();
+      var top=Math.max(viewTop,headerBounds.bottom);
+      list.style.setProperty("--attendance-header-height",headerBounds.height+"px");
+      if(board){
+        var bounds=board.getBoundingClientRect();
+        board.style.setProperty("--board-header-offset",Math.max(0,top-bounds.top-board.clientTop)+"px");
+      }
+      floating.hidden=!board||entry.disabled||entry.getBoundingClientRect().bottom>top||
+        bounds.bottom<=top||bounds.top>=viewBottom||Boolean(document.querySelector("dialog[open]"));
+      if(!floating.hidden){
+        floating.textContent=entry.textContent;
+        floating.style.setProperty("--entry-bottom-inset",Math.max(0,window.innerHeight-viewBottom)+"px");
+      }
+    }
+
+    function schedule(){
+      if(!frame)frame=requestAnimationFrame(update);
+    }
+
+    window.addEventListener("scroll",schedule,{passive:true});
+    window.addEventListener("resize",schedule);
+    viewport?.addEventListener("scroll",schedule,{passive:true});
+    viewport?.addEventListener("resize",schedule);
+    var layout=new ResizeObserver(schedule);
+    [header,list,entry,$("response-panel")].forEach(function(element){layout.observe(element);});
+    var changes=new MutationObserver(schedule);
+    changes.observe(list,{childList:true});
+    changes.observe(entry,{attributes:true,attributeFilter:["disabled"]});
+    document.querySelectorAll("dialog").forEach(function(dialog){
+      changes.observe(dialog,{attributes:true,attributeFilter:["open"]});
+    });
+    floating.addEventListener("click",function(){entry.click();});
+    schedule();
+  }
+
   function toggleBoardSummary(){
     var board=$("response-list").querySelector(".attendance-board-scroll");
     // Anchor the first visible date even when expanding changes column widths or row heights.
@@ -2375,6 +2420,7 @@
       return;
     }
     updateSeasonInputs();
+    setupBoardViewport();
     $("toggle-board-summary").addEventListener("click",toggleBoardSummary);
     $("year-end-form").addEventListener("submit",saveSeasonPeriod);
     $("event-list-filter").addEventListener("change",renderEventList);
