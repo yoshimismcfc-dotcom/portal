@@ -533,34 +533,31 @@
     }).join("");
   }
 
-  function matchCellSummary(day,people){
-    return Array.from(matchCategories(day.matches),function(entry){
+  function scheduleSummaryGroup(label,counts){
+    return '<div class="board-schedule-group"><span class="board-schedule-label">'+esc(label)+'</span>'+counts+'</div>';
+  }
+
+  function scheduleCellSummary(day,people){
+    var matchGroups=Array.from(matchCategories(day.matches),function(entry){
       var category=entry[0],matches=entry[1];
-      return '<div class="board-match-category"><span class="board-match-category-label">'+
-        esc(category==="その他"?"その他の試合":category)+'</span>'+
-        eventCountButtons(day,matches,people,"match",false)+'</div>';
-    }).join("");
+      return scheduleSummaryGroup(category==="その他"?"その他の試合":category+" 試合",
+        eventCountButtons(day,matches,people,"match",false));
+    });
+    var activities=day.activities.map(function(event){
+      var holiday=event.holidayAvailability;
+      var label=holiday?(event.holidayReference?"祝日出欠（参考）":"祝日出欠"):"行事";
+      return scheduleSummaryGroup(label,eventCountButtons(day,[event],people,"activity",!holiday));
+    });
+    return matchGroups.concat(activities).join("");
   }
 
-  function matchSummaryRow(days,people){
-    if(!days.some(function(day){return day.matches.length;}))return "";
-    return '<tr class="category-count-row board-match-summary"><th class="person-col" scope="row">試合</th>'+
+  function scheduleSummaryRow(days,people){
+    if(!days.some(function(day){return day.matches.length||day.activities.length;}))return "";
+    return '<tr class="board-schedule-summary"><th class="person-col" scope="row">予定</th>'+
       days.map(function(day){
-        var counts=matchCellSummary(day,people);
-        return counts?'<td class="board-match-cell">'+counts+'</td>':'<td aria-label="試合なし"></td>';
+        var counts=scheduleCellSummary(day,people);
+        return counts?'<td class="board-schedule-cell">'+counts+'</td>':'<td aria-label="試合・行事・祝日の出欠予定なし"></td>';
       }).join("")+'</tr>';
-  }
-
-  function activityCountButtons(day,people){
-    return eventCountButtons(day,day.activities,people,"activity",true);
-  }
-
-  function activitySummaryRow(days,people){
-    if(!days.some(function(day){return day.activities.length;}))return "";
-    var title=days.some(function(day){return day.activities.some(function(event){return event.holidayAvailability;});})?"行事・祝日":"行事";
-    return '<tr class="category-count-row"><th class="person-col" scope="row">'+title+'</th>'+
-      days.map(function(day){return '<td>'+(activityCountButtons(day,people)||
-        '<span class="category-count-empty" aria-label="行事なし">—</span>')+'</td>';}).join("")+'</tr>';
   }
 
   function dayHeading(day,people,showSummary=true){
@@ -1472,14 +1469,14 @@
       body=days.map(function(day){
         return '<tr><th class="event-col" scope="row" data-board-date="'+esc(day.date)+'">'+
           dayHeading(day,summaryPeople,boardSummaryExpanded)+
-          (boardSummaryExpanded?activityCountButtons(day,summaryPeople)+matchCellSummary(day,summaryPeople):"")+'</th>'+
+          (boardSummaryExpanded?scheduleCellSummary(day,summaryPeople):"")+'</th>'+
           people.map(function(person){return '<td>'+dayButton(day,person)+'</td>';}).join("")+'</tr>';
       }).join("");
     }else{
       head='<thead><tr><th class="person-col" scope="col">'+(boardSummaryExpanded?"練習の出欠":"名前")+'</th>'+days.map(function(day){
         return '<th scope="col" data-board-date="'+esc(day.date)+'">'+dayHeading(day,summaryPeople,boardSummaryExpanded)+'</th>';
       }).join("")+'</tr></thead><tbody>';
-      body=(boardSummaryExpanded?activitySummaryRow(days,summaryPeople)+matchSummaryRow(days,summaryPeople):"")+people.map(function(person){
+      body=(boardSummaryExpanded?scheduleSummaryRow(days,summaryPeople):"")+people.map(function(person){
         return '<tr><th class="person-col" scope="row">'+boardPersonName(person)+'</th>'+
           days.map(function(day){return '<td>'+dayButton(day,person)+'</td>';}).join("")+'</tr>';
       }).join("");
@@ -1487,7 +1484,7 @@
     $("board-toolbar").hidden=false;
     $("board-summary-controls").hidden=false;
     $("toggle-board-summary").setAttribute("aria-expanded",String(boardSummaryExpanded));
-    $("board-summary-label").textContent=boardSummaryExpanded?"出欠集計を閉じる":"出欠集計を表示（練習・試合・行事）";
+    $("board-summary-label").textContent=boardSummaryExpanded?"出欠集計を閉じる":"出欠集計を表示（練習・試合・行事・祝日）";
     $("board-summary-arrow").textContent=boardSummaryExpanded?"▴":"▾";
     $("board-status").textContent=transposeBoard?"日付が縦":"名前が縦";
     $("transpose-board").setAttribute("aria-pressed",String(transposeBoard));
