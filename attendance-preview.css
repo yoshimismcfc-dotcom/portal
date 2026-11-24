@@ -264,31 +264,6 @@
   outline-offset: -2px;
 }
 
-.attendance-preview-page .attendance-board-scroll {
-  background: var(--navy-820);
-  color: var(--ink);
-  overscroll-behavior-x: contain;
-}
-
-.attendance-preview-page .attendance-board :is(th.person-col, th.event-col) {
-  /* Swipes on the frozen column stay vertical. Keep pinch zoom and native momentum. */
-  touch-action: pan-y pinch-zoom;
-  background: var(--navy-900);
-  color: var(--ink);
-  border-inline-end: 1px solid var(--board-line);
-}
-
-.attendance-preview-page .attendance-board thead th {
-  z-index: 5;
-  background: var(--navy-760);
-  color: var(--ink);
-}
-
-.attendance-preview-page .attendance-board thead :is(th.person-col, th.event-col) {
-  z-index: 6;
-  background: var(--navy-760);
-}
-
 .attendance-preview-page .attendance-board :is(.board-member-grade, .event-count-summary) {
   color: var(--ink-2);
 }
@@ -631,15 +606,16 @@
   background:var(--attendance-board-bg);
   color:var(--ink);
   border:1px solid var(--board-line);
-  overflow:auto;
-  overscroll-behavior-x:contain;
-  overscroll-behavior-y:contain;
-  -webkit-overflow-scrolling:touch;
-  max-height:min(65svh,710px);
+  overflow: auto;
+  overscroll-behavior: contain;
+  touch-action: pan-x pan-y pinch-zoom;
+  max-height: min(65svh, 710px);
 }
+
 .attendance-preview-page .attendance-board {
-  color:var(--ink);
-  border-spacing:0;
+  color: var(--ink);
+  border-collapse: separate;
+  border-spacing: 0;
 }
 .attendance-preview-page .attendance-board th,
 .attendance-preview-page .attendance-board td {
@@ -658,25 +634,34 @@
 .attendance-preview-page .attendance-board.has-board-summary th[data-board-date] {
   vertical-align: top;
 }
-.attendance-preview-page .attendance-board thead th,
-.attendance-preview-page .attendance-board thead .person-col,
-.attendance-preview-page .attendance-board.is-transposed thead th {
-  background:var(--attendance-board-head);
-  color:var(--ink);
+/* The headers and all answers share one native scroll container. */
+.attendance-preview-page .attendance-board thead th {
+  position: sticky;
+  top: 0;
+  z-index: 5;
+  background: var(--attendance-board-head);
+  color: var(--ink);
 }
-.attendance-preview-page .attendance-board tbody th.person-col,
-.attendance-preview-page .attendance-board.is-transposed tbody th.event-col {
-  background:var(--attendance-board-frozen);
-  color:var(--ink);
+
+.attendance-preview-page .attendance-board :is(th.person-col, th.event-col) {
+  position: sticky;
+  left: 0;
 }
-.attendance-preview-page .attendance-board tbody tr:nth-child(even) td {
-  background:var(--attendance-board-alt);
+
+.attendance-preview-page .attendance-board tbody :is(th.person-col, th.event-col) {
+  z-index: 4;
+  background: var(--attendance-board-frozen);
+  color: var(--ink);
+  touch-action: pan-y pinch-zoom;
 }
-.attendance-preview-page .attendance-board tbody tr:nth-child(even) th.person-col {
-  background:var(--attendance-board-alt);
+
+.attendance-preview-page .attendance-board thead :is(th.person-col, th.event-col) {
+  z-index: 6;
 }
-.attendance-preview-page .attendance-board thead .person-col {
-  z-index:8;
+
+.attendance-preview-page .attendance-board tbody tr:nth-child(even) td,
+.attendance-preview-page .attendance-board tbody tr:nth-child(even) :is(th.person-col, th.event-col) {
+  background: var(--attendance-board-alt);
 }
 .attendance-preview-page .attendance-board .person-col {
   box-sizing: border-box;
@@ -718,10 +703,6 @@
 
 .attendance-preview-page .attendance-board .board-member-name:focus-visible {
   outline:3px solid var(--orange);
-}
-.attendance-preview-page .attendance-board :is(th.person-col,th.event-col),
-.attendance-preview-page .attendance-board :is(th.person-col,th.event-col) * {
-  touch-action:pan-y pinch-zoom!important;
 }
 .attendance-preview-page .board-day-heading {
   text-align: center;
