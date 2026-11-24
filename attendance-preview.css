@@ -682,7 +682,7 @@
   box-sizing: border-box;
   min-width: var(--attendance-person-width);
   width: var(--attendance-person-width);
-  max-width: var(--attendance-person-width);
+  max-width: none;
   padding-inline: 7px;
   box-shadow:2px 0 0 var(--board-line);
 }
@@ -693,10 +693,11 @@
   font-weight:850;
   text-align:left;
   width:100%;
+  min-width:max-content;
   min-height:44px;
   line-height:1.35;
-  white-space:normal;
-  overflow-wrap:anywhere;
+  white-space:nowrap;
+  overflow-wrap:normal;
   padding:2px 0;
 }
 .attendance-preview-page .attendance-board .board-member-grade {
@@ -799,7 +800,7 @@
 .attendance-preview-page .attendance-board.is-transposed .rotated-person {
   box-sizing: border-box;
   min-width: var(--attendance-person-width);
-  max-width: var(--attendance-person-width);
+  max-width: none;
   width: var(--attendance-person-width);
   padding-inline: 7px;
 }
@@ -1327,6 +1328,10 @@
   }
 
   .attendance-preview-page .attendance-board .person-col {
+    padding-inline: .25rem;
+  }
+
+  .attendance-preview-page .attendance-board th > .board-member-name {
     padding-inline: .25rem;
   }
 
