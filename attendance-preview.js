@@ -533,18 +533,22 @@
     }).join("");
   }
 
-  function categoryCountButton(day,matches,people){
-    return matches?eventCountButtons(day,matches,people,"match",false):
-      '<span class="category-count-empty" aria-label="試合なし">—</span>';
+  function matchCellSummary(day,people){
+    return Array.from(matchCategories(day.matches),function(entry){
+      var category=entry[0],matches=entry[1];
+      return '<div class="board-match-category"><span class="board-match-category-label">'+
+        esc(category==="その他"?"その他の試合":category)+'</span>'+
+        eventCountButtons(day,matches,people,"match",false)+'</div>';
+    }).join("");
   }
 
-  function categorySummaryRows(days,byDate,people){
-    var categories=matchCategories(days.flatMap(function(day){return day.matches;}));
-    return Array.from(categories.keys(),function(category){
-      var title=category==="その他"?"その他の試合":category+"試合";
-      return '<tr class="category-count-row"><th class="person-col" scope="row">'+esc(title)+'</th>'+
-        days.map(function(day){return '<td>'+categoryCountButton(day,byDate.get(day.date).get(category),people)+'</td>';}).join("")+'</tr>';
-    }).join("");
+  function matchSummaryRow(days,people){
+    if(!days.some(function(day){return day.matches.length;}))return "";
+    return '<tr class="category-count-row board-match-summary"><th class="person-col" scope="row">試合</th>'+
+      days.map(function(day){
+        var counts=matchCellSummary(day,people);
+        return counts?'<td class="board-match-cell">'+counts+'</td>':'<td aria-label="試合なし"></td>';
+      }).join("")+'</tr>';
   }
 
   function activityCountButtons(day,people){
@@ -1461,28 +1465,21 @@
     if(!days.length){rows.innerHTML='<div class="empty-state">表示できる日程がありません。</div>';return;}
 
     var head,body;
-    var categoriesByDate=boardSummaryExpanded?new Map(days.map(function(day){
-      return [day.date,matchCategories(day.matches)];
-    })):null;
     if(transposeBoard){
       head='<thead><tr><th class="event-col" scope="col">日付</th>'+people.map(function(person){
         return '<th class="rotated-person" scope="col">'+boardPersonName(person)+'</th>';
       }).join("")+'</tr></thead><tbody>';
       body=days.map(function(day){
-        var categoryRows=boardSummaryExpanded?Array.from(categoriesByDate.get(day.date),function(entry){
-          return '<div class="category-count-transposed"><span>'+esc(entry[0])+'</span>'+
-            categoryCountButton(day,entry[1],summaryPeople)+'</div>';
-        }).join(""):"";
         return '<tr><th class="event-col" scope="row" data-board-date="'+esc(day.date)+'">'+
           dayHeading(day,summaryPeople,boardSummaryExpanded)+
-          (boardSummaryExpanded?activityCountButtons(day,summaryPeople)+categoryRows:"")+'</th>'+
+          (boardSummaryExpanded?activityCountButtons(day,summaryPeople)+matchCellSummary(day,summaryPeople):"")+'</th>'+
           people.map(function(person){return '<td>'+dayButton(day,person)+'</td>';}).join("")+'</tr>';
       }).join("");
     }else{
       head='<thead><tr><th class="person-col" scope="col">'+(boardSummaryExpanded?"練習の出欠":"名前")+'</th>'+days.map(function(day){
         return '<th scope="col" data-board-date="'+esc(day.date)+'">'+dayHeading(day,summaryPeople,boardSummaryExpanded)+'</th>';
       }).join("")+'</tr></thead><tbody>';
-      body=(boardSummaryExpanded?activitySummaryRow(days,summaryPeople)+categorySummaryRows(days,categoriesByDate,summaryPeople):"")+people.map(function(person){
+      body=(boardSummaryExpanded?activitySummaryRow(days,summaryPeople)+matchSummaryRow(days,summaryPeople):"")+people.map(function(person){
         return '<tr><th class="person-col" scope="row">'+boardPersonName(person)+'</th>'+
           days.map(function(day){return '<td>'+dayButton(day,person)+'</td>';}).join("")+'</tr>';
       }).join("");

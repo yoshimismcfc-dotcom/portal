@@ -132,7 +132,7 @@ vm.runInNewContext(previewSource.replace('document.addEventListener("DOMContentL
   globalThis.preview = {
     state, familyChanged, familyUpdates, familyKey, editableDayEvents, calendarAttendanceSelection, getBoardEvents, groupBoardDays, countAnswers, renderEntryDay, applySharedAnswers, eligibility, matchRestriction,
     matchAttendanceTable, readEntryUpdates, eventListStatus,
-    categorySummaryRows, matchCategories, dayHeading, compactCountMarks, scheduleDays, dayButton, activitySummaryRow, detailChoices, attendanceEventTitle,
+    matchSummaryRow, matchCellSummary, matchCategories, dayHeading, compactCountMarks, scheduleDays, dayButton, activitySummaryRow, detailChoices, attendanceEventTitle,
     setSeason(period) { seasonPeriod = validSeasonPeriod(period); },
     setSharedReady(value) { sharedReady = value; },
     setRecruitment(records) { recruitmentRows = new Map(records); },
@@ -292,9 +292,8 @@ const practiceNote = preview.readEntryUpdates(practiceNoteForm, coach, [coachDay
 assert.equal(practiceNote.value, undefined);
 assert.equal(practiceNote.contact.message, "練習に遅れます");
 assert.doesNotMatch(preview.dayHeading(coachDay, coaches), /対象|未回答/);
-const coachCategories = new Map([[coachDay.date, preview.matchCategories(coachDay.matches)]]);
-assert.match(preview.categorySummaryRows([coachDay], coachCategories, coaches), /data-count-event="coach-match-a"[^>]+data-count-group="coaches"[^>]+参加 1人、未定 0人、不参加 1人.*data-count-event="coach-match-b"[^>]+data-count-group="coaches"[^>]+参加 1人、未定 1人、不参加 0人/);
-assert.doesNotMatch(preview.categorySummaryRows([coachDay], coachCategories, coaches), /対象|未回答/);
+assert.match(preview.matchSummaryRow([coachDay], coaches), /data-count-event="coach-match-a"[^>]+data-count-group="coaches"[^>]+参加 1人、未定 0人、不参加 1人.*data-count-event="coach-match-b"[^>]+data-count-group="coaches"[^>]+参加 1人、未定 1人、不参加 0人/);
+assert.doesNotMatch(preview.matchSummaryRow([coachDay], coaches), /対象|未回答/);
 const coachCell = preview.dayButton(coachDay, coach);
 assert.match(coachCell, /U12 ○/);
 assert.equal((coachCell.match(/data-mark=/g)||[]).length, 1);
@@ -344,8 +343,7 @@ preview.state.answers.calendar_fixture = { players: { [athlete.id]: { value: "at
 preview.state.answers["calendar_fixture-two"] = { players: { [athlete.id]: { value: "maybe" } } };
 const categoryRows = () => {
   const days = preview.groupBoardDays(preview.getBoardEvents()).filter(day => ["2026-11-25", "2026-11-28"].includes(day.date));
-  const byDate = new Map(days.map(day => [day.date, preview.matchCategories(day.matches)]));
-  return preview.categorySummaryRows(days, byDate, [athlete, extraPlayer]);
+  return preview.matchSummaryRow(days, [athlete, extraPlayer]);
 };
 const practiceWithMatches = preview.groupBoardDays(preview.getBoardEvents()).find(day => day.date === "2026-11-28");
 const practiceOnlyPlayer = { id: "practice-only", grade: "4年" };
@@ -357,11 +355,15 @@ assert.doesNotMatch(practiceDayHeading, /対象 延べ|参加 1人/);
 assert.match(preview.dayHeading({ ...practiceWithMatches, matches: [] }, practicePeople), /対象 4人/);
 assert.match(preview.dayHeading({ ...practiceWithMatches, practice: [] }, practicePeople), /練習なし/);
 const totalsMarkup = categoryRows();
-assert.match(totalsMarkup, />U12試合<.*?>U8試合</);
+assert.equal(Array.from(totalsMarkup.matchAll(/<tr\b/g)).length, 1);
+assert.match(totalsMarkup, /scope="row">試合<.*?<td aria-label="試合なし"><\/td><td class="board-match-cell">/);
+assert.match(totalsMarkup, /class="board-match-category-label">U12<.*?class="board-match-category-label">U8</);
+assert.equal(preview.matchCellSummary({ ...practiceWithMatches, matches: [] }, []), "");
+assert.equal(preview.matchSummaryRow([{ ...practiceWithMatches, matches: [] }], []), "");
 const unorderedCategories = ["U10", "U8", "", "U12", "U7", "U11", "U9"].map(category => ({ category }));
 assert.deepEqual(Array.from(preview.matchCategories(unorderedCategories).keys()),
   ["U12", "U11", "U10", "U9", "U8", "U7", "その他"]);
-assert.doesNotMatch(totalsMarkup, /U7試合/);
+assert.doesNotMatch(totalsMarkup, /class="board-match-category-label">U7</);
 assert.match(totalsMarkup, /試合なし/);
 assert.match(totalsMarkup, /data-count-event="calendar_fixture"[^>]+data-count-group="players"[^>]+参加 1人、未定 0人、不参加 0人.*data-count-event="calendar_fixture-two"[^>]+data-count-group="players"[^>]+参加 0人、未定 1人、不参加 0人/);
 preview.setVisibility([["calendar_fixture", true]]);
