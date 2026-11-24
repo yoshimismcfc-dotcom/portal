@@ -135,7 +135,17 @@
   grid-template-columns: minmax(0, 1fr);
 }
 
-.match-overview-counts .event-role-counts .role-count-button {
+.match-overview-counts .attendance-preview-page .board-schedule-group .event-role-counts .activity-count-title {
+  max-inline-size: 100%;
+  padding: .2rem .25rem 0;
+  white-space: normal;
+  overflow-wrap: anywhere;
+  font-size: .75rem;
+  line-height: 1.25;
+  text-align: center;
+}
+
+.event-role-counts .role-count-button {
   grid-template-columns: 3.25rem max-content;
   min-height: 44px;
   justify-content: start;
@@ -814,14 +824,14 @@
   .attendance-preview-page .attendance-board-scroll{max-height:min(64svh,650px)}
 }
 
-.attendance-preview-page .attendance-board .category-count-row > :is(th, td) {
+.attendance-preview-page .attendance-board .board-schedule-summary > :is(th, td) {
   background: var(--attendance-board-head);
 }
-.attendance-preview-page .attendance-board .category-count-row > th {
+.attendance-preview-page .attendance-board .board-schedule-summary > th {
   font-size: .875rem;
   font-weight: 800;
 }
-.attendance-preview-page .attendance-board .category-count-row > td {
+.attendance-preview-page .attendance-board .board-schedule-summary > td {
   padding: 0;
 }
 .category-count-button {
@@ -854,22 +864,29 @@
   color: var(--ink-2);
   font-size: .75rem;
 }
-.attendance-preview-page .attendance-board .board-match-cell {
+.attendance-preview-page .attendance-board .board-schedule-cell {
   vertical-align: top;
 }
 
-.board-match-category + .board-match-category,
-.attendance-board.is-transposed .board-match-category {
-  border-block-start: 1px solid var(--board-line);
+.board-schedule-group {
+  border: 1px solid var(--board-line);
+  border-radius: .375rem;
+  margin: .25rem;
+  background: var(--attendance-board-bg);
 }
 
-.board-match-category-label {
+.board-schedule-label {
   display: block;
-  padding-block: .15rem;
+  padding: .2rem .25rem;
+  border-block-end: 1px solid var(--board-line);
+  background: var(--attendance-board-alt);
+  border-radius: .375rem .375rem 0 0;
+  color: var(--ink);
   font-size: .8125rem;
   font-weight: 800;
-  line-height: 1.15;
+  line-height: 1.2;
   text-align: center;
+  overflow-wrap: anywhere;
 }
 
 .board-practice-label {
