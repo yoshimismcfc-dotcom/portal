@@ -803,8 +803,14 @@
   }
 }
 
-#entry-family-button {
-  margin-block: .5rem;
+#entry-family-picker {
+  margin-block-start: .75rem;
+  padding-block-start: .75rem;
+  border-block-start: 1px solid var(--line-2);
+}
+
+#entry-family-title, #entry-family-status {
+  margin: 0;
 }
 
 #floating-entry-button {
@@ -1196,6 +1202,15 @@
   display: grid;
   gap: .5rem;
   margin-block: .65rem;
+}
+
+#entry-family-options {
+  grid-template-columns: repeat(auto-fit, minmax(min(100%, 8rem), 1fr));
+}
+
+#entry-family-options button {
+  white-space: normal;
+  overflow-wrap: anywhere;
 }
 
 #family-choice-actions button,

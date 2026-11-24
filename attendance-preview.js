@@ -1990,9 +1990,9 @@
 
   function renderAttendanceFormEvents(){
     var root=$("attendance-form-events");
-    $("entry-family-button").hidden=Boolean($("entry-person").value);
-    $("entry-family-button").setAttribute("aria-expanded","false");
-    $("entry-family-picker").hidden=true;
+    var choosingPerson=!$("entry-person").value;
+    $("entry-family-picker").hidden=!choosingPerson;
+    if(choosingPerson)renderEntryFamilyOptions();
     entryBaseline=sharedRows;
     resetEntrySave($("attendance-form"));
     var person=getPeople().find(function(item){return item.id===$("entry-person").value;});
@@ -2388,12 +2388,6 @@
       dayEntryTrigger=null;
     });
     $("open-family-entry").addEventListener("click",function(){openFamilyEntry();});
-    $("entry-family-button").addEventListener("click",function(){
-      var picker=$("entry-family-picker");
-      picker.hidden=!picker.hidden;
-      $("entry-family-button").setAttribute("aria-expanded",String(!picker.hidden));
-      if(!picker.hidden)renderEntryFamilyOptions();
-    });
     $("entry-family-options").addEventListener("click",function(event){
       var button=event.target.closest("[data-entry-family]");
       if(!button)return;
