@@ -653,8 +653,10 @@
   min-width: var(--attendance-date-width);
   width: var(--attendance-date-width);
   padding: 0 3px;
-  vertical-align:top;
   background:var(--attendance-board-head);
+}
+.attendance-preview-page .attendance-board.has-board-summary th[data-board-date] {
+  vertical-align: top;
 }
 .attendance-preview-page .attendance-board thead th,
 .attendance-preview-page .attendance-board thead .person-col,
