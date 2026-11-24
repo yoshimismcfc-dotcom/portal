@@ -854,9 +854,22 @@
   color: var(--ink-2);
   font-size: .75rem;
 }
-.category-count-transposed {
-  border-top: 1px solid var(--board-line);
-  font-size: .75rem;
+.attendance-preview-page .attendance-board .board-match-cell {
+  vertical-align: top;
+}
+
+.board-match-category + .board-match-category,
+.attendance-board.is-transposed .board-match-category {
+  border-block-start: 1px solid var(--board-line);
+}
+
+.board-match-category-label {
+  display: block;
+  padding-block: .15rem;
+  font-size: .8125rem;
+  font-weight: 800;
+  line-height: 1.15;
+  text-align: center;
 }
 
 .board-practice-label {
