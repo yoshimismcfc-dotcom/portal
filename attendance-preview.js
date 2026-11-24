@@ -1495,20 +1495,6 @@
       '<div class="attendance-board-scroll" role="region" aria-label="出欠一覧、上下左右にスクロール" tabindex="0"><table class="attendance-board'+(transposeBoard?" is-transposed":"")+(boardSummaryExpanded?" has-board-summary":"")+'">'+head+body+'</tbody></table></div>';
     var newBoard=rows.querySelector(".attendance-board-scroll");
     if(preserveScroll){newBoard.scrollTop=savedTop;newBoard.scrollLeft=savedLeft;}
-    // iOS: keep horizontal position stable when the gesture starts on the
-    // sticky name column. Vertical scrolling remains native for both columns.
-    var lockLeft=null,unlockNameGesture=function(){lockLeft=null;};
-    newBoard.addEventListener("touchstart",function(event){
-      lockLeft=event.target.closest("th.person-col,th.event-col")?newBoard.scrollLeft:null;
-    },{passive:true});
-    newBoard.addEventListener("touchmove",function(){
-      if(lockLeft!==null&&newBoard.scrollLeft!==lockLeft)newBoard.scrollLeft=lockLeft;
-    },{passive:true});
-    newBoard.addEventListener("scroll",function(){
-      if(lockLeft!==null&&newBoard.scrollLeft!==lockLeft)newBoard.scrollLeft=lockLeft;
-    },{passive:true});
-    newBoard.addEventListener("touchend",unlockNameGesture,{passive:true});
-    newBoard.addEventListener("touchcancel",unlockNameGesture,{passive:true});
     var daysByDate=new Map(days.map(function(day){return [day.date,day];}));
     var peopleById=new Map(people.map(function(person){return [person.id,person];}));
     rows.querySelectorAll("[data-edit-person]").forEach(function(btn){
