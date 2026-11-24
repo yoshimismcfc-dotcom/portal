@@ -1783,7 +1783,28 @@
     dialog.showModal();
   }
 
+  function renderEntryFamilyOptions(){
+    var options=$("entry-family-options"),status=$("entry-family-status");
+    if(familyDirectoryState!=="ready"){
+      status.textContent=familyDirectoryState==="failed"?
+        "家族の一覧を読み込めませんでした。通信状態を確認し、ページを開き直してください。":
+        "登録済みの家族を読み込んでいます…";
+      options.replaceChildren();
+      return;
+    }
+    var roster=familyRoster();
+    status.textContent=familyRecords.size?"入力する家族を選んでください。":
+      "登録済みの家族がありません。「予定の確認・追加」の「家族を登録」から登録できます。";
+    options.innerHTML=[...familyRecords].map(function(entry){
+      var ids=familyIds(entry[1]);
+      var label=entry[1].name||roster.filter(function(member){return ids.has(member.key);}).map(familyLabel).join("・")||"家族名未登録";
+      return '<button type="button" class="secondary-button" data-entry-family="'+esc(entry[0])+
+        '" aria-haspopup="dialog">'+esc(label)+'</button>';
+    }).join("");
+  }
+
   function familyDirectoryChanged(){
+    if($("attendance-dialog").open&&!$("entry-family-picker").hidden)renderEntryFamilyOptions();
     if(!$("family-entry-dialog").open||$("family-picker").hidden||family.saving)return;
     renderFamilyPicker();
     if(familyDirectoryState==="failed")$("family-status").textContent="家族登録に接続できません。時間をおいて開き直してください。";
@@ -1970,6 +1991,8 @@
   function renderAttendanceFormEvents(){
     var root=$("attendance-form-events");
     $("entry-family-button").hidden=Boolean($("entry-person").value);
+    $("entry-family-button").setAttribute("aria-expanded","false");
+    $("entry-family-picker").hidden=true;
     entryBaseline=sharedRows;
     resetEntrySave($("attendance-form"));
     var person=getPeople().find(function(item){return item.id===$("entry-person").value;});
@@ -2366,7 +2389,15 @@
     });
     $("open-family-entry").addEventListener("click",function(){openFamilyEntry();});
     $("entry-family-button").addEventListener("click",function(){
-      openFamilyEntry();
+      var picker=$("entry-family-picker");
+      picker.hidden=!picker.hidden;
+      $("entry-family-button").setAttribute("aria-expanded",String(!picker.hidden));
+      if(!picker.hidden)renderEntryFamilyOptions();
+    });
+    $("entry-family-options").addEventListener("click",function(event){
+      var button=event.target.closest("[data-entry-family]");
+      if(!button)return;
+      openFamilyEntry(button.dataset.entryFamily);
       if($("family-entry-dialog").open)$("attendance-dialog").close();
     });
     $("family-existing").addEventListener("change",function(event){
