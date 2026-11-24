@@ -1496,7 +1496,7 @@
     $("transpose-board").setAttribute("aria-pressed",String(transposeBoard));
     rows.innerHTML='<p class="board-attendance-legend"><span>'+attendanceMark("attending")+'参加</span>'+
       '<span>'+attendanceMark("maybe")+'未定</span><span>'+attendanceMark("absent")+'不参加</span></p>'+
-      '<div class="attendance-board-scroll" role="region" aria-label="出欠一覧、上下左右にスクロール" tabindex="0"><table class="attendance-board'+(transposeBoard?" is-transposed":"")+'">'+head+body+'</tbody></table></div>';
+      '<div class="attendance-board-scroll" role="region" aria-label="出欠一覧、上下左右にスクロール" tabindex="0"><table class="attendance-board'+(transposeBoard?" is-transposed":"")+(boardSummaryExpanded?" has-board-summary":"")+'">'+head+body+'</tbody></table></div>';
     var newBoard=rows.querySelector(".attendance-board-scroll");
     if(preserveScroll){newBoard.scrollTop=savedTop;newBoard.scrollLeft=savedLeft;}
     // iOS: keep horizontal position stable when the gesture starts on the
