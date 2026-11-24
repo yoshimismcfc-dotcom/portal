@@ -1433,7 +1433,7 @@
     $("coach-roster-status").hidden=audience!=="coaches";
     $("coach-editor").hidden=!deviceMode||audience!=="coaches";
     var filters=$("grade-filters");
-    filters.hidden=audience!=="players";
+    filters.hidden=audience!=="players"||boardSummaryExpanded;
     if(audience==="players"){
       var counts=new Map();
       people.forEach(function(person){counts.set(person.grade,(counts.get(person.grade)||0)+1);});
@@ -1451,32 +1451,34 @@
       people=filterPeopleByGrade(people);
     }
     $("respondent-count").textContent=audience==="coaches"?"":people.length+"名";
-    $("respondent-count").hidden=audience==="coaches";
+    $("respondent-count").hidden=audience==="coaches"||boardSummaryExpanded;
+    $("attendance-entry-help").hidden=boardSummaryExpanded;
+    $("attendance-summary-help").hidden=!boardSummaryExpanded;
 
     $("entry-mode-button").textContent=deviceMode?"試作回答を入力する":"出欠を入力する";
     $("attendance-guide-entry").textContent=$("entry-mode-button").textContent;
-    if(!people.length){
+    if(!people.length&&!boardSummaryExpanded){
       rows.innerHTML='<div class="empty-state">'+(audience==="players"?esc(rosterState)+"。":esc(coachRosterStatus))+"</div>";
       return;
     }
     if(!days.length){rows.innerHTML='<div class="empty-state">表示できる日程がありません。</div>';return;}
 
-    var head,body;
+    var head,body,boardPeople=boardSummaryExpanded?[]:people;
     if(transposeBoard){
-      head='<thead><tr><th class="event-col" scope="col">日付</th>'+people.map(function(person){
+      head='<thead><tr><th class="event-col" scope="col">日付</th>'+boardPeople.map(function(person){
         return '<th class="rotated-person" scope="col">'+boardPersonName(person)+'</th>';
       }).join("")+'</tr></thead><tbody>';
       body=days.map(function(day){
         return '<tr><th class="event-col" scope="row" data-board-date="'+esc(day.date)+'">'+
           dayHeading(day,summaryPeople,boardSummaryExpanded)+
           (boardSummaryExpanded?scheduleCellSummary(day,summaryPeople):"")+'</th>'+
-          people.map(function(person){return '<td>'+dayButton(day,person)+'</td>';}).join("")+'</tr>';
+          boardPeople.map(function(person){return '<td>'+dayButton(day,person)+'</td>';}).join("")+'</tr>';
       }).join("");
     }else{
       head='<thead><tr><th class="person-col" scope="col">'+(boardSummaryExpanded?"練習の出欠":"名前")+'</th>'+days.map(function(day){
         return '<th scope="col" data-board-date="'+esc(day.date)+'">'+dayHeading(day,summaryPeople,boardSummaryExpanded)+'</th>';
       }).join("")+'</tr></thead><tbody>';
-      body=(boardSummaryExpanded?scheduleSummaryRow(days,summaryPeople):"")+people.map(function(person){
+      body=(boardSummaryExpanded?scheduleSummaryRow(days,summaryPeople):"")+boardPeople.map(function(person){
         return '<tr><th class="person-col" scope="row">'+boardPersonName(person)+'</th>'+
           days.map(function(day){return '<td>'+dayButton(day,person)+'</td>';}).join("")+'</tr>';
       }).join("");
@@ -1486,7 +1488,7 @@
     $("toggle-board-summary").setAttribute("aria-expanded",String(boardSummaryExpanded));
     $("board-summary-label").textContent=boardSummaryExpanded?"出欠集計を閉じる":"出欠集計を表示（練習・試合・行事・祝日）";
     $("board-summary-arrow").textContent=boardSummaryExpanded?"▴":"▾";
-    $("board-status").textContent=transposeBoard?"日付が縦":"名前が縦";
+    $("board-status").textContent=transposeBoard?"日付が縦":boardSummaryExpanded?"日付が横":"名前が縦";
     $("transpose-board").setAttribute("aria-pressed",String(transposeBoard));
     rows.innerHTML='<p class="board-attendance-legend"><span>'+attendanceMark("attending")+'参加</span>'+
       '<span>'+attendanceMark("maybe")+'未定</span><span>'+attendanceMark("absent")+'不参加</span></p>'+

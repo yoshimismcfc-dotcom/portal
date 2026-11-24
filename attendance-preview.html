@@ -49,7 +49,8 @@
       </ul>
     </details>
     <div id="board-summary-controls" hidden>
-      <p class="board-summary-help"><span id="attendance-guide-name">お子さんの名前</span>をタップするか、上の赤い「<span id="attendance-guide-entry">出欠を入力する</span>」ボタンから名前を選んでください。<br>遅刻・早退・送迎希望は「連絡事項（任意）」に入力できます。</p>
+      <p id="attendance-entry-help" class="board-summary-help"><span id="attendance-guide-name">お子さんの名前</span>をタップするか、上の赤い「<span id="attendance-guide-entry">出欠を入力する</span>」ボタンから名前を選んでください。<br>遅刻・早退・送迎希望は「連絡事項（任意）」に入力できます。</p>
+      <p id="attendance-summary-help" class="board-summary-help" hidden>人数をタップすると出欠一覧が開きます。</p>
       <button type="button" id="toggle-board-summary" class="secondary-button" aria-expanded="false" aria-controls="response-list"><span id="board-summary-label">出欠集計を表示（練習・試合・行事・祝日）</span><span id="board-summary-arrow" aria-hidden="true">▾</span></button>
     </div>
     <div id="response-list" class="response-list"></div>
@@ -291,6 +292,6 @@
     <div class="dialog-actions"><button type="button" id="cancel-event" class="secondary-button">キャンセル</button><button type="submit" class="primary-button">予定を追加</button></div>
   </form>
 </dialog>
-<script src="attendance-preview.js?v=20261124-schedule-row"></script>
+<script src="attendance-preview.js?v=20261124-summary-only"></script>
 </body>
 </html>
