@@ -8,7 +8,7 @@
   <title>出欠共有テスト｜吉見SMC FC</title>
   <link rel="stylesheet" href="common.css">
   <link rel="stylesheet" href="attendance-prototype.css?v=20261121-25">
-  <link rel="stylesheet" href="attendance-preview.css?v=20261125-family-entry-button">
+  <link rel="stylesheet" href="attendance-preview.css?v=20261125-visible-families">
   <script src="firebase-config.js"></script>
   <script src="calendar-attendance.js?v=20261122-girls2"></script>
   <script src="common.js"></script>
@@ -147,7 +147,11 @@
     <div class="attendance-entry-scroll">
       <h2 id="attendance-entry-title">出欠を入力</h2>
       <label for="entry-person">入力する人</label><select id="entry-person" required autofocus><option value="">名前を選択してください</option></select>
-      <button type="button" id="entry-family-button" class="secondary-button" aria-haspopup="dialog">家族まとめて入力</button>
+      <button type="button" id="entry-family-button" class="secondary-button" aria-expanded="false" aria-controls="entry-family-picker">家族まとめて入力</button>
+      <div id="entry-family-picker" hidden>
+        <p id="entry-family-status" class="small-note" role="status"></p>
+        <div id="entry-family-options"></div>
+      </div>
       <div id="attendance-form-events" class="attendance-form-events"></div>
       <details id="entry-general-note" class="match-contact" hidden>
         <summary>全日程の備考 <span>任意</span></summary>
@@ -296,6 +300,6 @@
     <div class="dialog-actions"><button type="button" id="cancel-event" class="secondary-button">キャンセル</button><button type="submit" class="primary-button">予定を追加</button></div>
   </form>
 </dialog>
-<script src="attendance-preview.js?v=20261125-family-entry-button"></script>
+<script src="attendance-preview.js?v=20261125-visible-families"></script>
 </body>
 </html>

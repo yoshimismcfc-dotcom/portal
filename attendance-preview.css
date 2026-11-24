@@ -1191,13 +1191,15 @@
   white-space: pre-line;
 }
 
-#family-choice-actions {
+#family-choice-actions,
+#entry-family-options {
   display: grid;
   gap: .5rem;
   margin-block: .65rem;
 }
 
-#family-choice-actions button {
+#family-choice-actions button,
+#entry-family-options button {
   min-height: 44px;
 }
 
