@@ -8,7 +8,7 @@
   <title>出欠共有テスト｜吉見SMC FC</title>
   <link rel="stylesheet" href="common.css">
   <link rel="stylesheet" href="attendance-prototype.css?v=20261121-25">
-  <link rel="stylesheet" href="attendance-preview.css?v=20261125-name-family-entry">
+  <link rel="stylesheet" href="attendance-preview.css?v=20261125-family-multiple-days">
   <script src="firebase-config.js"></script>
   <script src="calendar-attendance.js?v=20261122-girls2"></script>
   <script src="common.js"></script>
@@ -182,11 +182,9 @@
       <button type="button" class="secondary-button" id="family-clear-people" hidden>この家族登録を解除</button>
     </form>
     <div id="family-entry" hidden>
-      <label id="family-date-label" for="family-date">入力する日</label>
       <p id="family-event-label" hidden></p>
-      <select id="family-date"></select>
+      <p id="family-entry-guide" class="small-note">日付ごとに入力し、最後に「家族分を保存」を押してください。</p>
       <button type="button" id="family-edit-people" class="secondary-button">家族名・メンバーを変更</button>
-      <div id="family-bulk-actions"></div>
       <div id="family-entries"></div>
     </div>
   </div>
@@ -295,6 +293,6 @@
     <div class="dialog-actions"><button type="button" id="cancel-event" class="secondary-button">キャンセル</button><button type="submit" class="primary-button">予定を追加</button></div>
   </form>
 </dialog>
-<script src="attendance-preview.js?v=20261125-name-family-entry"></script>
+<script src="attendance-preview.js?v=20261125-family-multiple-days"></script>
 </body>
 </html>
