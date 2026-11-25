@@ -1188,6 +1188,20 @@
   margin: .25rem 0;
 }
 
+.family-bulk-scope {
+  display: flex;
+  align-items: center;
+  gap: .5rem;
+  min-height: 44px;
+  margin: 0;
+}
+
+.family-bulk-scope input {
+  width: 1.1rem;
+  height: 1.1rem;
+  min-height: 0;
+}
+
 .family-bulk-event button, #family-edit-people {
   min-height: 44px;
   margin: .15rem;

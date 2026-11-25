@@ -1651,8 +1651,9 @@
     return Object.keys(old).length!==Object.keys(next).length||Object.keys(next).some(function(key){return old[key]!==next[key];});
   }
 
-  function familyBulkCandidates(entry,eventId){
+  function familyBulkCandidates(entry,eventId,playersOnly=false){
     return entry.members.flatMap(function(member,index){
+      if(playersOnly&&member.group!=="players")return [];
       var section=entry.people.children[index];
       var inputs=Array.from(section.querySelectorAll('input[type="radio"]')).filter(function(input){
         return input.dataset.familyField==="answer-"+eventId&&!input.closest("[data-coach-practice][hidden]");
@@ -1665,8 +1666,12 @@
     entry.bulk.innerHTML=dayEvents(entry.day).filter(function(event){return !event.holidayReference;}).map(function(event){
       var candidates=familyBulkCandidates(entry,event.id);
       if(candidates.length<2)return "";
-      return '<section class="family-bulk-event"><strong>'+esc(scheduleEventTitle(event))+'</strong><p>'+
-        esc(candidates.map(function(item){return familyLabel(item.member);}).join("・"))+'</p>'+
+      var roles=new Set(candidates.map(function(item){return item.member.group;}));
+      var target=roles.size>1?
+        '<label class="family-bulk-scope"><input type="checkbox" data-family-scope="'+esc(event.id)+'"'+
+        (entry.playersOnly.has(event.id)?" checked":"")+'>子どもだけ</label>':
+        '<p>'+esc(candidates.map(function(item){return familyLabel(item.member);}).join("・"))+'</p>';
+      return '<section class="family-bulk-event"><strong>'+esc(scheduleEventTitle(event))+'</strong>'+target+
         ANSWERS.map(function(answer){
           return '<button type="button" class="secondary-button" data-family-event="'+esc(event.id)+'" data-family-value="'+
             esc(answer.value)+'">まとめて'+answerMark(answer.value)+'</button>';
@@ -1698,7 +1703,7 @@
       panel.dataset.familyDate=day.date;
       panel.innerHTML=(family.scope?"":'<h3 class="family-day-heading">'+entryCalendarDate(day.date)+'</h3>')+
         '<div class="family-day-bulk"></div><div class="family-day-people"></div>';
-      var entry={day:day,members:activeMembers,bulk:panel.querySelector(".family-day-bulk"),people:panel.querySelector(".family-day-people")};
+      var entry={day:day,members:activeMembers,playersOnly:new Set(),bulk:panel.querySelector(".family-day-bulk"),people:panel.querySelector(".family-day-people")};
       family.days.set(day.date,entry);
       activeMembers.forEach(function(member,index){
         var section=document.createElement("section");
@@ -1891,7 +1896,8 @@
   function applyFamilyBulk(button){
     var value=button.dataset.familyValue;
     var entry=family.days.get(button.closest("[data-family-date]").dataset.familyDate);
-    var candidates=familyBulkCandidates(entry,button.dataset.familyEvent);
+    var eventId=button.dataset.familyEvent;
+    var candidates=familyBulkCandidates(entry,eventId,entry.playersOnly.has(eventId));
     var changed=candidates.filter(function(item){return item.inputs.find(function(input){return input.checked;})?.value!==value;});
     if(changed.length&&!confirm(dateLabel(entry.day.date)+"の"+changed.map(function(item){return familyLabel(item.member);}).join("・")+
       " の回答を "+answerMark(value)+" にしますか？"))return;
@@ -2388,6 +2394,13 @@
       $("family-save").hidden=true;
       $("family-status").textContent="";
       renderFamilyPicker();
+    });
+    $("family-entries").addEventListener("change",function(event){
+      var scope=event.target;
+      if(!scope.matches("[data-family-scope]"))return;
+      var entry=family.days.get(scope.closest("[data-family-date]").dataset.familyDate);
+      if(scope.checked)entry.playersOnly.add(scope.dataset.familyScope);
+      else entry.playersOnly.delete(scope.dataset.familyScope);
     });
     $("family-entries").addEventListener("click",function(event){
       var button=event.target.closest("[data-family-event]");
