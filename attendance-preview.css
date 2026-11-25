@@ -1550,3 +1550,26 @@
 .calendar-attendance-embedded #calendar-attendance-view {
   padding: 2px 4px;
 }
+
+#chouseisan-form label {
+  display: grid;
+  gap: .35rem;
+  margin-block: .65rem;
+}
+
+#chouseisan-form :is(select, input[type="file"]) {
+  min-height: 44px;
+  width: 100%;
+  min-width: 0;
+  font-size: 1rem;
+}
+
+#chouseisan-fields details {
+  margin-block: .75rem;
+}
+
+#chouseisan-fields summary {
+  min-height: 44px;
+  align-content: center;
+  cursor: pointer;
+}

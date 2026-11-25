@@ -8,7 +8,7 @@
   <title>出欠共有テスト｜吉見SMC FC</title>
   <link rel="stylesheet" href="common.css">
   <link rel="stylesheet" href="attendance-prototype.css?v=20261121-25">
-  <link rel="stylesheet" href="attendance-preview.css?v=20261125-family-players-only">
+  <link rel="stylesheet" href="attendance-preview.css?v=20261126-chouseisan">
   <script src="firebase-config.js"></script>
   <script src="calendar-attendance.js?v=20261122-girls2"></script>
   <script src="common.js"></script>
@@ -62,7 +62,7 @@
     <section class="panel event-panel" id="event-panel" aria-labelledby="schedule-title">
       <div class="schedule-heading">
         <h2 id="schedule-title">日付別の予定</h2>
-        <div class="event-tools"><button id="export-csv" type="button" class="secondary-button">CSV出力</button><button id="reset-demo" type="button" class="secondary-button reset-button" hidden>試作データをリセット</button></div>
+        <div class="event-tools"><button id="import-chouseisan" type="button" class="secondary-button" aria-haspopup="dialog">調整さんCSVを取り込む</button><button id="export-csv" type="button" class="secondary-button">CSV出力</button><button id="reset-demo" type="button" class="secondary-button reset-button" hidden>試作データをリセット</button></div>
       </div>
       <p class="small-note">予定名を押すと詳細を確認できます。新しい予定は、その日の「＋ 予定を追加」から登録できます。</p>
       <div class="schedule-actions">
@@ -114,6 +114,21 @@
       <div id="saved-event-answers"></div>
     </div>
     <div class="dialog-actions"><button id="saved-event-open-board" type="button" class="secondary-button" hidden>出欠表で見る</button><button class="secondary-button" autofocus>閉じる</button></div>
+  </form>
+</dialog>
+<dialog id="chouseisan-dialog" class="event-dialog attendance-entry-dialog" aria-labelledby="chouseisan-title">
+  <form id="chouseisan-form">
+    <header><h2 id="chouseisan-title">調整さんCSVを取り込む</h2></header>
+    <p>予定と名前を確認し、出欠が空欄のところに○△×を取り込みます。コメントは取り込みません。</p>
+    <label>出欠表CSV <input type="file" id="chouseisan-file" accept=".csv,text/csv"></label>
+    <div id="chouseisan-fields" hidden>
+      <p id="chouseisan-source"></p>
+      <label>取り込み先 <select id="chouseisan-group"><option value="players">団員</option><option value="coaches">コーチ</option></select></label>
+      <details open><summary>日程と予定を照合</summary><div id="chouseisan-events"></div></details>
+      <details><summary>回答者と名簿を照合</summary><div id="chouseisan-people"></div></details>
+    </div>
+    <p id="chouseisan-status" role="status" aria-live="polite"></p>
+    <div class="dialog-actions"><button type="button" id="chouseisan-close" class="secondary-button">閉じる</button><button type="submit" id="chouseisan-save" class="primary-button" disabled>空欄に取り込む</button></div>
   </form>
 </dialog>
 <dialog id="csv-dialog" class="event-dialog attendance-entry-dialog" aria-labelledby="csv-title">
@@ -293,6 +308,6 @@
     <div class="dialog-actions"><button type="button" id="cancel-event" class="secondary-button">キャンセル</button><button type="submit" class="primary-button">予定を追加</button></div>
   </form>
 </dialog>
-<script src="attendance-preview.js?v=20261125-family-players-only"></script>
+<script src="attendance-preview.js?v=20261126-chouseisan"></script>
 </body>
 </html>
