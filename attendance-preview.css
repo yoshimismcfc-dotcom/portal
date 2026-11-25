@@ -1159,11 +1159,21 @@
   min-height: 0;
 }
 
-#family-entry select {
-  font-size: 1rem;
+#family-entry-guide {
+  margin-block: .3rem;
 }
 
-#family-bulk-actions, .family-person {
+.family-entry-day {
+  margin-block: .85rem;
+}
+
+.family-day-heading {
+  margin-block: 0 .45rem;
+  padding-block-start: .55rem;
+  border-block-start: 1px solid var(--surface-bd);
+}
+
+.family-day-bulk, .family-person {
   margin-block: .65rem;
 }
 
@@ -1184,7 +1194,13 @@
 }
 
 #family-status {
+  max-height: 25vh;
+  overflow-y: auto;
   white-space: pre-line;
+}
+
+#family-status:empty {
+  display: none;
 }
 
 #family-choice-actions {
