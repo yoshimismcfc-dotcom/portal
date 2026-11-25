@@ -5,7 +5,7 @@
   <meta name="robots" content="noindex,nofollow">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <meta name="theme-color" content="#07152d">
-  <title>出欠共有テスト｜吉見SMC FC</title>
+  <title>出欠入力・確認｜吉見SMC FC</title>
   <link rel="stylesheet" href="common.css">
   <link rel="stylesheet" href="attendance-prototype.css?v=20261121-25">
   <link rel="stylesheet" href="attendance-preview.css?v=20261126-chouseisan">
@@ -16,8 +16,9 @@
 <body class="attendance-preview-page">
 <header class="site-header"></header>
 <main class="page-wrap prototype-wrap">
-  <h1>出欠共有テスト</h1>
-  <p class="small-note">回答と連絡事項は利用者全員に共有されます。個人情報や非公開の連絡は入力しないでください。</p>
+  <h1>出欠入力・確認</h1>
+  <p>練習や試合の出欠を入力・変更できます。お子さんの出欠は「団員」、コーチご本人の出欠は「コーチ」を選んでください。</p>
+  <p class="small-note">出欠と連絡事項は利用者全員に共有されます。電話番号や個別に伝えたい内容は、コーチへ直接ご連絡ください。</p>
   <nav class="audience-tabs" aria-label="回答する人">
     <button type="button" class="audience-tab active" data-audience="players" aria-pressed="true">⚽ 団員</button>
     <button type="button" class="audience-tab" data-audience="coaches" aria-pressed="false">🧑‍🏫 コーチ</button>
@@ -41,15 +42,17 @@
     <p id="shared-attendance-status" class="small-note" role="status">クラウドの出欠を読み込み中です。</p>
 
     <details class="attendance-input-guide">
-      <summary>入力で迷ったとき</summary>
+      <summary>出欠の入力・変更方法</summary>
       <ul>
-        <li>日程ごとに出欠を選び、「回答を保存」を押してください。・は未回答、「対象外」は入力不要です。</li>
-        <li>祝日は通常練習がお休みです。試合が入る場合に備えて出欠を確認します。予定が未定なら△を選び、決まったら変更してください。</li>
-        <li>まとめて回答する家族は、「予定の確認・追加」の中にある「家族を登録」から設定できます。</li>
+        <li>「出欠を入力する」を押して名前を選ぶか、出欠表で名前をタップしてください。日程ごとに ○ 参加・△ 未定・× 不参加 を選び、最後に「回答を保存」を押してください。</li>
+        <li>予定が変わったときは、同じ手順で回答を変更できます。表の「・」は未回答、「対象外」は回答不要です。</li>
+        <li>家族分は「家族まとめて入力」から、複数の日程を入力できます。初めて使うときは「予定の確認・追加」から「家族を登録」してください。</li>
+        <li>試合の遅刻・早退・送迎希望は「連絡事項（任意）」に入力できます。</li>
+        <li>「祝日・試合に備えた出欠確認」は、試合が入った場合の参加可否を確認するためのものです。</li>
       </ul>
     </details>
     <div id="board-summary-controls" hidden>
-      <p id="attendance-entry-help" class="board-summary-help"><span id="attendance-guide-name">お子さんの名前</span>をタップするか、赤い「<span id="attendance-guide-entry">出欠を入力する</span>」ボタンから名前を選んでください。家族分は「家族まとめて入力」を選べます。<br>遅刻・早退・送迎希望は「連絡事項（任意）」に入力できます。</p>
+      <p id="attendance-entry-help" class="board-summary-help"><span id="attendance-guide-name">お子さんの名前</span>をタップするか、「<span id="attendance-guide-entry">出欠を入力する</span>」ボタンから名前を選んでください。家族分は「家族まとめて入力」を選べます。<br>遅刻・早退・送迎希望は「連絡事項（任意）」に入力できます。</p>
       <p id="attendance-summary-help" class="board-summary-help" hidden>人数をタップすると出欠一覧が開きます。</p>
       <button type="button" id="toggle-board-summary" class="secondary-button" aria-expanded="false" aria-controls="response-list"><span id="board-summary-label">出欠集計を表示（練習・試合・行事・祝日）</span><span id="board-summary-arrow" aria-hidden="true">▾</span></button>
     </div>
