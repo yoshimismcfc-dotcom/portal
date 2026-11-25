@@ -366,6 +366,7 @@
   }
 
   function dayEvents(day){return day.practice.concat(day.activities,day.matches);}
+  function inputDayEvents(day){return day.matches.concat(day.practice,day.activities);}
 
   function matchContact(eventId,personId,group){
     group=group||audience;
@@ -1242,7 +1243,7 @@
   }
 
   function editableDayEvents(day,person,group,eventId){
-    return dayEvents(day).filter(function(event){
+    return inputDayEvents(day).filter(function(event){
       return (!eventId||event.id===eventId)&&!event.holidayReference&&!responseRestriction(event,person,day,group);
     });
   }
@@ -1663,7 +1664,7 @@
   }
 
   function renderFamilyBulk(entry){
-    entry.bulk.innerHTML=dayEvents(entry.day).filter(function(event){return !event.holidayReference;}).map(function(event){
+    entry.bulk.innerHTML=inputDayEvents(entry.day).filter(function(event){return !event.holidayReference;}).map(function(event){
       var candidates=familyBulkCandidates(entry,event.id);
       if(candidates.length<2)return "";
       var roles=new Set(candidates.map(function(item){return item.member.group;}));

@@ -284,6 +284,10 @@ preview.state.answers[coachMatchB.id] = { coaches: { [coach.id]: { value: "atten
 const coaches = [coach, secondCoach];
 assert.match(preview.dayHeading(coachDay, coaches), /のコーチの出欠集計。参加 1人、未定 0人、不参加 1人/);
 assert.match(preview.renderEntryDay(coachDay, secondCoach, true), /連絡事項（任意）.*name="message-coach-practice"/);
+assert.deepEqual(
+  [...preview.renderEntryDay(coachDay, secondCoach, true).matchAll(/name="answer-([^"]+)" value="attending"/g)].map(match => match[1]),
+  [coachMatchA.id, coachMatchB.id, coachPractice.id],
+);
 const practiceNoteForm = new FormData();
 practiceNoteForm.set("answer-coach-practice","attending");
 practiceNoteForm.set("contact-coach-practice","1");
