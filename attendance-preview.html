@@ -29,6 +29,7 @@
     <div class="section-heading"><div><h1 id="response-title">参加予定【団員用】</h1><p id="response-summary" hidden></p><p id="coach-roster-status" class="small-note" role="status" hidden></p><p id="calendar-sync-status" role="status"></p></div><div class="attendance-heading-actions"><span id="respondent-count" class="month-label"></span><button id="open-match-summary" class="secondary-button" type="button" aria-haspopup="dialog">試合の予定・出欠</button></div></div>
     <button type="button" id="entry-mode-button" class="primary-button" aria-haspopup="dialog" disabled>出欠を入力する</button>
     <button type="button" id="open-add-coach" class="secondary-button" aria-haspopup="dialog" hidden>名前がないコーチを追加</button>
+    <button id="export-csv" type="button" class="secondary-button" aria-haspopup="dialog">CSV出力</button>
     <p id="answer-status" class="attendance-save-status" role="status" hidden></p>
     <div id="coach-editor" class="coach-editor" hidden>
       <details id="coach-local-editor">
@@ -67,7 +68,7 @@
     <section class="panel event-panel" id="event-panel" aria-labelledby="schedule-title">
       <div class="schedule-heading">
         <h2 id="schedule-title">日付別の予定</h2>
-        <div class="event-tools"><button id="import-chouseisan" type="button" class="secondary-button" aria-haspopup="dialog">調整さんCSVを取り込む</button><button id="export-csv" type="button" class="secondary-button">CSV出力</button><button id="reset-demo" type="button" class="secondary-button reset-button" hidden>試作データをリセット</button></div>
+        <div class="event-tools"><button id="import-chouseisan" type="button" class="secondary-button" aria-haspopup="dialog">調整さんCSVを取り込む</button><button id="reset-demo" type="button" class="secondary-button reset-button" hidden>試作データをリセット</button></div>
       </div>
       <p class="small-note">予定名を押すと詳細を確認できます。新しい予定は、その日の「＋ 予定を追加」から登録できます。</p>
       <div class="schedule-actions">
