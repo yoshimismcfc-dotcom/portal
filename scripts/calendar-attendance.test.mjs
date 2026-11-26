@@ -130,7 +130,7 @@ vm.runInNewContext(previewSource.replace('document.addEventListener("DOMContentL
   todayISO = () => "2026-11-22";
   holidays["2026-11-23"] = "勤労感謝の日";
   globalThis.preview = {
-    state, familyChanged, familyUpdates, familyKey, editableDayEvents, calendarAttendanceSelection, getBoardEvents, groupBoardDays, countAnswers, renderEntryDay, applySharedAnswers, eligibility, matchRestriction,
+    state, cancelledMatchPracticeUpdates, familyChanged, familyUpdates, familyKey, editableDayEvents, calendarAttendanceSelection, getBoardEvents, groupBoardDays, countAnswers, renderEntryDay, applySharedAnswers, eligibility, matchRestriction,
     matchAttendanceTable, readEntryUpdates, eventListStatus,
     scheduleSummaryRow, scheduleCellSummary, matchCategories, dayHeading, compactCountMarks, scheduleDays, dayButton, detailChoices, attendanceEventTitle,
     setSeason(period) { seasonPeriod = validSeasonPeriod(period); },
@@ -573,6 +573,32 @@ const familyPractice = {id:"family-training",date:"2026-11-28",kind:"practice"};
 const olderGame = {id:"family-u12",date:familyPractice.date,kind:"match",targetGrades:["6年"]};
 const youngerGame = {id:"family-u8",date:familyPractice.date,kind:"match",targetGrades:["2年"]};
 const familyDay = {date:familyPractice.date,practice:[familyPractice],matches:[olderGame,youngerGame],activities:[]};
+const practiceAfterCancellation = {...familyDay,matches:[youngerGame]};
+preview.state.answers[olderGame.id] = {
+  players:{[older.id]:{value:"maybe",contact:{late:true}}},
+  coaches:{[parent.id]:{value:"attending"}},
+};
+const transferRoster = {players:[older,sibling],coaches:[parent]};
+const transfers = (day, removed, hasAnswer = () => false) =>
+  Array.from(preview.cancelledMatchPracticeUpdates([day],removed,transferRoster,hasAnswer), job => ({...job}));
+assert.deepEqual(transfers(practiceAfterCancellation,[olderGame]), [
+  {group:"players",personId:older.id,id:familyPractice.id,value:"maybe"},
+  {group:"coaches",personId:parent.id,id:familyPractice.id,value:"attending"},
+]);
+assert.deepEqual(transfers(practiceAfterCancellation,[olderGame],(_event,person) => person===older)
+  .map(job => job.personId), [parent.id]);
+const otherActive = {...olderGame,id:"other-active"};
+assert.deepEqual(transfers({...familyDay,matches:[otherActive]},[olderGame]).map(job => job.personId), [parent.id]);
+assert.deepEqual(transfers({...practiceAfterCancellation,practice:[]},[olderGame]), []);
+preview.state.answers[youngerGame.id] = {coaches:{[parent.id]:{value:"attending"}}};
+assert.deepEqual(transfers(practiceAfterCancellation,[olderGame]).map(job => job.personId), [older.id]);
+const otherRemoved = {...olderGame,id:"other-removed"};
+preview.state.answers[otherRemoved.id] = {players:{[older.id]:{value:"absent"}}};
+assert.deepEqual(transfers({...familyDay,matches:[]},[olderGame,otherRemoved]).map(job => job.personId), [parent.id]);
+delete preview.state.answers[olderGame.id];
+delete preview.state.answers[youngerGame.id];
+delete preview.state.answers[otherRemoved.id];
+
 const familySection = values => ({querySelectorAll:()=>Object.entries(values).map(([key,value])=>({
   dataset:{familyField:key},value
 }))});

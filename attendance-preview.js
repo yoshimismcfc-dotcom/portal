@@ -18,6 +18,7 @@
   if(!deviceMode){state.answers={};state.matchNotes={};state.notes={};state.coaches=[];state.coachLinks={};}
   var weekendPracticeDates=new Set(), calendarMatchesChecked=false;
   var seasonPeriod=null, seasonReady=false, savingSeason=false, calendarSyncResult=null;
+  var practiceTransfers=new Set(), transferringPractice=false;
   var SEASON_CACHE="yoshimi_attendance_season_period";
   try{seasonPeriod=validSeasonPeriod(JSON.parse(localStorage.getItem(SEASON_CACHE)||"null"));}catch(error){}
   var eventVisibility=new Map(),visibilityReady=false,visibilitySaving=false,undoVisibility=null;
@@ -430,6 +431,66 @@
     group=group||audience;
     return eligibility(event,person,group)||
       (group==="players"&&event.kind!=="match"&&event.kind!=="activity"&&day?.matches.some(function(match){return !eligibility(match,person,group);})?"試合優先":"");
+  }
+
+  function cancelledMatchPracticeUpdates(days, cancelled, roster, hasPracticeAnswer){
+    var matchesByDate=new Map();
+    cancelled.forEach(function(match){
+      if(!matchesByDate.has(match.date))matchesByDate.set(match.date,[]);
+      matchesByDate.get(match.date).push(match);
+    });
+    return days.flatMap(function(day){
+      var matches=matchesByDate.get(day.date);
+      if(!matches||day.practice.length!==1)return [];
+      var practice=day.practice[0];
+      return Object.entries(roster).flatMap(function([group,people]){
+        return people.flatMap(function(person){
+          if(hasPracticeAnswer(practice,person,group)||responseRestriction(practice,person,day,group)||
+            (group==="coaches"&&day.matches.some(function(match){return answerValue(match,person,group)==="attending";})))return [];
+          var values=new Set(matches.map(function(match){return answerValue(match,person,group);}).filter(Boolean));
+          if(values.size!==1)return [];
+          return [{group:group,personId:person.id,id:practice.id,value:values.values().next().value}];
+        });
+      });
+    });
+  }
+
+  async function transferCancelledMatchAnswers(){
+    if(transferringPractice||!sharedReady||!visibilityReady||!seasonReady||!recruitmentReady||
+      !calendarSyncResult?.saved||calendarSyncResult.failed.length)return;
+    var cancelled=state.events.filter(function(event){
+      return event.kind==="match"&&event.id.startsWith("calendar_")&&event.calendarInactive&&!manuallyExcluded(event);
+    });
+    if(!cancelled.length)return;
+    var baseline=sharedRows, sync=calendarSyncResult;
+    var jobs=cancelledMatchPracticeUpdates(groupBoardDays(getBoardEvents()),cancelled,
+      {players:members,coaches:getPeople("coaches")},function(event,person,group){
+        return baseline.has(sharedStore.key(event.id,group,person.id));
+      }).filter(function(job){
+        return !practiceTransfers.has(sharedStore.key(job.id,job.group,job.personId));
+      });
+    if(!jobs.length)return;
+    transferringPractice=true;
+    var saved=0,failed=0;
+    try{
+      for(var start=0;start<jobs.length&&sharedReady&&calendarSyncResult===sync;start+=8){
+        await Promise.all(jobs.slice(start,start+8).map(async function(job){
+          var key=sharedStore.key(job.id,job.group,job.personId);
+          practiceTransfers.add(key);
+          try{
+            if(!sharedRows.has(key)){
+              var conflicts=await sharedStore.save(job.group,job.personId,[{id:job.id,value:job.value}],undefined,baseline);
+              if(!conflicts.size)saved++;
+            }
+          }catch(error){failed++;}
+        }));
+      }
+    }finally{
+      transferringPractice=false;
+      if(failed)announceSave("練習の出欠 "+saved+"件を引き継ぎました。"+failed+"件は保存できなかったため、ページを開き直すと再試行します。");
+      else if(saved)announceSave("カレンダーから消えた試合の出欠を、同じ日の練習に "+saved+"件引き継ぎました。");
+      if(calendarSyncResult!==sync)void transferCancelledMatchAnswers();
+    }
   }
 
   function canAnswer(event,person,day){
@@ -1461,6 +1522,7 @@
   }
 
   function renderResponse(preserveScroll){
+    void transferCancelledMatchAnswers();
     if(calendarView){renderCalendarAttendance();return;}
     var panel=$("response-panel"),rows=$("response-list"),oldBoard=rows.querySelector(".attendance-board-scroll");
     var savedTop=preserveScroll&&oldBoard?oldBoard.scrollTop:0,savedLeft=preserveScroll&&oldBoard?oldBoard.scrollLeft:0;
@@ -2329,6 +2391,7 @@
       syncedCalendarEvents=linked;
       var saved=syncCalendarAttendance(linked,false,failed);
       calendarSyncResult={saved:saved,failed:failed};
+      practiceTransfers.clear();
       renderCalendarSyncStatus();
       renderHolidaySettings();renderEventList();renderResponse(true);
       refreshSharedMatchSummary();refreshCsvIfOpen();
