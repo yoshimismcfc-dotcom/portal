@@ -11,6 +11,7 @@
   <script src="firebase-config.js"></script>
   <link rel="stylesheet" href="common.css">
   <script src="common.js"></script>
+  <script src="staff-coach-roster.js"></script>
   <style>
     /* タブ */
     .staff-tab-bar{display:flex;gap:0;margin-bottom:20px;border-radius:var(--r8);overflow:hidden;border:1px solid var(--line-2)}
@@ -211,17 +212,30 @@ function renderCoachNote(note){
   }).join("");
 }
 
+var savingCoachRoster=false;
+async function changeCoachRoster(update){
+  if(savingCoachRoster)return false;
+  savingCoachRoster=true;
+  try{
+    await SMCCoachRoster.update(window.FIREBASE_DB,update);
+    return true;
+  }catch(error){
+    alert("コーチ担当を保存できませんでした。通信状況を確認して、もう一度お試しください。");
+    return false;
+  }finally{
+    savingCoachRoster=false;
+  }
+}
 function moveCoach(id,direction){
-  var from=_coachData.findIndex(function(s){return s.id===id;});
-  var to=from+direction;
-  if(from<0||to<0||to>=_coachData.length)return;
-  var reordered=_coachData.slice();
-  var moved=reordered[from];
-  reordered[from]=reordered[to];
-  reordered[to]=moved;
-  _coachData=reordered;
-  renderCoach();
-  dbSave("staff/coach",_coachData,KEY_C,null);
+  void changeCoachRoster(function(rows){
+    var from=rows.findIndex(function(row){return row.id===id;});
+    var to=from+direction;
+    if(from<0||to<0||to>=rows.length)return;
+    var reordered=rows.slice();
+    reordered[from]=rows[to];
+    reordered[to]=rows[from];
+    return reordered;
+  });
 }
 
 function openAdd(type){
@@ -249,7 +263,7 @@ function openEdit(type,id){
   showCoachQualification(type);
   document.getElementById("modal").classList.add("open");
 }
-function saveStaff(){
+async function saveStaff(){
   var type=document.getElementById("m-type").value;
   var role=document.getElementById("m-role").value.trim();
   if(!role){alert("役職・担当を入力してください");return;}
@@ -262,10 +276,12 @@ function saveStaff(){
   if(type==="coach"){
     entry.phone=document.getElementById("m-phone").value.trim();
     entry.qualifications=document.getElementById("m-qualifications").value.trim();
-    var idx=_coachData.findIndex(function(x){return x.id===entry.id;});
-    if(idx>=0) _coachData[idx]=entry; else _coachData.push(entry);
-    dbSave("staff/coach",_coachData,KEY_C,null);
-    renderCoach();
+    var editing=Boolean(editId);
+    if(!await changeCoachRoster(function(rows){
+      if(!editing)return rows.concat(entry);
+      if(!rows.some(function(row){return row.id===entry.id;}))return;
+      return rows.map(function(row){return row.id===entry.id?entry:row;});
+    }))return;
   }else{
     var idx=_parentData.findIndex(function(x){return x.id===entry.id;});
     if(idx>=0) _parentData[idx]=entry; else _parentData.push(entry);
@@ -274,12 +290,13 @@ function saveStaff(){
   }
   closeModal();
 }
-function deleteStaff(){
+async function deleteStaff(){
   if(!editId||!confirm("削除しますか？"))return;
   if(editType==="coach"){
-    _coachData=_coachData.filter(function(x){return x.id!==editId;});
-    dbSave("staff/coach",_coachData,KEY_C,null);
-    renderCoach();
+    var id=editId;
+    if(!await changeCoachRoster(function(rows){
+      return rows.filter(function(row){return row.id!==id;});
+    }))return;
   }else{
     _parentData=_parentData.filter(function(x){return x.id!==editId;});
     dbSave("staff/parent",_parentData,KEY_P,null);
@@ -292,9 +309,9 @@ function confirmDel(type,id){
   var s=data.find(function(x){return x.id===id;});
   if(!s||!confirm("「"+s.role+"："+s.name+"」を削除しますか？"))return;
   if(type==="coach"){
-    _coachData=_coachData.filter(function(x){return x.id!==id;});
-    dbSave("staff/coach",_coachData,KEY_C,null);
-    renderCoach();
+    void changeCoachRoster(function(rows){
+      return rows.filter(function(row){return row.id!==id;});
+    });
   }else{
     _parentData=_parentData.filter(function(x){return x.id!==id;});
     dbSave("staff/parent",_parentData,KEY_P,null);

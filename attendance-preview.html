@@ -12,6 +12,7 @@
   <script src="firebase-config.js"></script>
   <script src="calendar-attendance.js?v=20261122-girls2"></script>
   <script src="common.js"></script>
+  <script src="staff-coach-roster.js"></script>
 </head>
 <body class="attendance-preview-page">
 <header class="site-header"></header>
@@ -27,6 +28,7 @@
   <section class="panel response-panel" id="response-panel">
     <div class="section-heading"><div><h1 id="response-title">参加予定【団員用】</h1><p id="response-summary" hidden></p><p id="coach-roster-status" class="small-note" role="status" hidden></p><p id="calendar-sync-status" role="status"></p></div><div class="attendance-heading-actions"><span id="respondent-count" class="month-label"></span><button id="open-match-summary" class="secondary-button" type="button" aria-haspopup="dialog">試合の予定・出欠</button></div></div>
     <button type="button" id="entry-mode-button" class="primary-button" aria-haspopup="dialog" disabled>出欠を入力する</button>
+    <button type="button" id="open-add-coach" class="secondary-button" aria-haspopup="dialog" hidden>名前がないコーチを追加</button>
     <p id="answer-status" class="attendance-save-status" role="status" hidden></p>
     <div id="coach-editor" class="coach-editor" hidden>
       <details id="coach-local-editor">
@@ -166,6 +168,7 @@
     <div class="attendance-entry-scroll">
       <h2 id="attendance-entry-title" tabindex="-1" autofocus>出欠を入力</h2>
       <label for="entry-person">名前</label><select id="entry-person" required><option value="">名前を選択してください</option></select>
+      <button type="button" id="entry-add-coach" class="secondary-button" aria-haspopup="dialog" hidden>名前がない方はこちら</button>
       <div id="attendance-form-events" class="attendance-form-events"></div>
       <details id="entry-general-note" class="match-contact" hidden>
         <summary>全日程の備考 <span>任意</span></summary>
@@ -174,6 +177,18 @@
     </div>
     <p data-entry-status class="attendance-save-status" role="status"></p>
     <div class="dialog-actions"><button type="button" id="cancel-attendance" class="secondary-button">キャンセル</button><button type="submit" id="save-attendance" class="primary-button">回答を保存</button></div>
+  </form>
+</dialog>
+<dialog id="add-coach-dialog" class="event-dialog attendance-entry-dialog" aria-labelledby="add-coach-title">
+  <form id="add-coach-form">
+    <div class="attendance-entry-scroll">
+      <h2 id="add-coach-title">コーチの名前を追加</h2>
+      <p>名前は出欠一覧と担当フォルダの「コーチ担当」に表示されます。</p>
+      <label for="new-coach-name">名前</label>
+      <input type="text" id="new-coach-name" name="coachName" required maxlength="40" autocomplete="name">
+      <p id="add-coach-status" role="status"></p>
+    </div>
+    <div class="dialog-actions"><button type="button" id="close-add-coach" class="secondary-button">キャンセル</button><button type="submit" id="save-new-coach" class="primary-button">追加する</button></div>
   </form>
 </dialog>
 <dialog id="family-choice-dialog" class="event-dialog attendance-entry-dialog" aria-labelledby="family-choice-title">
@@ -312,6 +327,6 @@
     <div class="dialog-actions"><button type="button" id="cancel-event" class="secondary-button">キャンセル</button><button type="submit" class="primary-button">予定を追加</button></div>
   </form>
 </dialog>
-<script src="attendance-preview.js?v=20261127-cancelled-match-practice"></script>
+<script src="attendance-preview.js?v=20261127-coach-registration"></script>
 </body>
 </html>
