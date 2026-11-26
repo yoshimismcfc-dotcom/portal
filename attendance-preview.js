@@ -316,6 +316,44 @@
     if(changed)saveState();
   }
 
+  function openCoachRegistration(){
+    $("add-coach-form").reset();
+    $("add-coach-status").textContent="";
+    $("add-coach-dialog").showModal();
+    $("new-coach-name").focus();
+  }
+
+  async function saveCoachRegistration(event){
+    event.preventDefault();
+    var form=event.currentTarget, input=$("new-coach-name"), status=$("add-coach-status");
+    var name=input.value.trim().replace(/\s*コーチ$/,"").trim();
+    if(!name||/[、，,\r\n]/.test(name)||!namesFromStaff([{name:name}]).length){
+      status.textContent="登録するコーチ1人の名前を入力してください。";
+      return;
+    }
+    var controls=Array.from(form.elements);
+    if($("save-new-coach").disabled)return;
+    controls.forEach(function(control){control.disabled=true;});
+    status.textContent="担当フォルダに保存しています…";
+    try{
+      var result=await window.SMCCoachRoster.add(window.FIREBASE_DB,name);
+      staffCoaches=namesFromStaff(result.rows);
+      staffCoachesReady=true;
+      linkLocalCoachAnswers();
+      coachRosterStatus="";
+      var coach=getPeople("coaches").find(function(person){return coachNameKey(person.name)===coachNameKey(name);});
+      if(!coach)throw new Error("coach-not-found");
+      renderResponse(true);
+      $("add-coach-dialog").close();
+      announceSave(result.saved?"コーチ名を出欠一覧と担当フォルダに追加しました。":"同じ名前が登録済みです。登録済みの名前で出欠を入力できます。");
+      if(sharedReady)openAttendanceForm(coach.id);
+    }catch(error){
+      status.textContent="担当フォルダに保存できませんでした。通信状態を確認して、もう一度お試しください。";
+    }finally{
+      controls.forEach(function(control){control.disabled=false;});
+    }
+  }
+
   function readStaffCoaches(){
     if(coachRosterStarted)return;
     coachRosterStarted=true;
@@ -1537,6 +1575,7 @@
     // Do not silently disable the input button when a session link is missing.
     // Clicking it explains how to reconnect without overwriting old answers.
     $("entry-mode-button").disabled=!getPeople().length||!sharedReady;
+    $("open-add-coach").hidden=audience!=="coaches";
     $("coach-roster-status").textContent=coachRosterStatus;
     $("coach-roster-status").hidden=audience!=="coaches";
     $("coach-editor").hidden=!deviceMode||audience!=="coaches";
@@ -2037,7 +2076,7 @@
     }).join("");
     select.value=personId||"";
     renderAttendanceFormEvents();
-    $("attendance-dialog").showModal();
+    if(!$("attendance-dialog").open)$("attendance-dialog").showModal();
     $("attendance-form-events").parentElement.scrollTop=0;
   }
 
@@ -2047,6 +2086,7 @@
     resetEntrySave($("attendance-form"));
     var person=getPeople().find(function(item){return item.id===$("entry-person").value;});
     $("save-attendance").disabled=!person;
+    $("entry-add-coach").hidden=audience!=="coaches"||Boolean(person);
     $("entry-general-note").hidden=!person;
     $("entry-comment").value=person?(state.notes[audience]?.[person.id]||""):"";
     if(!person){root.replaceChildren();return;}
@@ -2687,6 +2727,12 @@
       $("grade-filters").querySelector('[data-grade="'+CSS.escape(selectedGrade)+'"]')?.focus({preventScroll:true});
     });
     $("open-match-summary").addEventListener("click",openMatchSummary);
+    $("open-add-coach").addEventListener("click",openCoachRegistration);
+    $("entry-add-coach").addEventListener("click",openCoachRegistration);
+    $("close-add-coach").addEventListener("click",function(){$("add-coach-dialog").close();});
+    $("add-coach-dialog").addEventListener("cancel",function(event){if($("save-new-coach").disabled)event.preventDefault();});
+    $("add-coach-form").addEventListener("submit",saveCoachRegistration);
+
     document.querySelectorAll(".audience-tab").forEach(function(btn){btn.addEventListener("click",function(){audience=btn.dataset.audience;if(audience==="coaches")readStaffCoaches();selectedGrade="すべて";document.querySelectorAll(".audience-tab").forEach(function(tab){var active=tab===btn;tab.classList.toggle("active",active);tab.setAttribute("aria-pressed",active?"true":"false");});render();});});
     $("cancel-event").addEventListener("click",function(){$("event-dialog").close();});$("event-form").addEventListener("submit",function(e){e.preventDefault();var title=$("event-title").value.trim();if(!title)return;if(selectedDate<todayISO()||selectedDate>maxDate()||!isDefaultDay(selectedDate)){alert("今日から2か月先までの対象日を一覧から選んでください。");return;}var kind=$("event-kind").value,dayId=defaultEvent(selectedDate).id;
       var reuseDay=kind==="practice"&&!eventForDate(selectedDate).some(function(event){return event.id===dayId||event.kind==="practice";});
