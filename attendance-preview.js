@@ -11,6 +11,8 @@
     id:params.get("calendar-attendance"),date:params.get("date")||"",
     parentHeader:window.parent!==window&&params.get("calendar-dialog")==="1"
   }:null;
+  var sharedMatchLink=params.has("match")?{id:params.get("match"),date:params.get("date")||""}:null;
+  var refreshLineComposer=null;
   var syncedCalendarEvents=[];
   var state=loadState(),members=[],rosterState="読み込み中",holidays={},audience="players",selectedDate="",selectedEventId="",selectedGrade="すべて",transposeBoard=false;
   var staffCoaches=[],staffCoachesReady=false,coachRosterStarted=false,coachRosterStatus="コーチ担当を読み込み中…";
@@ -1301,7 +1303,11 @@
     var day=groupBoardDays(getBoardEvents().filter(function(event){return event.date===detail.date;}))[0];
     var events=day?detailChoices(day,detail.kind,detail.category):[];
     if(detail.eventId)events=events.filter(function(event){return event.id===detail.eventId;});
-    if(!events.length){$("match-detail-dialog").close();return;}
+    if(!events.length){
+      if(detail.sharedLink)showSharedMatchStatus("この試合は削除されたか、出欠の受付を終了しました。");
+      $("match-detail-dialog").close();
+      return;
+    }
     var event=events.length===1?events[0]:null;
     var match=event?.kind==="match";
     $("match-detail-date").textContent=dateLabel(detail.date);
@@ -1559,7 +1565,68 @@
     }
   }
 
+  function openLineInvitation(){
+    const dialog=$("line-invite-dialog");
+    if(!refreshLineComposer)refreshLineComposer=window.SMCAttendanceLineInvite.setup(dialog,dateLabel,location.href);
+    refreshLineInvitation();
+    dialog.showModal();
+  }
+
+  function refreshLineInvitation(){
+    if(!refreshLineComposer)return;
+    if(!calendarMatchesChecked||!visibilityReady||!seasonReady||!calendarSyncResult?.saved){
+      refreshLineComposer(null,"受付中の試合を確認しています。読み込めない場合はページを開き直してください。");
+      return;
+    }
+    const failed=calendarSyncResult.failed;
+    const entries=getBoardEvents().filter(event=>event.kind==="match"&&event.id.startsWith("calendar_")&&
+      !failed.includes(event.calendarLabel||event.category)).map(event=>{
+        const description=String(event.description||"").replace(/<[^>]*>/g," ").normalize("NFKC");
+        const meeting=description.match(/(?:【集合(?:時間)?】|\b集合(?:時間)?\s*[:：]|集合(?:時間)?\s*[:：]?)\s*(\d{1,2}[:時]\d{2}(?:分)?)/)?.[1]||"";
+        return {id:event.id,date:event.date,category:matchCategory(event),title:event.title,startTime:event.startTime,place:event.place,meeting};
+      });
+    refreshLineComposer(entries,failed.length?"一部のカレンダーを取得できませんでした。確認できた試合を表示しています。":
+      entries.length?"":"出欠受付中の試合がありません。");
+  }
+
+  function showSharedMatchStatus(message){
+    const status=$("shared-match-link-status");
+    status.hidden=false;
+    status.querySelector("p").textContent=message;
+  }
+
+  function openSharedMatch(){
+    if(!sharedMatchLink||calendarView)return;
+    const link=sharedMatchLink;
+    if(!link.id.startsWith("calendar_")||!/^\d{4}-\d{2}-\d{2}$/.test(link.date)||link.date<todayISO()||link.date>maxDate()){
+      showSharedMatchStatus("この試合の出欠受付は終了したか、リンクが正しくありません。");
+      sharedMatchLink=null;
+      return;
+    }
+    if(!calendarMatchesChecked||!calendarSyncResult?.saved||!visibilityReady||!seasonReady||
+      !sharedReady||!recruitmentReady||!rosterState.startsWith("名簿から")){
+      if($("shared-match-link-status").hidden)showSharedMatchStatus("試合の出欠を読み込んでいます…");
+      return;
+    }
+    const match=getBoardEvents().find(event=>event.kind==="match"&&event.id===link.id&&event.date===link.date);
+    const failed=calendarSyncResult.failed;
+    if(failed.length&&(!match||failed.includes(match.calendarLabel||match.category))){
+      showSharedMatchStatus("カレンダーに接続できず、試合の受付状況を確認できませんでした。ページを開き直してください。");
+      return;
+    }
+    sharedMatchLink=null;
+    if(!match){
+      showSharedMatchStatus("この試合は削除されたか、出欠の受付を終了しました。");
+      return;
+    }
+    $("shared-match-link-status").hidden=true;
+    openAttendanceDetail(match.date,"match","",match.id,null,"players");
+    if(activeAttendanceDetail)activeAttendanceDetail.sharedLink=true;
+  }
+
   function renderResponse(preserveScroll){
+    refreshLineInvitation();
+    openSharedMatch();
     void transferCancelledMatchAnswers();
     if(calendarView){renderCalendarAttendance();return;}
     var panel=$("response-panel"),rows=$("response-list"),oldBoard=rows.querySelector(".attendance-board-scroll");
@@ -2333,7 +2400,8 @@
     matches.forEach(function(match){
       if(calendarMatchUnavailable(match))return;
       var previous=events.get(match.id);
-      if(!restore&&!previous&&match.kind==="match"&&!match.seasonOnly&&!isAutomaticMatch(match))return;
+      var directlyLinked=sharedMatchLink?.id===match.id&&sharedMatchLink.date===match.date;
+      if(!restore&&!previous&&match.kind==="match"&&!match.seasonOnly&&!isAutomaticMatch(match)&&!directlyLinked)return;
       var hidden=previous?.hidden&&!restore;
       if(previous&&!previous.calendarInactive&&Boolean(previous.hidden)===Boolean(hidden)&&
         ["date","startTime","endTime","descriptionTime","description","title","place","category","calendarLabel","calendarUrl","kind","seasonOnly"].every(function(key){return previous[key]===match[key];})&&
@@ -2571,6 +2639,7 @@
       renderCalendarAttendance();
       return;
     }
+    $("open-line-invite").addEventListener("click",openLineInvitation);
     updateSeasonInputs();
     setupBoardViewport();
     $("toggle-board-summary").addEventListener("click",toggleBoardSummary);
@@ -2740,6 +2809,10 @@
     $("entry-mode-button").addEventListener("click",function(){if(!requireSharedConnection())return;if(getPeople().length){openAttendanceForm("");return;}if(audience==="coaches"&&!state.coaches.length){$("coach-local-editor").open=true;$("coach-editor").scrollIntoView({behavior:"smooth",block:"center"});$("coach-name-input").focus({preventScroll:true});return;}});$("transpose-board").addEventListener("click",function(){transposeBoard=!transposeBoard;renderResponse();});$("cancel-attendance").addEventListener("click",function(){$("attendance-dialog").close();});$("attendance-form").addEventListener("submit",saveAttendanceForm);$("export-csv").addEventListener("click",openCsv);$("import-chouseisan").addEventListener("click",openChouseisan);$("reset-demo").addEventListener("click",function(){if(!confirm("この端末に保存した試作の予定・回答・コーチ名をすべて削除しますか？団員名簿は変更されません。"))return;state={events:[],archive:[],coaches:[],coachLinks:{},answers:{},notes:{},matchNotes:{}};selectedEventId="";selectedDate="";localStorage.removeItem(STORAGE_KEY);render();});$("add-coach").addEventListener("click",function(){var input=$("coach-name-input"),name=input.value.trim();if(!name){input.focus();return;}if(getPeople().some(function(c){return coachNameKey(c.name)===coachNameKey(name);})){alert("同じ名前がすでに登録されています。");return;}state.coaches.push({id:"coach_"+Date.now().toString(36)+"_"+Math.random().toString(36).slice(2,6),name:name});input.value="";saveState();render();});
     $("archive-list").addEventListener("click",handleEventListClick);
     render();loadHolidays();
+    if(params.has("line-invite")&&!params.has("match"))openLineInvitation();
+    if(sharedMatchLink)window.setTimeout(function(){
+      if(sharedMatchLink)showSharedMatchStatus("試合の確認に時間がかかっています。通信状況を確認して、ページを開き直してください。");
+    },12000);
   }
   document.addEventListener("DOMContentLoaded",init);
 })();

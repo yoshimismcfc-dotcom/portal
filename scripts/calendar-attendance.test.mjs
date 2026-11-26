@@ -491,20 +491,42 @@ const calendarHtml = fs.readFileSync(path.join(root, "calendar.html"), "utf8");
 const attendanceHtml = fs.readFileSync(path.join(root, "attendance.html"), "utf8");
 assert.ok(commonSource.includes("const UPCOMING_DAYS = 90"), "カレンダーの取得期間が90日になっていません");
 assert.ok(commonSource.includes("end.setDate(end.getDate() + UPCOMING_DAYS)"), "90日設定がAPI取得期間へ使われていません");
-assert.ok(commonSource.includes('href="attendance.html#match-attendance"'), "カレンダーから参加案内への入口がありません");
 assert.ok(commonSource.includes("if (!isCalendarPage) return;"), "出欠ページとカレンダーの表示分岐がありません");
-assert.ok(attendanceHtml.includes('id="match-attendance"'), "出欠ページに試合参加案内の本体がありません");
-assert.ok(attendanceHtml.includes('id="calendar-attendance-copy"'), "出欠ページにLINE一括コピーボタンがありません");
-assert.ok(attendanceHtml.includes('id="calendar-attendance-category"'), "カテゴリー別の一括選択がありません");
-assert.ok(attendanceHtml.includes('id="calendar-attendance-select-all"'), "全選択ボタンがありません");
-assert.ok(attendanceHtml.includes('id="calendar-attendance-clear"'), "選択解除ボタンがありません");
-assert.ok(commonSource.includes("selectedAttendanceKeys"), "選択した試合だけをコピーする処理がありません");
-assert.ok(commonSource.includes("selectedEvents"), "LINE文生成へ選択結果を反映していません");
-assert.ok(commonSource.includes("category.style.backgroundColor"), "カテゴリー色を画面へ反映していません");
-assert.ok(attendanceHtml.includes('src="calendar-attendance.js"'), "出欠ページで調整さんURLの安全な抽出処理を読み込んでいません");
-assert.equal(calendarHtml.includes('id="calendar-attendance-copy"'), false, "カレンダーHTMLに管理用のコピーボタンを重複配置しないでください");
-
-console.log("OK: 調整さんURLの安全な抽出、試合・カテゴリー選択、カテゴリー色、LINE案内文、画面の役割分担を検査しました。");
+const inviteSource = fs.readFileSync(path.join(root, "attendance-line-invite.js"), "utf8");
+const inviteContext = {URL,URLSearchParams};
+vm.runInNewContext(inviteSource,inviteContext);
+const invites = inviteContext.SMCAttendanceLineInvite;
+const inviteFixtures = [
+  {id:"calendar_same%2Fsecond",date:"2026-11-28",category:"U8",title:"同日の後の試合",startTime:"12:00"},
+  {id:"calendar_first",date:"2026-11-27",category:"U12",title:"前日の試合",meeting:"08:00",place:"会場"},
+  {id:"calendar_same%2Ffirst",date:"2026-11-28",category:"U8",title:"同日の先の試合",startTime:"09:00"},
+];
+const inviteBase = "https://example.test/portal/attendance-preview.html?line-invite=1";
+const copied = invites.buildMessage(inviteFixtures,inviteBase,String);
+assert(copied.indexOf("前日の試合")<copied.indexOf("同日の先の試合"));
+assert(copied.indexOf("同日の先の試合")<copied.indexOf("同日の後の試合"));
+assert.match(copied,/集合 08:00\n会場 会場/);
+assert.doesNotMatch(copied,/chouseisan\.com|調整さん/);
+assert.equal((copied.match(/お子さんの名前/g)||[]).length,1);
+for(const event of inviteFixtures){
+  const link=new URL(invites.matchUrl(event,inviteBase));
+  assert.equal(link.pathname,"/portal/attendance-preview.html");
+  assert.equal(link.searchParams.get("match"),event.id);
+  assert.equal(link.searchParams.get("date"),event.date);
+  assert(!link.searchParams.has("line-invite"));
+  assert(copied.includes(link.href));
+}
+assert(commonSource.includes('href="attendance-preview.html?line-invite=1"'));
+assert(attendanceHtml.includes('id="match-attendance"'));
+assert(attendanceHtml.includes('href="attendance-preview.html?line-invite=1"'));
+assert(!attendanceHtml.includes('id="calendar-attendance-copy"'));
+assert(!calendarHtml.includes('id="line-invite-copy"'));
+const previewHtml = fs.readFileSync(path.join(root, "attendance-preview.html"), "utf8");
+assert(previewHtml.includes('id="line-invite-copy"'));
+assert(previewHtml.includes('id="line-invite-category"'));
+assert(previewHtml.includes('id="export-csv"'));
+assert(previewSource.includes('openAttendanceDetail(match.date,"match","",match.id,null,"players")'));
+console.log("OK: 試合順・カテゴリー・保護者案内の試合別URLとCSV出力を検査しました。");
 
 // The year-end interval crosses into January and uses saved calendar IDs for replies.
 preview.setSeason({ start:"2026-12-28", end:"2027-01-07" });
