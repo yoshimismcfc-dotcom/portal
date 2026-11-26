@@ -12,30 +12,6 @@
   <link rel="stylesheet" href="common.css">
   <script src="calendar-attendance.js"></script>
   <script src="common.js"></script>
-  <style>
-    .attend-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:18px}
-    .attend-card{
-      background:var(--surface-lt);border-radius:var(--r16);border:2px solid var(--line-2);
-      padding:18px 10px;display:flex;flex-direction:column;gap:10px;
-      box-shadow:var(--shadow);text-align:center;transition:.18s;
-    }
-    .attend-card:hover{border-color:var(--cyan);box-shadow:var(--glow-c),var(--shadow)}
-    .attend-card.coach-card{border-color:rgba(0,212,255,.4)}
-    .attend-card.coach-card:hover{border-color:var(--orange);box-shadow:var(--glow-o),var(--shadow)}
-    .attend-card .card-emoji{font-size:2rem;filter:drop-shadow(0 0 8px rgba(255,107,43,.4))}
-    .attend-card .card-title{font-size:1rem;font-weight:900;color:#ffffff}
-    .attend-card .card-subtitle{font-size:.72rem;color:#a8d4f0;margin-top:2px;line-height:1.45}
-    .attend-card .btn{width:100%;min-height:44px;padding:10px 6px;font-size:.78rem;line-height:1.35;white-space:normal;word-break:keep-all}
-    
-    @media(max-width:380px){
-      .attend-grid{gap:8px}
-      .attend-card{padding:15px 8px;border-radius:var(--r12)}
-      .attend-card .card-emoji{font-size:1.75rem}
-      .attend-card .card-title{font-size:.92rem}
-      .attend-card .card-subtitle{font-size:.66rem}
-      .attend-card .btn{font-size:.72rem;padding:9px 4px}
-    }
-  </style>
 </head>
 <body>
 <header class="site-header"></header>
@@ -64,30 +40,7 @@
     <div class="alert-body" id="auto-heat-body"></div>
   </div>
 
-  <div class="attend-grid">
-    <!-- 団員 -->
-    <div class="attend-card">
-      <div class="card-emoji">⚽</div>
-      <div><div class="card-title">団員</div>
-        <div class="card-subtitle">練習・試合の出欠はこちら</div></div>
-      <a class="btn btn-primary btn-lg"
-         href="https://chouseisan.com/s?h=04a01b20cc2b4a38b3e1f4aa93d1d06c"
-         target="_blank" rel="noopener" style="text-align:center">
-        📅 回答する（団員）
-      </a>
-    </div>
-    <!-- コーチ -->
-    <div class="attend-card coach-card">
-      <div class="card-emoji">🧑‍🏫</div>
-      <div><div class="card-title">コーチ</div>
-        <div class="card-subtitle">練習参加・試合帯同の可否</div></div>
-      <a class="btn btn-cyan btn-lg"
-         href="https://chouseisan.com/s?h=20c37e0538dd4feb8d91d8e31be23ad3"
-         target="_blank" rel="noopener" style="text-align:center">
-        📅 回答する（コーチ）
-      </a>
-    </div>
-  </div>
+  <p><a class="btn btn-primary" href="attendance-preview.html">📅 出欠入力・確認を開く</a></p>
 
   <section class="calendar-attendance attendance-page-panel" id="match-attendance" aria-labelledby="calendar-attendance-title">
     <div class="calendar-attendance-head">
