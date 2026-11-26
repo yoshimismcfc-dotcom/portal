@@ -708,10 +708,9 @@
 function enhanceCalendarUpcomingAgenda() {
     const calendarFrame = document.getElementById("gcal-iframe");
     const calendarWrap = calendarFrame?.closest(".gcal-wrap");
-    const attendancePage = document.getElementById("match-attendance");
     const matchPicker = document.getElementById("calendar-match-dialog");
     const isCalendarPage = Boolean(calendarFrame && calendarWrap);
-    if ((!isCalendarPage && !attendancePage && !matchPicker) || (isCalendarPage && document.getElementById("calendar-upcoming-agenda"))) return;
+    if ((!isCalendarPage && !matchPicker) || (isCalendarPage && document.getElementById("calendar-upcoming-agenda"))) return;
 
     const PUBLIC_CALENDAR_KEY = ["AIzaSyDRH2RymQBOFCcXIDDjJc", "EbBdyuVmfXLnQ"].join("");
     const CACHE_KEY = "smc-calendar-upcoming-v8";
@@ -757,7 +756,7 @@ function enhanceCalendarUpcomingAgenda() {
       return externalDetailLink(place, href);
     }
 
-    if (matchPicker && !isCalendarPage && !attendancePage) {
+    if (matchPicker && !isCalendarPage) {
       matchPicker.dataset.calendarReady = "true";
       matchPicker.addEventListener("smc-calendar-request", async () => {
         const start = new Date();
@@ -1193,11 +1192,11 @@ function enhanceCalendarUpcomingAgenda() {
           <div class="calendar-upcoming-skeleton"></div>
         </div>
         <p class="calendar-upcoming-note">Googleカレンダーの今後${UPCOMING_DAYS}日間を日付順に表示します。予定をタップするとGoogleカレンダーで詳細を確認できます。</p>
-        <a class="calendar-attendance-gateway" id="calendar-attendance-gateway" href="attendance.html#match-attendance" hidden>
+        <a class="calendar-attendance-gateway" id="calendar-attendance-gateway" href="attendance-preview.html?line-invite=1">
           <span class="calendar-attendance-gateway-icon" aria-hidden="true">📣</span>
           <span>
-            <span class="calendar-attendance-gateway-title">出欠確認・参加案内</span>
-            <span class="calendar-attendance-gateway-help" id="calendar-attendance-gateway-count"></span>
+            <span class="calendar-attendance-gateway-title">保護者向け・試合参加のご案内</span>
+            <span class="calendar-attendance-gateway-help">試合を選んでLINE案内文を作成できます</span>
           </span>
           <span class="calendar-attendance-gateway-arrow">案内を開く ›</span>
         </a>
@@ -1208,24 +1207,9 @@ function enhanceCalendarUpcomingAgenda() {
     const list = section?.querySelector("#calendar-upcoming-list");
     const badge = section?.querySelector("#calendar-upcoming-badge");
     const refreshButton = section?.querySelector("#calendar-upcoming-refresh");
-    const attendanceGateway = section?.querySelector("#calendar-attendance-gateway");
-    const attendanceGatewayCount = section?.querySelector("#calendar-attendance-gateway-count");
-    const attendanceSection = attendancePage;
-    const attendanceList = attendancePage?.querySelector("#calendar-attendance-list");
-    const attendanceCount = attendancePage?.querySelector("#calendar-attendance-count");
-    const attendanceCopy = attendancePage?.querySelector("#calendar-attendance-copy");
-    const attendanceStatus = attendancePage?.querySelector("#calendar-attendance-status");
-    const attendanceRefresh = attendancePage?.querySelector("#calendar-attendance-refresh");
-    const attendanceCategory = attendancePage?.querySelector("#calendar-attendance-category");
-    const attendanceSelectAll = attendancePage?.querySelector("#calendar-attendance-select-all");
-    const attendanceClear = attendancePage?.querySelector("#calendar-attendance-clear");
-    const attendanceSelectionSummary = attendancePage?.querySelector("#calendar-attendance-selection-summary");
     const days = ["日", "月", "火", "水", "木", "金", "土"];
     let requestInFlight = false;
     let lastLoadedAt = 0;
-    let attendanceEntries = [];
-    let selectedAttendanceKeys = new Set();
-    let attendanceSelectionTouched = false;
 
     function parseStart(event) {
       if (event.allDay) {
@@ -1277,163 +1261,7 @@ function enhanceCalendarUpcomingAgenda() {
       target.replaceChildren(dot, text);
     }
 
-    function updateAttendanceSelection() {
-      if (!attendanceList || !attendanceCopy || !attendanceSelectionSummary) return;
-      attendanceList.querySelectorAll("[data-attendance-key]").forEach((item) => {
-        const selected = selectedAttendanceKeys.has(item.dataset.attendanceKey);
-        item.classList.toggle("is-selected", selected);
-        const checkbox = item.querySelector(".calendar-attendance-check");
-        if (checkbox) checkbox.checked = selected;
-      });
-      const selectedCount = attendanceEntries.filter((entry) => selectedAttendanceKeys.has(entry.key)).length;
-      attendanceCopy.disabled = selectedCount === 0;
-      attendanceCopy.textContent = selectedCount
-        ? `📋 選択した${selectedCount}件をLINE文にコピー`
-        : "📋 配信する試合を選択してください";
-      attendanceSelectionSummary.textContent = `${selectedCount}件選択中／全${attendanceEntries.length}件`;
-    }
-
-    function selectAttendanceEntries(category) {
-      attendanceSelectionTouched = true;
-      selectedAttendanceKeys.clear();
-      attendanceEntries.forEach((entry) => {
-        if (category === "__all" || entry.category === category) selectedAttendanceKeys.add(entry.key);
-      });
-      if (attendanceStatus) attendanceStatus.textContent = "";
-      updateAttendanceSelection();
-    }
-
-    function renderAttendance(events) {
-      const helper = window.SMCCalendarAttendance;
-      const entries = helper ? helper.normalizeEntries(events) : [];
-      if (attendanceGateway) {
-        attendanceGateway.hidden = entries.length === 0;
-        if (entries.length) attendanceGatewayCount.textContent = `調整さんが登録された試合が${entries.length}件あります`;
-      }
-      if (!attendanceSection || !attendanceList || !attendanceCount || !attendanceCopy || !attendanceStatus || !attendanceCategory || !attendanceSelectAll || !attendanceClear || !attendanceSelectionSummary) return;
-
-      attendanceEntries = entries;
-      const validKeys = new Set(entries.map((entry) => entry.key));
-      selectedAttendanceKeys = attendanceSelectionTouched
-        ? new Set(Array.from(selectedAttendanceKeys).filter((key) => validKeys.has(key)))
-        : new Set(entries.map((entry) => entry.key));
-      attendanceList.replaceChildren();
-      attendanceStatus.textContent = "";
-      attendanceCount.textContent = `${entries.length}件`;
-
-      attendanceCategory.replaceChildren();
-      const promptOption = document.createElement("option");
-      promptOption.value = "";
-      promptOption.textContent = "カテゴリーを選んでください";
-      attendanceCategory.appendChild(promptOption);
-      Array.from(new Set(entries.map((entry) => entry.category))).sort((left, right) => left.localeCompare(right, "ja")).forEach((category) => {
-        const option = document.createElement("option");
-        option.value = category;
-        option.textContent = `${category}だけ選択`;
-        attendanceCategory.appendChild(option);
-      });
-      attendanceCategory.disabled = entries.length === 0;
-      attendanceSelectAll.disabled = entries.length === 0;
-      attendanceClear.disabled = entries.length === 0;
-
-      attendanceCategory.onchange = function(){
-        if (!attendanceCategory.value) return;
-        selectAttendanceEntries(attendanceCategory.value);
-        attendanceCategory.value = "";
-      };
-      attendanceSelectAll.onclick = function(){ selectAttendanceEntries("__all"); };
-      attendanceClear.onclick = function(){ selectAttendanceEntries("__none"); };
-
-      if (!entries.length) {
-        const empty = document.createElement("div");
-        empty.className = "calendar-upcoming-state";
-        empty.textContent = `今後${UPCOMING_DAYS}日間に、調整さんURLが登録された試合はありません。`;
-        attendanceList.appendChild(empty);
-        updateAttendanceSelection();
-        return;
-      }
-
-      entries.forEach((entry) => {
-        const item = document.createElement("div");
-        item.className = "calendar-attendance-item";
-        item.dataset.attendanceKey = entry.key;
-        item.setAttribute("role", "group");
-
-        const checkbox = document.createElement("input");
-        checkbox.type = "checkbox";
-        checkbox.className = "calendar-attendance-check";
-        checkbox.setAttribute("aria-label", `${entry.title}をLINE配信に含める`);
-        checkbox.addEventListener("change", () => {
-          attendanceSelectionTouched = true;
-          if (checkbox.checked) selectedAttendanceKeys.add(entry.key);
-          else selectedAttendanceKeys.delete(entry.key);
-          attendanceStatus.textContent = "";
-          updateAttendanceSelection();
-        });
-
-        const name = document.createElement("div");
-        name.className = "calendar-attendance-name";
-        const title = document.createElement("span");
-        title.textContent = entry.title;
-        const category = document.createElement("span");
-        category.className = "calendar-attendance-category";
-        category.textContent = entry.category;
-        category.style.color = entry.color;
-        category.style.borderColor = entry.color;
-        category.style.backgroundColor = entry.color + "22";
-        name.append(title, category);
-
-        const date = document.createElement("div");
-        date.className = "calendar-attendance-date";
-        date.textContent = entry.dateLabel;
-        const link = document.createElement("a");
-        link.className = "calendar-attendance-url";
-        link.href = entry.url;
-        link.target = "_blank";
-        link.rel = "noopener noreferrer";
-        link.textContent = entry.url;
-        link.setAttribute("aria-label", `${entry.title}の調整さんを開く`);
-        item.addEventListener("click", (event) => {
-          if (event.target.closest("a,input")) return;
-          checkbox.click();
-        });
-        item.append(checkbox, name, date, link);
-        attendanceList.appendChild(item);
-      });
-      updateAttendanceSelection();
-
-      attendanceCopy.onclick = async function(){
-        const selectedEvents = attendanceEntries
-          .filter((entry) => selectedAttendanceKeys.has(entry.key))
-          .map((entry) => ({title:entry.title, start:entry.start, attendanceUrl:entry.url, label:entry.category}));
-        const message = helper.buildLineMessage(selectedEvents);
-        if (!message) {
-          attendanceStatus.textContent = "配信する試合を1件以上選択してください。";
-          return;
-        }
-        try {
-          if (navigator.clipboard?.writeText) await navigator.clipboard.writeText(message);
-          else throw new Error("Clipboard API unavailable");
-          attendanceStatus.textContent = "選択した試合だけをコピーしました。LINEのトークまたは一斉配信画面へ貼り付けてください。";
-        } catch (error) {
-          let copied = false;
-          try {
-            const textarea = document.createElement("textarea");
-            textarea.value = message;
-            textarea.setAttribute("readonly", "");
-            textarea.style.cssText = "position:fixed;left:-9999px;top:0";
-            document.body.appendChild(textarea);
-            textarea.select();
-            copied = typeof document.execCommand === "function" && document.execCommand("copy");
-            textarea.remove();
-          } catch (fallbackError) { copied = false; }
-          attendanceStatus.textContent = copied ? "選択した試合だけをコピーしました。LINEへ貼り付けてください。" : "コピーできませんでした。ブラウザの共有機能をご利用ください。";
-        }
-      };
-    }
-
     function renderEvents(events, cached) {
-      renderAttendance(events);
       if (!isCalendarPage) return;
       list.replaceChildren();
       list.setAttribute("aria-busy", "false");
@@ -1507,18 +1335,6 @@ function enhanceCalendarUpcomingAgenda() {
     }
 
     function renderError() {
-      if (attendanceGateway) attendanceGateway.hidden = true;
-      if (attendanceSection && attendanceList && attendanceStatus && attendanceCopy) {
-        attendanceList.replaceChildren();
-        attendanceCopy.disabled = true;
-        attendanceStatus.textContent = "予定を取得できませんでした。通信環境を確認して、もう一度お試しください。";
-        const retry = document.createElement("button");
-        retry.type = "button";
-        retry.className = "calendar-upcoming-retry";
-        retry.textContent = "もう一度読み込む";
-        retry.addEventListener("click", () => loadEvents(true));
-        attendanceList.appendChild(retry);
-      }
       if (!isCalendarPage) return;
       list.replaceChildren();
       list.setAttribute("aria-busy", "false");
@@ -1601,15 +1417,14 @@ function enhanceCalendarUpcomingAgenda() {
         if (isCalendarPage) {
           list.setAttribute("aria-busy", "true");
           badge.textContent = "更新中";
-        } else if (attendanceStatus) attendanceStatus.textContent = "最新の予定を確認しています…";
+        }
       } else if (isCalendarPage) {
         list.setAttribute("aria-busy", "true");
         list.innerHTML = '<div class="calendar-upcoming-skeleton"></div><div class="calendar-upcoming-skeleton"></div>';
         badge.textContent = "読込中";
-      } else if (attendanceStatus) attendanceStatus.textContent = "カレンダーから予定を確認しています…";
+      }
       requestInFlight = true;
       if (refreshButton) refreshButton.disabled = true;
-      if (attendanceRefresh) attendanceRefresh.disabled = true;
       const now = new Date();
       const today = eventDate(now);
       const agendaStart = isCalendarPage ? new Date(today + "T00:00:00+09:00") : now;
@@ -1645,12 +1460,10 @@ function enhanceCalendarUpcomingAgenda() {
       } finally {
         requestInFlight = false;
         if (refreshButton) refreshButton.disabled = false;
-        if (attendanceRefresh) attendanceRefresh.disabled = false;
       }
     }
 
     if (refreshButton) refreshButton.addEventListener("click", () => loadEvents(true));
-    if (attendanceRefresh) attendanceRefresh.addEventListener("click", () => loadEvents(true));
     document.addEventListener("visibilitychange", () => {
       if (document.visibilityState === "visible" && Date.now() - lastLoadedAt > 60 * 1000) {
         loadEvents(false);

@@ -13,11 +13,18 @@
   <script src="calendar-attendance.js?v=20261122-girls2"></script>
   <script src="common.js"></script>
   <script src="staff-coach-roster.js"></script>
+  <script src="attendance-line-invite.js"></script>
+  <style>
+    #line-invite-list > label { display:grid; grid-template-columns:1.2rem max-content 3rem minmax(0,1fr); gap:.45rem; align-items:center; min-height:44px; border-bottom:1px solid var(--line-2); }
+    #line-invite-list > label span:last-child { overflow-wrap:anywhere; }
+    #line-invite-preview { width:100%; }
+  </style>
 </head>
 <body class="attendance-preview-page">
 <header class="site-header"></header>
 <main class="page-wrap prototype-wrap">
   <h1>出欠入力・確認</h1>
+  <div id="shared-match-link-status" hidden><p role="status">試合の出欠を読み込んでいます…</p><a href="attendance-preview.html">出欠一覧に戻る</a></div>
   <p>練習や試合の出欠を入力・変更できます。お子さんの出欠は「団員」、コーチご本人の出欠は「コーチ」を選んでください。</p>
   <p class="small-note">出欠と連絡事項は利用者全員に共有されます。電話番号や個別に伝えたい内容は、コーチへ直接ご連絡ください。</p>
   <nav class="audience-tabs" aria-label="回答する人">
@@ -104,7 +111,7 @@
       <div id="event-list" class="event-list"></div>
     </section>
   </details>
-  <p><a class="secondary-button" href="attendance.html#match-attendance">保護者向け・試合参加のご案内（LINE文作成）</a></p>
+  <p><button id="open-line-invite" type="button" class="secondary-button" aria-haspopup="dialog">保護者向け・試合参加のご案内（LINE文作成）</button></p>
 </main>
 <main id="calendar-attendance-view" class="page-wrap prototype-wrap" hidden>
   <h1 id="calendar-attendance-title">出欠一覧</h1>
@@ -121,6 +128,24 @@
       <div id="saved-event-answers"></div>
     </div>
     <div class="dialog-actions"><button id="saved-event-open-board" type="button" class="secondary-button" hidden>出欠表で見る</button><button class="secondary-button" autofocus>閉じる</button></div>
+  </form>
+</dialog>
+<dialog id="line-invite-dialog" class="event-dialog attendance-entry-dialog" aria-labelledby="line-invite-title">
+  <form method="dialog">
+    <div class="attendance-entry-scroll">
+      <h2 id="line-invite-title">保護者向け・試合参加のご案内</h2>
+      <label for="line-invite-category">カテゴリー</label>
+      <select id="line-invite-category" disabled><option value="">すべて</option></select>
+      <p><button type="button" class="secondary-button" id="line-invite-all" disabled>表示中の試合をすべて選択</button>
+      <button type="button" class="secondary-button" id="line-invite-clear" disabled>選択を解除</button></p>
+      <p id="line-invite-availability" role="status">受付中の試合を確認しています…</p>
+      <div id="line-invite-list" role="group" aria-label="日付順の試合"></div>
+      <p id="line-invite-count" role="status">0件選択中</p>
+      <label for="line-invite-preview">LINE案内文のプレビュー</label>
+      <textarea id="line-invite-preview" rows="6" readonly></textarea>
+      <p id="line-invite-status" role="status"></p>
+    </div>
+    <div class="dialog-actions"><button class="secondary-button" type="submit">閉じる</button><button id="line-invite-copy" type="button" class="primary-button" data-usage-event="line_copy" disabled>LINE文をコピー</button></div>
   </form>
 </dialog>
 <dialog id="chouseisan-dialog" class="event-dialog attendance-entry-dialog" aria-labelledby="chouseisan-title">
@@ -328,6 +353,6 @@
     <div class="dialog-actions"><button type="button" id="cancel-event" class="secondary-button">キャンセル</button><button type="submit" class="primary-button">予定を追加</button></div>
   </form>
 </dialog>
-<script src="attendance-preview.js?v=20261127-coach-registration"></script>
+<script src="attendance-preview.js?v=20261127-line-invite"></script>
 </body>
 </html>
