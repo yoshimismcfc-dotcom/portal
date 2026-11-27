@@ -758,13 +758,13 @@ function enhanceCalendarUpcomingAgenda() {
 
     if (matchPicker && !isCalendarPage) {
       matchPicker.dataset.calendarReady = "true";
-      matchPicker.addEventListener("smc-calendar-request", async () => {
+      matchPicker.addEventListener("smc-calendar-request", async ({detail}) => {
         const start = new Date();
-        const end = new Date(start);
-        end.setDate(end.getDate() + UPCOMING_DAYS);
-        // Include events earlier today as well as all upcoming events in Japan.
-        const today = new Intl.DateTimeFormat("sv-SE", { timeZone: "Asia/Tokyo", dateStyle: "short" }).format(start);
+        const today = detail?.from || eventDate(start);
         const from = new Date(today + "T00:00:00+09:00");
+        const end = new Date(detail?.through ? detail.through + "T00:00:00+09:00" : start);
+        // Google Calendar's upper bound is exclusive. Include the full last day in Japan.
+        end.setUTCDate(end.getUTCDate() + (detail?.through ? 1 : UPCOMING_DAYS));
         const groups = CALENDARS.filter((calendar) => calendar.label === "全体" || /^U(?:[7-9]|1[0-2])$/.test(calendar.label));
         const results = await Promise.allSettled(groups.map((calendar) =>
           fetchCalendar(calendar, from.toISOString(), end.toISOString(), 250, true, true)
