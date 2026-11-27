@@ -130,7 +130,7 @@ vm.runInNewContext(previewSource.replace('document.addEventListener("DOMContentL
   todayISO = () => "2026-11-22";
   holidays["2026-11-23"] = "勤労感謝の日";
   globalThis.preview = {
-    state, cancelledMatchPracticeUpdates, familyChanged, familyUpdates, familyKey, editableDayEvents, calendarAttendanceSelection, getBoardEvents, groupBoardDays, countAnswers, renderEntryDay, applySharedAnswers, eligibility, matchRestriction,
+    state, maxDate, cancelledMatchPracticeUpdates, familyChanged, familyUpdates, familyKey, editableDayEvents, calendarAttendanceSelection, getBoardEvents, groupBoardDays, countAnswers, renderEntryDay, applySharedAnswers, eligibility, matchRestriction,
     matchAttendanceTable, readEntryUpdates, eventListStatus,
     scheduleSummaryRow, scheduleCellSummary, matchCategories, dayHeading, compactCountMarks, scheduleDays, dayButton, detailChoices, attendanceEventTitle,
     setSeason(period) { seasonPeriod = validSeasonPeriod(period); },
@@ -147,6 +147,16 @@ vm.runInNewContext(previewSource.replace('document.addEventListener("DOMContentL
   };
 `), previewContext);
 const preview = previewContext.preview;
+for(const [today, end] of [
+  ["2026-11-30", "2027-01-31"],
+  ["2026-12-01", "2027-02-28"],
+  ["2026-12-31", "2027-02-28"],
+  ["2027-01-01", "2027-03-31"],
+  ["2027-02-28", "2027-04-30"],
+  ["2027-12-01", "2028-02-29"],
+]){
+  assert.equal(preview.maxDate(today),end);
+}
 const practice = makeEvent("全体練習", "2026-11-28T08:00:00+09:00", { label: "全体" });
 const match = makeEvent("U12（6年）大会", "2026-11-28", { label: "U12", sourceId: "fixture" });
 const cancelledPractice = { ...practice, title: "【練習中止】全体練習" };

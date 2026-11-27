@@ -35,7 +35,7 @@
   function fromISO(value){var parts=String(value).split("-").map(Number);return new Date(parts[0],parts[1]-1,parts[2]);}
   function dateLabel(value){var date=fromISO(value);return date.getFullYear()+"年"+(date.getMonth()+1)+"月"+date.getDate()+"日（"+DAY_NAMES[date.getDay()]+"）";}
   function todayISO(){return new Intl.DateTimeFormat("sv-SE",{timeZone:"Asia/Tokyo",year:"numeric",month:"2-digit",day:"2-digit"}).format(new Date());}
-  function maxDate(){var d=fromISO(todayISO()),day=d.getDate();d.setDate(1);d.setMonth(d.getMonth()+2);var lastDay=new Date(d.getFullYear(),d.getMonth()+1,0).getDate();d.setDate(Math.min(day,lastDay));return localISO(d);}
+  function maxDate(today=todayISO()){var date=fromISO(today);return localISO(new Date(date.getFullYear(),date.getMonth()+3,0));}
   function movePastEvents(){var today=todayISO(),active=[];state.events.forEach(function(event){if(event.date<today){event.archivedAt=new Date().toISOString();state.archive.push(event);}else active.push(event);});if(active.length!==state.events.length){state.events=active;saveState();}}
   function readRoster(){
     if(previewRosterStarted)return;
@@ -140,7 +140,7 @@
         (excluded?'<small>自動表示を停止中</small>':"")+'</div>'+
         '<button type="button" class="secondary-button" data-holiday-date="'+date+'" aria-label="'+esc(name+"を"+action)+'"'+
         (holidaySettingsReady&&!savingHoliday?"":" disabled")+'>'+action+'</button></div>';
-    }).join(""):'<p class="small-note">今後2か月の祝日を表示します。</p>';
+    }).join(""):'<p class="small-note">今月から翌々月末までの祝日を表示します。</p>';
     if(focused)list.querySelector('[data-holiday-date="'+focused+'"]')?.focus({preventScroll:true});
   }
   async function toggleHoliday(date){
@@ -1233,7 +1233,7 @@
     status.hidden=Boolean(days.length);
     status.textContent=days.length?"":!calendarMatchesChecked?
       ($("calendar-sync-status").textContent||"カレンダーを読み込んでいます…"):
-      calendarSyncResult?.failed.length?"予定を取得できませんでした。時間をおいてご確認ください。":"2か月以内に表示できる試合はありません。";
+      calendarSyncResult?.failed.length?"予定を取得できませんでした。時間をおいてご確認ください。":"出欠の受付期間内に試合はありません。";
     var markup=days.map(function(day){
       return '<section class="match-overview-day"><h3>'+esc(dateLabel(day.date))+'</h3>'+
         day.matches.map(function(event){
@@ -2441,7 +2441,7 @@
       var visible=matches.filter(function(match){return (!match.seasonOnly||isSeasonDate(match.date))&&!calendarMatchUnavailable(match)&&(!category.value||match.category===category.value);});
       list.replaceChildren();
       if(loading){status.textContent="カレンダーを読み込んでいます…";return;}
-      var message=visible.length?visible.length+"件の予定。追加・復元する試合を選んでください。":"2か月以内の予定がありません。";
+      var message=visible.length?visible.length+"件の予定。追加・復元する試合を選んでください。":"出欠の受付期間内に予定はありません。";
       if(failed.length)message+=" "+failed.join("・")+"は読み込めませんでした。";
       status.textContent=message;
 
@@ -2486,7 +2486,8 @@
       if($("match-summary-dialog").open)renderMatchSummary();
       refresh.disabled=true;
       renderMatches();
-      dialog.dispatchEvent(new Event("smc-calendar-request"));
+      var from=todayISO();
+      dialog.dispatchEvent(new CustomEvent("smc-calendar-request",{detail:{from:from,through:maxDate(from)}}));
     }
     dialog.addEventListener("smc-calendar-result",function(event){
       failed=event.detail.failed;
@@ -2803,7 +2804,7 @@
     $("add-coach-form").addEventListener("submit",saveCoachRegistration);
 
     document.querySelectorAll(".audience-tab").forEach(function(btn){btn.addEventListener("click",function(){audience=btn.dataset.audience;if(audience==="coaches")readStaffCoaches();selectedGrade="すべて";document.querySelectorAll(".audience-tab").forEach(function(tab){var active=tab===btn;tab.classList.toggle("active",active);tab.setAttribute("aria-pressed",active?"true":"false");});render();});});
-    $("cancel-event").addEventListener("click",function(){$("event-dialog").close();});$("event-form").addEventListener("submit",function(e){e.preventDefault();var title=$("event-title").value.trim();if(!title)return;if(selectedDate<todayISO()||selectedDate>maxDate()||!isDefaultDay(selectedDate)){alert("今日から2か月先までの対象日を一覧から選んでください。");return;}var kind=$("event-kind").value,dayId=defaultEvent(selectedDate).id;
+    $("cancel-event").addEventListener("click",function(){$("event-dialog").close();});$("event-form").addEventListener("submit",function(e){e.preventDefault();var title=$("event-title").value.trim();if(!title)return;if(selectedDate<todayISO()||selectedDate>maxDate()||!isDefaultDay(selectedDate)){alert("今日から翌々月末までの対象日を一覧から選んでください。");return;}var kind=$("event-kind").value,dayId=defaultEvent(selectedDate).id;
       var reuseDay=kind==="practice"&&!eventForDate(selectedDate).some(function(event){return event.id===dayId||event.kind==="practice";});
       var id=reuseDay?dayId:"demo_"+Date.now().toString(36)+"_"+Math.random().toString(36).slice(2,7);state.events.push({id:id,date:selectedDate,kind:$("event-kind").value,title:title,place:$("event-place").value.trim(),createdAt:new Date().toISOString()});saveState();$("event-dialog").close();openEvent(id);});
     $("entry-mode-button").addEventListener("click",function(){if(!requireSharedConnection())return;if(getPeople().length){openAttendanceForm("");return;}if(audience==="coaches"&&!state.coaches.length){$("coach-local-editor").open=true;$("coach-editor").scrollIntoView({behavior:"smooth",block:"center"});$("coach-name-input").focus({preventScroll:true});return;}});$("transpose-board").addEventListener("click",function(){transposeBoard=!transposeBoard;renderResponse();});$("cancel-attendance").addEventListener("click",function(){$("attendance-dialog").close();});$("attendance-form").addEventListener("submit",saveAttendanceForm);$("export-csv").addEventListener("click",openCsv);$("import-chouseisan").addEventListener("click",openChouseisan);$("reset-demo").addEventListener("click",function(){if(!confirm("この端末に保存した試作の予定・回答・コーチ名をすべて削除しますか？団員名簿は変更されません。"))return;state={events:[],archive:[],coaches:[],coachLinks:{},answers:{},notes:{},matchNotes:{}};selectedEventId="";selectedDate="";localStorage.removeItem(STORAGE_KEY);render();});$("add-coach").addEventListener("click",function(){var input=$("coach-name-input"),name=input.value.trim();if(!name){input.focus();return;}if(getPeople().some(function(c){return coachNameKey(c.name)===coachNameKey(name);})){alert("同じ名前がすでに登録されています。");return;}state.coaches.push({id:"coach_"+Date.now().toString(36)+"_"+Math.random().toString(36).slice(2,6),name:name});input.value="";saveState();render();});
