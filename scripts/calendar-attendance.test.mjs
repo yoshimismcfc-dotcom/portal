@@ -124,13 +124,13 @@ assert.equal(initialCalendarDay([makeEvent("練習", "2026-11-23")], today).next
 const previewSource = fs.readFileSync(path.join(root, "attendance-preview.js"), "utf8");
 const previewContext = {
   Intl, FormData, URLSearchParams, location: { hash: "" }, window: { SMCCalendarAttendance: attendance },
-  localStorage: { getItem: () => null, setItem() {} }
+  localStorage: { getItem: key => key === "yoshimi_smc_attendance_summary_expanded" ? "false" : null, setItem() {} }
 };
 vm.runInNewContext(previewSource.replace('document.addEventListener("DOMContentLoaded",init);', `
   todayISO = () => "2026-11-22";
   holidays["2026-11-23"] = "勤労感謝の日";
   globalThis.preview = {
-    state, maxDate, cancelledMatchPracticeUpdates, familyChanged, familyUpdates, familyKey, editableDayEvents, calendarAttendanceSelection, getBoardEvents, groupBoardDays, countAnswers, renderAttendanceBoard, renderEntryDay, applySharedAnswers, eligibility, matchRestriction,
+    state, maxDate, boardSummaryExpanded, cancelledMatchPracticeUpdates, familyChanged, familyUpdates, familyKey, editableDayEvents, calendarAttendanceSelection, getBoardEvents, groupBoardDays, countAnswers, renderAttendanceBoard, renderEntryDay, applySharedAnswers, eligibility, matchRestriction,
     matchAttendanceTable, readEntryUpdates, eventListStatus,
     scheduleSummaryRow, scheduleCellSummary, matchCategories, dayHeading, compactCountMarks, scheduleDays, dayButton, detailChoices, attendanceEventTitle,
     setSeason(period) { seasonPeriod = validSeasonPeriod(period); },
@@ -147,6 +147,7 @@ vm.runInNewContext(previewSource.replace('document.addEventListener("DOMContentL
   };
 `), previewContext);
 const preview = previewContext.preview;
+assert.equal(preview.boardSummaryExpanded,true,"以前の折りたたみ設定が残っていても集計を表示する");
 for(const [today, end] of [
   ["2026-11-30", "2027-01-31"],
   ["2026-12-01", "2027-02-28"],
