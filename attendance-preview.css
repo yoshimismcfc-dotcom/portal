@@ -631,9 +631,6 @@
   padding: 0 3px;
   background:var(--attendance-board-head);
 }
-.attendance-preview-page .attendance-board.has-board-summary th[data-board-date] {
-  vertical-align: top;
-}
 /* The headers and all answers share one native scroll container. */
 .attendance-preview-page .attendance-board thead th {
   position: sticky;
@@ -652,7 +649,7 @@
   z-index: 4;
   background: var(--attendance-board-frozen);
   color: var(--ink);
-  touch-action: pan-y pinch-zoom;
+  touch-action: pan-x pan-y pinch-zoom;
 }
 
 .attendance-preview-page .attendance-board thead :is(th.person-col, th.event-col) {
@@ -797,7 +794,7 @@
     max-height: min(64svh, 650px);
   }
 
-  .attendance-preview-page .attendance-board-scroll:has(.attendance-board:not(.has-board-summary, .is-transposed)) {
+  .attendance-preview-page .attendance-board-scroll:has(.attendance-board:not(.is-transposed)) {
     max-height: min(704px, max(calc(64svh + 54px),
       calc(100svh - var(--attendance-header-height, 64px) - 58px - env(safe-area-inset-bottom, 0px))));
   }
@@ -885,26 +882,22 @@
   overflow-wrap: anywhere;
 }
 
-.board-practice-label {
-  display: block;
-  color: var(--ink-2);
-  font-size: .75rem;
-  line-height: 1.25;
-  white-space: nowrap;
-}
-
 #board-summary-controls {
   margin-block: .45rem;
 }
 
-#board-summary-list[hidden] {
-  display: none;
+.attendance-preview-page .attendance-board .board-summary-column {
+  min-width: var(--attendance-date-width);
+  width: var(--attendance-date-width);
 }
 
-#attendance-summary-help {
-  margin-top: .4rem;
+.attendance-preview-page .attendance-board .board-schedule-cell .role-count-button {
+  grid-template-columns: 1fr;
+  justify-items: center;
+  gap: .15rem;
+  min-height: 44px;
+  padding: .2rem .125rem;
 }
-
 
 .board-summary-help {
   margin: 0 0 .4rem;
@@ -1386,15 +1379,6 @@
 
   .attendance-preview-page .attendance-board .board-day-heading .day-detail-link {
     gap: .125rem;
-  }
-
-  .attendance-preview-page .attendance-board.has-board-summary .day-detail-link {
-    min-height: 26px;
-  }
-
-  .attendance-preview-page .attendance-board .event-role-counts .role-count-button {
-    grid-template-columns: 2.0625rem max-content;
-    min-height: 32px;
   }
 
   .attendance-preview-page .attendance-board .role-count-button .category-count-values {
