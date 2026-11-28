@@ -130,7 +130,7 @@ vm.runInNewContext(previewSource.replace('document.addEventListener("DOMContentL
   todayISO = () => "2026-11-22";
   holidays["2026-11-23"] = "勤労感謝の日";
   globalThis.preview = {
-    state, maxDate, cancelledMatchPracticeUpdates, familyChanged, familyUpdates, familyKey, editableDayEvents, calendarAttendanceSelection, getBoardEvents, groupBoardDays, countAnswers, renderEntryDay, applySharedAnswers, eligibility, matchRestriction,
+    state, maxDate, cancelledMatchPracticeUpdates, familyChanged, familyUpdates, familyKey, editableDayEvents, calendarAttendanceSelection, getBoardEvents, groupBoardDays, countAnswers, renderAttendanceBoard, renderEntryDay, applySharedAnswers, eligibility, matchRestriction,
     matchAttendanceTable, readEntryUpdates, eventListStatus,
     scheduleSummaryRow, scheduleCellSummary, matchCategories, dayHeading, compactCountMarks, scheduleDays, dayButton, detailChoices, attendanceEventTitle,
     setSeason(period) { seasonPeriod = validSeasonPeriod(period); },
@@ -292,6 +292,21 @@ preview.state.answers[coachPractice.id] = { coaches: { [coach.id]: { value: "att
 preview.state.answers[coachMatchA.id] = { coaches: { [coach.id]: { value: "attending" }, [secondCoach.id]: { value: "absent" } } };
 preview.state.answers[coachMatchB.id] = { coaches: { [coach.id]: { value: "attending" }, [secondCoach.id]: { value: "maybe" } } };
 const coaches = [coach, secondCoach];
+const makeBoardRoot = () => {
+  const position={scrollTop:10,scrollLeft:20};
+  return {position,querySelector:()=>position,innerHTML:""};
+};
+const summaryBoard=makeBoardRoot(),individualBoard=makeBoardRoot();
+preview.renderAttendanceBoard(summaryBoard,[coachDay],coaches,true,true);
+preview.renderAttendanceBoard(individualBoard,[coachDay],coaches,false,true);
+assert.match(summaryBoard.innerHTML,/has-board-summary/);
+assert.match(summaryBoard.innerHTML,/data-count-event="coach-match-a"/);
+assert.doesNotMatch(summaryBoard.innerHTML,/data-answer-person=/);
+assert.match(individualBoard.innerHTML,/data-answer-person=/);
+assert.doesNotMatch(individualBoard.innerHTML,/has-board-summary/);
+assert.equal(summaryBoard.position.scrollLeft,20);
+assert.equal(individualBoard.position.scrollTop,10);
+
 assert.match(preview.dayHeading(coachDay, coaches), /のコーチの出欠集計。参加 1人、未定 0人、不参加 1人/);
 assert.match(preview.renderEntryDay(coachDay, secondCoach, true), /連絡事項（任意）.*name="message-coach-practice"/);
 assert.deepEqual(
@@ -535,6 +550,8 @@ const previewHtml = fs.readFileSync(path.join(root, "attendance-preview.html"), 
 assert(previewHtml.includes('id="line-invite-copy"'));
 assert(previewHtml.includes('id="line-invite-category"'));
 assert(previewHtml.includes('id="export-csv"'));
+assert(previewHtml.indexOf('id="board-summary-list"') < previewHtml.indexOf('id="response-list"'));
+assert(previewHtml.includes('aria-controls="board-summary-list"'));
 assert(previewSource.includes('openAttendanceDetail(match.date,"match","",match.id,null,"players")'));
 console.log("OK: 試合順・カテゴリー・保護者案内の試合別URLとCSV出力を検査しました。");
 

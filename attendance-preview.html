@@ -8,7 +8,7 @@
   <title>出欠入力・確認｜吉見SMC FC</title>
   <link rel="stylesheet" href="common.css">
   <link rel="stylesheet" href="attendance-prototype.css?v=20261121-25">
-  <link rel="stylesheet" href="attendance-preview.css?v=20261126-chouseisan">
+  <link rel="stylesheet" href="attendance-preview.css?v=20261128-summary-above">
   <script src="firebase-config.js"></script>
   <script src="calendar-attendance.js?v=20261122-girls2"></script>
   <script src="common.js"></script>
@@ -46,7 +46,6 @@
       </details>
     </div>
     <div class="attendance-board-controls">
-      <div class="response-filters" id="grade-filters" aria-label="学年の絞り込み"></div>
       <div class="board-toolbar" id="board-toolbar" hidden><span id="board-status" role="status">名前が縦</span><div class="preview-board-actions"><button type="button" id="transpose-board" aria-pressed="false">縦横切替</button></div></div>
     </div>
     <p id="shared-attendance-status" class="small-note" role="status">クラウドの出欠を読み込み中です。</p>
@@ -62,9 +61,14 @@
       </ul>
     </details>
     <div id="board-summary-controls" hidden>
-      <p id="attendance-entry-help" class="board-summary-help"><span id="attendance-guide-name">お子さんの名前</span>をタップするか、「<span id="attendance-guide-entry">出欠を入力する</span>」ボタンから名前を選んでください。家族分は「家族まとめて入力」を選べます。<br>遅刻・早退・送迎希望は「連絡事項（任意）」に入力できます。</p>
+      <button type="button" id="toggle-board-summary" class="secondary-button" aria-expanded="false" aria-controls="board-summary-list"><span id="board-summary-label">出欠集計を表示（練習・試合・行事・祝日）</span><span id="board-summary-arrow" aria-hidden="true">▾</span></button>
       <p id="attendance-summary-help" class="board-summary-help" hidden>人数をタップすると出欠一覧が開きます。</p>
-      <button type="button" id="toggle-board-summary" class="secondary-button" aria-expanded="false" aria-controls="response-list"><span id="board-summary-label">出欠集計を表示（練習・試合・行事・祝日）</span><span id="board-summary-arrow" aria-hidden="true">▾</span></button>
+      <div id="board-summary-list" class="response-list" hidden></div>
+    </div>
+    <h2>参加者別の出欠</h2>
+      <p id="attendance-entry-help" class="board-summary-help"><span id="attendance-guide-name">お子さんの名前</span>をタップするか、「<span id="attendance-guide-entry">出欠を入力する</span>」ボタンから名前を選んでください。家族分は「家族まとめて入力」を選べます。<br>遅刻・早退・送迎希望は「連絡事項（任意）」に入力できます。</p>
+    <div class="attendance-board-controls">
+      <div class="response-filters" id="grade-filters" aria-label="学年の絞り込み"></div>
     </div>
     <div id="response-list" class="response-list"></div>
     <button type="button" id="floating-entry-button" class="primary-button" aria-haspopup="dialog" hidden>出欠を入力する</button>
@@ -353,6 +357,6 @@
     <div class="dialog-actions"><button type="button" id="cancel-event" class="secondary-button">キャンセル</button><button type="submit" class="primary-button">予定を追加</button></div>
   </form>
 </dialog>
-<script src="attendance-preview.js?v=20261127-three-month-attendance"></script>
+<script src="attendance-preview.js?v=20261128-summary-above"></script>
 </body>
 </html>
