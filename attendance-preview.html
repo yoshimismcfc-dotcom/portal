@@ -8,7 +8,7 @@
   <title>出欠入力・確認｜吉見SMC FC</title>
   <link rel="stylesheet" href="common.css">
   <link rel="stylesheet" href="attendance-prototype.css?v=20261121-25">
-  <link rel="stylesheet" href="attendance-preview.css?v=20261128-summary-above">
+  <link rel="stylesheet" href="attendance-preview.css?v=20261128-unified-board">
   <script src="firebase-config.js"></script>
   <script src="calendar-attendance.js?v=20261122-girls2"></script>
   <script src="common.js"></script>
@@ -25,7 +25,6 @@
 <main class="page-wrap prototype-wrap">
   <h1>出欠入力・確認</h1>
   <div id="shared-match-link-status" hidden><p role="status">試合の出欠を読み込んでいます…</p><a href="attendance-preview.html">出欠一覧に戻る</a></div>
-  <p>練習や試合の出欠を入力・変更できます。お子さんの出欠は「団員」、コーチご本人の出欠は「コーチ」を選んでください。</p>
   <p class="small-note">出欠と連絡事項は利用者全員に共有されます。電話番号や個別に伝えたい内容は、コーチへ直接ご連絡ください。</p>
   <nav class="audience-tabs" aria-label="回答する人">
     <button type="button" class="audience-tab active" data-audience="players" aria-pressed="true">⚽ 団員</button>
@@ -33,7 +32,7 @@
   </nav>
 
   <section class="panel response-panel" id="response-panel">
-    <div class="section-heading"><div><h1 id="response-title">参加予定【団員用】</h1><p id="response-summary" hidden></p><p id="coach-roster-status" class="small-note" role="status" hidden></p><p id="calendar-sync-status" role="status"></p></div><div class="attendance-heading-actions"><span id="respondent-count" class="month-label"></span><button id="open-match-summary" class="secondary-button" type="button" aria-haspopup="dialog">試合の予定・出欠</button></div></div>
+    <div class="section-heading"><div><p id="response-summary" hidden></p><p id="coach-roster-status" class="small-note" role="status" hidden></p><p id="calendar-sync-status" role="status"></p></div><div class="attendance-heading-actions"><button id="open-match-summary" class="secondary-button" type="button" aria-haspopup="dialog">試合の予定・出欠</button></div></div>
     <button type="button" id="entry-mode-button" class="primary-button" aria-haspopup="dialog" disabled>出欠を入力する</button>
     <button type="button" id="open-add-coach" class="secondary-button" aria-haspopup="dialog" hidden>名前がないコーチを追加</button>
     <button id="export-csv" type="button" class="secondary-button" aria-haspopup="dialog">CSV出力</button>
@@ -46,6 +45,7 @@
       </details>
     </div>
     <div class="attendance-board-controls">
+      <div class="response-filters" id="grade-filters" aria-label="学年の絞り込み"></div>
       <div class="board-toolbar" id="board-toolbar" hidden><span id="board-status" role="status">名前が縦</span><div class="preview-board-actions"><button type="button" id="transpose-board" aria-pressed="false">縦横切替</button></div></div>
     </div>
     <p id="shared-attendance-status" class="small-note" role="status">クラウドの出欠を読み込み中です。</p>
@@ -60,15 +60,9 @@
         <li>「祝日・試合に備えた出欠確認」は、試合が入った場合の参加可否を確認するためのものです。</li>
       </ul>
     </details>
+    <p id="attendance-entry-help" class="board-summary-help">名前をタップすると出欠を入力・変更できます。</p>
     <div id="board-summary-controls" hidden>
-      <button type="button" id="toggle-board-summary" class="secondary-button" aria-expanded="false" aria-controls="board-summary-list"><span id="board-summary-label">出欠集計を表示（練習・試合・行事・祝日）</span><span id="board-summary-arrow" aria-hidden="true">▾</span></button>
-      <p id="attendance-summary-help" class="board-summary-help" hidden>人数をタップすると出欠一覧が開きます。</p>
-      <div id="board-summary-list" class="response-list" hidden></div>
-    </div>
-    <h2>参加者別の出欠</h2>
-      <p id="attendance-entry-help" class="board-summary-help"><span id="attendance-guide-name">お子さんの名前</span>をタップするか、「<span id="attendance-guide-entry">出欠を入力する</span>」ボタンから名前を選んでください。家族分は「家族まとめて入力」を選べます。<br>遅刻・早退・送迎希望は「連絡事項（任意）」に入力できます。</p>
-    <div class="attendance-board-controls">
-      <div class="response-filters" id="grade-filters" aria-label="学年の絞り込み"></div>
+      <button type="button" id="toggle-board-summary" class="secondary-button" aria-expanded="true" aria-controls="response-list"><span id="board-summary-label">出欠集計を閉じる</span><span id="board-summary-arrow" aria-hidden="true">▴</span></button>
     </div>
     <div id="response-list" class="response-list"></div>
     <button type="button" id="floating-entry-button" class="primary-button" aria-haspopup="dialog" hidden>出欠を入力する</button>
@@ -357,6 +351,6 @@
     <div class="dialog-actions"><button type="button" id="cancel-event" class="secondary-button">キャンセル</button><button type="submit" class="primary-button">予定を追加</button></div>
   </form>
 </dialog>
-<script src="attendance-preview.js?v=20261128-summary-open"></script>
+<script src="attendance-preview.js?v=20261128-unified-board"></script>
 </body>
 </html>

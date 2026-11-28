@@ -132,12 +132,13 @@ vm.runInNewContext(previewSource.replace('document.addEventListener("DOMContentL
   globalThis.preview = {
     state, maxDate, boardSummaryExpanded, cancelledMatchPracticeUpdates, familyChanged, familyUpdates, familyKey, editableDayEvents, calendarAttendanceSelection, getBoardEvents, groupBoardDays, countAnswers, renderAttendanceBoard, renderEntryDay, applySharedAnswers, eligibility, matchRestriction,
     matchAttendanceTable, readEntryUpdates, eventListStatus,
-    scheduleSummaryRow, scheduleCellSummary, matchCategories, dayHeading, compactCountMarks, scheduleDays, dayButton, detailChoices, attendanceEventTitle,
+    scheduleSummaryRow, scheduleCellSummary, matchCategories, dayHeading, compactCountMarks, scheduleDays, dayButton, practiceCellSummary, detailChoices, attendanceEventTitle,
     setSeason(period) { seasonPeriod = validSeasonPeriod(period); },
     setSharedReady(value) { sharedReady = value; },
     setRecruitment(records) { recruitmentRows = new Map(records); },
     setVisibility(values) { eventVisibility = new Map(values); },
     useGroup(group) { audience = group; },
+    setTranspose(value) { transposeBoard = value; },
     sync(events, failed = []) {
       syncWeekendPractices(events, failed);
       calendarMatchesChecked = true;
@@ -216,7 +217,7 @@ assert.equal(preview.countAnswers([activity], [athlete], activityDay).eligible, 
 assert.match(preview.renderEntryDay(activityDay, athlete, true), />行事<.*スポ少マラソン/);
 preview.setSharedReady(true);
 preview.state.answers[activity.id]={players:{[athlete.id]:{value:"attending"}}};
-assert.match(preview.dayHeading(activityDay, [athlete]), /練習なし/);
+assert.match(preview.practiceCellSummary(activityDay, [athlete]), /練習なし/);
 assert.match(preview.scheduleSummaryRow([activityDay], [athlete]),
   /スポ少マラソンの団員の出欠集計。対象 1人、参加 1人、未定 0人、不参加 0人/);
 preview.useGroup("coaches");
@@ -294,21 +295,26 @@ preview.state.answers[coachMatchA.id] = { coaches: { [coach.id]: { value: "atten
 preview.state.answers[coachMatchB.id] = { coaches: { [coach.id]: { value: "attending" }, [secondCoach.id]: { value: "maybe" } } };
 const coaches = [coach, secondCoach];
 const makeBoardRoot = () => {
-  const position={scrollTop:10,scrollLeft:20};
+  const position={scrollTop:10,scrollLeft:20,querySelector:()=>null};
   return {position,querySelector:()=>position,innerHTML:""};
 };
-const summaryBoard=makeBoardRoot(),individualBoard=makeBoardRoot();
-preview.renderAttendanceBoard(summaryBoard,[coachDay],coaches,true,true);
-preview.renderAttendanceBoard(individualBoard,[coachDay],coaches,false,true);
-assert.match(summaryBoard.innerHTML,/has-board-summary/);
-assert.match(summaryBoard.innerHTML,/data-count-event="coach-match-a"/);
-assert.doesNotMatch(summaryBoard.innerHTML,/data-answer-person=/);
-assert.match(individualBoard.innerHTML,/data-answer-person=/);
-assert.doesNotMatch(individualBoard.innerHTML,/has-board-summary/);
-assert.equal(summaryBoard.position.scrollLeft,20);
-assert.equal(individualBoard.position.scrollTop,10);
-
-assert.match(preview.dayHeading(coachDay, coaches), /のコーチの出欠集計。参加 1人、未定 0人、不参加 1人/);
+const attendanceBoard=makeBoardRoot();
+preview.renderAttendanceBoard(attendanceBoard,[coachDay],coaches,coaches,true,true);
+assert.equal((attendanceBoard.innerHTML.match(/<table/g)||[]).length,1);
+assert.equal((attendanceBoard.innerHTML.match(/data-board-date=/g)||[]).length,1);
+assert.equal((attendanceBoard.innerHTML.match(/board-attendance-legend/g)||[]).length,1);
+assert.match(attendanceBoard.innerHTML,/練習の出欠.*data-count-event="coach-match-a".*data-answer-person=/);
+assert.equal(attendanceBoard.position.scrollLeft,20);
+assert.equal(attendanceBoard.position.scrollTop,10);
+preview.renderAttendanceBoard(attendanceBoard,[coachDay],coaches,coaches,false,true);
+assert.doesNotMatch(attendanceBoard.innerHTML,/data-count-event=/);
+assert.match(attendanceBoard.innerHTML,/data-answer-person=/);
+preview.setTranspose(true);
+preview.renderAttendanceBoard(attendanceBoard,[coachDay],coaches,coaches,true,true);
+assert.equal((attendanceBoard.innerHTML.match(/data-board-date=/g)||[]).length,1);
+assert.match(attendanceBoard.innerHTML,/board-summary-column.*data-count-event="coach-match-a".*data-answer-person=/);
+preview.setTranspose(false);
+assert.match(preview.practiceCellSummary(coachDay, coaches), /のコーチの出欠集計。参加 1人、未定 0人、不参加 1人/);
 assert.match(preview.renderEntryDay(coachDay, secondCoach, true), /連絡事項（任意）.*name="message-coach-practice"/);
 assert.deepEqual(
   [...preview.renderEntryDay(coachDay, secondCoach, true).matchAll(/name="answer-([^"]+)" value="attending"/g)].map(match => match[1]),
@@ -321,7 +327,7 @@ practiceNoteForm.set("message-coach-practice","練習に遅れます");
 const practiceNote = preview.readEntryUpdates(practiceNoteForm, coach, [coachDay])[0];
 assert.equal(practiceNote.value, undefined);
 assert.equal(practiceNote.contact.message, "練習に遅れます");
-assert.doesNotMatch(preview.dayHeading(coachDay, coaches), /対象|未回答/);
+assert.doesNotMatch(preview.practiceCellSummary(coachDay, coaches), /対象|未回答/);
 assert.match(preview.scheduleSummaryRow([coachDay], coaches), /data-count-event="coach-match-a"[^>]+data-count-group="coaches"[^>]+参加 1人、未定 0人、不参加 1人.*data-count-event="coach-match-b"[^>]+data-count-group="coaches"[^>]+参加 1人、未定 1人、不参加 0人/);
 assert.doesNotMatch(preview.scheduleSummaryRow([coachDay], coaches), /対象|未回答/);
 const coachCell = preview.dayButton(coachDay, coach);
@@ -379,11 +385,11 @@ const practiceWithMatches = preview.groupBoardDays(preview.getBoardEvents()).fin
 const practiceOnlyPlayer = { id: "practice-only", grade: "4年" };
 const youngerMatchPlayer = { id: "younger-match", grade: "2年" };
 const practicePeople = [athlete, extraPlayer, practiceOnlyPlayer, youngerMatchPlayer];
-const practiceDayHeading = preview.dayHeading(practiceWithMatches, practicePeople);
+const practiceDayHeading = preview.practiceCellSummary(practiceWithMatches, practicePeople);
 assert.match(practiceDayHeading, /練習の団員の出欠集計。対象 1人/);
 assert.doesNotMatch(practiceDayHeading, /対象 延べ|参加 1人/);
-assert.match(preview.dayHeading({ ...practiceWithMatches, matches: [] }, practicePeople), /対象 4人/);
-assert.match(preview.dayHeading({ ...practiceWithMatches, practice: [] }, practicePeople), /練習なし/);
+assert.match(preview.practiceCellSummary({ ...practiceWithMatches, matches: [] }, practicePeople), /対象 4人/);
+assert.match(preview.practiceCellSummary({ ...practiceWithMatches, practice: [] }, practicePeople), /練習なし/);
 const totalsMarkup = categoryRows();
 const combinedDay = {
   ...practiceWithMatches,
@@ -396,7 +402,7 @@ const combinedMarkup = preview.scheduleSummaryRow([combinedDay], [athlete, extra
 assert.match(combinedMarkup, /<td class="board-schedule-cell">.*U12 試合.*U8 試合.*class="board-schedule-label">行事<.*スポ少マラソン.*class="board-schedule-label">祝日出欠<.*data-count-event="holiday-example"[^>]+data-count-kind="activity".*<\/td><\/tr>/);
 
 assert.equal(Array.from(totalsMarkup.matchAll(/<tr\b/g)).length, 1);
-assert.match(totalsMarkup, /scope="row">予定<.*?<td aria-label="試合・行事・祝日の出欠予定なし"><\/td><td class="board-schedule-cell">/);
+assert.match(totalsMarkup, /scope="row">試合・行事<.*?<td aria-label="試合・行事・祝日の出欠予定なし"><\/td><td class="board-schedule-cell">/);
 assert.match(totalsMarkup, /class="board-schedule-label">U12 試合<.*?class="board-schedule-label">U8 試合</);
 assert.equal(preview.scheduleCellSummary({ ...practiceWithMatches, matches: [] }, []), "");
 assert.equal(preview.scheduleSummaryRow([{ ...practiceWithMatches, matches: [] }], []), "");
@@ -413,16 +419,17 @@ assert.match(categoryRows(), /集計待ち/);
 preview.setSharedReady(true);
 
 const narrowDay = preview.groupBoardDays(preview.getBoardEvents()).find(day => day.date === "2026-11-25");
-const narrowHeading = preview.dayHeading(narrowDay, [athlete]);
+const narrowHeading = preview.dayHeading(narrowDay);
+const narrowPracticeCounts = preview.practiceCellSummary(narrowDay, [athlete]);
 assert.match(narrowHeading, /href="calendar.html\?date=2026-11-25"/);
-assert.match(narrowHeading, /data-count-date="2026-11-25" data-count-kind="practice" data-count-group="players"[^>]*><span class="role-count-label"/);
+assert.match(narrowPracticeCounts, /data-count-date="2026-11-25" data-count-kind="practice" data-count-group="players"[^>]*><span class="role-count-label"/);
 assert.equal(preview.attendanceEventTitle({ kind:"match", category:"U8", title:"Ｕ８(２年)北坂戸大会" }), "Ｕ８(２年)北坂戸大会");
 assert.deepEqual(Array.from(preview.detailChoices(practiceWithMatches,"match","U12"), item=>item.id),
   ["calendar_fixture","calendar_fixture-two"]);
 assert.equal(preview.detailChoices(practiceWithMatches,"match","U8").length,1);
 assert.equal(preview.detailChoices(practiceWithMatches,"practice","").length,1);
 assert.doesNotMatch(narrowHeading, /▦|練習・行事|未回答/);
-assert.match(narrowHeading, /data-count-kind="practice" data-count-group="coaches"/);
+assert.match(narrowPracticeCounts, /data-count-kind="practice" data-count-group="coaches"/);
 assert.doesNotMatch(categoryRows(), /category-count-context/);
 const formattedCounts = preview.compactCountMarks({ attending: 12, maybe: 10, absent: 11 });
 assert.match(formattedCounts, /data-mark="attending"[^>]*><\/i>12/);
@@ -551,8 +558,8 @@ const previewHtml = fs.readFileSync(path.join(root, "attendance-preview.html"), 
 assert(previewHtml.includes('id="line-invite-copy"'));
 assert(previewHtml.includes('id="line-invite-category"'));
 assert(previewHtml.includes('id="export-csv"'));
-assert(previewHtml.indexOf('id="board-summary-list"') < previewHtml.indexOf('id="response-list"'));
-assert(previewHtml.includes('aria-controls="board-summary-list"'));
+assert(!previewHtml.includes('id="board-summary-list"'));
+assert(previewHtml.includes('aria-controls="response-list"'));
 assert(previewSource.includes('openAttendanceDetail(match.date,"match","",match.id,null,"players")'));
 console.log("OK: 試合順・カテゴリー・保護者案内の試合別URLとCSV出力を検査しました。");
 
