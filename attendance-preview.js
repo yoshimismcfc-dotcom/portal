@@ -1493,9 +1493,7 @@
     renderEventParticipants(rows,event,day);
   }
 
-  var BOARD_SUMMARY_KEY="yoshimi_smc_attendance_summary_expanded";
   var boardSummaryExpanded=true;
-  try{boardSummaryExpanded=localStorage.getItem(BOARD_SUMMARY_KEY)!=="false";}catch(error){}
 
   function setupBoardViewport(){
     var header=document.querySelector(".site-header"),list=$("response-list");
@@ -1547,7 +1545,6 @@
 
   function toggleBoardSummary(){
     boardSummaryExpanded=!boardSummaryExpanded;
-    try{localStorage.setItem(BOARD_SUMMARY_KEY,String(boardSummaryExpanded));}catch(error){}
     renderResponse(true);
   }
 
