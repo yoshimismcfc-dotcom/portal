@@ -897,6 +897,15 @@
   margin-block: .45rem;
 }
 
+#board-summary-list[hidden] {
+  display: none;
+}
+
+#attendance-summary-help {
+  margin-top: .4rem;
+}
+
+
 .board-summary-help {
   margin: 0 0 .4rem;
   color: var(--ink-2);
